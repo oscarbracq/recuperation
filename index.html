@@ -367,7 +367,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=18"></script>
+<script src="supabase-db.js?v=19"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
@@ -627,7 +627,7 @@ const ICON = {
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 10"/></svg>',
   chev: '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>'
 };
-const ACT = {running: ['Course', 'run'], track_running: ['Piste', 'run'], cycling: ['Vélo', 'bike'], road_biking: ['Vélo route', 'bike'], indoor_cycling: ['Vélo intérieur', 'bike'], walking: ['Marche', 'walk'], strength_training: ['Musculation', 'gym']};
+const ACT = {running: ['Course', 'run'], track_running: ['Sprint', 'run'], cycling: ['Vélo', 'bike'], road_biking: ['Vélo route', 'bike'], indoor_cycling: ['Vélo intérieur', 'bike'], walking: ['Marche', 'walk'], strength_training: ['Musculation', 'gym']};
 
 /* ---------- metric catalogue ---------- */
 // Each metric: tile on Aujourd'hui + detail sheet. `sci` is the one-line reason it is worth tracking.
@@ -653,7 +653,7 @@ function METRICS() {
       sci: 'Très stable d\'une nuit à l\'autre. Une hausse de plus de 1 respiration par minute par rapport à ta moyenne, surtout avec une température cutanée en hausse, est souvent le premier signe d\'une infection.'},
     {id: 'effort', sec: 'load', lab: 'Effort moyen 7 j', icon: 'load', c: 'var(--blue)', unit: '/21', dec: 1, k: TODAY, bars: true, sum: false, value: () => avgN('effort', 7) ?? 0,
       extra: () => effortLevel(avgN('effort', 7) ?? 0) + ' en moyenne',
-      sci: 'Effort de 0 à 21, comme le Strain de Whoop. Il vient de deux sources : la fréquence cardiaque de tes séances enregistrées par la montre (temps passé haut dans ta réserve cardiaque, méthode TRIMP de Banister), et le RPE × durée que tu notes pour la muscu et la piste (méthode de Foster). L\'échelle est logarithmique : passer de 15 à 18 demande beaucoup plus que de 5 à 8. Léger sous 10, modéré de 10 à 14, soutenu de 14 à 18, maximal au-delà.'},
+      sci: 'Effort de 0 à 21, comme le Strain de Whoop. Il vient de deux sources : la fréquence cardiaque de tes séances enregistrées par la montre (temps passé haut dans ta réserve cardiaque, méthode TRIMP de Banister), et le RPE × durée que tu notes pour la muscu et le sprint (méthode de Foster). L\'échelle est logarithmique : passer de 15 à 18 demande beaucoup plus que de 5 à 8. Léger sous 10, modéré de 10 à 14, soutenu de 14 à 18, maximal au-delà.'},
     {id: 'sprint', sec: 'load', lab: 'Sprint 7 j', icon: 'bolt', c: 'var(--warn)', unit: 'm', k: TODAY, bars: true, value: () => sumN('sprint'), weekly: true,
       sci: 'En sprint, c\'est le volume à haute vitesse (au-delà de 90 % de ta vitesse max) qui charge le plus les ischios et le dos, pas le kilométrage. Les blessures arrivent surtout lors des hausses brutales d\'une semaine à l\'autre.'},
     {id: 'bikeKm', sec: 'load', lab: 'Vélo 7 j', icon: 'bike', c: 'var(--blue)', unit: 'km', dec: 0, k: TODAY, bars: true, value: () => sumN('bikeKm'), weekly: true,
@@ -800,7 +800,7 @@ function recentSessions() {
     const k = addDays(TODAY, -i);
     (G(k, 'acts') || []).filter(a => !((a === gymAct(k) && M(k, 'gymRpe')) || (a === trackAct(k) && M(k, 'trackRpe')))).sort((a, b) => (b.start || '').localeCompare(a.start || '')).forEach(a => rows.push({k, name: a.name || ACT[a.type]?.[0] || a.type, ic: ACT[a.type]?.[1] || 'load', meta: `${fx(a.min)} min${a.km ? ' · ' + fx(a.km, 1) + ' km' : ''}${a.avgHr ? ' · FC moy. ' + a.avgHr : ''}`, eff: toEffort(trimpOf(a))}));
     if (M(k, 'gymRpe')) rows.push({k, name: 'Musculation', ic: 'gym', meta: `${M(k, 'gymMin') || 90} min · RPE ${M(k, 'gymRpe')}`, eff: toEffort(M(k, 'gymRpe') * (M(k, 'gymMin') || 90) / 4)});
-    if (M(k, 'trackRpe')) rows.push({k, name: 'Piste', ic: 'bolt', meta: `${M(k, 'trackMin') || 75} min · RPE ${M(k, 'trackRpe')}${M(k, 'sprintM') ? ' · ' + M(k, 'sprintM') + ' m de sprint' : ''}`, eff: toEffort(M(k, 'trackRpe') * (M(k, 'trackMin') || 75) / 4)});
+    if (M(k, 'trackRpe')) rows.push({k, name: 'Sprint', ic: 'bolt', meta: `${M(k, 'trackMin') || 75} min · RPE ${M(k, 'trackRpe')}${M(k, 'sprintM') ? ' · ' + M(k, 'sprintM') + ' m de sprint' : ''}`, eff: toEffort(M(k, 'trackRpe') * (M(k, 'trackMin') || 75) / 4)});
   }
   if (!rows.length) return '';
   return `<h2>Séances récentes <small>effort /21</small></h2><div class="list">${rows.slice(0, 6).map(r => `<button class="sess" data-day="${r.k}"><span class="ic">${ICON[r.ic]}</span><span><b>${esc(r.name)}</b><span class="meta">${esc(fmtShort(r.k))} · ${esc(r.meta)}</span></span><span class="eff">${fx(r.eff, 1)}</span></button>`).join('')}</div>`;
@@ -898,8 +898,8 @@ const SRC = {
   rhr: 'FC la plus basse de la journée, mesurée par la Fenix.',
   sleepH: 'Durée de sommeil réelle, réveils exclus. Zone verte : 8 à 10 h.',
   resp: 'Respirations par minute pendant le sommeil. Sert d\'alerte infection.',
-  effort: 'Fréquence cardiaque de tes séances plus le RPE de la muscu et de la piste, sur 21.',
-  sprint: 'Mètres courus au-delà de 90 % de ta vitesse max, notés après la piste.',
+  effort: 'Fréquence cardiaque de tes séances plus le RPE de la muscu et du sprint, sur 21.',
+  sprint: 'Mètres courus au-delà de 90 % de ta vitesse max, notés après la séance de sprint.',
   bikeKm: 'Tous tes trajets et sorties à vélo enregistrés par la montre.',
   runKm: 'Kilomètres de course enregistrés par la montre.',
   weight: 'Première pesée du matin sur la Body Scan.',
@@ -1024,7 +1024,7 @@ function vProfile() {
     <div class="card small muted stack">
       <p><b style="color:var(--fg)">Récupération</b> : VFC de la nuit et moyenne 7 jours comparées à ta base 60 jours (45 %), sommeil par rapport à ton besoin de ${fx(SLEEP_NEED, 1)} h (35 %), FC au repos (20 %). Moins 15 points si la respiration ou la température cutanée signalent une infection. Seuils faible / modérée / élevée à 34 et 67 %, comme Whoop.</p>
       <p><b style="color:var(--fg)">Tes zones</b> : VFC et FC repos = moyenne 7 jours comparée à ta base 60 jours ± 0,5 écart-type (le plus petit changement qui a un sens, Plews et Buchheit). Sommeil = 8 à 10 h, la recommandation pour les athlètes. Respiration = ta moyenne ± 1 par minute. Le poids et la composition n'ont pas de zone : leur tendance suffit.</p>
-      <p><b style="color:var(--fg)">Effort de 0 à 21</b> : charge cardio de la montre (TRIMP, à partir de ta FC repos et de ta FC max de ${S.hrMax} bpm) plus le RPE × durée de la muscu et de la piste que tu notes.</p>
+      <p><b style="color:var(--fg)">Effort de 0 à 21</b> : charge cardio de la montre (TRIMP, à partir de ta FC repos et de ta FC max de ${S.hrMax} bpm) plus le RPE × durée de la muscu et du sprint que tu notes.</p>
       <p><b style="color:var(--fg)">Effort conseillé</b> : selon tes jours d'entraînement (${['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'].filter((_, i) => (p.schedule?.highDays || [1, 3, 5]).includes(i)).join(', ')}) et ta récupération du matin.</p>
       <p><b style="color:var(--fg)">Ignoré volontairement</b> : statut d'entraînement, VO2max estimée, Body Battery, scores de sommeil et statut VFC calculés par Garmin ou Withings.</p>
     </div>
@@ -1159,9 +1159,9 @@ function noteBody(k) {
     <div class="sec-label">Musculation</div>
     ${gA ? watch(gA) : ''}
     <div class="list">${slider('e-grpe', 'RPE de la séance', 'gymRpe', 0, 10, '0 = pas de muscu · 10 = effort maximal', 0)}${numRow('e-gmin', 'Durée', 'gymMin', gA ? 'remplie par la montre' : 'par défaut 90 min', 'min')}</div>
-    <div class="sec-label">Piste</div>
+    <div class="sec-label">Sprint</div>
     ${tA ? watch(tA) : ''}
-    <div class="list">${slider('e-trpe', 'RPE de la séance', 'trackRpe', 0, 10, '0 = pas de piste', 0)}${numRow('e-tmin', 'Durée', 'trackMin', tA ? 'remplie par la montre' : 'par défaut 75 min', 'min')}${numRow('e-sprint', 'Mètres de sprint', 'sprintM', 'au-delà de 90 % de ta vitesse max', 'm')}${numRow('e-jumps', 'Contacts de sauts', 'jumps', 'bonds, pliométrie', 'nb')}</div>
+    <div class="list">${slider('e-trpe', 'RPE de la séance', 'trackRpe', 0, 10, '0 = pas de sprint', 0)}${numRow('e-tmin', 'Durée', 'trackMin', tA ? 'remplie par la montre' : 'par défaut 75 min', 'min')}${numRow('e-sprint', 'Mètres de sprint', 'sprintM', 'au-delà de 90 % de ta vitesse max', 'm')}${numRow('e-jumps', 'Contacts de sauts', 'jumps', 'bonds, pliométrie', 'nb')}</div>
     <div class="sec-label">Alimentation</div>
     <div class="list"><div class="row col"><div class="seg" role="group" aria-label="Alimentation" id="e-nut">${NUTRITION.map(([l], i) => `<button type="button" data-nut="${i}" aria-pressed="${(draft.nutrition ?? 0) === i}">${l}</button>`).join('')}</div><span class="hint" id="e-nut-hint">${NUTRITION[draft.nutrition ?? 0][1]}. Précise dans la note si besoin.</span></div></div>
     <div class="sec-label">Douleur ou gêne</div>
