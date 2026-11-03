@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#B8CFFA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
@@ -224,7 +225,8 @@ textarea{width:100%;font:inherit;color:var(--fg);background:var(--card2);border:
 .srcs i{width:8px;height:8px;border-radius:50%}
 .srcs i.ok{background:var(--good)} .srcs i.late{background:var(--warn)} .srcs i.off{background:var(--fg3)}
 .foot a{color:var(--blue)}
-.ptr{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;margin-top:28px;padding:12px;color:var(--fg2);font-size:.8125rem;transition:transform .35s cubic-bezier(.32,.72,0,1),color .15s}
+.ptr{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;margin-top:12px;padding:12px;color:var(--fg2);font-size:.8125rem;opacity:0;transition:transform .35s cubic-bezier(.32,.72,0,1),color .15s,opacity .2s}
+.ptr.pull,.ptr.ready,.ptr.busy{opacity:1}
 .ptr .spin{width:22px;height:22px;border-radius:50%;border:2.5px solid var(--line);border-top-color:var(--blue);transition:transform .2s}
 .ptr.ready{color:var(--blue)} .ptr.ready .spin{transform:rotate(180deg)}
 .ptr.busy .spin{animation:spin .8s linear infinite}
@@ -338,7 +340,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=5"></script>
+<script src="supabase-db.js?v=6"></script>
 <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
 <script>const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1203,13 +1205,15 @@ const atBottom = () => window.innerHeight + window.scrollY >= document.documentE
 // Same footer at the bottom of every tab: connection status, a fix-it link when a source is late, and pull up to refresh.
 function footer() {
   const when = iso => { if (!iso) return null; const d = new Date(iso); return {txt: key(d) === TODAY ? d.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'}) : d.toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'}), late: (Date.now() - d) / 36e5 > 12}; };
-  const src = [['Garmin', when(S.sync?.garmin), 'https://connect.garmin.com/app/settings/personalApiToken'], ['Withings', when(S.sync?.withings), 'https://developer.withings.com/dashboard/']];
+  // Last time each source was checked, even when it had nothing new (status/sync), else the last data write.
+  const last = c => [S.checked?.[c], S.sync?.[c]].filter(Boolean).sort().pop();
+  const src = [['Garmin', when(last('garmin')), 'https://connect.garmin.com/app/settings/personalApiToken'], ['Withings', when(last('withings')), 'https://developer.withings.com/dashboard/']];
   const late = src.filter(([, w]) => !w || w.late);
   return `<div class="foot">
     <div class="srcs">${src.map(([n, w]) => `<span><i class="${!w ? 'off' : w.late ? 'late' : 'ok'}"></i>${n} ${w ? w.txt : '–'}</span>`).join('')}</div>
-    ${late.length ? `<p class="small muted" style="text-align:center;margin:6px 0 0">${late.map(([n]) => n).join(' et ')} : pas de nouvelle donnée depuis plus de 12 h. ${late.map(([n, , u]) => `<a href="${u}" target="_blank" rel="noopener">Ouvrir ${n}</a>`).join(' · ')}, ou demande à Claude de reconnecter.</p>` : ''}
-    ${S.req && (!S.sync?.garmin || S.req > S.sync.garmin) ? `<p class="small muted" style="text-align:center;margin:6px 0 0">Mise à jour demandée à ${new Date(S.req).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}, en cours dans l'heure.</p>` : ''}
-    <button class="ptr" data-ptr aria-label="Actualiser les données"><span class="spin"></span><span class="ptr-txt">Tire vers le haut pour actualiser</span></button></div>`;
+    ${late.length ? `<p class="small muted" style="text-align:center;margin:6px 0 0">${late.map(([n]) => n).join(' et ')} : pas de contact depuis plus de 12 h. ${late.map(([n, , u]) => `<a href="${u}" target="_blank" rel="noopener">Ouvrir ${n}</a>`).join(' · ')}, ou demande à Claude de reconnecter.</p>` : ''}
+    ${S.req && !window.RECUP_SYNC && (!last('garmin') || S.req > last('garmin')) ? `<p class="small muted" style="text-align:center;margin:6px 0 0">Mise à jour demandée à ${new Date(S.req).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}, en cours dans l'heure.</p>` : ''}
+    <button class="ptr" data-ptr aria-label="Actualiser les données"><span class="spin"></span></button></div>`;
 }
 document.addEventListener('touchstart', e => { if (!S.sheet && atBottom()) ptr.y0 = e.touches[0].clientY; }, {passive: true});
 document.addEventListener('touchmove', e => {
@@ -1218,30 +1222,33 @@ document.addEventListener('touchmove', e => {
   const el = ptrEl(); if (!el) return;
   // Rubber band: the indicator follows less and less the further you pull.
   el.style.transform = `translateY(${-(ptr.d * 60) / (60 + ptr.d * .55)}px)`;
+  el.classList.toggle('pull', ptr.d > 12);
   el.classList.toggle('ready', ptr.d > PTR_GO);
-  el.querySelector('.ptr-txt').textContent = ptr.d > PTR_GO ? 'Relâche pour actualiser' : 'Tire vers le haut pour actualiser';
 }, {passive: true});
 document.addEventListener('touchend', () => {
   if (ptr.y0 == null) return;
   const go = ptr.d > PTR_GO; ptr.y0 = null; ptr.d = 0;
-  const el = ptrEl(); if (el) { el.style.transform = ''; el.classList.remove('ready'); }
+  const el = ptrEl(); if (el) { el.style.transform = ''; el.classList.remove('ready', 'pull'); }
   if (go) refreshAll();
 });
 async function refreshAll() {
   if (ptr.busy) return;
   if (!S.db) { toast('Ouvre la page connecté à ton compte'); return; }
   ptr.busy = true;
-  const el = ptrEl(); if (el) { el.classList.add('busy'); el.querySelector('.ptr-txt').textContent = 'Actualisation…'; }
-  // The page cannot reach Garmin or Withings itself: it leaves a request that the cloud sync picks up at its next hourly check.
+  const el = ptrEl(); if (el) el.classList.add('busy');
+  // The installed app asks Garmin and Withings right away (RECUP_SYNC); elsewhere the request waits for the hourly cloud check.
+  // Either way the request is left so the cloud sync also refreshes the advice.
+  let msg = 'Demande envoyée · Garmin et Withings relus dans l\'heure', failed = false;
   try {
     await S.db.doc('requests/sync').set({requestedAt: new Date().toISOString()});
-    await Promise.all([...['garmin', 'withings', 'manual', 'reports'].map(c => S.db.collection(c).get()), S.db.doc('analysis/latest').get(), S.db.doc('profile/main').get()]);
-  } catch (e) { toast('Actualisation impossible, vérifie ta connexion'); }
+    if (window.RECUP_SYNC) msg = await window.RECUP_SYNC();
+    await Promise.all([...['garmin', 'withings', 'manual', 'reports'].map(c => S.db.collection(c).get()), S.db.doc('analysis/latest').get(), S.db.doc('profile/main').get(), S.db.doc('status/sync').get()]);
+  } catch (e) { failed = true; }
   REST = null;
   setTimeout(() => {
     ptr.busy = false; render();
-    toast('Demande envoyée · Garmin et Withings relus dans l\'heure');
-  }, 600);
+    toast(failed ? 'Actualisation impossible, vérifie ta connexion' : msg);
+  }, 400);
 }
 const ptrEl = () => $('#v-' + S.tab + ' [data-ptr]');
 document.addEventListener('click', e => { if (e.target.closest('[data-ptr]')) refreshAll(); });
@@ -1269,6 +1276,7 @@ setTab(S.tab);
   db.collection('reports').onSnapshot(snap => { S.reports = snap.docs.map(d => ({id: d.id, ...d.data()})); render(); }, fail);
   db.doc('analysis/latest').onSnapshot(snap => { S.analysis = snap.exists ? snap.data() : null; render(); }, fail);
   db.doc('requests/sync').onSnapshot(snap => { S.req = snap.exists ? snap.data().requestedAt : null; render(); }, () => {});
+  db.doc('status/sync').onSnapshot(snap => { S.checked = snap.exists ? snap.data() : null; render(); }, () => {});
   db.doc('profile/main').onSnapshot(snap => { S.profile = snap.exists ? snap.data() : null; render(); }, fail);
 })();
 </script>
