@@ -343,12 +343,15 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 .hm-info{margin-top:auto;min-height:96px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;text-align:center;transition:opacity .25s}
 .hm-info b{font:700 2rem/1.1 var(--display);letter-spacing:-.025em;color:#fff}
 .hm-info span{font-size:.9375rem;color:rgba(255,255,255,.62)}
+.hm-sum{max-width:340px;display:flex;flex-direction:column;gap:6px;font-size:.875rem;line-height:1.4;color:rgba(255,255,255,.66)}
+.hm-sum .eyebrow{color:rgba(255,255,255,.42)}
+.hm-sum b{font:600 .875rem/1.4 var(--font);letter-spacing:0;color:#fff}
 .hm-info .hint{font-size:.6875rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.42);margin-top:8px}
 .hm-dock{display:flex;justify-content:center;gap:0;margin-top:30px;padding-bottom:22px}
-.hm-k{position:relative;width:50px;display:flex;flex-direction:column;align-items:center;padding:0;color:#fff;touch-action:none;transition:transform .5s cubic-bezier(.32,.72,0,1),opacity .3s}
-.hm-k .l{position:relative;width:50px;height:76px;display:grid;place-items:center;font:800 3.5rem/1 var(--display);letter-spacing:-.02em}
+.hm-k{position:relative;width:80px;display:flex;flex-direction:column;align-items:center;padding:0;color:#fff;touch-action:none;transition:transform .5s cubic-bezier(.32,.72,0,1),opacity .3s}
+.hm-k .l{position:relative;width:80px;height:92px;display:grid;place-items:center;font:800 4.5rem/1 var(--display);letter-spacing:-.02em}
 /* The box exists only around the touched letter, a little wider than its slot. */
-.hm-k .l::before{content:"";position:absolute;inset:-6px -22px;border-radius:26px;border:2px solid transparent;transition:border-color .25s,background .25s,box-shadow .25s,opacity .25s;opacity:0}
+.hm-k .l::before{content:"";position:absolute;inset:-2px -4px;border-radius:26px;border:2px solid transparent;transition:border-color .25s,background .25s,box-shadow .25s,opacity .25s;opacity:0}
 .hm-k .n{position:absolute;top:calc(100% + 12px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:.6875rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#fff;opacity:0;transition:opacity .25s}
 .hm-k.on{z-index:2}
 .hm-k.on .l::before{opacity:1;border-color:var(--mc);background:color-mix(in srgb,var(--mc) 14%,transparent);box-shadow:0 0 0 5px color-mix(in srgb,var(--mc) 20%,transparent),0 12px 44px color-mix(in srgb,var(--mc) 50%,transparent)}
@@ -1326,10 +1329,13 @@ function openSheet(kind, arg) {
   if (kind === 'note') { draft = structuredClone(S.manual[arg] || {}); $('#sheet-body').innerHTML = noteBody(arg); }
   else { $('#sheet-body').innerHTML = detailBody(arg); initCharts($('#sheet-body')); }
   sheetScroll.scrollTop = 0; sheetEl.classList.remove('flat');
+  if (!sheetEl.classList.contains('on')) try { history.pushState({mod: S.mod, sheet: true}, ''); } catch (e) {}
   $('#scrim').classList.add('on'); sheetEl.classList.add('on'); document.body.style.overflow = 'hidden';
   setSheetY(0);
 }
-function closeSheet() {
+function closeSheet(fromBack) {
+  // Closed by hand: drop the history step the sheet added, so the next back leaves the page as usual.
+  if (!fromBack && S.sheet && history.state?.sheet) try { history.back(); } catch (e) {}
   S.sheet = null; sheetDrag = null;
   $('#scrim').classList.remove('on'); $('#scrim').style.opacity = '';
   sheetEl.classList.remove('on', 'drag'); document.body.style.overflow = '';
@@ -1340,7 +1346,7 @@ function closeSheet() {
 // pulling further down (anywhere, or on the grey handle) moves the whole sheet down; far enough, it closes.
 const sheetEl = $('#sheet'), sheetScroll = $('#sheet-scroll');
 let sheetDrag = null, sheetY = 0;
-$('#sheet-gap').addEventListener('click', closeSheet);
+$('#sheet-gap').addEventListener('click', () => closeSheet());
 // Once the card reaches the top of the screen its rounded corners go: it reads as a page.
 sheetScroll.addEventListener('scroll', () => sheetEl.classList.toggle('flat', sheetScroll.scrollTop >= $('#sheet-gap').offsetHeight - 1), {passive: true});
 function setSheetY(y, animate = true) {
@@ -1438,8 +1444,8 @@ document.addEventListener('input', e => {
   if (e.target.dataset.pain) draft.pains[e.target.dataset.pain] = +e.target.value;
 });
 document.addEventListener('change', e => { if (e.target.id === 'e-date' && e.target.value) openSheet('note', e.target.value); });
-$('#scrim').addEventListener('click', closeSheet);
-$('#sh-cancel').addEventListener('click', closeSheet);
+$('#scrim').addEventListener('click', () => closeSheet());
+$('#sh-cancel').addEventListener('click', () => closeSheet());
 $('#sh-save').addEventListener('click', saveNote);
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('#sheet').classList.contains('on')) closeSheet(); });
 
@@ -1697,7 +1703,7 @@ function go(mod, push = true) {
   // The phone's back gesture returns to the home page.
   if (push && mod !== 'home') try { history.pushState({mod}, ''); } catch (e) {}
 }
-addEventListener('popstate', e => { if (P.stack.length) { closePane(); try { history.pushState({mod: S.mod}, ''); } catch (err) {} return; } go(e.state?.mod || 'home', false); });
+addEventListener('popstate', e => { if (S.sheet) { closeSheet(true); return; } if (P.stack.length) { closePane(); try { history.pushState({mod: S.mod}, ''); } catch (err) {} return; } if ((e.state?.mod || 'home') === S.mod) return; go(e.state?.mod || 'home', false); });
 function renderMod(force) {
   if (S.mod === 'home' && (HP.el || HP.busy)) return;
   const el = S.mod === 'home' ? $('#home-view') : S.mod === 'T' ? $('#t-view') : S.mod === 'N' ? $('#f-view') : null;
@@ -1725,14 +1731,33 @@ function vHome() {
     </div>`;
 }
 function homeInfo(s) {
-  if (!s) return '<span>Touche une lettre, puis glisse-la vers le haut</span>';
+  if (!s) return homeSummary() + '<span class="hint">Touche une lettre, puis glisse-la vers le haut</span>';
   return `<b>${modName(s)}</b><span>${esc(homeStatus(s))}</span><span class="hint">↑ Glisse vers le haut pour ouvrir</span>`;
+}
+// What happened over the last 24 hours, and what to do or avoid next, from the same numbers as Recovery.
+function homeSummary() {
+  const kG = lastKey('hrv'), rec = kG ? recovery(kG) : null, z = zoneOf(rec?.score);
+  const sl = kG ? VAL.sleepH(kG) : null, hrv = kG ? G(kG, 'hrv') : null, eff = effortDay(TODAY) || effortDay(addDays(TODAY, -1));
+  const tgt = effortTarget(rec?.score, highDay(TODAY)), todo = S.analysis?.today?.[0];
+  const facts = [sl != null && `nuit de ${fx(sl, 1)} h`, hrv != null && `VFC ${hrv} ms`, rec && `récupération ${rec.score} %`, eff && `effort ${fx(eff, 1)}/21`].filter(Boolean);
+  if (!facts.length) return '';
+  const avoid = z === 'bad' ? 'les séances intenses et le sprint maximal' : `de dépasser ${tgt.lvl[1]} sur 21 d'effort`;
+  return `<div class="hm-sum"><span class="eyebrow">Tes dernières 24 h</span><span>${esc(facts.join(' · '))}</span>
+    ${todo ? `<span><b>À faire :</b> ${esc(todo)}</span>` : `<span><b>À faire :</b> ${esc(tgt.text)}</span>`}
+    <span><b>À éviter :</b> ${esc(avoid)}.</span></div>`;
 }
 function homeStatus(m) {
   if (m === 'T') { if (S.live) return 'Séance en cours : ' + S.live.name; const d = logsOn(TODAY); if (d.length) return 'Fait aujourd\'hui : ' + d[0].name; const p = planFor(TODAY); return p ? 'Prévu aujourd\'hui : ' + p.name : 'Rien de prévu aujourd\'hui'; }
   if (m === 'N') { const g = fuelGoal(TODAY), t = dayTotals(TODAY); return `${fx(t.kcal)} sur ${fx(g.kcal)} kcal aujourd'hui`; }
   const kG = lastKey('hrv'), rec = kG ? recovery(kG) : null;
   return rec ? `${ZONE[zoneOf(rec.score)]} · ${rec.score} %` : 'En calibrage : quelques nuits de mesures';
+}
+function homeReset() {
+  HP.sel = null;
+  $('#hm')?.classList.remove('sel');
+  document.querySelectorAll('.hm-k').forEach(k => { k.classList.remove('on'); k.style.transform = ''; });
+  const g = $('#hm-glow'); if (g) { g.classList.remove('on'); g.style.setProperty('--gs', 1); }
+  const i = $('#hm-info'); if (i) i.innerHTML = homeInfo(null);
 }
 // Selecting only touches the page (no redraw), so the finger keeps hold of the letter it pressed.
 function homeSelect(b) {
@@ -1756,7 +1781,10 @@ function homeOpen(m) {
   }, 470);
 }
 document.addEventListener('pointerdown', e => {
-  const b = e.target.closest('.hm-k'); if (!b || HP.busy) return;
+  const b = e.target.closest('.hm-k');
+  if (!b) { if (HP.sel && S.mod === 'home' && !HP.busy && !e.target.closest('.hm-gear')) homeReset(); return; }
+  if (HP.busy) return;
+  HP.was = HP.sel === b.dataset.k;
   HP.el = b; HP.id = e.pointerId; HP.x0 = e.clientX; HP.y0 = e.clientY; HP.dy = 0; HP.dx = 0; HP.vy = 0; HP.ly = e.clientY; HP.lt = performance.now();
   try { b.setPointerCapture(e.pointerId); } catch (err) {}
   homeSelect(b); HP.cx = parseFloat(HP.x);
@@ -1778,6 +1806,7 @@ const homeRelease = e => {
   b.classList.remove('drag'); $('#hm-glow')?.classList.remove('drag');
   // Far enough up, or thrown upwards: it opens. Otherwise it springs back into the word.
   if (e.type === 'pointerup' && (HP.dy > SWIPE || (HP.vy > .6 && HP.dy > 24))) { homeOpen(b.dataset.k); return; }
+  if (e.type === 'pointerup' && HP.was && HP.dy < 10 && Math.abs(HP.dx) < 10) { homeReset(); return; }
   b.style.transform = ''; const g = $('#hm-glow'); if (g) { g.style.left = HP.x; g.style.setProperty('--gs', 1); }
 };
 document.addEventListener('pointerup', homeRelease);
