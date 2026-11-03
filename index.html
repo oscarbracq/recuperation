@@ -299,9 +299,10 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 .scrim{position:fixed;inset:0;background:var(--scrim);z-index:40;opacity:0;pointer-events:none;transition:opacity .35s ease}
 .scrim.on{opacity:1;pointer-events:auto}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;max-width:620px;margin:0 auto;height:calc(100% - 28px - env(safe-area-inset-top,0px));background:var(--bg);border-radius:20px 20px 0 0;transform:translateY(105%);transition:transform .5s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;box-shadow:0 -10px 40px rgba(0,0,0,.18)}
-.sheet.on{transform:none}
-.sheet header{position:relative;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:16px max(16px,env(safe-area-inset-left,0px)) 10px;border-bottom:1px solid var(--line)}
-.sheet header::before{content:"";position:absolute;top:6px;left:50%;width:36px;height:5px;border-radius:3px;background:var(--fg3);transform:translateX(-50%);opacity:.6}
+.sheet.on{transform:translateY(var(--sy,0px))}
+.sheet.drag{transition:none}
+.sheet header{position:relative;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:20px max(16px,env(safe-area-inset-left,0px)) 10px;border-bottom:1px solid var(--line);touch-action:none;cursor:grab}
+.sheet header::before{content:"";position:absolute;top:7px;left:50%;width:40px;height:5px;border-radius:3px;background:var(--fg3);transform:translateX(-50%);opacity:.7}
 .sheet header b{font-weight:600}
 .sheet header button{color:var(--accent);font-size:1.0625rem}
 .sheet header .save{justify-self:end;font-weight:600}
@@ -340,7 +341,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=8"></script>
+<script src="supabase-db.js?v=9"></script>
 <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
 <script>const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1129,9 +1130,60 @@ function openSheet(kind, arg) {
   if (kind === 'note') { draft = structuredClone(S.manual[arg] || {}); $('#sheet-body').innerHTML = noteBody(arg); }
   else { $('#sheet-body').innerHTML = detailBody(arg); initCharts($('#sheet-body')); }
   $('#sheet-body').scrollTop = 0;
+  const wasOpen = $('#sheet').classList.contains('on');
   $('#scrim').classList.add('on'); $('#sheet').classList.add('on'); document.body.style.overflow = 'hidden';
+  // Details open at half height and rise as you read; the note form opens full for the keyboard.
+  if (!wasOpen) setSheetY(kind === 'note' ? 0 : sheetHalf());
 }
-function closeSheet() { S.sheet = null; $('#scrim').classList.remove('on'); $('#sheet').classList.remove('on'); document.body.style.overflow = ''; }
+function closeSheet() {
+  S.sheet = null; sheetDrag = null;
+  $('#scrim').classList.remove('on'); $('#scrim').style.opacity = '';
+  $('#sheet').classList.remove('on', 'drag'); document.body.style.overflow = '';
+}
+
+/* ---------- sheet drag: the grey handle moves the sheet, like iOS ---------- */
+// Two resting heights, half and full. Pull it below half to close; push the content up to open it fully.
+const sheetEl = $('#sheet'), sheetBody = $('#sheet-body');
+let sheetDrag = null, sheetY = 0;
+const sheetHalf = () => Math.round(sheetEl.offsetHeight * .42);
+function setSheetY(y, animate = true) {
+  sheetY = y;
+  sheetEl.classList.toggle('drag', !animate);
+  sheetEl.style.setProperty('--sy', y + 'px');
+  // The dimmed background fades with the sheet while it is dragged.
+  $('#scrim').style.opacity = animate ? '' : String(Math.max(0, Math.min(1, 1 - y / sheetEl.offsetHeight)));
+}
+sheetEl.addEventListener('touchstart', e => {
+  if (e.target.closest('.chartbox, input, textarea, select')) return;
+  const y = e.touches[0].clientY, header = !!e.target.closest('header');
+  sheetDrag = {y0: y, start: sheetY, active: header, header, last: y, t: performance.now(), v: 0};
+}, {passive: true});
+sheetEl.addEventListener('touchmove', e => {
+  const d = sheetDrag; if (!d) return;
+  const y = e.touches[0].clientY, dy = y - d.y0;
+  if (!d.active) {
+    if (Math.abs(dy) < 6) return;
+    // From the content: pushing up while at half raises the sheet, pulling down at the very top lowers it.
+    if ((dy < 0 && sheetY > 0) || (dy > 0 && sheetBody.scrollTop <= 0)) { d.active = true; d.y0 = y; d.start = sheetY; }
+    else { sheetDrag = null; return; }
+  }
+  e.preventDefault();
+  const now = performance.now();
+  d.v = (y - d.last) / Math.max(1, now - d.t); d.last = y; d.t = now;
+  let ny = d.start + (y - d.y0);
+  // Past full height it resists (handle) or simply stops (content).
+  if (ny < 0) ny = d.header ? ny / 4 : 0;
+  setSheetY(ny, false);
+}, {passive: false});
+sheetEl.addEventListener('touchend', () => {
+  const d = sheetDrag; sheetDrag = null;
+  if (!d?.active) return;
+  const half = sheetHalf(), h = sheetEl.offsetHeight;
+  // Where a flick would carry the sheet decides where it rests.
+  const land = sheetY + d.v * 200;
+  if (land > half + (h - half) * .35) { closeSheet(); return; }
+  setSheetY(land < half / 2 ? 0 : half);
+});
 async function saveNote() {
   const k = $('#e-date').value || TODAY;
   const doc = {...(S.manual[k] || {})};

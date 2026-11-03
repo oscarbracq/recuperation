@@ -59,7 +59,7 @@ img{max-width:100%}
 '@
 $scripts = @'
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=8"></script>
+<script src="supabase-db.js?v=9"></script>
 <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
 <script>
 '@
