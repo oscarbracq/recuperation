@@ -51,7 +51,7 @@ function makeSupabaseDb(SB) {
     return {
       id, path: col + '/' + id,
       onSnapshot: (fn, err) => listen(col, id, fn, err),
-      async get() { await load(col); return docSnap(col, id); },
+      async get() { await load(col); notify(col); return docSnap(col, id); },
       async set(data) {
         const {error} = await SB.from('docs').upsert({collection: col, id, data, updated_at: new Date().toISOString()});
         if (error) throw error;
@@ -64,7 +64,7 @@ function makeSupabaseDb(SB) {
     collection: col => ({
       path: col,
       onSnapshot: (fn, err) => listen(col, null, fn, err),
-      async get() { await load(col); return colSnap(col); },
+      async get() { await load(col); notify(col); return colSnap(col); },
       doc: id => docRef(col, id)
     }),
     doc: path => { const i = path.lastIndexOf('/'); return docRef(path.slice(0, i), path.slice(i + 1)); }
@@ -100,6 +100,14 @@ async function recupGetDb() {
     });
   }
   if (!session.user.user_metadata?.hasPassword) askPassword(SB, session.user.email);
+  // Pull to refresh: the sync function asks Garmin and Withings right away (a few seconds).
+  window.RECUP_SYNC = async () => {
+    const {data: {session: s}} = await SB.auth.getSession();
+    const r = await fetch(RECUP_SUPABASE.url + '/functions/v1/sync', {method: 'POST', headers: {Authorization: 'Bearer ' + s.access_token, apikey: RECUP_SUPABASE.key}});
+    const j = await r.json();
+    const part = (name, x) => x && !x.error ? name + ' à jour' : name + ' : ' + (x?.error || 'pas de réponse');
+    return part('Garmin', j.garmin) + ' · ' + part('Withings', j.withings);
+  };
   return makeSupabaseDb(SB);
 }
 
