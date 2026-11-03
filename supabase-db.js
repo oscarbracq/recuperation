@@ -86,10 +86,15 @@ async function recupGetDb() {
       form.addEventListener('submit', async e => {
         e.preventDefault();
         const email = form.email.value.trim();
-        if (sentTo === email && form.code.value.trim()) {
+        const pasted = form.code.value.trim();
+        if (sentTo === email && pasted) {
           msg.textContent = 'Vérification…';
-          const {error} = await SB.auth.verifyOtp({email, token: form.code.value.trim(), type: 'email'});
-          if (error) msg.textContent = 'Code incorrect ou expiré. Vérifie-le ou redemande un code.';
+          // A pasted mail link carries the hashed token; a typed code is the short one.
+          const m = pasted.match(/[?&]token=([^&#\s]+)/), t = pasted.match(/[?&]type=([a-z_]+)/);
+          const {error} = m
+            ? await SB.auth.verifyOtp({token_hash: decodeURIComponent(m[1]), type: t ? t[1] : 'magiclink'})
+            : await SB.auth.verifyOtp({email, token: pasted, type: 'email'});
+          if (error) msg.textContent = 'Lien expiré ou déjà utilisé : redemande un lien.';
           return;
         }
         msg.textContent = 'Envoi…';
@@ -97,11 +102,10 @@ async function recupGetDb() {
         if (error) { msg.textContent = 'Envoi impossible : ' + error.message; return; }
         sentTo = email;
         codeRow.hidden = false;
-        btn.textContent = 'Valider le code';
-        form.code.focus();
-        msg.textContent = 'C\'est envoyé ! Tape le code reçu par mail.';
+        btn.textContent = 'Me connecter';
+        msg.textContent = 'C\'est envoyé ! Dans le mail, appuie longuement sur « Sign in », copie le lien et colle-le ci-dessus.';
       });
-      form.email.addEventListener('input', () => { sentTo = null; codeRow.hidden = true; btn.textContent = 'Recevoir le code'; });
+      form.email.addEventListener('input', () => { sentTo = null; codeRow.hidden = true; btn.textContent = 'Recevoir le lien'; });
       SB.auth.onAuthStateChange((_ev, s) => { if (s) { box.hidden = true; resolve(s); } });
     });
   }
