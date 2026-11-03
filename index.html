@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#B5CEFA" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0B1A40" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="TNR Athletics">
@@ -348,10 +347,10 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 :root[data-mod="home"]{--aura1:#7FB0FF;--aura2:#FF9C94;--aura3:#86E0A8;--top:#E4E8F5}
 @media (prefers-color-scheme:dark){
   :root[data-mod="T"]:not([data-theme="light"]){--accent:#FF5A4E;--accent-soft:rgba(255,90,78,.18);--aura1:#B91C1C;--aura2:#9F1239;--aura3:#7C2D12;--top:#2A0707}
-  :root[data-mod="N"]:not([data-theme="light"]){--accent:#34D27A;--accent-soft:rgba(52,210,122,.18);--aura1:#15803D;--aura2:#047857;--aura3:#166534;--top:#04210F}
+  :root[data-mod="N"]:not([data-theme="light"]){--accent:#34D27A;--accent-soft:rgba(52,210,122,.18);--aura1:#15803D;--aura2:#047857;--aura3:#166534;--top:#052613}
   :root[data-mod="home"]:not([data-theme="light"]){--aura1:#1D4ED8;--aura2:#B91C1C;--aura3:#15803D;--top:#05070F}}
 :root[data-theme="dark"][data-mod="T"]{--accent:#FF5A4E;--accent-soft:rgba(255,90,78,.18);--aura1:#B91C1C;--aura2:#9F1239;--aura3:#7C2D12;--top:#2A0707}
-:root[data-theme="dark"][data-mod="N"]{--accent:#34D27A;--accent-soft:rgba(52,210,122,.18);--aura1:#15803D;--aura2:#047857;--aura3:#166534;--top:#04210F}
+:root[data-theme="dark"][data-mod="N"]{--accent:#34D27A;--accent-soft:rgba(52,210,122,.18);--aura1:#15803D;--aura2:#047857;--aura3:#166534;--top:#052613}
 :root[data-theme="dark"][data-mod="home"]{--aura1:#1D4ED8;--aura2:#B91C1C;--aura3:#15803D;--top:#05070F}
 .trfmark{display:block;margin:0 auto 10px;padding:4px 10px;font:700 .75rem/1 var(--display);letter-spacing:.32em;text-indent:.32em;color:var(--fg2)}
 /* Home: a black page and the three letters within reach of the thumb. Press one: it lights up in its colour and
@@ -371,12 +370,15 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 .hm-info b{font:700 2rem/1.1 var(--display);letter-spacing:-.025em;color:#fff}
 .hm-info span{font-size:.9375rem;color:rgba(255,255,255,.62)}
 .hm-info .hint{font-size:.6875rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.42);margin-top:8px}
-.hm-dock{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:30px}
-.hm-k{display:flex;flex-direction:column;align-items:center;gap:10px;padding:0;color:#fff;touch-action:none;transition:transform .5s cubic-bezier(.32,.72,0,1),opacity .3s}
-.hm-k .l{width:100%;max-width:104px;aspect-ratio:1;border-radius:26px;display:grid;place-items:center;font:800 2.75rem/1 var(--display);letter-spacing:-.02em;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.12);transition:border-color .25s,background .25s,box-shadow .25s}
-.hm-k .n{font-size:.6875rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5);transition:color .25s}
-.hm-k.on .l{border-color:var(--mc);background:color-mix(in srgb,var(--mc) 14%,transparent);box-shadow:0 0 0 5px color-mix(in srgb,var(--mc) 20%,transparent),0 12px 44px color-mix(in srgb,var(--mc) 50%,transparent)}
-.hm-k.on .n{color:#fff}
+.hm-dock{display:flex;justify-content:center;gap:0;margin-top:30px;padding-bottom:22px}
+.hm-k{position:relative;width:50px;display:flex;flex-direction:column;align-items:center;padding:0;color:#fff;touch-action:none;transition:transform .5s cubic-bezier(.32,.72,0,1),opacity .3s}
+.hm-k .l{position:relative;width:50px;height:76px;display:grid;place-items:center;font:800 3.5rem/1 var(--display);letter-spacing:-.02em}
+/* The box exists only around the touched letter, a little wider than its slot. */
+.hm-k .l::before{content:"";position:absolute;inset:-6px -22px;border-radius:26px;border:2px solid transparent;transition:border-color .25s,background .25s,box-shadow .25s,opacity .25s;opacity:0}
+.hm-k .n{position:absolute;top:calc(100% + 12px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:.6875rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#fff;opacity:0;transition:opacity .25s}
+.hm-k.on{z-index:2}
+.hm-k.on .l::before{opacity:1;border-color:var(--mc);background:color-mix(in srgb,var(--mc) 14%,transparent);box-shadow:0 0 0 5px color-mix(in srgb,var(--mc) 20%,transparent),0 12px 44px color-mix(in srgb,var(--mc) 50%,transparent)}
+.hm-k.on .n{opacity:1}
 .hm.sel .hm-k:not(.on){opacity:.35}
 .hm-k.drag{transition:none}
 .hm-k:focus-visible{outline:none}
@@ -538,15 +540,14 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=20"></script>
+<script src="supabase-db.js?v=21"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js');
   navigator.serviceWorker.addEventListener('controllerchange', () => { if (had) location.reload(); });
 }</script>
-<script>
-const $ = s => document.querySelector(s);
+<script>const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const key = d => { const z = new Date(d.getTime() - d.getTimezoneOffset()*60000); return z.toISOString().slice(0,10); };
 const addDays = (k, n) => { const d = new Date(k + 'T12:00:00'); d.setDate(d.getDate() + n); return key(d); };
@@ -1222,7 +1223,6 @@ function settings() {
   const sw = (k, label, hint) => `<div class="row"><label for="pref-${k}">${label}<span class="hint">${hint}</span></label><span class="switch"><input type="checkbox" id="pref-${k}" data-prefsw="${k}"${PREFS[k] ? ' checked' : ''}><span></span></span></div>`;
   return `<div class="list">
       <div class="row col"><span class="l">Apparence<span class="hint">Automatique suit le réglage clair ou sombre du téléphone</span></span>${seg('theme', [['auto', 'Automatique'], ['light', 'Clair'], ['dark', 'Sombre']])}</div>
-      <div class="row col"><span class="l">Page à l'ouverture</span>${seg('openTab', [['today', "Aujourd'hui"], ['last', 'Dernière page vue']])}</div>
       ${sw('autoSync', "Actualiser à l'ouverture", "Va chercher Garmin et Withings à chaque ouverture de l'appli")}
       ${sw('haptic', 'Vibration', "Petit retour quand tu tires pour actualiser")}
       ${sw('aura', 'Fond animé', 'Les halos bleus qui bougent doucement derrière les pages')}
@@ -1539,18 +1539,19 @@ document.addEventListener('click', e => { if (e.target.closest('[data-ptr]')) re
 /* ---------- settings (Profil > Réglages) ---------- */
 const PREFS = {theme: 'auto', openTab: 'last', autoSync: false, haptic: true, aura: true};
 try { Object.assign(PREFS, JSON.parse(localStorage.getItem('sl-prefs') || '{}')); } catch (e) {}
-const TOP_COLOR = {light: '#B5CEFA', dark: '#0B1A40'};
 function applyPrefs() {
   const root = document.documentElement;
   if (PREFS.theme === 'auto') delete root.dataset.theme; else root.dataset.theme = PREFS.theme;
-  // The system bar colour follows the chosen look, not only the phone's.
-  document.querySelectorAll('meta[name="theme-color"]').forEach(m => {
-    if (m.dataset.media === undefined) { m.dataset.media = m.media || ''; m.dataset.content = m.content; }
-    if (PREFS.theme === 'auto') { m.media = m.dataset.media; m.content = m.dataset.content; }
-    else { m.media = ''; m.content = TOP_COLOR[PREFS.theme]; }
-  });
+  syncBars();
   document.querySelector('.aura')?.classList.toggle('still', !PREFS.aura);
 }
+// The phone's top bar takes the colour of the top of the page shown: black on the home page, then the blue,
+// red or green of each part, in light or dark (each part sets --top).
+function syncBars() {
+  const c = getComputedStyle(document.documentElement).getPropertyValue('--top').trim() || '#000';
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.media = ''; m.content = c; });
+}
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', syncBars);
 // Settings answer the tap at once on the spot (no page redraw, which a focused text field would also block).
 function setPref(k, v) {
   PREFS[k] = v;
@@ -1719,7 +1720,9 @@ function suggest(it) {
 
 /* ---------- module switching ---------- */
 function go(mod, push = true) {
-  S.mod = mod; document.documentElement.dataset.mod = mod;
+  S.mod = mod; document.documentElement.dataset.mod = mod; syncBars();
+  // Opening a part from the home page always lands on its first page.
+  if (push && mod !== 'home') { if (mod === 'R') S.tab = 'today'; if (mod === 'T') S.ttab = 'today'; if (mod === 'N') { S.ftab = 'journal'; S.fday = TODAY; } }
   ['home', 'T', 'N', 'R'].forEach(m => { $('#mod-' + m).hidden = m !== mod; });
   fitTabbar();
   if (mod === 'R') setTab(S.tab); else renderMod(true);
@@ -1749,7 +1752,7 @@ function vHome() {
   return `<div class="hm-glow${s ? ' on' : ''}" id="hm-glow" style="--gc:${c || '#000'};left:${HP.x}"></div>
     <div class="hm${s ? ' sel' : ''}" id="hm">
       <button class="hm-gear" data-hset aria-label="Réglages de l'accueil">${GEAR}</button>
-      <header class="hm-head"><div class="trfmark" aria-hidden="true">TNR</div><div class="sub">${fmtDay(TODAY)}</div><h1 class="hello">${esc(greeting(rec?.score))}</h1></header>
+      <header class="hm-head"><div class="sub">${fmtDay(TODAY)}</div><h1 class="hello">${esc(greeting(rec?.score))}</h1></header>
       <div class="hm-info" id="hm-info" aria-live="polite">${homeInfo(s)}</div>
       <div class="hm-dock">${HOME_K.map(([m, col]) => `<button class="hm-k${s === m ? ' on' : ''}" data-k="${m}" style="--mc:${col}" aria-label="${modName(m)} : touche puis glisse vers le haut pour ouvrir"><span class="l">${m}</span><span class="n">${modName(m)}</span></button>`).join('')}</div>
     </div>`;
@@ -1787,24 +1790,28 @@ function homeOpen(m) {
 }
 document.addEventListener('pointerdown', e => {
   const b = e.target.closest('.hm-k'); if (!b || HP.busy) return;
-  HP.el = b; HP.id = e.pointerId; HP.y0 = e.clientY; HP.dy = 0;
+  HP.el = b; HP.id = e.pointerId; HP.x0 = e.clientX; HP.y0 = e.clientY; HP.dy = 0; HP.dx = 0; HP.vy = 0; HP.ly = e.clientY; HP.lt = performance.now();
   try { b.setPointerCapture(e.pointerId); } catch (err) {}
-  homeSelect(b);
+  homeSelect(b); HP.cx = parseFloat(HP.x);
   b.classList.add('drag'); $('#hm-glow').classList.add('drag');
 });
 document.addEventListener('pointermove', e => {
   if (!HP.el || e.pointerId !== HP.id) return;
-  HP.dy = Math.max(0, HP.y0 - e.clientY);
-  // The letter follows the finger with some resistance; the colour grows with it.
-  HP.el.style.transform = `translateY(${-HP.dy * .6}px)`;
-  $('#hm-glow').style.setProperty('--gs', 1 + Math.min(1, HP.dy / SWIPE) * .9);
+  const up = HP.y0 - e.clientY, now = performance.now();
+  HP.dx = e.clientX - HP.x0; HP.dy = Math.max(0, up);
+  HP.vy = (HP.ly - e.clientY) / Math.max(1, now - HP.lt); HP.ly = e.clientY; HP.lt = now;
+  // No rail: the letter goes wherever the thumb goes (an arc, sideways); the colour follows it and grows as it rises.
+  HP.el.style.transform = `translate(${HP.dx}px,${-up}px)`;
+  const g = $('#hm-glow'); g.style.left = (HP.cx + HP.dx) + 'px';
+  g.style.setProperty('--gs', 1 + Math.min(1, HP.dy / SWIPE) * .9);
 });
 const homeRelease = e => {
   if (!HP.el || e.pointerId !== HP.id) return;
   const b = HP.el; HP.el = null; HP.id = null;
   b.classList.remove('drag'); $('#hm-glow')?.classList.remove('drag');
-  if (HP.dy > SWIPE && e.type === 'pointerup') { homeOpen(b.dataset.k); return; }
-  b.style.transform = ''; $('#hm-glow')?.style.setProperty('--gs', 1);
+  // Far enough up, or thrown upwards: it opens. Otherwise it springs back into the word.
+  if (e.type === 'pointerup' && (HP.dy > SWIPE || (HP.vy > .6 && HP.dy > 24))) { homeOpen(b.dataset.k); return; }
+  b.style.transform = ''; const g = $('#hm-glow'); if (g) { g.style.left = HP.x; g.style.setProperty('--gs', 1); }
 };
 document.addEventListener('pointerup', homeRelease);
 document.addEventListener('pointercancel', homeRelease);
@@ -2427,7 +2434,7 @@ function bootTNR(db) {
 // The page ends just above the tab bar, whatever its real height on the phone, so the sources line shows with some air.
 const fitTabbar = () => { const t = document.querySelector('.mod:not([hidden]) .tabbar'); if (t) document.documentElement.style.setProperty('--tbh', t.offsetHeight + 'px'); };
 fitTabbar(); addEventListener('resize', fitTabbar);
-try { const t = localStorage.getItem('sl-tab'); if (PREFS.openTab === 'last' && t && $('#v-' + t)) S.tab = t; const g = localStorage.getItem('sl-gran'); if (GRAN.some(([x]) => x === g)) S.gran = g; } catch (e) {}
+try { const t = localStorage.getItem('sl-tab');  const g = localStorage.getItem('sl-gran'); if (GRAN.some(([x]) => x === g)) S.gran = g; } catch (e) {}
 setTab(S.tab);
 go('home', false);
 (async () => {
