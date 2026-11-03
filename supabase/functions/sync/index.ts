@@ -74,12 +74,21 @@ async function mergeMonths(collection: string, days: Record<string, Record<strin
 }
 
 async function syncGarmin(nDays: number, debug: boolean) {
+  // Access pass: from the API key if one is set here, else the pass the hourly cloud sync renews
+  // with the key it already holds (stored in recup_private.garmin).
+  let jwt: string;
   const key = Deno.env.get('GARMIN_API_KEY');
-  if (!key) throw new Error('clé Garmin absente');
-  const tr = await fetch(`${GARMIN}/personalapitoken-service/personal-api/personal-api-key/token`, {method: 'POST', headers: {Authorization: 'ApiKey ' + key}});
-  if (!tr.ok) throw new Error('jeton Garmin ' + tr.status);
-  let jwt = (await tr.text()).trim();
-  try { const j = JSON.parse(jwt); jwt = j.token || j.accessToken || j.access_token || jwt; } catch { /* raw JWT */ }
+  if (key) {
+    const tr = await fetch(`${GARMIN}/personalapitoken-service/personal-api/personal-api-key/token`, {method: 'POST', headers: {Authorization: 'ApiKey ' + key}});
+    if (!tr.ok) throw new Error('jeton Garmin ' + tr.status);
+    jwt = (await tr.text()).trim();
+    try { const j = JSON.parse(jwt); jwt = j.token || j.accessToken || j.access_token || jwt; } catch { /* raw JWT */ }
+  } else {
+    const pass = await getPrivate('garmin');
+    if (!pass?.jwt) throw new Error('pass Garmin pas encore installé');
+    if (pass.exp && pass.exp * 1000 < Date.now()) throw new Error('pass Garmin expiré');
+    jwt = pass.jwt;
+  }
   const get = async (p: string) => {
     const r = await fetch(GARMIN + p, {headers: {Authorization: 'Bearer ' + jwt, Accept: 'application/json'}});
     if (!r.ok) throw new Error(r.status + ' ' + p.split('?')[0]);

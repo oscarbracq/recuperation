@@ -105,8 +105,9 @@ async function recupGetDb() {
     const {data: {session: s}} = await SB.auth.getSession();
     const r = await fetch(RECUP_SUPABASE.url + '/functions/v1/sync', {method: 'POST', headers: {Authorization: 'Bearer ' + s.access_token, apikey: RECUP_SUPABASE.key}});
     const j = await r.json();
-    const part = (name, x) => x && !x.error ? name + ' à jour' : name + ' : ' + (x?.error || 'pas de réponse');
-    return part('Garmin', j.garmin) + ' · ' + part('Withings', j.withings);
+    const ok = x => x && !x.error;
+    if (ok(j.garmin) && ok(j.withings)) return 'Garmin et Withings à jour';
+    return [ok(j.garmin) ? 'Garmin à jour' : 'Garmin indisponible', ok(j.withings) ? 'Withings à jour' : 'Withings indisponible'].join(' · ');
   };
   return makeSupabaseDb(SB);
 }
