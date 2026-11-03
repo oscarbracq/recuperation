@@ -3,15 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#B8CFFA" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#B5CEFA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B1A40" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
-:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 body{margin:0}
 img{max-width:100%}
 [hidden]{display:none!important}
@@ -33,7 +32,7 @@ img{max-width:100%}
   --line:rgba(60,60,67,.14); --accent:#2F7BF5; --accent-soft:rgba(47,123,245,.12); --orange:#D44A2A;
   --good:#22B04F; --warn:#E8900A; --bad:#EE3A2E; --blue:#2F7BF5; --violet:#8E6CF0; --teal:#1AA6B7;
   --bar:rgba(249,249,251,.8); --scrim:rgba(0,0,0,.32); --shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.05);
-  --aura1:#7FB0FF; --aura2:#9ED8FF; --aura3:#A7B4FF; --aura-o:.6;
+  --aura1:#7FB0FF; --aura2:#9ED8FF; --aura3:#A7B4FF; --aura-o:.6; --top:#B5CEFA;
   --font:system-ui,-apple-system,"SF Pro Text","Segoe UI",Roboto,sans-serif;
   --display:system-ui,-apple-system,"SF Pro Display","Segoe UI",Roboto,sans-serif;
 }
@@ -42,16 +41,16 @@ img{max-width:100%}
   --line:rgba(235,235,245,.12); --accent:#4C8FFF; --accent-soft:rgba(76,143,255,.18); --orange:#FF6A45;
   --good:#32D46A; --warn:#FFAE2E; --bad:#FF5147; --blue:#4C8FFF; --violet:#A68BFF; --teal:#3CC8D8;
   --bar:rgba(22,22,24,.8); --scrim:rgba(0,0,0,.55); --shadow:none; color-scheme:dark;
-  --aura1:#1D4ED8; --aura2:#0369A1; --aura3:#3730A3; --aura-o:.5}}
+  --aura1:#1D4ED8; --aura2:#0369A1; --aura3:#3730A3; --aura-o:.5; --top:#0B1A40}}
 :root[data-theme="dark"]{
   --bg:#000000; --card:#1C1C1E; --card2:#2A2A2D; --fg:#F5F5F7; --fg2:#9C9CA4; --fg3:#5E5E66;
   --line:rgba(235,235,245,.12); --accent:#4C8FFF; --accent-soft:rgba(76,143,255,.18); --orange:#FF6A45;
   --good:#32D46A; --warn:#FFAE2E; --bad:#FF5147; --blue:#4C8FFF; --violet:#A68BFF; --teal:#3CC8D8;
   --bar:rgba(22,22,24,.8); --scrim:rgba(0,0,0,.55); --shadow:none; color-scheme:dark;
-  --aura1:#1D4ED8; --aura2:#0369A1; --aura3:#3730A3; --aura-o:.5}
+  --aura1:#1D4ED8; --aura2:#0369A1; --aura3:#3730A3; --aura-o:.5; --top:#0B1A40}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:var(--fg);font:16px/1.45 var(--font);-webkit-font-smoothing:antialiased}
-.wrap{max-width:600px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px calc(100px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:600px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:calc(12px + env(safe-area-inset-top,0px)) calc(100px + env(safe-area-inset-bottom,0px))}
 .top{text-align:center;margin:4px 0 16px}
 .top .sub{color:var(--fg2);font-size:.9375rem}
 .top .sub::first-letter{text-transform:uppercase}
@@ -293,7 +292,8 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .tabbar button svg{width:26px;height:26px;transition:transform .1s ease-out}
 .tabbar button[aria-selected="true"]{color:var(--accent)}
 .tabbar button:active svg{transform:scale(.9)}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+/* Top fade, like a chat app: the system bar colour melts into the page instead of a hard band. */
+body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-inset-top,0px) + 56px);z-index:10;pointer-events:none;background:linear-gradient(to bottom,var(--top) env(safe-area-inset-top,0px),color-mix(in srgb,var(--top) 55%,transparent) calc(env(safe-area-inset-top,0px) + 22px),transparent)}
 
 /* Sheet */
 .scrim{position:fixed;inset:0;background:var(--scrim);z-index:40;opacity:0;pointer-events:none;transition:opacity .35s ease}
@@ -340,7 +340,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=7"></script>
+<script src="supabase-db.js?v=8"></script>
 <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
 <script>const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
