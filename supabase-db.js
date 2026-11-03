@@ -71,8 +71,8 @@ function makeSupabaseDb(SB) {
   };
 }
 
-// Sign-in with a code (or link) sent by e-mail; the session then stays on the phone.
-// The code lets the installed app sign in even when mail links open another browser.
+// Sign-in with e-mail + password (the mail link stays as a fallback for the very first time).
+// Once signed in without a password, the app asks once to choose one, so another browser can sign in too.
 async function recupGetDb() {
   const SB = window.supabase.createClient(RECUP_SUPABASE.url, RECUP_SUPABASE.key, {auth: {persistSession: true, detectSessionInUrl: true}});
   let {data: {session}} = await SB.auth.getSession();
@@ -81,33 +81,38 @@ async function recupGetDb() {
       const box = document.getElementById('login');
       box.hidden = false;
       const form = box.querySelector('form'), msg = box.querySelector('.msg');
-      const codeRow = box.querySelector('.code'), btn = form.querySelector('button');
-      let sentTo = null;
       form.addEventListener('submit', async e => {
         e.preventDefault();
+        msg.textContent = 'Connexion…';
+        const {error} = await SB.auth.signInWithPassword({email: form.email.value.trim(), password: form.password.value});
+        if (error) msg.textContent = 'E-mail ou mot de passe incorrect.';
+      });
+      box.querySelector('.link').addEventListener('click', async () => {
         const email = form.email.value.trim();
-        const pasted = form.code.value.trim();
-        if (sentTo === email && pasted) {
-          msg.textContent = 'Vérification…';
-          // A pasted mail link carries the hashed token; a typed code is the short one.
-          const m = pasted.match(/[?&]token=([^&#\s]+)/), t = pasted.match(/[?&]type=([a-z_]+)/);
-          const {error} = m
-            ? await SB.auth.verifyOtp({token_hash: decodeURIComponent(m[1]), type: t ? t[1] : 'magiclink'})
-            : await SB.auth.verifyOtp({email, token: pasted, type: 'email'});
-          if (error) msg.textContent = 'Lien expiré ou déjà utilisé : redemande un lien.';
-          return;
-        }
+        if (!email) { msg.textContent = 'Écris d\'abord ton e-mail.'; return; }
         msg.textContent = 'Envoi…';
         const {error} = await SB.auth.signInWithOtp({email, options: {emailRedirectTo: location.origin + location.pathname, shouldCreateUser: true}});
-        if (error) { msg.textContent = 'Envoi impossible : ' + error.message; return; }
-        sentTo = email;
-        codeRow.hidden = false;
-        btn.textContent = 'Me connecter';
-        msg.textContent = 'C\'est envoyé ! Dans le mail, appuie longuement sur « Sign in », copie le lien et colle-le ci-dessus.';
+        msg.textContent = error ? 'Envoi impossible : ' + error.message : 'Lien envoyé : ouvre le mail et touche « Sign in ».';
       });
-      form.email.addEventListener('input', () => { sentTo = null; codeRow.hidden = true; btn.textContent = 'Recevoir le lien'; });
       SB.auth.onAuthStateChange((_ev, s) => { if (s) { box.hidden = true; resolve(s); } });
     });
   }
+  if (!session.user.user_metadata?.hasPassword) askPassword(SB, session.user.email);
   return makeSupabaseDb(SB);
+}
+
+function askPassword(SB, email) {
+  const box = document.getElementById('setpw');
+  box.querySelector('.who').textContent = email;
+  box.hidden = false;
+  const form = box.querySelector('form'), msg = box.querySelector('.msg');
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (form.password.value.length < 6) { msg.textContent = 'Au moins 6 caractères.'; return; }
+    msg.textContent = 'Enregistrement…';
+    const {error} = await SB.auth.updateUser({password: form.password.value, data: {hasPassword: true}});
+    if (error) { msg.textContent = 'Impossible : ' + error.message; return; }
+    box.hidden = true;
+  });
+  box.querySelector('.later').addEventListener('click', () => { box.hidden = true; });
 }
