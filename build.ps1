@@ -54,7 +54,7 @@ img{max-width:100%}
 </style>
 </head>
 <body>
-<div id="login" hidden><form><div class="logo">R</div><h1 style="margin:0">Récupération</h1><p class="small muted" style="margin:0">Entre ton e-mail : tu reçois un lien de connexion, une seule fois.</p><input name="email" type="email" required autocomplete="email" placeholder="ton e-mail"><button class="btn" type="submit">Recevoir le lien</button><p class="msg"></p></form></div>
+<div id="login" hidden><form><div class="logo">R</div><h1 style="margin:0">Récupération</h1><p class="small muted" style="margin:0">Entre ton e-mail : tu reçois un code de connexion, une seule fois.</p><input name="email" type="email" required autocomplete="email" placeholder="ton e-mail"><div class="code" hidden><input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="code reçu par mail" style="width:100%;box-sizing:border-box;text-align:center;letter-spacing:.3em"></div><button class="btn" type="submit">Recevoir le code</button><p class="msg"></p></form></div>
 '@
 $scripts = @'
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>

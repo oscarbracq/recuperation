@@ -71,7 +71,8 @@ function makeSupabaseDb(SB) {
   };
 }
 
-// Sign-in with a link sent by e-mail; the session then stays on the phone.
+// Sign-in with a code (or link) sent by e-mail; the session then stays on the phone.
+// The code lets the installed app sign in even when mail links open another browser.
 async function recupGetDb() {
   const SB = window.supabase.createClient(RECUP_SUPABASE.url, RECUP_SUPABASE.key, {auth: {persistSession: true, detectSessionInUrl: true}});
   let {data: {session}} = await SB.auth.getSession();
@@ -80,13 +81,27 @@ async function recupGetDb() {
       const box = document.getElementById('login');
       box.hidden = false;
       const form = box.querySelector('form'), msg = box.querySelector('.msg');
+      const codeRow = box.querySelector('.code'), btn = form.querySelector('button');
+      let sentTo = null;
       form.addEventListener('submit', async e => {
         e.preventDefault();
         const email = form.email.value.trim();
+        if (sentTo === email && form.code.value.trim()) {
+          msg.textContent = 'Vérification…';
+          const {error} = await SB.auth.verifyOtp({email, token: form.code.value.trim(), type: 'email'});
+          if (error) msg.textContent = 'Code incorrect ou expiré. Vérifie-le ou redemande un code.';
+          return;
+        }
         msg.textContent = 'Envoi…';
         const {error} = await SB.auth.signInWithOtp({email, options: {emailRedirectTo: location.origin + location.pathname, shouldCreateUser: true}});
-        msg.textContent = error ? 'Envoi impossible : ' + error.message : 'C\'est envoyé ! Ouvre le mail sur ce téléphone et touche le lien.';
+        if (error) { msg.textContent = 'Envoi impossible : ' + error.message; return; }
+        sentTo = email;
+        codeRow.hidden = false;
+        btn.textContent = 'Valider le code';
+        form.code.focus();
+        msg.textContent = 'C\'est envoyé ! Tape le code reçu par mail.';
       });
+      form.email.addEventListener('input', () => { sentTo = null; codeRow.hidden = true; btn.textContent = 'Recevoir le code'; });
       SB.auth.onAuthStateChange((_ev, s) => { if (s) { box.hidden = true; resolve(s); } });
     });
   }

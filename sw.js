@@ -1,6 +1,6 @@
 // Récupération — offline shell. Pages are network-first (always the latest version when online),
 // static files cache-first. Supabase data is never cached here: the app reads it live.
-const CACHE = 'recup-v1';
+const CACHE = 'recup-v2';
 const SHELL = ['./', './index.html', './supabase-db.js', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL))); self.skipWaiting(); });
