@@ -52,7 +52,7 @@ img{max-width:100%}
 body{background:var(--bg);color:var(--fg);font:16px/1.45 var(--font);-webkit-font-smoothing:antialiased}
 /* No browser pull-down-to-reload at the top: refreshing is the pull up at the bottom of each page. */
 html,body{overscroll-behavior-y:none}
-.wrap{max-width:600px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:calc(12px + env(safe-area-inset-top,0px)) var(--tbh,calc(64px + env(safe-area-inset-bottom,0px)))}
+.wrap{max-width:600px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:calc(60px + env(safe-area-inset-top,0px)) var(--tbh,calc(64px + env(safe-area-inset-bottom,0px)))}
 .top{text-align:center;margin:4px 0 16px}
 .top .sub{color:var(--fg2);font-size:.9375rem}
 .top .sub::first-letter{text-transform:uppercase}
@@ -354,7 +354,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=14"></script>
+<script src="supabase-db.js?v=15"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
