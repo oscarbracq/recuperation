@@ -334,6 +334,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 #mod-home{position:fixed;inset:0;z-index:5;background:#000;color:#F5F5F7;overflow:hidden;user-select:none;-webkit-user-select:none}
 #home-view{height:100%}
 .hm{position:relative;z-index:1;height:100%;max-width:600px;margin:0 auto;display:flex;flex-direction:column;padding:calc(28px + env(safe-area-inset-top,0px)) 20px calc(32px + env(safe-area-inset-bottom,0px))}
+.backhome{position:fixed;left:max(10px,env(safe-area-inset-left,0px));top:calc(env(safe-area-inset-top,0px) + 14px);z-index:39;width:40px;height:40px;display:grid;place-items:center;border-radius:50%;color:var(--accent)}
+.backhome svg{width:24px;height:24px}
+:root[data-mod="home"] .backhome{display:none}
 .hm-head{text-align:center}
 .hm-head .trfmark{color:rgba(255,255,255,.5)}
 .hm-head .sub{color:rgba(255,255,255,.5);font-size:.9375rem}
@@ -344,9 +347,16 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 .hm-info{margin-top:auto;min-height:96px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;text-align:center;transition:opacity .25s}
 .hm-info b{font:700 2rem/1.1 var(--display);letter-spacing:-.025em;color:#fff}
 .hm-info span{font-size:.9375rem;color:rgba(255,255,255,.62)}
-.hm-sum{max-width:340px;display:flex;flex-direction:column;gap:6px;font-size:.875rem;line-height:1.4;color:rgba(255,255,255,.66)}
+.hm-sum{max-width:330px;margin:26px auto 0;display:flex;flex-direction:column;gap:16px;text-align:center}
 .hm-sum .eyebrow{color:rgba(255,255,255,.42)}
-.hm-sum b{font:600 .875rem/1.4 var(--font);letter-spacing:0;color:#fff}
+.hm-sum .facts{margin:-8px 0 0;font-size:.9375rem;line-height:1.5;color:#fff;font-variant-numeric:tabular-nums}
+.hm-sum .facts span{white-space:nowrap}
+.hm-sum .facts i{font-style:normal;color:rgba(255,255,255,.3);margin:0 6px}
+.hm-sum .blk{display:flex;flex-direction:column;gap:4px}
+.hm-sum .tag{font-size:.6875rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.hm-sum .tag.ok{color:#30D158}
+.hm-sum .tag.no{color:#FF6B5E}
+.hm-sum .blk p{margin:0;font-size:.875rem;line-height:1.45;color:rgba(255,255,255,.72)}
 .hm-info .hint{font-size:.6875rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.42);margin-top:8px}
 .hm-dock{display:flex;justify-content:center;gap:0;margin-top:30px;padding-bottom:22px}
 .hm-k{position:relative;width:80px;display:flex;flex-direction:column;align-items:center;padding:0;color:#fff;touch-action:none;transition:transform .5s cubic-bezier(.32,.72,0,1),opacity .3s}
@@ -462,6 +472,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
 <div id="mod-home" class="mod"><section id="home-view"></section></div>
+<button class="backhome" data-home aria-label="Retour à l'accueil"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
 <div id="mod-R" class="mod" hidden>
 <div class="wrap">
   <button class="trfmark" data-home aria-label="Retour à l'accueil">TNR</button>
@@ -1726,13 +1737,13 @@ function vHome() {
   return `<div class="hm-glow${s ? ' on' : ''}" id="hm-glow" style="--gc:${c || '#000'};left:${HP.x}"></div>
     <div class="hm${s ? ' sel' : ''}" id="hm">
       <button class="hm-gear" data-hset aria-label="Réglages de l'accueil">${GEAR}</button>
-      <header class="hm-head"><div class="sub">${fmtDay(TODAY)}</div><h1 class="hello">${esc(greeting(rec?.score))}</h1></header>
+      <header class="hm-head"><div class="sub">${fmtDay(TODAY)}</div><h1 class="hello">${esc(greeting(rec?.score))}</h1>${homeSummary()}</header>
       <div class="hm-info" id="hm-info" aria-live="polite">${homeInfo(s)}</div>
       <div class="hm-dock">${HOME_K.map(([m, col]) => `<button class="hm-k${s === m ? ' on' : ''}" data-k="${m}" style="--mc:${col}" aria-label="${modName(m)} : touche puis glisse vers le haut pour ouvrir"><span class="l">${m}</span><span class="n">${modName(m)}</span></button>`).join('')}</div>
     </div>`;
 }
 function homeInfo(s) {
-  if (!s) return homeSummary() + '<span class="hint">Touche une lettre, puis glisse-la vers le haut</span>';
+  if (!s) return '<span class="hint">Touche une lettre, puis glisse-la vers le haut</span>';
   return `<b>${modName(s)}</b><span>${esc(homeStatus(s))}</span><span class="hint">↑ Glisse vers le haut pour ouvrir</span>`;
 }
 // What happened over the last 24 hours, and what to do or avoid next, from the same numbers as Recovery.
@@ -1740,12 +1751,13 @@ function homeSummary() {
   const kG = lastKey('hrv'), rec = kG ? recovery(kG) : null, z = zoneOf(rec?.score);
   const sl = kG ? VAL.sleepH(kG) : null, hrv = kG ? G(kG, 'hrv') : null, eff = effortDay(TODAY) || effortDay(addDays(TODAY, -1));
   const tgt = effortTarget(rec?.score, highDay(TODAY)), todo = S.analysis?.today?.[0];
-  const facts = [sl != null && `nuit de ${fx(sl, 1)} h`, hrv != null && `VFC ${hrv} ms`, rec && `récupération ${rec.score} %`, eff && `effort ${fx(eff, 1)}/21`].filter(Boolean);
+  const facts = [sl != null && `Nuit ${fx(sl, 1)} h`, hrv != null && `VFC ${hrv} ms`, rec && `Récupération ${rec.score} %`, eff && `Effort ${fx(eff, 1)}/21`].filter(Boolean);
   if (!facts.length) return '';
   const avoid = z === 'bad' ? 'les séances intenses et le sprint maximal' : `de dépasser ${tgt.lvl[1]} sur 21 d'effort`;
-  return `<div class="hm-sum"><span class="eyebrow">Tes dernières 24 h</span><span>${esc(facts.join(' · '))}</span>
-    ${todo ? `<span><b>À faire :</b> ${esc(todo)}</span>` : `<span><b>À faire :</b> ${esc(tgt.text)}</span>`}
-    <span><b>À éviter :</b> ${esc(avoid)}.</span></div>`;
+  return `<div class="hm-sum"><span class="eyebrow">Tes dernières 24 h</span>
+    <p class="facts">${facts.map(f => '<span>' + esc(f) + '</span>').join('<i>·</i>')}</p>
+    <div class="blk"><span class="tag ok">À faire</span><p>${esc(todo || tgt.text)}</p></div>
+    <div class="blk"><span class="tag no">À éviter</span><p>${esc(avoid.charAt(0).toUpperCase() + avoid.slice(1))}.</p></div></div>`;
 }
 function homeStatus(m) {
   if (m === 'T') { if (S.live) return 'Séance en cours : ' + S.live.name; const d = logsOn(TODAY); if (d.length) return 'Fait aujourd\'hui : ' + d[0].name; const p = planFor(TODAY); return p ? 'Prévu aujourd\'hui : ' + p.name : 'Rien de prévu aujourd\'hui'; }
