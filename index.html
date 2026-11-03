@@ -208,6 +208,13 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,label:focus-visi
 .row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;min-height:50px}
 .row+.row{border-top:1px solid var(--line)}
 .row label,.row .l{flex:1;min-width:0}
+.proto details{display:block}
+.proto details+details{border-top:1px solid var(--line)}
+.proto summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+.proto summary::-webkit-details-marker{display:none}
+.proto summary::after{content:"›";color:var(--fg3);font-size:1.25rem;transition:transform .2s}
+.proto details[open] summary::after{transform:rotate(90deg)}
+.proto ul{margin:10px 0 2px;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:.875rem;color:var(--fg2)}
 .row .hint{display:block;font-size:.75rem;color:var(--fg2)}
 .row input[type=date],.row input[type=number]{font:inherit;color:var(--fg);background:var(--card2);border:0;border-radius:10px;padding:8px 10px;width:110px;text-align:right;font-variant-numeric:tabular-nums}
 .row.col{flex-direction:column;align-items:stretch;gap:8px}
@@ -555,14 +562,15 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=24"></script>
+<script src="supabase-db.js?v=25"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js');
   navigator.serviceWorker.addEventListener('controllerchange', () => { if (had) location.reload(); });
 }</script>
-<script>const $ = s => document.querySelector(s);
+<script>
+const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const key = d => { const z = new Date(d.getTime() - d.getTimezoneOffset()*60000); return z.toISOString().slice(0,10); };
 const addDays = (k, n) => { const d = new Date(k + 'T12:00:00'); d.setDate(d.getDate() + n); return key(d); };
@@ -1204,6 +1212,9 @@ function progressCard() {
       <p class="small" style="margin-top:8px">${!next ? (allOk ? 'Tu es revenu au sprint et ta charge progresse dans les clous. Bravo pour tout le chemin parcouru.' : 'Tu es revenu au sprint. Garde un œil sur les critères pour progresser sans te blesser.') : allOk ? 'Tous les voyants sont au vert : tu as fait le travail pour passer à l\'étape suivante. Valide-la avec ton kiné.' : 'Chaque critère validé te rapproche de l\'étape suivante. La décision finale se prend avec ton kiné.'}</p></div>` : ''}
   </div>`;
 }
+// Charter, weekly schedule, anti-dead-time ideas, force-velocity profile, season plan and tests,
+// from his "Train de vie performance" file.
+let TDV_PROTO = [];
 function vProfile() {
   const p = S.profile || {};
   return `
@@ -1229,6 +1240,8 @@ function vProfile() {
     </div>
     <h2>Connexions</h2>
     ${connectors()}
+    ${TDV_PROTO.length ? `<h2>Mon protocole <small>Train de vie performance</small></h2>
+    <div class="list proto">${TDV_PROTO.map(([t, l]) => `<details class="row col"><summary class="l"><b>${esc(t)}</b></summary><ul>${l.map(x => `<li>${esc(x)}</li>`).join('')}</ul></details>`).join('')}</div>` : ''}
     <h2>Réglages</h2>
     ${settings()}`;
 }
@@ -1661,7 +1674,31 @@ const EX = [
   ['speedend', 'Endurance de vitesse', 'track', 'Endurance de vitesse', 'Maintien de la vitesse', 'Vitesse quasi maximale sur 80 à 150 m, garde la technique jusqu\'au bout.', 'm'],
   ['tempo', 'Tempo', 'track', 'Tempo', 'Aérobie, récupération', 'Environ 70 % de ta vitesse, foulée relâchée, récup en marchant.', 'm'],
   ['hill', 'Côte', 'track', 'Résistance', 'Puissance, accélération', 'Pente de 5 à 10 %, poussées complètes, retour en marchant.', 'm'],
-  ['sled', 'Traîneau', 'track', 'Résistance', 'Puissance horizontale', 'Charge qui ralentit d\'environ 10 % ta vitesse, posture d\'accélération.', 'm']
+  ['sled', 'Traîneau', 'track', 'Résistance', 'Puissance horizontale', 'Charge qui ralentit d\'environ 10 % ta vitesse, posture d\'accélération.', 'm'],
+  ['legpress', 'Presse à cuisses', 'gym', 'Bas du corps', 'Quadriceps, fessiers', 'Dos plaqué au dossier, genoux dans l\'axe des pieds, pousse sans verrouiller les genoux.', 'kg'],
+  ['halfsquat', 'Demi-squat à la barre', 'gym', 'Bas du corps', 'Quadriceps, fessiers', 'Descends jusqu\'à cuisses à 45°, remonte avec l\'intention d\'aller le plus vite possible.', 'kg'],
+  ['deadlift', 'Soulevé de terre à la barre', 'gym', 'Chaîne postérieure', 'Fessiers, ischios, dos', 'Barre contre les tibias, dos neutre, pousse le sol et verrouille les hanches en haut.', 'kg'],
+  ['legext', 'Leg extension', 'gym', 'Bas du corps', 'Quadriceps', 'Monte vite, tiens 1 s en haut, redescends en contrôle. Possible sur une jambe.', 'kg'],
+  ['adductor', 'Adducteurs à la machine', 'gym', 'Prévention', 'Adducteurs', 'Serre les jambes en contrôle. En cas de pubalgie : excentrique et isométrie légère seulement.', 'kg'],
+  ['glutecable', 'Fessier au câble', 'gym', 'Chaîne postérieure', 'Fessiers', 'Jambe tendue vers l\'arrière sans cambrer, serre le fessier en fin de mouvement. Reps par jambe.', 'kg'],
+  ['cablecrunch', 'Abdos à la poulie', 'gym', 'Tronc', 'Abdominaux', 'À genoux face à la poulie, enroule le buste vers le bassin sans tirer avec les bras.', 'kg'],
+  ['lumbar', 'Banc à lombaires', 'gym', 'Tronc', 'Lombaires, fessiers', 'Descends dos neutre, remonte jusqu\'à l\'alignement du corps, sans hyperextension.', 'pc'],
+  ['pecdeck', 'Pec deck', 'gym', 'Haut du corps', 'Pectoraux', 'Coudes légèrement fléchis, ramène les bras devant toi et serre 1 s.', 'kg'],
+  ['mpress', 'Développé épaules à la machine', 'gym', 'Haut du corps', 'Épaules, triceps', 'Dos collé au dossier, pousse au-dessus de la tête sans cambrer.', 'kg'],
+  ['farmer', 'Farmer carry', 'gym', 'Tronc', 'Gainage, avant-bras, épaules', 'Une charge lourde dans chaque main, marche droit en aller-retour, épaules basses.', 'kg'],
+  ['chair', 'Chaise romaine', 'gym', 'Tronc', 'Abdominaux, fléchisseurs de hanche', 'Suspendu aux appuis, monte les genoux sans balancer, redescends lentement.', 'pc'],
+  ['hrow', 'Tirage horizontal', 'gym', 'Haut du corps', 'Dos', 'Buste droit, tire les coudes vers l\'arrière en serrant les omoplates.', 'kg'],
+  ['pulldown', 'Tirage vertical', 'gym', 'Haut du corps', 'Dos, biceps', 'Tire la barre vers le haut de la poitrine, coudes vers le bas.', 'kg'],
+  ['tibkb', 'Tibial antérieur à la kettlebell', 'gym', 'Prévention', 'Jambier antérieur', 'Assis, kettlebell sur l\'avant du pied, relève la pointe le plus haut possible.', 'kg'],
+  ['abwheel', 'Roulette abdominale', 'gym', 'Tronc', 'Abdominaux profonds', 'À genoux, roule vers l\'avant dos neutre, reviens sans creuser le bas du dos.', 'pc'],
+  ['curl', 'Curl biceps', 'gym', 'Haut du corps', 'Biceps', 'Coudes fixes le long du corps, monte et redescends en contrôle.', 'kg'],
+  ['triext', 'Extension triceps', 'gym', 'Haut du corps', 'Triceps', 'Coudes fixes, déplie les bras complètement, retour contrôlé.', 'kg'],
+  ['latraise', 'Élévations latérales', 'gym', 'Haut du corps', 'Épaules', 'Bras légèrement fléchis, monte jusqu\'à l\'horizontale sans hausser les épaules.', 'kg'],
+  ['frontraise', 'Élévations frontales', 'gym', 'Haut du corps', 'Avant des épaules', 'Monte les haltères devant toi jusqu\'à hauteur d\'épaules, sans élan.', 'kg'],
+  ['reardelt', 'Oiseau aux haltères', 'gym', 'Haut du corps', 'Arrière des épaules', 'Buste penché, ouvre les bras sur les côtés en serrant les omoplates.', 'kg'],
+  ['deadbug', 'Dead bug', 'gym', 'Tronc', 'Abdominaux profonds', 'Sur le dos, bas du dos plaqué au sol, étends bras et jambe opposés lentement.', 's'],
+  ['dbhip', 'Dead bug + hip thrust', 'gym', 'Tronc', 'Abdominaux, fessiers', 'Kettlebell et élastique : enchaîne le dead bug et la montée de bassin.', 'kg'],
+  ['pogo', 'Pogo jumps', 'gym', 'Pliométrie', 'Raideur de cheville', 'Petits rebonds sur l\'avant du pied, genoux presque tendus, contacts très courts.', 's']
 ].map(([id, n, t, cat, m, c, u]) => ({id, n, t, cat, m, c, u}));
 const EXI = Object.fromEntries(EX.map(e => [e.id, e]));
 const exOf = id => EXI[id] || {id, n: id, t: 'gym', cat: '', m: '', c: '', u: 'kg'};
@@ -1699,7 +1736,10 @@ const BUILTIN = [
     {ex: 'warmup', min: 15}, {ex: 'askip', reps: 2, dist: 20}, {ex: 'sled', reps: 6, dist: 20, pct: 95, rest: 150}, {ex: 'hill', reps: 6, dist: 40, pct: 95, rest: 180}]}
 ];
 const myPlans = () => Object.values(S.plans).filter(p => !p.deleted).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-const allPlans = () => [...myPlans(), ...BUILTIN];
+// Oscar's own programme, food plan and protocol, from his "Train de vie performance" file. They are personal,
+// so they live in the private database (tdv/main), loaded after sign-in, never in this public page.
+let TDV_PLANS = [];
+const allPlans = () => [...myPlans(), ...TDV_PLANS, ...BUILTIN];
 const planById = id => allPlans().find(p => p.id === id);
 const planFor = k => planById(S.tset.week?.[dow(k)]);
 const logs = () => Object.values(S.logs).filter(l => !l.deleted).sort((a, b) => (b.date + (b.start || '')).localeCompare(a.date + (a.start || '')));
@@ -1709,7 +1749,7 @@ function itemText(it) {
   const e = exOf(it.ex);
   if (it.min) return it.min + ' min';
   if (e.t === 'track') return `${it.reps} × ${it.dist} m${it.pct ? ' · ' + it.pct + ' %' : ''}`;
-  return `${it.sets} × ${it.reps}${e.u === 's' ? ' s' : ''}${it.pct ? ' · ' + it.pct + ' %' : ''}`;
+  return `${it.sets} × ${it.reps}${e.u === 's' ? ' s' : ''}${it.pct ? ' · ' + it.pct + ' %' : ''}${it.kg ? ' · ' + fx(it.kg, 1) + ' kg' : ''}${it.rpe ? ' · RPE ' + it.rpe : ''}${it.note ? ' · ' + it.note : ''}`;
 }
 
 /* ---------- history, records and suggested loads ---------- */
@@ -1948,6 +1988,7 @@ function tSessions() {
     <header class="top"><div class="sub">Programmes et séances</div><h1>Séances</h1></header>
     <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Piste']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
     <h2>Mes séances</h2><div class="list">${mine.map(row).join('')}<button class="addbtn" data-tnew>+ Créer une séance</button></div>
+    ${k === 'gym' && TDV_PLANS.length ? `<h2>Mon programme <small>Train de vie performance</small></h2><div class="list">${TDV_PLANS.map(row).join('')}</div>` : ''}
     <h2>Programmes TNR <small>à dupliquer et adapter</small></h2><div class="list">${base.map(row).join('')}</div>
     <div style="margin-top:16px"><button class="btn ghost" data-tplan>Planifier ma semaine</button></div>`;
 }
@@ -2202,6 +2243,8 @@ function exView(id) {
 /* ---------- Fuel: food database ---------- */
 // Common foods, values per 100 g (French tables, CIQUAL-like): kcal, protein, carbs, fat, then a usual portion.
 const FOODS = [
+  ['Pain de seigle', 230, 7, 43, 1.5, 125, '2 à 3 tranches'], ['Cerneaux de noix', 690, 15, 7, 65, 15, 'poignée'], ['Chocolat noir 85 %', 600, 10, 20, 50, 15, 'carrés'],
+  ['Ratatouille', 50, 1.2, 5.5, 2.5, 250, 'portion'], ['Sauce soja salée', 60, 8, 6, 0, 10, 'cuillère à soupe'],
   ['Riz blanc cuit', 130, 2.7, 28, 0.3, 150, 'assiette'], ['Riz complet cuit', 123, 2.7, 25.6, 1, 150, 'assiette'], ['Pâtes cuites', 157, 5.8, 30.6, 0.9, 180, 'assiette'],
   ['Pâtes complètes cuites', 149, 6, 28, 1.5, 180, 'assiette'], ['Semoule cuite', 112, 3.8, 23, 0.2, 150, 'assiette'], ['Quinoa cuit', 120, 4.4, 21.3, 1.9, 150, 'assiette'],
   ['Patate douce cuite', 86, 1.6, 20, 0.1, 200, 'portion'], ['Pomme de terre cuite', 80, 2, 17, 0.1, 200, 'portion'], ['Frites', 312, 3.4, 41, 15, 150, 'portion'],
@@ -2311,6 +2354,8 @@ function fFoods() {
     <h2>Base TNR <small>${FOODS.length} aliments courants</small></h2>
     <div class="list">${FOODS.map(f => `<div class="rowbtn"><span><b>${esc(f.n)}</b><span class="meta">pour 100 g · P ${fx(f.p, 1)} · G ${fx(f.c, 1)} · L ${fx(f.f, 1)}</span></span><span class="kc">${fx(f.kcal)}</span></div>`).join('')}</div>`;
 }
+// His food plan and daily targets, from "Train de vie performance" (Plan alimentaire and Charte).
+let TDV_FUEL = null;
 function fGoals() {
   const g = fuelGoal(TODAY), gt = fuelGoal(TODAY, true), gr = fuelGoal(TODAY, false);
   return `
@@ -2328,6 +2373,9 @@ function fGoals() {
       <p><b style="color:var(--fg)">Dépense</b> : × 1,75 un jour d'entraînement (séance prévue dans ${modName('T')}, séance faite, ou jour d'entraînement de ${modName('R')}), × 1,5 un jour de repos. Objectif : − 400 kcal pour perdre du gras, + 250 kcal pour prendre du muscle.</p>
       <p><b style="color:var(--fg)">Macros</b> : protéines ${fx(S.fset.protein || 2, 1)} g/kg, lipides 1 g/kg, les glucides complètent. Ce sont eux qui montent les jours d'entraînement.</p>
     </div>
+    ${TDV_FUEL ? `<h2>Mon plan alimentaire <small>Train de vie performance</small></h2>
+    <div class="list">${TDV_FUEL.meals.map(([m, d]) => `<div class="row col"><span class="l">${esc(m)}<span class="hint">${esc(d)}</span></span></div>`).join('')}</div>
+    <div class="card small muted stack" style="margin-top:12px"><p><b style="color:var(--fg)">Total du jour</b> : ${esc(TDV_FUEL.total)}.</p>${TDV_FUEL.extra.map(x => `<p>${esc(x)}.</p>`).join('')}</div>` : ''}
     ${S.profile?.nutrition ? `<h2>Ton plan alimentaire</h2><div class="card why">${esc(S.profile.nutrition)}</div><p class="note" style="text-align:left">Modifiable dans ${modName('R')}, onglet Profil.</p>` : ''}`;
 }
 async function saveFset(patch) { Object.assign(S.fset, patch); renderMod(); await dbSet('settings/fuel', {...S.fset, updatedAt: new Date().toISOString()}); }
@@ -2507,6 +2555,7 @@ function bootTNR(db) {
   col('plans', 'plans'); col('training', 'logs'); col('fuel', 'fuel'); col('foods', 'foods');
   db.doc('settings/training').onSnapshot(s => { S.tset = s.exists ? s.data() : {}; renderMod(); }, () => {});
   db.doc('settings/fuel').onSnapshot(s => { S.fset = s.exists ? s.data() : {}; renderMod(); }, () => {});
+  db.doc('tdv/main').onSnapshot(s => { const d = s.exists ? s.data() : {}; TDV_PLANS = d.plans || []; TDV_FUEL = d.fuel || null; TDV_PROTO = d.proto || []; renderMod(); if (S.mod === 'R') render(); }, () => {});
 }
 
 /* ---------- boot ---------- */
