@@ -9,11 +9,11 @@ render() { # svg size output
   "$EDGE" --headless=new --disable-gpu --hide-scrollbars --default-background-color=00000000 --window-size="$2,$2" \
     --screenshot="$(cygpath -m "$PWD/$3")" "file:///$(cygpath -m "$PWD/tmp/x.svg")" >/dev/null 2>&1
 }
-render trf-icone-appli.svg 192 ../icon-192.png
-render trf-icone-appli.svg 512 ../icon-512.png
-render trf-icone-carree.svg 512 ../icon-maskable-512.png
-render trf-icone-carree.svg 180 ../apple-touch-icon.png
-render trf-logo.svg 1024 trf-logo.png
-render trf-logo-carre.svg 1024 trf-logo-carre.png
+render tnr-icone-appli.svg 192 ../icon-192.png
+render tnr-icone-appli.svg 512 ../icon-512.png
+render tnr-icone-carree.svg 512 ../icon-maskable-512.png
+render tnr-icone-carree.svg 180 ../apple-touch-icon.png
+render tnr-logo.svg 1024 tnr-logo.png
+render tnr-logo-carre.svg 1024 tnr-logo-carre.png
 rm -rf tmp
 echo "icônes à jour"

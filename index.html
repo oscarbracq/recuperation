@@ -7,11 +7,11 @@
 <meta name="theme-color" content="#0B1A40" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="TRF Athletics">
-<meta name="application-name" content="TRF Athletics">
+<meta name="apple-mobile-web-app-title" content="TNR Athletics">
+<meta name="application-name" content="TNR Athletics">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon-192.png?v=trf2">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=trf2">
+<link rel="icon" href="icon-192.png?v=tnr">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=tnr">
 <style>
 body{margin:0}
 img{max-width:100%}
@@ -24,8 +24,8 @@ img{max-width:100%}
 </style>
 </head>
 <body>
-<div id="login" hidden><form><img class="logo" src="icon-192.png?v=trf2" alt="TRF Athletics"><h1 style="margin:0">TRF Athletics</h1><input name="email" type="email" required autocomplete="email" placeholder="ton e-mail"><input name="password" type="password" required autocomplete="current-password" placeholder="ton mot de passe"><button class="btn" type="submit">Se connecter</button><p class="msg"></p><button class="link" type="button" style="background:none;border:0;color:var(--fg2);font:inherit;font-size:.8125rem;text-decoration:underline">Pas encore de mot de passe ? Recevoir un lien par mail</button></form></div>
-<div id="setpw" hidden><form><img class="logo" src="icon-192.png?v=trf2" alt="TRF Athletics"><h1 style="margin:0;font-size:1.375rem">Choisis ton mot de passe</h1><p class="small muted" style="margin:0">Pour ouvrir l'appli sur n'importe quel navigateur avec <b class="who"></b>.</p><input name="password" type="password" autocomplete="new-password" placeholder="nouveau mot de passe"><button class="btn" type="submit">Enregistrer</button><p class="msg"></p><button class="later" type="button" style="background:none;border:0;color:var(--fg2);font:inherit;font-size:.8125rem">Plus tard</button></form></div><title>TRF Athletics</title>
+<div id="login" hidden><form><img class="logo" src="icon-192.png?v=tnr" alt="TNR Athletics"><h1 style="margin:0">TNR Athletics</h1><input name="email" type="email" required autocomplete="email" placeholder="ton e-mail"><input name="password" type="password" required autocomplete="current-password" placeholder="ton mot de passe"><button class="btn" type="submit">Se connecter</button><p class="msg"></p><button class="link" type="button" style="background:none;border:0;color:var(--fg2);font:inherit;font-size:.8125rem;text-decoration:underline">Pas encore de mot de passe ? Recevoir un lien par mail</button></form></div>
+<div id="setpw" hidden><form><img class="logo" src="icon-192.png?v=tnr" alt="TNR Athletics"><h1 style="margin:0;font-size:1.375rem">Choisis ton mot de passe</h1><p class="small muted" style="margin:0">Pour ouvrir l'appli sur n'importe quel navigateur avec <b class="who"></b>.</p><input name="password" type="password" autocomplete="new-password" placeholder="nouveau mot de passe"><button class="btn" type="submit">Enregistrer</button><p class="msg"></p><button class="later" type="button" style="background:none;border:0;color:var(--fg2);font:inherit;font-size:.8125rem">Plus tard</button></form></div><title>TNR Athletics</title>
 
 <style>
 /* Layout: iOS-style grouped list — centered header, recovery gauge hero, 2-column metric tiles that open a detail sheet with a scrubbable chart, translucent tab bar */
@@ -342,28 +342,56 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 @media (prefers-reduced-motion:reduce){.sheet,.scrim,.toast,.btn,.tile,.seg button,.switch span::after{transition:opacity .2s ease!important}.sheet{transform:none;opacity:0;pointer-events:none}.sheet.on{opacity:1;pointer-events:auto}}
 @media (prefers-reduced-transparency:reduce){.tabbar{background:var(--card);backdrop-filter:none;-webkit-backdrop-filter:none}}
 
-/* ---------- TRF Athletics: home, Training (red) and Fuel (green). Reload keeps everything above. ---------- */
+/* ---------- TNR Athletics: home, Training (red), Nutrition (green). Recovery (blue) keeps everything above. ---------- */
 :root[data-mod="T"]{--accent:#E0352B;--accent-soft:rgba(224,53,43,.12);--aura1:#FF9C94;--aura2:#FFB8A8;--aura3:#FF8FA3;--top:#FFD3CE}
-:root[data-mod="F"]{--accent:#1E9E50;--accent-soft:rgba(30,158,80,.12);--aura1:#86E0A8;--aura2:#B3EFC4;--aura3:#9EE6D0;--top:#C9F1D8}
+:root[data-mod="N"]{--accent:#1E9E50;--accent-soft:rgba(30,158,80,.12);--aura1:#86E0A8;--aura2:#B3EFC4;--aura3:#9EE6D0;--top:#C9F1D8}
 :root[data-mod="home"]{--aura1:#7FB0FF;--aura2:#FF9C94;--aura3:#86E0A8;--top:#E4E8F5}
 @media (prefers-color-scheme:dark){
   :root[data-mod="T"]:not([data-theme="light"]){--accent:#FF5A4E;--accent-soft:rgba(255,90,78,.18);--aura1:#B91C1C;--aura2:#9F1239;--aura3:#7C2D12;--top:#2A0707}
-  :root[data-mod="F"]:not([data-theme="light"]){--accent:#34D27A;--accent-soft:rgba(52,210,122,.18);--aura1:#15803D;--aura2:#047857;--aura3:#166534;--top:#04210F}
+  :root[data-mod="N"]:not([data-theme="light"]){--accent:#34D27A;--accent-soft:rgba(52,210,122,.18);--aura1:#15803D;--aura2:#047857;--aura3:#166534;--top:#04210F}
   :root[data-mod="home"]:not([data-theme="light"]){--aura1:#1D4ED8;--aura2:#B91C1C;--aura3:#15803D;--top:#05070F}}
 :root[data-theme="dark"][data-mod="T"]{--accent:#FF5A4E;--accent-soft:rgba(255,90,78,.18);--aura1:#B91C1C;--aura2:#9F1239;--aura3:#7C2D12;--top:#2A0707}
-:root[data-theme="dark"][data-mod="F"]{--accent:#34D27A;--accent-soft:rgba(52,210,122,.18);--aura1:#15803D;--aura2:#047857;--aura3:#166534;--top:#04210F}
+:root[data-theme="dark"][data-mod="N"]{--accent:#34D27A;--accent-soft:rgba(52,210,122,.18);--aura1:#15803D;--aura2:#047857;--aura3:#166534;--top:#04210F}
 :root[data-theme="dark"][data-mod="home"]{--aura1:#1D4ED8;--aura2:#B91C1C;--aura3:#15803D;--top:#05070F}
 .trfmark{display:block;margin:0 auto 10px;padding:4px 10px;font:700 .75rem/1 var(--display);letter-spacing:.32em;text-indent:.32em;color:var(--fg2)}
-/* Home: three big doors, one per part of the app. */
-.mods{display:flex;flex-direction:column;gap:12px}
-.modc{position:relative;display:grid;grid-template-columns:60px 1fr auto;align-items:center;gap:14px;padding:16px;border-radius:22px;background:var(--card);box-shadow:var(--shadow);text-align:left;width:100%;overflow:hidden;transition:transform .15s ease-out}
-.modc:active{transform:scale(.98)}
-.modc::after{content:"";position:absolute;right:-20%;top:-40%;width:70%;height:180%;background:radial-gradient(closest-side,var(--mc),transparent);opacity:.13;pointer-events:none}
-.modc .let{width:60px;height:60px;border-radius:16px;display:grid;place-items:center;font:800 1.875rem/1 var(--display);color:#fff;background:var(--mc)}
-.modc b{display:block;font:700 1.3125rem/1.1 var(--display);letter-spacing:-.015em}
-.modc .d{display:block;font-size:.8125rem;color:var(--fg2);margin-top:2px}
-.modc .st{text-align:right;font:600 1.0625rem/1.15 var(--display);font-variant-numeric:tabular-nums;max-width:120px}
-.modc .st small{display:block;font:500 .6875rem/1.3 var(--font);color:var(--fg2)}
+/* Home: a black page and the three letters within reach of the thumb. Press one: it lights up in its colour and
+   that colour rises from under it into the black. Swipe it up to open that part of the app. */
+:root[data-mod="home"],:root[data-mod="home"]:not([data-theme="light"]),:root[data-theme="dark"][data-mod="home"]{--top:#000}
+#mod-home{position:fixed;inset:0;z-index:5;background:#000;color:#F5F5F7;overflow:hidden;user-select:none;-webkit-user-select:none}
+#home-view{height:100%}
+.hm{position:relative;z-index:1;height:100%;max-width:600px;margin:0 auto;display:flex;flex-direction:column;padding:calc(28px + env(safe-area-inset-top,0px)) 20px calc(32px + env(safe-area-inset-bottom,0px))}
+.hm-head{text-align:center}
+.hm-head .trfmark{color:rgba(255,255,255,.5)}
+.hm-head .sub{color:rgba(255,255,255,.5);font-size:.9375rem}
+.hm-head .sub::first-letter{text-transform:uppercase}
+.hm-head h1{color:#fff}
+.hm-gear{position:absolute;right:12px;top:calc(16px + env(safe-area-inset-top,0px));width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:rgba(255,255,255,.55)}
+.hm-gear svg{width:22px;height:22px}
+.hm-info{margin-top:auto;min-height:96px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;text-align:center;transition:opacity .25s}
+.hm-info b{font:700 2rem/1.1 var(--display);letter-spacing:-.025em;color:#fff}
+.hm-info span{font-size:.9375rem;color:rgba(255,255,255,.62)}
+.hm-info .hint{font-size:.6875rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.42);margin-top:8px}
+.hm-dock{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:30px}
+.hm-k{display:flex;flex-direction:column;align-items:center;gap:10px;padding:0;color:#fff;touch-action:none;transition:transform .5s cubic-bezier(.32,.72,0,1),opacity .3s}
+.hm-k .l{width:100%;max-width:104px;aspect-ratio:1;border-radius:26px;display:grid;place-items:center;font:800 2.75rem/1 var(--display);letter-spacing:-.02em;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.12);transition:border-color .25s,background .25s,box-shadow .25s}
+.hm-k .n{font-size:.6875rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5);transition:color .25s}
+.hm-k.on .l{border-color:var(--mc);background:color-mix(in srgb,var(--mc) 14%,transparent);box-shadow:0 0 0 5px color-mix(in srgb,var(--mc) 20%,transparent),0 12px 44px color-mix(in srgb,var(--mc) 50%,transparent)}
+.hm-k.on .n{color:#fff}
+.hm.sel .hm-k:not(.on){opacity:.35}
+.hm-k.drag{transition:none}
+.hm-k:focus-visible{outline:none}
+.hm-k:focus-visible .l{outline:2px solid #fff;outline-offset:3px}
+.hm-glow{position:absolute;left:50%;bottom:-55vh;width:160vw;height:120vh;border-radius:50%;background:radial-gradient(closest-side,var(--gc,#000) 0%,color-mix(in srgb,var(--gc,#000) 45%,transparent) 45%,transparent 75%);opacity:0;transform:translateX(-50%) scale(.55);transition:opacity .5s ease,transform .7s cubic-bezier(.32,.72,0,1);pointer-events:none;z-index:0}
+.hm-glow.on{opacity:.9;transform:translateX(-50%) scale(var(--gs,1))}
+.hm-glow.drag{transition:opacity .2s}
+.hm-glow.go{opacity:1;transform:translateX(-50%) scale(3.2);transition:transform .55s cubic-bezier(.4,0,.2,1),opacity .2s}
+.hm.going .hm-head,.hm.going .hm-info,.hm.going .hm-gear,.hm.going .hm-k:not(.on){opacity:0;transition:opacity .25s}
+.hm.going .hm-k.on{transform:translateY(-55vh) scale(1.15)!important;opacity:0;transition:transform .5s cubic-bezier(.4,0,.2,1),opacity .4s .12s}
+.mod.enter{animation:modfade .4s ease}
+.mod.enter .wrap{animation:modrise .5s cubic-bezier(.32,.72,0,1)}
+@keyframes modfade{from{opacity:0}}
+@keyframes modrise{from{transform:translateY(28px)}}
+@media (prefers-reduced-motion:reduce){.hm-k,.hm-glow,.hm-glow.go{transition:opacity .2s!important}.hm.going .hm-k.on{transform:none!important}.mod.enter,.mod.enter .wrap{animation:none}}
 /* Shared pieces of Training and Fuel */
 .chiptag{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:99px;font-size:.6875rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:var(--accent-soft);color:var(--accent)}
 .bigname{font:700 1.375rem/1.15 var(--display);letter-spacing:-.015em;margin:8px 0 2px}
@@ -450,14 +478,13 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 .qty{display:flex;align-items:center;gap:10px;margin-top:12px}
 .qty input{flex:1;font:700 1.75rem var(--display);text-align:center;color:var(--fg);background:var(--card2);border:0;border-radius:14px;padding:10px;font-variant-numeric:tabular-nums}
 .qty span{font-weight:600;color:var(--fg2)}
-#mod-home .wrap{padding-bottom:calc(32px + env(safe-area-inset-bottom,0px))}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-<div id="mod-home" class="mod"><div class="wrap"><section id="home-view"></section></div></div>
+<div id="mod-home" class="mod"><section id="home-view"></section></div>
 <div id="mod-R" class="mod" hidden>
 <div class="wrap">
-  <button class="trfmark" data-home aria-label="Retour à l'accueil TRF">TRF</button>
+  <button class="trfmark" data-home aria-label="Retour à l'accueil">TNR</button>
   <section id="v-today"></section>
   <section id="v-trends" hidden></section>
   <section id="v-reports" hidden></section>
@@ -479,8 +506,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
   <button role="tab" data-mtab="progress" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 4-7 5 5"/><path d="M3 21h18"/></svg>Progrès</button>
 </nav></div>
 </div>
-<div id="mod-F" class="mod" hidden><div class="wrap"><section id="f-view"></section></div>
-<div class="tabbar" id="tb-F"><nav role="tablist" aria-label="Sections">
+<div id="mod-N" class="mod" hidden><div class="wrap"><section id="f-view"></section></div>
+<div class="tabbar" id="tb-N"><nav role="tablist" aria-label="Sections">
   <button role="tab" data-mtab="journal" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/></svg>Journal</button>
   <button role="tab" data-mtab="progress" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 4-7 5 5"/><path d="M3 21h18"/></svg>Progrès</button>
   <button role="tab" data-mtab="foods" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.5c-2-2-7-1.5-7 4 0 4 3 8.5 5 8.5 1 0 1.5-.5 2-.5s1 .5 2 .5c2 0 5-4.5 5-8.5 0-5.5-5-6-7-4z"/><path d="M12 7.5c0-2 1-3.5 3-4.5"/></svg>Aliments</button>
@@ -1540,24 +1567,27 @@ document.addEventListener('change', e => { const k = e.target.dataset?.prefsw; i
 applyPrefs();
 
 /* =====================================================================
-   TRF Athletics: a home page to choose Training (T), Reload (R) or Fuel (F).
-   Reload is the recovery app above, unchanged. Training and Fuel reuse its look and feed it:
+   TNR Athletics: train, eat, recover, again. A home page to choose Training (T), Nutrition (N) or Recovery (R).
+   Recovery is the app above, unchanged (its code still says Reload). Training and Nutrition reuse its look and feed it:
    a finished session fills "Ma journée" (RPE, duration, sprint metres) so it counts in the effort,
-   and Fuel's targets follow the Withings weight and the training days.
+   and Nutrition's targets follow the Withings weight and the training days.
    ===================================================================== */
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const r25 = x => Math.round(x / 2.5) * 2.5;
 // Estimated one-rep max (Epley); above 10 reps the estimate is no longer reliable, so reps are capped.
 const e1rm = (kg, reps) => kg > 0 && reps > 0 ? kg * (1 + Math.min(reps, 10) / 30) : 0;
 const dow = k => new Date(k + 'T12:00:00').getDay();
+// Names of the three parts. The letters T, N, R stay whatever the language.
+const NAMES = {en: {T: 'Training', N: 'Nutrition', R: 'Recovery'}, fr: {T: 'Entraînement', N: 'Nutrition', R: 'Récupération'}};
+const modName = m => (NAMES[S.lang] || NAMES.en)[m];
 const DAYS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-Object.assign(S, {mod: 'home', plans: {}, logs: {}, tset: {}, fuel: {}, foods: {}, fset: {}, ttab: 'today', tkind: 'gym', lib: {q: '', cat: ''}, prog: 'squat', ftab: 'journal', fday: TODAY, live: null});
+Object.assign(S, {mod: 'home', plans: {}, logs: {}, tset: {}, fuel: {}, foods: {}, fset: {}, ttab: 'today', tkind: 'gym', lib: {q: '', cat: ''}, prog: 'squat', ftab: 'journal', fday: TODAY, live: null, lang: 'en'});
 try { Object.assign(S, JSON.parse(localStorage.getItem('trf-ui') || '{}')); S.fday = TODAY; S.mod = 'home'; } catch (e) {}
 try { S.live = JSON.parse(localStorage.getItem('trf-live') || 'null'); } catch (e) {}
-const saveUi = () => { try { localStorage.setItem('trf-ui', JSON.stringify({ttab: S.ttab, tkind: S.tkind, prog: S.prog, ftab: S.ftab})); } catch (e) {} };
+const saveUi = () => { try { localStorage.setItem('trf-ui', JSON.stringify({ttab: S.ttab, tkind: S.tkind, prog: S.prog, ftab: S.ftab, lang: S.lang})); } catch (e) {} };
 const saveLive = () => { try { S.live ? localStorage.setItem('trf-live', JSON.stringify(S.live)) : localStorage.removeItem('trf-live'); } catch (e) {} };
 const TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
-const trfMark = () => '<button class="trfmark" data-home aria-label="Retour à l\'accueil TRF">TRF</button>';
+const trfMark = () => '<button class="trfmark" data-home aria-label="Retour à l\'accueil">TNR</button>';
 async function dbSet(path, data) {
   if (!S.db) { toast('Non enregistré : ouvre l\'appli connecté à ton compte'); return false; }
   try { await S.db.doc(path).set(data); return true; } catch (e) { toast('Échec de l\'enregistrement, réessaie'); return false; }
@@ -1690,7 +1720,7 @@ function suggest(it) {
 /* ---------- module switching ---------- */
 function go(mod, push = true) {
   S.mod = mod; document.documentElement.dataset.mod = mod;
-  ['home', 'R', 'T', 'F'].forEach(m => { $('#mod-' + m).hidden = m !== mod; });
+  ['home', 'T', 'N', 'R'].forEach(m => { $('#mod-' + m).hidden = m !== mod; });
   fitTabbar();
   if (mod === 'R') setTab(S.tab); else renderMod(true);
   window.scrollTo(0, 0);
@@ -1699,29 +1729,93 @@ function go(mod, push = true) {
 }
 addEventListener('popstate', e => { if (P.stack.length) { closePane(); try { history.pushState({mod: S.mod}, ''); } catch (err) {} return; } go(e.state?.mod || 'home', false); });
 function renderMod(force) {
-  const el = S.mod === 'home' ? $('#home-view') : S.mod === 'T' ? $('#t-view') : S.mod === 'F' ? $('#f-view') : null;
+  if (S.mod === 'home' && (HP.el || HP.busy)) return;
+  const el = S.mod === 'home' ? $('#home-view') : S.mod === 'T' ? $('#t-view') : S.mod === 'N' ? $('#f-view') : null;
   if (!el) return;
   const html = S.mod === 'home' ? vHome() : S.mod === 'T' ? vT() : vF();
   if (force || el._html !== html) { el.innerHTML = html; el._html = html; initCharts(el); }
-  const bar = S.mod === 'T' ? '#tb-T' : S.mod === 'F' ? '#tb-F' : null;
+  const bar = S.mod === 'T' ? '#tb-T' : S.mod === 'N' ? '#tb-N' : null;
   if (bar) document.querySelectorAll(bar + ' button').forEach(b => b.setAttribute('aria-selected', b.dataset.mtab === (S.mod === 'T' ? S.ttab : S.ftab)));
   if (P.stack.length && P.live) paneRender();
 }
 
 /* ---------- home ---------- */
+const HOME_K = [['T', '#FF3B30'], ['N', '#30D158'], ['R', '#0A84FF']];
+const SWIPE = 90;
+const HP = {sel: null, x: '50%', el: null, id: null, y0: 0, dy: 0, busy: false};
+const GEAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>';
 function vHome() {
-  const kG = lastKey('hrv'), rec = kG ? recovery(kG) : null, z = zoneOf(rec?.score);
-  const p = planFor(TODAY), done = logsOn(TODAY);
-  const g = fuelGoal(TODAY), t = dayTotals(TODAY);
-  const card = (m, letter, name, desc, color, stat) => `<button class="modc" data-go="${m}" style="--mc:${color}"><span class="let">${letter}</span><span><b>${name}</b><span class="d">${desc}</span></span><span class="st">${stat}</span></button>`;
-  return `
-    <header class="top"><div class="trfmark" aria-hidden="true">TRF</div><div class="sub">${fmtDay(TODAY)}</div><h1 class="hello">${esc(greeting(rec?.score))}</h1></header>
-    <div class="mods">
-      ${card('T', 'T', 'Training', 'Musculation et piste', '#E0352B', S.live ? 'En cours<small>reprendre la séance</small>' : done.length ? 'Fait ✓<small>' + esc(done[0].name) + '</small>' : p ? esc(p.name.split(' · ')[0]) + '<small>prévu aujourd\'hui</small>' : 'Repos<small>rien de prévu</small>')}
-      ${card('R', 'R', 'Reload', 'Récupération et forme', '#2F7BF5', rec ? `<span style="color:${ZCOL[z]}">${rec.score} %</span><small>${ZONE[z].replace('Récupération ', '')}</small>` : '–<small>en calibrage</small>')}
-      ${card('F', 'F', 'Fuel', 'Alimentation et objectifs', '#1E9E50', `${fx(t.kcal)}<small>sur ${fx(g.kcal)} kcal</small>`)}
-    </div>
-    <p class="note">Tout est relié : tes séances comptent dans ta récupération, et tes objectifs alimentaires suivent ton poids et tes jours d'entraînement.</p>`;
+  const kG = lastKey('hrv'), rec = kG ? recovery(kG) : null, s = HP.sel, c = HOME_K.find(k => k[0] === s)?.[1];
+  return `<div class="hm-glow${s ? ' on' : ''}" id="hm-glow" style="--gc:${c || '#000'};left:${HP.x}"></div>
+    <div class="hm${s ? ' sel' : ''}" id="hm">
+      <button class="hm-gear" data-hset aria-label="Réglages de l'accueil">${GEAR}</button>
+      <header class="hm-head"><div class="trfmark" aria-hidden="true">TNR</div><div class="sub">${fmtDay(TODAY)}</div><h1 class="hello">${esc(greeting(rec?.score))}</h1></header>
+      <div class="hm-info" id="hm-info" aria-live="polite">${homeInfo(s)}</div>
+      <div class="hm-dock">${HOME_K.map(([m, col]) => `<button class="hm-k${s === m ? ' on' : ''}" data-k="${m}" style="--mc:${col}" aria-label="${modName(m)} : touche puis glisse vers le haut pour ouvrir"><span class="l">${m}</span><span class="n">${modName(m)}</span></button>`).join('')}</div>
+    </div>`;
+}
+function homeInfo(s) {
+  if (!s) return '<span>Touche une lettre, puis glisse-la vers le haut</span>';
+  return `<b>${modName(s)}</b><span>${esc(homeStatus(s))}</span><span class="hint">↑ Glisse vers le haut pour ouvrir</span>`;
+}
+function homeStatus(m) {
+  if (m === 'T') { if (S.live) return 'Séance en cours : ' + S.live.name; const d = logsOn(TODAY); if (d.length) return 'Fait aujourd\'hui : ' + d[0].name; const p = planFor(TODAY); return p ? 'Prévu aujourd\'hui : ' + p.name : 'Rien de prévu aujourd\'hui'; }
+  if (m === 'N') { const g = fuelGoal(TODAY), t = dayTotals(TODAY); return `${fx(t.kcal)} sur ${fx(g.kcal)} kcal aujourd'hui`; }
+  const kG = lastKey('hrv'), rec = kG ? recovery(kG) : null;
+  return rec ? `${ZONE[zoneOf(rec.score)]} · ${rec.score} %` : 'En calibrage : quelques nuits de mesures';
+}
+// Selecting only touches the page (no redraw), so the finger keeps hold of the letter it pressed.
+function homeSelect(b) {
+  const m = b.dataset.k, col = HOME_K.find(k => k[0] === m)[1], r = b.getBoundingClientRect(), g = $('#hm-glow');
+  HP.sel = m; HP.x = (r.left + r.width / 2) + 'px';
+  $('#hm').classList.add('sel');
+  document.querySelectorAll('.hm-k').forEach(k => k.classList.toggle('on', k === b));
+  g.style.setProperty('--gc', col); g.style.left = HP.x; g.style.setProperty('--gs', 1); g.classList.add('on');
+  $('#hm-info').innerHTML = homeInfo(m);
+  if (PREFS.haptic) navigator.vibrate?.(8);
+}
+function homeOpen(m) {
+  HP.busy = true;
+  $('#hm').classList.add('going'); $('#hm-glow').classList.add('go');
+  if (PREFS.haptic) navigator.vibrate?.(14);
+  setTimeout(() => {
+    HP.busy = false; HP.sel = null;
+    go(m);
+    const el = $('#mod-' + m); el.classList.add('enter'); setTimeout(() => el.classList.remove('enter'), 550);
+    if (m === 'T' && S.live) openLive();
+  }, 470);
+}
+document.addEventListener('pointerdown', e => {
+  const b = e.target.closest('.hm-k'); if (!b || HP.busy) return;
+  HP.el = b; HP.id = e.pointerId; HP.y0 = e.clientY; HP.dy = 0;
+  try { b.setPointerCapture(e.pointerId); } catch (err) {}
+  homeSelect(b);
+  b.classList.add('drag'); $('#hm-glow').classList.add('drag');
+});
+document.addEventListener('pointermove', e => {
+  if (!HP.el || e.pointerId !== HP.id) return;
+  HP.dy = Math.max(0, HP.y0 - e.clientY);
+  // The letter follows the finger with some resistance; the colour grows with it.
+  HP.el.style.transform = `translateY(${-HP.dy * .6}px)`;
+  $('#hm-glow').style.setProperty('--gs', 1 + Math.min(1, HP.dy / SWIPE) * .9);
+});
+const homeRelease = e => {
+  if (!HP.el || e.pointerId !== HP.id) return;
+  const b = HP.el; HP.el = null; HP.id = null;
+  b.classList.remove('drag'); $('#hm-glow')?.classList.remove('drag');
+  if (HP.dy > SWIPE && e.type === 'pointerup') { homeOpen(b.dataset.k); return; }
+  b.style.transform = ''; $('#hm-glow')?.style.setProperty('--gs', 1);
+};
+document.addEventListener('pointerup', homeRelease);
+document.addEventListener('pointercancel', homeRelease);
+// Keyboard: Enter or Space on a letter opens it.
+document.addEventListener('keydown', e => { const b = e.target.closest?.('.hm-k'); if (b && (e.key === 'Enter' || e.key === ' ') && !HP.busy) { e.preventDefault(); homeSelect(b); homeOpen(b.dataset.k); } });
+function homeSettings() {
+  openPane({title: 'Réglages', render: () => `
+    <div class="list" style="margin-top:16px"><div class="row col"><span class="l">Langue<span class="hint">Change les noms des trois parties. Les lettres T, N, R restent les mêmes.</span></span>
+      <div class="seg" role="group" aria-label="Langue">${[['fr', 'Français'], ['en', 'English']].map(([v, l]) => `<button type="button" data-hlang="${v}" aria-pressed="${(S.lang || 'en') === v}">${l}</button>`).join('')}</div>
+      <span class="hint">${['T', 'N', 'R'].map(m => `${m} · ${modName(m)}`).join(' &nbsp; ')}</span></div></div>
+    <p class="note" style="text-align:left">L'apparence, la vibration et l'actualisation se règlent dans ${modName('R')}, onglet Profil.</p>`});
 }
 
 /* ---------- Training ---------- */
@@ -1737,15 +1831,15 @@ function tToday() {
   const week = [0, 1, 2, 3, 4, 5, 6].map(i => { const k = addDays(mon, i), d = logsOn(k).length, pl = planFor(k); return `<span class="${k === TODAY ? 'today' : ''}">${DOW[i]}<i class="${d ? 'done' : pl ? 'plan' : ''}">${d ? '✓' : +k.slice(8)}</i></span>`; }).join('');
   const wk = weekTotals(mon);
   const live = S.live ? `<button class="banner" data-tlive style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Séance en cours</b><br><span class="small muted">${esc(S.live.name)}</span></span><span class="chiptag">Reprendre</span></button>` : '';
-  const main = done.length ? `<article class="card"><span class="chiptag">${TICK.replace('<svg', '<svg width="12" height="12"')} Fait aujourd'hui</span>${done.map(l => `<div class="bigname">${esc(l.name)}</div><p class="small muted">${l.min} min · RPE ${l.rpe}/10${l.tonnage ? ' · ' + fx(l.tonnage) + ' kg soulevés' : ''}${l.sprintM ? ' · ' + fx(l.sprintM) + ' m de sprint' : ''}</p>`).join('')}<p class="small" style="margin-top:10px">Bravo. La séance est déjà comptée dans ton effort du jour sur Reload.</p></article>`
+  const main = done.length ? `<article class="card"><span class="chiptag">${TICK.replace('<svg', '<svg width="12" height="12"')} Fait aujourd'hui</span>${done.map(l => `<div class="bigname">${esc(l.name)}</div><p class="small muted">${l.min} min · RPE ${l.rpe}/10${l.tonnage ? ' · ' + fx(l.tonnage) + ' kg soulevés' : ''}${l.sprintM ? ' · ' + fx(l.sprintM) + ' m de sprint' : ''}</p>`).join('')}<p class="small" style="margin-top:10px">Bravo. La séance est déjà comptée dans ton effort du jour sur ${modName('R')}.</p></article>`
     : p ? `<article class="card"><span class="chiptag">${p.kind === 'gym' ? 'Musculation' : 'Piste'} · ${estMin(p)} min</span><div class="bigname">${esc(p.name)}</div><p class="small muted">${esc(p.desc || '')}</p>
         <ul class="exl">${p.items.map(it => `<li><span>${esc(exOf(it.ex).n)}</span><span>${itemText(it)}</span></li>`).join('')}</ul>
         <div style="margin-top:14px"><button class="btn" data-tstart="${p.id}">Commencer la séance</button></div></article>`
     : `<article class="card empty"><b>Pas de séance prévue aujourd'hui</b>Profite de la récupération, ou choisis une séance.<div class="stack" style="margin-top:14px"><button class="btn ghost" data-ttab="sessions">Choisir une séance</button><button class="btn ghost" data-tplan>Planifier ma semaine</button></div></article>`;
   return `
-    <header class="top"><div class="sub">${fmtDay(TODAY)} · semaine ${seasonWeek(TODAY)}</div><h1>Training</h1></header>
+    <header class="top"><div class="sub">${fmtDay(TODAY)} · semaine ${seasonWeek(TODAY)}</div><h1>${modName('T')}</h1></header>
     <div class="stack">${live}
-      <div class="card" style="display:flex;gap:12px;align-items:center"><span class="pill ${z}"><i></i>${rec ? rec.score + ' %' : 'Reload'}</span><span class="small">${rec ? esc(tgt.text) : 'Ta récupération du matin s\'affichera ici pour ajuster la séance.'}</span></div>
+      <div class="card" style="display:flex;gap:12px;align-items:center"><span class="pill ${z}"><i></i>${rec ? rec.score + ' %' : modName('R')}</span><span class="small">${rec ? esc(tgt.text) : 'Ta récupération du matin s\'affichera ici pour ajuster la séance.'}</span></div>
       ${main}
       <div class="card"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Cette semaine</span><button class="small" style="color:var(--accent);font-weight:600" data-tplan>Planning</button></div><div class="week">${week}</div>
         <div class="stats" style="margin-top:12px"><div><b>${wk.n}</b><span>séances</span></div><div><b>${fx(wk.tonnage / 1000, 1)} t</b><span>soulevées</span></div><div><b>${fx(wk.sprintM)} m</b><span>de sprint</span></div></div></div>
@@ -1768,7 +1862,7 @@ function tSessions() {
     <header class="top"><div class="sub">Programmes et séances</div><h1>Séances</h1></header>
     <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Piste']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
     <h2>Mes séances</h2><div class="list">${mine.map(row).join('')}<button class="addbtn" data-tnew>+ Créer une séance</button></div>
-    <h2>Programmes TRF <small>à dupliquer et adapter</small></h2><div class="list">${base.map(row).join('')}</div>
+    <h2>Programmes TNR <small>à dupliquer et adapter</small></h2><div class="list">${base.map(row).join('')}</div>
     <div style="margin-top:16px"><button class="btn ghost" data-tplan>Planifier ma semaine</button></div>`;
 }
 function tLibrary() {
@@ -1895,7 +1989,7 @@ async function savePlan() {
 function weekPlanner() {
   openPane({title: 'Planning de la semaine', render: () => {
     const opts = sel => `<option value="">Repos</option>${['gym', 'track'].map(k => `<optgroup label="${k === 'gym' ? 'Musculation' : 'Piste'}">${allPlans().filter(p => p.kind === k).map(p => `<option value="${p.id}"${p.id === sel ? ' selected' : ''}>${esc(p.name)}</option>`).join('')}</optgroup>`).join('')}`;
-    return `<p class="small muted" style="margin:16px 4px 10px">Une séance par jour. Elle s'affiche dans Training le jour venu, compte comme jour d'entraînement pour Reload, et ajuste tes objectifs dans Fuel.</p>
+    return `<p class="small muted" style="margin:16px 4px 10px">Une séance par jour. Elle s'affiche dans ${modName('T')} le jour venu, compte comme jour d'entraînement pour ${modName('R')}, et ajuste tes objectifs dans ${modName('N')}.</p>
       <div class="list">${[1, 2, 3, 4, 5, 6, 0].map(d => `<div class="row"><label for="wk-${d}" style="flex:none;width:96px">${DAYS[d]}</label><select id="wk-${d}" class="mini-in" style="text-align:left" data-tweek="${d}">${opts(S.tset.week?.[d])}</select></div>`).join('')}</div>`;
   }});
 }
@@ -1965,7 +2059,7 @@ function finishPane() {
     <div class="list"><div class="row col"><label for="fin-rpe">Difficulté ressentie (RPE)<span class="hint">1 = très facile · 10 = effort maximal</span></label><div class="rangeline"><input type="range" id="fin-rpe" min="1" max="10" value="${rpe}" data-finrpe><output>${rpe}</output></div></div>
     <div class="row"><label for="fin-min">Durée<span class="hint">modifiable</span></label><input type="number" inputmode="numeric" id="fin-min" value="${min}" style="width:90px;text-align:right" class="mini-in"></div></div>
     <div class="sec-label">Note</div><textarea id="fin-note" rows="3" placeholder="Sensations, douleurs, consignes du coach…">${esc(L.note || '')}</textarea>
-    <p class="note" style="text-align:left">En enregistrant, la séance est ajoutée à « Ma journée » dans Reload : elle compte dans ton effort du jour et dans ta récupération.</p>
+    <p class="note" style="text-align:left">En enregistrant, la séance est ajoutée à « Ma journée » dans ${modName('R')} : elle compte dans ton effort du jour et dans ta récupération.</p>
     <div style="margin-top:14px"><button class="btn" data-tsave>Enregistrer la séance</button></div>`});
 }
 async function saveLive2() {
@@ -1981,7 +2075,7 @@ async function saveLive2() {
   if (!await dbSet('training/' + doc.id, doc)) return;
   await feedReload(L.date);
   S.live = null; saveLive(); stopRest(); closeAllPanes();
-  toast('Séance enregistrée · ajoutée à Reload');
+  toast(`Séance enregistrée · ajoutée à ${modName('R')}`);
 }
 // Reload's "Ma journée" is rebuilt from every session logged that day, so it stays right if a session is edited or deleted.
 async function feedReload(k) {
@@ -2083,7 +2177,7 @@ function fJournal() {
   const macro = (lab, v, goal, color) => `<div class="macro" style="--mc:${color}"><span>${lab}</span><b>${fx(v)}<small> / ${fx(goal)} g</small></b><div class="bar"><i style="width:${clamp(v / goal * 100, 0, 100)}%"></i></div></div>`;
   const y = fday(addDays(k, -1)).items || [];
   return `
-    <header class="top"><div class="sub">Journal alimentaire</div><h1>Fuel</h1></header>
+    <header class="top"><div class="sub">Journal alimentaire</div><h1>${modName('N')}</h1></header>
     <div class="card" style="padding:8px 12px"><div class="daynav"><button data-fdayoff="-1" aria-label="Jour précédent">‹</button><b>${esc(title)}</b><button data-fdayoff="1" aria-label="Jour suivant" ${k >= TODAY ? 'disabled' : ''}>›</button></div></div>
     <div class="stack" style="margin-top:12px">
       <article class="card">
@@ -2128,7 +2222,7 @@ function fFoods() {
     <header class="top"><div class="sub">Tes aliments et la base</div><h1>Aliments</h1></header>
     <h2>Mes aliments</h2><div class="list">${mine.map(f => `<button class="rowbtn" data-fmine="${f.id}"><span><b>${esc(f.n)}</b><span class="meta">pour 100 g · P ${fx(f.p, 1)} · G ${fx(f.c, 1)} · L ${fx(f.f, 1)}</span></span><span class="kc">${fx(f.kcal)} kcal</span></button>`).join('')}<button class="addbtn" data-fnewfood>+ Créer un aliment</button></div>
     <p class="note" style="text-align:left">Ajoute tes produits habituels (étiquette « pour 100 g ») : ils apparaissent en premier dans la recherche.</p>
-    <h2>Base TRF <small>${FOODS.length} aliments courants</small></h2>
+    <h2>Base TNR <small>${FOODS.length} aliments courants</small></h2>
     <div class="list">${FOODS.map(f => `<div class="rowbtn"><span><b>${esc(f.n)}</b><span class="meta">pour 100 g · P ${fx(f.p, 1)} · G ${fx(f.c, 1)} · L ${fx(f.f, 1)}</span></span><span class="kc">${fx(f.kcal)}</span></div>`).join('')}</div>`;
 }
 function fGoals() {
@@ -2145,10 +2239,10 @@ function fGoals() {
     <h2>Comment c'est calculé</h2>
     <div class="card small muted stack">
       <p><b style="color:var(--fg)">Base</b> : formule de Mifflin-St Jeor avec ton poids Withings (moyenne 7 jours : ${fx(g.w, 1)} kg), ta taille (${fx(g.h)} cm) et ton âge (${fx(g.age)} ans).</p>
-      <p><b style="color:var(--fg)">Dépense</b> : × 1,75 un jour d'entraînement (séance prévue dans Training, séance faite, ou jour d'entraînement de Reload), × 1,5 un jour de repos. Objectif : − 400 kcal pour perdre du gras, + 250 kcal pour prendre du muscle.</p>
+      <p><b style="color:var(--fg)">Dépense</b> : × 1,75 un jour d'entraînement (séance prévue dans ${modName('T')}, séance faite, ou jour d'entraînement de ${modName('R')}), × 1,5 un jour de repos. Objectif : − 400 kcal pour perdre du gras, + 250 kcal pour prendre du muscle.</p>
       <p><b style="color:var(--fg)">Macros</b> : protéines ${fx(S.fset.protein || 2, 1)} g/kg, lipides 1 g/kg, les glucides complètent. Ce sont eux qui montent les jours d'entraînement.</p>
     </div>
-    ${S.profile?.nutrition ? `<h2>Ton plan alimentaire</h2><div class="card why">${esc(S.profile.nutrition)}</div><p class="note" style="text-align:left">Modifiable dans Reload, onglet Profil.</p>` : ''}`;
+    ${S.profile?.nutrition ? `<h2>Ton plan alimentaire</h2><div class="card why">${esc(S.profile.nutrition)}</div><p class="note" style="text-align:left">Modifiable dans ${modName('R')}, onglet Profil.</p>` : ''}`;
 }
 async function saveFset(patch) { Object.assign(S.fset, patch); renderMod(); await dbSet('settings/fuel', {...S.fset, updatedAt: new Date().toISOString()}); }
 async function saveDay(k, d) { S.fuel[k] = d; renderMod(); await dbSet('fuel/' + k, {...d, date: k, updatedAt: new Date().toISOString()}); }
@@ -2237,7 +2331,8 @@ document.addEventListener('click', e => {
   const t = e.target, at = s => t.closest(s);
   let b;
   if (at('[data-home]')) { go('home'); return; }
-  if ((b = at('[data-go]'))) { go(b.dataset.go); if (b.dataset.go === 'T' && S.live) openLive(); return; }
+  if (at('[data-hset]')) { homeSettings(); return; }
+  if ((b = at('[data-hlang]'))) { S.lang = b.dataset.hlang; saveUi(); paneRender(); renderMod(true); return; }
   if ((b = at('[data-mtab]'))) { if (S.mod === 'T') S.ttab = b.dataset.mtab; else S.ftab = b.dataset.mtab; saveUi(); renderMod(true); window.scrollTo(0, 0); return; }
   if ((b = at('[data-ttab]'))) { S.ttab = b.dataset.ttab; saveUi(); renderMod(true); return; }
   if ((b = at('[data-tkind]'))) { S.tkind = b.dataset.tkind; saveUi(); renderMod(); return; }
@@ -2321,7 +2416,7 @@ $('#scrim').addEventListener('click', () => { if (P.stack.length) closeAllPanes(
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && P.stack.length) closePane(); });
 // The live session clock ticks while its sheet is open.
 setInterval(() => { if (P.live && S.live) { const b = $('#pane-body .livehead b'); if (b) b.textContent = Math.max(0, Math.floor((Date.now() - new Date(S.live.start)) / 60000)) + ' min'; } }, 15000);
-function bootTRF(db) {
+function bootTNR(db) {
   const col = (name, key) => db.collection(name).onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); S[key] = o; renderMod(); }, () => {});
   col('plans', 'plans'); col('training', 'logs'); col('fuel', 'fuel'); col('foods', 'foods');
   db.doc('settings/training').onSnapshot(s => { S.tset = s.exists ? s.data() : {}; renderMod(); }, () => {});
@@ -2357,7 +2452,7 @@ go('home', false);
   db.doc('requests/sync').onSnapshot(snap => { S.req = snap.exists ? snap.data().requestedAt : null; render(); }, () => {});
   db.doc('status/sync').onSnapshot(snap => { S.checked = snap.exists ? snap.data() : null; render(); }, () => {});
   db.doc('profile/main').onSnapshot(snap => { S.profile = snap.exists ? snap.data() : null; render(); }, fail);
-  bootTRF(db);
+  bootTNR(db);
   if (PREFS.autoSync && window.RECUP_SYNC) refreshAll();
 })();
 </script>
