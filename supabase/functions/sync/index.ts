@@ -74,20 +74,22 @@ async function mergeMonths(collection: string, days: Record<string, Record<strin
 }
 
 async function syncGarmin(nDays: number, debug: boolean) {
-  // Access pass: from the API key if one is set here, else the pass the hourly cloud sync renews
-  // with the key it already holds (stored in recup_private.garmin).
-  let jwt: string;
-  const key = Deno.env.get('GARMIN_API_KEY');
+  // Access pass: from the personal API key Oscar pasted in the app's settings (recup_private.garmin.apiKey),
+  // else the 24 h pass the cloud sync used to renew there.
+  let jwt = '';
+  const priv = (await getPrivate('garmin')) || {};
+  const key = priv.apiKey || Deno.env.get('GARMIN_API_KEY');
   if (key) {
     const tr = await fetch(`${GARMIN}/personalapitoken-service/personal-api/personal-api-key/token`, {method: 'POST', headers: {Authorization: 'ApiKey ' + key}});
-    if (!tr.ok) throw new Error('jeton Garmin ' + tr.status);
-    jwt = (await tr.text()).trim();
-    try { const j = JSON.parse(jwt); jwt = j.token || j.accessToken || j.access_token || jwt; } catch { /* raw JWT */ }
-  } else {
-    const pass = await getPrivate('garmin');
-    if (!pass?.jwt) throw new Error('pass Garmin pas encore installé');
-    if (pass.exp && pass.exp * 1000 < Date.now()) throw new Error('pass Garmin expiré');
-    jwt = pass.jwt;
+    if (tr.ok) {
+      jwt = (await tr.text()).trim();
+      try { const j = JSON.parse(jwt); jwt = j.token || j.accessToken || j.access_token || jwt; } catch { /* raw JWT */ }
+    } else if (!priv.jwt) throw new Error('clé API Garmin refusée (' + tr.status + ')');
+  }
+  if (!jwt) {
+    if (!priv.jwt) throw new Error('pass Garmin pas encore installé');
+    if (priv.exp && priv.exp * 1000 < Date.now()) throw new Error('pass Garmin expiré');
+    jwt = priv.jwt;
   }
   const get = async (p: string) => {
     const r = await fetch(GARMIN + p, {headers: {Authorization: 'Bearer ' + jwt, Accept: 'application/json'}});
@@ -183,6 +185,19 @@ async function syncWithings(nDays: number) {
   return {days: await mergeMonths('withings', days)};
 }
 
+// Withings sign-in, last step: the app sends back the one-time code Withings gave it, exchanged here
+// with the client id and secret Oscar pasted in the settings. Only the refresh token is kept.
+async function linkWithings(code: string, redirect: string) {
+  const cfg = await getPrivate('withings');
+  if (!cfg?.client_id || !cfg?.client_secret) throw new Error('client ID et secret Withings manquants');
+  const tr = await fetch('https://wbsapi.withings.net/v2/oauth2', {method: 'POST', body: new URLSearchParams({
+    action: 'requesttoken', grant_type: 'authorization_code', client_id: cfg.client_id, client_secret: cfg.client_secret, code, redirect_uri: redirect})});
+  const tj = await tr.json();
+  if (tj.status !== 0) throw new Error('Withings a refusé le code (' + tj.status + ')');
+  await putPrivate('withings', {...cfg, refresh_token: tj.body.refresh_token, userid: tj.body.userid, linkedAt: new Date().toISOString(), updatedAt: new Date().toISOString()});
+  return {linked: true};
+}
+
 Deno.serve(async req => {
   if (req.method === 'OPTIONS') return new Response('ok', {headers: CORS});
   const token = req.headers.get('x-recup-token');
@@ -194,6 +209,11 @@ Deno.serve(async req => {
     allowed = data.user?.email === OWNER;
   }
   if (!allowed) return json({error: 'non autorisé'}, 401);
+  const body = await req.json().catch(() => ({}));
+  if (body.withingsCode) {
+    if (token) return json({error: 'non autorisé'}, 401);
+    try { return json(await linkWithings(String(body.withingsCode), String(body.redirect || ''))); } catch (e) { return json({error: String((e as Error).message || e)}, 400); }
+  }
 
   const url = new URL(req.url);
   const nDays = Math.min(60, Math.max(1, Number(url.searchParams.get('days')) || 3));

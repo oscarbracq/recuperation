@@ -47,6 +47,7 @@ p{margin:0}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 button:focus-visible,input:focus-visible,textarea:focus-visible,label:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px 18px;border-radius:14px;background:var(--accent);color:#fff;font-weight:600;font-size:1.0625rem;transition:transform .1s ease-out,opacity .1s}
+.btn:disabled{opacity:.45;cursor:default}
 .btn:active{transform:scale(.97);opacity:.9}
 .btn.ghost{background:var(--accent-soft);color:var(--accent)}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;font-size:.8125rem;font-weight:600;white-space:nowrap}
@@ -1818,8 +1819,45 @@ function homeSettings() {
     <div class="list" style="margin-top:16px"><div class="row col"><span class="l">Langue<span class="hint">Change les noms des trois parties. Les lettres T, N, R restent les mêmes.</span></span>
       <div class="seg" role="group" aria-label="Langue">${[['fr', 'Français'], ['en', 'English']].map(([v, l]) => `<button type="button" data-hlang="${v}" aria-pressed="${(S.lang || 'en') === v}">${l}</button>`).join('')}</div>
       <span class="hint">${['T', 'N', 'R'].map(m => `${m} · ${modName(m)}`).join(' &nbsp; ')}</span></div></div>
-    <p class="note" style="text-align:left">L'apparence, la vibration et l'actualisation se règlent dans ${modName('R')}, onglet Profil.</p>`});
+    <p class="note" style="text-align:left">L'apparence, la vibration et l'actualisation se règlent dans ${modName('R')}, onglet Profil.</p>
+    ${connSection()}`});
+  if (window.RECUP_KEYS) connLoad();
 }
+/* Connexions: Oscar pastes his own Garmin and Withings keys; they go to the private table and never come back. */
+let CONN = null;
+async function connLoad() {
+  try { CONN = await window.RECUP_KEYS.state(); } catch (e) { CONN = {error: true}; }
+  if (P.stack.length) paneRender();
+}
+function connSection() {
+  if (!window.RECUP_KEYS) return `<h2>Connexions</h2><p class="note" style="text-align:left">Garmin et Withings se connectent depuis l'appli installée (oscarbracq.github.io/recuperation).</p>`;
+  const c = CONN || {}, wait = !CONN;
+  const st = (on, yes, no) => `<span class="hint" style="color:${on ? 'var(--good)' : 'var(--fg2)'}">${wait ? 'Vérification…' : c.error ? 'État indisponible' : on ? '● ' + yes : '○ ' + no}</span>`;
+  return `<h2>Connexions</h2>
+    <div class="list"><div class="row col"><span class="l">Garmin${st(c.garminKey, 'Connecté par ta clé API', 'Pas de clé : passe par la synchro cloud')}</span>
+      <div class="field"><label class="eyebrow" for="cn-garmin">Clé API Garmin</label><input id="cn-garmin" type="password" autocomplete="off" placeholder="${c.garminKey ? 'Déjà enregistrée · colle-en une autre pour la changer' : 'Colle ta clé ici'}"></div>
+      <button class="btn ghost" data-cnsave="garmin">Enregistrer la clé Garmin</button></div></div>
+    <div class="list" style="margin-top:12px"><div class="row col"><span class="l">Withings${st(c.withingsLinked, 'Connecté' + (c.withingsLinkedAt ? ' le ' + new Date(c.withingsLinkedAt).toLocaleDateString('fr-FR') : ''), 'Pas encore connecté')}</span>
+      <div class="field"><label class="eyebrow" for="cn-wid">Client ID Withings</label><input id="cn-wid" autocomplete="off" value="${esc(c.withingsClient || '')}" placeholder="Colle ton Client ID ici"></div>
+      <div class="field"><label class="eyebrow" for="cn-wsec">Client secret Withings</label><input id="cn-wsec" type="password" autocomplete="off" placeholder="${c.withingsSecret ? 'Déjà enregistré · colle-en un autre pour le changer' : 'Colle ton Client secret ici'}"></div>
+      <button class="btn ghost" data-cnsave="withings">Enregistrer les clés Withings</button>
+      <button class="btn" data-cnlink${c.withingsClient && c.withingsSecret ? '' : ' disabled'}>Connecter Withings</button>
+      <span class="hint">Adresse de retour à mettre dans ton tableau de bord Withings : https://oscarbracq.github.io/recuperation/</span></div></div>`;
+}
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-cnsave],[data-cnlink]'); if (!b || !window.RECUP_KEYS) return;
+  if (b.hasAttribute('data-cnlink')) { if (CONN?.withingsClient) window.RECUP_KEYS.linkWithings(CONN.withingsClient); return; }
+  const v = b.dataset.cnsave === 'garmin' ? {apiKey: $('#cn-garmin').value.trim()} : {client_id: $('#cn-wid').value.trim(), client_secret: $('#cn-wsec').value.trim()};
+  if (b.dataset.cnsave === 'withings' && !v.client_secret && CONN?.withingsSecret) delete v.client_secret;
+  if (Object.values(v).some(x => !x)) { toast('Colle d\'abord la clé'); return; }
+  b.disabled = true;
+  try {
+    await window.RECUP_KEYS.save(b.dataset.cnsave, v);
+    toast(b.dataset.cnsave === 'garmin' ? 'Clé Garmin enregistrée' : 'Clés Withings enregistrées');
+    await connLoad();
+    if (b.dataset.cnsave === 'garmin') refreshAll();
+  } catch (err) { toast('Enregistrement impossible'); b.disabled = false; }
+});
 
 /* ---------- Training ---------- */
 function vT() {
@@ -2456,6 +2494,8 @@ go('home', false);
   db.doc('status/sync').onSnapshot(snap => { S.checked = snap.exists ? snap.data() : null; render(); }, () => {});
   db.doc('profile/main').onSnapshot(snap => { S.profile = snap.exists ? snap.data() : null; render(); }, fail);
   bootTNR(db);
-  if (PREFS.autoSync && window.RECUP_SYNC) refreshAll();
+  // Back from the Withings sign-in page: say how it went, show the settings, then fetch the data.
+  if (window.RECUP_WITHINGS_DONE) window.RECUP_WITHINGS_DONE.then(m => { homeSettings(); toast(m); if (/connecté/.test(m)) refreshAll(); });
+  else if (PREFS.autoSync && window.RECUP_SYNC) refreshAll();
 })();
 </script>

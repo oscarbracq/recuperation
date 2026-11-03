@@ -6,6 +6,9 @@ window.RECUP_SUPABASE = {
   key: 'sb_publishable_M9pSe3Z09YfVUWM3cvCCJg_BADWxRWG'
 };
 
+// Must match, letter for letter, the address entered in the Withings developer dashboard.
+const WITHINGS_REDIRECT = 'https://oscarbracq.github.io/recuperation/';
+
 function makeSupabaseDb(SB) {
   const cache = {};
   const listeners = new Set();
@@ -107,10 +110,30 @@ async function recupGetDb() {
     const r = await fetch(RECUP_SUPABASE.url + '/functions/v1/sync', {method: 'POST', headers: {Authorization: 'Bearer ' + s.access_token, apikey: RECUP_SUPABASE.key}});
     const j = await r.json();
     const ok = x => x && !x.error;
-    // Withings stays with the hourly cloud sync (the refresh request left above): it arrives within the hour.
-    const withings = ok(j.withings) ? 'Withings à jour' : /pas encore install/.test(j.withings?.error || '') ? 'Withings dans l\'heure' : 'Withings indisponible';
+    const withings = ok(j.withings) ? 'Withings à jour' : /pas encore install/.test(j.withings?.error || '') ? 'Withings à connecter (Réglages)' : 'Withings indisponible';
     return (ok(j.garmin) ? 'Garmin à jour' : 'Garmin indisponible') + ' · ' + withings;
   };
+  // Réglages > Connexions: keys go into the private table through recup_key_set; only yes/no comes back.
+  window.RECUP_KEYS = {
+    state: async () => { const {data, error} = await SB.rpc('recup_key_state'); if (error) throw error; return data; },
+    save: async (k, v) => { const {error} = await SB.rpc('recup_key_set', {p_k: k, p_v: v}); if (error) throw error; },
+    // Withings sign-in: their page sends back here with ?code=…&state=withings.
+    linkWithings: clientId => {
+      location.href = 'https://account.withings.com/oauth2_user/authorize2?' + new URLSearchParams({
+        response_type: 'code', client_id: clientId, scope: 'user.info,user.metrics,user.activity', redirect_uri: WITHINGS_REDIRECT, state: 'withings'});
+    }
+  };
+  const back = new URLSearchParams(location.search);
+  if (back.get('state') === 'withings') {
+    history.replaceState(null, '', location.pathname);
+    window.RECUP_WITHINGS_DONE = (async () => {
+      if (!back.get('code')) return 'Connexion Withings annulée';
+      const r = await fetch(RECUP_SUPABASE.url + '/functions/v1/sync', {method: 'POST', headers: {Authorization: 'Bearer ' + session.access_token, apikey: RECUP_SUPABASE.key, 'Content-Type': 'application/json'},
+        body: JSON.stringify({withingsCode: back.get('code'), redirect: WITHINGS_REDIRECT})});
+      const j = await r.json().catch(() => ({}));
+      return j.linked ? 'Withings connecté' : 'Withings : ' + (j.error || 'connexion impossible');
+    })();
+  }
   return makeSupabaseDb(SB);
 }
 
