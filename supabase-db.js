@@ -100,6 +100,7 @@ async function recupGetDb() {
     });
   }
   if (!session.user.user_metadata?.hasPassword) askPassword(SB, session.user.email);
+  window.RECUP_SIGNOUT = async () => { await SB.auth.signOut(); location.reload(); };
   // Pull to refresh: the sync function asks Garmin and Withings right away (a few seconds).
   window.RECUP_SYNC = async () => {
     const {data: {session: s}} = await SB.auth.getSession();

@@ -52,8 +52,9 @@ img{max-width:100%}
 body{background:var(--bg);color:var(--fg);font:16px/1.45 var(--font);-webkit-font-smoothing:antialiased}
 /* No browser pull-down-to-reload at the top: refreshing is the pull up at the bottom of each page. */
 html,body{overscroll-behavior-y:none}
-.wrap{max-width:600px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:calc(60px + env(safe-area-inset-top,0px)) var(--tbh,calc(64px + env(safe-area-inset-bottom,0px)))}
-.top{text-align:center;margin:4px 0 16px}
+.wrap{max-width:600px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:calc(24px + env(safe-area-inset-top,0px)) var(--tbh,calc(64px + env(safe-area-inset-bottom,0px)))}
+/* Page title block sits midway between the top of the screen and the first card: same space above and below. */
+.top{text-align:center;margin:4px 0 28px}
 .top .sub{color:var(--fg2);font-size:.9375rem}
 .top .sub::first-letter{text-transform:uppercase}
 h1{font:700 2.125rem/1.1 var(--display);letter-spacing:-.025em;margin:2px 0 0;text-wrap:balance}
@@ -219,6 +220,7 @@ textarea{width:100%;font:inherit;color:var(--fg);background:var(--card2);border:
 @keyframes drift3{to{transform:translate(10vmax,-12vmax) scale(1.08)}}
 .wrap{position:relative;z-index:1}
 @media (prefers-reduced-motion:reduce){.aura span{animation:none}}
+.aura.still span{animation:none}
 .grid>:last-child:nth-child(odd){grid-column:1/-1}
 .foot{margin-top:24px}
 .srcs{display:flex;justify-content:center;gap:16px;font-size:.75rem;color:var(--fg2);font-variant-numeric:tabular-nums}
@@ -295,7 +297,7 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .tabbar button[aria-selected="true"]{color:var(--accent)}
 .tabbar button:active svg{transform:scale(.9)}
 /* Top fade, like a chat app: the system bar colour melts into the page instead of a hard band. */
-body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-inset-top,0px) + 56px);z-index:55;pointer-events:none;background:linear-gradient(to bottom,var(--top) env(safe-area-inset-top,0px),color-mix(in srgb,var(--top) 55%,transparent) calc(env(safe-area-inset-top,0px) + 22px),transparent)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-inset-top,0px) + 24px);z-index:55;pointer-events:none;background:linear-gradient(to bottom,var(--top) env(safe-area-inset-top,0px),color-mix(in srgb,var(--top) 55%,transparent) calc(env(safe-area-inset-top,0px) + 10px),transparent)}
 
 /* Sheet */
 .scrim{position:fixed;inset:0;background:var(--scrim);z-index:40;opacity:0;pointer-events:none;transition:opacity .35s ease}
@@ -354,7 +356,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=15"></script>
+<script src="supabase-db.js?v=16"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
@@ -1016,7 +1018,23 @@ function vProfile() {
       <p><b style="color:var(--fg)">Ignoré volontairement</b> : statut d'entraînement, VO2max estimée, Body Battery, scores de sommeil et statut VFC calculés par Garmin ou Withings.</p>
     </div>
     <h2>Connexions</h2>
-    ${connectors()}`;
+    ${connectors()}
+    <h2>Réglages</h2>
+    ${settings()}`;
+}
+// Settings live on this phone only (localStorage): they are about how the app looks and behaves here.
+function settings() {
+  const seg = (k, opts) => `<div class="seg" role="group">${opts.map(([v, l]) => `<button type="button" data-pref="${k}" data-v="${v}" aria-pressed="${PREFS[k] === v}">${l}</button>`).join('')}</div>`;
+  const sw = (k, label, hint) => `<div class="row"><label for="pref-${k}">${label}<span class="hint">${hint}</span></label><span class="switch"><input type="checkbox" id="pref-${k}" data-prefsw="${k}"${PREFS[k] ? ' checked' : ''}><span></span></span></div>`;
+  return `<div class="list">
+      <div class="row col"><span class="l">Apparence<span class="hint">Automatique suit le réglage clair ou sombre du téléphone</span></span>${seg('theme', [['auto', 'Automatique'], ['light', 'Clair'], ['dark', 'Sombre']])}</div>
+      <div class="row col"><span class="l">Page à l'ouverture</span>${seg('openTab', [['today', "Aujourd'hui"], ['last', 'Dernière page vue']])}</div>
+      ${sw('autoSync', "Actualiser à l'ouverture", "Va chercher Garmin et Withings à chaque ouverture de l'appli")}
+      ${sw('haptic', 'Vibration', "Petit retour quand tu tires pour actualiser")}
+      ${sw('aura', 'Fond animé', 'Les halos bleus qui bougent doucement derrière les pages')}
+    </div>
+    ${window.RECUP_SIGNOUT ? `<div style="margin-top:12px"><button class="btn ghost" id="pf-signout">Se déconnecter</button></div>` : ''}
+    <p class="note" style="text-align:left">Réglages gardés sur ce téléphone.</p>`;
 }
 // Four slots lined up with the tab bar's four columns: Garmin, Withings, then two free slots for future sources.
 function connectors() {
@@ -1294,6 +1312,7 @@ document.addEventListener('touchend', () => {
   if (ptr.y0 == null) return;
   const go = ptr.d > PTR_GO; ptr.y0 = null; ptr.d = 0;
   const el = ptrEl(); if (el) { el.style.transform = ''; el.classList.remove('ready', 'pull'); }
+  if (go && PREFS.haptic) navigator.vibrate?.(12);
   if (go) refreshAll();
 });
 async function refreshAll() {
@@ -1320,11 +1339,38 @@ async function refreshAll() {
 const ptrEl = () => $('#v-' + S.tab + ' [data-ptr]');
 document.addEventListener('click', e => { if (e.target.closest('[data-ptr]')) refreshAll(); });
 
+/* ---------- settings (Profil > Réglages) ---------- */
+const PREFS = {theme: 'auto', openTab: 'last', autoSync: false, haptic: true, aura: true};
+try { Object.assign(PREFS, JSON.parse(localStorage.getItem('sl-prefs') || '{}')); } catch (e) {}
+const TOP_COLOR = {light: '#B5CEFA', dark: '#0B1A40'};
+function applyPrefs() {
+  const root = document.documentElement;
+  if (PREFS.theme === 'auto') delete root.dataset.theme; else root.dataset.theme = PREFS.theme;
+  // The system bar colour follows the chosen look, not only the phone's.
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m => {
+    if (m.dataset.media === undefined) { m.dataset.media = m.media || ''; m.dataset.content = m.content; }
+    if (PREFS.theme === 'auto') { m.media = m.dataset.media; m.content = m.dataset.content; }
+    else { m.media = ''; m.content = TOP_COLOR[PREFS.theme]; }
+  });
+  document.querySelector('.aura')?.classList.toggle('still', !PREFS.aura);
+}
+function setPref(k, v) {
+  PREFS[k] = v;
+  try { localStorage.setItem('sl-prefs', JSON.stringify(PREFS)); } catch (e) {}
+  applyPrefs(); render();
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-pref]'); if (b) setPref(b.dataset.pref, b.dataset.v);
+  if (e.target.closest('#pf-signout')) window.RECUP_SIGNOUT?.();
+});
+document.addEventListener('change', e => { const k = e.target.dataset?.prefsw; if (k) setPref(k, e.target.checked); });
+applyPrefs();
+
 /* ---------- boot ---------- */
 // The page ends just above the tab bar, whatever its real height on the phone, so the sources line shows with some air.
 const fitTabbar = () => document.documentElement.style.setProperty('--tbh', $('.tabbar').offsetHeight + 'px');
 fitTabbar(); addEventListener('resize', fitTabbar);
-try { const t = localStorage.getItem('sl-tab'); if (t && $('#v-' + t)) S.tab = t; const g = localStorage.getItem('sl-gran'); if (GRAN.some(([x]) => x === g)) S.gran = g; } catch (e) {}
+try { const t = localStorage.getItem('sl-tab'); if (PREFS.openTab === 'last' && t && $('#v-' + t)) S.tab = t; const g = localStorage.getItem('sl-gran'); if (GRAN.some(([x]) => x === g)) S.gran = g; } catch (e) {}
 setTab(S.tab);
 (async () => {
   const db = await recupGetDb();
@@ -1348,6 +1394,7 @@ setTab(S.tab);
   db.doc('requests/sync').onSnapshot(snap => { S.req = snap.exists ? snap.data().requestedAt : null; render(); }, () => {});
   db.doc('status/sync').onSnapshot(snap => { S.checked = snap.exists ? snap.data() : null; render(); }, () => {});
   db.doc('profile/main').onSnapshot(snap => { S.profile = snap.exists ? snap.data() : null; render(); }, fail);
+  if (PREFS.autoSync && window.RECUP_SYNC) refreshAll();
 })();
 </script>
 
