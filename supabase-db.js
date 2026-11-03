@@ -87,14 +87,7 @@ async function recupGetDb() {
         if (password.length < 6) { msg.textContent = 'Mot de passe : au moins 6 caractères.'; return; }
         msg.textContent = 'Connexion…';
         const {error} = await SB.auth.signInWithPassword({email, password});
-        if (!error) { SB.auth.updateUser({data: {hasPassword: true}}); return; }
-        // First time on this address: create the account with this password (no mail needed).
-        const up = await SB.auth.signUp({email, password, options: {data: {hasPassword: true}}});
-        if (up.data?.session) return;
-        const exists = up.error?.message?.includes('registered') || (up.data?.user && !up.data.user.identities?.length);
-        msg.textContent = exists
-          ? 'Mot de passe incorrect. Si tu n\'as jamais choisi de mot de passe pour cette adresse, utilise ton autre e-mail.'
-          : 'Connexion impossible : ' + (up.error?.message || 'réessaie dans un instant.');
+        if (error) msg.textContent = 'E-mail ou mot de passe incorrect.';
       });
       box.querySelector('.link').addEventListener('click', async () => {
         const email = form.email.value.trim();
