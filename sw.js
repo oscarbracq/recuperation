@@ -1,8 +1,8 @@
-// Récupération — offline fallback only. Every same-origin file is network-first, so the phone
+// TRF Athletics — offline fallback only. Every same-origin file is network-first, so the phone
 // always runs one consistent version when online; the cache only serves when there is no network.
 // Supabase data is never cached here: the app reads it live.
-const CACHE = 'recup-v20';
-const SHELL = ['./', './index.html', './supabase-db.js', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
+const CACHE = 'recup-v21';
+const SHELL = ['./', './index.html', './supabase-db.js', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL))); self.skipWaiting(); });
 self.addEventListener('activate', e => {

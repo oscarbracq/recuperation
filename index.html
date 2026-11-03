@@ -16,14 +16,14 @@ img{max-width:100%}
 [hidden]{display:none!important}
 #login,#setpw{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg)}
 #login form,#setpw form{width:min(360px,100%);display:flex;flex-direction:column;gap:12px;text-align:center;position:relative;z-index:1}
-#login .logo,#setpw .logo{width:72px;height:72px;margin:0 auto 8px;border-radius:18px;background:linear-gradient(135deg,#2F7BF5,#1D4ED8);color:#fff;font:700 44px/72px system-ui,sans-serif}
+#login .logo,#setpw .logo{display:block;width:80px;height:80px;margin:0 auto 8px}
 #login input,#setpw input{font:inherit;padding:14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--fg)}
 #login .msg,#setpw .msg{font-size:.875rem;color:var(--fg2);min-height:1.4em;margin:0}
 </style>
 </head>
 <body>
-<div id="login" hidden><form><div class="logo">R</div><h1 style="margin:0">Récupération</h1><input name="email" type="email" required autocomplete="email" placeholder="ton e-mail"><input name="password" type="password" required autocomplete="current-password" placeholder="ton mot de passe"><button class="btn" type="submit">Se connecter</button><p class="msg"></p><button class="link" type="button" style="background:none;border:0;color:var(--fg2);font:inherit;font-size:.8125rem;text-decoration:underline">Pas encore de mot de passe ? Recevoir un lien par mail</button></form></div>
-<div id="setpw" hidden><form><div class="logo">R</div><h1 style="margin:0;font-size:1.375rem">Choisis ton mot de passe</h1><p class="small muted" style="margin:0">Pour ouvrir l'appli sur n'importe quel navigateur avec <b class="who"></b>.</p><input name="password" type="password" autocomplete="new-password" placeholder="nouveau mot de passe"><button class="btn" type="submit">Enregistrer</button><p class="msg"></p><button class="later" type="button" style="background:none;border:0;color:var(--fg2);font:inherit;font-size:.8125rem">Plus tard</button></form></div><title>Récupération</title>
+<div id="login" hidden><form><img class="logo" src="icon-192.png" alt="TRF Athletics"><h1 style="margin:0">TRF Athletics</h1><input name="email" type="email" required autocomplete="email" placeholder="ton e-mail"><input name="password" type="password" required autocomplete="current-password" placeholder="ton mot de passe"><button class="btn" type="submit">Se connecter</button><p class="msg"></p><button class="link" type="button" style="background:none;border:0;color:var(--fg2);font:inherit;font-size:.8125rem;text-decoration:underline">Pas encore de mot de passe ? Recevoir un lien par mail</button></form></div>
+<div id="setpw" hidden><form><img class="logo" src="icon-192.png" alt="TRF Athletics"><h1 style="margin:0;font-size:1.375rem">Choisis ton mot de passe</h1><p class="small muted" style="margin:0">Pour ouvrir l'appli sur n'importe quel navigateur avec <b class="who"></b>.</p><input name="password" type="password" autocomplete="new-password" placeholder="nouveau mot de passe"><button class="btn" type="submit">Enregistrer</button><p class="msg"></p><button class="later" type="button" style="background:none;border:0;color:var(--fg2);font:inherit;font-size:.8125rem">Plus tard</button></form></div><title>TRF Athletics</title>
 
 <style>
 /* Layout: iOS-style grouped list — centered header, recovery gauge hero, 2-column metric tiles that open a detail sheet with a scrubbable chart, translucent tab bar */
@@ -55,6 +55,8 @@ html,body{overscroll-behavior-y:none}
 .wrap{max-width:600px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:calc(24px + env(safe-area-inset-top,0px)) var(--tbh,calc(64px + env(safe-area-inset-bottom,0px)))}
 /* Page title block sits midway between the top of the screen and the first card: same space above and below. */
 .top{text-align:center;margin:4px 0 28px}
+/* TRF Athletics brand mark above the date on Aujourd'hui (the app icon itself). */
+.brand{display:block;width:56px;height:56px;margin:0 auto 12px;border-radius:12.5px;box-shadow:0 0 0 1px var(--line),0 4px 14px rgba(11,23,51,.18)}
 .top .sub{color:var(--fg2);font-size:.9375rem}
 .top .sub::first-letter{text-transform:uppercase}
 h1{font:700 2.125rem/1.1 var(--display);letter-spacing:-.025em;margin:2px 0 0;text-wrap:balance}
@@ -376,7 +378,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
   navigator.serviceWorker.register('sw.js');
   navigator.serviceWorker.addEventListener('controllerchange', () => { if (had) location.reload(); });
 }</script>
-<script>const $ = s => document.querySelector(s);
+<script>
+const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const key = d => { const z = new Date(d.getTime() - d.getTimezoneOffset()*60000); return z.toISOString().slice(0,10); };
 const addDays = (k, n) => { const d = new Date(k + 'T12:00:00'); d.setDate(d.getDate() + n); return key(d); };
@@ -391,6 +394,8 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const mean = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
 const TODAY = key(new Date());
 const SLEEP_NEED = 8.5;
+// TRF Athletics logo (Training, Reload, Fuel), drawn in SVG; same file as the app icon.
+const TRF_LOGO = '<svg class="brand" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="TRF Athletics"><defs><linearGradient id="trf-or" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox"><stop offset="0" stop-color="#B8862F"/><stop offset="0.5" stop-color="#F4DA8E"/><stop offset="0.7" stop-color="#D4A84F"/><stop offset="1" stop-color="#A6772A"/></linearGradient><linearGradient id="trf-fond" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#11204A"/><stop offset="1" stop-color="#091229"/></linearGradient></defs><rect role="img" aria-label="TRF Athletics" rx="229" fill="url(#trf-fond)"/><g transform="translate(-51.2 -61.1) scale(1.1)"><path fill="url(#trf-or)" fill-rule="evenodd" d="M512,232 L664,440 L360,440 Z M512,306.6 L577.4,396 L446.6,396 Z"/><path fill="#F5F3EE" fill-rule="evenodd" d="M260,464 L764,464 L720,508 L642,508 L642,562 L722,562 L678,606 L642,606 L642,708 L598,708 L598,508 L426,508 L426,708 L382,708 L382,508 L304,508 Z"/><path fill="#F5F3EE" fill-rule="evenodd" d="M448,522 L556,522 L576,542 L576,640 L562,654 L576,708 L528,708 L514,654 L492,654 L492,708 L448,708 Z M492,566 L524,566 L532,574 L532,610 L492,610 Z"/><path fill="url(#trf-or)" fill-rule="evenodd" d="M303.4,810 L322.4,752 L334.4,752 L353.4,810 L340.4,810 L336.8,799 L320,799 L316.4,810 Z M328.4,773.4 L333.2,788 L323.6,788 Z M359.9,752 L399.9,752 L399.9,765 L386.4,765 L386.4,810 L373.4,810 L373.4,765 L359.9,765 Z M411.4,752 L424.4,752 L424.4,774.5 L438.4,774.5 L438.4,752 L451.4,752 L451.4,810 L438.4,810 L438.4,787.5 L424.4,787.5 L424.4,810 L411.4,810 Z M467.4,752 L480.4,752 L480.4,797 L501.4,797 L501.4,810 L467.4,810 Z M512.8,752 L546.8,752 L546.8,765 L525.8,765 L525.8,774.5 L542.8,774.5 L542.8,787.5 L525.8,787.5 L525.8,797 L546.8,797 L546.8,810 L512.8,810 Z M555.4,752 L595.4,752 L595.4,765 L581.9,765 L581.9,810 L568.9,810 L568.9,765 L555.4,765 Z M606.9,752 L619.9,752 L619.9,810 L606.9,810 Z M644.8,752 L672.4,752 L672.4,765 L647.4,765 L647.4,797 L672.4,797 L672.4,810 L644.8,810 L634.4,799.6 L634.4,762.4 Z M693,752 L720.6,752 L720.6,765 L695.6,765 L695.6,774.5 L710.2,774.5 L720.6,784.9 L720.6,799.6 L710.2,810 L682.6,810 L682.6,797 L707.6,797 L707.6,787.5 L693,787.5 L682.6,777.1 L682.6,762.4 Z"/></g></svg>';
 
 const S = { db: null, g: {}, w: {}, manual: {}, analysis: null, reports: [], profile: null, hrMax: 195, tab: 'today', gran: 'week', off: 0, status: 'loading', sheet: null };
 // Season weeks run Monday to Sunday; week 1 is the week of 31 August 2026 unless the profile says otherwise.
@@ -785,7 +790,7 @@ function vToday() {
     : A?.syncWarning ? `<div class="banner">${esc(A.syncWarning)}</div>` : '';
   const ms = METRICS(), sec = id => ms.filter(m => m.sec === id).map(tile).join('');
   return `
-    <header class="top"><div class="sub">${fmtDay(TODAY)} · semaine ${seasonWeek(TODAY)}</div><h1 class="hello">${esc(greeting(rec?.score))}</h1></header>
+    <header class="top">${TRF_LOGO}<div class="sub">${fmtDay(TODAY)} · semaine ${seasonWeek(TODAY)}</div><h1 class="hello">${esc(greeting(rec?.score))}</h1></header>
     <div class="stack">${banner}
       <article class="card hero">
         <div class="rings">

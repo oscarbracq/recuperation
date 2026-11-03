@@ -1,7 +1,7 @@
 {
-  "name": "Récupération",
-  "short_name": "Récupération",
-  "description": "Récupération, effort et condition physique d'Oscar, à partir de Garmin et Withings.",
+  "name": "TRF Athletics",
+  "short_name": "TRF Athletics",
+  "description": "TRF Athletics : récupération, effort et condition physique d'Oscar, à partir de Garmin et Withings.",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",
