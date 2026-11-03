@@ -106,8 +106,9 @@ async function recupGetDb() {
     const r = await fetch(RECUP_SUPABASE.url + '/functions/v1/sync', {method: 'POST', headers: {Authorization: 'Bearer ' + s.access_token, apikey: RECUP_SUPABASE.key}});
     const j = await r.json();
     const ok = x => x && !x.error;
-    if (ok(j.garmin) && ok(j.withings)) return 'Garmin et Withings à jour';
-    return [ok(j.garmin) ? 'Garmin à jour' : 'Garmin indisponible', ok(j.withings) ? 'Withings à jour' : 'Withings indisponible'].join(' · ');
+    // Withings stays with the hourly cloud sync (the refresh request left above): it arrives within the hour.
+    const withings = ok(j.withings) ? 'Withings à jour' : /pas encore install/.test(j.withings?.error || '') ? 'Withings dans l\'heure' : 'Withings indisponible';
+    return (ok(j.garmin) ? 'Garmin à jour' : 'Garmin indisponible') + ' · ' + withings;
   };
   return makeSupabaseDb(SB);
 }
