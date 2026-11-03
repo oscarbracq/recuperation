@@ -107,7 +107,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,label:focus-visi
 .effbar span{height:22px;border-radius:6px;background:var(--line);font-size:.625rem;font-weight:600;color:var(--fg2);display:flex;align-items:center;justify-content:center;letter-spacing:.02em}
 .effbar span.on{background:var(--blue);color:#fff}
 /* Discreet 0-21 ruler under the effort bands: one thin line, a tick and its number where each band starts. */
-.effscale{display:flex;gap:3px;position:relative;height:15px;margin-top:5px;border-top:1px solid var(--fg3);opacity:.75}
+.effscale{display:flex;gap:3px;position:relative;height:15px;margin-top:5px;border-top:1px solid color-mix(in srgb,var(--fg3) 75%,transparent)}
+.effscale .you{position:absolute;top:-4px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:2px;font:700 .625rem/1 var(--font);color:var(--blue);font-variant-numeric:tabular-nums;transition:left .6s cubic-bezier(.32,.72,0,1)}
+.effscale .you s{display:block;width:7px;height:7px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 2px var(--card2)}
 .effscale span{position:relative}
 .effscale span::before,.effscale::after{content:"";position:absolute;top:-1px;width:1px;height:5px;background:var(--fg3)}
 .effscale span::before{left:0}
@@ -367,7 +369,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=19"></script>
+<script src="supabase-db.js?v=20"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
@@ -760,6 +762,17 @@ function greeting(score) {
   return pool[Math.abs(seed) % pool.length];
 }
 
+// 0-21 ruler under the effort bands, with a marker at today's effort so far. The bands are separated by 3 px gaps,
+// so the marker is placed inside its own band to line up with the bars above.
+function effScale(v) {
+  v = Math.max(0, Math.min(21, v || 0));
+  const i = Math.max(0, EFFORT.findIndex(([a, b]) => v >= a && v < b) === -1 ? EFFORT.length - 1 : EFFORT.findIndex(([a, b]) => v >= a && v < b));
+  const left = `calc((100% - ${3 * (EFFORT.length - 1)}px) * ${(v / 21).toFixed(4)} + ${3 * i}px)`;
+  const near = a => Math.abs(a - v) < 1.6;
+  return `<div class="effscale" aria-label="Effort du jour : ${fx(v, 1)} sur 21">${EFFORT.map(([a, b]) => `<span style="flex:${b - a}"><i${near(a) ? ' hidden' : ''}>${a}</i></span>`).join('')}<em${near(21) ? ' hidden' : ''}>21</em>
+    <b class="you" style="left:${left}"><s></s>${fx(v, 1)}</b></div>`;
+}
+
 /* ---------- views ---------- */
 function vToday() {
   const A = S.analysis, kG = lastKey('hrv');
@@ -781,7 +794,7 @@ function vToday() {
           <button class="ringbtn" data-metric="effort">${ring(effT || effY, 21, 'var(--blue)', 'sm')}<b class="num">${fx(effT || effY, 1)}</b><span>Effort ${effT ? 'du jour' : 'hier'}</span></button>
         </div>
         <div class="state"><span class="pill ${z}"><i></i>${ZONE[z]}</span><p class="small muted" style="width:100%;text-align:center">${ZONE_SUB[z]}${rec?.ill ? ' · possible début d\'infection' : ''}</p></div>
-        <div class="target"><span class="eyebrow">${high ? 'Jour d\'entraînement' : 'Jour de récupération'} · objectif d'effort</span><b>${tgt.lvl[2]} <span class="muted">· ${tgt.lvl[0]} à ${tgt.lvl[1]} sur 21</span></b><div class="effbar">${EFFORT.map(([a, b, n]) => `<span class="${n === tgt.lvl[2] ? 'on' : ''}" style="flex:${b - a}">${n}</span>`).join('')}</div><div class="effscale" aria-hidden="true">${EFFORT.map(([a, b]) => `<span style="flex:${b - a}"><i>${a}</i></span>`).join('')}<em>21</em></div></div>
+        <div class="target"><span class="eyebrow">${high ? 'Jour d\'entraînement' : 'Jour de récupération'} · objectif d'effort</span><b>${tgt.lvl[2]} <span class="muted">· ${tgt.lvl[0]} à ${tgt.lvl[1]} sur 21</span></b><div class="effbar">${EFFORT.map(([a, b, n]) => `<span class="${n === tgt.lvl[2] ? 'on' : ''}" style="flex:${b - a}">${n}</span>`).join('')}</div>${effScale(effT)}</div>
         ${A?.summary ? `<p class="summary">${esc(A.summary)}</p>` : `<p class="summary muted">${esc(tgt.text)}</p>`}
         ${A?.today?.length ? `<div class="todo"><div class="eyebrow">À faire aujourd'hui</div><ul>${A.today.slice(0, 3).map((t, i) => `<li><b>${i + 1}</b><span>${esc(t)}</span></li>`).join('')}</ul></div>` : ''}
       </article>
