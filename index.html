@@ -203,7 +203,8 @@ input[type=range]{flex:1;accent-color:var(--accent);height:28px}
 textarea{width:100%;font:inherit;color:var(--fg);background:var(--card2);border:0;border-radius:12px;padding:10px 12px;resize:vertical}
 .switch{position:relative;width:51px;height:31px;flex:none}
 .switch input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
-.switch span{position:absolute;inset:0;border-radius:99px;background:var(--fg3);transition:background .2s}
+.switch input{z-index:1}
+.switch span{position:absolute;inset:0;pointer-events:none;border-radius:99px;background:var(--fg3);transition:background .2s}
 .switch span::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.2);transition:transform .3s cubic-bezier(.32,.72,0,1)}
 .switch input:checked+span{background:var(--good)}
 .switch input:checked+span::after{transform:translateX(20px)}
@@ -356,7 +357,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=16"></script>
+<script src="supabase-db.js?v=17"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
@@ -1238,8 +1239,10 @@ async function saveProfile() {
 function render() {
   const el = $('#v-' + S.tab);
   if (S.tab === 'profile' && el.contains(document.activeElement) && document.activeElement.tagName === 'TEXTAREA') return;
-  el.innerHTML = {today: vToday, trends: vTrends, reports: vReports, profile: vProfile}[S.tab]() + footer();
-  initCharts(el);
+  // Data arrives in bursts (several snapshots in the first seconds): only touch the page when it really changed,
+  // so a tap in progress is never lost to a redraw of identical content.
+  const html = {today: vToday, trends: vTrends, reports: vReports, profile: vProfile}[S.tab]() + footer();
+  if (el._html !== html) { el.innerHTML = html; el._html = html; initCharts(el); }
   if (S.sheet?.kind === 'detail' && !scrubBox) { const y = $('#sheet-scroll').scrollTop; $('#sheet-body').innerHTML = detailBody(S.sheet.arg); initCharts($('#sheet-body')); $('#sheet-scroll').scrollTop = y; }
 }
 function setTab(t) {
@@ -1354,13 +1357,16 @@ function applyPrefs() {
   });
   document.querySelector('.aura')?.classList.toggle('still', !PREFS.aura);
 }
+// Settings answer the tap at once on the spot (no page redraw, which a focused text field would also block).
 function setPref(k, v) {
   PREFS[k] = v;
   try { localStorage.setItem('sl-prefs', JSON.stringify(PREFS)); } catch (e) {}
-  applyPrefs(); render();
+  document.querySelectorAll(`[data-pref="${k}"]`).forEach(b => b.setAttribute('aria-pressed', b.dataset.v === v));
+  const sw = document.querySelector(`[data-prefsw="${k}"]`); if (sw) sw.checked = !!v;
+  applyPrefs();
 }
 document.addEventListener('click', e => {
-  const b = e.target.closest('[data-pref]'); if (b) setPref(b.dataset.pref, b.dataset.v);
+  const b = e.target.closest('[data-pref]'); if (b) { document.activeElement?.blur?.(); setPref(b.dataset.pref, b.dataset.v); }
   if (e.target.closest('#pf-signout')) window.RECUP_SIGNOUT?.();
 });
 document.addEventListener('change', e => { const k = e.target.dataset?.prefsw; if (k) setPref(k, e.target.checked); });
