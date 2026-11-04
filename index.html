@@ -250,15 +250,13 @@ textarea{width:100%;font:inherit;color:var(--fg);background:var(--card2);border:
 .srcs i{width:8px;height:8px;border-radius:50%}
 .srcs i.ok{background:var(--good)} .srcs i.late{background:var(--warn)} .srcs i.off{background:var(--fg3)}
 .foot a{color:var(--blue)}
-.ptr{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;margin-top:14px;padding:4px 0 0;color:var(--fg2);font-size:.8125rem;opacity:0;transition:transform .35s cubic-bezier(.32,.72,0,1),color .15s,opacity .2s}
+.ptr{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:100%;height:0;margin-top:14px;padding:0;overflow:visible;color:var(--fg2);font-size:.8125rem;opacity:0;transition:height .35s cubic-bezier(.32,.72,0,1),transform .35s cubic-bezier(.32,.72,0,1),color .15s,opacity .25s}
+.ptr.busy{height:64px}
+.ptr.done .spin{transform:translateY(24px)}
 .ptr.pull,.ptr.ready,.ptr.busy{opacity:1}
 .ptr .spin{width:22px;height:22px;border-radius:50%;border:2.5px solid var(--line);border-top-color:var(--blue);transition:transform .2s}
 .ptr.ready{color:var(--blue)} .ptr.ready .spin{transform:rotate(180deg)}
 .ptr.busy .spin{animation:spin .8s linear infinite}
-/* While it loads, the wheel floats in its own space just above the tab bar, then fades away. */
-.ptr-float{position:fixed;left:50%;bottom:calc(var(--tbh,64px) + 18px);z-index:21;width:40px;height:40px;margin-left:-20px;border-radius:50%;display:grid;place-items:center;background:var(--card);box-shadow:0 4px 14px rgba(0,0,0,.25);opacity:0;transform:scale(.6);transition:opacity .25s,transform .25s;pointer-events:none}
-.ptr-float.on{opacity:1;transform:none}
-.ptr-float .spin{width:20px;height:20px;border-radius:50%;border:2.5px solid var(--line);border-top-color:var(--blue);animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.ptr.busy .spin{animation:none;border-color:var(--blue)}}
 .conns{display:grid;grid-template-columns:repeat(4,1fr);text-align:center}
@@ -576,7 +574,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=33"></script>
+<script src="supabase-db.js?v=34"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
@@ -1586,9 +1584,9 @@ function footer() {
     <div class="srcs">${src.map(([n, w]) => `<span><i class="${!w ? 'off' : w.late ? 'late' : 'ok'}"></i>${n} ${w ? w.txt : '–'}</span>`).join('')}</div>
     ${late.length ? `<p class="small muted" style="text-align:center;margin:6px 0 0">${late.map(([n]) => n).join(' et ')} : pas de contact depuis plus de 12 h. ${late.map(([n, , u]) => `<a href="${u}" target="_blank" rel="noopener">Ouvrir ${n}</a>`).join(' · ')}, ou demande à Claude de reconnecter.</p>` : ''}
     ${S.req && !window.RECUP_SYNC && (!last('garmin') || S.req > last('garmin')) ? `<p class="small muted" style="text-align:center;margin:6px 0 0">Mise à jour demandée à ${new Date(S.req).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}, en cours dans l'heure.</p>` : ''}
-    <button class="ptr" data-ptr aria-label="Actualiser les données"><span class="spin"></span></button></div>`;
+    <button class="ptr${ptr.busy && !ptr.silent ? ' busy' : ''}" data-ptr aria-label="Actualiser les données"><span class="spin"></span></button></div>`;
 }
-document.addEventListener('touchstart', e => { if (!S.sheet && atBottom()) ptr.y0 = e.touches[0].clientY; }, {passive: true});
+document.addEventListener('touchstart', e => { if (S.mod === 'R' && !S.sheet && !P.stack.length && atBottom()) ptr.y0 = e.touches[0].clientY; }, {passive: true});
 document.addEventListener('touchmove', e => {
   if (ptr.y0 == null || ptr.busy) return;
   ptr.d = Math.max(0, ptr.y0 - e.touches[0].clientY);
@@ -1606,13 +1604,20 @@ document.addEventListener('touchend', () => {
   if (go && PREFS.haptic) navigator.vibrate?.(12);
   if (go) refreshAll();
 });
-async function refreshAll() {
+async function refreshAll(silent = false) {
   if (ptr.busy) return;
-  if (!S.db) { toast('Ouvre la page connecté à ton compte'); return; }
-  ptr.busy = true;
-  let fl = $('#ptr-float');
-  if (!fl) { document.body.insertAdjacentHTML('beforeend', '<div class="ptr-float" id="ptr-float" aria-hidden="true"><span class="spin"></span></div>'); fl = $('#ptr-float'); }
-  requestAnimationFrame(() => fl.classList.add('on'));
+  if (!S.db) { if (!silent) toast('Ouvre la page connecté à ton compte'); return; }
+  ptr.busy = true; ptr.silent = silent;
+  if (!silent) {
+    const el = ptrEl(); if (el) el.classList.add('busy');
+    // Once its space has opened (.35 s), the page slides up so the wheel turns just above the tab bar.
+    setTimeout(() => {
+      const y0 = scrollY, t0 = performance.now();
+      const step = now => { const k = Math.min(1, (now - t0) / 250), end = document.documentElement.scrollHeight - innerHeight; window.scrollTo(0, y0 + (end - y0) * (1 - (1 - k) ** 3)); if (k < 1) requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+      setTimeout(() => window.scrollTo(0, document.documentElement.scrollHeight), 320);
+    }, 380);
+  }
   // The installed app asks Garmin and Withings right away (RECUP_SYNC); elsewhere the request waits for the hourly cloud check.
   // Either way the request is left so the cloud sync also refreshes the advice.
   let msg = 'Demande envoyée · Garmin et Withings relus dans l\'heure', failed = false;
@@ -1625,9 +1630,11 @@ async function refreshAll() {
   try { (await navigator.serviceWorker?.getRegistration?.())?.update(); } catch (e) {}
   REST = null;
   setTimeout(() => {
-    ptr.busy = false; $('#ptr-float')?.classList.remove('on'); render();
-    toast(failed ? 'Actualisation impossible, vérifie ta connexion' : msg);
-  }, 400);
+    // The wheel drops down and its space folds away; only a failure is said, and only when asked by hand.
+    const el = ptrEl(); if (el) el.classList.add('done');
+    setTimeout(() => { ptr.busy = false; ptr.silent = false; ptrEl()?.classList.remove('busy'); setTimeout(render, 400); }, 250);
+    if (failed && !silent) toast('Actualisation impossible, vérifie ta connexion');
+  }, 200);
 }
 const ptrEl = () => $('#v-' + S.tab + ' [data-ptr]');
 document.addEventListener('click', e => { if (e.target.closest('[data-ptr]')) refreshAll(); });
