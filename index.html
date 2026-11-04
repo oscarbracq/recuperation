@@ -340,6 +340,12 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .rmcalc{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:8px;align-items:end;margin-top:10px}
 .rmcalc label{font-size:.75rem;color:var(--fg2);display:flex;flex-direction:column;gap:4px}
 .rmcalc output{font:700 1.5rem/1 var(--display);text-align:center;padding:8px 0}
+.bottles{display:flex;gap:10px;margin-top:12px}
+.bottles button{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border-radius:14px;background:var(--card2);font-size:.75rem;font-weight:600;color:var(--fg2)}
+.bottles .bt{width:22px;height:40px;border-radius:7px 7px 9px 9px;border:2px solid var(--line);position:relative}
+.bottles .bt::before{content:"";position:absolute;left:5px;right:5px;top:-6px;height:5px;border-radius:2px;background:var(--line)}
+.bottles button[aria-pressed="true"]{color:var(--fg)}
+.bottles button[aria-pressed="true"] .bt{background:#4FB3FF;border-color:#4FB3FF}
 .useg{display:inline-flex;margin:8px 0 2px}
 .useg button{flex:none;padding:5px 12px}
 .rmback{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
@@ -632,7 +638,7 @@ details.slow[open]>summary h2::after{content:" ▴"}
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=42"></script>
+<script src="supabase-db.js?v=43"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
@@ -2634,6 +2640,9 @@ document.addEventListener('change', async e => {
 });
 document.addEventListener('change', e => {
   const t = e.target;
+  if (t.matches?.('[data-mng]')) { const items = planItems().map(x => ({...x})), i = +t.dataset.mng, f = foodAny(items[i].food || items[i].n), g = Math.max(0, +t.value || 0); if (f) items[i] = itemOf(f, g, items[i].meal); saveMenu(items).then(() => paneRender()); return; }
+  if (t.matches?.('[data-mprice]')) { saveFset({prices: {...(S.fset.prices || {}), [t.dataset.mprice]: +String(t.value).replace(',', '.') || null}}).then(() => paneRender()); return; }
+  if (t.matches?.('[data-mbudget]')) { saveFset({budget: +t.value || 100}).then(() => paneRender()); return; }
   if (t.matches?.('[data-se]')) { seDraft()[t.dataset.se] = t.value; S.tset = {...(S.tset || {}), season: seDraft()}; return; }
   if (t.matches?.('[data-seb]')) { const [i, j] = t.dataset.seb.split('.').map(Number); seDraft().blocks[i][j] = j === 1 ? Math.max(1, +t.value || 1) : t.value; S.tset = {...(S.tset || {}), season: seDraft()}; return; }
   if (t.matches?.('[data-lmeta]') && S.live) { S.live[t.dataset.lmeta] = t.value; saveLive(); return; }
@@ -3103,6 +3112,7 @@ const FUEL_PLAN_FROM = '2026-11-03';
 const PLAN_ITEMS = {src: null, items: []};
 const normName = s => s.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '').split(/[\s']+/).filter(Boolean);
 function planItems() {
+  if (S.fset?.menu?.length) return S.fset.menu;
   if (PLAN_ITEMS.src === TDV_FUEL) return PLAN_ITEMS.items;
   const items = [];
   (TDV_FUEL?.meals || []).forEach(([, txt], i) => {
@@ -3135,7 +3145,7 @@ function fuelGoal(k, train = trainDay(k)) {
   const goal = S.fset.goal || 'maintain', adj = {cut: -400, maintain: 0, gain: 250}[goal];
   let kcal = S.fset.kcal ? S.fset.kcal + (train ? 250 : -250) : Math.round((bmr * (train ? 1.75 : 1.5) + adj) / 10) * 10;
   const p = Math.round(w * (S.fset.protein || 2)), f = Math.round(w * 1), c = Math.max(0, Math.round((kcal - p * 4 - f * 9) / 4));
-  return {kcal, p, c, f, w, h, age, bmr: Math.round(bmr), train, goal, water: S.fset.water || 10};
+  return {kcal, p, c, f, w, h, age, bmr: Math.round(bmr), train, goal, water: S.fset.water || (train ? 12 : 8)};
 }
 function vF() {
   const body = {journal: fJournal, progress: fProgress, foods: fFoods, goals: fGoals}[S.ftab]();
@@ -3163,9 +3173,10 @@ function fJournal() {
         return `<div class="list meal"><h3>${lab}<small>${kc ? fx(kc) + ' kcal' : ''}</small></h3>
           ${its.map(it => `<button class="rowbtn" data-fitem="${it.i}"><span><b>${esc(it.n)}</b><span class="meta">${fx(it.g)} g · P ${fx(it.p)} · G ${fx(it.c)} · L ${fx(it.f)}</span></span><span class="kc">${fx(it.kcal)}</span></button>`).join('')}
           <button class="addbtn" data-fadd="${m}">+ Ajouter un aliment</button>${!its.length && hasP ? `<button class="addbtn" data-fplanmeal="${m}" style="color:var(--fg2);font-weight:500">Remettre le ${lab.toLowerCase()} du plan</button>` : ''}${!its.length && hasY ? `<button class="addbtn" data-fcopy="${m}" style="color:var(--fg2);font-weight:500">Reprendre le ${lab.toLowerCase()} de la veille</button>` : ''}</div>`; }).join('')}
-      <div class="card"><div class="chead" style="margin:0"><span class="eyebrow">Eau</span><b class="num">${fx((d.water || 0) * .25, 2)} L <span class="small muted">/ ${fx(g.water * .25, 1)} L</span></b></div>
-        <div class="water">${Array.from({length: Math.max(g.water, (d.water || 0) + 1)}, (_, i) => `<button data-fwater="${i + 1}" class="${i < (d.water || 0) ? 'on' : ''}" aria-label="${i + 1} verre${i ? 's' : ''}"></button>`).join('')}</div>
-        <p class="small muted" style="margin-top:8px">Un verre = 25 cl. Touche un verre pour le remplir.</p></div>
+      <div class="card"><div class="chead" style="margin:0"><span class="eyebrow">Eau</span><b class="num">${fx((d.water || 0) * .25, 1)} L <span class="small muted">/ ${fx(g.water * .25, 1)} L</span></b></div>
+        <div class="bottles">${(trainDay(S.fday) ? ['Gourde 1', 'Gourde 2', 'Entraînement'] : ['Gourde 1', 'Gourde 2']).map((l, i) => `<button data-fbottle="${i}" aria-pressed="${!!(d.bottles || [])[i]}"><span class="bt"></span>${l}</button>`).join('')}</div>
+        <p class="small muted" style="margin-top:8px">Une gourde = 1 L. Touche-la quand elle est finie.</p></div>
+      <div class="card"><span class="eyebrow">Aliment de la semaine</span><p style="margin:6px 0 0"><b>${esc(weekFood()[0])}</b></p><p class="small muted" style="margin:4px 0 0">${esc(weekFood()[1])}.</p></div>
     </div>
     <p class="note">Objectifs calculés sur ton poids Withings (${fx(g.w, 1)} kg) et tes jours d'entraînement. Réglages dans Objectifs.</p>`;
 }
@@ -3180,6 +3191,7 @@ function fProgress() {
   const wpts = series('weight', 30).map(p => ({k: p.k, v: p.v, tip: cap(fmtShort(p.k))}));
   return `
     <header class="top"><div class="sub">Calories, protéines et poids</div><h1>Progrès</h1></header>
+    ${diagHtml(fuelDiag(), 'Ta semaine')}
     <div class="stats"><div><b>${fx(mean(last7.map(d => d.v)))}</b><span>kcal / jour (7 j)</span></div><div><b>${fx(mean(last7.map(d => d.p)))} g</b><span>protéines / jour</span></div><div><b>${inGoal}/${logged.length}</b><span>jours dans l'objectif</span></div></div>
     <div class="stack" style="margin-top:12px">
       <div class="card"><span class="eyebrow">Calories · 14 jours</span><p class="small muted" style="margin:4px 0 30px">Pointillés : ton objectif moyen. Un jour est « dans l'objectif » à ± 10 %.</p>${chart(days, {color: 'var(--accent)', bars: true, target: Math.round(avgGoal), unit: 'kcal'})}</div>
@@ -3191,10 +3203,98 @@ function fFoods() {
   const mine = myFoods();
   return `
     <header class="top"><div class="sub">Tes aliments et la base</div><h1>Aliments</h1></header>
+    <div class="stack" style="margin-bottom:12px"><button class="banner" data-fmenu style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Mon menu</b><br><span class="small muted">Ton menu de tous les jours, avec les remplacements à macros égales</span></span>${ICON.chev}</button>
+      <button class="banner" data-fshop style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Courses de la semaine</b><br><span class="small muted">${weekCost() != null ? fx(weekCost(), 2) + ' € la semaine · ' + fx(weekCost() / 7, 2) + ' € par jour' : 'Quantités pour 7 jours, prix et budget'}</span></span>${ICON.chev}</button></div>
     <h2>Mes aliments</h2><div class="list">${mine.map(f => `<button class="rowbtn" data-fmine="${f.id}"><span><b>${esc(f.n)}</b><span class="meta">pour 100 g · P ${fx(f.p, 1)} · G ${fx(f.c, 1)} · L ${fx(f.f, 1)}</span></span><span class="kc">${fx(f.kcal)} kcal</span></button>`).join('')}<button class="addbtn" data-fnewfood>+ Créer un aliment</button></div>
     <p class="note" style="text-align:left">Ajoute tes produits habituels (étiquette « pour 100 g ») : ils apparaissent en premier dans la recherche.</p>
     <h2>Base TNR <small>${FOODS.length} aliments courants</small></h2>
     <div class="list">${FOODS.map(f => `<div class="rowbtn"><span><b>${esc(f.n)}</b><span class="meta">pour 100 g · P ${fx(f.p, 1)} · G ${fx(f.c, 1)} · L ${fx(f.f, 1)}</span></span><span class="kc">${fx(f.kcal)}</span></div>`).join('')}</div>`;
+}
+
+/* ---------- the menu: swaps that keep the macros, the Sunday shopping list with its cost, the bottles ---------- */
+const allFoods = () => [...myFoods(), ...FOODS];
+const foodAny = id => foodById(id) || FOODS.find(f => f.n === id);
+const itemOf = (f, g, meal) => { const r = g / 100; return {n: f.n, g, kcal: Math.round(f.kcal * r), p: +(f.p * r).toFixed(1), c: +(f.c * r).toFixed(1), f: +(f.f * r).toFixed(1), meal, food: f.id}; };
+// What an item is mostly there for: carbohydrates, protein or fat (by its calories).
+const mainMacro = it => { const c = it.c * 4, p = it.p * 4, f = it.f * 9; return c >= p && c >= f ? 'c' : p >= f ? 'p' : 'f'; };
+const MACRO_N = {c: 'glucides', p: 'protéines', f: 'lipides'};
+function swapItem(it, food) {
+  const k = mainMacro(it), per = food[k];
+  const g = per > 0 ? Math.max(5, Math.round(it[k] / per * 100 / 5) * 5) : it.g;
+  return {item: itemOf(food, g, it.meal), k, kept: it[k]};
+}
+async function saveMenu(items) { await saveFset({menu: items.map(x => ({...x})), menuFrom: TODAY}); }
+function menuPane() {
+  openPane({title: 'Mon menu', render: () => {
+    const items = planItems(), own = !!S.fset.menu?.length;
+    const tot = items.reduce((t, x) => ({kcal: t.kcal + x.kcal, p: t.p + x.p, c: t.c + x.c, f: t.f + x.f}), {kcal: 0, p: 0, c: 0, f: 0});
+    return `<p class="small muted" style="margin:16px 4px 8px">Ton menu de tous les jours. Il remplit ton journal chaque matin et se reconduit tout seul. Remplace un aliment : la quantité est recalculée pour garder les mêmes macros.</p>
+      <div class="card"><div class="stats"><div><b>${fx(tot.kcal)}</b><span>kcal</span></div><div><b>${fx(tot.p)} g</b><span>protéines</span></div><div><b>${fx(tot.c)} g</b><span>glucides</span></div><div><b>${fx(tot.f)} g</b><span>lipides</span></div></div></div>
+      ${MEALS.map(([m, lab]) => { const its = items.map((x, i) => ({...x, i})).filter(x => x.meal === m); return its.length ? `<div class="sec-label">${lab}</div><div class="list">${its.map(x => `<div class="row"><span class="l">${esc(x.n)}<span class="hint">${fx(x.g)} g · ${fx(x.kcal)} kcal · surtout ${MACRO_N[mainMacro(x)]}</span></span><span style="display:flex;gap:6px"><input class="mini-in" inputmode="numeric" style="width:64px" value="${x.g}" data-mng="${x.i}" aria-label="Grammes"><button class="chip" data-mswap="${x.i}">Remplacer</button></span></div>`).join('')}</div>` : ''; }).join('')}
+      ${own ? '<div style="margin-top:12px"><button class="btn ghost" data-mreset>Revenir au plan de mon fichier</button></div>' : ''}`;
+  }});
+}
+function swapPick(i) {
+  const it = planItems()[i];
+  pickFoodFor(f => { const {item, k, kept} = swapItem(it, f); const items = planItems().map(x => ({...x})); items[i] = item; saveMenu(items).then(() => { paneRender(); toast(`${f.n} : ${item.g} g pour garder ${fx(kept)} g de ${MACRO_N[k]}`); }); });
+}
+function pickFoodFor(onPick) {
+  const rows = q => allFoods().filter(f => { const n = normName(f.n).join(' '); return normName(q || '').every(w => n.includes(w)); }).slice(0, 60).map(f => `<button class="rowbtn" data-mpick="${f.id}"><span><b>${esc(f.n)}</b><span class="meta">pour 100 g · P ${fx(f.p, 1)} · G ${fx(f.c, 1)} · L ${fx(f.f, 1)}</span></span><span class="kc">+</span></button>`).join('');
+  openPane({title: 'Remplacer par', focus: '#mp-q', render: () => `<div style="margin-top:14px"><input class="search" id="mp-q" type="search" placeholder="Rechercher" data-mpq aria-label="Rechercher"></div><div class="list" id="mp-res">${rows('')}</div>`,
+    pick: id => { closePane(); onPick(foodAny(id)); }, setQ: v => { $('#mp-res').innerHTML = rows(v); }});
+}
+// Raw weight to buy for cooked foods (rice ×0.37, pasta ×0.4, meat +28 % raw).
+const RAW = [[/riz/i, .37, 'cru'], [/pâtes|pates/i, .4, 'crues'], [/escalope|dinde|poulet|bœuf|boeuf|steak|viande/i, 1.28, 'cru']];
+function shopList() {
+  const by = {};
+  for (const x of planItems()) { const k = x.food || x.n; (by[k] ||= {n: x.n, food: x.food, g: 0}).g += x.g * 7; }
+  return Object.values(by).map(x => { const r = RAW.find(([re]) => re.test(x.n) && /cuit|escalope|dinde|poulet|steak|viande/i.test(x.n)); const buy = r ? x.g * r[1] : x.g, price = +(S.fset.prices?.[x.food || x.n]) || null; return {...x, buy, raw: r?.[2], price, cost: price ? buy / 1000 * price : null}; });
+}
+function shopPane() {
+  openPane({title: 'Courses de la semaine', render: () => {
+    const L = shopList(), tot = L.reduce((a, x) => a + (x.cost || 0), 0), budget = +S.fset.budget || 100, miss = L.filter(x => x.price == null).length;
+    return `<p class="small muted" style="margin:16px 4px 8px">Les quantités pour 7 jours de ton menu. Note le prix au kilo une fois : le total se calcule tout seul.</p>
+      <div class="card"><div class="stats"><div><b>${fx(tot, 2)} €</b><span>la semaine</span></div><div><b>${fx(tot / 7, 2)} €</b><span>par jour</span></div><div><b>${fx(budget)} €</b><span>budget</span></div></div>
+        ${tot > budget ? `<p class="malert" style="margin-top:10px">Au-dessus de ton budget de ${fx(tot - budget, 2)} €.</p>` : tot > budget * .9 ? `<p class="malert mid" style="margin-top:10px">Proche de ton budget : il reste ${fx(budget - tot, 2)} €.</p>` : ''}
+        ${miss ? `<p class="small muted" style="margin:8px 0 0">${miss} prix à noter pour un total complet.</p>` : ''}</div>
+      <div class="list" style="margin-top:12px">${L.map(x => `<div class="row"><span class="l">${esc(x.n.replace(/ cuit(e|s)?/i, ''))}<span class="hint">${x.buy >= 1000 ? fx(x.buy / 1000, 2) + ' kg' : fx(x.buy) + ' g'}${x.raw ? ' ' + x.raw : ''}${x.cost != null ? ' · ' + fx(x.cost, 2) + ' €' : ''}</span></span><input class="mini-in" inputmode="decimal" style="width:76px" placeholder="€/kg" value="${x.price ?? ''}" data-mprice="${esc(x.food || x.n)}" aria-label="Prix au kilo"></div>`).join('')}</div>
+      <div class="list" style="margin-top:12px"><div class="row"><label for="mb-b">Budget par semaine</label><input id="mb-b" class="mini-in" inputmode="numeric" style="width:76px" value="${budget}" data-mbudget> €</div></div>`;
+  }});
+}
+const weekCost = () => { const L = shopList(); return L.some(x => x.cost != null) ? L.reduce((a, x) => a + (x.cost || 0), 0) : null; };
+// E5. One food a week for variety and micronutrients, within the budget.
+const WEEK_FOOD = [['Foie de bœuf (100 g, 1 fois)', 'vitamine A, B12, fer : remplace une escalope'], ['Sardines ou maquereau', 'oméga-3 et vitamine D : remplace une escalope'],
+  ['Épinards ou brocoli', 'fer, folates, vitamine K : dans la ratatouille ou à côté'], ['Poivron rouge et betterave', 'vitamine C et nitrates : change les couleurs de tes légumes'],
+  ['Lentilles', 'fer et fibres : une part de riz en moins'], ['Kiwi ou orange', 'vitamine C, aide à absorber le fer : en collation'], ['Œufs', 'choline et protéines complètes : au petit-déjeuner']];
+const weekFood = () => WEEK_FOOD[Math.abs(seasonWeek(TODAY)) % WEEK_FOOD.length];
+// E6. Blood tests: values by date and the next one.
+const BLOOD = [['Ferritine', 'µg/L'], ['Fer', 'µmol/L'], ['Hémoglobine', 'g/dL'], ['Vitamine D', 'ng/mL'], ['Vitamine B12', 'pg/mL'], ['Magnésium', 'mmol/L'], ['CRP', 'mg/L'], ['TSH', 'mUI/L'], ['Testostérone', 'ng/mL']];
+function bloodPane() {
+  openPane({title: 'Prises de sang', render: () => {
+    const L = (S.fset.blood || []).slice().sort((a, b) => b.date.localeCompare(a.date)), last = L[0];
+    return `<p class="small muted" style="margin:16px 4px 8px">Note les valeurs importantes de tes bilans. Claude s'en sert pour les conseils, et l'appli te rappelle le prochain.</p>
+      <div class="list"><div class="row"><label for="bl-d">Date du bilan</label><input type="date" id="bl-d" class="mini-in" value="${TODAY}"></div>
+        ${BLOOD.map(([n, u]) => `<div class="row"><label>${esc(n)}<span class="hint">${u}${last?.vals?.[n] != null ? ' · dernier ' + last.vals[n] : ''}</span></label><input class="mini-in" inputmode="decimal" style="width:80px" data-blood="${esc(n)}"></div>`).join('')}
+        <div class="row"><label for="bl-n">Prochain bilan</label><input type="date" id="bl-n" class="mini-in" value="${S.fset.bloodNext || addDays(TODAY, 182)}"></div></div>
+      <div style="margin-top:12px"><button class="btn" data-bloodsave>Enregistrer</button></div>
+      ${L.length ? `<h2>Historique</h2><div class="list">${L.map(b => `<div class="rowbtn" style="display:block"><b>${esc(cap(fmtShort(b.date)))}</b><span class="meta">${Object.entries(b.vals).map(([k, v]) => esc(k) + ' ' + v).join(' · ')}</span></div>`).join('')}</div>` : ''}`;
+  }});
+}
+// E7. The week in food, from the journal.
+function fuelDiag() {
+  const out = []; let pLow = 0, cLow = 0, hiDays = 0, n = 0, wLow = 0;
+  for (let i = 1; i <= 7; i++) {
+    const k = addDays(TODAY, -i), d = fday(k), t = dayTotals(k), g = fuelGoal(k); if (!t.kcal) continue; n++;
+    if (t.p < g.p * .9) pLow++;
+    if (trainDay(k)) { hiDays++; if (t.c < g.c * .85) cLow++; }
+    if ((d.water || 0) < g.water * .75) wLow++;
+  }
+  if (!n) return out;
+  if (pLow >= 3) out.push(['mid', `Protéines sous l'objectif ${pLow} jours sur ${n} : ajoute une source au repas le plus léger.`]);
+  if (hiDays && cLow >= 2) out.push(['mid', `Glucides trop bas ${cLow} jours intenses sur ${hiDays} : ces jours-là, augmente le riz ou les pâtes.`]);
+  if (wLow >= 3) out.push(['mid', `Eau sous l'objectif ${wLow} jours sur ${n} : finis tes deux gourdes avant le soir.`]);
+  if (!out.length) out.push(['good', `Semaine propre : ${n} jour${n > 1 ? 's' : ''} noté${n > 1 ? 's' : ''}, protéines, glucides et eau dans tes objectifs.`]);
+  return out;
 }
 // His food plan and daily targets, from "Train de vie performance" (Plan alimentaire and Charte).
 let TDV_FUEL = null;
@@ -3202,6 +3302,7 @@ function fGoals() {
   const g = fuelGoal(TODAY), gt = fuelGoal(TODAY, true), gr = fuelGoal(TODAY, false);
   return `
     <header class="top"><div class="sub">Calculés pour toi, modifiables</div><h1>Objectifs</h1></header>
+    <button class="banner" data-fblood style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;margin-bottom:12px"><span><b>Prises de sang</b><br><span class="small muted">${S.fset.bloodNext ? 'Prochain bilan le ' + esc(fmtShort(S.fset.bloodNext)) + (S.fset.bloodNext <= TODAY ? ' : c\'est le moment' : '') : 'Tes valeurs et le prochain bilan'}</span></span>${ICON.chev}</button>
     <div class="list" style="margin-bottom:12px"><div class="row col"><label for="fg-plan">Mon plan alimentaire<span class="hint">Ce que tu manges en ce moment, à quoi tu fais attention. Claude s'en sert dans les analyses.</span></label><textarea id="fg-plan" rows="3" data-fplannote>${esc(S.profile?.nutrition || '')}</textarea></div></div>
     <div class="list"><div class="row col"><span class="l">Ton objectif</span><div class="seg" role="group">${[['cut', 'Perdre du gras'], ['maintain', 'Maintenir'], ['gain', 'Prendre du muscle']].map(([v, l]) => `<button type="button" data-fgoal="${v}" aria-pressed="${g.goal === v}">${l}</button>`).join('')}</div></div>
       <div class="row col"><label for="fg-prot">Protéines<span class="hint">En g par kg de poids. Recommandé aux sprinteurs : 1,6 à 2,2.</span></label><div class="rangeline"><input type="range" id="fg-prot" min="1.4" max="2.6" step="0.1" value="${S.fset.protein || 2}" data-fprot><output>${fx(S.fset.protein || 2, 1)}</output></div></div>
@@ -3349,6 +3450,14 @@ document.addEventListener('click', e => {
   if ((b = at('[data-tgfill]'))) { fillFromWatch(b.dataset.tgfill); return; }
   if (at('[data-rmlist]')) { rmList(); return; }
   if (at('[data-hask]')) { askClaude(); return; }
+  if (at('[data-fmenu]')) { menuPane(); return; }
+  if (at('[data-fshop]')) { shopPane(); return; }
+  if (at('[data-fblood]')) { bloodPane(); return; }
+  if ((b = at('[data-mswap]'))) { swapPick(+b.dataset.mswap); return; }
+  if ((b = at('[data-mpick]'))) { P.stack.at(-1).pick(b.dataset.mpick); return; }
+  if (at('[data-mreset]')) { saveFset({menu: null}).then(() => { PLAN_ITEMS.src = null; paneRender(); toast('Plan de ton fichier remis'); }); return; }
+  if ((b = at('[data-fbottle]'))) { const i = +b.dataset.fbottle, d = structuredClone(fday(S.fday)); d.items ||= []; const bt = [...(d.bottles || [])]; bt[i] = !bt[i]; d.bottles = bt; d.water = bt.filter(Boolean).length * 4; saveDay(S.fday, d); return; }
+  if (at('[data-bloodsave]')) { const vals = {}; document.querySelectorAll('[data-blood]').forEach(i => { const v = String(i.value).replace(',', '.'); if (v) vals[i.dataset.blood] = +v; }); const list = [...(S.fset.blood || [])]; if (Object.keys(vals).length) list.push({date: $('#bl-d').value || TODAY, vals}); saveFset({blood: list, bloodNext: $('#bl-n').value || null}).then(() => { toast('Bilan enregistré'); paneRender(); }); return; }
   if (at('[data-tseason]')) { SE_DRAFT = null; seDraft(); seasonPane(); return; }
   if ((b = at('[data-stpl]'))) { const d = seDraft(); d.blocks = SEASON_TPL[b.dataset.stpl].blocks.map(x => [...x]); S.tset = {...(S.tset || {}), season: d}; paneRender(); return; }
   if (at('[data-seadd]')) { const d = seDraft(); d.blocks.push(['Nouveau bloc', 3, 'Objectif']); S.tset = {...(S.tset || {}), season: d}; paneRender(); return; }
@@ -3384,6 +3493,7 @@ document.addEventListener('input', e => {
   const t = e.target, d = t.dataset;
   if (d.tlibq !== undefined) { S.lib.q = t.value; $('#t-libl').innerHTML = libRows(); }
   else if (d.pkq !== undefined) P.stack.at(-1).setQ(t.value);
+  else if (d.mpq !== undefined) P.stack.at(-1).setQ(t.value);
   else if (d.ffq !== undefined) P.stack.at(-1).setQ(t.value);
   else if (d.fqty !== undefined) P.stack.at(-1).setG(t.value);
   else if (d.lv) {
