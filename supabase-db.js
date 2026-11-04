@@ -123,6 +123,39 @@ async function recupGetDb() {
         response_type: 'code', client_id: clientId, scope: 'user.info,user.metrics,user.activity', redirect_uri: WITHINGS_REDIRECT, state: 'withings'});
     }
   };
+  // Notifications at 9 h and 20 h: the phone subscribes to Web Push with the key of the `notify` function,
+  // which keeps the subscription in the private table and sends the summaries.
+  const notify = async body => {
+    const {data: {session: s}} = await SB.auth.getSession();
+    const r = await fetch(RECUP_SUPABASE.url + '/functions/v1/notify', {method: 'POST', headers: {Authorization: 'Bearer ' + s.access_token, apikey: RECUP_SUPABASE.key, 'Content-Type': 'application/json'}, body: JSON.stringify(body)});
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || j.error) throw new Error(j.error || 'notify ' + r.status);
+    return j;
+  };
+  const pushReady = async () => 'PushManager' in window && 'serviceWorker' in navigator ? navigator.serviceWorker.ready : null;
+  window.RECUP_PUSH = {
+    state: async () => {
+      if (!('Notification' in window) || !(await pushReady())) return 'unsupported';
+      if (Notification.permission === 'denied') return 'denied';
+      return (await (await pushReady()).pushManager.getSubscription()) && Notification.permission === 'granted' ? 'on' : 'off';
+    },
+    on: async () => {
+      if (await Notification.requestPermission() !== 'granted') return 'denied';
+      const reg = await pushReady(), {key} = await notify({key: true});
+      const raw = Uint8Array.from(atob(key.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((key.length + 3) % 4)), c => c.charCodeAt(0));
+      let sub = await reg.pushManager.getSubscription();
+      if (sub) await sub.unsubscribe();
+      sub = await reg.pushManager.subscribe({userVisibleOnly: true, applicationServerKey: raw});
+      await notify({subscribe: sub.toJSON()});
+      return 'on';
+    },
+    off: async () => {
+      const sub = await (await pushReady())?.pushManager.getSubscription();
+      if (sub) { await notify({unsubscribe: sub.endpoint}).catch(() => {}); await sub.unsubscribe(); }
+      return 'off';
+    },
+    test: () => notify({test: true})
+  };
   const back = new URLSearchParams(location.search);
   if (back.get('state') === 'withings') {
     history.replaceState(null, '', location.pathname);

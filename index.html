@@ -379,6 +379,14 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 .hm-head h1{color:#fff}
 .hm-gear{position:absolute;right:12px;top:calc(16px + env(safe-area-inset-top,0px));width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:rgba(255,255,255,.55)}
 .hm-gear svg{width:22px;height:22px}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(300px,82vw);z-index:60;background:var(--card);color:var(--fg);padding:calc(20px + env(safe-area-inset-top,0px)) 16px 24px;transform:translateX(105%);transition:transform .35s cubic-bezier(.32,.72,0,1);box-shadow:-8px 0 30px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:10px}
+.drawer.on{transform:none}
+.drawer-scrim{position:fixed;inset:0;z-index:59;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .3s}
+.drawer-scrim.on{opacity:1;pointer-events:auto}
+.drawer h2{margin:0 0 6px;font-size:1.25rem}
+.drawer .ditem{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:14px;border-radius:14px;background:var(--card2);color:var(--fg);font:inherit;text-align:left;border:0}
+.drawer .ditem .hint{display:block;font-size:.8125rem;color:var(--fg2);margin-top:2px}
+@media (prefers-reduced-motion:reduce){.drawer{transition:none}}
 .hm-info{margin-top:auto;min-height:96px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;text-align:center;transition:opacity .25s}
 .hm-info b{font:700 2rem/1.1 var(--display);letter-spacing:-.025em;color:#fff}
 .hm-info span{font-size:.9375rem;color:rgba(255,255,255,.62)}
@@ -564,7 +572,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=26"></script>
+<script src="supabase-db.js?v=28"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
@@ -971,7 +979,7 @@ function effScale(v) {
 
 /* ---------- views ---------- */
 function vToday() {
-  const A = S.analysis, kG = lastKey('hrv');
+  const A = AN(), kG = lastKey('hrv');
   const rec = kG ? recovery(kG) : null, z = zoneOf(rec?.score);
   const high = highDay(TODAY), tgt = effortTarget(rec?.score, high);
   const effT = effortDay(TODAY), effY = effortDay(addDays(TODAY, -1));
@@ -992,7 +1000,7 @@ function vToday() {
         <div class="state"><span class="pill ${z}"><i></i>${ZONE[z]}</span><p class="small muted" style="width:100%;text-align:center">${ZONE_SUB[z]}${rec?.ill ? ' · possible début d\'infection' : ''}</p></div>
         <div class="target"><span class="eyebrow">${high ? 'Jour d\'entraînement' : 'Jour de récupération'} · objectif d'effort</span><b>${tgt.lvl[2]} <span class="muted">· ${tgt.lvl[0]} à ${tgt.lvl[1]} sur 21</span></b><div class="effbar">${EFFORT.map(([a, b, n]) => `<span class="${n === tgt.lvl[2] ? 'on' : ''}" style="flex:${b - a}">${n}</span>`).join('')}</div>${effScale(effT)}</div>
         ${A?.summary ? `<p class="summary">${esc(A.summary)}</p>` : `<p class="summary muted">${esc(tgt.text)}</p>`}
-        ${A?.today?.length ? `<div class="todo"><div class="eyebrow">À faire aujourd'hui</div><ul>${A.today.slice(0, 3).map((t, i) => `<li><b>${i + 1}</b><span>${esc(t)}</span></li>`).join('')}</ul></div>` : ''}
+        ${(A?.today?.length || !aiOn()) ? `<div class="todo"><div class="eyebrow">À faire aujourd'hui</div><ul>${(A?.today?.length ? A.today : baseTodo(tgt)).slice(0, 3).map((t, i) => `<li><b>${i + 1}</b><span>${esc(t)}</span></li>`).join('')}</ul></div>` : ''}
       </article>
       <button class="btn" id="open-entry"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>${S.manual[TODAY] ? 'Modifier ma journée' : 'Noter ma journée'}</button>
     </div>
@@ -1093,7 +1101,7 @@ function detailBody(id) {
   const inZone = zone && vals.length ? Math.round(vals.filter(x => x >= zone[0] && x <= zone[1]).length / vals.length * 100) : null;
   const stat = (val, lab) => `<div><b>${val}</b><span>${lab}</span></div>`;
   const stats = day ? '' : `<div class="stats" style="margin-top:12px">${stat(f(tot), m.weekly ? 'total' : 'moyenne')}${stat(sgn(pct(tot, prev)) || '–', 'vs période d\'avant')}${zone ? stat(inZone != null ? inZone + ' %' : '–', 'en zone') : stat(f(vals.length ? Math.max(...vals) : null), 'maximum')}</div>`;
-  const note = S.analysis?.notes?.[id === 'sleepH' ? 'sleep' : id];
+  const note = AN()?.notes?.[id === 'sleepH' ? 'sleep' : id];
   return `
     <div class="dhead"><div class="eyebrow" style="color:${m.c}">${m.lab}</div><div class="big num">${shown}<small>${m.fmt ? '' : m.unit}</small></div>${m.extra ? `<div class="small muted">${m.extra()}</div>` : ''}</div>
     <div style="margin:12px 0 10px">${granSeg()}</div>
@@ -1140,7 +1148,25 @@ function vTrends() {
 }
 
 function list(items) { return Array.isArray(items) && items.length ? `<ul>${items.map(i => `<li>${esc(i)}</li>`).join('')}</ul>` : ''; }
+// Without the AI: three plain to-dos from the targets of the app itself.
+function baseTodo(tgt) {
+  const g = typeof fuelGoal === 'function' ? fuelGoal(TODAY) : null;
+  return [tgt.text, `Effort visé : ${tgt.lvl[0]} à ${tgt.lvl[1]} sur 21 (${tgt.lvl[2].toLowerCase()}).`, `Sommeil : vise ${hmH(SLEEP_NEED)} cette nuit${g ? `, et ${fx(g.p)} g de protéines aujourd'hui` : ''}.`];
+}
+// Without the AI: the week in numbers, computed here from the raw data (last 7 days vs the 7 before).
+function weekAuto() {
+  const prev = addDays(TODAY, -7), d = (a, b, n = 1, u = '') => a == null ? '–' : fx(a, n) + u + (b != null ? ` <span class="muted">(${sgn(pct(a, b)) || 'stable'})</span>` : '');
+  const nights = series('sleepH', 7).filter(p => p.v != null), good = nights.filter(p => p.v >= SLEEP_NEED).length;
+  const rows = [['Sommeil moyen', d(avgN('sleepH', 7), avgN('sleepH', 7, prev), 1, ' h')], ['Nuits à 8 h 30 ou plus', nights.length ? `${good} sur ${nights.length}` : '–'],
+    ['VFC moyenne', d(avgN('hrv', 7), avgN('hrv', 7, prev), 0, ' ms')], ['FC au repos', d(avgN('rhr', 7), avgN('rhr', 7, prev), 0, ' bpm')],
+    ['Récupération moyenne', d(avgN('recovery', 7), avgN('recovery', 7, prev), 0, ' %')], ['Effort total', d(sumN('effort', 7), sumN('effort', 7, prev), 1)],
+    ['Poids moyen', d(avgN('weight', 7), avgN('weight', 7, prev), 1, ' kg')]];
+  return `<article class="card rep"><div class="eyebrow">Ta semaine en chiffres · 7 derniers jours</div>
+    <div class="list" style="margin-top:10px">${rows.map(([l, v]) => `<div class="row"><span class="l">${l}</span><b>${v}</b></div>`).join('')}</div>
+    <p class="small muted" style="margin-top:10px">Entre parenthèses : l'écart avec les 7 jours d'avant. Calculé par l'appli à partir de tes mesures Garmin et Withings, sans IA.</p></article>`;
+}
 function vReports() {
+  if (!aiOn()) return `<header class="top"><div class="sub">Tes chiffres de la semaine</div><h1>Bilans</h1></header><div class="stack">${weekAuto()}</div>`;
   const reps = [...S.reports].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   const body = reps.length ? reps.map(r => `
     <article class="card rep">
@@ -1822,12 +1848,13 @@ function renderMod(force) {
 const HOME_K = [['T', '#FF3B30'], ['N', '#30D158'], ['R', '#0A84FF']];
 const SWIPE = 90;
 const HP = {sel: null, x: '50%', el: null, id: null, y0: 0, dy: 0, busy: false};
+const BARS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
 const GEAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>';
 function vHome() {
   const kG = lastKey('hrv'), rec = kG ? recovery(kG) : null, s = HP.sel, c = HOME_K.find(k => k[0] === s)?.[1];
   return `<div class="hm-glow${s ? ' on' : ''}" id="hm-glow" style="--gc:${c || '#000'};left:${HP.x}"></div>
     <div class="hm${s ? ' sel' : ''}" id="hm">
-      <button class="hm-gear" data-hset aria-label="Réglages de l'accueil">${GEAR}</button>
+      <button class="hm-gear" data-hmenu aria-label="Menu">${BARS}</button>
       <header class="hm-head"><div class="sub">${fmtDay(TODAY)}</div><h1 class="hello">${esc(greeting(rec?.score))}</h1>${homeSummary()}</header>
       <div class="hm-info" id="hm-info" aria-live="polite">${homeInfo(s)}</div>
       <div class="hm-dock">${HOME_K.map(([m, col]) => `<button class="hm-k${s === m ? ' on' : ''}" data-k="${m}" style="--mc:${col}" aria-label="${modName(m)} : touche puis glisse vers le haut pour ouvrir"><span class="l">${m}</span><span class="n">${modName(m)}</span></button>`).join('')}</div>
@@ -1841,7 +1868,7 @@ function homeInfo(s) {
 function homeSummary() {
   const kG = lastKey('hrv'), rec = kG ? recovery(kG) : null, z = zoneOf(rec?.score);
   const sl = kG ? VAL.sleepH(kG) : null, hrv = kG ? G(kG, 'hrv') : null, eff = effortDay(TODAY) || effortDay(addDays(TODAY, -1));
-  const tgt = effortTarget(rec?.score, highDay(TODAY)), todo = S.analysis?.today?.[0];
+  const tgt = effortTarget(rec?.score, highDay(TODAY)), todo = AN()?.today?.[0];
   const facts = [sl != null && `Nuit ${fx(sl, 1)} h`, hrv != null && `VFC ${hrv} ms`, rec && `Récupération ${rec.score} %`, eff && `Effort ${fx(eff, 1)}/21`].filter(Boolean);
   if (!facts.length) return '';
   const avoid = z === 'bad' ? 'les séances intenses et le sprint maximal' : `de dépasser ${tgt.lvl[1]} sur 21 d'effort`;
@@ -1917,15 +1944,70 @@ document.addEventListener('pointerup', homeRelease);
 document.addEventListener('pointercancel', homeRelease);
 // Keyboard: Enter or Space on a letter opens it.
 document.addEventListener('keydown', e => { const b = e.target.closest?.('.hm-k'); if (b && (e.key === 'Enter' || e.key === ' ') && !HP.busy) { e.preventDefault(); homeSelect(b); homeOpen(b.dataset.k); } });
+/* Side menu of the home page: Paramètres, and the AI switch. With the AI off the app runs on its own:
+   raw data, its own rule-based targets and explanations, never the texts written by Claude (analysis, weekly reports). */
+const aiOn = () => S.app?.ai !== false;
+const AN = () => aiOn() ? S.analysis : null;
+function drawerHtml() {
+  return `<h2>Menu</h2>
+    <button class="ditem" data-hset><span>Paramètres<span class="hint">Langue, notifications, connexions</span></span><span aria-hidden="true">›</span></button>
+    <div class="ditem"><label for="dr-ai">IA<span class="hint">${aiOn() ? 'Connectée : conseils et bilans écrits par Claude.' : 'Déconnectée : tes données, tes objectifs et les explications de base, sans texte écrit par l\'IA.'}</span></label><span class="switch"><input type="checkbox" id="dr-ai" data-hai${aiOn() ? ' checked' : ''}><span></span></span></div>`;
+}
+function openDrawer() {
+  let d = $('#drawer');
+  if (!d) {
+    document.body.insertAdjacentHTML('beforeend', '<div class="drawer-scrim" id="drawer-scrim"></div><nav class="drawer" id="drawer" aria-label="Menu"></nav>');
+    d = $('#drawer'); $('#drawer-scrim').addEventListener('click', closeDrawer);
+  }
+  d.innerHTML = drawerHtml();
+  requestAnimationFrame(() => { d.classList.add('on'); $('#drawer-scrim').classList.add('on'); });
+}
+function closeDrawer() { $('#drawer')?.classList.remove('on'); $('#drawer-scrim')?.classList.remove('on'); }
+document.addEventListener('change', async e => {
+  if (!e.target.matches?.('[data-hai]')) return;
+  S.app = {...(S.app || {}), ai: e.target.checked};
+  $('#drawer').innerHTML = drawerHtml();
+  render(); renderMod(true);
+  toast(S.app.ai ? 'IA connectée' : 'IA déconnectée : l\'appli marche sans elle');
+  await dbSet('settings/app', {...S.app, updatedAt: new Date().toISOString()});
+});
 function homeSettings() {
   openPane({title: 'Réglages', render: () => `
     <div class="list" style="margin-top:16px"><div class="row col"><span class="l">Langue<span class="hint">Change les noms des trois parties. Les lettres T, N, R restent les mêmes.</span></span>
       <div class="seg" role="group" aria-label="Langue">${[['fr', 'Français'], ['en', 'English']].map(([v, l]) => `<button type="button" data-hlang="${v}" aria-pressed="${(S.lang || 'en') === v}">${l}</button>`).join('')}</div>
       <span class="hint">${['T', 'N', 'R'].map(m => `${m} · ${modName(m)}`).join(' &nbsp; ')}</span></div></div>
     <p class="note" style="text-align:left">L'apparence, la vibration et l'actualisation se règlent dans ${modName('R')}, onglet Profil.</p>
+    ${notifSection()}
     ${connSection()}`});
   if (window.RECUP_KEYS) connLoad();
+  notifLoad();
 }
+/* Notifications: a short summary on the phone at 9 h (night, recovery, advice) and 20 h (effort vs target, tonight). */
+let NOTIF = null;
+async function notifLoad() {
+  try { NOTIF = window.RECUP_PUSH ? await window.RECUP_PUSH.state() : 'unsupported'; } catch (e) { NOTIF = 'off'; }
+  if (P.stack.length) paneRender();
+}
+function notifSection() {
+  const st = NOTIF, hint = st === 'unsupported' ? 'Disponible dans l\'appli installée sur ton téléphone.' : st === 'denied' ? 'Bloquées par le téléphone : Paramètres > Applications > TNR Athletics > Notifications.' : 'À 9 h : ta nuit, ta récupération et le conseil du jour. À 20 h : ton effort par rapport à l\'objectif et ce soir.';
+  return `<h2>Notifications</h2>
+    <div class="list"><div class="row"><label for="hs-notif">Bilan à 9 h et 20 h<span class="hint">${hint}</span></label><span class="switch"><input type="checkbox" id="hs-notif" data-hnotif${st === 'on' ? ' checked' : ''}${!st || st === 'unsupported' || st === 'denied' ? ' disabled' : ''}><span></span></span></div>
+      ${st === 'on' ? '<div class="row col"><button class="btn ghost" data-hnotiftest>M\'envoyer une notification de test</button></div>' : ''}</div>`;
+}
+document.addEventListener('change', async e => {
+  const t = e.target; if (!t.matches?.('[data-hnotif]') || !window.RECUP_PUSH) return;
+  t.disabled = true;
+  try { NOTIF = t.checked ? await window.RECUP_PUSH.on() : await window.RECUP_PUSH.off(); toast(NOTIF === 'on' ? 'Notifications activées' : NOTIF === 'denied' ? 'Notifications refusées par le téléphone' : 'Notifications coupées'); }
+  catch (err) { NOTIF = await window.RECUP_PUSH.state().catch(() => 'off'); toast('Activation impossible pour l\'instant'); }
+  paneRender();
+});
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-hnotiftest]'); if (!b || !window.RECUP_PUSH) return;
+  b.disabled = true;
+  try { const r = await window.RECUP_PUSH.test(); toast(r.results?.some(x => x.status < 300) ? 'Notification envoyée' : 'Envoi impossible pour l\'instant'); }
+  catch (err) { toast('Envoi impossible pour l\'instant'); }
+  b.disabled = false;
+});
 /* Connexions: Oscar pastes his own Garmin and Withings keys; they go to the private table and never come back. */
 let CONN = null;
 async function connLoad() {
@@ -2296,7 +2378,30 @@ const FOODS = [
 const MEALS = [['breakfast', 'Petit-déjeuner'], ['lunch', 'Déjeuner'], ['snack', 'Collation'], ['dinner', 'Dîner']];
 const foodById = id => S.foods[id] || FOODS.find(f => f.id === id);
 const myFoods = () => Object.values(S.foods).filter(f => !f.deleted).sort((a, b) => a.n.localeCompare(b.n));
-const fday = k => S.fuel[k] || {items: [], water: 0};
+// A day nobody has written yet starts from his food plan (Train de vie performance): every "aliment 125 g"
+// of its four meals becomes a journal line. Nothing is saved until he changes something, so a day he filled
+// by hand is never rewritten, and days before the plan arrived stay empty.
+const FUEL_PLAN_FROM = '2026-11-03';
+const PLAN_ITEMS = {src: null, items: []};
+const normName = s => s.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '').split(/[\s']+/).filter(Boolean);
+function planItems() {
+  if (PLAN_ITEMS.src === TDV_FUEL) return PLAN_ITEMS.items;
+  const items = [];
+  (TDV_FUEL?.meals || []).forEach(([, txt], i) => {
+    const meal = MEALS[i]?.[0]; if (!meal) return;
+    for (const part of String(txt).split('·')) {
+      const m = part.trim().match(/^(.+?)\s+(\d+(?:[,.]\d+)?)\s*g\b/); if (!m) continue;
+      const words = normName(m[1]), f = FOODS.find(f => { const n = normName(f.n); return words.every(w => n.includes(w)); });
+      if (!f) continue;
+      const g = +m[2].replace(',', '.'), r = g / 100;
+      items.push({n: f.n, g, kcal: Math.round(f.kcal * r), p: +(f.p * r).toFixed(1), c: +(f.c * r).toFixed(1), f: +(f.f * r).toFixed(1), meal, food: f.id});
+    }
+  });
+  Object.assign(PLAN_ITEMS, {src: TDV_FUEL, items});
+  return items;
+}
+const planFills = k => S.fset.planFill !== false && k >= FUEL_PLAN_FROM && k <= TODAY && planItems().length > 0;
+const fday = k => S.fuel[k] || (planFills(k) ? {items: structuredClone(planItems()), water: 0, fromPlan: true} : {items: [], water: 0});
 function dayTotals(k) {
   const t = {kcal: 0, p: 0, c: 0, f: 0};
   for (const it of fday(k).items || []) { t.kcal += it.kcal; t.p += it.p; t.c += it.c; t.f += it.f; }
@@ -2334,11 +2439,12 @@ function fJournal() {
         <div class="macros">${macro('Protéines', t.p, g.p, '#E0352B')}${macro('Glucides', t.c, g.c, '#2F7BF5')}${macro('Lipides', t.f, g.f, '#E8900A')}</div>
         <p class="small muted" style="margin-top:12px">${g.train ? `Jour d'entraînement${plan ? ' (' + esc(plan.name) + ')' : ''} : plus de glucides pour remplir tes réserves.` : 'Jour de repos : un peu moins de glucides, les protéines restent hautes pour reconstruire.'}</p>
       </article>
+      ${d.fromPlan ? '<p class="small muted" style="margin:0 4px">Rempli avec ton plan alimentaire. Change seulement ce qui diffère : touche un aliment pour modifier la quantité ou le retirer.</p>' : ''}
       ${MEALS.map(([m, lab]) => { const its = (d.items || []).map((it, i) => ({...it, i})).filter(it => it.meal === m), kc = its.reduce((s, it) => s + it.kcal, 0);
-        const hasY = y.some(it => it.meal === m);
+        const hasY = y.some(it => it.meal === m), hasP = k >= FUEL_PLAN_FROM && planItems().some(it => it.meal === m);
         return `<div class="list meal"><h3>${lab}<small>${kc ? fx(kc) + ' kcal' : ''}</small></h3>
           ${its.map(it => `<button class="rowbtn" data-fitem="${it.i}"><span><b>${esc(it.n)}</b><span class="meta">${fx(it.g)} g · P ${fx(it.p)} · G ${fx(it.c)} · L ${fx(it.f)}</span></span><span class="kc">${fx(it.kcal)}</span></button>`).join('')}
-          <button class="addbtn" data-fadd="${m}">+ Ajouter un aliment</button>${!its.length && hasY ? `<button class="addbtn" data-fcopy="${m}" style="color:var(--fg2);font-weight:500">Reprendre le ${lab.toLowerCase()} de la veille</button>` : ''}</div>`; }).join('')}
+          <button class="addbtn" data-fadd="${m}">+ Ajouter un aliment</button>${!its.length && hasP ? `<button class="addbtn" data-fplanmeal="${m}" style="color:var(--fg2);font-weight:500">Remettre le ${lab.toLowerCase()} du plan</button>` : ''}${!its.length && hasY ? `<button class="addbtn" data-fcopy="${m}" style="color:var(--fg2);font-weight:500">Reprendre le ${lab.toLowerCase()} de la veille</button>` : ''}</div>`; }).join('')}
       <div class="card"><div class="chead" style="margin:0"><span class="eyebrow">Eau</span><b class="num">${fx((d.water || 0) * .25, 2)} L <span class="small muted">/ ${fx(g.water * .25, 1)} L</span></b></div>
         <div class="water">${Array.from({length: Math.max(g.water, (d.water || 0) + 1)}, (_, i) => `<button data-fwater="${i + 1}" class="${i < (d.water || 0) ? 'on' : ''}" aria-label="${i + 1} verre${i ? 's' : ''}"></button>`).join('')}</div>
         <p class="small muted" style="margin-top:8px">Un verre = 25 cl. Touche un verre pour le remplir.</p></div>
@@ -2392,12 +2498,13 @@ function fGoals() {
       <p><b style="color:var(--fg)">Macros</b> : protéines ${fx(S.fset.protein || 2, 1)} g/kg, lipides 1 g/kg, les glucides complètent. Ce sont eux qui montent les jours d'entraînement.</p>
     </div>
     ${TDV_FUEL ? `<h2>Mon plan alimentaire <small>Train de vie performance</small></h2>
-    <div class="list">${TDV_FUEL.meals.map(([m, d]) => `<div class="row col"><span class="l">${esc(m)}<span class="hint">${esc(d)}</span></span></div>`).join('')}</div>
+    <div class="list">${TDV_FUEL.meals.map(([m, d]) => `<div class="row col"><span class="l">${esc(m)}<span class="hint">${esc(d)}</span></span></div>`).join('')}
+      <div class="row col"><span class="l">Remplir le journal avec ce plan<span class="hint">Chaque nouveau jour part de ces 4 repas. Tu ne changes que ce qui diffère.</span></span><div class="seg" role="group">${[['on', 'Oui'], ['off', 'Non']].map(([v, l]) => `<button type="button" data-fplanfill="${v}" aria-pressed="${(S.fset.planFill !== false) === (v === 'on')}">${l}</button>`).join('')}</div></div></div>
     <div class="card small muted stack" style="margin-top:12px"><p><b style="color:var(--fg)">Total du jour</b> : ${esc(TDV_FUEL.total)}.</p>${TDV_FUEL.extra.map(x => `<p>${esc(x)}.</p>`).join('')}</div>` : ''}
     ${S.profile?.nutrition ? `<h2>Ton plan alimentaire</h2><div class="card why">${esc(S.profile.nutrition)}</div><p class="note" style="text-align:left">Modifiable dans ${modName('R')}, onglet Profil.</p>` : ''}`;
 }
 async function saveFset(patch) { Object.assign(S.fset, patch); renderMod(); await dbSet('settings/fuel', {...S.fset, updatedAt: new Date().toISOString()}); }
-async function saveDay(k, d) { S.fuel[k] = d; renderMod(); await dbSet('fuel/' + k, {...d, date: k, updatedAt: new Date().toISOString()}); }
+async function saveDay(k, d) { delete d.fromPlan; S.fuel[k] = d; renderMod(); await dbSet('fuel/' + k, {...d, date: k, updatedAt: new Date().toISOString()}); }
 
 /* ---------- Fuel: add a food ---------- */
 let OFF = {q: '', res: [], t: null};
@@ -2483,7 +2590,8 @@ document.addEventListener('click', e => {
   const t = e.target, at = s => t.closest(s);
   let b;
   if (at('[data-home]')) { go('home'); return; }
-  if (at('[data-hset]')) { homeSettings(); return; }
+  if (at('[data-hmenu]')) { openDrawer(); return; }
+  if (at('[data-hset]')) { closeDrawer(); homeSettings(); return; }
   if ((b = at('[data-hlang]'))) { S.lang = b.dataset.hlang; saveUi(); paneRender(); renderMod(true); return; }
   if ((b = at('[data-mtab]'))) { if (S.mod === 'T') S.ttab = b.dataset.mtab; else S.ftab = b.dataset.mtab; saveUi(); renderMod(true); window.scrollTo(0, 0); return; }
   if ((b = at('[data-ttab]'))) { S.ttab = b.dataset.ttab; saveUi(); renderMod(true); return; }
@@ -2531,6 +2639,8 @@ document.addEventListener('click', e => {
   if ((b = at('[data-fqv]'))) { $('#fq-g').value = b.dataset.fqv; P.stack.at(-1).setG(b.dataset.fqv); return; }
   if (at('[data-fqok]')) { P.stack.at(-1).ok(); return; }
   if (at('[data-fqdel]')) { P.stack.at(-1).del(); return; }
+  if ((b = at('[data-fplanmeal]'))) { const m = b.dataset.fplanmeal, d = structuredClone(fday(S.fday)); d.items ||= []; d.items.push(...structuredClone(planItems().filter(it => it.meal === m))); saveDay(S.fday, d); toast('Repas du plan remis'); return; }
+  if ((b = at('[data-fplanfill]'))) { saveFset({planFill: b.dataset.fplanfill === 'on'}); return; }
   if ((b = at('[data-fcopy]'))) { const m = b.dataset.fcopy, d = structuredClone(fday(S.fday)); d.items ||= []; d.items.push(...(fday(addDays(S.fday, -1)).items || []).filter(it => it.meal === m)); saveDay(S.fday, d); toast('Repas repris de la veille'); return; }
   if ((b = at('[data-fwater]'))) { const n = +b.dataset.fwater, d = structuredClone(fday(S.fday)); d.items ||= []; d.water = (d.water || 0) === n ? n - 1 : n; saveDay(S.fday, d); return; }
   if ((b = at('[data-fnewfood]'))) { newFood(b.dataset.fnewfood || ''); return; }
@@ -2602,6 +2712,7 @@ go('home', false);
   db.collection('manual').onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); S.manual = o; render(); }, fail);
   db.collection('reports').onSnapshot(snap => { S.reports = snap.docs.map(d => ({id: d.id, ...d.data()})); render(); }, fail);
   db.doc('analysis/latest').onSnapshot(snap => { S.analysis = snap.exists ? snap.data() : null; render(); }, fail);
+  db.doc('settings/app').onSnapshot(snap => { S.app = snap.exists ? snap.data() : {}; render(); renderMod(); }, () => {});
   db.doc('requests/sync').onSnapshot(snap => { S.req = snap.exists ? snap.data().requestedAt : null; render(); }, () => {});
   db.doc('status/sync').onSnapshot(snap => { S.checked = snap.exists ? snap.data() : null; render(); }, () => {});
   db.doc('profile/main').onSnapshot(snap => { S.profile = snap.exists ? snap.data() : null; render(); }, fail);
