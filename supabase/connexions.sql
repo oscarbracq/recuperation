@@ -6,7 +6,8 @@ create or replace function public.recup_key_set(p_k text, p_v jsonb) returns voi
 language plpgsql security definer set search_path = public as $$
 begin
   if coalesce(auth.jwt() ->> 'email', '') <> 'oscarbracq@yahoo.com' then raise exception 'non autorisé'; end if;
-  if p_k not in ('garmin', 'withings') then raise exception 'clé inconnue'; end if;
+  -- Garmin, Withings, and the other apps added in Paramètres (app_<name>).
+  if p_k not in ('garmin', 'withings') and p_k !~ '^app_[a-z0-9_]{1,30}$' then raise exception 'clé inconnue'; end if;
   insert into public.recup_private (k, v, updated_at) values (p_k, p_v, now())
   on conflict (k) do update set v = coalesce(public.recup_private.v, '{}'::jsonb) || excluded.v, updated_at = now();
 end $$;
