@@ -98,7 +98,7 @@ async function sendAll(st: any, payload: unknown) {
 async function loadData() {
   const rows: any[] = [];
   for (let from = 0; ; from += 1000) {
-    const {data, error} = await db.from('docs').select('collection,id,data').in('collection', ['garmin', 'withings', 'manual', 'profile', 'analysis', 'settings']).range(from, from + 999);
+    const {data, error} = await db.from('docs').select('collection,id,data').in('collection', ['garmin', 'withings', 'manual', 'profile', 'analysis', 'settings', 'training']).range(from, from + 999);
     if (error) throw error;
     rows.push(...data);
     if (data.length < 1000) break;
@@ -110,6 +110,7 @@ async function loadData() {
     else if (r.collection === 'profile' && r.id === 'main') S.profile = r.data;
     else if (r.collection === 'analysis' && r.id === 'latest') S.analysis = r.data;
     else if (r.collection === 'settings' && r.id === 'app') S.app = r.data;
+    else if (r.collection === 'training') (S.training ||= {})[r.id] = r.data;
   }
   return S;
 }
@@ -188,6 +189,26 @@ function brief(S: any, TODAY: string) {
   };
 }
 
+// Once an hour from 11 h to 22 h: a quick sync, then if the watch sent a strength or track session today and
+// nothing is noted yet in Training, one notification per session to fill it in.
+async function sessionWatch(st: any, TODAY: string, hm: string, token: string | null) {
+  const h = +hm.slice(0, 2), m = +hm.slice(3, 5);
+  if (h < 11 || h > 22 || m >= 5 || !st.subs?.length || st.watchRun === TODAY + ' ' + h) return null;
+  st.watchRun = TODAY + ' ' + h; await putPrivate('push', st);
+  const syncToken = token || st.syncToken;
+  if (syncToken) {
+    try { await fetch(Deno.env.get('SUPABASE_URL') + '/functions/v1/sync', {method: 'POST', headers: {'x-recup-token': syncToken, Authorization: 'Bearer ' + (st.anonKey || Deno.env.get('SUPABASE_ANON_KEY') || ''), 'Content-Type': 'application/json'}, body: '{}', signal: AbortSignal.timeout(40000)}); } catch (_) { /* the check still runs on what is there */ }
+  }
+  const S = await loadData();
+  const acts = (S.g[TODAY]?.acts || []).filter((a: any) => /strength|track/.test(a.type) && (a.min || 0) >= 10);
+  const logged = Object.values(S.training || {}).some((l: any) => l?.date === TODAY);
+  const seen: string[] = st.seen?.[TODAY] || [], a = acts.find((x: any) => !seen.includes(x.start));
+  if (!a || logged) return {watched: hm, acts: acts.length, logged};
+  st.seen = {[TODAY]: [...seen, a.start]}; await putPrivate('push', st);
+  const results = await sendAll(st, {title: `Séance reçue · ${/strength/.test(a.type) ? 'Musculation' : 'Piste'} ${Math.round(a.min)} min`, body: 'Ta séance est validée. Note ce que tu as fait : tout est déjà rempli comme prévu.', tag: 'tnr-session', url: './'});
+  return {sessionNotified: a.start, results};
+}
+
 Deno.serve(async req => {
   if (req.method === 'OPTIONS') return new Response('ok', {headers: CORS});
   const token = req.headers.get('x-recup-token'), cronKey = req.headers.get('x-notify-key');
@@ -235,7 +256,7 @@ Deno.serve(async req => {
     const {data: app} = await db.from('docs').select('data').eq('collection', 'settings').eq('id', 'app').maybeSingle();
     const times: string[] = Array.isArray(app?.data?.notifTimes) ? app.data.notifTimes : ['09:00', '20:00'];
     due = times.find(t => /^\d\d:\d\d$/.test(t) && mins(hm) - mins(t) >= 0 && mins(hm) - mins(t) < 10 && (st.last || {})[t] !== TODAY) || null;
-    if (!due) return json({skipped: 'pas d\'envoi prévu à ' + hm});
+    if (!due) return json((await sessionWatch(st, TODAY, hm, token)) || {skipped: 'pas d\'envoi prévu à ' + hm});
   }
   const slot = (due ? +due.slice(0, 2) : hour) < 14 ? 'morning' : 'evening';
   if (!st.subs?.length) return json({skipped: 'aucun téléphone abonné'});
