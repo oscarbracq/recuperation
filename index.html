@@ -308,6 +308,11 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .zoom .chip{background:var(--card);font-size:.8125rem;padding:7px 11px}
 .watch{display:flex;align-items:center;gap:8px;font-size:.8125rem;color:var(--good);margin:0 16px 8px}
 .watch svg{width:16px;height:16px;flex:none}
+.useg{display:inline-flex;margin:8px 0 2px}
+.useg button{flex:none;padding:5px 12px}
+.rmback{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.rmback button{padding:8px 13px;border-radius:99px;border:1.5px dashed var(--line);color:var(--fg2);font-size:.8125rem;font-weight:500;text-align:left}
+.rmback button b{color:var(--fg);font-weight:600}
 .chip{padding:8px 13px;border-radius:99px;background:var(--card2);font-size:.875rem;font-weight:500;transition:background .15s,color .15s,transform .1s}
 .chip:active{transform:scale(.95)}
 .chip[aria-pressed="true"]{background:var(--accent);color:#fff}
@@ -365,21 +370,15 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 .trfmark{display:block;margin:0 auto 10px;padding:4px 10px;font:700 .75rem/1 var(--display);letter-spacing:.32em;text-indent:.32em;color:var(--fg2)}
 /* Inside a part: its name in small letters at the top. Scrolling down, the other letters fade and the initial
    grows into the same square as on the home page, centred; swipe that square down to go back home. */
-.mm-space{height:20px;margin:0 auto 10px}
-.modmark{--p:0;position:fixed;left:0;right:0;top:0;z-index:38;pointer-events:none}
+.mm-space{height:34px;margin:0 auto 12px}
+/* The part's name, big and white at the top of the page. Pulled down from the top: the other letters fade and the
+   initial comes to the centre; pulled down again: it follows the thumb, the page fades, and it flies back home. */
+.modmark{position:absolute;left:0;right:0;top:0;z-index:38;pointer-events:none}
 :root[data-mod="home"] .modmark{display:none}
-.mm-line{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 24px);height:20px;display:flex;justify-content:center;align-items:center;font:700 .75rem/1 var(--display);letter-spacing:.32em;text-indent:.32em;text-transform:uppercase;color:var(--fg2);pointer-events:auto;cursor:pointer}
-.mm-line .g{opacity:calc(1 - var(--p) * 6)}
-.mm-line .r{opacity:calc(1 - var(--p) * 1.6)}
-.modmark.big .mm-line{pointer-events:none}
-.mm-sq{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + 8px);width:80px;height:92px;margin-left:-40px}
-.mm-k{position:absolute;inset:0;display:grid;place-items:center;font:800 4.5rem/1 var(--display);letter-spacing:-.02em;color:color-mix(in srgb,var(--fg) calc(var(--p) * 100%),var(--fg2));opacity:min(1,calc(var(--p) * 6));transform-origin:50% 50%;will-change:transform;touch-action:none}
-.mm-k::before{content:"";position:absolute;inset:-2px -4px;border-radius:26px;z-index:-1;border:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--bg));box-shadow:0 0 0 5px color-mix(in srgb,var(--accent) 20%,transparent),0 12px 44px color-mix(in srgb,var(--accent) 40%,transparent);opacity:var(--p)}
-.modmark.big .mm-k{pointer-events:auto;cursor:grab}
-.mm-k.back{transition:transform .45s cubic-bezier(.32,.72,0,1)}
-.mm-k.leave{transition:transform .35s cubic-bezier(.4,0,1,1),opacity .3s;opacity:0}
-.mm-hint{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 108px);text-align:center;font-size:.6875rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--fg2);opacity:0;transition:opacity .25s}
-.modmark.drag .mm-hint{opacity:1}
+.mm-title{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 24px);height:34px;display:flex;justify-content:center;align-items:center;font:700 1.75rem/1 var(--display);letter-spacing:.04em;text-transform:uppercase;color:var(--fg);white-space:nowrap}
+.mm-title span{display:inline-block;will-change:transform,opacity}
+.mm-title.anim span{transition:transform .45s cubic-bezier(.32,.72,0,1),opacity .35s}
+.mod.mm-fade{transition:opacity .3s}
 /* Home: a black page and the three letters within reach of the thumb. Press one: it lights up in its colour and
    that colour rises from under it into the black. Swipe it up to open that part of the app. */
 :root[data-mod="home"],:root[data-mod="home"]:not([data-theme="light"]),:root[data-theme="dark"][data-mod="home"]{--top:#000}
@@ -534,7 +533,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
 <div id="mod-home" class="mod"><section id="home-view"></section></div>
-<div class="modmark" id="modmark"><div class="mm-line" data-home role="button" aria-label="Retour à l'accueil"><span class="g"></span><span class="r"></span></div><div class="mm-sq"><div class="mm-k" aria-label="Glisse vers le bas pour revenir à l'accueil"></div></div><div class="mm-hint">↓ Glisse pour l'accueil</div></div>
+<div class="modmark" id="modmark" aria-hidden="true"><div class="mm-title"><span class="i"></span><span class="r"></span></div></div>
 <button class="backhome" data-home aria-label="Retour à l'accueil"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
 <div id="mod-R" class="mod" hidden>
 <div class="wrap">
@@ -568,7 +567,6 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
   <button role="tab" data-mtab="goals" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/></svg>Objectifs</button>
 </nav></div>
 </div>
-<div class="rest" id="rest" hidden><b>0:00</b><button data-rest-add>+30 s</button><button data-rest-stop>Passer</button></div>
 
 <div class="scrim" id="scrim"></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
@@ -592,7 +590,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=35"></script>
+<script src="supabase-db.js?v=36"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
@@ -1658,54 +1656,90 @@ const ptrEl = () => $('#v-' + S.tab + ' [data-ptr]');
 document.addEventListener('click', e => { if (e.target.closest('[data-ptr]')) refreshAll(); });
 
 // The back arrow hides while reading down the page and returns as soon as the page goes back up.
-const MM_NAME = {T: 'Training', N: 'Nutrition', R: 'Recovery'}, MM = {p: 0, dx: 0, dy: 0, s0: 1 / 6, drag: null};
-function mmMeasure() {
-  const g = $('#modmark .g'), q = $('#modmark .mm-sq'); if (!g || !q || S.mod === 'home') return;
-  const a = g.getBoundingClientRect(), b = q.getBoundingClientRect(), ls = parseFloat(getComputedStyle(g).letterSpacing) || 0;
-  if (!a.width) return;
-  MM.dx = a.left + (a.width - ls) / 2 - (b.left + b.width / 2); MM.dy = a.top + a.height / 2 - (b.top + b.height / 2);
-  MM.s0 = parseFloat(getComputedStyle(g).fontSize) / parseFloat(getComputedStyle($('#modmark .mm-k')).fontSize); mmPaint();
-}
+const MM_NAME = {T: 'Training', N: 'Nutrition', R: 'Recovery'}, MM = {focus: false, dx: 0, d: null};
+const mmI = () => $('#modmark .i'), mmR = () => $('#modmark .r');
 function mmSet(mod) {
   const n = MM_NAME[mod]; if (!n) return;
-  $('#modmark .g').textContent = n[0]; $('#modmark .r').textContent = n.slice(1); $('#modmark .mm-k').textContent = n[0];
-  $('#modmark .mm-k').classList.remove('leave', 'back'); $('#modmark .mm-k').style.opacity = '';
-  MM.p = 0; requestAnimationFrame(mmMeasure);
+  mmI().textContent = n[0]; mmR().textContent = n.slice(1);
+  MM.focus = false; mmPaint(0, 0);
 }
-function mmPaint(extraY = 0) {
-  const m = $('#modmark'), k = $('#modmark .mm-k'); if (!m || !k) return;
-  const p = MM.p, e = 1 - Math.pow(1 - p, 3), sc = MM.s0 + (1 - MM.s0) * e;
-  m.style.setProperty('--p', e.toFixed(3)); m.classList.toggle('big', p > .6);
-  k.style.transform = `translate(${(1 - e) * MM.dx}px,${(1 - e) * MM.dy + extraY}px) scale(${sc})`;
+// How far the initial travels to reach the centre of the screen.
+function mmMeasure() {
+  const a = mmI().getBoundingClientRect(); if (!a.width) return 0;
+  const cur = new DOMMatrix(getComputedStyle(mmI()).transform).m41;
+  return innerWidth / 2 - (a.left - cur + a.width / 2);
 }
-let mmRaf = 0;
-addEventListener('scroll', () => { if (mmRaf || S.mod === 'home') return; mmRaf = requestAnimationFrame(() => { mmRaf = 0; if (MM.drag) return; MM.p = Math.max(0, Math.min(1, scrollY / 130)); mmPaint(); }); }, {passive: true});
-addEventListener('resize', () => requestAnimationFrame(mmMeasure));
-document.fonts?.ready.then(() => mmMeasure());
-document.addEventListener('pointerdown', e => {
-  const k = e.target.closest('.mm-k'); if (!k || !$('#modmark').classList.contains('big')) return;
-  MM.drag = {id: e.pointerId, y0: e.clientY, dy: 0, ly: e.clientY, lt: performance.now(), v: 0};
-  k.classList.remove('back'); k.setPointerCapture?.(e.pointerId); $('#modmark').classList.add('drag');
-  if (PREFS.haptic) navigator.vibrate?.(8);
-});
-document.addEventListener('pointermove', e => {
-  const d = MM.drag; if (!d || e.pointerId !== d.id) return;
-  const now = performance.now(); d.v = (e.clientY - d.ly) / Math.max(1, now - d.lt); d.ly = e.clientY; d.lt = now;
-  d.dy = Math.max(0, e.clientY - d.y0); d.dy = d.dy < 140 ? d.dy : 140 + (d.dy - 140) * .4; mmPaint(d.dy);
-});
-const mmEnd = e => {
-  const d = MM.drag; if (!d || e.pointerId !== d.id) return;
-  MM.drag = null; $('#modmark').classList.remove('drag');
-  const k = $('#modmark .mm-k');
-  if (d.dy > 90 || (d.dy > 30 && d.v > .5)) {
-    if (PREFS.haptic) navigator.vibrate?.(14);
-    k.classList.add('leave'); mmPaint(innerHeight * .6);
-    setTimeout(() => { go('home'); k.classList.remove('leave'); }, 320);
+// f: 0 = the whole name, 1 = the initial alone in the centre; y: how far it has been pulled down after that.
+function mmPaint(f, y, anim) {
+  const t = $('#modmark .mm-title'); if (!t) return;
+  t.classList.toggle('anim', !!anim);
+  const sc = 1 + .35 * f + Math.min(y, 300) / 300 * .6;
+  mmI().style.transform = `translate(${MM.dx * f}px,${y}px) scale(${sc})`;
+  mmR().style.opacity = String(1 - Math.min(1, f * 1.4));
+  mmR().style.transform = `translateX(${f * 14}px)`;
+  const m = $('#mod-' + S.mod), o = String(Math.max(0, 1 - y / 320));
+  if (m) m.style.opacity = y ? o : '';
+}
+const mmOk = e => !['home'].includes(S.mod) && MM_NAME[S.mod] && !S.sheet && !P.stack.length && !$('.drawer.on') && !HP.busy
+  && !e.target.closest('.chartbox, input, textarea, select, .tabbar, .sheet, .pane');
+document.addEventListener('touchstart', e => {
+  if (e.touches.length !== 1 || !mmOk(e) || scrollY > 2) { MM.d = null; return; }
+  const t = e.touches[0]; MM.d = {x0: t.clientX, y0: t.clientY, on: false, dy: 0, v: 0, ly: t.clientY, lt: performance.now()};
+}, {passive: true});
+document.addEventListener('touchmove', e => {
+  const d = MM.d; if (!d) return;
+  const t = e.touches[0], dx = t.clientX - d.x0, dy = t.clientY - d.y0;
+  if (!d.on) {
+    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+    if (dy <= 0 || Math.abs(dx) > Math.abs(dy)) {
+      // Pushing the page back up while the initial is centred brings the whole name back.
+      if (MM.focus && dy < 0 && Math.abs(dy) > Math.abs(dx)) { MM.focus = false; mmPaint(0, 0, true); }
+      MM.d = null; return;
+    }
+    d.on = true; d.y0 = t.clientY; if (!MM.focus) MM.dx = mmMeasure();
+  }
+  e.preventDefault();
+  const now = performance.now(); d.v = (t.clientY - d.ly) / Math.max(1, now - d.lt); d.ly = t.clientY; d.lt = now;
+  const r = Math.max(0, t.clientY - d.y0); d.dy = r;
+  if (!MM.focus) mmPaint(Math.min(1, r / 110), Math.max(0, r - 110) * .25);
+  else mmPaint(1, r < 240 ? r : 240 + (r - 240) * .5);
+}, {passive: false});
+const mmEnd = () => {
+  const d = MM.d; MM.d = null; if (!d?.on) return;
+  if (!MM.focus) {
+    const go1 = d.dy > 60 || (d.dy > 25 && d.v > .4);
+    MM.focus = go1; mmPaint(go1 ? 1 : 0, 0, true);
+    if (go1 && PREFS.haptic) navigator.vibrate?.(8);
     return;
   }
-  k.classList.add('back'); mmPaint(); setTimeout(() => k.classList.remove('back'), 460);
+  if (d.dy > 120 || (d.dy > 40 && d.v > .6)) { mmHome(); return; }
+  mmPaint(1, 0, true);
 };
-document.addEventListener('pointerup', mmEnd); document.addEventListener('pointercancel', mmEnd);
+addEventListener('scroll', () => { if (MM.focus && !MM.d && scrollY > 20) { MM.focus = false; mmPaint(0, 0, true); } }, {passive: true});
+document.addEventListener('touchend', mmEnd); document.addEventListener('touchcancel', mmEnd);
+// Back home: the page is gone, the letter flies to its own place among T N R, and the home page fades in.
+function mmHome() {
+  const m = S.mod, src = mmI(), a = src.getBoundingClientRect(), fs = parseFloat(getComputedStyle(src).fontSize);
+  const sc0 = new DOMMatrix(getComputedStyle(src).transform).a;
+  if (PREFS.haptic) navigator.vibrate?.(14);
+  const fly = document.createElement('div');
+  fly.textContent = m; fly.setAttribute('aria-hidden', 'true');
+  fly.style.cssText = 'position:fixed;left:0;top:0;z-index:70;pointer-events:none;font:800 4.5rem/1 var(--display);letter-spacing:-.02em;color:#fff;transform-origin:50% 50%';
+  document.body.appendChild(fly);
+  const fw = fly.offsetWidth, fh = fly.offsetHeight, k0 = fs * sc0 / parseFloat(getComputedStyle(fly).fontSize);
+  const from = `translate(${a.left + a.width / 2 - fw / 2}px,${a.top + a.height / 2 - fh / 2}px) scale(${k0})`;
+  fly.style.transform = from;
+  const mel = $('#mod-' + m);
+  go('home');
+  if (mel) mel.style.opacity = '';
+  const home = $('#mod-home'), tl = $(`.hm-k[data-k="${m}"] .l`);
+  if (!tl) { fly.remove(); return; }
+  tl.style.opacity = '0';
+  const b = tl.getBoundingClientRect();
+  const to = `translate(${b.left + b.width / 2 - fw / 2}px,${b.top + b.height / 2 - fh / 2}px) scale(1)`;
+  home.animate([{opacity: 0}, {opacity: 1}], {duration: 450, easing: 'ease-out'});
+  fly.animate([{transform: from}, {transform: to}], {duration: 520, easing: 'cubic-bezier(.32,.72,0,1)'}).onfinish = () => { tl.style.opacity = ''; fly.remove(); };
+}
 let lastScrollY = 0;
 addEventListener('scroll', () => { const y = scrollY, a = $('.backhome'); if (a) a.classList.toggle('away', y > 60 && y > lastScrollY); lastScrollY = y; }, {passive: true});
 
@@ -1894,19 +1928,20 @@ const planFor = k => planById(S.tset.week?.[dow(k)]) || tdvPlanFor(k);
 const logs = () => Object.values(S.logs).filter(l => !l.deleted).sort((a, b) => (b.date + (b.start || '')).localeCompare(a.date + (a.start || '')));
 const logsOn = k => logs().filter(l => l.date === k);
 function estMin(p) { return Math.round(p.items.reduce((s, it) => s + (it.min || 0) + (it.sets || it.reps || 0) * (((it.rest || 60) + (it.dist ? it.dist / 6 : 40)) / 60), 0) / 5) * 5; }
+const unitOf = it => it.u || (exOf(it.ex).u === 's' ? 's' : 'reps');
 function itemText(it) {
   const e = exOf(it.ex);
   if (it.min) return it.min + ' min';
   if (e.t === 'track') return `${it.reps} × ${it.dist} m${it.pct ? ' · ' + it.pct + ' %' : ''}`;
-  return `${it.sets} × ${it.reps}${e.u === 's' ? ' s' : ''}${it.pct ? ' · ' + it.pct + ' %' : ''}${it.kg ? ' · ' + fx(it.kg, 1) + ' kg' : ''}${it.rpe ? ' · RPE ' + it.rpe : ''}${it.note ? ' · ' + it.note : ''}`;
+  return `${it.sets} × ${it.reps}${unitOf(it) === 's' ? ' s' : ''}${it.pct ? ' · ' + it.pct + ' %' : ''}${it.kg ? ' · ' + fx(it.kg, 1) + ' kg' : ''}${it.rpe ? ' · RPE ' + it.rpe : ''}${it.note ? ' · ' + it.note : ''}`;
 }
 
 /* ---------- history, records and suggested loads ---------- */
 function exHistory(id) { const out = []; for (const l of logs()) for (const it of l.items) if (it.ex === id) out.push({date: l.date, it}); return out; }
-function bestE1rm(id) { let b = 0; for (const {it} of exHistory(id)) for (const s of it.sets || []) b = Math.max(b, e1rm(+s.kg, +s.reps)); return b; }
+function bestE1rm(id) { let b = 0; for (const {it} of exHistory(id)) if (unitOf(it) !== 's') for (const s of it.sets || []) b = Math.max(b, e1rm(+s.kg, +s.reps)); return b; }
 function lastText(id) {
   const h = exHistory(id)[0]; if (!h) return '';
-  if (h.it.sets) { const s = h.it.sets; return `Dernière fois (${short(h.date)}) : ${s.map(x => (x.kg ? fx(x.kg, x.kg % 1 ? 1 : 0) + ' × ' : '') + x.reps).join(', ')}`; }
+  if (h.it.sets) { const s = h.it.sets; return `Dernière fois (${short(h.date)}) : ${s.map(x => (x.kg ? fx(x.kg, x.kg % 1 ? 1 : 0) + ' × ' : '') + x.reps + (unitOf(h.it) === 's' ? ' s' : '')).join(', ')}`; }
   const t = h.it.reps.filter(r => r.t); return t.length ? `Dernière fois (${short(h.date)}) : ${t.map(r => fx(r.t, 2) + ' s').join(', ')}` : '';
 }
 // Progression rule: +2.5 % when every set was completed last time, otherwise the same load until it is.
@@ -2183,6 +2218,11 @@ function tToday() {
   const mon = monday(TODAY);
   const week = [0, 1, 2, 3, 4, 5, 6].map(i => { const k = addDays(mon, i), d = logsOn(k).length, pl = planFor(k); return `<span class="${k === TODAY ? 'today' : ''}">${DOW[i]}<i class="${d ? 'done' : pl ? 'plan' : ''}">${d ? '✓' : +k.slice(8)}</i></span>`; }).join('');
   const wk = weekTotals(mon);
+  const wA = !done.length && !S.live ? watchSession(TODAY, p) : null;
+  const ask = wA ? `<article class="card"><span class="chiptag">Reçue de ta montre</span><div class="bigname">${esc(wA.name || (ACT[wA.type] || [wA.type])[0])}</div>
+      <p class="small muted">${esc(wA.start || '')} · ${fx(wA.min)} min${wA.avgHr ? ' · FC moyenne ' + wA.avgHr : ''}</p>
+      <p class="small" style="margin-top:8px">${p ? `Séance validée. Dis-moi ce que tu as fait par rapport à « ${esc(p.name)} » : tout est déjà rempli comme prévu, corrige seulement ce qui a changé.` : 'Séance validée. Note ce que tu as fait pour la garder dans ton historique.'}</p>
+      <div style="margin-top:14px"><button class="btn" data-tgfill="${esc(wA.start || '')}">Remplir ma séance</button></div></article>` : '';
   const live = S.live ? `<button class="banner" data-tlive style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Séance en cours</b><br><span class="small muted">${esc(S.live.name)}</span></span><span class="chiptag">Reprendre</span></button>` : '';
   const main = done.length ? `<article class="card"><span class="chiptag">${TICK.replace('<svg', '<svg width="12" height="12"')} Fait aujourd'hui</span>${done.map(l => `<div class="bigname">${esc(l.name)}</div><p class="small muted">${l.min} min · RPE ${l.rpe}/10${l.tonnage ? ' · ' + fx(l.tonnage) + ' kg soulevés' : ''}${l.sprintM ? ' · ' + fx(l.sprintM) + ' m de sprint' : ''}</p>`).join('')}<p class="small" style="margin-top:10px">Bravo. La séance est déjà comptée dans ton effort du jour sur ${modName('R')}.</p></article>`
     : p ? `<article class="card"><span class="chiptag">${p.kind === 'gym' ? 'Musculation' : 'Piste'} · ${estMin(p)} min</span><div class="bigname">${esc(p.name)}</div><p class="small muted">${esc(p.desc || '')}</p>
@@ -2191,7 +2231,7 @@ function tToday() {
     : `<article class="card empty"><b>Pas de séance prévue aujourd'hui</b>Profite de la récupération, ou choisis une séance.<div class="stack" style="margin-top:14px"><button class="btn ghost" data-ttab="sessions">Choisir une séance</button><button class="btn ghost" data-tplan>Planifier ma semaine</button></div></article>`;
   return `
     <header class="top"><div class="sub">${fmtDay(TODAY)} · semaine ${seasonWeek(TODAY)}</div><h1>${modName('T')}</h1>${(() => { const n = planFor(addDays(TODAY, 1)); return n ? `<p class="small muted" style="margin:6px 0 0">Demain : ${esc(n.name)}</p>` : ''; })()}</header>
-    <div class="stack">${live}
+    <div class="stack">${live}${ask}
       <div class="card" style="display:flex;gap:12px;align-items:center"><span class="pill ${z}"><i></i>${rec ? rec.score + ' %' : modName('R')}</span><span class="small">${rec ? esc(tgt.text) : 'Ta récupération du matin s\'affichera ici pour ajuster la séance.'}</span></div>
       ${main}
       <div class="card"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Cette semaine</span><button class="small" style="color:var(--accent);font-weight:600" data-tplan>Planning</button></div><div class="week">${week}</div>
@@ -2310,7 +2350,7 @@ function editBody() {
     ${ED.items.map((it, i) => { const e = exOf(it.ex); return `<div class="exbox" style="margin:0"><h3>${esc(e.n)}<small>${esc(e.cat)}</small></h3>
       ${it.ex === 'warmup' ? `<div class="edrow" style="grid-template-columns:1fr"><label>Minutes${num(i, 'min', it.min, '15')}</label></div>`
         : trk || e.t === 'track' ? `<div class="edrow"><label>Répét.${num(i, 'reps', it.reps, '4')}</label><label>Distance m${num(i, 'dist', it.dist, '30')}</label><label>Intensité %${num(i, 'pct', it.pct, '95')}</label><label>Récup s${num(i, 'rest', it.rest, '180')}</label></div>`
-        : `<div class="edrow"><label>Séries${num(i, 'sets', it.sets, '4')}</label><label>${e.u === 's' ? 'Secondes' : 'Répét.'}${num(i, 'reps', it.reps, '5')}</label><label>% du max${num(i, 'pct', it.pct, '–')}</label><label>Récup s${num(i, 'rest', it.rest, '120')}</label></div>`}
+        : `<div class="seg useg" role="group" aria-label="Compter en">${[['reps', 'Répétitions'], ['s', 'Secondes']].map(([v, l]) => `<button type="button" data-edu="${i}.${v}" aria-pressed="${unitOf(it) === v}">${l}</button>`).join('')}</div><div class="edrow"><label>Séries${num(i, 'sets', it.sets, '4')}</label><label>${unitOf(it) === 's' ? 'Secondes' : 'Répét.'}${num(i, 'reps', it.reps, '5')}</label><label>% du max${num(i, 'pct', it.pct, '–')}</label><label>Récup s${num(i, 'rest', it.rest, '120')}</label></div>`}
       <div class="tools"><button type="button" data-edmv="${i}.-1">Monter</button><button type="button" data-edmv="${i}.1">Descendre</button><button type="button" class="rm" data-edrm="${i}">Retirer</button></div></div>`; }).join('')}
     <button class="btn ghost" data-edadd>+ Ajouter un exercice</button>
     <p class="small muted">Le % du max se calcule sur ton max estimé à partir de tes séances. Laisse vide pour les exercices au poids du corps.</p></div>`;
@@ -2359,15 +2399,32 @@ function liveItem(it) {
   const e = exOf(it.ex);
   if (e.t === 'track') return {ex: it.ex, tg: it, reps: Array.from({length: it.min ? 1 : it.reps || 1}, () => ({dist: it.dist || '', t: '', done: false}))};
   const sg = suggest(it);
-  return {ex: it.ex, tg: it, sets: Array.from({length: it.sets || 1}, () => ({kg: sg ? sg.kg : '', reps: it.reps || '', done: false}))};
+  return {ex: it.ex, tg: it, u: unitOf(it), sets: Array.from({length: it.sets || 1}, () => ({kg: sg ? sg.kg : '', reps: it.reps || '', done: false}))};
+}
+// A training session the watch sent to Garmin today (strength for a gym plan, running for a track plan).
+function watchSession(k, p) {
+  const want = p?.kind === 'track' ? ['track_running', 'running'] : p?.kind === 'gym' ? ['strength_training'] : ['strength_training', 'track_running'];
+  return (G(k, 'acts') || []).filter(a => want.includes(a.type) && (a.min || 0) >= 10).sort((a, b) => (b.start || '').localeCompare(a.start || ''))[0] || null;
+}
+// After the watch: the planned session, already filled in as planned and ticked, to correct.
+function fillFromWatch(start) {
+  const p = planFor(TODAY), a = watchSession(TODAY, p); if (!a) return;
+  const items = (p ? p.items : []).map(liveItem);
+  for (const it of items) for (const x of it.sets || it.reps) x.done = true;
+  S.live = {id: uid(), plan: p?.id || null, name: p?.name || a.name || (ACT[a.type] || ['Séance'])[0], kind: p?.kind || (a.type === 'strength_training' ? 'gym' : 'track'),
+    date: TODAY, start: new Date().toISOString(), items, fill: !!p, garmin: {min: a.min, start: a.start, avgHr: a.avgHr || null}};
+  saveLive(); openLive();
 }
 function openLive() { if (!S.live) return; openPane({title: S.live.name, live: true, left: {label: 'Terminer', fn: finishPane}, render: liveBody}); }
 function liveBody() {
   const L = S.live; if (!L) return '<div class="empty">Séance terminée.</div>';
-  const min = Math.max(0, Math.floor((Date.now() - new Date(L.start)) / 60000));
+  const gA = L.garmin;
   const doneSets = L.items.reduce((s, it) => s + (it.sets || it.reps).filter(x => x.done).length, 0), all = L.items.reduce((s, it) => s + (it.sets || it.reps).length, 0);
-  return `<div class="livehead"><span class="chiptag">${L.kind === 'gym' ? 'Musculation' : 'Piste'} · ${doneSets}/${all}</span><b>${min} min</b></div>
+  const back = (L.removed || []).map((r, n) => `<button data-tlback="${n}" aria-label="Remettre ${esc(exOf(r.item.ex).n)} dans la séance"><b>${esc(exOf(r.item.ex).n)}</b> · retiré · toucher pour remettre</button>`).join('');
+  return `<div class="livehead"><span class="chiptag">${L.kind === 'gym' ? 'Musculation' : 'Piste'} · ${doneSets}/${all}</span>${gA ? `<b>${fx(gA.min)} min</b>` : ''}</div>
+    ${L.fill ? `<p class="small muted" style="margin:10px 4px 0">Tout est rempli comme prévu. Corrige ce qui a changé et décoche ce que tu n'as pas fait.</p>` : ''}
     ${L.items.map((it, i) => liveBox(it, i)).join('')}
+    ${back ? `<div class="rmback">${back}</div>` : ''}
     <div class="stack" style="margin-top:14px"><button class="btn ghost" data-tladd>+ Ajouter un exercice</button><button class="btn" data-tfinish>Terminer la séance</button>
     <button class="small muted" data-tcancel style="padding:10px">Abandonner sans enregistrer</button></div>`;
 }
@@ -2384,34 +2441,25 @@ function liveBox(it, i) {
     }).join('');
   } else {
     const prev = exHistory(it.ex)[0]?.it.sets || [];
-    rows = `<div class="setrow hd"><span>#</span><span>Avant</span><span>${e.u === 'kg' ? 'kg' : e.u === 's' ? '' : '+ kg'}</span><span>${e.u === 's' ? 'Secondes' : 'Répét.'}</span><span></span></div>` + it.sets.map((s, j) => `<div class="setrow ${s.done ? 'done' : ''}"><span class="n">${j + 1}</span><span class="prev">${prev[j] ? (prev[j].kg ? fx(prev[j].kg, prev[j].kg % 1 ? 1 : 0) + '×' : '') + prev[j].reps : '–'}</span>${e.u === 's' ? '<span></span>' : `<input class="mini-in" inputmode="decimal" data-lv="${i}.${j}.kg" value="${s.kg}" placeholder="${e.u === 'kg' ? 'kg' : '0'}" aria-label="Charge">`}<input class="mini-in" inputmode="numeric" data-lv="${i}.${j}.reps" value="${s.reps}" placeholder="${tg.reps || ''}" aria-label="Répétitions">${ok(i + '.' + j, s.done)}</div>`).join('');
+    rows = `<div class="seg useg" role="group" aria-label="Compter en">${[['reps', 'Répétitions'], ['s', 'Secondes']].map(([v, l]) => `<button type="button" data-tlu="${i}.${v}" aria-pressed="${unitOf(it) === v}">${l}</button>`).join('')}</div><div class="setrow hd"><span>#</span><span>Avant</span><span>${e.u === 'kg' ? 'kg' : e.u === 's' ? '' : '+ kg'}</span><span>${unitOf(it) === 's' ? 'Secondes' : 'Répét.'}</span><span></span></div>` + it.sets.map((s, j) => `<div class="setrow ${s.done ? 'done' : ''}"><span class="n">${j + 1}</span><span class="prev">${prev[j] ? (prev[j].kg ? fx(prev[j].kg, prev[j].kg % 1 ? 1 : 0) + '×' : '') + prev[j].reps : '–'}</span>${e.u === 's' ? '<span></span>' : `<input class="mini-in" inputmode="decimal" data-lv="${i}.${j}.kg" value="${s.kg}" placeholder="${e.u === 'kg' ? 'kg' : '0'}" aria-label="Charge">`}<input class="mini-in" inputmode="numeric" data-lv="${i}.${j}.reps" value="${s.reps}" placeholder="${tg.reps || ''}" aria-label="${unitOf(it) === 's' ? 'Secondes' : 'Répétitions'}">${ok(i + '.' + j, s.done)}</div>`).join('');
   }
-  return `<div class="exbox"><h3>${esc(e.n)}<small>${itemText(tg.ex ? tg : {ex: it.ex, sets: it.sets?.length, reps: '', min: 0})}${tg.rest ? ' · ' + fmtRest(tg.rest) : ''}</small></h3>
+  return `<div class="exbox"><h3>${esc(e.n)}<small>${itemText(tg.ex ? {...tg, u: it.u} : {ex: it.ex, sets: it.sets?.length, reps: '', min: 0})}</small></h3>
     ${last ? `<div class="hint">${esc(last)}</div>` : ''}${sg ? `<div class="sug">Proposé : ${fx(sg.kg, sg.kg % 1 ? 1 : 0)} kg · ${esc(sg.why)}</div>` : ''}
     <div class="sets">${rows}</div>
     <div class="tools"><button data-tlset="${i}">+ Série</button><button data-tex="${it.ex}">Consignes</button><button class="rm" data-tlrm="${i}">Retirer</button></div></div>`;
 }
 let RT = {t: null, end: 0};
-function startRest(sec) {
-  if (!sec) return;
-  RT.end = Date.now() + sec * 1000; clearInterval(RT.t);
-  $('#rest').hidden = false;
-  const tick = () => {
-    const s = Math.round((RT.end - Date.now()) / 1000);
-    if (s <= 0) { stopRest(); if (PREFS.haptic) navigator.vibrate?.([180, 80, 180]); toast('Repos terminé · série suivante'); return; }
-    $('#rest b').textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
-  };
-  tick(); RT.t = setInterval(tick, 250);
-}
-function stopRest() { clearInterval(RT.t); $('#rest').hidden = true; }
+// No rest timer: the watch times the rests.
+function stopRest() { clearInterval(RT.t); }
 function finishPane() {
   const L = S.live; if (!L) return;
-  const min = Math.max(1, Math.round((Date.now() - new Date(L.start)) / 60000));
+  if (!L.garmin) { const a = watchSession(L.date, {kind: L.kind}); if (a) L.garmin = {min: a.min, start: a.start, avgHr: a.avgHr || null}; }
+  const min = L.garmin?.min ? Math.round(L.garmin.min) : Math.max(1, Math.round((Date.now() - new Date(L.start)) / 60000));
   let rpe = L.rpe || 7;
   openPane({title: 'Fin de séance', left: {label: 'Enregistrer', fn: () => saveLive2()}, render: () => `
     <div class="dhead"><div class="eyebrow">${esc(L.name)}</div><div class="big num">${min}<small>min</small></div></div>
     <div class="list"><div class="row col"><label for="fin-rpe">Difficulté ressentie (RPE)<span class="hint">1 = très facile · 10 = effort maximal</span></label><div class="rangeline"><input type="range" id="fin-rpe" min="1" max="10" value="${rpe}" data-finrpe><output>${rpe}</output></div></div>
-    <div class="row"><label for="fin-min">Durée<span class="hint">modifiable</span></label><input type="number" inputmode="numeric" id="fin-min" value="${min}" style="width:90px;text-align:right" class="mini-in"></div></div>
+    <div class="row"><label for="fin-min">Durée<span class="hint">${L.garmin ? 'enregistrée par ta montre' : 'modifiable'}</span></label><input type="number" inputmode="numeric" id="fin-min" value="${min}" style="width:90px;text-align:right" class="mini-in"></div></div>
     <div class="sec-label">Note</div><textarea id="fin-note" rows="3" placeholder="Sensations, douleurs, consignes du coach…">${esc(L.note || '')}</textarea>
     <p class="note" style="text-align:left">En enregistrant, la séance est ajoutée à « Ma journée » dans ${modName('R')} : elle compte dans ton effort du jour et dans ta récupération.</p>
     <div style="margin-top:14px"><button class="btn" data-tsave>Enregistrer la séance</button></div>`});
@@ -2420,9 +2468,9 @@ async function saveLive2() {
   const L = S.live; if (!L) return;
   const rpe = +($('#fin-rpe')?.value || 7), min = +($('#fin-min')?.value || 1), note = ($('#fin-note')?.value || '').trim();
   const items = L.items.map(it => it.reps ? {ex: it.ex, pct: it.tg?.pct || null, reps: it.reps.filter(r => r.done).map(r => ({dist: +r.dist || 0, t: +r.t || null}))}
-    : {ex: it.ex, sets: it.sets.filter(s => s.done).map(s => ({kg: +s.kg || 0, reps: +s.reps || 0}))}).filter(it => (it.reps || it.sets).length);
+    : {ex: it.ex, ...(it.u === 's' ? {u: 's'} : {}), sets: it.sets.filter(s => s.done).map(s => ({kg: +s.kg || 0, reps: +s.reps || 0}))}).filter(it => (it.reps || it.sets).length);
   if (!items.length) { toast('Valide au moins une série avec ✓'); return; }
-  const tonnage = items.reduce((s, it) => s + (it.sets || []).reduce((a, x) => a + x.kg * x.reps, 0), 0);
+  const tonnage = items.reduce((s, it) => s + (it.u === 's' ? 0 : (it.sets || []).reduce((a, x) => a + x.kg * x.reps, 0)), 0);
   const sprintM = items.reduce((s, it) => s + (it.reps && SPRINT_CATS.includes(exOf(it.ex).cat) && (it.pct ?? 100) >= 90 ? it.reps.reduce((a, r) => a + r.dist, 0) : 0), 0);
   const doc = {id: L.id, plan: L.plan, name: L.name, kind: L.kind, date: L.date, start: L.start, min, rpe, note, items, tonnage: Math.round(tonnage), sprintM, updatedAt: new Date().toISOString()};
   S.logs[doc.id] = doc;
@@ -2746,17 +2794,19 @@ document.addEventListener('click', e => {
   if ((b = at('[data-tok]'))) {
     const [i, j] = b.dataset.tok.split('.').map(Number), it = S.live.items[i], x = (it.sets || it.reps)[j];
     x.done = !x.done; saveLive(); paneRender();
-    if (x.done) { if (PREFS.haptic) navigator.vibrate?.(10); const last = j === (it.sets || it.reps).length - 1; startRest(last ? Math.min(it.tg?.rest || 0, 120) : it.tg?.rest || 0); }
+    if (x.done && PREFS.haptic) navigator.vibrate?.(10);
     return;
   }
   if ((b = at('[data-tlset]'))) { const it = S.live.items[+b.dataset.tlset], arr = it.sets || it.reps, l = arr.at(-1) || {}; arr.push({...l, done: false, t: ''}); saveLive(); paneRender(); return; }
-  if ((b = at('[data-tlrm]'))) { S.live.items.splice(+b.dataset.tlrm, 1); saveLive(); paneRender(); return; }
+  if ((b = at('[data-tlrm]'))) { const i = +b.dataset.tlrm, [item] = S.live.items.splice(i, 1); (S.live.removed ||= []).push({at: i, item}); saveLive(); paneRender(); return; }
+  if ((b = at('[data-tlback]'))) { const [r] = S.live.removed.splice(+b.dataset.tlback, 1); S.live.items.splice(Math.min(r.at, S.live.items.length), 0, r.item); saveLive(); paneRender(); return; }
+  if ((b = at('[data-tlu]'))) { const [i, u] = b.dataset.tlu.split('.'); S.live.items[+i].u = u; saveLive(); paneRender(); return; }
+  if ((b = at('[data-edu]'))) { const [i, u] = b.dataset.edu.split('.'); ED.items[+i].u = u; if (u === 's' && !ED.items[+i].reps) ED.items[+i].reps = 30; paneRender(); return; }
+  if ((b = at('[data-tgfill]'))) { fillFromWatch(b.dataset.tgfill); return; }
   if (at('[data-tladd]')) { pickExercise('any', id => { S.live.items.push(liveItem(defaultItem(id))); saveLive(); paneRender(); }); return; }
   if (at('[data-tfinish]')) { finishPane(); return; }
   if (at('[data-tsave]')) { saveLive2(); return; }
   if (at('[data-tcancel]')) { S.live = null; saveLive(); stopRest(); closeAllPanes(); toast('Séance abandonnée'); return; }
-  if (at('[data-rest-add]')) { RT.end += 30000; return; }
-  if (at('[data-rest-stop]')) { stopRest(); return; }
   // Fuel
   if ((b = at('[data-fdayoff]'))) { S.fday = addDays(S.fday, +b.dataset.fdayoff); if (S.fday > TODAY) S.fday = TODAY; renderMod(); return; }
   if ((b = at('[data-fadd]'))) { addFood(b.dataset.fadd); return; }
