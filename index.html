@@ -308,6 +308,17 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .zoom .chip{background:var(--card);font-size:.8125rem;padding:7px 11px}
 .watch{display:flex;align-items:center;gap:8px;font-size:.8125rem;color:var(--good);margin:0 16px 8px}
 .watch svg{width:16px;height:16px;flex:none}
+.caps{display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:6px;margin-top:10px}
+.caps span{background:var(--card2);border-radius:12px;padding:8px 6px;text-align:center;font:700 1rem/1.1 var(--display);font-variant-numeric:tabular-nums}
+.caps small{display:block;font:600 .625rem/1.2 var(--text,inherit);color:var(--fg2);margin-top:3px}
+.caps.over span{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--bad) 45%,transparent)}
+.musrow{display:grid;grid-template-columns:116px 1fr 46px;align-items:center;gap:10px;padding:7px 0;font-size:.8125rem}
+.musrow .bar{height:8px;border-radius:99px;background:var(--card2);overflow:hidden}
+.musrow .bar i{display:block;height:100%;border-radius:99px}
+.musrow b{text-align:right;font-variant-numeric:tabular-nums}
+.rmcalc{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:8px;align-items:end;margin-top:10px}
+.rmcalc label{font-size:.75rem;color:var(--fg2);display:flex;flex-direction:column;gap:4px}
+.rmcalc output{font:700 1.5rem/1 var(--display);text-align:center;padding:8px 0}
 .useg{display:inline-flex;margin:8px 0 2px}
 .useg button{flex:none;padding:5px 12px}
 .rmback{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
@@ -600,7 +611,7 @@ details.slow[open]>summary h2::after{content:" ▴"}
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=39"></script>
+<script src="supabase-db.js?v=40"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
@@ -1953,6 +1964,122 @@ const EXI = Object.fromEntries(EX.map(e => [e.id, e]));
 const exOf = id => EXI[id] || {id, n: id, t: 'gym', cat: '', m: '', c: '', u: 'kg'};
 // Track efforts that count as sprint volume for Reload: at least 90 % and not drills, warm-up or tempo.
 const SPRINT_CATS = ['Accélération', 'Vitesse max', 'Endurance de vitesse', 'Résistance'];
+/* ---------- muscles: what each exercise loads, each muscle's weekly limit, the fatigue left ---------- */
+// [key, name, weekly limit (Oscar's Bloc 2 sheet, editable), recovery time in days (how fast the load fades)]
+const MUS = [['glutes', 'Fessiers', 950, 2.5], ['hams', 'Ischio-jambiers', 650, 2.5], ['quads', 'Quadriceps', 500, 2.5], ['calves', 'Mollets', 450, 1.5],
+  ['adduct', 'Adducteurs', 550, 2], ['psoas', 'Psoas', 320, 2], ['tib', 'Tibial antérieur', 250, 1.5], ['erect', 'Érecteurs du rachis', 250, 2.5],
+  ['abs', 'Grand droit', 280, 1.5], ['obl', 'Obliques', 300, 1.5], ['lats', 'Grand dorsal', 350, 2], ['rhomb', 'Rhomboïdes', 200, 2],
+  ['shoul', 'Épaules', 600, 2], ['pecs', 'Pectoraux', 300, 2], ['tri', 'Triceps', 300, 1.5], ['bi', 'Biceps', 200, 1.5]];
+const MUSI = Object.fromEntries(MUS.map(([k, n, l, t]) => [k, {k, n, l, t}]));
+const musLimit = k => +(S.tset?.limits?.[k]) || MUSI[k].l;
+// Share of the work: 1 = main muscle, .5 to .75 = helper, .25 = stabiliser.
+const MUSC = {
+  squat: {quads: 1, glutes: 1, adduct: .5, erect: .5, hams: .25, abs: .25}, fsquat: {quads: 1, glutes: .5, erect: .5, abs: .5}, bss: {quads: 1, glutes: 1, adduct: .5, hams: .25},
+  stepup: {quads: 1, glutes: 1, hams: .25}, lunge: {quads: 1, glutes: 1, adduct: .5}, hbdl: {glutes: 1, quads: .75, hams: .75, erect: .75, lats: .25},
+  rdl: {hams: 1, glutes: 1, erect: .75}, sldl: {hams: 1, glutes: 1, erect: .5, adduct: .25}, hipthrust: {glutes: 1, hams: .5, quads: .25}, nordic: {hams: 1},
+  legcurl: {hams: 1, calves: .25}, calf: {calves: 1}, tib: {tib: 1}, copen: {adduct: 1, obl: .5, abs: .25}, hipflex: {psoas: 1, quads: .25},
+  pclean: {glutes: 1, hams: .75, quads: .75, erect: .75, shoul: .5, rhomb: .5, calves: .5}, hclean: {glutes: 1, hams: .75, quads: .5, erect: .75, shoul: .5, rhomb: .5, calves: .5},
+  psnatch: {glutes: 1, hams: .75, quads: .5, erect: .75, shoul: .75, rhomb: .5}, jsquat: {quads: 1, glutes: 1, calves: .75}, boxjump: {quads: 1, glutes: 1, calves: .75},
+  hurdlehop: {calves: 1, quads: .5, glutes: .5, tib: .5}, dropjump: {calves: 1, quads: .75, glutes: .75, tib: .5}, bounds: {glutes: 1, hams: .75, quads: .75, calves: .75, psoas: .5},
+  medball: {abs: .75, obl: .75, shoul: .75, glutes: .5, pecs: .25}, bench: {pecs: 1, tri: .75, shoul: .5}, ohp: {shoul: 1, tri: .75, abs: .25}, pullup: {lats: 1, bi: .75, rhomb: .5},
+  row: {lats: 1, rhomb: 1, bi: .5, erect: .25}, dips: {pecs: 1, tri: 1, shoul: .5}, pallof: {obl: 1, abs: .5}, plank: {abs: 1, obl: .5}, legraise: {abs: 1, psoas: .75},
+  legpress: {quads: 1, glutes: .75}, halfsquat: {quads: 1, glutes: 1, erect: .25}, deadlift: {glutes: 1, hams: .75, erect: 1, quads: .5, lats: .25}, legext: {quads: 1},
+  adductor: {adduct: 1}, glutecable: {glutes: 1}, cablecrunch: {abs: 1, obl: .25}, lumbar: {erect: 1, glutes: .5, hams: .25}, pecdeck: {pecs: 1, shoul: .25},
+  mpress: {shoul: 1, tri: .75}, farmer: {obl: .5, abs: .5, shoul: .5, erect: .25}, chair: {abs: 1, psoas: .75}, hrow: {lats: 1, rhomb: 1, bi: .5}, pulldown: {lats: 1, bi: .75},
+  tibkb: {tib: 1}, abwheel: {abs: 1, lats: .25}, curl: {bi: 1}, triext: {tri: 1}, latraise: {shoul: 1}, frontraise: {shoul: 1}, reardelt: {shoul: .75, rhomb: .75},
+  deadbug: {abs: 1, obl: .5}, dbhip: {glutes: 1, abs: .75}, pogo: {calves: 1, tib: .5}
+};
+// Running: Oscar's own coefficients (sheet "Charge en Athlétisme"), shifted by the kind of running:
+// starts load the quads and glutes more, top speed the hamstrings, calves and psoas.
+const RUN_BASE = {hams: 1, glutes: 1, calves: 1, psoas: .9, quads: .8, adduct: .8, tib: .7, shoul: .7, obl: .6, abs: .6, erect: .6, lats: .5, tri: .3, bi: .3, pecs: .3, rhomb: .3};
+const RUN_SHIFT = {'Accélération': {quads: 1, glutes: 1, hams: .85, psoas: .8, calves: .9}, 'Vitesse max': {hams: 1, calves: 1, psoas: 1, quads: .7, glutes: .9},
+  'Résistance': {quads: 1, glutes: 1, hams: .8, calves: .9, erect: .7}, 'Tempo': {quads: .7, hams: .8}};
+// Stress factor and usual intensity per kind of running. 10 m = 1 heavy rep (Oscar's rule, after Bannister and Foster).
+const RUN_FS = {'Accélération': [2.5, .95], 'Vitesse max': [3, .97], 'Endurance de vitesse': [2, .92], 'Résistance': [2.5, .9], 'Tempo': [1, .75], 'Échauffement et gammes': [.5, .6]};
+const musCoef = ex => { const e = exOf(ex); return e.t === 'track' ? {...RUN_BASE, ...(RUN_SHIFT[e.cat] || {})} : MUSC[ex] || {}; };
+// Accessory, core and prevention work counts in the muscle's volume, but not in the average intensity of the session.
+const ACCESSORY = e => ['Prévention', 'Tronc'].includes(e.cat);
+
+/* ---------- maxima: a 1RM for every exercise (a test wins, otherwise the best set) and the load for reps × RPE ---------- */
+const UNI = ['bss', 'stepup', 'lunge', 'sldl', 'legext', 'legcurl', 'calf', 'copen', 'glutecable', 'tibkb', 'adductor'];
+const rmTest = (ex, side = '') => S.tset?.rm?.[ex + side] || null;
+function rmOf(ex, side = '') {
+  const t = rmTest(ex, side) || (side ? rmTest(ex) : null);
+  if (t) return {kg: +t.kg, src: 'test', date: t.date};
+  const a = bestE1rm(ex); return a ? {kg: a, src: 'auto'} : null;
+}
+// % of the max for a number of reps at an RPE (reps in reserve = 10 − RPE), the same Epley curve as the estimate.
+const pctFor = (reps, rpe) => { const n = reps + (10 - rpe); return n <= 1 ? 1 : 1 / (1 + n / 30); };
+const loadFor = (ex, reps, rpe, side = '') => { const r = rmOf(ex, side); return r ? r25(r.kg * pctFor(reps, rpe)) : null; };
+async function saveRm(key, kg) {
+  const rm = {...(S.tset?.rm || {})};
+  if (kg > 0) rm[key] = {kg, date: TODAY}; else delete rm[key];
+  S.tset = {...(S.tset || {}), rm};
+  await dbSet('settings/training', S.tset);
+}
+
+/* ---------- load per muscle: reps × intensity × share, and for running metres ÷ 10 × intensity × stress factor × share ---------- */
+function logMuscle(l) {
+  const out = {}, add = (k, v) => { out[k] = (out[k] || 0) + v; };
+  for (const it of l.items || []) {
+    const e = exOf(it.ex), c = musCoef(it.ex);
+    if (it.sets) {
+      const rm = rmOf(it.ex)?.kg, secs = it.u === 's' || (!it.u && e.u === 's');
+      for (const st of it.sets) {
+        const reps = secs ? (+st.reps || 0) / 3 : (+st.reps || 0);
+        const inten = +st.kg > 0 && rm && e.u === 'kg' ? Math.min(1.05, +st.kg / rm) : .6;
+        for (const k in c) add(k, reps * inten * c[k]);
+      }
+    } else if (it.reps) {
+      const [fs, di] = RUN_FS[e.cat] || [1, .8], inten = (+it.pct || 0) / 100 || di;
+      for (const r of it.reps) { const d = +r.dist || 0; for (const k in c) add(k, d / 10 * inten * fs * c[k]); }
+    }
+  }
+  return out;
+}
+const daysBetween = (a, b) => Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 864e5);
+// For each muscle: load over the 7 days that end on `end`, % of its weekly limit, and the fatigue still there today.
+function musState(end = TODAY) {
+  const from = addDays(end, -6), week = {}, fat = {};
+  for (const l of logs()) {
+    if (l.date > end || l.date < addDays(end, -20)) continue;
+    const m = logMuscle(l), d = daysBetween(l.date, end);
+    for (const k in m) {
+      if (l.date >= from) week[k] = (week[k] || 0) + m[k];
+      fat[k] = (fat[k] || 0) + m[k] * Math.exp(-d / MUSI[k].t);
+    }
+  }
+  return MUS.map(([k, n]) => { const w = week[k] || 0, lim = musLimit(k); return {k, n, week: w, lim, pct: w / lim * 100, fat: fat[k] || 0, fatPct: (fat[k] || 0) / (lim / 3) * 100}; });
+}
+const musZone = pct => pct >= 100 ? 'bad' : pct >= 75 ? 'mid' : 'good';
+// Balance between opposite groups over 7 days (sprinter: the back chain should not lag behind the front).
+function musBalance(st = musState()) {
+  const v = Object.fromEntries(st.map(x => [x.k, x.week])), sum = ks => ks.reduce((a, k) => a + (v[k] || 0), 0);
+  const pairs = [['Ischios / quadriceps', sum(['hams']), sum(['quads']), .8], ['Chaîne arrière / avant', sum(['glutes', 'hams', 'erect', 'calves']), sum(['quads', 'psoas', 'abs', 'tib']), 1.2],
+    ['Tirage / poussée', sum(['lats', 'rhomb', 'bi']), sum(['pecs', 'shoul', 'tri']), 1]];
+  return pairs.filter(([, a, b]) => a + b > 20).map(([n, a, b, target]) => { const r = b ? a / b : 9; return {n, r, target, off: r < target * .67 || r > target * 1.6}; });
+}
+
+/* ---------- session caps (Oscar's sheets): 30 sets, 500 reps, 30 minutes of real effort, intensity under 85 % in a strength block ---------- */
+function planCheck(items) {
+  let sets = 0, reps = 0, sec = 0, iw = 0, ir = 0;
+  for (const it of items) {
+    const e = exOf(it.ex);
+    if (it.ex === 'warmup' || it.min) continue;
+    if (e.t === 'track') { const n = +it.reps || 0; sets += 1; reps += n; sec += n * (+it.dist || 0) / 7.5; continue; }
+    const n = (+it.sets || 0), r = +it.reps || 0, secs = unitOf(it) === 's';
+    sets += n; reps += n * (secs ? r / 3 : r); sec += n * (secs ? r : r * 3);
+    if (!ACCESSORY(e) && it.pct) { iw += it.pct * n * r; ir += n * r; }
+  }
+  const avg = ir ? iw / ir : null, min = sec / 60, warn = [];
+  if (sets > 30) warn.push(`${sets} séries : au-dessus de ta limite de 30`);
+  if (reps > 500) warn.push(`${Math.round(reps)} répétitions : au-dessus de ta limite de 500`);
+  if (min > 30) warn.push(`${Math.round(min)} min d'effort réel : au-dessus de ta limite de 30`);
+  if (avg && avg > 85) warn.push(`intensité moyenne ${Math.round(avg)} % : au-dessus de 85 % pour un bloc de force`);
+  return {sets, reps: Math.round(reps), min: Math.round(min), avg, warn};
+}
+const capsLine = c => `<div class="caps${c.warn.length ? ' over' : ''}"><span>${c.sets}<small>/30 séries</small></span><span>${c.reps}<small>/500 rép.</small></span><span>${c.min}<small>/30 min d'effort</small></span>${c.avg ? `<span>${Math.round(c.avg)}<small>% moyen</small></span>` : ''}</div>${c.warn.map(w => `<p class="small" style="color:var(--bad);margin:6px 4px 0">⚠ ${esc(w)}</p>`).join('')}`;
+
 
 /* ---------- programmes ---------- */
 // Built-in sessions for a sprinter. gym items: sets × reps, % of the estimated max, rest in s.
@@ -2025,12 +2152,19 @@ function suggest(it) {
   if (done.length) {
     const top = Math.max(...done.map(s => +s.kg));
     const hit = done.length >= (it.sets || 1) && done.every(s => +s.reps >= (it.reps || 0));
+    const f = recFactor();
+    if (f.k < 1) return {kg: r25(top * f.k), why: 'même base que la dernière fois' + f.why};
     if (!hit) return {kg: top, why: 'même charge que la dernière fois : valide d\'abord toutes les séries'};
     const n = r25(top * 1.025);
     return n > top ? {kg: n, why: `+${fx((n - top) / top * 100, 1)} % : tout réussi la dernière fois`} : {kg: top, why: 'tout réussi : ajoute une répétition'};
   }
-  const b = bestE1rm(it.ex);
-  return it.pct && b ? {kg: r25(b * it.pct / 100), why: `${it.pct} % de ton max estimé (${fx(b)} kg)`} : null;
+  const b = rmOf(it.ex)?.kg, f = recFactor();
+  return it.pct && b ? {kg: r25(b * it.pct / 100 * f.k), why: `${it.pct} % de ton max (${fx(b)} kg)${f.why}`} : null;
+}
+// Low recovery this morning: the proposed loads go down a little.
+function recFactor() {
+  const kG = lastKey('hrv'), z = kG === TODAY || kG === addDays(TODAY, -1) ? zoneOf(recovery(kG)?.score) : null;
+  return z === 'bad' ? {k: .9, why: ' · −10 % : récupération basse'} : z === 'mid' ? {k: .95, why: ' · −5 % : récupération moyenne'} : {k: 1, why: ''};
 }
 
 /* ---------- module switching ---------- */
@@ -2228,6 +2362,12 @@ document.addEventListener('change', async e => {
   NOTIF_BUSY = false; paneRender();
 });
 document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.matches?.('[data-rmset]')) { saveRm(t.dataset.rmset, +String(t.value).replace(',', '.') || 0).then(() => { paneRender(); toast('Max enregistré'); }); return; }
+  if (t.matches?.('[data-rmc]')) { const v = loadFor(t.dataset.rmc, +$('#rmc-r').value, +$('#rmc-p').value); $('#rmc-o').textContent = v != null ? fx(v, v % 1 ? 1 : 0) + ' kg' : '–'; return; }
+  if (t.matches?.('[data-mlim]')) { S.tset = {...(S.tset || {}), limits: {...(S.tset?.limits || {}), [t.dataset.mlim]: +t.value || MUSI[t.dataset.mlim].l}}; dbSet('settings/training', S.tset); renderMod(); return; }
+});
+document.addEventListener('change', e => {
   if (!e.target.matches?.('[data-fplannote]')) return;
   S.profile = {...(S.profile || {}), nutrition: e.target.value.trim(), updatedAt: new Date().toISOString()};
   dbSet('profile/main', S.profile); toast('Plan enregistré');
@@ -2345,6 +2485,7 @@ function tLibrary() {
   const cats = [...new Set(EX.map(e => e.cat))];
   return `
     <header class="top"><div class="sub">${EX.length} exercices, consignes et records</div><h1>Exercices</h1></header>
+    <button class="banner" data-rmlist style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;margin-bottom:12px"><span><b>Mes max</b><br><span class="small muted">Un 1RM par exercice, et la charge pour tes répétitions et ton RPE</span></span>${ICON.chev}</button>
     <input class="search" type="search" placeholder="Rechercher un exercice" value="${esc(S.lib.q)}" data-tlibq aria-label="Rechercher un exercice">
     <div class="chipsx">${['', ...cats].map(c => `<button class="chip" data-tlibc="${esc(c)}" aria-pressed="${S.lib.cat === c}">${c || 'Tous'}</button>`).join('')}</div>
     <div class="list" id="t-libl">${libRows()}</div>`;
@@ -2375,7 +2516,7 @@ function tProgress() {
   return `
     <header class="top"><div class="sub">Records et volume</div><h1>Progrès</h1></header>
     ${sprinterCard()}
-    <div class="stack">
+    <div class="stack">${musCard()}
       ${lifts.length ? `<div class="card"><div class="chead" style="margin-bottom:6px"><span class="eyebrow">Max estimé</span><b class="num">${fx(bestE1rm(S.prog))} kg</b></div>
         <div class="chipsx">${lifts.map(id => `<button class="chip" data-tprog="${id}" aria-pressed="${S.prog === id}">${esc(exOf(id).n)}</button>`).join('')}</div>
         ${hist.length > 1 ? chart(hist, {color: 'var(--accent)', dec: 0, unit: 'kg'}) : '<p class="small muted">Encore une séance avec cet exercice pour voir la courbe.</p>'}
@@ -2415,6 +2556,7 @@ function planView(id) {
     const mine = !BUILTIN.includes(p);
     return `<div class="dhead"><span class="chiptag">${p.kind === 'gym' ? 'Musculation' : 'Piste'} · ${estMin(p)} min</span><div class="bigname" style="font-size:1.75rem">${esc(p.name)}</div><p class="small muted">${esc(p.desc || '')}</p></div>
       <div class="list">${p.items.map(it => { const e = exOf(it.ex), sg = suggest(it); return `<button class="rowbtn" data-tex="${it.ex}"><span><b>${esc(e.n)}</b><span class="meta">${itemText(it)}${it.rest ? ' · récup ' + fmtRest(it.rest) : ''}${sg ? ' · ' + fx(sg.kg, sg.kg % 1 ? 1 : 0) + ' kg proposés' : ''}</span></span>${ICON.chev}</button>`; }).join('')}</div>
+      ${p.kind === 'gym' ? capsLine(planCheck(p.items)) : ''}
       <div class="stack" style="margin-top:16px"><button class="btn" data-tstart="${p.id}">Commencer</button>
       <button class="btn ghost" data-tedit="${p.id}">${mine ? 'Modifier' : 'Dupliquer et adapter'}</button>
       ${mine ? `<button class="btn ghost" data-tdel="${p.id}" style="color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent)">Supprimer</button>` : ''}</div>`;
@@ -2441,6 +2583,7 @@ function editBody() {
         : trk || e.t === 'track' ? `<div class="edrow"><label>Répét.${num(i, 'reps', it.reps, '4')}</label><label>Distance m${num(i, 'dist', it.dist, '30')}</label><label>Intensité %${num(i, 'pct', it.pct, '95')}</label><label>Récup s${num(i, 'rest', it.rest, '180')}</label></div>`
         : `<div class="seg useg" role="group" aria-label="Compter en">${[['reps', 'Répétitions'], ['s', 'Secondes']].map(([v, l]) => `<button type="button" data-edu="${i}.${v}" aria-pressed="${unitOf(it) === v}">${l}</button>`).join('')}</div><div class="edrow"><label>Séries${num(i, 'sets', it.sets, '4')}</label><label>${unitOf(it) === 's' ? 'Secondes' : 'Répét.'}${num(i, 'reps', it.reps, '5')}</label><label>% du max${num(i, 'pct', it.pct, '–')}</label><label>Récup s${num(i, 'rest', it.rest, '120')}</label></div>`}
       <div class="tools"><button type="button" data-edmv="${i}.-1">Monter</button><button type="button" data-edmv="${i}.1">Descendre</button><button type="button" class="rm" data-edrm="${i}">Retirer</button></div></div>`; }).join('')}
+    ${ED.items.length ? capsLine(planCheck(ED.items)) : ''}
     <button class="btn ghost" data-edadd>+ Ajouter un exercice</button>
     <p class="small muted">Le % du max se calcule sur ton max estimé à partir de tes séances. Laisse vide pour les exercices au poids du corps.</p></div>`;
 }
@@ -2595,12 +2738,44 @@ function logView(id) {
       <div style="margin-top:16px"><button class="btn ghost" data-tlogdel="${l.id}" style="color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent)">Supprimer cette séance</button></div>`;
   }});
 }
+function rmBlock(id) {
+  const sides = UNI.includes(id) ? ['', ' D', ' G'] : [''];
+  const row = sd => { const t = rmTest(id, sd.trim() ? '|' + sd.trim() : ''); return `<label>${sd ? 'Jambe ' + (sd.trim() === 'D' ? 'droite' : 'gauche') : 'Test (1RM)'}<input class="mini-in" inputmode="decimal" placeholder="kg" value="${t ? t.kg : ''}" data-rmset="${id}${sd.trim() ? '|' + sd.trim() : ''}"></label>`; };
+  const r = rmOf(id), reps = [1, 2, 3, 4, 5, 6, 8, 10, 12, 15], rpes = [10, 9.5, 9, 8.5, 8, 7.5, 7, 6];
+  return `<div class="card" style="margin-top:12px"><div class="chead"><span class="eyebrow">Ton max</span><b class="num">${r ? fx(r.kg, r.kg % 1 ? 1 : 0) + ' kg' : '–'}</b></div>
+    <p class="small muted" style="margin:4px 0 0">${r ? (r.src === 'test' ? 'Ton test du ' + esc(fmtShort(r.date)) : 'Estimé à partir de ta meilleure série') : 'Fais une séance avec cet exercice ou note ton test.'}</p>
+    <div class="rmcalc" style="grid-template-columns:repeat(${sides.length},1fr)">${sides.map(row).join('')}</div>
+    ${r ? `<span class="eyebrow" style="display:block;margin-top:14px">Charge pour</span><div class="rmcalc"><label>Répétitions<select class="mini-in" data-rmc="${id}" id="rmc-r">${reps.map(n => `<option${n === 5 ? ' selected' : ''}>${n}</option>`).join('')}</select></label>
+      <label>RPE<select class="mini-in" data-rmc="${id}" id="rmc-p">${rpes.map(n => `<option value="${n}"${n === 8 ? ' selected' : ''}>${fx(n, n % 1 ? 1 : 0)}</option>`).join('')}</select></label><output id="rmc-o">${fx(loadFor(id, 5, 8))} kg</output></div>
+      <p class="small muted" style="margin:6px 0 0">RPE 8 = il te reste 2 répétitions. Ta récupération du jour peut baisser la charge proposée en séance.</p>` : ''}</div>`;
+}
+function rmList() {
+  openPane({title: 'Mes max', render: () => {
+    const ex = EX.filter(e => e.t === 'gym' && e.u === 'kg'), cats = [...new Set(ex.map(e => e.cat))];
+    return `<p class="small muted" style="margin:16px 4px 6px">Un max par exercice : ton test s'il existe, sinon l'estimation de ta meilleure série. Touche un exercice pour noter un test ou calculer une charge.</p>
+      ${cats.map(c => `<div class="sec-label">${esc(c)}</div><div class="list">${ex.filter(e => e.cat === c).map(e => { const r = rmOf(e.id); return `<button class="rowbtn" data-tex="${e.id}"><span><b>${esc(e.n)}</b><span class="meta">${r ? (r.src === 'test' ? 'test du ' + esc(fmtShort(r.date)) : 'estimé') : 'pas encore de donnée'}${UNI.includes(e.id) && (rmTest(e.id, '|D') || rmTest(e.id, '|G')) ? ' · D ' + (rmTest(e.id, '|D')?.kg ?? '–') + ' / G ' + (rmTest(e.id, '|G')?.kg ?? '–') : ''}</span></span><span class="kc">${r ? fx(r.kg, r.kg % 1 ? 1 : 0) + ' kg' : '–'}</span></button>`; }).join('')}</div>`).join('')}`;
+  }});
+}
+// The load on each muscle over 7 days, against its weekly limit, and the balance between opposite groups.
+function musCard() {
+  const st = musState(), any = st.some(x => x.week > 0); if (!any) return '';
+  const col = {good: 'var(--good)', mid: 'var(--warn)', bad: 'var(--bad)'}, bal = musBalance(st);
+  return `<div class="card"><div class="chead"><span class="eyebrow">Charge par muscle · 7 jours</span><button class="small" style="color:var(--accent);font-weight:600" data-mlims>Limites</button></div>
+    ${st.filter(x => x.week > 0).sort((a, b) => b.pct - a.pct).map(x => `<div class="musrow"><span>${esc(x.n)}</span><span class="bar"><i style="width:${Math.min(100, x.pct).toFixed(0)}%;background:${col[musZone(x.pct)]}"></i></span><b>${Math.round(x.pct)} %</b></div>`).join('')}
+    ${bal.length ? `<div class="sec-label" style="margin-top:8px">Équilibre</div>${bal.map(b => `<p class="small" style="margin:4px 0;${b.off ? 'color:var(--bad)' : ''}">${esc(b.n)} : ${fx(b.r, 2)} ${b.off ? '· déséquilibré' : '· correct'}</p>`).join('')}` : ''}
+    <p class="small muted" style="margin-top:8px">Muscu : répétitions × intensité × part du muscle. Piste : mètres ÷ 10 × intensité × facteur de stress × part du muscle, tes coefficients.</p></div>`;
+}
+function musLimits() {
+  openPane({title: 'Limites par muscle', render: () => `<p class="small muted" style="margin:16px 4px 6px">Charge maximale sur 7 jours pour chaque muscle. Au-delà, l'appli te prévient.</p>
+    <div class="list">${MUS.map(([k, n, l]) => `<div class="row"><label for="ml-${k}">${esc(n)}<span class="hint">par défaut ${l}</span></label><input id="ml-${k}" class="mini-in" inputmode="numeric" style="width:90px" value="${musLimit(k)}" data-mlim="${k}"></div>`).join('')}</div>`});
+}
 function exView(id) {
   openPane({title: 'Exercice', render: () => {
     const e = exOf(id), h = exHistory(id), b = bestE1rm(id);
     const pts = h.slice().reverse().map(({date, it}) => ({k: date, v: it.sets ? Math.max(0, ...it.sets.map(s => e1rm(+s.kg, +s.reps))) || null : Math.min(...it.reps.map(r => +r.t || 99)) < 99 ? Math.min(...it.reps.map(r => +r.t || 99)) : null, tip: cap(fmtShort(date))}));
     return `<div class="dhead"><div class="eyebrow" style="color:var(--accent)">${esc(e.cat)}</div><div class="bigname" style="font-size:1.75rem">${esc(e.n)}</div><p class="small muted">${esc(e.m)}</p></div>
       <div class="card why">${esc(e.c)}</div>
+      ${e.t === 'gym' && e.u === 'kg' ? rmBlock(id) : ''}
       ${b ? `<div class="stats" style="margin-top:12px"><div><b>${fx(b)} kg</b><span>max estimé</span></div><div><b>${h.length}</b><span>séances</span></div><div><b>${esc(short(h[0].date))}</b><span>dernière fois</span></div></div>` : ''}
       ${pts.filter(p => p.v).length > 1 ? `<div class="card" style="margin-top:12px"><span class="eyebrow">${e.t === 'gym' ? 'Max estimé par séance' : 'Meilleur temps par séance'}</span><div style="margin-top:30px">${chart(pts, {color: 'var(--accent)', dec: e.t === 'gym' ? 0 : 2, unit: e.t === 'gym' ? 'kg' : 's'})}</div></div>` : ''}
       ${h.length ? `<h2>Historique</h2><div class="list">${h.slice(0, 8).map(({date, it}) => `<div class="rowbtn" style="display:block"><b>${esc(cap(fmtShort(date)))}</b><span class="meta">${it.sets ? it.sets.map(s => (s.kg ? fx(s.kg, s.kg % 1 ? 1 : 0) + ' × ' : '') + s.reps).join(' · ') : it.reps.map(r => r.dist + ' m' + (r.t ? ' ' + fx(r.t, 2) + ' s' : '')).join(' · ')}</span></div>`).join('')}</div>` : '<p class="note">Pas encore fait dans une séance enregistrée.</p>'}`;
@@ -2896,6 +3071,8 @@ document.addEventListener('click', e => {
   if ((b = at('[data-tlu]'))) { const [i, u] = b.dataset.tlu.split('.'); S.live.items[+i].u = u; saveLive(); paneRender(); return; }
   if ((b = at('[data-edu]'))) { const [i, u] = b.dataset.edu.split('.'); ED.items[+i].u = u; if (u === 's' && !ED.items[+i].reps) ED.items[+i].reps = 30; paneRender(); return; }
   if ((b = at('[data-tgfill]'))) { fillFromWatch(b.dataset.tgfill); return; }
+  if (at('[data-rmlist]')) { rmList(); return; }
+  if (at('[data-mlims]')) { musLimits(); return; }
   if (at('[data-tladd]')) { pickExercise('any', id => { S.live.items.push(liveItem(defaultItem(id))); saveLive(); paneRender(); }); return; }
   if (at('[data-tfinish]')) { finishPane(); return; }
   if (at('[data-tsave]')) { saveLive2(); return; }
