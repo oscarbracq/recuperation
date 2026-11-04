@@ -406,11 +406,27 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .vamk{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-top:12px}
 .vam{display:flex;flex-direction:column;gap:3px;text-align:left;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:transparent;color:inherit;font:inherit}
 .vam span{font-size:.78rem;opacity:.75}.vam[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent)}
+*{scrollbar-width:none}*::-webkit-scrollbar{display:none;width:0;height:0}
 .restb:not(:empty){display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--accent) 18%,transparent)}
 .restb b{font-size:1.8rem;font-variant-numeric:tabular-nums}
 .fvsteps{display:flex;justify-content:center;gap:8px;margin:16px 0 6px}.fvsteps span{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:.8rem;font-weight:700;background:rgba(255,255,255,.08)}
 .fvsteps span.on{background:var(--accent);color:#fff}.fvsteps span.ok{background:color-mix(in srgb,var(--accent) 35%,transparent)}
 .sugg{padding:12px 14px}
+.sesh{margin:22px 0 0;font-size:1.5rem;font-weight:800}
+.sesbox{border:2px solid var(--accent);border-radius:22px;padding:14px;display:flex;flex-direction:column;gap:14px}
+.sesbox>.btn{margin:0}#ed-list{display:flex;flex-direction:column;gap:14px}#ed-list[hidden]{display:none}
+.wtl{display:flex;flex-direction:column;gap:6px;margin:4px 0 6px}
+.wti{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 6px 6px 12px;border-radius:10px;background:rgba(255,255,255,.06)}
+.wti>span{display:flex;align-items:baseline;gap:8px;min-width:0}.wti b{font-size:.92rem;font-weight:600}.wti small{font-size:.76rem;opacity:.65;white-space:nowrap}
+.wtl{gap:4px}
+.wx{border:0;background:transparent;color:inherit;font-size:1.3rem;line-height:1;padding:4px 6px;opacity:.7}
+.addln{border:1px dashed rgba(255,255,255,.25);background:transparent;color:inherit;font:inherit;font-size:.88rem;border-radius:12px;padding:9px 12px;width:100%;text-align:left}
+.rmc,.symc{padding:14px 16px}
+.rmh b{display:block;font-size:1.15rem;font-weight:800;letter-spacing:-.01em}.rmh span{display:block;font-size:.8rem;opacity:.7;margin-top:2px}
+.rmseg{margin-top:12px}.rmin{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}.rmin input{width:100%;text-align:center;font-size:1.2rem}
+.symg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.symg label{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.78rem;opacity:.9}
+.symg label span{font-weight:700;font-size:.85rem}.symg input{width:100%;text-align:center;font-size:1.25rem}
+.symgap{text-align:center;margin-top:10px;font-weight:600;font-size:.9rem;opacity:.85}.symgap.bad{color:var(--bad);opacity:1}
 .vares{display:grid;gap:8px}.vares div{display:flex;justify-content:space-between;gap:10px}.vares span{opacity:.75}
 .sheet header .close[hidden]{display:none}
 .edx h3{justify-content:flex-start}
@@ -456,6 +472,42 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .pldays button[aria-pressed="true"]{background:var(--accent);color:#fff}
 .pldays button[aria-pressed="true"] b{color:#fff}
 .pltl{display:flex;flex-direction:column;gap:4px}
+.plfs{position:fixed;inset:0;z-index:45;background:var(--bg);color:var(--fg);display:none;overscroll-behavior:contain}
+.plfs.on{display:block}
+.plfs-in{position:absolute;inset:0;display:flex;flex-direction:column;padding:calc(8px + env(safe-area-inset-top,0px)) 12px calc(8px + env(safe-area-inset-bottom,0px))}
+.plfs.rot .plfs-in{width:100vh;height:100vw;inset:auto;top:0;left:0;transform-origin:top left;transform:rotate(90deg) translateY(-100%);padding:8px calc(12px + env(safe-area-inset-top,0px))}
+.plfs-top{display:flex;align-items:center;gap:10px;padding:4px 0 10px}
+.plfs-ic{width:40px;height:40px;flex:none;display:grid;place-items:center;border-radius:50%;background:var(--card2);color:var(--fg)}
+.plfs-ic[aria-pressed="true"]{background:var(--accent);color:#fff}
+.plfs-t{flex:1;min-width:0;text-align:center;display:flex;flex-direction:column}
+.plfs-t b{font:700 1.0625rem var(--display)}
+.plfs-t small{font-size:.6875rem;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plg-scroll{flex:1;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.plg{position:relative;display:flex;padding-left:40px}
+.plg-axis{position:absolute;left:0;top:0;bottom:0;width:36px}
+.plg-axis span{position:absolute;right:4px;transform:translateY(-50%);font:600 .625rem var(--display);color:var(--fg3,var(--fg2));font-variant-numeric:tabular-nums}
+.plg-col{position:relative;flex:1;min-width:0;border-left:1px solid var(--line)}
+.plg-col.today{background:color-mix(in srgb,var(--accent) 5%,transparent)}
+.plg-h{position:absolute;left:0;right:0;border-top:1px solid var(--line);opacity:.6}
+.plg-now{position:absolute;left:0;right:0;border-top:2px solid var(--bad);z-index:2;pointer-events:none}
+.plg-now::before{content:"";position:absolute;left:-4px;top:-5px;width:8px;height:8px;border-radius:50%;background:var(--bad)}
+.plg-b{position:absolute;left:3px;right:3px;display:flex;flex-direction:column;justify-content:flex-start;gap:1px;overflow:hidden;text-align:left;padding:4px 7px;border-radius:8px;background:color-mix(in srgb,var(--pc) 22%,var(--card));border-left:3px solid var(--pc);color:var(--fg);touch-action:pan-y;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.plg-b b{font-size:.75rem;font-weight:600;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.plg-b small{font-size:.625rem;color:var(--fg2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.plg-b.short{padding:0 7px;justify-content:center}
+.plg-b.short b{font-size:.625rem}
+.plg-b.lift{z-index:5;box-shadow:0 10px 26px rgba(0,0,0,.35);background:color-mix(in srgb,var(--pc) 40%,var(--card));transition:none}
+.plfs.week .plg-b{left:1px;right:1px;padding:2px 4px;border-radius:5px;border-left-width:2px}
+.plfs.week .plg-b b{font-size:.5625rem;white-space:normal}
+.plfs.week .plg-b small{font-size:.5rem}
+.plg-head{display:flex;padding-left:40px;padding-bottom:4px}
+.plg-head span{flex:1;text-align:center;font-size:.6875rem;font-weight:600;color:var(--fg2)}
+.plg-head span b{color:var(--fg);font-family:var(--display)}
+.plg-head span.today{color:var(--accent)}
+.plg-leg{display:none;flex-wrap:wrap;gap:4px 12px;padding:8px 0 2px;font-size:.625rem;color:var(--fg2)}
+.plfs.week .plg-leg{display:flex}
+.plg-leg span{display:flex;align-items:center;gap:4px}
+.plg-leg i{width:8px;height:8px;border-radius:2px}
 .plb{display:grid;grid-template-columns:52px 1fr;gap:10px;align-items:start;text-align:left;padding:8px 10px;border-radius:12px;background:color-mix(in srgb,var(--pc) 16%,var(--card));border-left:4px solid var(--pc);color:var(--fg)}
 .plb .t{font:600 .75rem/1.25 var(--display);color:var(--fg2);font-variant-numeric:tabular-nums}
 .plb .t small{font-weight:500;opacity:.8}
@@ -793,15 +845,14 @@ details.slow[open]>summary h2::after{content:" ▴"}
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=53"></script>
+<script src="supabase-db.js?v=54"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js');
   navigator.serviceWorker.addEventListener('controllerchange', () => { if (had) location.reload(); });
 }</script>
-<script>
-const $ = s => document.querySelector(s);
+<script>const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const key = d => { const z = new Date(d.getTime() - d.getTimezoneOffset()*60000); return z.toISOString().slice(0,10); };
 const addDays = (k, n) => { const d = new Date(k + 'T12:00:00'); d.setDate(d.getDate() + n); return key(d); };
@@ -1406,9 +1457,6 @@ function jumpsPane() {
       ${ck ? `<div class="card" style="margin-bottom:10px"><span class="eyebrow">Forme du jour</span><p class="small" style="margin:6px 0 0">${esc(ck.txt)}</p></div>` : ''}
       <div class="sec-label">Sauts</div><div class="list">${JTYPES.filter(x => x[2] !== 'time').map(row).join('')}</div>${sym}
       <div class="sec-label">Sprint</div><div class="list">${JTYPES.filter(x => x[2] === 'time').map(row).join('')}</div>
-      <div class="sec-label">Importer de My Jump</div>
-      <div class="card"><p class="small" style="margin:0 0 10px">Dans My Jump : ouvre tes résultats › <b>Exporter (CSV)</b> › <b>Partager</b> › choisis <b>TNR Athletics</b>. Les sauts arrivent ici tout seuls. Sinon, enregistre le fichier puis touche le bouton.</p>
-        <button class="btn ghost" data-jimp>Choisir le fichier My Jump</button><input type="file" id="j-file" accept=".csv,.txt,text/csv,text/plain,text/comma-separated-values" hidden></div>
       <div class="sec-label">Ajouter un saut à la main</div>
       <div class="chipsx">${JTYPES.map(([id, n]) => `<button class="chip" data-jtype="${id}" aria-pressed="${id === JF.type}">${esc(n)}</button>`).join('')}</div>
       <div class="list">
@@ -1456,6 +1504,7 @@ const hOfTf = tf => GRAV * tf * tf / 8 * 100; // cm
 const FILM = {
   jump: 'Pose le téléphone au sol ou sur un support à 1 à 1,5 m, bien de côté ou de face, cadré sur tes pieds. Filme en mode Ralenti (240 images/s, sinon 120).',
   rules: 'Pour que la mesure soit juste : jambes tendues et pointes de pieds en l\'air, atterris sur les mêmes jambes tendues. Plier les genoux en vol rallonge le temps de vol et gonfle la hauteur.',
+  hfv: 'Pose des plots à 0, 5, 10, 15, 20, 25 et 30 m, et un deuxième plot en face de chacun de l\'autre côté du couloir. Téléphone sur un pied à hauteur de hanche, perpendiculaire à la piste, à 10 à 15 m sur le côté, en face des 15 m, pour voir de 0 à 30 m. Tu marques l\'image où ta hanche passe la ligne entre deux plots : c\'est ce qui évite l\'erreur de perspective. Filme en Ralenti.',
   sprint: 'Place le téléphone sur un pied, de côté, au niveau de la ligne d\'arrivée, perpendiculaire à la piste, avec la ligne de départ aussi dans le cadre (donc loin, ou sur 5 à 10 m). Filme en Ralenti.'
 };
 const VT = {
@@ -1467,6 +1516,7 @@ const VT = {
   dj: {n: 'Drop jump', what: 'Tombe d\'une box (30 à 40 cm) et rebondis le plus haut et le plus vite possible. Donne contact, RSI et raideur.', film: 'jump', drop: true, marks: [['c', 'Contact', 'première image où les pieds touchent le sol après la chute'], ['to', 'Décollage', 'première image où les deux pieds ont quitté le sol'], ['ld', 'Atterrissage', 'première image où un pied retouche le sol']]},
   rj105: {n: 'Test 10/5', what: 'Un saut puis 10 rebonds enchaînés, le plus haut avec le moins de contact. On garde la moyenne de tes 5 meilleurs RSI.', film: 'jump', seq: true},
   pogo: {n: 'Pogo jumps', what: 'Rebonds chevilles raides, genoux presque tendus. Donne contact, RSI et raideur de cheville.', film: 'jump', seq: true},
+  hfv: {n: 'Sprint 30 m', what: 'Sprint maximal de 30 m depuis un départ debout ou en 3 appuis. Tes passages tous les 5 m donnent ton profil force-vitesse horizontal.', film: 'hfv', marks: [['st', 'Départ', 'première image où tu bouges'], ...[5, 10, 15, 20, 25, 30].map(d => ['p' + d, d + ' m', 'image où la hanche passe la ligne des ' + d + ' m'])]},
   sprint: {n: 'Sprint chronométré', what: 'Ton temps sur 10, 20, 30 ou 60 m, ou un 5-0-5, sans cellules.', film: 'sprint', dist: true, marks: [['st', 'Départ', 'première image où le pied arrière quitte le sol'], ['ar', 'Arrivée', 'première image où le buste passe la ligne']]}
 };
 const vtMarks = id => { const m = VT[id].marks; return typeof m === 'string' ? VT[m].marks : m; };
@@ -1474,7 +1524,7 @@ const bodyKg = () => { const w = VAL.weight ? VAL.weight(lastKey('weight') || TO
 let VA = null;
 function testLab() {
   openPane({title: 'Tests pliométriques', render: () => `<p class="small muted" style="margin:16px 4px 8px">Touche un test, puis Commencer : tu poses le téléphone, tu sautes, et tu repères les images de décollage et d'atterrissage. L'appli calcule tout. La vidéo reste sur ton téléphone.</p>
-    <div class="list">${Object.entries(VT).filter(([id]) => id !== 'sprint').map(([id, t]) => { const last = jLast(id === 'sprint' ? 'spr30' : id); return `<button class="rowbtn" data-vatest="${id}"><span><b>${esc(t.n)}</b><span class="meta">${esc(t.what)}</span></span>${ICON.chev}</button>`; }).join('')}</div>
+    <div class="list">${Object.entries(VT).filter(([id]) => id !== 'sprint' && id !== 'hfv').map(([id, t]) => { const last = jLast(id === 'sprint' ? 'spr30' : id); return `<button class="rowbtn" data-vatest="${id}"><span><b>${esc(t.n)}</b><span class="meta">${esc(t.what)}</span></span>${ICON.chev}</button>`; }).join('')}</div>
     <div class="card" style="margin-top:12px"><span class="eyebrow">Bien filmer</span><p class="small" style="margin:6px 0 0">${esc(FILM.jump)}</p><p class="small" style="margin:6px 0 0">${esc(FILM.rules)}</p></div>`});
 }
 function vaPane(id, opt = {}) {
@@ -1584,6 +1634,14 @@ function vaCompute() {
     out.rec = {type: VA.test, rsi: +rsi.toFixed(2), tc: Math.round(tc * 1000), h: +h.toFixed(1), n: jumps.length, ...(k ? {k: +k.toFixed(1)} : {})};
     return out;
   }
+  if (VA.test === 'hfv') {
+    if (M.st == null) return out;
+    const pts = [5, 10, 15, 20, 25, 30].filter(d => M['p' + d] != null && M['p' + d] > M.st).map(d => ({x: d, t: (M['p' + d] - M.st) / cap}));
+    if (pts.length < 3) { out.warn.push('Marque au moins 3 passages, idéalement les 6.'); return out; }
+    for (let i = 1; i < pts.length; i++) if (pts[i].t <= pts[i - 1].t) { out.warn.push('Les passages doivent être dans l\'ordre.'); return out; }
+    const r = hfvCompute(pts, hfvOpt()); hfvRows(r, out);
+    out.rec = {type: 'hfv', res: r, splits: pts, split: Object.fromEntries(pts.map(q => [q.x, q.t]))}; return out;
+  }
   if (VA.test === 'sprint') {
     if (M.st == null || M.ar == null || M.ar <= M.st) return out;
     const s = sec(M.st, M.ar), d = VA.dist === '505' ? null : +VA.dist;
@@ -1638,6 +1696,7 @@ function vaUI() {
 }
 async function vaSave() {
   const R = vaCompute(); if (!R.rec) return;
+  if (R.rec.type === 'hfv') { if (VA.opt?.onSave) { const cb = VA.opt.onSave; cb(R.rec); closePane(); toast(`Sprint enregistré : 30 m en ${fx(R.rec.res.t30, 2)} s`); } return; }
   const j = {id: uid(), date: TODAY, src: 'video', ...R.rec};
   if (await saveJumps([...jumps(), j])) {
     const b = jBest(j.type, j.side); toast(b && b.id === j.id ? `Nouveau record : ${jFmt(j)}` : `Enregistré : ${jFmt(j)}`, 4000);
@@ -1681,6 +1740,135 @@ document.addEventListener('change', e => {
   if (e.target.matches?.('[data-vadrop]')) { VA.drop = +e.target.value || 30; vaUI(); }
 });
 
+
+// Test de RM: every main lift in a list, a test from 1 to 5 repetitions. 1RM from a 2-5RM = mean of Epley and Brzycki,
+// the two most accurate equations under 10 repetitions (LeSuer 1997); a 1RM is kept as it is.
+const RM_EX = ['squat', 'fsquat', 'deadlift', 'rdl', 'hbdl', 'hipthrust', 'bench', 'ohp', 'pclean'];
+const rmEst = (kg, r) => r <= 1 ? kg : (kg * (1 + r / 30) + kg * 36 / (37 - r)) / 2;
+const RMR = {};
+function rmTestPane() {
+  openPane({title: 'Test de RM', render: () => `<details class="card" style="margin-top:16px"><summary><b>Le protocole</b> <span class="small muted">· touche pour l'ouvrir</span></summary>
+      <p class="small" style="margin:8px 0 0">Échauffement général 5 à 10 min. Puis 10 répétitions à 50 %, 5 à 70 %, 3 à 80 %, 1 à 90 % de la charge visée. Ensuite des essais à la charge visée, 3 à 5 min de récup, 4 essais au plus : +2,5 à 5 % après une réussite. Choisis le nombre de répétitions du test (1 à 5RM) : plus il est bas, plus le 1RM est exact.</p></details>
+    <div class="stack" style="margin-top:12px">${RM_EX.filter(id => EX.some(e => e.id === id)).map(ex => {
+      const last = tests().filter(x => x.type === '5rm' && x.ex === ex).reverse().sort((a, b) => b.date.localeCompare(a.date))[0], r = RMR[ex] || last?.reps || 5, one = rmTest(ex)?.kg;
+      return `<div class="card rmc"><div class="rmh"><b>${esc(exOf(ex).n)}</b><span>${last ? `${last.reps || 5}RM ${fx(last.kg, 1)} kg le ${esc(fmtShort(last.date))} · ` : ''}${one ? '1RM ' + fx(one, 1) + ' kg' : 'pas encore testé'}</span></div>
+        <div class="seg rmseg" role="group" aria-label="Nombre de répétitions">${[1, 2, 3, 4, 5].map(n => `<button type="button" data-rmr="${ex}.${n}" aria-pressed="${r === n}">${n}RM</button>`).join('')}</div>
+        <div class="rmin"><input class="mini-in big" inputmode="decimal" id="rmkg-${ex}" placeholder="kg"><button type="button" class="btn" data-rmsave="${ex}">Enregistrer</button></div></div>`; }).join('')}</div>`});
+}
+async function rmSave(ex) {
+  const kg = +String($('#rmkg-' + ex)?.value || '').replace(',', '.'), r = RMR[ex] || 5;
+  if (!(kg > 0)) { toast('Indique la charge'); return; }
+  const one = Math.round(rmEst(kg, r) * 2) / 2;
+  S.tset = {...(S.tset || {}), tests: [...tests(), {type: '5rm', ex, kg, reps: r, date: TODAY}], rm: {...(S.tset?.rm || {}), [ex]: {kg: one, date: TODAY, from: r + 'RM'}}};
+  if (await dbSet('settings/training', S.tset)) { toast(`${exOf(ex).n} : ${r}RM ${fx(kg, 1)} kg · 1RM ${fx(one, 1)} kg`, 4000); paneRender(); renderMod(); }
+}
+
+function morePane() {
+  openPane({title: 'Plus de tests', render: () => `<div class="sec-label" style="margin-top:16px">Importer de My Jump</div>
+    <div class="card"><p class="small" style="margin:0">Pour récupérer tous tes résultats My Jump dans l'appli :</p>
+      <p class="small" style="margin:8px 0 0">1. Dans My Jump, ouvre tes résultats et touche <b>Exporter (CSV)</b>.</p>
+      <p class="small" style="margin:6px 0 0">2. Touche <b>Partager</b>, puis choisis <b>TNR Athletics</b> : les sauts arrivent tout seuls dans Mes max en saut.</p>
+      <p class="small" style="margin:6px 0 10px">3. Sinon, enregistre le fichier et choisis-le ici. Les sauts déjà importés ne sont jamais comptés deux fois.</p>
+      <button class="btn" data-jimp>Choisir le fichier My Jump</button><input type="file" id="j-file" accept=".csv,.txt,text/csv,text/plain,text/comma-separated-values" hidden></div>
+    <div class="sec-label">Noter un résultat à la main</div>
+    <div class="list"><button class="rowbtn" data-tjumps><span><b>Mes max en saut</b><span class="meta">box jump, longueur, triple bond, ou un saut mesuré ailleurs</span></span>${ICON.chev}</button></div>`});
+}
+
+// Horizontal force-velocity profile (Samozino et al. 2016, simple method): split times → v(t) = Vmax·(1 − e^(−t/τ)) fitted on
+// the positions; horizontal force = (body + sled mass)·acceleration + air drag + sled friction; F-v line → F0, V0, Pmax;
+// ratio of forces RF = horizontal force ÷ resultant force (RFmax after 0,3 s) and its decrease with speed DRF (Morin 2011).
+// Air: ρ = 1,293·(P/760)·273/(273+T), frontal area Af = 0,2025·h^0,725·m^0,425·0,266, Cd = 0,9.
+function hfvCompute(pts, o) {
+  const g = (t, tau) => t + tau * Math.exp(-t / tau) - tau; let best = null;
+  for (let tau = .3; tau <= 3; tau += .001) {
+    let sxg = 0, sgg = 0; for (const q of pts) { const gv = g(q.t, tau); sxg += q.x * gv; sgg += gv * gv; }
+    const vmax = sxg / sgg; let sse = 0; for (const q of pts) { const e = q.x - vmax * g(q.t, tau); sse += e * e; }
+    if (!best || sse < best.sse) best = {tau, vmax, sse};
+  }
+  const {tau, vmax, sse} = best, mx = pts.reduce((a, q) => a + q.x, 0) / pts.length, sst = pts.reduce((a, q) => a + (q.x - mx) ** 2, 0);
+  const m = o.m, ms = o.sled || 0, rho = 1.293 * (o.Pb / 760) * 273 / (273 + o.T), Af = .2025 * o.h ** .725 * m ** .425 * .266, k = .5 * rho * Af * .9;
+  const tAt = x => { let a = 0, b = 20; for (let i = 0; i < 60; i++) { const c = (a + b) / 2; if (vmax * g(c, tau) < x) a = c; else b = c; } return (a + b) / 2; };
+  const tEnd = tAt(30), S1 = [], S2 = [];
+  for (let t = .01; t <= tEnd; t += .01) {
+    const v = vmax * (1 - Math.exp(-t / tau)), a = vmax / tau * Math.exp(-t / tau), FH = (m + ms) * a + k * v * v + (o.mu || 0) * ms * GRAV;
+    S1.push([v, FH / m]); if (t >= .3) S2.push([v, FH / Math.sqrt(FH * FH + (m * GRAV) ** 2)]);
+  }
+  const lin = L => { const n = L.length, ax = L.reduce((s, q) => s + q[0], 0) / n, ay = L.reduce((s, q) => s + q[1], 0) / n; const sl = L.reduce((s, q) => s + (q[0] - ax) * (q[1] - ay), 0) / L.reduce((s, q) => s + (q[0] - ax) ** 2, 0); return [sl, ay - sl * ax]; };
+  const [sl, F0] = lin(S1), V0 = -F0 / sl, [dsl] = lin(S2);
+  return {tau, vmax, r2: sst ? 1 - sse / sst : null, F0, V0, Pmax: F0 * V0 / 4, Sfv: sl, RFmax: Math.max(...S2.map(q => q[1])) * 100, DRF: dsl * 100, t10: tAt(10), t20: tAt(20), t30: tEnd};
+}
+const hfvOpt = () => ({m: +(VA?.opt?.m || bodyKg() || 75), h: +(VA?.opt?.h || S.profile?.height || 180) / 100, sled: +(VA?.opt?.sled || 0), mu: VA?.opt?.mu ?? .35, T: +(VA?.opt?.T ?? 20), Pb: 760});
+function hfvRows(r, out) {
+  out.rows.push(['Vitesse max (Vmax)', fx(r.vmax, 2) + ' m/s · ' + fx(r.vmax * 3.6, 1) + ' km/h'], ['Constante τ', fx(r.tau, 2) + ' s'], ['F0', fx(r.F0, 2) + ' N/kg'], ['V0', fx(r.V0, 2) + ' m/s'],
+    ['Pmax', fx(r.Pmax, 1) + ' W/kg'], ['RF max', fx(r.RFmax, 1) + ' %'], ['DRF', fx(r.DRF, 1) + ' %/(m/s)'], ['Temps 10 / 20 / 30 m', `${fx(r.t10, 2)} / ${fx(r.t20, 2)} / ${fx(r.t30, 2)} s`]);
+  if (r.r2 != null) out.rows.push(['Ajustement (R²)', fx(r.r2, 4)]);
+  if (r.r2 != null && r.r2 < .995) out.warn.push('Le modèle colle mal à tes passages : un repère est sûrement décalé. Revois les passages.');
+}
+let HFW = null;
+function hfvPane() {
+  const w = bodyKg();
+  HFW = {step: 0, m: w ? +w.toFixed(1) : '', h: S.profile?.height || 180, T: 20, mu: .35, sled: 20, runs: []};
+  openPane({title: 'Profil force-vitesse en sprint', onClose: () => clearInterval(PREST.t), render: hfvRender});
+}
+function hfvGrab() { document.querySelectorAll('#pane-body [data-hfw]').forEach(i => { HFW[i.dataset.hfw] = +String(i.value).replace(',', '.') || ''; }); }
+function hfvLV() { // load-velocity of the sled runs (Cross 2017): Vmax falls in a straight line with the load
+  const by = {}; for (const r of HFW.runs) { const L = r.sled || 0; if (!by[L] || r.res.vmax > by[L].vmax) by[L] = r.res; }
+  const pts = Object.entries(by).map(([L, x]) => [+L, x.vmax]); if (pts.length < 2 || !pts.some(q => q[0] === 0)) return null;
+  const n = pts.length, ax = pts.reduce((s, q) => s + q[0], 0) / n, ay = pts.reduce((s, q) => s + q[1], 0) / n, sl = pts.reduce((s, q) => s + (q[0] - ax) * (q[1] - ay), 0) / pts.reduce((s, q) => s + (q[0] - ax) ** 2, 0);
+  const v0 = ay - sl * ax, L0 = -v0 / sl; return sl < 0 ? {v0, L0, at: d => L0 * d} : null;
+}
+function hfvRender() {
+  const st = HFW.step, steps = ['Installation', 'Mesures', 'Échauffement', 'Sprints', 'Résultat'];
+  const bar = `<div class="fvsteps">${steps.map((n, i) => `<span class="${i === st ? 'on' : i < st ? 'ok' : ''}">${i + 1}</span>`).join('')}</div><div class="eyebrow" style="text-align:center;margin-bottom:8px">${steps[st]}</div>`;
+  const nav = (next, label = 'Suivant', dis = false) => `<div class="stack" style="margin-top:14px"><button class="btn" data-hfstep="${next}" ${dis ? 'disabled' : ''}>${label}</button>${st ? `<button class="btn ghost" data-hfstep="${st - 1}">Retour</button>` : ''}</div>`;
+  if (st === 0) return bar + `<div class="card"><p class="small" style="margin:0">Ce test donne ta force horizontale au départ (F0), ta vitesse max théorique (V0), ta puissance (Pmax) et ton efficacité à orienter la force vers l'avant (RF, DRF). Avec un traîneau, il donne aussi la charge qui correspond à chaque objectif.</p>
+    <p class="small" style="margin:8px 0 0">${esc(FILM.hfv)}</p><p class="small" style="margin:8px 0 0"><b>Il te faut :</b> 14 plots, un décamètre, un pied pour le téléphone, et un traîneau si tu veux le profil chargé.</p></div>` + nav(1, 'Commencer');
+  if (st === 1) return bar + `<div class="list"><div class="row"><label>Masse</label><span><input class="mini-in" inputmode="decimal" style="width:80px" value="${HFW.m}" data-hfw="m"> kg</span></div>
+      <div class="row"><label>Taille</label><span><input class="mini-in" inputmode="decimal" style="width:80px" value="${HFW.h}" data-hfw="h"> cm</span></div>
+      <div class="row"><label>Température<span class="hint">pour la résistance de l'air</span></label><span><input class="mini-in" inputmode="decimal" style="width:80px" value="${HFW.T}" data-hfw="T"> °C</span></div></div>
+    <p class="small muted" style="margin:8px 4px 0">La taille et la masse servent à calculer la surface que tu opposes à l'air.</p>` + nav(2, 'Suivant', !(HFW.m && HFW.h));
+  if (st === 2) return bar + `<div class="card"><p class="small" style="margin:0">1. 8 min de footing, mobilité de hanche et de cheville.</p><p class="small" style="margin:6px 0 0">2. Gammes : A-skip, B-skip, talons-fesses, 2 × 20 m.</p><p class="small" style="margin:6px 0 0">3. 3 accélérations de 30 m à 70, 80 et 90 %, retour en marchant.</p><p class="small" style="margin:6px 0 0">4. 3 min de repos avant le premier sprint.</p>
+    <p class="small" style="margin:10px 0 0"><b>Chaque sprint :</b> à fond jusqu'à 30 m, toujours le même départ. 4 à 5 min de récup entre deux sprints, 6 à 8 min avec traîneau.</p></div>` + nav(3, 'Échauffement fait');
+  if (st === 3) {
+    const lv = hfvLV();
+    return bar + `<p class="small muted" style="margin:0 4px 8px">Fais 2 sprints sans charge, le meilleur compte. Pour le profil chargé, ajoute 2 à 4 charges de traîneau (par exemple 20, 40, 60 % de ta masse).</p>
+    <div id="rest-box" class="restb"></div>
+    ${HFW.runs.length ? `<div class="list">${HFW.runs.map((r, i) => `<div class="row"><span class="l">${r.sled ? 'Traîneau ' + fx(r.sled) + ' kg' : 'Sans charge'}<span class="hint">Vmax ${fx(r.res.vmax, 2)} m/s · F0 ${fx(r.res.F0, 1)} N/kg · Pmax ${fx(r.res.Pmax, 1)} W/kg · 30 m en ${fx(r.res.t30, 2)} s</span></span><button type="button" class="chip" data-hfdel="${i}" aria-label="Retirer">×</button></div>`).join('')}</div>` : ''}
+    <div class="stack" style="margin-top:12px"><button class="btn" data-hffilm="0">Filmer un sprint sans charge</button></div>
+    <div class="list" style="margin-top:12px"><div class="row"><label>Charge du traîneau</label><span><input class="mini-in" inputmode="decimal" style="width:70px" value="${HFW.sled}" data-hfw="sled"> kg</span></div>
+      <div class="row"><label>Frottement du traîneau (μ)<span class="hint">0,35 sur piste synthétique, plus sur herbe</span></label><input class="mini-in" inputmode="decimal" style="width:70px" value="${HFW.mu}" data-hfw="mu"></div></div>
+    <div class="stack" style="margin-top:8px"><button class="btn ghost" data-hffilm="1">Filmer un sprint avec traîneau</button></div>
+    ${lv ? `<p class="small" style="margin:10px 4px 0">Profil charge-vitesse prêt (${Object.keys(HFW.runs.reduce((a, r) => (a[r.sled || 0] = 1, a), {})).length} charges).</p>` : ''}` + nav(4, 'Voir mon profil', !HFW.runs.some(r => !r.sled));
+  }
+  const free = HFW.runs.filter(r => !r.sled).sort((a, b) => b.res.Pmax - a.res.Pmax)[0]; if (!free) return bar + '<p class="small">Il faut au moins un sprint sans charge.</p>' + nav(3, 'Retour aux sprints');
+  const r = free.res, lv = hfvLV(), out = {rows: [], warn: []}; hfvRows(r, out);
+  const fvTxt = r.RFmax < 45 ? 'Ton RF max est bas : au départ, tu pousses trop vers le haut. Priorité aux départs chargés (traîneau lourd, côtes courtes) et à la position du buste.'
+    : r.DRF < -8 ? 'Ta force vers l\'avant chute vite avec la vitesse (DRF très négatif) : travaille l\'efficacité à vitesse élevée (sprints lancés, traîneau léger).'
+    : `RF et DRF dans les normes du sprint. Il n’existe pas de profil horizontal optimal publié : compare-toi d’un test à l’autre. F0 qui monte = meilleure accélération, V0 qui monte = meilleure vitesse max.`;
+  return bar + `<div class="card"><div class="stats"><div><b>${fx(r.F0, 1)}</b><span>F0 N/kg</span></div><div><b>${fx(r.V0, 2)}</b><span>V0 m/s</span></div><div><b>${fx(r.Pmax, 1)}</b><span>Pmax W/kg</span></div></div>
+    <div class="vares" style="margin-top:12px">${out.rows.map(([l, v]) => `<div><span>${esc(l)}</span><b>${esc(v)}</b></div>`).join('')}</div>
+    <p class="small" style="margin:12px 0 0">${esc(fvTxt)}</p>${out.warn.map(w => `<p class="small" style="margin:8px 0 0;color:var(--warn)">${esc(w)}</p>`).join('')}</div>
+    ${lv ? `<div class="card" style="margin-top:10px"><span class="eyebrow">Charges de traîneau</span><div class="vares" style="margin-top:8px"><div><span>Charge qui t'arrêterait (L0)</span><b>${fx(lv.L0, 0)} kg</b></div>
+      <div><span>−10 % de vitesse : technique, vitesse</span><b>${fx(lv.at(.1), 0)} kg</b></div><div><span>−30 % : accélération</span><b>${fx(lv.at(.3), 0)} kg</b></div><div><span>−50 % : puissance max</span><b>${fx(lv.at(.5), 0)} kg</b></div></div>
+      <p class="small muted" style="margin:8px 0 0">La vitesse max baisse en ligne droite avec la charge (Cross 2017) : −50 % de vitesse = la charge où ta puissance horizontale est la plus haute.</p></div>` : ''}
+    <div class="stack" style="margin-top:14px"><button class="btn" data-hfsave>Enregistrer mon profil</button><button class="btn ghost" data-hfstep="3">Retour aux sprints</button></div>`;
+}
+async function hfvSave() {
+  const free = HFW.runs.filter(r => !r.sled).sort((a, b) => b.res.Pmax - a.res.Pmax)[0]; if (!free) return; const lv = hfvLV();
+  const t = {type: 'hfv', date: TODAY, m: +HFW.m, h: +HFW.h, T: +HFW.T, splits: free.splits, ...Object.fromEntries(Object.entries(free.res).map(([k, v]) => [k, v == null ? null : +v.toFixed(4)])),
+    runs: HFW.runs.map(r => ({sled: r.sled || 0, mu: r.mu, vmax: +r.res.vmax.toFixed(3), F0: +r.res.F0.toFixed(3), t30: +r.res.t30.toFixed(3)})), ...(lv ? {L0: +lv.L0.toFixed(1)} : {})};
+  S.tset = {...(S.tset || {}), tests: [...tests(), t]};
+  const js = [10, 20, 30].filter(d => free.split?.[d]).map(d => ({id: uid(), type: 'spr' + d, date: TODAY, src: 'video', t: +free.split[d].toFixed(3)}));
+  if (await dbSet('settings/training', S.tset)) { if (js.length) await saveJumps([...jumps(), ...js]); toast('Profil force-vitesse en sprint enregistré'); closePane(); renderMod(); }
+}
+document.addEventListener('click', e => {
+  if (!HFW) return; const at = q => e.target.closest?.(q); let b;
+  if ((b = at('[data-hfstep]'))) { hfvGrab(); HFW.step = +b.dataset.hfstep; paneRender(); $('#pane-scroll').scrollTop = 0; return; }
+  if ((b = at('[data-hfdel]'))) { HFW.runs.splice(+b.dataset.hfdel, 1); paneRender(); return; }
+  if ((b = at('[data-hffilm]'))) { hfvGrab(); const sled = b.dataset.hffilm === '1' ? +HFW.sled || 0 : 0, mu = +HFW.mu || .35;
+    vaPane('hfv', {m: HFW.m, h: HFW.h, T: HFW.T, sled, mu, onSave: j => { HFW.runs.push({sled, mu, res: j.res, splits: j.splits, split: j.split}); restStart(sled ? 420 : 270); }}); return; }
+  if (at('[data-hfsave]')) { hfvSave(); return; }
+});
 /* ---------- guided protocols: 5RM, left/right symmetry, force-velocity ---------- */
 // The rest timer the protocols share.
 const PREST = {end: 0, t: null};
@@ -1729,15 +1917,13 @@ let SYMD = null;
 function symPane() {
   SYMD = {};
   for (const [ex] of SYM) SYMD[ex] = {D: rmTest(ex, '|D')?.kg || '', G: rmTest(ex, '|G')?.kg || ''};
-  openPane({title: 'Symétrie gauche / droite', onClose: () => clearInterval(PREST.t), render: () => `<p class="small muted" style="margin:16px 4px 8px">Pour chaque exercice : échauffe les deux côtés, commence par ta jambe la plus faible, même technique et même amplitude des deux côtés, 2 min de récup entre les côtés. Au-dessus de 10 % d'écart, c'est à corriger.</p>
-    <div id="rest-box" class="restb"></div>
-    ${SYM.map(([ex, n]) => { const d = +SYMD[ex].D, g = +SYMD[ex].G, gap = d && g ? Math.abs(d - g) / Math.max(d, g) * 100 : null, unit = ex === 'copen' ? 's' : ex === 'tibkb' ? 'reps' : 'kg';
-      return `<div class="sec-label">${esc(n)} <small>${esc(SYM_HOW[ex] || '')}</small></div><div class="list">
-        <div class="row"><label>Droite</label><span><input class="mini-in" inputmode="decimal" style="width:70px" value="${SYMD[ex].D}" data-symv="${ex}.D"> ${unit} <button class="chip" data-rest="120" data-restgo>Récup</button></span></div>
-        <div class="row"><label>Gauche</label><span><input class="mini-in" inputmode="decimal" style="width:70px" value="${SYMD[ex].G}" data-symv="${ex}.G"> ${unit}</span></div>
-        <div class="row"><span class="l">Écart</span><b style="${gap > 10 ? 'color:var(--bad)' : ''}">${gap != null ? fx(gap, 1) + ' %' + (gap > 10 ? ' · ' + (d < g ? 'droite' : 'gauche') + ' plus faible' : '') : '–'}</b></div></div>`; }).join('')}
-    <div class="sec-label">Au saut</div><div class="list"><button class="rowbtn" data-vatest="cmju"><span><b>CMJ sur une jambe, filmé</b><span class="meta">l'asymétrie d'explosivité, en plus de la force</span></span>${ICON.chev}</button></div>
-    <div style="margin-top:12px"><button class="btn" data-symsave>Enregistrer le test</button></div>`});
+  openPane({title: 'Symétrie gauche / droite', render: () => `<p class="small muted" style="margin:16px 4px 10px">Pour chaque exercice : échauffe les deux côtés, commence par ta jambe la plus faible, même technique et même amplitude, 2 min entre les côtés. Au-dessus de 10 % d'écart, c'est à corriger.</p>
+    <div class="stack">${SYM.map(([ex, n]) => { const d = +SYMD[ex].D, g = +SYMD[ex].G, gap = d && g ? Math.abs(d - g) / Math.max(d, g) * 100 : null, unit = ex === 'copen' ? 's' : ex === 'tibkb' ? 'répétitions' : 'kg';
+      return `<div class="card symc"><div class="rmh"><b>${esc(n)}</b><span>${esc(SYM_HOW[ex] || '')}</span></div>
+        <div class="symg">${[['D', 'Droite'], ['G', 'Gauche']].map(([sd, l]) => `<label><span>${l}</span><input class="mini-in big" inputmode="decimal" value="${SYMD[ex][sd]}" data-symv="${ex}.${sd}" aria-label="${esc(n)} ${l}"><small>${unit}</small></label>`).join('')}</div>
+        <div class="symgap${gap > 10 ? ' bad' : ''}">${gap != null ? `Écart ${fx(gap, 1)} %${gap > 10 ? ' · ' + (d < g ? 'droite' : 'gauche') + ' plus faible' : ' · équilibré'}` : 'Écart –'}</div></div>`; }).join('')}</div>
+    <div class="list" style="margin-top:14px"><button class="rowbtn" data-vatest="cmju"><span><b>CMJ sur une jambe, filmé</b><span class="meta">l'asymétrie d'explosivité, en plus de la force</span></span>${ICON.chev}</button></div>
+    <div style="margin-top:14px"><button class="btn" data-symsave>Enregistrer le test</button></div>`});
 }
 async function symSave() {
   const rm = {...(S.tset?.rm || {})}, res = {}; let n = 0;
@@ -1798,7 +1984,11 @@ async function fvSave() {
 }
 document.addEventListener('click', e => {
   const at = q => e.target.closest?.(q); let b;
-  if (at('[data-t5start]')) { T5 = null; t5Pane(); return; }
+  if (at('[data-t5start]')) { rmTestPane(); return; }
+  if ((b = at('[data-rmr]'))) { const [ex, n] = b.dataset.rmr.split('.'); RMR[ex] = +n; const kg = $('#rmkg-' + ex)?.value; paneRender(); if (kg) $('#rmkg-' + ex).value = kg; return; }
+  if ((b = at('[data-rmsave]'))) { rmSave(b.dataset.rmsave); return; }
+  if (at('[data-thfvstart]')) { hfvPane(); return; }
+  if (at('[data-tmore]')) { morePane(); return; }
   if (at('[data-tsymstart]')) { symPane(); return; }
   if (at('[data-tfvstart]')) { fvPane(); return; }
   if (at('[data-tplyo]')) { testLab(); return; }
@@ -2197,7 +2387,7 @@ function bedGoal(k = TODAY) { const b = dayPlan(k).filter(x => x.c === 'sommeil'
 const todayRoutine = () => (PLN().extra?.[TODAY] || []).find(x => x.routine);
 async function savePlanning(patch) {
   S.planning = {...PLN(), ...patch};
-  paneRender(); render(); renderMod();
+  paneRender(); render(); renderMod(); plfsRender();
   await dbSet('settings/planning', {...S.planning, updatedAt: new Date().toISOString()});
 }
 // Free time for a routine: gaps between blocks, or the calm / dead-time blocks, after now and before bed.
@@ -2215,17 +2405,135 @@ function freeSlots(k, min) {
 }
 let PLAN_UI = {wd: wdOf(TODAY)};
 const DAYS_FR = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+// Full screen, closed only by its cross (the back gesture does nothing here). Upright: one day on a time grid.
+// The turn button lays it sideways for the whole week, like his "Train de vie performance" sheet. Blocks snap to 5 minutes:
+// press and hold a block, then slide it (and, on the week, to another day).
+const PL_STEP = 5, PL_ORDER = [1, 2, 3, 4, 5, 6, 0];
+const PLFS = {on: false, mode: 'day'};
+const plMonday = () => addDays(TODAY, -((wdOf(TODAY) + 6) % 7));
+const plDay = wd => addDays(plMonday(), (wd + 6) % 7);
+const plIdx = (x, wd, k) => x.date ? 'x' + (PLN().extra[k] || []).findIndex(y => y.a === x.a && y.n === x.n) : weekPlan(wd).findIndex(y => y.a === x.a && y.n === x.n);
+const ICON_TURN = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="3" width="8" height="14" rx="1.6" transform="rotate(-35 12 10)"/><path d="M3 13a9 9 0 0 0 7 8"/><path d="M8 21h2.4v-2.4"/><path d="M21 11a9 9 0 0 0-7-8"/><path d="M16 3h-2.4v2.4"/></svg>';
 function planningPane() {
   PLAN_UI = {wd: wdOf(TODAY)};
-  openPane({title: 'Mon planning', render: () => {
-    const wd = PLAN_UI.wd, monday = addDays(TODAY, -((wdOf(TODAY) + 6) % 7)), k = addDays(monday, (wd + 6) % 7), L = dayPlan(k);
-    const own = !!PLN().week?.[wd];
-    return `<p class="small muted" style="margin:16px 4px 10px">Ta semaine type, tirée de Train de vie performance. Touche un bloc pour le déplacer, le changer ou le copier sur d'autres jours.</p>
-      <div class="pldays">${[1, 2, 3, 4, 5, 6, 0].map(d => { const kd = addDays(monday, (d + 6) % 7); return `<button data-pld="${d}" aria-pressed="${d === wd}"><span>${DAYS_FR[d].slice(0, 3)}</span><b>${+kd.slice(8)}</b></button>`; }).join('')}</div>
-      <div class="pltl">${L.map(x => { const i = x.date ? 'x' + (PLN().extra[k] || []).findIndex(y => y.a === x.a && y.n === x.n) : weekPlan(wd).findIndex(y => y.a === x.a && y.n === x.n); const h = Math.max(44, Math.min(120, (tmin(x.b) - tmin(x.a)) * .9)); return `<button class="plb" data-plb="${i}" style="--pc:${PCAT[x.c]?.[1] || '#888'};min-height:${h}px"><span class="t">${tfr(x.a)}<br><small>${tfr(x.b)}</small></span><span class="n"><b>${esc(x.n)}</b><small>${esc(PCAT[x.c]?.[0] || '')}${x.date ? ' · ce jour seulement' : ''}</small></span></button>`; }).join('')}</div>
-      <div class="stack" style="margin-top:14px"><button class="btn ghost" data-pladd>+ Ajouter un bloc</button>${own ? '<button class="btn ghost" data-plreset>Revenir au planning de mon fichier</button>' : ''}</div>`;
-  }});
+  let el = $('#plfs');
+  if (!el) {
+    el = document.createElement('div'); el.id = 'plfs'; el.className = 'plfs'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Mon planning');
+    document.body.appendChild(el); plDragInit(el);
+  }
+  PLFS.on = true; PLFS.mode = 'day'; PLFS.scrolled = false;
+  el.classList.add('on'); document.body.style.overflow = 'hidden';
+  try { history.pushState({mod: S.mod, plan: true}, ''); } catch (e) {}
+  plfsRender();
 }
+function plfsClose() {
+  PLFS.on = false; $('#plfs')?.classList.remove('on');
+  if (!P.stack.length && !S.sheet) document.body.style.overflow = '';
+  renderMod();
+}
+// Sideways only when the phone itself stays upright (the installed app is locked upright); a browser that turns does it alone.
+const plRot = () => PLFS.mode === 'week' && innerHeight > innerWidth;
+addEventListener('resize', () => { if (PLFS.on) plfsRender(); });
+function plfsRender() {
+  const el = $('#plfs'); if (!el || !PLFS.on) return;
+  const old = el.querySelector('.plg-scroll'), keep = old ? old.scrollTop : null;
+  const week = PLFS.mode === 'week', days = week ? PL_ORDER : [PLAN_UI.wd];
+  const lists = days.map(wd => ({wd, k: plDay(wd), L: dayPlan(plDay(wd))}));
+  const all = lists.flatMap(d => d.L);
+  const t0 = Math.max(0, Math.floor(Math.min(7 * 60, ...all.map(x => tmin(x.a))) / 60) * 60), t1 = 24 * 60;
+  const K = week ? 1.1 : 1.6, H = (t1 - t0) * K;
+  const used = [...new Set(all.map(x => x.c))].filter(c => PCAT[c]);
+  const hours = []; for (let t = t0; t <= t1; t += 60) hours.push(t);
+  const nowM = new Date().getHours() * 60 + new Date().getMinutes();
+  const col = ({wd, k, L}) => `<div class="plg-col${k === TODAY ? ' today' : ''}" data-plcol="${wd}">${hours.map(t => `<i class="plg-h" style="top:${(t - t0) * K}px"></i>`).join('')}
+      ${L.map(x => { const a = tmin(x.a), b = tmin(x.b), h = (b - a) * K, short = h < 30; return `<button class="plg-b${short ? ' short' : ''}" data-plb="${plIdx(x, wd, k)}" data-plwd="${wd}" style="--pc:${PCAT[x.c]?.[1] || '#888'};top:${(a - t0) * K}px;height:${Math.max(h - 1, 8)}px"><b>${esc(x.n)}</b>${short ? '' : `<small>${x.a} – ${x.b}${x.date ? ' · ce jour' : ''}</small>`}</button>`; }).join('')}
+      ${k === TODAY && nowM >= t0 ? `<i class="plg-now" style="top:${(nowM - t0) * K}px"></i>` : ''}</div>`;
+  const own = !!PLN().week?.[PLAN_UI.wd];
+  el.className = 'plfs on ' + (week ? 'week' : 'day') + (plRot() ? ' rot' : '');
+  el.innerHTML = `<div class="plfs-in">
+    <header class="plfs-top"><button class="plfs-ic" data-plx aria-label="Fermer le planning"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <div class="plfs-t"><b>Mon planning</b><small>${week ? 'Semaine type · garde le doigt sur un bloc pour le glisser' : DAYS_FR[PLAN_UI.wd] + ' · garde le doigt sur un bloc pour le glisser'}</small></div>
+      <button class="plfs-ic" data-plturn aria-label="${week ? 'Revenir à la journée' : 'Voir toute la semaine, téléphone tourné'}" aria-pressed="${week}">${ICON_TURN}</button></header>
+    ${week ? '' : `<div class="pldays">${PL_ORDER.map(d => `<button data-pld="${d}" aria-pressed="${d === PLAN_UI.wd}"><span>${DAYS_FR[d].slice(0, 3)}</span><b>${+plDay(d).slice(8)}</b></button>`).join('')}</div>`}
+    ${week ? `<div class="plg-head"><span></span>${lists.map(d => `<span class="${d.k === TODAY ? 'today' : ''}">${DAYS_FR[d.wd].slice(0, 3)} <b>${+d.k.slice(8)}</b></span>`).join('')}</div>` : ''}
+    <div class="plg-scroll"><div class="plg" style="height:${H + 8}px"><div class="plg-axis">${hours.map(t => `<span style="top:${(t - t0) * K}px">${String(t / 60 % 24).padStart(2, '0')} h</span>`).join('')}</div>${lists.map(col).join('')}</div>
+      ${week ? '' : `<div class="stack" style="margin:14px 0 24px"><button class="btn ghost" data-pladd>+ Ajouter un bloc</button>${own ? '<button class="btn ghost" data-plreset>Revenir au planning de mon fichier</button>' : ''}</div>`}</div>
+    <div class="plg-leg">${used.map(c => `<span><i style="background:${PCAT[c][1]}"></i>${esc(PCAT[c][0])}</span>`).join('')}</div>
+  </div>`;
+  el.dataset.t0 = t0; el.dataset.k = K;
+  const sc = el.querySelector('.plg-scroll');
+  if (keep != null && PLFS.scrolled) sc.scrollTop = keep;
+  else { sc.scrollTop = Math.max(0, ((PLAN_UI.wd === wdOf(TODAY) || week ? Math.max(nowM - 90, 7 * 60) : 7 * 60) - t0) * K); PLFS.scrolled = true; }
+}
+// Press and hold, then slide: the block follows the finger in 5-minute steps and is saved when the finger lifts.
+function plDragInit(el) {
+  let D = null, timer = null;
+  const pt = e => ({x: e.clientX, y: e.clientY});
+  // In the sideways view the page is turned a quarter: the finger's left-right is the grid's up-down.
+  const local = (p, q) => plRot() ? {dx: q.y - p.y, dy: -(q.x - p.x)} : {dx: q.x - p.x, dy: q.y - p.y};
+  const stop = e => e.stopPropagation();
+  ['touchstart', 'touchend', 'pointerup', 'pointercancel'].forEach(t => el.addEventListener(t, stop));
+  el.addEventListener('touchmove', e => { e.stopPropagation(); if (D?.live) e.preventDefault(); }, {passive: false});
+  el.addEventListener('contextmenu', e => { if (e.target.closest('.plg-b')) e.preventDefault(); });
+  el.addEventListener('pointerdown', e => {
+    e.stopPropagation();
+    const b = e.target.closest('.plg-b'); if (!b) return;
+    PLAN_UI.wd = +b.dataset.plwd;
+    D = {b, p0: pt(e), live: false, id: e.pointerId, min: 0, day: 0};
+    clearTimeout(timer);
+    timer = setTimeout(() => { if (!D) return; D.live = true; D.b.classList.add('lift'); if (PREFS.haptic) navigator.vibrate?.(15); try { D.b.setPointerCapture(D.id); } catch (err) {} }, 380);
+  });
+  el.addEventListener('pointermove', e => {
+    e.stopPropagation();
+    if (!D) return;
+    const d = local(D.p0, pt(e));
+    if (!D.live) { if (Math.hypot(d.dx, d.dy) > 8) { clearTimeout(timer); D = null; } return; }
+    const K = +el.dataset.k, cw = el.querySelector('.plg-col')?.offsetWidth || 1;
+    D.min = Math.round(d.dy / K / PL_STEP) * PL_STEP;
+    D.day = PLFS.mode === 'week' ? Math.round(d.dx / cw) : 0;
+    D.b.style.transform = `translate(${D.day * cw}px,${D.min * K}px)`;
+    D.b.querySelector('small')?.replaceChildren(document.createTextNode(plShiftLabel(D)));
+  });
+  el.addEventListener('pointerup', async e => {
+    clearTimeout(timer);
+    const d = D; D = null;
+    if (!d?.live) return;
+    // The click that follows the lift must not open the editor.
+    el.addEventListener('click', ev => { ev.stopPropagation(); ev.preventDefault(); }, {capture: true, once: true});
+    d.b.classList.remove('lift');
+    if (!d.min && !d.day) { d.b.style.transform = ''; return; }
+    await plMove(d.b.dataset.plb, +d.b.dataset.plwd, d.min, d.day);
+  });
+  el.addEventListener('pointercancel', () => { clearTimeout(timer); if (D?.live) { D.b.classList.remove('lift'); D.b.style.transform = ''; } D = null; });
+}
+function plBlockOf(i, wd) { const k = plDay(wd); return String(i).startsWith('x') ? (PLN().extra?.[k] || [])[+String(i).slice(1)] : weekPlan(wd)[+i]; }
+function plShiftLabel(d) {
+  const x = plBlockOf(d.b.dataset.plb, +d.b.dataset.plwd); if (!x) return '';
+  const wd = PL_ORDER[(PL_ORDER.indexOf(+d.b.dataset.plwd) + d.day + 70) % 7];
+  return `${d.day ? DAYS_FR[wd].slice(0, 3) + ' ' : ''}${tstr(Math.max(0, tmin(x.a) + d.min))} – ${tstr(Math.min(24 * 60, tmin(x.b) + d.min))}`;
+}
+async function plMove(i, wd, min, dayShift) {
+  const x = plBlockOf(i, wd); if (!x) return;
+  const len = tmin(x.b) - tmin(x.a), a = Math.max(0, Math.min(24 * 60 - len, tmin(x.a) + min));
+  const moved = {...x, a: tstr(a), b: tstr(a + len)}; delete moved.date;
+  if (String(i).startsWith('x')) {
+    const k = plDay(wd), ex = {...(PLN().extra || {})}, l = [...(ex[k] || [])]; l[+String(i).slice(1)] = {...l[+String(i).slice(1)], a: moved.a, b: moved.b}; ex[k] = l;
+    await savePlanning({extra: ex}); toast(`Bloc déplacé à ${tfr(moved.a)}`); return;
+  }
+  const to = PL_ORDER[(PL_ORDER.indexOf(wd) + dayShift + 70) % 7], week = {...(PLN().week || {})};
+  const from = weekPlan(wd).filter((_, j) => j !== +i);
+  if (to === wd) week[wd] = [...from, moved].sort((p, q) => p.a.localeCompare(q.a));
+  else { week[wd] = from; week[to] = [...weekPlan(to), moved].sort((p, q) => p.a.localeCompare(q.a)); }
+  await savePlanning({week});
+  toast(to === wd ? `Bloc déplacé à ${tfr(moved.a)}` : `Bloc déplacé au ${DAYS_FR[to].toLowerCase()} à ${tfr(moved.a)}`);
+}
+document.addEventListener('click', e => {
+  if (!PLFS.on || !e.target.closest('#plfs')) return;
+  if (e.target.closest('[data-plx]')) { plfsClose(); return; }
+  if (e.target.closest('[data-plturn]')) { PLFS.mode = PLFS.mode === 'week' ? 'day' : 'week'; PLFS.scrolled = false; plfsRender(); return; }
+  if (e.target.closest('[data-pld]')) plfsRender();
+});
+addEventListener('keydown', e => { if (e.key === 'Escape' && PLFS.on && !P.stack.length) plfsClose(); });
 let PB = null;
 function blockEdit(i) {
   const wd = PLAN_UI.wd, monday = addDays(TODAY, -((wdOf(TODAY) + 6) % 7)), k = addDays(monday, (wd + 6) % 7);
@@ -2237,9 +2545,9 @@ function blockEdit(i) {
     return `<div class="list" style="margin-top:16px">
       <div class="row col"><label for="pb-n">Nom</label><input id="pb-n" value="${esc(b.n)}" placeholder="Ex. Rouleau et respiration" data-pbf="n"></div>
       <div class="row col"><span class="l">Type de bloc</span><div class="chips2b">${Object.entries(PCAT).map(([c, [n, col]]) => `<button type="button" class="chip" data-pbc="${c}" aria-pressed="${b.c === c}" style="--pc:${col}"><i class="dot" style="background:${col}"></i>${esc(n)}</button>`).join('')}</div></div>
-      <div class="row"><label for="pb-a">Début</label><input type="time" id="pb-a" class="mini-in" value="${b.a}" data-pbf="a"></div>
-      <div class="row"><label for="pb-b">Fin</label><input type="time" id="pb-b" class="mini-in" value="${b.b === '24:00' ? '23:59' : b.b}" data-pbf="b"></div>
-      <div class="row"><span class="l">Déplacer</span><span style="display:flex;gap:6px"><button type="button" class="chip" data-pbsh="-30">− 30 min</button><button type="button" class="chip" data-pbsh="-15">− 15</button><button type="button" class="chip" data-pbsh="15">+ 15</button><button type="button" class="chip" data-pbsh="30">+ 30 min</button></span></div>
+      <div class="row"><label for="pb-a">Début</label><input type="time" step="300" id="pb-a" class="mini-in" value="${b.a}" data-pbf="a"></div>
+      <div class="row"><label for="pb-b">Fin</label><input type="time" step="300" id="pb-b" class="mini-in" value="${b.b === '24:00' ? '23:59' : b.b}" data-pbf="b"></div>
+      <div class="row"><span class="l">Déplacer</span><span style="display:flex;gap:6px"><button type="button" class="chip" data-pbsh="-15">− 15</button><button type="button" class="chip" data-pbsh="-5">− 5</button><button type="button" class="chip" data-pbsh="5">+ 5</button><button type="button" class="chip" data-pbsh="15">+ 15 min</button></span></div>
       ${PB.extra ? '' : `<div class="row col"><span class="l">Copier aussi sur<span class="hint">Le même bloc, aux mêmes heures</span></span><div class="chips2b">${[1, 2, 3, 4, 5, 6, 0].filter(d => d !== PB.wd).map(d => `<button type="button" class="chip" data-pbcp="${d}" aria-pressed="${PB.copy.includes(d)}">${DAYS_FR[d]}</button>`).join('')}</div></div>`}
     </div>
     ${PB.idx >= 0 ? '<div style="margin-top:12px"><button class="btn ghost" data-pbdel style="color:var(--bad)">Supprimer ce bloc</button></div>' : ''}`;
@@ -3663,7 +3971,7 @@ function go(mod, push = true) {
   // The phone's back gesture returns to the home page.
   if (push && mod !== 'home') try { history.pushState({mod}, ''); } catch (e) {}
 }
-addEventListener('popstate', e => { if (S.sheet) { closeSheet(true); return; } if (P.stack.length) { closePane(); try { history.pushState({mod: S.mod}, ''); } catch (err) {} return; } if ((e.state?.mod || 'home') === S.mod) return; go(e.state?.mod || 'home', false); });
+addEventListener('popstate', e => { if (PLFS.on && !S.sheet && !P.stack.length) { try { history.pushState({mod: S.mod, plan: true}, ''); } catch (err) {} return; } if (S.sheet) { closeSheet(true); return; } if (P.stack.length) { closePane(); try { history.pushState({mod: S.mod}, ''); } catch (err) {} return; } if ((e.state?.mod || 'home') === S.mod) return; go(e.state?.mod || 'home', false); });
 function renderMod(force) {
   if (S.mod === 'home' && (HP.el || HP.busy)) return;
   const el = S.mod === 'home' ? $('#home-view') : S.mod === 'T' ? $('#t-view') : S.mod === 'N' ? $('#f-view') : null;
@@ -4023,7 +4331,7 @@ function tSessions() {
     <h2>Mes séances</h2><div class="list">${mine.map(row).join('')}<button class="addbtn" data-tnew>+ Créer une séance</button></div>
     ${k === 'gym' && TDV_PLANS.length ? `<h2>Mon programme <small>Train de vie performance</small></h2><div class="list">${TDV_PLANS.map(row).join('')}</div>` : ''}
     ${base.length ? `<h2>Programmes TNR <small>à dupliquer et adapter</small></h2><div class="list">${base.map(row).join('')}</div>` : ''}
-    <div style="margin-top:16px"><button class="btn ghost" data-tplan>Planifier ma semaine</button></div>`;
+    <div style="margin-top:16px"><button class="btn ghost" data-tsplan>Planning des séances</button></div>`;
 }
 function tLibrary() {
   return `
@@ -4057,7 +4365,7 @@ function logSplit(l) {
     if (it.sets) {
       const rm = rmOf(it.ex)?.kg, secs = it.u === 's' || (!it.u && e.u === 's');
       for (const st of it.sets) {
-        const reps = secs ? (+st.reps || 0) / 3 : (+st.reps || 0), inten = +st.kg > 0 && rm && e.u === 'kg' ? Math.min(1.05, +st.kg / rm) : .6;
+        const reps = secs ? (+st.reps || 0) / 3 : (+st.reps || 0), inten = +st.kg > 0 && rm && e.u === 'kg' ? Math.min(1.05, +st.kg / rm) : +l.rpe > 0 ? clamp(.35 + .06 * +l.rpe, .4, .95) : .6;
         r.ton += (+st.kg || 0) * (+st.reps || 0); if (rm && +st.kg > 0 && !ACCESSORY(e)) { r.gW += inten * reps; r.gR += reps; }
         for (const k in c) { add(k, reps * inten * c[k], reps * c[k]); r.gL += reps * inten * c[k]; }
       }
@@ -4141,17 +4449,20 @@ function tProfile() {
   const lastSym = tests().filter(x => x.type === 'sym').sort((a, b) => b.date.localeCompare(a.date))[0];
   const fv = lastTest('fv'), fvr = fv ? fvProfile(fv) : null, cmj = jBest('cmj');
   const ago = d => { const n = daysBetween(d, TODAY); return n > 56 ? 'à refaire (' + Math.round(n / 7) + ' sem.)' : 'fait le ' + fmtShort(d); };
-  const row = (attr, title, sub) => `<button class="rowbtn" ${attr}><span><b>${title}</b><span class="meta">${sub}</span></span>${ICON.chev}</button>`;
+  const row = (attr, title, sub) => `<button class="banner" ${attr} style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>${title}</b><br><span class="small muted">${sub}</span></span>${ICON.chev}</button>`;
+  const hfv = tests().filter(x => x.type === 'hfv').sort((a, b) => b.date.localeCompare(a.date))[0];
   return `
     <header class="top"><div class="sub">Ton profil d'athlète</div><h1>Profil</h1></header>
     ${sprinterCard()}
     <div class="sec-label">Tests</div>
-    <div class="list">
-      ${row('data-t5start', 'Test 5RM', esc(last5 ? ago(last5.date) + ' · ' : '') + 'squat, hip thrust, soulevé, développé couché · protocole guidé')}
+    <div class="stack">
+      ${row('data-t5start', 'Test de RM', esc(last5 ? ago(last5.date) + ' · ' : '') + 'de 1 à 5RM, ton 1RM calculé · tous tes exercices de base')}
       ${row('data-tsymstart', 'Test de symétrie gauche / droite', esc(lastSym ? ago(lastSym.date) + ' · ' : '') + 'mollets, tibial, quadriceps, ischios, adducteurs, moyen fessier')}
-      ${row('data-tfvstart', 'Test profil force-vitesse', esc(fvr ? `${ago(fv.date)} · ${Math.round(fvr.imb * 100)} % de l'optimal · ` : '') + 'squat jumps chargés filmés · méthode Samozino')}
+      ${row('data-tfvstart', 'Test profil force-vitesse vertical', esc(fvr ? `${ago(fv.date)} · ${Math.round(fvr.imb * 100)} % de l'optimal · ` : '') + 'squat jumps chargés filmés · méthode Samozino')}
+      ${row('data-thfvstart', 'Test profil force-vitesse en sprint', esc(hfv ? `${ago(hfv.date)} · F0 ${fx(hfv.F0, 1)} N/kg · Vmax ${fx(hfv.vmax, 2)} m/s · ` : '') + 'sprint 30 m filmé, avec ou sans traîneau · horizontal')}
       ${row('data-tplyo', 'Tests pliométriques', esc(cmj ? 'CMJ ' + fx(+cmj.h, 1) + ' cm · ' : '') + 'CMJ, squat jump, drop jump, RSI, 10/5, pogo, une jambe')}
       ${row('data-vatest="sprint"', 'Tests de sprint', '10, 20, 30, 60 m et 5-0-5 · chronométrés à la vidéo')}
+      <button class="btn ghost" data-tmore>+ Plus de tests</button>
     </div>
     <div class="sec-label">Mes résultats</div>
     <div class="stack">
@@ -4194,7 +4505,7 @@ function planView(id) {
       ${coolText(p.cool).length ? `<div class="card wtxt" style="margin-top:12px"><span class="eyebrow">Retour au calme</span>${coolText(p.cool).map(t => `<p class="small">${esc(t)}</p>`).join('')}</div>` : ''}
       ${p.kind === 'gym' ? capsLine(planCheck(p.items)) : ''}
       <div class="stack" style="margin-top:16px"><button class="btn" data-tstart="${p.id}">Commencer</button>
-      <button class="btn ghost" data-tedit="${p.id}">${mine ? 'Modifier' : 'Dupliquer et adapter'}</button>
+      <button class="btn ghost" data-tedit="${p.id}">${mine ? 'Modifier' : 'Dupliquer et adapter'}</button>${mine ? `<button class="btn ghost" data-tdup="${p.id}">Dupliquer</button>` : ''}
       ${mine ? `<button class="btn ghost" data-tdel="${p.id}" style="color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent)">Supprimer</button>` : ''}</div>`;
   }});
 }
@@ -4247,20 +4558,37 @@ function sessionAuto(ed) {
 const WARM_G = [['cardio', 'Cardio', 'monter la température et le cœur'], ['mob', 'Mobilité articulaire', 'lubrifier les articulations dans tous les angles'], ['act', 'Activation', 'réveiller les muscles de la séance']];
 // [id, name, group, dose, muscles, minutes, for track only]
 const WARM = [
-  ['w_row', 'Rameur', 'cardio', '5 min', {}, 5], ['w_bike', 'Vélo', 'cardio', '5 min', {}, 5], ['w_ski', 'SkiErg', 'cardio', '4 min', {}, 4], ['w_ab', 'Assault bike', 'cardio', '4 min', {}, 4],
+  ['w_row', 'Rameur', 'cardio', '5 min', {}, 5, 'gym'], ['w_bike', 'Vélo', 'cardio', '5 min', {}, 5, 'gym'], ['w_ski', 'SkiErg', 'cardio', '4 min', {}, 4, 'gym'], ['w_ab', 'Assault bike', 'cardio', '4 min', {}, 4, 'gym'],
   ['w_rope', 'Corde à sauter', 'cardio', '3 min', {calves: 1}, 3], ['w_jog', 'Footing léger', 'cardio', '8 min', {calves: .5, hams: .5}, 8], ['w_jj', 'Jumping jacks', 'cardio', '2 min', {}, 2],
   ['m_ank', 'Cheville, genou au mur', 'mob', '10 par côté', {calves: 1, tib: 1}, 1], ['m_hipc', 'Cercles de hanche', 'mob', '10 par côté', {glutes: 1, adduct: 1, psoas: 1}, 1],
   ['m_9090', 'Hanches 90/90', 'mob', '8 bascules', {glutes: 1, adduct: .75}, 2], ['m_swing', 'Balanciers de jambe avant-arrière', 'mob', '10 par jambe', {hams: 1, psoas: 1}, 1],
   ['m_swl', 'Balanciers de jambe latéraux', 'mob', '10 par jambe', {adduct: 1, glutes: .5}, 1], ['m_wgs', 'Le plus grand étirement du monde', 'mob', '4 par côté', {psoas: 1, hams: .75, obl: .75}, 2],
   ['m_tsp', 'Rotations thoraciques', 'mob', '8 par côté', {erect: .75, obl: 1, lats: .5}, 1], ['m_cc', 'Chat-vache', 'mob', '10', {erect: 1, abs: .5}, 1],
-  ['m_band', 'Tour d\'épaules à la bande', 'mob', '10', {shoul: 1, pecs: .75, lats: .75}, 1], ['m_arm', 'Cercles de bras', 'mob', '10 par sens', {shoul: 1}, 1], ['m_wri', 'Poignets et coudes', 'mob', '30 s', {tri: .5, bi: .5}, 1],
+  ['m_band', 'Tour d\'épaules à la bande', 'mob', '10', {shoul: 1, pecs: .75, lats: .75}, 1, 'gym'], ['m_arm', 'Cercles de bras', 'mob', '10 par sens', {shoul: 1}, 1], ['m_wri', 'Poignets et coudes', 'mob', '30 s', {tri: .5, bi: .5}, 1, 'gym'],
   ['a_bridge', 'Pont fessier', 'act', '2 × 10', {glutes: 1, hams: .5}, 1], ['a_monster', 'Monster walk', 'act', '2 × 10 pas', {glutes: 1}, 1], ['a_gm', 'Good morning au poids du corps', 'act', '10', {hams: 1, erect: .75}, 1],
   ['a_squat', 'Squat au poids du corps', 'act', '10', {quads: 1, glutes: .5}, 1], ['a_lunge', 'Fentes au poids du corps', 'act', '6 par jambe', {quads: 1, glutes: 1}, 1], ['a_pogo', 'Pogo jumps', 'act', '2 × 15', {calves: 1, tib: .5}, 1],
   ['a_march', 'Marche du soldat à l\'élastique', 'act', '10 par jambe', {psoas: 1}, 1], ['a_bug', 'Dead bug', 'act', '8 par côté', {abs: 1}, 1], ['a_plank', 'Gainage', 'act', '30 s', {abs: 1, obl: .5}, 1],
-  ['a_cop', 'Copenhague court', 'act', '15 s par côté', {adduct: 1}, 1], ['a_pull', 'Écarté à l\'élastique', 'act', '15', {shoul: 1, rhomb: 1}, 1], ['a_push', 'Pompes lentes', 'act', '8', {pecs: 1, tri: .75}, 1],
-  ['a_scap', 'Tractions scapulaires', 'act', '8', {lats: 1, rhomb: 1}, 1], ['a_skip', 'Gammes : A-skip, B-skip', 'act', '2 × 20 m', {psoas: 1, calves: 1, hams: .5}, 2, true],
-  ['a_strides', 'Lignes droites progressives', 'act', '3 × 60 m', {hams: 1, glutes: .75, calves: .75}, 3, true]
-].map(([id, n, g, dose, mus, min, trk]) => ({id, n, g, dose, mus, min, trk}));
+  ['a_cop', 'Copenhague court', 'act', '15 s par côté', {adduct: 1}, 1], ['a_pull', 'Écarté à l\'élastique', 'act', '15', {shoul: 1, rhomb: 1}, 1, 'gym'], ['a_push', 'Pompes lentes', 'act', '8', {pecs: 1, tri: .75}, 1, 'gym'],
+  ['a_scap', 'Tractions scapulaires', 'act', '8', {lats: 1, rhomb: 1}, 1, 'gym'], ['a_skip', 'Gammes : A-skip, B-skip', 'act', '2 × 20 m', {psoas: 1, calves: 1, hams: .5}, 2, true],
+  ['a_strides', 'Lignes droites progressives', 'act', '3 × 60 m', {hams: 1, glutes: .75, calves: .75}, 3, true],
+  ['w_ell', 'Elliptique', 'cardio', '5 min', {}, 5, 'gym'], ['w_tread', 'Tapis de course', 'cardio', '5 min', {calves: .5}, 5, 'gym'], ['w_stair', 'Escalier ou stepper', 'cardio', '4 min', {quads: .5, glutes: .5}, 4, 'gym'],
+  ['w_shadow', 'Shadow boxing', 'cardio', '3 min', {shoul: .5}, 3, 'gym'], ['w_knees', 'Montées de genoux sur place', 'cardio', '1 min', {psoas: 1}, 1], ['w_butt', 'Talons-fesses sur place', 'cardio', '1 min', {hams: .5}, 1],
+  ['w_shuffle', 'Pas chassés', 'cardio', '2 × 20 m', {adduct: .75, glutes: .5}, 2], ['w_back', 'Course arrière légère', 'cardio', '2 × 30 m', {quads: .75, calves: .5}, 2, true], ['w_cod', 'Footing avec changements de direction', 'cardio', '4 min', {adduct: .5, calves: .5}, 4, true],
+  ['m_ankc', 'Cercles de chevilles', 'mob', '10 par sens', {calves: .75, tib: .75}, 1], ['m_knee', 'Cercles de genoux', 'mob', '10 par sens', {quads: .5}, 1], ['m_lrot', 'Fente avec rotation du buste', 'mob', '5 par côté', {psoas: 1, obl: .75, quads: .5}, 2],
+  ['m_coss', 'Fente latérale (cossack squat)', 'mob', '6 par côté', {adduct: 1, glutes: .5}, 2], ['m_deep', 'Squat profond tenu', 'mob', '45 s', {glutes: .75, adduct: .75, calves: .5}, 1], ['m_pig', 'Pigeon dynamique', 'mob', '6 par côté', {glutes: 1}, 2],
+  ['m_hfr', 'Fléchisseurs de hanche en fente basse, dynamique', 'mob', '8 par côté', {psoas: 1, quads: .5}, 2], ['m_inch', 'Inchworm', 'mob', '6', {hams: 1, shoul: .5, abs: .5}, 2], ['m_spider', 'Fente de Spiderman', 'mob', '5 par côté', {psoas: 1, adduct: .75, glutes: .5}, 2],
+  ['m_neck', 'Rotations de nuque', 'mob', '5 par sens', {}, 1], ['m_pelv', 'Rotations du bassin', 'mob', '10 par sens', {erect: .5, obl: .5}, 1], ['m_toe', 'Gros orteil et voûte plantaire', 'mob', '30 s par pied', {calves: .5}, 1],
+  ['m_book', 'Livre ouvert (rotation thoracique au sol)', 'mob', '6 par côté', {erect: .5, obl: .75, pecs: .5}, 1], ['m_disl', 'Passage d\'épaules au bâton', 'mob', '10', {shoul: 1, pecs: .5}, 1, 'gym'], ['m_wall', 'Glissés au mur (wall slides)', 'mob', '10', {shoul: 1, rhomb: .75}, 1, 'gym'],
+  ['m_hcar', 'Rotations contrôlées de hanche (CARs)', 'mob', '3 par sens', {glutes: .75, psoas: .75, adduct: .5}, 2], ['m_frank', 'Marche Frankenstein', 'mob', '2 × 15 m', {hams: 1}, 2], ['m_hurd', 'Passages de haies, marché', 'mob', '2 × 6 haies', {psoas: 1, adduct: .75, glutes: .75}, 3, true],
+  ['a_clam', 'Clamshell à l\'élastique', 'act', '12 par côté', {glutes: 1}, 1], ['a_sl_bridge', 'Pont fessier sur une jambe', 'act', '8 par côté', {glutes: 1, hams: .75}, 1], ['a_calf', 'Montées sur pointes', 'act', '15', {calves: 1}, 1],
+  ['a_tib', 'Relevés de pointes (tibial)', 'act', '15', {tib: 1}, 1], ['a_bird', 'Bird dog', 'act', '8 par côté', {erect: .75, abs: .5, glutes: .5}, 1], ['a_pallof', 'Pallof press', 'act', '8 par côté', {obl: 1, abs: .5}, 1, 'gym'],
+  ['a_side', 'Gainage latéral', 'act', '20 s par côté', {obl: 1, adduct: .25}, 1], ['a_face', 'Face pull à l\'élastique', 'act', '15', {shoul: 1, rhomb: 1}, 1, 'gym'], ['a_er', 'Rotations externes à l\'élastique', 'act', '12 par bras', {shoul: 1}, 1, 'gym'],
+  ['a_ytw', 'Y-T-W au sol', 'act', '6 de chaque', {shoul: 1, rhomb: 1}, 2, 'gym'], ['a_sqj', 'Squat jumps légers', 'act', '5', {quads: 1, glutes: .75, calves: .5}, 1], ['a_hops', 'Sauts sur place', 'act', '2 × 10', {calves: 1}, 1],
+  ['a_bounds', 'Bonds courts', 'act', '2 × 20 m', {glutes: 1, hams: .75, calves: .75}, 2, true], ['a_cskip', 'Gammes : C-skip, talons-fesses dynamiques', 'act', '2 × 20 m', {hams: 1, psoas: .75}, 2, true], ['a_arms', 'Bras de sprint', 'act', '2 × 15 s', {shoul: .75}, 1, true],
+  ['a_wall', 'Wall drill', 'act', '3 × 10 s', {psoas: 1, glutes: .75, calves: .5}, 2, true], ['a_toes', 'Marche sur pointes', 'act', '20 m', {calves: 1}, 1], ['a_slrdl', 'Soulevé de terre sur une jambe au poids du corps', 'act', '6 par côté', {hams: 1, glutes: 1}, 1],
+  ['a_bmarch', 'Pont fessier en marche', 'act', '10', {glutes: 1, hams: .75, abs: .5}, 1], ['a_gob', 'Goblet squat léger', 'act', '8', {quads: 1, glutes: .75}, 1, 'gym'], ['a_air', 'Avion sur une jambe (hip airplane)', 'act', '4 par côté', {glutes: 1, adduct: .5}, 1],
+  ['a_hollow', 'Hollow hold', 'act', '20 s', {abs: 1}, 1]
+].map(([id, n, g, dose, mus, min, ctx]) => ({id, n, g, dose, mus, min, trk: ctx === true || ctx === 'trk', gymOnly: ctx === 'gym'}));
 const WX = Object.fromEntries(WARM.map(w => [w.id, w]));
 function sessionMus(ed) {
   const m = {};
@@ -4271,7 +4599,7 @@ function warmSuggest(ed) {
   const m = sessionMus(ed), trk = ed.kind === 'track', sc = w => Object.entries(w.mus).reduce((a, [k, v]) => a + (m[k] || 0) * v, 0);
   const out = {};
   for (const [g] of WARM_G) {
-    let L = WARM.filter(w => w.g === g && (!w.trk || trk));
+    let L = WARM.filter(w => w.g === g && (!w.trk || trk) && !(trk && w.gymOnly));
     if (g === 'cardio') L = L.sort((a, b) => (trk ? (b.id === 'w_jog') - (a.id === 'w_jog') : (a.id === 'w_jog') - (b.id === 'w_jog')));
     else L = L.sort((a, b) => (trk ? (b.trk || 0) - (a.trk || 0) : 0) || sc(b) - sc(a));
     out[g] = L.map(w => [w.id, w.n, w.g, w.dose]);
@@ -4296,7 +4624,10 @@ document.addEventListener('click', e => {
   if ((b = at('[data-eddate]'))) { ED.date = ED.date === b.dataset.eddate ? null : b.dataset.eddate; paneRender(); return; }
   if (at('[data-edwarm]')) { ED.warm = {sel: warmDefault(ED)}; paneRender(); return; }
   if (at('[data-edwarmx]')) { delete ED.warm; paneRender(); return; }
-  if (at('[data-edwmore]')) { ED.warm.more = !ED.warm.more; paneRender(); return; }
+  if ((b = at('[data-edwadd]'))) { warmPick(b.dataset.edwadd); return; }
+  if ((b = at('[data-edwpick]'))) { ED.warm.sel = [...(ED.warm.sel || []), b.dataset.edwpick]; closePane(); return; }
+  if (at('[data-edcadd]')) { coolPick(); return; }
+  if ((b = at('[data-edcpick]'))) { ED.cool.sel = [...(ED.cool.sel || []), b.dataset.edcpick]; closePane(); return; }
   if ((b = at('[data-edws]'))) { const id = b.dataset.edws, L = ED.warm.sel; ED.warm.sel = L.includes(id) ? L.filter(x => x !== id) : [...L, id]; paneRender(); return; }
   if (at('[data-edcool]')) { ED.cool = {min: 10, sel: coolDefault(ED)}; paneRender(); return; }
   if (at('[data-edcoolx]')) { delete ED.cool; paneRender(); return; }
@@ -4326,15 +4657,16 @@ document.addEventListener('touchend', () => {
   let to = L.findIndex(b => { const r = b.getBoundingClientRect(); return d.y < r.top + r.height / 2; }); if (to < 0) to = L.length;
   const it = ED.items.splice(d.i, 1)[0]; ED.items.splice(to, 0, it); paneRender();
 });
-function editPlan(id, date) {
-  const p = id ? planById(id) : null, mine = p && !BUILTIN.includes(p) && !TDV_PLANS.includes(p);
+function editPlan(id, date, dup = false) {
+  const p = id ? planById(id) : null, mine = p && !BUILTIN.includes(p) && !TDV_PLANS.includes(p) && !dup;
   ED = p ? structuredClone(p) : {kind: S.tkind === 'track' ? 'track' : 'gym', name: '', desc: '', items: []};
   if (ED.kind === 'class') ED.kind = 'gym';
-  if (!mine) { ED.id = uid(); ED.autoName = true; ED.autoDesc = true; }
+  if (dup) { ED.id = uid(); ED.autoName = false; ED.autoDesc = false; ED.name = (p.name || 'Séance') + ' (copie)'; ED.wk = monday(TODAY); }
+  else if (!mine) { ED.id = uid(); ED.autoName = true; ED.autoDesc = true; }
   else { ED.autoName ??= false; ED.autoDesc ??= false; }
-  ED.date = date || Object.entries(S.tset.dated || {}).find(([, v]) => v === ED.id)?.[0] || (mine ? null : TODAY);
+  ED.date = dup ? null : date || Object.entries(S.tset.dated || {}).find(([, v]) => v === ED.id)?.[0] || (mine ? null : TODAY);
   ED.wk = ED.date ? monday(ED.date) : monday(TODAY);
-  openPane({title: mine ? 'Modifier la séance' : 'Nouvelle séance', fixed: true, left: {label: 'Enregistrer', fn: savePlan}, render: editBody, onClose: () => { ED = null; }});
+  openPane({title: dup ? 'Copie de la séance' : mine ? 'Modifier la séance' : 'Nouvelle séance', fixed: true, left: {label: 'Enregistrer', fn: savePlan}, render: editBody, onClose: () => { ED = null; }});
 }
 function whenRow() {
   const wk = ED.wk, sw = seasonWeek(wk);
@@ -4342,20 +4674,36 @@ function whenRow() {
     <div class="pldays">${[0, 1, 2, 3, 4, 5, 6].map(i => { const k = addDays(wk, i), b = dayPlan(k).find(x => x.c === (ED.kind === 'track' ? 'athle' : 'muscu')); return `<button type="button" data-eddate="${k}" aria-pressed="${ED.date === k}"><span>${DOW[i]}</span><b>${+k.slice(8)}</b>${b ? '<i class="pdot"></i>' : ''}</button>`; }).join('')}</div>
     <span class="hint">${ED.date ? 'Le ' + esc(fmtDay(ED.date)) + (dayPlan(ED.date).find(x => x.c === (ED.kind === 'track' ? 'athle' : 'muscu')) ? ', sur ton créneau du planning' : '') : 'Sans date : touche un jour. Le point = ' + (ED.kind === 'track' ? 'athlétisme' : 'musculation') + ' dans ton planning.'}</span></div>`;
 }
+const WARM_ADD = {cardio: '+ Ajouter du cardio', mob: '+ Ajouter de la mobilité', act: '+ Ajouter une activation'};
 function warmBox() {
   if (!ED.warm) return `<button class="btn ghost" data-edwarm>+ Ajouter un échauffement</button>`;
-  const sug = warmSuggest(ED), sel = ED.warm.sel || [];
+  const sel = ED.warm.sel || [];
   return `<div class="exbox wbox"><h3>Échauffement<small>${warmMin(ED.warm)} min</small></h3>
-    ${WARM_G.map(([g, lab, why]) => `<div class="sec-label" style="margin:10px 0 4px">${lab}<small style="text-transform:none;letter-spacing:0;font-weight:500"> · ${why}</small></div><div class="chips2b">${sug[g].filter((x, j) => j < (ED.warm.more ? 99 : g === 'cardio' ? 4 : 5) || sel.includes(x[0])).map(x => `<button type="button" class="chip" data-edws="${x[0]}" aria-pressed="${sel.includes(x[0])}">${esc(x[1])} <small>${esc(x[3])}</small></button>`).join('')}</div>`).join('')}
-    <div class="tools"><button type="button" data-edwmore>${ED.warm.more ? 'Moins de choix' : 'Plus de choix'}</button><button type="button" class="rm" data-edwarmx>Retirer l'échauffement</button></div></div>`;
+    ${WARM_G.map(([g, lab, why]) => { const L = sel.map(id => WX[id]).filter(x => x && x.g === g);
+      return `<div class="sec-label" style="margin:12px 0 4px">${lab}<small style="text-transform:none;letter-spacing:0;font-weight:500"> · ${why}</small></div>
+      ${L.length ? `<div class="wtl">${L.map(x => `<div class="wti"><span><b>${esc(x.n)}</b><small>${esc(x.dose)}</small></span><button type="button" class="wx" data-edws="${x.id}" aria-label="Retirer ${esc(x.n)}">×</button></div>`).join('')}</div>` : ''}
+      <button type="button" class="addln" data-edwadd="${g}">${WARM_ADD[g]}</button>`; }).join('')}
+    <div class="tools"><button type="button" class="rm" data-edwarmx>Retirer l'échauffement</button></div></div>`;
+}
+function warmPick(g) {
+  const lab = WARM_G.find(x => x[0] === g)[1];
+  openPane({title: lab, render: () => { const sel = ED?.warm?.sel || [], L = (warmSuggest(ED)[g] || []).filter(x => !sel.includes(x[0]));
+    return `<p class="small muted" style="margin:16px 4px 8px">Les plus utiles pour ta séance en premier. Touche pour ajouter.</p><div class="list">${L.map(([id, n, , dose]) => `<button class="rowbtn" data-edwpick="${id}"><span><b>${esc(n)}</b><span class="meta">${esc(dose)}</span></span><span class="kc">+</span></button>`).join('')}</div>`; }});
 }
 function coolBox() {
   if (!ED.cool) return `<button class="btn ghost" data-edcool>+ Ajouter un retour au calme</button>`;
-  const sug = coolSuggest(ED), sel = ED.cool.sel || [];
+  const sel = ED.cool.sel || [];
   return `<div class="exbox wbox"><h3>Retour au calme<small>${ED.cool.min} min</small></h3>
     <div class="chips2b" style="margin-top:8px">${[5, 10, 15, 20].map(m => `<button type="button" class="chip" data-edcm="${m}" aria-pressed="${ED.cool.min === m}">${m} min</button>`).join('')}</div>
-    <div class="chips2b" style="margin-top:8px">${sug.map(x => `<button type="button" class="chip" data-edcs="${x.id}" aria-pressed="${sel.includes(x.id)}">${esc(x.n)} <small>${x.min} min</small></button>`).join('')}</div>
+    ${sel.length ? `<div class="wtl" style="margin-top:10px">${sel.map(id => RX[id]).filter(Boolean).map(x => `<div class="wti"><span><b>${esc(x.n)}</b><small>${x.min} min</small></span><button type="button" class="wx" data-edcs="${x.id}" aria-label="Retirer ${esc(x.n)}">×</button></div>`).join('')}</div>` : ''}
+    <button type="button" class="addln" data-edcadd style="margin-top:6px">+ Ajouter au retour au calme</button>
     <div class="tools"><button type="button" class="rm" data-edcoolx>Retirer le retour au calme</button></div></div>`;
+}
+function coolPick() {
+  openPane({title: 'Retour au calme', render: () => { const sel = ED?.cool?.sel || [], m = sessionMus(ED), sc = r => (r.mus || []).reduce((a, k) => a + (m[k] || 0), 0);
+    const L = RLIB.map(r => RX[r[0]]).filter(r => r && ['respi', 'etir', 'mob'].includes(r.kind) && !sel.includes(r.id)).sort((a, b) => (a.kind === 'respi') - (b.kind === 'respi') || sc(b) - sc(a));
+    const grp = [['respi', 'Respiration'], ['etir', 'Étirements légers'], ['mob', 'Mobilité douce']];
+    return `<p class="small muted" style="margin:16px 4px 8px">Les plus utiles pour ta séance en premier. Touche pour ajouter.</p>${grp.map(([k, n]) => { const G2 = L.filter(r => r.kind === k); return G2.length ? `<div class="sec-label">${n}</div><div class="list">${G2.map(r => `<button class="rowbtn" data-edcpick="${r.id}"><span><b>${esc(r.n)}</b><span class="meta">${r.min} min${r.tool ? ' · ' + esc(r.tool) : ''}</span></span><span class="kc">+</span></button>`).join('')}</div>` : ''; }).join('')}`; }});
 }
 function editBody() {
   if (!ED) return '';
@@ -4367,18 +4715,21 @@ function editBody() {
     ${whenRow()}
     <div class="field"><label class="eyebrow" for="ed-name">Nom${ED.autoName ? ' · rempli tout seul' : ''}</label><input id="ed-name" data-ed="name" value="${esc(ED.autoName ? A.name : ED.name)}" placeholder="Ajoute des exercices : le nom se remplit"></div>
     <div class="field"><label class="eyebrow" for="ed-desc">Objectif${ED.autoDesc ? ' · rempli tout seul' : ''}</label><input id="ed-desc" data-ed="desc" value="${esc(ED.autoDesc ? A.desc : ED.desc || '')}" placeholder="Il suit la logique de tes exercices"></div>
+    <h2 class="sesh">Séance</h2>
+    <div class="sesbox">
     ${warmBox()}
-    <div id="ed-list">${ED.items.map((it, i) => { const e = exOf(it.ex), rm = !trk && e.u === 'kg' ? rmOf(it.ex)?.kg : null, kg = rm && it.pct ? r25(rm * it.pct / 100 * recFactor().k) : null; return `<div class="exbox edx" data-edi="${i}"><h3><span class="grip" aria-hidden="true">⋮⋮</span>${esc(e.n)}<small>${esc(e.eq || e.cat)}</small></h3>
+    <div id="ed-list"${ED.items.length ? '' : ' hidden'}>${ED.items.map((it, i) => { const e = exOf(it.ex), rm = !trk && e.u === 'kg' ? rmOf(it.ex)?.kg : null, kg = rm && it.pct ? r25(rm * it.pct / 100 * recFactor().k) : null; return `<div class="exbox edx" data-edi="${i}"><h3><span class="grip" aria-hidden="true">⋮⋮</span>${esc(e.n)}<small>${esc(e.eq || e.cat)}</small></h3>
       ${it.ex === 'warmup' ? `<div class="edrow" style="grid-template-columns:1fr"><label>Minutes${num(i, 'min', it.min, '15')}</label></div>`
         : trk || e.t === 'track' ? `<div class="edrow"><label>Répét.${num(i, 'reps', it.reps, '4')}</label><label>Distance m${num(i, 'dist', it.dist, '30')}</label><label>Intensité %${num(i, 'pct', it.pct, '95')}</label><label>Récup${rest(i, it.rest, '3:00')}</label></div>`
         : `<div class="seg useg" role="group" aria-label="Compter en">${[['reps', 'Répétitions'], ['s', 'Secondes']].map(([v, l]) => `<button type="button" data-edu="${i}.${v}" aria-pressed="${unitOf(it) === v}">${l}</button>`).join('')}</div>
-          <div class="edrow"><label>Séries${num(i, 'sets', it.sets, '4')}</label><label>${unitOf(it) === 's' ? 'Secondes' : 'Répét.'}${num(i, 'reps', it.reps, '5')}</label><label>% du max${num(i, 'pct', it.pct, '–')}</label><label>Récup${rest(i, it.rest, '2:00')}</label></div>
+          <div class="edrow"><label>Séries${num(i, 'sets', it.sets, '3')}</label><label>${unitOf(it) === 's' ? 'Secondes' : 'Répét.'}${num(i, 'reps', it.reps, '10')}</label><label>% du max${num(i, 'pct', it.pct, '–')}</label><label>Récup${rest(i, it.rest, '3:00')}</label></div>
           <div class="tempo"><span>Tempo</span>${['Excentrique', 'Pause bas', 'Concentrique', 'Pause haut'].map((l, j) => `<label>${l}<input class="mini-in" inputmode="numeric" data-edt="${i}.${j}" value="${(it.tempo || [])[j] ?? ''}" placeholder="–"></label>`).join('')}</div>
           ${kg ? `<p class="sug">≈ ${fx(kg, kg % 1 ? 1 : 0)} kg à ${it.pct} % de ton max (${fx(rm)} kg)${recFactor().why}</p>` : rm ? `<p class="hint">Ton max : ${fx(rm)} kg. Mets un % pour avoir la charge.</p>` : ''}`}
       <div class="tools"><span class="hint">Appuie longuement pour déplacer</span><button type="button" class="rm" data-edrm="${i}">Retirer</button></div></div>`; }).join('')}</div>
     ${ED.items.length ? capsLine(planCheck(ED.items)) : ''}
     <button class="btn ghost" data-edadd>+ Ajouter un exercice</button>
     ${coolBox()}
+    </div>
     <p class="small muted">Récup : tape 90 pour 90 s, 2 pour 2 min, 1,30 pour 1 min 30. Le % du max se calcule sur ton max (test ou estimation de tes séances).</p></div>`;
 }
 const EQUIPS = ['Barre', 'Haltères', 'Kettlebell', 'Machine', 'Poulie', 'Poids du corps', 'Élastique', 'Médecine-ball', 'Barre hexagonale', 'Landmine', 'Barre EZ', 'Smith', 'Box', 'Banc', 'Barre de traction', 'Barres parallèles', 'Traîneau', 'Ballon', 'Haies'];
@@ -4430,7 +4781,7 @@ function defaultItem(id) {
   const e = exOf(id);
   if (id === 'warmup') return {ex: id, min: 15};
   if (e.t === 'track') return e.u === 'g' ? {ex: id, reps: 2, dist: 20} : {ex: id, reps: 4, dist: 30, pct: 95, rest: 180};
-  return {ex: id, sets: 3, reps: e.u === 's' ? 30 : 8, rest: 90};
+  return {ex: id, sets: 3, reps: e.u === 's' ? 30 : 10, rest: 180, tempo: e.u === 's' ? undefined : [3, 0, 1, 0]};
 }
 async function savePlan() {
   if (!ED) return;
@@ -4446,6 +4797,22 @@ async function savePlan() {
   S.tset = {...S.tset, dated}; await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()});
   closePane(); if (P.stack.length) closePane();
   toast('Séance enregistrée'); planView(doc.id);
+}
+
+function sessionsPlanning() {
+  openPane({title: 'Planning des séances', render: () => {
+    const dated = S.tset?.dated || {}, lastD = Object.keys(dated).filter(k => k >= TODAY).sort().at(-1), mon = monday(TODAY);
+    let end = addDays(mon, 13); if (lastD && addDays(monday(lastD), 6) > end) end = addDays(monday(lastD), 6);
+    const weeks = []; for (let w = mon; w <= end; w = addDays(w, 7)) weeks.push(w);
+    const body = weeks.map(w => { const rows = [];
+      for (let i = 0; i < 7; i++) { const k = addDays(w, i), p = planFor(k); if (!p) continue;
+        const b = dayPlan(k).find(x => x.c === (p.kind === 'track' ? 'athle' : 'muscu')), done = logsOn(k).length > 0;
+        rows.push(`<button class="rowbtn" data-tplanv="${p.id}"><span><b>${esc(cap(fmtShort(k)))}${b ? ' · ' + tfr(b.a) : ''}</b><span class="meta">${p.kind === 'track' ? 'Piste' : 'Muscu'} · ${esc(p.name)} · ${estMin(p)} min${dated[k] ? '' : ' · séance type du jour'}</span></span>${done ? '<span class="chiptag">Fait</span>' : k < TODAY ? '<span class="small muted">passé</span>' : ICON.chev}</button>`); }
+      return `<div class="sec-label">Semaine ${seasonWeek(w)} <small>${esc(fmtShort(w))} – ${esc(fmtShort(addDays(w, 6)))}</small></div>${rows.length ? `<div class="list">${rows.join('')}</div>` : '<p class="small muted" style="margin:0 4px">Aucune séance programmée.</p>'}`; }).join('');
+    return `<div style="margin-top:8px">${body}</div>
+      <div class="stack" style="margin-top:16px"><button class="btn ghost" data-tplan>Séance type pour chaque jour</button><button class="btn ghost" data-hplan>Mes jours et mes heures</button></div>
+      <p class="note" style="text-align:left">Une séance placée à une date passe avant la séance type du jour. Pour placer une séance, ouvre-la puis Modifier ou Dupliquer, et choisis le jour.</p>`;
+  }});
 }
 function weekPlanner() {
   openPane({title: 'Planning de la semaine', render: () => {
@@ -5200,6 +5567,8 @@ document.addEventListener('click', e => {
   if (at('[data-tplan]')) { weekPlanner(); return; }
   if ((b = at('[data-tstart]'))) { startSession(b.dataset.tstart); return; }
   if ((b = at('[data-tedit]'))) { editPlan(b.dataset.tedit); return; }
+  if ((b = at('[data-tdup]'))) { editPlan(b.dataset.tdup, null, true); toast('Choisis le jour de la copie'); return; }
+  if (at('[data-tsplan]')) { sessionsPlanning(); return; }
   if ((b = at('[data-tdel]'))) { const p = S.plans[b.dataset.tdel]; if (p) { p.deleted = true; dbSet('plans/' + p.id, p); closeAllPanes(); toast('Séance supprimée'); } return; }
   if ((b = at('[data-tex]'))) { exView(b.dataset.tex); return; }
   if ((b = at('[data-tlog]'))) { logView(b.dataset.tlog); return; }
