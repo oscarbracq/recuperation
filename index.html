@@ -316,6 +316,8 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .mlegend{display:flex;gap:12px;justify-content:center;font-size:.75rem;color:var(--fg2);margin-top:4px}
 .mlegend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:-1px}
 .malert{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--bad) 12%,transparent);font-size:.8125rem;line-height:1.4}
+.malert.ok{background:color-mix(in srgb,var(--good) 12%,transparent)}
+.seasonl{display:block;margin:8px auto 0;padding:6px 12px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-size:.8125rem;font-weight:600}
 .malert.mid{background:color-mix(in srgb,var(--warn) 14%,transparent)}
 .hm-syn{max-width:400px;margin:18px auto 0;display:flex;flex-direction:column;gap:2px;text-align:left}
 .hm-syn details{border-radius:12px;transition:background .2s}
@@ -630,7 +632,7 @@ details.slow[open]>summary h2::after{content:" ▴"}
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=41"></script>
+<script src="supabase-db.js?v=42"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
@@ -1036,6 +1038,139 @@ function fuelMsg(k) {
   return `${fx(-left)} kcal au-dessus de l'objectif.` + prot;
 }
 /* ---------- greeting: one short line, like a mate saying hi; picked by time of day and stable for the day ---------- */
+
+
+/* ---------- season: blocks of weeks (Oscar's periodisation), the week's goal, the days to the competition ---------- */
+const SEASON_TPL = {
+  hiver: {name: 'Saison hivernale', blocks: [['Bloc 1 : PPG / Force', 5, 'Force max'], ['Bloc 2 : PPS / Puissance', 3, 'Conversion force → vitesse'], ['Bloc 3 : Pré-compétition', 2, 'Vitesse / force'], ['Bloc 4 : Compétition', 2, 'Affûtage']]},
+  ete: {name: 'Saison estivale', blocks: [['Bloc 1 : PPG / Force', 8, 'Force max'], ['Bloc 2 : PPS / Puissance', 6, 'Conversion force → vitesse'], ['Bloc 3 : Pré-compétition', 3, 'Vitesse / force'], ['Bloc 4 : Compétition', 3, 'Affûtage']]}
+};
+// Where today falls: the block, its week, and the goal of the block.
+function seasonNow(k = TODAY) {
+  const se = S.tset?.season; if (!se?.start || !se.blocks?.length) return null;
+  let d = daysBetween(se.start, k); if (d < 0) return {before: -d, se};
+  for (const [i, b] of se.blocks.entries()) { if (d < b[1] * 7) return {se, i, name: b[0], goal: b[2], week: Math.floor(d / 7) + 1, of: b[1], comp: se.comp ? daysBetween(k, se.comp) : null}; d -= b[1] * 7; }
+  return {after: true, se, comp: se.comp ? daysBetween(k, se.comp) : null};
+}
+function seasonLine() {
+  const n = seasonNow();
+  if (!n) return `<button class="small" data-tseason style="color:var(--accent);font-weight:600;margin-top:6px">+ Planifier ma saison</button>`;
+  const comp = n.comp != null && n.comp >= 0 ? ` · compétition dans ${n.comp} j` : '';
+  return `<button class="seasonl" data-tseason>${n.before ? `Saison dans ${n.before} jours` : n.after ? 'Saison terminée' : `${esc(n.name)} · semaine ${n.week}/${n.of} · ${esc(n.goal)}`}${comp}</button>`;
+}
+function seasonPane() {
+  openPane({title: 'Ma saison', render: () => {
+    const se = S.tset?.season || {start: monday(TODAY), blocks: SEASON_TPL.hiver.blocks.map(b => [...b]), comp: ''};
+    return `<p class="small muted" style="margin:16px 4px 8px">Tes blocs de préparation, comme dans ta planification. Le bloc et la semaine s'affichent en haut de Training.</p>
+      <div class="seg" role="group" style="margin-bottom:10px">${Object.entries(SEASON_TPL).map(([k, t]) => `<button type="button" data-stpl="${k}">${t.name}</button>`).join('')}</div>
+      <div class="list"><div class="row"><label for="se-start">Début</label><input type="date" id="se-start" class="mini-in" value="${se.start}" data-se="start"></div>
+        <div class="row"><label for="se-comp">Compétition visée</label><input type="date" id="se-comp" class="mini-in" value="${se.comp || ''}" data-se="comp"></div></div>
+      ${se.blocks.map((b, i) => `<div class="sec-label">Bloc ${i + 1}</div><div class="list"><div class="row"><input class="mini-in" style="text-align:left;flex:1" value="${esc(b[0])}" data-seb="${i}.0" aria-label="Nom du bloc"></div>
+        <div class="row"><label>Semaines</label><input class="mini-in" inputmode="numeric" style="width:70px" value="${b[1]}" data-seb="${i}.1"></div>
+        <div class="row"><input class="mini-in" style="text-align:left;flex:1" value="${esc(b[2])}" data-seb="${i}.2" aria-label="Objectif du bloc"></div></div>`).join('')}
+      <div class="stack" style="margin-top:12px"><button class="btn ghost" data-seadd>+ Ajouter un bloc</button><button class="btn" data-sesave>Enregistrer ma saison</button></div>`;
+  }});
+}
+let SE_DRAFT = null;
+const seDraft = () => SE_DRAFT ||= structuredClone(S.tset?.season || {start: monday(TODAY), blocks: SEASON_TPL.hiver.blocks.map(b => [...b]), comp: ''});
+
+/* ---------- backup sessions when running is not possible (Oscar's "Séance de secours") ---------- */
+const BACKUP = [
+  {id: 'p-sec-impact', kind: 'gym', name: 'Secours · sans impact', desc: 'Si courir n\'est pas possible (impact)', items: [
+    {ex: 'pogo', sets: 3, reps: 10, u: 'reps'}, {ex: 'hipflex', sets: 3, reps: 10, note: 'le plus vite possible'}, {ex: 'calf', sets: 3, reps: 10, note: 'excentrique ou isométrique'},
+    {ex: 'tibkb', sets: 3, reps: 10, note: 'excentrique ou isométrique'}, {ex: 'plank', sets: 3, reps: 60}]},
+  {id: 'p-sec-bassin', kind: 'gym', name: 'Secours · équilibre du bassin', desc: 'Si courir n\'est pas possible (bassin)', items: [
+    {ex: 'pogo', sets: 3, reps: 10, u: 'reps'}, {ex: 'dropjump', sets: 3, reps: 10}, {ex: 'bss', sets: 2, reps: 8, note: 'ou pistol squat'},
+    {ex: 'glutecable', sets: 3, reps: 10, note: 'moyen fessier, excentrique ou isométrique'}, {ex: 'plank', sets: 5, reps: 30, note: 'transverse, avec la respiration'}]}
+];
+
+/* ---------- tests: 5RM, left/right symmetry, force-velocity profile (Samozino), and when to test again ---------- */
+const TEST_5RM = ['squat', 'hipthrust', 'deadlift', 'bench'];
+const SYM = [['calf', 'Mollets'], ['tibkb', 'Tibial antérieur'], ['legext', 'Leg extension'], ['legcurl', 'Leg curl'], ['copen', 'Copenhague (s)'], ['glutecable', 'Moyen fessier']];
+const tests = () => S.tset?.tests || [];
+const lastTest = type => tests().filter(t => t.type === type).sort((a, b) => b.date.localeCompare(a.date))[0] || null;
+// Squat jumps at several loads → force and velocity at each, then the straight line F = F0 − Sfv·V.
+function fvProfile(t) {
+  const m = +t.mass, hpo = +t.hpo, g = 9.81; if (!m || !hpo) return null;
+  const pts = (t.jumps || []).filter(j => +j.h > 0).map(j => { const M = m + (+j.add || 0), h = +j.h; return {F: M * g * (h / hpo + 1) / m, V: Math.sqrt(g * h / 2)}; });
+  if (pts.length < 2) return null;
+  const n = pts.length, mx = pts.reduce((a, p) => a + p.V, 0) / n, my = pts.reduce((a, p) => a + p.F, 0) / n;
+  const slope = pts.reduce((a, p) => a + (p.V - mx) * (p.F - my), 0) / pts.reduce((a, p) => a + (p.V - mx) ** 2, 0), F0 = my - slope * mx, V0 = -F0 / slope;
+  const opt = +t.opt || -12.65, imb = slope / opt;
+  return {F0, V0, Pmax: F0 * V0 / 4, Sfv: slope, opt, imb, verdict: imb > 1.1 ? 'trop orienté force : priorité à la vitesse' : imb < .9 ? 'trop orienté vitesse : priorité à la force' : 'équilibré'};
+}
+function testsPane() {
+  openPane({title: 'Tests', render: () => {
+    const fv = lastTest('fv'), fvr = fv ? fvProfile(fv) : null, due = t => !t || daysBetween(t.date, TODAY) > 56;
+    const w = VAL.weight ? VAL.weight(lastKey('weight') || TODAY) : null;
+    return `<p class="small muted" style="margin:16px 4px 8px">Tes tests de référence. Ils mettent à jour tes max, et l'appli te rappelle de les refaire toutes les 8 semaines.</p>
+      <div class="sec-label">5RM</div><div class="list">${TEST_5RM.map(ex => { const t = tests().filter(x => x.type === '5rm' && x.ex === ex).sort((a, b) => b.date.localeCompare(a.date))[0]; return `<div class="row"><label for="t5-${ex}">${esc(exOf(ex).n)}<span class="hint">${t ? 'dernier : ' + t.kg + ' kg le ' + esc(fmtShort(t.date)) + (due(t) ? ' · à refaire' : '') : 'pas encore testé'}</span></label><input id="t5-${ex}" class="mini-in" inputmode="decimal" style="width:80px" placeholder="kg" data-t5="${ex}"></div>`; }).join('')}</div>
+      <div class="sec-label">Symétrie gauche / droite <small>sous 10 % d'écart</small></div><div class="list">${SYM.map(([ex, n]) => { const d = rmTest(ex, '|D')?.kg, gg = rmTest(ex, '|G')?.kg, gap = d && gg ? Math.abs(d - gg) / Math.max(d, gg) * 100 : null; return `<div class="row"><span class="l">${esc(n)}<span class="hint" style="${gap > 10 ? 'color:var(--bad)' : ''}">${gap != null ? `D ${d} · G ${gg} · écart ${fx(gap, 1)} %${gap > 10 ? ' : à corriger' : ''}` : 'note D et G dans la fiche de l\'exercice'}</span></span><button class="chip" data-tex="${ex}">Noter</button></div>`; }).join('')}</div>
+      <div class="sec-label">Profil force-vitesse <small>squat jump, méthode Samozino</small></div>
+      <div class="list"><div class="row"><label>Masse (kg)</label><input class="mini-in" inputmode="decimal" style="width:80px" value="${fv?.mass || (w ? fx(w, 1).replace(',', '.') : '')}" data-fv="mass"></div>
+        <div class="row"><label>Distance de poussée (m)<span class="hint">jambe tendue − hauteur de départ</span></label><input class="mini-in" inputmode="decimal" style="width:80px" value="${fv?.hpo || ''}" data-fv="hpo"></div>
+        ${[0, 20, 40, 60].map((a, i) => `<div class="row"><label>Saut avec +${a} kg<span class="hint">hauteur en m</span></label><input class="mini-in" inputmode="decimal" style="width:80px" value="${fv?.jumps?.[i]?.h || ''}" data-fvj="${i}" data-add="${a}"></div>`).join('')}
+        <div class="row"><label>Profil optimal (Sfv)<span class="hint">celui de ta feuille, modifiable</span></label><input class="mini-in" inputmode="decimal" style="width:80px" value="${fv?.opt || -12.65}" data-fv="opt"></div></div>
+      ${fvr ? `<div class="card" style="margin-top:10px"><div class="stats"><div><b>${fx(fvr.F0, 1)}</b><span>F0 N/kg</span></div><div><b>${fx(fvr.V0, 2)}</b><span>V0 m/s</span></div><div><b>${fx(fvr.Pmax, 1)}</b><span>Pmax W/kg</span></div></div><p class="small" style="margin:10px 0 0">Profil à ${Math.round(fvr.imb * 100)} % de l'optimal : <b>${esc(fvr.verdict)}</b>.${due(fv) ? ' À refaire.' : ''}</p></div>` : ''}
+      <div style="margin-top:12px"><button class="btn" data-tsavetests>Enregistrer les tests</button></div>`;
+  }});
+}
+async function saveTests() {
+  const t = [...tests()];
+  document.querySelectorAll('[data-t5]').forEach(i => { const kg = +String(i.value).replace(',', '.'); if (kg > 0) { t.push({type: '5rm', ex: i.dataset.t5, kg, date: TODAY}); } });
+  const fv = {type: 'fv', date: TODAY, jumps: []};
+  document.querySelectorAll('[data-fv]').forEach(i => { fv[i.dataset.fv] = +String(i.value).replace(',', '.') || null; });
+  document.querySelectorAll('[data-fvj]').forEach(i => { const h = +String(i.value).replace(',', '.'); fv.jumps[+i.dataset.fvj] = {add: +i.dataset.add, h: h || null}; });
+  const prev = lastTest('fv'), same = prev && JSON.stringify(prev.jumps) === JSON.stringify(fv.jumps) && prev.mass === fv.mass && prev.hpo === fv.hpo && prev.opt === fv.opt;
+  if (fv.jumps.filter(j => j.h).length >= 2 && !same) t.push(fv);
+  // A 5RM sets the 1RM of that lift (Epley).
+  const rm = {...(S.tset?.rm || {})};
+  for (const x of t.filter(x => x.type === '5rm' && x.date === TODAY)) rm[x.ex] = {kg: Math.round(e1rm(x.kg, 5)), date: TODAY};
+  S.tset = {...(S.tset || {}), tests: t, rm};
+  if (await dbSet('settings/training', S.tset)) { toast('Tests enregistrés'); paneRender(); renderMod(); }
+}
+
+/* ---------- the method coach and the training diagnosis: rules over 2 to 4 weeks ---------- */
+function weekIntensity(mon) {
+  let w = 0, r = 0, reps = 0;
+  for (let i = 0; i < 7; i++) for (const l of logsOn(addDays(mon, i))) for (const it of l.items || []) {
+    if (!it.sets || ACCESSORY(exOf(it.ex))) continue; const rm = rmOf(it.ex)?.kg;
+    for (const st of it.sets) { reps += +st.reps || 0; if (rm && +st.kg > 0) { w += (+st.kg / rm) * (+st.reps || 0); r += +st.reps || 0; } }
+  }
+  return {int: r ? w / r * 100 : null, reps};
+}
+function trainingDiag() {
+  const out = [], mon = monday(TODAY), a = weekIntensity(addDays(mon, -7)), b = weekIntensity(addDays(mon, -14));
+  if (a.int && b.int && a.int - b.int > 3) out.push(['mid', `Intensité moyenne +${fx(a.int - b.int, 1)} points la semaine dernière : ta limite est +2,5 à 3 %.`]);
+  if (a.reps && b.reps && (a.reps - b.reps) / b.reps > .08) out.push(['mid', `Volume +${Math.round((a.reps - b.reps) / b.reps * 100)} % la semaine dernière : ta limite est +4 à 8 %.`]);
+  const e7 = avgN('effort', 7), e28 = avgN('effort', 28);
+  if (e7 && e28 && e7 / e28 > 1.3) out.push(['bad', `Charge qui monte trop vite : effort 7 jours ${Math.round((e7 / e28 - 1) * 100)} % au-dessus de ta moyenne 28 jours.`]);
+  for (const id of MAIN_LIFTS) {
+    const h = exHistory(id).filter(x => x.it.sets); if (h.length < 4) continue;
+    const best = d => Math.max(0, ...h.filter(x => x.date <= d).flatMap(x => x.it.sets.map(st => e1rm(+st.kg, +st.reps))));
+    if (daysBetween(h.at(-1).date, h[0].date) >= 21 && best(TODAY) <= best(addDays(TODAY, -21)) * 1.005) out.push(['mid', `${exOf(id).n} : pas de progrès depuis 3 semaines. Change de stimulus (tempo, méthode, charge).`]);
+  }
+  let vmax = 0; for (let i = 0; i < 7; i++) for (const l of logsOn(addDays(TODAY, -i))) for (const it of l.items || []) if (it.reps && exOf(it.ex).cat === 'Vitesse max') vmax += it.reps.reduce((x, r) => x + (+r.dist || 0), 0);
+  const sea = seasonNow();
+  if (sea && /PPS|Pré|Comp/.test(sea.name || '') && vmax < 150) out.push(['mid', `Seulement ${vmax} m à vitesse max sur 7 jours dans un bloc de vitesse.`]);
+  const fv = lastTest('fv'), fvr = fv ? fvProfile(fv) : null;
+  if (fvr && fvr.imb > 1.1) out.push(['good', 'Ton profil force-vitesse demande de la vitesse : privilégie les charges légères rapides et le sprint.']);
+  for (const t of TEST_5RM) { const x = tests().filter(y => y.type === '5rm' && y.ex === t).sort((p, q) => q.date.localeCompare(p.date))[0]; if (x && daysBetween(x.date, TODAY) > 56) { out.push(['mid', `Test 5RM ${exOf(t).n.toLowerCase()} à refaire (dernier il y a ${Math.round(daysBetween(x.date, TODAY) / 7)} semaines).`]); break; } }
+  return out;
+}
+// The coach watches the high-low method itself, and says when to lighten a week or change method.
+function methodCoach() {
+  const out = [], kG = lastKey('hrv'), hb = kG ? base('hrv', kG, 60) : null;
+  if (hb) { let low = 0; for (let i = 0; i < 14; i++) { const v = avgN('hrv', 7, addDays(TODAY, -i)); if (v != null && v < hb.m - hb.sd * .5) low++; } if (low >= 10) out.push(['bad', 'Ta VFC reste sous ta norme depuis 2 semaines : fais une semaine allégée (−30 à 40 % de volume), puis reprends.']); }
+  let calm = 0, calmN = 0; for (let i = 1; i <= 14; i++) { const k = addDays(TODAY, -i); if (!highDay(k) && new Date(k + 'T12:00:00').getDay() !== 0) { calmN++; if ((effortDay(k) || 0) >= 10) calm++; } }
+  if (calmN >= 4 && calm / calmN >= .5) out.push(['mid', `Tes jours calmes ne le sont pas : ${calm} sur ${calmN} au-dessus de 10/21. En high-low, garde-les vraiment légers.`]);
+  const red = musState().filter(x => x.pct >= 100), redPrev = musState(addDays(TODAY, -7)).filter(x => x.pct >= 100).map(x => x.k);
+  for (const x of red.filter(x => redPrev.includes(x.k))) out.push(['bad', `${x.n} au-dessus de sa limite deux semaines de suite : baisse son volume ou espace les séances qui le chargent.`]);
+  const stuck = trainingDiag().filter(d => /pas de progrès/.test(d[1])).length;
+  if (stuck >= 2) out.push(['mid', 'Plusieurs mouvements stagnent en même temps : il est peut-être temps de changer de méthode (ondulatoire, blocs plus courts, autre répartition high-low).']);
+  return out;
+}
+const diagHtml = (list, title) => list.length ? `<div class="card"><span class="eyebrow">${title}</span>${list.map(([z, t]) => `<p class="malert ${z === 'bad' ? '' : z === 'mid' ? 'mid' : 'ok'}">${esc(t)}</p>`).join('')}</div>` : '';
 
 /* ---------- the body: each muscle coloured by its load over the period, against its limit ---------- */
 // [muscle, cx offset from the middle (0 = centre), cy, rx, ry] on a 200 × 400 figure, front and back.
@@ -2251,7 +2386,7 @@ const myPlans = () => Object.values(S.plans).filter(p => !p.deleted).sort((a, b)
 // Oscar's own programme, food plan and protocol, from his "Train de vie performance" file. They are personal,
 // so they live in the private database (tdv/main), loaded after sign-in, never in this public page.
 let TDV_PLANS = [];
-const allPlans = () => [...myPlans(), ...TDV_PLANS, ...BUILTIN];
+const allPlans = () => [...myPlans(), ...TDV_PLANS, ...BUILTIN, ...BACKUP];
 const planById = id => allPlans().find(p => p.id === id);
 // Session n of his programme = (season week - 1) x 3 + slot (Monday 1, Wednesday 2, Friday 3); repeated ones share a sheet.
 function tdvPlanFor(k) {
@@ -2499,6 +2634,9 @@ document.addEventListener('change', async e => {
 });
 document.addEventListener('change', e => {
   const t = e.target;
+  if (t.matches?.('[data-se]')) { seDraft()[t.dataset.se] = t.value; S.tset = {...(S.tset || {}), season: seDraft()}; return; }
+  if (t.matches?.('[data-seb]')) { const [i, j] = t.dataset.seb.split('.').map(Number); seDraft().blocks[i][j] = j === 1 ? Math.max(1, +t.value || 1) : t.value; S.tset = {...(S.tset || {}), season: seDraft()}; return; }
+  if (t.matches?.('[data-lmeta]') && S.live) { S.live[t.dataset.lmeta] = t.value; saveLive(); return; }
   if (t.matches?.('[data-rmset]')) { saveRm(t.dataset.rmset, +String(t.value).replace(',', '.') || 0).then(() => { paneRender(); toast('Max enregistré'); }); return; }
   if (t.matches?.('[data-rmc]')) { const v = loadFor(t.dataset.rmc, +$('#rmc-r').value, +$('#rmc-p').value); $('#rmc-o').textContent = v != null ? fx(v, v % 1 ? 1 : 0) + ' kg' : '–'; return; }
   if (t.matches?.('[data-mlim]')) { S.tset = {...(S.tset || {}), limits: {...(S.tset?.limits || {}), [t.dataset.mlim]: +t.value || MUSI[t.dataset.mlim].l}}; dbSet('settings/training', S.tset); renderMod(); return; }
@@ -2586,8 +2724,9 @@ function tToday() {
         <div style="margin-top:14px"><button class="btn" data-tstart="${p.id}">Commencer la séance</button></div></article>`
     : `<article class="card empty"><b>Pas de séance prévue aujourd'hui</b>Profite de la récupération, ou choisis une séance.<div class="stack" style="margin-top:14px"><button class="btn ghost" data-ttab="sessions">Choisir une séance</button><button class="btn ghost" data-tplan>Planifier ma semaine</button></div></article>`;
   return `
-    <header class="top"><div class="sub">${fmtDay(TODAY)} · semaine ${seasonWeek(TODAY)}</div><p class="pmsg">${esc(trainMsg(p, done))}</p>${(() => { const n = planFor(addDays(TODAY, 1)); return n ? `<p class="small muted" style="margin:6px 0 0">Demain : ${esc(n.name)}</p>` : ''; })()}</header>
-    <div class="stack">${live}${ask}
+    <header class="top"><div class="sub">${fmtDay(TODAY)} · semaine ${seasonWeek(TODAY)}</div><p class="pmsg">${esc(trainMsg(p, done))}</p>${seasonLine()}${(() => { const n = planFor(addDays(TODAY, 1)); return n ? `<p class="small muted" style="margin:6px 0 0">Demain : ${esc(n.name)}</p>` : ''; })()}</header>
+    <div class="stack">${live}${ask}${diagHtml(methodCoach(), 'Coach')}
+      ${painActive() && !done.length && !S.live ? `<div class="card"><span class="eyebrow">Douleur notée</span><p class="small" style="margin:6px 0 10px">Si courir n'est pas possible aujourd'hui, prends une séance de secours.</p><div class="stack">${BACKUP.map(b => `<button class="btn ghost" data-tplanv="${b.id}">${esc(b.name)}</button>`).join('')}</div></div>` : ''}
       <div class="card" style="display:flex;gap:12px;align-items:center"><span class="pill ${z}"><i></i>${rec ? rec.score + ' %' : modName('R')}</span><span class="small">${rec ? esc(tgt.text) : 'Ta récupération du matin s\'affichera ici pour ajuster la séance.'}</span></div>
       ${main}
       <div class="card"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Cette semaine</span><button class="small" style="color:var(--accent);font-weight:600" data-tplan>Planning</button></div><div class="week">${week}</div>
@@ -2640,24 +2779,24 @@ function sprinterCard() {
 }
 function tProgress() {
   const L = logs();
-  if (!L.length) return `<header class="top"><div class="sub">Records et volume</div><h1>Progrès</h1></header>${sprinterCard()}<div class="card empty"><b>Tes progrès apparaîtront ici</b>Termine ta première séance : charges, records et volume se calculent tout seuls.</div>`;
+  if (!L.length) return `<header class="top"><div class="sub">Records et volume</div><h1>Progrès</h1></header>${sprinterCard()}<button class="banner" data-ttests style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;margin-bottom:12px"><span><b>Tests</b><br><span class="small muted">5RM, symétrie gauche/droite, profil force-vitesse</span></span>${ICON.chev}</button><div class="card empty"><b>Tes progrès apparaîtront ici</b>Termine ta première séance : charges, records et volume se calculent tout seuls.</div>`;
   const lifts = MAIN_LIFTS.filter(id => bestE1rm(id));
   if (!lifts.includes(S.prog) && lifts.length) S.prog = lifts[0];
   // Best time per track exercise and distance.
   const bests = {};
-  for (const l of L) for (const it of l.items) if (it.reps) for (const r of it.reps) if (+r.t > 0 && +r.dist > 0) { const kk = it.ex + '|' + r.dist; if (!bests[kk] || +r.t < bests[kk].t) bests[kk] = {ex: it.ex, dist: +r.dist, t: +r.t, date: l.date}; }
+  for (const l of L) for (const it of l.items) if (it.reps) for (const r of it.reps) if (+r.t > 0 && +r.dist > 0) { const kk = it.ex + '|' + r.dist; if (!bests[kk] || +r.t < bests[kk].t) bests[kk] = {ex: it.ex, dist: +r.dist, t: +r.t, date: l.date, shoes: l.shoes, cond: l.cond}; }
   const weeks = [], mon = monday(TODAY);
   for (let i = 7; i >= 0; i--) { const m = addDays(mon, -7 * i), w = weekTotals(m); weeks.push({k: m, v: w.tonnage / 1000, s: w.sprintM, lab: 'S' + seasonWeek(m), tip: 'Semaine ' + seasonWeek(m)}); }
   const hist = S.prog ? exHistory(S.prog).slice().reverse().map(({date, it}) => ({k: date, v: Math.max(...(it.sets || []).map(s => e1rm(+s.kg, +s.reps)), 0) || null, tip: cap(fmtShort(date))})) : [];
   return `
     <header class="top"><div class="sub">Records et volume</div><h1>Progrès</h1></header>
     ${sprinterCard()}
-    <div class="stack">${bodyCard()}${musCard()}
+    <div class="stack">${diagHtml(trainingDiag(), 'Diagnostic')}<button class="banner" data-ttests style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Tests</b><br><span class="small muted">5RM, symétrie gauche/droite, profil force-vitesse</span></span>${ICON.chev}</button>${bodyCard()}${musCard()}
       ${lifts.length ? `<div class="card"><div class="chead" style="margin-bottom:6px"><span class="eyebrow">Max estimé</span><b class="num">${fx(bestE1rm(S.prog))} kg</b></div>
         <div class="chipsx">${lifts.map(id => `<button class="chip" data-tprog="${id}" aria-pressed="${S.prog === id}">${esc(exOf(id).n)}</button>`).join('')}</div>
         ${hist.length > 1 ? chart(hist, {color: 'var(--accent)', dec: 0, unit: 'kg'}) : '<p class="small muted">Encore une séance avec cet exercice pour voir la courbe.</p>'}
         <p class="small muted" style="margin-top:8px">Calculé à partir de ta meilleure série de chaque séance (formule d'Epley) : pas besoin de tester ton max.</p></div>` : ''}
-      ${Object.keys(bests).length ? `<div class="card"><span class="eyebrow">Meilleurs chronos</span><ul class="exl">${Object.values(bests).sort((a, b) => a.dist - b.dist).map(b => `<li><span>${esc(exOf(b.ex).n)} ${b.dist} m</span><span>${fx(b.t, 2)} s · ${fx(b.dist / b.t * 3.6, 1)} km/h</span></li>`).join('')}</ul></div>` : ''}
+      ${Object.keys(bests).length ? `<div class="card"><span class="eyebrow">Meilleurs chronos</span><ul class="exl">${Object.values(bests).sort((a, b) => a.dist - b.dist).map(b => `<li><span>${esc(exOf(b.ex).n)} ${b.dist} m</span><span>${fx(b.t, 2)} s · ${fx(b.dist / b.t * 3.6, 1)} km/h${b.shoes ? ' · ' + esc(b.shoes) : ''}${b.cond ? ' · ' + esc(b.cond) : ''}</span></li>`).join('')}</ul></div>` : ''}
       <div class="card"><span class="eyebrow">Tonnage par semaine</span><p class="small muted" style="margin:4px 0 30px">Charge × répétitions de toutes tes séries de musculation, en tonnes.</p>${chart(weeks, {color: 'var(--accent)', bars: true, dec: 1, unit: 't'})}</div>
       <div class="card"><span class="eyebrow">Sprint par semaine</span><p class="small muted" style="margin:4px 0 30px">Mètres courus à 90 % et plus. La règle : pas plus de +15 % d'une semaine à l'autre.</p>${chart(weeks.map(w => ({...w, v: w.s})), {color: 'var(--accent)', bars: true, dec: 0, unit: 'm'})}</div>
     </div>`;
@@ -2793,6 +2932,7 @@ function liveBody() {
   const doneSets = L.items.reduce((s, it) => s + (it.sets || it.reps).filter(x => x.done).length, 0), all = L.items.reduce((s, it) => s + (it.sets || it.reps).length, 0);
   const back = (L.removed || []).map((r, n) => `<button data-tlback="${n}" aria-label="Remettre ${esc(exOf(r.item.ex).n)} dans la séance"><b>${esc(exOf(r.item.ex).n)}</b> · retiré · toucher pour remettre</button>`).join('');
   return `<div class="livehead"><span class="chiptag">${L.kind === 'gym' ? 'Musculation' : 'Piste'} · ${doneSets}/${all}</span>${gA ? `<b>${fx(gA.min)} min</b>` : ''}</div>
+    ${L.kind === 'track' ? `<div class="edrow" style="margin-top:10px;grid-template-columns:1fr 1fr"><label>Chaussures<select class="mini-in" data-lmeta="shoes">${['', 'Pointes carbone', 'Pointes', 'Running fractionné', 'Running long'].map(o => `<option${(L.shoes || '') === o ? ' selected' : ''}>${o}</option>`).join('')}</select></label><label>Conditions<select class="mini-in" data-lmeta="cond">${['', 'Piste, vent favorable', 'Piste, sans vent', 'Piste, vent contraire', 'Indoor', 'Pluie'].map(o => `<option${(L.cond || '') === o ? ' selected' : ''}>${o}</option>`).join('')}</select></label></div>` : ''}
     ${L.fill ? `<p class="small muted" style="margin:10px 4px 0">Tout est rempli comme prévu. Corrige ce qui a changé et décoche ce que tu n'as pas fait.</p>` : ''}
     ${L.items.map((it, i) => liveBox(it, i)).join('')}
     ${back ? `<div class="rmback">${back}</div>` : ''}
@@ -2843,7 +2983,7 @@ async function saveLive2() {
   if (!items.length) { toast('Valide au moins une série avec ✓'); return; }
   const tonnage = items.reduce((s, it) => s + (it.u === 's' ? 0 : (it.sets || []).reduce((a, x) => a + x.kg * x.reps, 0)), 0);
   const sprintM = items.reduce((s, it) => s + (it.reps && SPRINT_CATS.includes(exOf(it.ex).cat) && (it.pct ?? 100) >= 90 ? it.reps.reduce((a, r) => a + r.dist, 0) : 0), 0);
-  const doc = {id: L.id, plan: L.plan, name: L.name, kind: L.kind, date: L.date, start: L.start, min, rpe, note, items, tonnage: Math.round(tonnage), sprintM, updatedAt: new Date().toISOString()};
+  const doc = {id: L.id, plan: L.plan, name: L.name, kind: L.kind, date: L.date, start: L.start, min, rpe, note, items, shoes: L.shoes || null, cond: L.cond || null, tonnage: Math.round(tonnage), sprintM, updatedAt: new Date().toISOString()};
   S.logs[doc.id] = doc;
   if (!await dbSet('training/' + doc.id, doc)) return;
   await feedReload(L.date);
@@ -3209,6 +3349,12 @@ document.addEventListener('click', e => {
   if ((b = at('[data-tgfill]'))) { fillFromWatch(b.dataset.tgfill); return; }
   if (at('[data-rmlist]')) { rmList(); return; }
   if (at('[data-hask]')) { askClaude(); return; }
+  if (at('[data-tseason]')) { SE_DRAFT = null; seDraft(); seasonPane(); return; }
+  if ((b = at('[data-stpl]'))) { const d = seDraft(); d.blocks = SEASON_TPL[b.dataset.stpl].blocks.map(x => [...x]); S.tset = {...(S.tset || {}), season: d}; paneRender(); return; }
+  if (at('[data-seadd]')) { const d = seDraft(); d.blocks.push(['Nouveau bloc', 3, 'Objectif']); S.tset = {...(S.tset || {}), season: d}; paneRender(); return; }
+  if (at('[data-sesave]')) { S.tset = {...(S.tset || {}), season: seDraft()}; dbSet('settings/training', S.tset).then(ok => { if (ok) { toast('Saison enregistrée'); closePane(); renderMod(); } }); return; }
+  if (at('[data-ttests]')) { testsPane(); return; }
+  if (at('[data-tsavetests]')) { saveTests(); return; }
   if ((b = at('[data-mgran]'))) { S.mgran = b.dataset.mgran; renderMod(true); return; }
   if ((b = at('[data-mz]'))) { S.msel = S.msel === b.dataset.mz ? null : b.dataset.mz; renderMod(true); return; }
   if (at('[data-mlims]')) { musLimits(); return; }
