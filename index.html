@@ -572,7 +572,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=28"></script>
+<script src="supabase-db.js?v=29"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
@@ -1472,6 +1472,32 @@ sheetEl.addEventListener('touchend', () => {
   if (sheetY + d.v * 200 > sheetEl.offsetHeight * .25) { closeSheet(); return; }
   setSheetY(0);
 });
+// The same pull-down on the second sheet (Réglages, Training and Fuel windows): far enough, it closes.
+(() => {
+  const el = $('#pane'), sc = $('#pane-scroll');
+  let d = null, y = 0;
+  const set = (v, anim = true) => { y = v; el.classList.toggle('drag', !anim); el.style.setProperty('--sy', v + 'px'); $('#scrim').style.opacity = anim ? '' : String(Math.max(0, Math.min(1, 1 - v / el.offsetHeight))); };
+  el.addEventListener('touchstart', e => {
+    if (e.target.closest('.chartbox, input, textarea, select')) return;
+    const t = e.touches[0].clientY; d = {y0: t, start: y, active: false, last: t, t: performance.now(), v: 0};
+  }, {passive: true});
+  el.addEventListener('touchmove', e => {
+    if (!d) return;
+    const t = e.touches[0].clientY, dy = t - d.y0;
+    if (!d.active) {
+      if (Math.abs(dy) < 6) return;
+      if (dy > 0 && sc.scrollTop <= 0) { d.active = true; d.y0 = t; d.start = y; } else { d = null; return; }
+    }
+    e.preventDefault();
+    const now = performance.now(); d.v = (t - d.last) / Math.max(1, now - d.t); d.last = t; d.t = now;
+    set(Math.max(0, d.start + (t - d.y0)), false);
+  }, {passive: false});
+  el.addEventListener('touchend', () => {
+    const g = d; d = null; if (!g?.active) return;
+    if (y + g.v * 200 > el.offsetHeight * .25) { el.classList.remove('drag'); closeAllPanes(); setTimeout(() => set(0), 500); return; }
+    set(0);
+  });
+})();
 async function saveNote() {
   const k = $('#e-date').value || TODAY;
   const doc = {...(S.manual[k] || {})};
@@ -1988,11 +2014,22 @@ async function notifLoad() {
   try { NOTIF = window.RECUP_PUSH ? await window.RECUP_PUSH.state() : 'unsupported'; } catch (e) { NOTIF = 'off'; }
   if (P.stack.length) paneRender();
 }
+const NOTIF_DEF = ['09:00', '20:00'];
+const notifTimes = () => Array.isArray(S.app?.notifTimes) ? S.app.notifTimes : NOTIF_DEF;
+const notifKind = t => +t.slice(0, 2) < 14 ? 'Bilan du matin : ta nuit, ta récupération, le conseil du jour' : 'Bilan du soir : ton effort et ce que tu fais ou évites ce soir';
+async function saveNotifTimes(times) {
+  S.app = {...(S.app || {}), notifTimes: [...new Set(times.filter(Boolean))].sort()};
+  paneRender();
+  await dbSet('settings/app', {...S.app, updatedAt: new Date().toISOString()});
+}
 function notifSection() {
-  const st = NOTIF, hint = st === 'unsupported' ? 'Disponible dans l\'appli installée sur ton téléphone.' : st === 'denied' ? 'Bloquées par le téléphone : Paramètres > Applications > TNR Athletics > Notifications.' : 'À 9 h : ta nuit, ta récupération et le conseil du jour. À 20 h : ton effort par rapport à l\'objectif et ce soir.';
+  const st = NOTIF, hint = st === 'unsupported' ? 'Disponible dans l\'appli installée sur ton téléphone.' : st === 'denied' ? 'Bloquées par le téléphone : Paramètres > Applications > TNR Athletics > Notifications.' : 'Un petit bilan sur ton téléphone, aux heures que tu choisis (jusqu\'à 3 par jour).';
   return `<h2>Notifications</h2>
-    <div class="list"><div class="row"><label for="hs-notif">Bilan à 9 h et 20 h<span class="hint">${hint}</span></label><span class="switch"><input type="checkbox" id="hs-notif" data-hnotif${st === 'on' ? ' checked' : ''}${!st || st === 'unsupported' || st === 'denied' ? ' disabled' : ''}><span></span></span></div>
-      ${st === 'on' ? '<div class="row col"><button class="btn ghost" data-hnotiftest>M\'envoyer une notification de test</button></div>' : ''}</div>`;
+    <div class="list"><div class="row"><label for="hs-notif">Recevoir les notifications<span class="hint">${hint}</span></label><span class="switch"><input type="checkbox" id="hs-notif" data-hnotif${st === 'on' ? ' checked' : ''}${!st || st === 'unsupported' || st === 'denied' ? ' disabled' : ''}><span></span></span></div>
+      ${st === 'on' ? `${notifTimes().map((t, i) => `<div class="row"><label for="hs-nt${i}">Notification ${i + 1}<span class="hint">${notifKind(t)}</span></label><span style="display:flex;gap:8px;align-items:center"><input type="time" id="hs-nt${i}" class="mini-in" style="width:110px" value="${t}" data-hntime="${i}"><button type="button" class="chip" data-hntdel="${i}" aria-label="Retirer la notification ${i + 1}">✕</button></span></div>`).join('')}
+      ${notifTimes().length < 3 ? '<div class="row col"><button class="addbtn" data-hntadd>+ Ajouter une notification</button></div>' : ''}
+      ${notifTimes().length ? '' : '<div class="row"><span class="hint">Aucune heure choisie : tu ne reçois rien. Ajoute une notification pour en recevoir.</span></div>'}
+      <div class="row col"><span class="hint">Avant 14 h : bilan du matin. À partir de 14 h : bilan du soir. Envoyée à 5 minutes près, juste après une synchro Garmin et Withings.</span><button class="btn ghost" data-hnotiftest>M'envoyer une notification de test</button></div>` : ''}</div>`;
 }
 document.addEventListener('change', async e => {
   const t = e.target; if (!t.matches?.('[data-hnotif]') || !window.RECUP_PUSH) return;
@@ -2000,6 +2037,17 @@ document.addEventListener('change', async e => {
   try { NOTIF = t.checked ? await window.RECUP_PUSH.on() : await window.RECUP_PUSH.off(); toast(NOTIF === 'on' ? 'Notifications activées' : NOTIF === 'denied' ? 'Notifications refusées par le téléphone' : 'Notifications coupées'); }
   catch (err) { NOTIF = await window.RECUP_PUSH.state().catch(() => 'off'); toast('Activation impossible pour l\'instant'); }
   paneRender();
+});
+document.addEventListener('change', e => {
+  const t = e.target; if (!t.matches?.('[data-hntime]') || !t.value) return;
+  const times = [...notifTimes()]; times[+t.dataset.hntime] = t.value; saveNotifTimes(times);
+});
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-hntadd],[data-hntdel]'); if (!b) return;
+  const times = [...notifTimes()];
+  if (b.dataset.hntdel != null) times.splice(+b.dataset.hntdel, 1);
+  else times.push(['09:00', '20:00', '13:00', '18:00'].find(x => !times.includes(x)) || '12:00');
+  saveNotifTimes(times);
 });
 document.addEventListener('click', async e => {
   const b = e.target.closest('[data-hnotiftest]'); if (!b || !window.RECUP_PUSH) return;

@@ -1,6 +1,7 @@
 // TNR Athletics — the 9 h and 20 h summary, sent to Oscar's phone as a Web Push notification (free, no third party).
-// Called by pg_cron at both possible UTC hours, with the cron key this function keeps in recup_private (push.cronKey),
-// so no secret is ever written in the job; it only sends when it is 9 h or 20 h in Paris, asks the `sync` function
+// Called by pg_cron every 5 minutes, with the cron key this function keeps in recup_private (push.cronKey),
+// so no secret is ever written in the job; it only sends at the times Oscar chose in the app (settings/app.notifTimes,
+// up to 3, default 9 h and 20 h, Paris time; before 14 h the morning summary, after it the evening one), asks the `sync` function
 // for fresh Garmin and Withings data first (with the ingest token handed over once by supabase-notify-token.ps1),
 // then builds the text from the same rules as the app.
 // The app (Oscar's session) uses it to get the public key, save its push subscription and send a test.
@@ -23,7 +24,8 @@ const serverKey = () => {
 const db = createClient(Deno.env.get('SUPABASE_URL')!, serverKey(), {auth: {persistSession: false}});
 const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), {status, headers: {...CORS, 'Content-Type': 'application/json'}});
 const parisDay = (d: Date) => new Intl.DateTimeFormat('en-CA', {timeZone: 'Europe/Paris'}).format(d);
-const parisHour = (d: Date) => +new Intl.DateTimeFormat('en-GB', {timeZone: 'Europe/Paris', hour: '2-digit', hourCycle: 'h23'}).format(d);
+const parisHM = (d: Date) => new Intl.DateTimeFormat('en-GB', {timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', hourCycle: 'h23'}).format(d);
+const mins = (hm: string) => +hm.slice(0, 2) * 60 + +hm.slice(3, 5);
 
 async function sha256(s: string) {
   const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
@@ -202,7 +204,7 @@ Deno.serve(async req => {
   const body = await req.json().catch(() => ({}));
   if (!st.cronKey) { st.cronKey = b64u(crypto.getRandomValues(new Uint8Array(24))); await putPrivate('push', st); }
   if (token && body.keepToken) { st.syncToken = token; await putPrivate('push', st); return json({kept: true}); }
-  const now = new Date(), TODAY = parisDay(now), hour = parisHour(now);
+  const now = new Date(), TODAY = parisDay(now), hm = parisHM(now), hour = +hm.slice(0, 2);
 
   if (body.key) return json({key: (await vapidKeys(st)).pub});
   if (body.subscribe?.endpoint && body.subscribe?.keys?.p256dh) {
@@ -216,10 +218,15 @@ Deno.serve(async req => {
     return json({unsubscribed: true});
   }
 
-  // Scheduled run (or a test): 9 h → morning, 20 h → evening; any other hour is the other UTC offset, skipped.
-  const slot = body.test ? (hour < 15 ? 'morning' : 'evening') : body.slot === 'morning' || body.slot === 'evening' ? body.slot : hour === 9 ? 'morning' : hour === 20 ? 'evening' : null;
-  if (!slot) return json({skipped: 'heure de Paris ' + hour + ' h'});
-  if (!body.test && (st.last || {})[slot] === TODAY) return json({skipped: 'déjà envoyé'});
+  // Scheduled run (or a test): a chosen time reached in the last 10 minutes and not sent yet today.
+  let due: string | null = null;
+  if (!body.test) {
+    const {data: app} = await db.from('docs').select('data').eq('collection', 'settings').eq('id', 'app').maybeSingle();
+    const times: string[] = Array.isArray(app?.data?.notifTimes) ? app.data.notifTimes : ['09:00', '20:00'];
+    due = times.find(t => /^\d\d:\d\d$/.test(t) && mins(hm) - mins(t) >= 0 && mins(hm) - mins(t) < 10 && (st.last || {})[t] !== TODAY) || null;
+    if (!due) return json({skipped: 'pas d\'envoi prévu à ' + hm});
+  }
+  const slot = (due ? +due.slice(0, 2) : hour) < 14 ? 'morning' : 'evening';
   if (!st.subs?.length) return json({skipped: 'aucun téléphone abonné'});
   let sync: unknown = null;
   const syncToken = token || st.syncToken;
@@ -231,6 +238,6 @@ Deno.serve(async req => {
   }
   const b = brief(await loadData(), TODAY)[slot as 'morning' | 'evening']();
   const results = await sendAll(st, {...b, tag: 'tnr-' + slot, url: './'});
-  if (!body.test) { st.last = {...(st.last || {}), [slot]: TODAY}; await putPrivate('push', st); }
+  if (due) { st.last = {...(st.last || {}), [due]: TODAY}; await putPrivate('push', st); }
   return json({slot, ...b, sync, results});
 });
