@@ -778,7 +778,7 @@ details.slow[open]>summary h2::after{content:" ▴"}
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=49"></script>
+<script src="supabase-db.js?v=50"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
@@ -1292,6 +1292,146 @@ async function saveTests() {
   for (const x of t.filter(x => x.type === '5rm' && x.date === TODAY)) rm[x.ex] = {kg: Math.round(e1rm(x.kg, 5)), date: TODAY};
   S.tset = {...(S.tset || {}), tests: t, rm};
   if (await dbSet('settings/training', S.tset)) { toast('Tests enregistrés'); paneRender(); renderMod(); }
+}
+
+/* ---------- jumps: his records (height, RSI, length), typed by hand or imported from a My Jump export ----------
+   My Jump keeps its data on the phone and has no API: its CSV export is shared to the app (Android share sheet,
+   see the share_target of the manifest) or picked as a file. Stored apart from the training settings in settings/jumps. */
+const JTYPES = [
+  ['cmj', 'CMJ', 'h', 'contre-mouvement, mains sur les hanches'], ['abk', 'CMJ bras libres', 'h', 'Abalakov'], ['sj', 'Squat jump', 'h', 'départ arrêté, sans élan'],
+  ['cmju', 'CMJ sur une jambe', 'h', 'gauche et droite'], ['dj', 'Drop jump', 'rsi', 'RSI = hauteur ÷ temps de contact'], ['pogo', 'Pogo jumps', 'rsi', 'rebonds, chevilles raides'],
+  ['box', 'Box jump', 'box', 'hauteur de la box'], ['broad', 'Saut en longueur sans élan', 'd', 'pieds joints'], ['triple', 'Triple bond', 'd', 'sans élan']
+];
+const JT = Object.fromEntries(JTYPES.map(([id, n, m, hint]) => [id, {id, n, m, hint}]));
+let JUMPS = null; // null until settings/jumps has loaded
+const jumps = () => JUMPS || [];
+const jVal = j => JT[j.type]?.m === 'rsi' ? +j.rsi || (+j.h || 0) / 1000 : JT[j.type]?.m === 'box' ? +j.box || 0 : JT[j.type]?.m === 'd' ? +j.d || 0 : +j.h || 0;
+const jFmt = j => { const m = JT[j.type]?.m;
+  if (m === 'rsi' && !j.rsi) return `${fx(+j.h, 1)} cm${j.tc ? ` · ${Math.round(j.tc)} ms` : ''}`;
+  if (m === 'rsi') return `RSI ${fx(+j.rsi, 2)}${j.h ? ` · ${fx(+j.h, 1)} cm` : ''}${j.tc ? ` · ${Math.round(j.tc)} ms` : ''}`;
+  if (m === 'box') return `${fx(+j.box)} cm`;
+  if (m === 'd') return +j.d >= 100 ? `${fx(+j.d / 100, 2)} m` : `${fx(+j.d)} cm`;
+  return `${fx(+j.h, 1)} cm${j.side ? ' · ' + (j.side === 'G' ? 'gauche' : 'droite') : ''}`; };
+const jBest = (type, side) => jumps().filter(j => j.type === type && (!side || j.side === side) && jVal(j) > 0).sort((a, b) => jVal(b) - jVal(a))[0] || null;
+const jLast = (type, side) => jumps().filter(j => j.type === type && (!side || j.side === side) && jVal(j) > 0).sort((a, b) => b.date.localeCompare(a.date))[0] || null;
+// Weekly CMJ as a readiness check: the last one against the mean of the 4 weeks before.
+function cmjCheck() {
+  const l = jLast('cmj'); if (!l) return null;
+  const prev = jumps().filter(j => j.type === 'cmj' && +j.h > 0 && j.date < l.date && j.date >= addDays(l.date, -28));
+  if (prev.length < 2) return null;
+  const m = prev.reduce((a, j) => a + +j.h, 0) / prev.length, d = (+l.h - m) / m * 100;
+  return {d, txt: d <= -5 ? `CMJ ${fx(d, 1)} % sous ta moyenne : fatigue nerveuse, allège la séance.` : d >= 3 ? `CMJ +${fx(d, 1)} % au-dessus de ta moyenne : tu es frais.` : 'CMJ dans ta moyenne.'};
+}
+async function saveJumps(list) {
+  JUMPS = list.sort((a, b) => b.date.localeCompare(a.date));
+  const ok = await dbSet('settings/jumps', {list: JUMPS, updatedAt: new Date().toISOString()});
+  renderMod(); if (P.stack.length) paneRender(); return ok;
+}
+// A CSV from My Jump (or any sheet): columns found by their names, in English, Spanish or French.
+function parseJumpCsv(txt) {
+  const lines = String(txt).replace(/^\uFEFF/, '').split(/\r?\n/).filter(l => l.trim());
+  if (lines.length < 2) return [];
+  const sep = [';', ',', '\t'].sort((a, b) => lines[0].split(b).length - lines[0].split(a).length)[0];
+  const cells = l => { const out = []; let cur = '', q = false; for (const ch of l) { if (ch === '"') q = !q; else if (ch === sep && !q) { out.push(cur); cur = ''; } else cur += ch; } out.push(cur); return out.map(x => x.trim()); };
+  const head = cells(lines[0]).map(h => h.toLowerCase().normalize('NFD').replace(/\p{M}/gu, ''));
+  const col = re => head.findIndex(h => re.test(h));
+  const ci = {date: col(/date|fecha|dia|day/), type: col(/test|type|tipo|protocol|salto|jump$|ejercicio|exercise|mode/), h: col(/height|altura|hauteur|^jump height/),
+    tc: col(/contact|contacto|^tc\b/), rsi: col(/rsi/), d: col(/distance|distancia|longueur|length/), side: col(/leg|pierna|side|lado|jambe/), box: col(/box|caj|drop height|altura de caida/)};
+  const num = v => { const n = parseFloat(String(v || '').replace(',', '.').replace(/[^\d.\-]/g, '')); return isFinite(n) ? n : null; };
+  const kind = v => { const t = String(v || '').toLowerCase();
+    return /drop|\bdj\b|caida/.test(t) ? 'dj' : /pogo|rebound|repeat|reactiv|hop|rebote/.test(t) ? 'pogo' : /abalakov|\babk\b|arm swing|brazos/.test(t) ? 'abk'
+      : /squat|\bsj\b/.test(t) ? 'sj' : /box|caj/.test(t) ? 'box' : /triple/.test(t) ? 'triple' : /broad|horizontal|long|longitud/.test(t) ? 'broad'
+      : /single|one leg|unilateral|una pierna|unipodal/.test(t) ? 'cmju' : /cmj|counter|contra/.test(t) ? 'cmj' : null; };
+  const day = v => { const t = String(v || '').trim(); let m;
+    if ((m = t.match(/(\d{4})-(\d{1,2})-(\d{1,2})/))) return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
+    if ((m = t.match(/(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})/))) { const y = m[3].length === 2 ? '20' + m[3] : m[3]; return `${y}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`; }
+    return null; };
+  const out = [];
+  for (const l of lines.slice(1)) {
+    const c = cells(l), type = kind(ci.type >= 0 ? c[ci.type] : '') || (ci.rsi >= 0 && num(c[ci.rsi]) ? 'dj' : ci.d >= 0 && num(c[ci.d]) ? 'broad' : ci.h >= 0 ? 'cmj' : null);
+    if (!type) continue;
+    const j = {id: uid(), type, date: (ci.date >= 0 && day(c[ci.date])) || TODAY, src: 'myjump'};
+    let h = ci.h >= 0 ? num(c[ci.h]) : null; if (h != null && h > 0 && h < 1.5) h *= 100; // metres → cm
+    let tc = ci.tc >= 0 ? num(c[ci.tc]) : null; if (tc != null && tc > 0 && tc < 3) tc *= 1000; // seconds → ms
+    let d = ci.d >= 0 ? num(c[ci.d]) : null; if (d != null && d > 0 && d < 20) d *= 100;
+    if (h) j.h = +h.toFixed(1); if (tc) j.tc = Math.round(tc); if (d) j.d = Math.round(d);
+    const rsi = ci.rsi >= 0 ? num(c[ci.rsi]) : null; if (rsi) j.rsi = +rsi.toFixed(2); else if (h && tc) j.rsi = +((h / 100) / (tc / 1000)).toFixed(2);
+    if (type === 'box' && ci.box >= 0) j.box = num(c[ci.box]); if (type === 'box' && !j.box && h) j.box = Math.round(h);
+    if (ci.side >= 0) { const sd = String(c[ci.side]).toLowerCase(); j.side = /left|izq|gauche|^g|^l/.test(sd) ? 'G' : /right|der|droite|^d|^r/.test(sd) ? 'D' : undefined; if (j.side && type === 'cmj') j.type = 'cmju'; if (!j.side) delete j.side; }
+    if (jVal(j) > 0) out.push(j);
+  }
+  return out;
+}
+async function importJumps(txt) {
+  const got = parseJumpCsv(txt);
+  if (!got.length) { toast('Aucun saut reconnu dans ce fichier : envoie-le à Claude pour l\'adapter', 5000); return 0; }
+  const key = j => [j.type, j.date, j.side || '', jVal(j)].join('|'), have = new Set(jumps().map(key));
+  const fresh = got.filter(j => !have.has(key(j)));
+  if (fresh.length) await saveJumps([...jumps(), ...fresh]);
+  toast(fresh.length ? `${fresh.length} saut${fresh.length > 1 ? 's' : ''} importé${fresh.length > 1 ? 's' : ''} de My Jump` : 'Ces sauts sont déjà dans l\'appli', 4000);
+  return fresh.length;
+}
+let JF = {type: 'cmj'};
+function jumpsPane() {
+  openPane({title: 'Mes max en saut', render: () => {
+    const ck = cmjCheck(), t = JT[JF.type];
+    const row = ([id, n, , hint]) => { const sides = id === 'cmju' ? ['G', 'D'] : [null];
+      return sides.map(sd => { const b = jBest(id, sd), l = jLast(id, sd);
+        return `<div class="row"><span class="l">${esc(n)}${sd ? (sd === 'G' ? ' · gauche' : ' · droite') : ''}<span class="hint">${l ? 'dernier : ' + esc(jFmt(l)) + ' le ' + esc(fmtShort(l.date)) : esc(hint)}</span></span><b>${b ? esc(jFmt(b).split(' · ')[0]) : '–'}</b></div>`; }).join(''); };
+    const f = (k, lab, unit) => `<div class="row"><label for="jf-${k}">${lab}</label><span><input class="mini-in" id="jf-${k}" inputmode="decimal" style="width:80px" data-jf="${k}" value="${esc(JF[k] ?? '')}"> ${unit}</span></div>`;
+    const sym = (() => { const g = jBest('cmju', 'G'), d = jBest('cmju', 'D'); if (!g || !d) return ''; const gap = Math.abs(g.h - d.h) / Math.max(g.h, d.h) * 100;
+      return `<p class="small" style="margin:8px 4px 0">Écart gauche / droite : <b>${fx(gap, 1)} %</b>${gap > 10 ? ' : au-dessus de 10 %, travaille la jambe faible.' : ' : équilibré.'}</p>`; })();
+    return `<p class="small muted" style="margin:16px 4px 8px">Tes records de saut. Le chiffre à droite est ton meilleur, le dernier est en dessous.</p>
+      ${ck ? `<div class="card" style="margin-bottom:10px"><span class="eyebrow">Forme du jour</span><p class="small" style="margin:6px 0 0">${esc(ck.txt)}</p></div>` : ''}
+      <div class="list">${JTYPES.map(row).join('')}</div>${sym}
+      <div class="sec-label">Importer de My Jump</div>
+      <div class="card"><p class="small" style="margin:0 0 10px">Dans My Jump : ouvre tes résultats › <b>Exporter (CSV)</b> › <b>Partager</b> › choisis <b>TNR Athletics</b>. Les sauts arrivent ici tout seuls. Sinon, enregistre le fichier puis touche le bouton.</p>
+        <button class="btn ghost" data-jimp>Choisir le fichier My Jump</button><input type="file" id="j-file" accept=".csv,.txt,text/csv,text/plain,text/comma-separated-values" hidden></div>
+      <div class="sec-label">Ajouter un saut à la main</div>
+      <div class="chipsx">${JTYPES.map(([id, n]) => `<button class="chip" data-jtype="${id}" aria-pressed="${id === JF.type}">${esc(n)}</button>`).join('')}</div>
+      <div class="list">
+        <div class="row"><label for="jf-date">Date</label><input type="date" id="jf-date" class="mini-in" data-jf="date" value="${JF.date || TODAY}"></div>
+        ${JF.type === 'cmju' ? `<div class="row"><span class="l">Jambe</span><div class="seg" role="group">${[['G', 'Gauche'], ['D', 'Droite']].map(([v, l]) => `<button type="button" data-jside="${v}" aria-pressed="${(JF.side || 'G') === v}">${l}</button>`).join('')}</div></div>` : ''}
+        ${t.m === 'h' ? f('h', 'Hauteur', 'cm') : t.m === 'rsi' ? f('h', 'Hauteur', 'cm') + f('tc', 'Temps de contact', 'ms') + f('rsi', 'Ou RSI direct', '') : t.m === 'box' ? f('box', 'Hauteur de la box', 'cm') : f('d', 'Distance', 'cm')}
+      </div>
+      <div style="margin-top:12px"><button class="btn" data-jadd>Ajouter</button></div>
+      ${jumps().length ? `<div class="sec-label">Historique</div><div class="list">${jumps().slice(0, 30).map(j => `<div class="row"><span class="l">${esc(JT[j.type]?.n || j.type)}<span class="hint">${esc(fmtShort(j.date))}${j.src === 'myjump' ? ' · My Jump' : ''}</span></span><span>${esc(jFmt(j))} <button type="button" class="chip" data-jdel="${j.id}" aria-label="Supprimer">×</button></span></div>`).join('')}</div>` : ''}`;
+  }});
+}
+function jumpAdd() {
+  document.querySelectorAll('#pane-body [data-jf]').forEach(i => { JF[i.dataset.jf] = i.dataset.jf === 'date' ? i.value : String(i.value).replace(',', '.'); });
+  const t = JT[JF.type], j = {id: uid(), type: JF.type, date: JF.date || TODAY, src: 'manual'};
+  for (const k of ['h', 'tc', 'rsi', 'box', 'd']) { const v = +JF[k]; if (v > 0) j[k] = v; }
+  if (t.m === 'rsi' && !j.rsi && j.h && j.tc) j.rsi = +((j.h / 100) / (j.tc / 1000)).toFixed(2);
+  if (JF.type === 'cmju') j.side = JF.side || 'G';
+  if (!(jVal(j) > 0)) { toast(t.m === 'rsi' ? 'Il faut la hauteur et le temps de contact, ou le RSI' : 'Il manque la mesure'); return; }
+  JF = {type: JF.type, date: JF.date, side: JF.side};
+  saveJumps([...jumps(), j]).then(ok => ok && toast(`${t.n} ajouté`));
+}
+document.addEventListener('click', e => {
+  const at = q => e.target.closest?.(q); let b;
+  if (at('[data-tjumps]')) { jumpsPane(); return; }
+  if (at('[data-jimp]')) { $('#j-file')?.click(); return; }
+  if ((b = at('[data-jtype]'))) { document.querySelectorAll('#pane-body [data-jf]').forEach(i => { if (i.dataset.jf === 'date') JF.date = i.value; }); JF = {type: b.dataset.jtype, date: JF.date}; paneRender(); return; }
+  if ((b = at('[data-jside]'))) { JF.side = b.dataset.jside; paneRender(); return; }
+  if (at('[data-jadd]')) { jumpAdd(); return; }
+  if ((b = at('[data-jdel]'))) { saveJumps(jumps().filter(j => j.id !== b.dataset.jdel)).then(() => toast('Saut supprimé')); return; }
+});
+document.addEventListener('change', async e => {
+  if (e.target.id !== 'j-file' || !e.target.files?.[0]) return;
+  const txt = await e.target.files[0].text(); e.target.value = ''; importJumps(txt);
+});
+// A file shared from My Jump lands in the service worker, which keeps it in the 'jump-share' cache and opens ./?jumpshare=1.
+async function jumpShareCheck() {
+  if (!/[?&]jumpshare=1/.test(location.search)) return;
+  history.replaceState(null, '', location.pathname);
+  for (let i = 0; i < 60 && JUMPS === null; i++) await new Promise(r => setTimeout(r, 250));
+  if (JUMPS === null) { toast('Connexion lente : partage à nouveau le fichier'); return; }
+  try {
+    const c = await caches.open('jump-share'), r = await c.match('./jump-share.txt'); if (!r) return;
+    const txt = await r.text(); await c.delete('./jump-share.txt');
+    go('T'); S.ttab = 'profile'; renderMod(true); await importJumps(txt); jumpsPane();
+  } catch (err) { toast('Import My Jump impossible : choisis le fichier dans Profil › Mes max en saut'); }
 }
 
 /* ---------- the method coach and the training diagnosis: rules over 2 to 4 weeks ---------- */
@@ -3526,7 +3666,7 @@ function tProfile() {
     <div class="stack">
       <button class="banner" data-ttests style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Tests</b><br><span class="small muted">5RM, symétrie gauche/droite, profil force-vitesse</span></span>${ICON.chev}</button>
       <button class="banner" data-rmlist style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Mes max</b><br><span class="small muted">${nMax ? nMax + ' max testés · ' : ''}les charges de tes séances en découlent</span></span>${ICON.chev}</button>
-      <div class="card"><span class="eyebrow">My Jump</span><p class="small" style="margin:6px 0 0">My Jump ne partage pas ses mesures avec d'autres applis. Note la hauteur de tes sauts dans Tests : elle alimente ton profil force-vitesse. Un saut vertical (CMJ) par semaine, toujours dans les mêmes conditions, montre aussi ta fatigue nerveuse : une baisse de plus de 5 % = alléger.</p></div>
+      <button class="banner" data-tjumps style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Mes max en saut</b><br><span class="small muted">${(() => { const b = jBest('cmj'), ck = cmjCheck(); return b ? 'CMJ ' + fx(+b.h, 1) + ' cm' + (ck && ck.d <= -5 ? ' · fatigue détectée' : '') + ' · ' : ''; })()}CMJ, drop jump, pogo, box, longueur · import My Jump</span></span>${ICON.chev}</button>
     </div>`;
 }
 /* ---------- pane: a second sheet for Training and Fuel, with a stack (a picker can open over an editor) ---------- */
@@ -4677,6 +4817,8 @@ function bootTNR(db) {
   const col = (name, key) => db.collection(name).onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); S[key] = o; renderMod(); }, () => {});
   col('plans', 'plans'); col('training', 'logs'); col('fuel', 'fuel'); col('foods', 'foods');
   db.doc('settings/training').onSnapshot(s => { S.tset = s.exists ? s.data() : {}; renderMod(); }, () => {});
+  db.doc('settings/jumps').onSnapshot(s => { JUMPS = (s.exists ? s.data().list : null) || []; renderMod(); if (P.stack.length) paneRender(); }, () => {});
+  jumpShareCheck();
   db.doc('settings/fuel').onSnapshot(s => { S.fset = s.exists ? s.data() : {}; renderMod(); }, () => {});
   db.doc('settings/planning').onSnapshot(s => { S.planning = s.exists ? s.data() : null; renderMod(); if (S.mod === 'R') render(); if (P.stack.length) paneRender(); }, () => {});
   db.doc('tdv/main').onSnapshot(s => { const d = s.exists ? s.data() : {}; TDV_PLANS = d.plans || []; TDV_FUEL = d.fuel || null; TDV_PROTO = d.proto || []; renderMod(); if (S.mod === 'R') render(); }, () => {});
