@@ -380,6 +380,10 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .vamk{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-top:12px}
 .vam{display:flex;flex-direction:column;gap:3px;text-align:left;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:transparent;color:inherit;font:inherit}
 .vam span{font-size:.78rem;opacity:.75}.vam[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent)}
+.restb:not(:empty){display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--accent) 18%,transparent)}
+.restb b{font-size:1.8rem;font-variant-numeric:tabular-nums}
+.fvsteps{display:flex;justify-content:center;gap:8px;margin:16px 0 6px}.fvsteps span{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:.8rem;font-weight:700;background:rgba(255,255,255,.08)}
+.fvsteps span.on{background:var(--accent);color:#fff}.fvsteps span.ok{background:color-mix(in srgb,var(--accent) 35%,transparent)}
 .vares{display:grid;gap:8px}.vares div{display:flex;justify-content:space-between;gap:10px}.vares span{opacity:.75}
 .sheet header .close[hidden]{display:none}
 .edx h3{justify-content:flex-start}
@@ -1228,7 +1232,7 @@ const BACKUP = [
 const TEST_5RM = ['squat', 'hipthrust', 'deadlift', 'bench'];
 const SYM = [['calf', 'Mollets'], ['tibkb', 'Tibial antérieur'], ['legext', 'Leg extension'], ['legcurl', 'Leg curl'], ['copen', 'Copenhague (s)'], ['glutecable', 'Moyen fessier']];
 const tests = () => S.tset?.tests || [];
-const lastTest = type => tests().filter(t => t.type === type).sort((a, b) => b.date.localeCompare(a.date))[0] || null;
+const lastTest = type => tests().filter(t => t.type === type).reverse().sort((a, b) => b.date.localeCompare(a.date))[0] || null;
 // Squat jumps at several loads → force and velocity at each, then the straight line F = F0 − Sfv·V.
 function fvProfile(t) {
   const m = +t.mass, hpo = +t.hpo, g = 9.81; if (!m || !hpo) return null;
@@ -1434,23 +1438,55 @@ const vtMarks = id => { const m = VT[id].marks; return typeof m === 'string' ? V
 const bodyKg = () => { const w = VAL.weight ? VAL.weight(lastKey('weight') || TODAY) : null; return w || null; };
 let VA = null;
 function testLab() {
-  openPane({title: 'Tests filmés', render: () => `<p class="small muted" style="margin:16px 4px 8px">Filme au ralenti, repère les images de décollage et d'atterrissage, l'appli calcule tout. La vidéo reste sur ton téléphone.</p>
-    <div class="list">${Object.entries(VT).map(([id, t]) => { const last = jLast(id === 'sprint' ? 'spr30' : id); return `<button class="rowbtn" data-vatest="${id}"><span><b>${esc(t.n)}</b><span class="meta">${esc(t.what)}</span></span>${ICON.chev}</button>`; }).join('')}</div>
+  openPane({title: 'Tests pliométriques', render: () => `<p class="small muted" style="margin:16px 4px 8px">Touche un test, puis Commencer : tu poses le téléphone, tu sautes, et tu repères les images de décollage et d'atterrissage. L'appli calcule tout. La vidéo reste sur ton téléphone.</p>
+    <div class="list">${Object.entries(VT).filter(([id]) => id !== 'sprint').map(([id, t]) => { const last = jLast(id === 'sprint' ? 'spr30' : id); return `<button class="rowbtn" data-vatest="${id}"><span><b>${esc(t.n)}</b><span class="meta">${esc(t.what)}</span></span>${ICON.chev}</button>`; }).join('')}</div>
     <div class="card" style="margin-top:12px"><span class="eyebrow">Bien filmer</span><p class="small" style="margin:6px 0 0">${esc(FILM.jump)}</p><p class="small" style="margin:6px 0 0">${esc(FILM.rules)}</p></div>`});
 }
-function vaPane(id) {
+function vaPane(id, opt = {}) {
   if (VA?.url) URL.revokeObjectURL(VA.url);
-  VA = {test: id, url: null, fileFps: null, capFps: null, frame: 0, n: 0, marks: {}, seq: [], add: 0, side: 'G', drop: 30, dist: 30, zoom: false, ox: 50, oy: 80, cur: 0};
+  VA = {test: id, url: null, fileFps: null, capFps: null, frame: 0, n: 0, marks: {}, seq: [], add: opt.add || 0, side: opt.side || 'G', drop: 30, dist: 30, zoom: false, ox: 50, oy: 80, cur: 0, opt, live: false};
   const t = VT[id];
-  openPane({title: t.n, fixed: true, keep: true, onClose: vaStop, render: vaRender, mount: vaMount, refresh: vaUI});
+  openPane({title: t.n + (opt.add != null && id === 'sj' ? (opt.add ? ' · +' + opt.add + ' kg' : ' · sans charge') : ''), fixed: true, keep: true, onClose: vaStop, render: vaRender, mount: vaMount, refresh: vaUI});
 }
-function vaStop() { const v = $('#va-v'); if (v) { v.pause(); v.removeAttribute('src'); v.load(); } if (VA?.url) URL.revokeObjectURL(VA.url); VA = null; }
+function vaStop() { liveStop(); const v = $('#va-v'); if (v) { v.pause(); v.removeAttribute('src'); v.load(); } if (VA?.url) URL.revokeObjectURL(VA.url); VA = null; }
+// Filming inside the app: the back camera at the highest speed the phone gives the browser, a 3-2-1, then the recording.
+const LIVE = {stream: null, rec: null, fps: null, t: null};
+function liveStop() { clearTimeout(LIVE.t); try { LIVE.rec?.state === 'recording' && LIVE.rec.stop(); } catch (e) {} LIVE.stream?.getTracks().forEach(t => t.stop()); LIVE.stream = null; LIVE.rec = null; }
+async function liveStart() {
+  try {
+    LIVE.stream = await navigator.mediaDevices.getUserMedia({audio: false, video: {facingMode: 'environment', frameRate: {ideal: 240}, height: {ideal: 720}}});
+    const tr = LIVE.stream.getVideoTracks()[0]; LIVE.fps = Math.round(tr.getSettings().frameRate || 30);
+    const v = $('#va-live'); if (v) { v.srcObject = LIVE.stream; await v.play().catch(() => {}); }
+    const i = $('#va-livefps'); if (i) i.innerHTML = LIVE.fps >= 100 ? `Caméra à <b>${LIVE.fps} images/s</b> : mesure précise.` : `Ton navigateur donne la caméra à <b>${LIVE.fps} images/s</b> seulement (± 3 à 4 cm). Pour un vrai test, filme avec l'Appareil photo en mode Ralenti et choisis la vidéo.`;
+  } catch (e) { liveStop(); toast('Caméra refusée ou indisponible : autorise l\'appareil photo, ou choisis une vidéo', 5000); VA.live = false; const v = P.stack.at(-1); v.shown = false; paneRender(); }
+}
+function liveRecord() {
+  if (!LIVE.stream) return; const secs = VT[VA.test].seq ? 9 : VT[VA.test].film === 'sprint' ? 8 : 4;
+  const b = $('#va-recbtn'), say = t => { if (b) b.textContent = t; };
+  let n = 3; say('3'); b.disabled = true;
+  const tick = () => { n--; if (n > 0) { say(String(n)); try { navigator.vibrate?.(60); } catch (e) {} LIVE.t = setTimeout(tick, 1000); return; } go2(); };
+  const go2 = () => {
+    say('Saute !'); try { navigator.vibrate?.(200); } catch (e) {}
+    const type = ['video/webm;codecs=vp9', 'video/webm', 'video/mp4'].find(t => window.MediaRecorder?.isTypeSupported?.(t)) || '';
+    const ch = []; LIVE.rec = new MediaRecorder(LIVE.stream, type ? {mimeType: type, videoBitsPerSecond: 12e6} : {});
+    LIVE.rec.ondataavailable = e => e.data.size && ch.push(e.data);
+    LIVE.rec.onstop = () => { const fps = LIVE.fps; liveStop(); if (!VA) return; VA.url = URL.createObjectURL(new Blob(ch, {type: type || 'video/webm'})); VA.live = false; VA.fileFps = null; VA.capFps = fps; VA.frame = 0; VA.marks = {}; VA.seq = []; const v = P.stack.at(-1); v.shown = false; paneRender(); };
+    LIVE.rec.start(250); LIVE.t = setTimeout(() => { say('…'); try { LIVE.rec.stop(); } catch (e) {} }, secs * 1000);
+  };
+  LIVE.t = setTimeout(tick, 1000);
+}
 function vaRender() {
   const t = VT[VA.test];
+  if (VA.live) return `<div class="vabox" style="margin-top:14px"><video id="va-live" playsinline muted autoplay></video></div>
+    <p class="small" id="va-livefps" style="margin:8px 4px">Ouverture de la caméra…</p>
+    <p class="small muted" style="margin:0 4px 10px">${esc(FILM[t.film])}</p>
+    <button class="btn" id="va-recbtn" data-varec style="font-size:1.2rem;min-height:58px">Commencer</button>
+    <button class="btn ghost" data-vapick="gal" style="margin-top:8px">Plutôt choisir une vidéo au ralenti</button>
+    <input type="file" id="va-gal" accept="video/*" hidden>`;
   if (!VA.url) return `<p class="small" style="margin:16px 4px 8px">${esc(t.what)}</p>
     <div class="card"><span class="eyebrow">Filmer</span><p class="small" style="margin:6px 0 0">${esc(FILM[t.film])}</p>${t.film === 'jump' ? `<p class="small" style="margin:6px 0 0">${esc(FILM.rules)}</p>` : ''}
       <p class="small muted" style="margin:6px 0 0">Le plus précis : ouvre l'Appareil photo du téléphone en mode <b>Ralenti</b>, filme, puis choisis la vidéo ici.</p></div>
-    <div class="stack" style="margin-top:12px"><button class="btn" data-vapick="gal">Choisir une vidéo au ralenti</button><button class="btn ghost" data-vapick="cam">Filmer maintenant</button></div>
+    <div class="stack" style="margin-top:12px"><button class="btn" data-valive>Commencer : filmer ici</button><button class="btn ghost" data-vapick="gal">Choisir une vidéo au ralenti</button></div>
     <input type="file" id="va-gal" accept="video/*" hidden><input type="file" id="va-cam" accept="video/*" capture="environment" hidden>`;
   return `<div class="vabox" id="va-box"><video id="va-v" playsinline muted preload="auto"></video></div>
     <div class="vainfo" id="va-info">Chargement de la vidéo…</div>
@@ -1475,7 +1511,7 @@ function vaMount() {
   v.addEventListener('loadedmetadata', async () => {
     if (!isFinite(v.duration)) { v.currentTime = 1e9; await new Promise(r => { v.addEventListener('durationchange', r, {once: true}); setTimeout(r, 3000); }); v.currentTime = 0; }
     if (!VA) return;
-    if (!VA.fileFps) { VA.fileFps = (await vaFps(v)) || 30; VA.capFps = VA.capFps || (VA.fileFps >= 100 ? VA.fileFps : null); }
+    if (!VA.fileFps) { VA.fileFps = (await vaFps(v)) || VA.capFps || 30; VA.capFps = VA.capFps || (VA.fileFps >= 100 ? VA.fileFps : null); }
     VA.n = Math.max(1, Math.floor(v.duration * VA.fileFps) - 1); $('#va-r').max = VA.n; vaSeek(VA.frame); vaUI();
   }, {once: true});
   v.addEventListener('seeked', vaInfo);
@@ -1570,6 +1606,7 @@ async function vaSave() {
   const j = {id: uid(), date: TODAY, src: 'video', ...R.rec};
   if (await saveJumps([...jumps(), j])) {
     const b = jBest(j.type, j.side); toast(b && b.id === j.id ? `Nouveau record : ${jFmt(j)}` : `Enregistré : ${jFmt(j)}`, 4000);
+    if (VA.opt?.onSave) { const cb = VA.opt.onSave; cb(j); closePane(); return; }
     VA.marks = {}; VA.seq = []; vaUI();
   }
 }
@@ -1583,6 +1620,8 @@ document.addEventListener('click', e => {
   if (at('[data-tlab]')) { testLab(); return; }
   if ((b = at('[data-vatest]'))) { vaPane(b.dataset.vatest); return; }
   if (!VA) return;
+  if (at('[data-valive]')) { VA.live = true; const v = P.stack.at(-1); v.shown = false; paneRender(); liveStart(); return; }
+  if (at('[data-varec]')) { liveRecord(); return; }
   if ((b = at('[data-vapick]'))) { $(b.dataset.vapick === 'cam' ? '#va-cam' : '#va-gal')?.click(); return; }
   if ((b = at('[data-vago]'))) { e.stopPropagation(); vaSeek(VA.marks[b.dataset.vago]); return; }
   if ((b = at('[data-vaf]'))) { vaSeek(VA.frame + +b.dataset.vaf); return; }
@@ -1602,9 +1641,149 @@ document.addEventListener('change', e => {
   if (!VA) return;
   if ((e.target.id === 'va-gal' || e.target.id === 'va-cam') && e.target.files?.[0]) {
     VA.url = URL.createObjectURL(e.target.files[0]); VA.fileFps = null; VA.capFps = null; VA.frame = 0; VA.marks = {}; VA.seq = [];
-    const v = P.stack.at(-1); v.shown = false; paneRender(); return;
+    liveStop(); VA.live = false; const v = P.stack.at(-1); v.shown = false; paneRender(); return;
   }
   if (e.target.matches?.('[data-vadrop]')) { VA.drop = +e.target.value || 30; vaUI(); }
+});
+
+/* ---------- guided protocols: 5RM, left/right symmetry, force-velocity ---------- */
+// The rest timer the protocols share.
+const PREST = {end: 0, t: null};
+function restStart(sec) { PREST.end = Date.now() + sec * 1000; clearInterval(PREST.t); PREST.t = setInterval(restTick, 250); restTick(); }
+function restTick() {
+  const el = $('#rest-box'); const left = Math.max(0, Math.round((PREST.end - Date.now()) / 1000));
+  if (el) el.innerHTML = left ? `<span class="eyebrow">Récupération</span><b>${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}</b><button type="button" class="chip" data-reststop>Passer</button>` : '';
+  if (!left) { clearInterval(PREST.t); if (PREST.end) { PREST.end = 0; try { navigator.vibrate?.([200, 100, 200]); } catch (e) {} toast('C\'est reparti'); } }
+}
+// 5RM (NSCA protocol): warm-up sets at 50, 70, 80 and 90 % of the expected 5RM, then attempts of 5 with 3 to 5 min of rest,
+// +2,5 to 5 % after a success, at most 4 attempts. The best success sets the 5RM and the 1RM of the lift (Epley).
+const UPPER = new Set(['bench']);
+let T5 = null;
+function t5Pane(ex) {
+  ex ||= T5?.ex || 'squat';
+  const one = rmTest(ex)?.kg, exp = one ? r25(one / (1 + 5 / 30)) : null;
+  T5 = {ex, exp: T5?.ex === ex ? T5.exp : exp, done: T5?.ex === ex ? T5.done : [], tries: T5?.ex === ex ? T5.tries : []};
+  if (!P.stack.at(-1)?.t5) openPane({title: 'Test 5RM', t5: true, onClose: () => clearInterval(PREST.t), render: t5Render}); else paneRender();
+}
+function t5Next() { const ok = T5.tries.filter(t => t.ok), last = T5.tries.at(-1), up = UPPER.has(T5.ex) ? .025 : .05;
+  if (!last) return r25(T5.exp); if (last.ok) return r25(last.kg * (1 + up)); return r25((ok.at(-1)?.kg ?? last.kg) + (ok.length ? (last.kg - ok.at(-1).kg) / 2 : -last.kg * up)); }
+function t5Render() {
+  const exp = T5.exp, W = exp ? [[10, .5, 60], [5, .7, 120], [3, .8, 180], [1, .9, 180]] : [];
+  const best = T5.tries.filter(t => t.ok).map(t => t.kg).sort((a, b) => b - a)[0], stop = T5.tries.length >= 4 || (T5.tries.length >= 2 && !T5.tries.at(-1).ok && T5.tries.at(-2) && !T5.tries.at(-2).ok);
+  return `<div class="chipsx" style="margin-top:14px">${TEST_5RM.map(x => `<button class="chip" data-t5ex="${x}" aria-pressed="${x === T5.ex}">${esc(exOf(x).n)}</button>`).join('')}</div>
+    <div class="list"><div class="row"><label for="t5-exp">5RM attendu<span class="hint">${rmTest(T5.ex) ? 'calculé depuis ton max de ' + fx(rmTest(T5.ex).kg) + ' kg' : 'la charge que tu fais pour 5 à peu près'}</span></label><span><input id="t5-exp" class="mini-in" inputmode="decimal" style="width:80px" value="${exp || ''}" data-t5exp> kg</span></div></div>
+    <div id="rest-box" class="restb"></div>
+    ${exp ? `<div class="sec-label">1 · Échauffement</div><p class="small muted" style="margin:0 4px 8px">5 à 10 min de cardio léger et de mobilité, puis ces séries. Touche « Fait » pour lancer la récup.</p>
+    <div class="list">${W.map(([r, pc, rest], i) => `<div class="row"><span class="l">${r} répétition${r > 1 ? 's' : ''} à ${fx(r25(exp * pc), 1)} kg<span class="hint">${Math.round(pc * 100)} % · puis ${rest / 60} min de récup</span></span><button class="chip" data-t5w="${i}" data-rest="${rest}" aria-pressed="${T5.done.includes(i)}">${T5.done.includes(i) ? 'Fait ✓' : 'Fait'}</button></div>`).join('')}</div>
+    <div class="sec-label">2 · Essais à 5 répétitions</div><p class="small muted" style="margin:0 4px 8px">5 répétitions propres, amplitude complète. 4 min de récup entre deux essais, 4 essais au plus.</p>
+    <div class="list">${T5.tries.map((t, i) => `<div class="row"><span class="l">Essai ${i + 1} · ${fx(t.kg, 1)} kg</span><b style="color:${t.ok ? 'var(--good)' : 'var(--bad)'}">${t.ok ? 'Réussi' : 'Échoué'}</b></div>`).join('')}
+      ${stop ? '' : `<div class="row"><label for="t5-try">Essai ${T5.tries.length + 1}</label><span><input id="t5-try" class="mini-in" inputmode="decimal" style="width:80px" value="${t5Next()}" data-t5try> kg</span></div>
+      <div class="row" style="gap:8px"><button class="btn" data-t5ok="1" style="flex:1">5 réussies</button><button class="btn ghost" data-t5ok="0" style="flex:1">Échec</button></div>`}</div>
+    ${best ? `<div class="card" style="margin-top:12px"><div class="vares"><div><span>Ton 5RM</span><b>${fx(best, 1)} kg</b></div><div><span>Ton 1RM estimé (Epley)</span><b>${fx(r25(e1rm(best, 5)), 1)} kg</b></div></div></div>
+      <div style="margin-top:12px"><button class="btn" data-t5save>Enregistrer ${fx(best, 1)} kg</button></div>` : ''}` : '<p class="small muted" style="margin:10px 4px">Indique ton 5RM attendu pour calculer l\'échauffement.</p>'}`;
+}
+async function t5Save() {
+  const best = T5.tries.filter(t => t.ok).map(t => t.kg).sort((a, b) => b - a)[0]; if (!best) return;
+  const t = [...tests(), {type: '5rm', ex: T5.ex, kg: best, date: TODAY}], rm = {...(S.tset?.rm || {}), [T5.ex]: {kg: Math.round(e1rm(best, 5)), date: TODAY}};
+  S.tset = {...(S.tset || {}), tests: t, rm};
+  if (await dbSet('settings/training', S.tset)) { toast(`${exOf(T5.ex).n} : 5RM ${fx(best, 1)} kg enregistré`); T5 = null; closePane(); renderMod(); }
+}
+// Symmetry: the same test on each leg, weak side first, the gap above 10 % is to correct.
+const SYM_HOW = {calf: '5RM sur une jambe, genou tendu', tibkb: 'nombre max de répétitions avec la même charge', legext: '5RM sur une jambe', legcurl: '5RM sur une jambe', copen: 'tenue max en secondes', glutecable: '5RM sur une jambe'};
+let SYMD = null;
+function symPane() {
+  SYMD = {};
+  for (const [ex] of SYM) SYMD[ex] = {D: rmTest(ex, '|D')?.kg || '', G: rmTest(ex, '|G')?.kg || ''};
+  openPane({title: 'Symétrie gauche / droite', onClose: () => clearInterval(PREST.t), render: () => `<p class="small muted" style="margin:16px 4px 8px">Pour chaque exercice : échauffe les deux côtés, commence par ta jambe la plus faible, même technique et même amplitude des deux côtés, 2 min de récup entre les côtés. Au-dessus de 10 % d'écart, c'est à corriger.</p>
+    <div id="rest-box" class="restb"></div>
+    ${SYM.map(([ex, n]) => { const d = +SYMD[ex].D, g = +SYMD[ex].G, gap = d && g ? Math.abs(d - g) / Math.max(d, g) * 100 : null, unit = ex === 'copen' ? 's' : ex === 'tibkb' ? 'reps' : 'kg';
+      return `<div class="sec-label">${esc(n)} <small>${esc(SYM_HOW[ex] || '')}</small></div><div class="list">
+        <div class="row"><label>Droite</label><span><input class="mini-in" inputmode="decimal" style="width:70px" value="${SYMD[ex].D}" data-symv="${ex}.D"> ${unit} <button class="chip" data-rest="120" data-restgo>Récup</button></span></div>
+        <div class="row"><label>Gauche</label><span><input class="mini-in" inputmode="decimal" style="width:70px" value="${SYMD[ex].G}" data-symv="${ex}.G"> ${unit}</span></div>
+        <div class="row"><span class="l">Écart</span><b style="${gap > 10 ? 'color:var(--bad)' : ''}">${gap != null ? fx(gap, 1) + ' %' + (gap > 10 ? ' · ' + (d < g ? 'droite' : 'gauche') + ' plus faible' : '') : '–'}</b></div></div>`; }).join('')}
+    <div class="sec-label">Au saut</div><div class="list"><button class="rowbtn" data-vatest="cmju"><span><b>CMJ sur une jambe, filmé</b><span class="meta">l'asymétrie d'explosivité, en plus de la force</span></span>${ICON.chev}</button></div>
+    <div style="margin-top:12px"><button class="btn" data-symsave>Enregistrer le test</button></div>`});
+}
+async function symSave() {
+  const rm = {...(S.tset?.rm || {})}, res = {}; let n = 0;
+  for (const [ex] of SYM) for (const sd of ['D', 'G']) { const v = +String(SYMD[ex][sd]).replace(',', '.'); if (v > 0) { if (rm[ex + '|' + sd]?.kg !== v) { rm[ex + '|' + sd] = {kg: v, date: TODAY}; } res[ex + sd] = v; n++; } }
+  if (!n) { toast('Note au moins un côté'); return; }
+  S.tset = {...(S.tset || {}), rm, tests: [...tests(), {type: 'sym', date: TODAY, res}]};
+  if (await dbSet('settings/training', S.tset)) { toast('Symétrie enregistrée'); closePane(); renderMod(); }
+}
+// Force-velocity profile (Samozino 2008, 2012): squat jumps from 90° with 4 to 5 loads, 2 filmed attempts each, the best kept;
+// push-off distance hpo = leg length (great trochanter to toes, foot extended) − height of the great trochanter at 90°.
+let FVW = null;
+function fvPane() {
+  const prev = lastTest('fv'), w = bodyKg();
+  FVW = {step: 0, mass: prev?.mass || (w ? +w.toFixed(1) : ''), L: prev?.L || '', H: prev?.H || '', opt: prev?.opt || -12.65, loads: [0, 20, 40, 60, 80], best: {}, tries: {}};
+  openPane({title: 'Profil force-vitesse', onClose: () => clearInterval(PREST.t), render: fvRender});
+}
+const fvHpo = () => { const L = +FVW.L, H = +FVW.H; return L > H && H > 0 ? +((L - H) / 100).toFixed(3) : null; };
+function fvGrab() { document.querySelectorAll('#pane-body [data-fvw]').forEach(i => { FVW[i.dataset.fvw] = +String(i.value).replace(',', '.') || ''; }); }
+function fvResult() { const hpo = fvHpo(); if (!hpo || !FVW.mass) return null;
+  const jumps = FVW.loads.filter(a => FVW.best[a]).map(a => ({add: a, h: +(FVW.best[a] / 100).toFixed(3)}));
+  return {t: {type: 'fv', date: TODAY, mass: +FVW.mass, hpo, L: +FVW.L, H: +FVW.H, opt: +FVW.opt || -12.65, jumps}, r: fvProfile({mass: +FVW.mass, hpo, opt: +FVW.opt || -12.65, jumps})}; }
+function fvRender() {
+  const st = FVW.step, hpo = fvHpo();
+  const steps = ['Matériel', 'Mesures', 'Échauffement', 'Sauts chargés', 'Résultat'];
+  const bar = `<div class="fvsteps">${steps.map((n, i) => `<span class="${i === st ? 'on' : i < st ? 'ok' : ''}">${i + 1}</span>`).join('')}</div><div class="eyebrow" style="text-align:center;margin-bottom:8px">${steps[st]}</div>`;
+  const nav = (next, label = 'Suivant', dis = false) => `<div class="stack" style="margin-top:14px"><button class="btn" data-fvstep="${next}" ${dis ? 'disabled' : ''}>${label}</button>${st ? `<button class="btn ghost" data-fvstep="${st - 1}">Retour</button>` : ''}</div>`;
+  if (st === 0) return bar + `<div class="card"><p class="small" style="margin:0">Ce test mesure ta force maximale (F0), ta vitesse maximale (V0) et ta puissance (Pmax) en poussée verticale. Il te dit surtout si tu dois travailler <b>plus de force ou plus de vitesse</b> pour sauter et accélérer plus fort.</p>
+    <p class="small" style="margin:8px 0 0"><b>Il te faut :</b> une barre et des disques (ou un gilet lesté), un banc ou une box pour régler l'angle de 90°, un mètre ruban, et le téléphone sur un support.</p>
+    <p class="small" style="margin:8px 0 0"><b>Durée :</b> 25 min environ. 5 charges (sans charge, +20, +40, +60, +80 kg), 2 essais par charge, 2 min de récup.</p></div>` + nav(1, 'Commencer');
+  if (st === 1) return bar + `<p class="small muted" style="margin:0 4px 8px">Ces mesures servent à calculer ta distance de poussée. Prends-les une fois, l'appli les garde.</p>
+    <div class="list"><div class="row"><label>Masse<span class="hint">ta balance Withings</span></label><span><input class="mini-in" inputmode="decimal" style="width:80px" value="${FVW.mass}" data-fvw="mass"> kg</span></div>
+      <div class="row"><label>Longueur de jambe<span class="hint">allongé, du grand trochanter (os saillant sur le côté de la hanche) au bout des orteils, pied en pointe</span></label><span><input class="mini-in" inputmode="decimal" style="width:80px" value="${FVW.L}" data-fvw="L"> cm</span></div>
+      <div class="row"><label>Hauteur à 90°<span class="hint">en position de départ, genoux à 90°, du sol au grand trochanter. Règle le banc à cette hauteur.</span></label><span><input class="mini-in" inputmode="decimal" style="width:80px" value="${FVW.H}" data-fvw="H"> cm</span></div>
+      <div class="row"><span class="l">Distance de poussée</span><b>${hpo ? fx(hpo, 2) + ' m' : '–'}</b></div></div>` + nav(2, 'Suivant', !(hpo && FVW.mass));
+  if (st === 2) return bar + `<div class="card"><p class="small" style="margin:0">1. 5 min de vélo ou de footing léger.</p><p class="small" style="margin:6px 0 0">2. Mobilité : chevilles, hanches, 10 squats au poids du corps.</p><p class="small" style="margin:6px 0 0">3. 5 squat jumps sous-maximaux, puis 2 à fond.</p>
+    <p class="small" style="margin:10px 0 0"><b>La technique, à chaque saut :</b> descends jusqu'à toucher le banc (90°), <b>tiens 2 secondes immobile</b>, puis pousse le plus vite possible <b>sans redescendre avant</b>. Barre bien tenue sur les épaules. Jambes tendues en l'air, atterris jambes tendues. Un contre-mouvement fausse le test : refais l'essai.</p></div>` + nav(3, 'Échauffement fait');
+  if (st === 3) { const r = fvResult();
+    return bar + `<p class="small muted" style="margin:0 4px 8px">Pour chaque charge : « Filmer », fais ton saut, marque le décollage et l'atterrissage. 2 essais, le meilleur compte. Tu peux aussi taper la hauteur si tu l'as mesurée ailleurs. Arrête-toi quand tu sautes moins de 10 cm.</p>
+    <div id="rest-box" class="restb"></div>
+    <div class="list">${FVW.loads.map(a => { const tr = FVW.tries[a] || [];
+      return `<div class="row"><span class="l">${a ? '+' + a + ' kg' : 'Sans charge'}<span class="hint">${tr.length ? tr.map(h => fx(h, 1) + ' cm').join(' · ') : 'pas encore sauté'}${FVW.best[a] ? ' · meilleur ' + fx(FVW.best[a], 1) + ' cm' : ''}</span></span><span style="display:flex;gap:6px;align-items:center"><input class="mini-in" inputmode="decimal" style="width:60px" placeholder="cm" data-fvh="${a}"><button class="chip" data-fvfilm="${a}" ${tr.length >= 2 ? 'aria-pressed="true"' : ''}>${tr.length >= 2 ? 'Encore' : 'Filmer'}</button></span></div>`; }).join('')}</div>
+    ${r?.r ? `<p class="small" style="margin:10px 4px 0">Déjà ${Object.keys(FVW.best).length} charges : profil à ${Math.round(r.r.imb * 100)} % de l'optimal.</p>` : ''}` + nav(4, 'Voir mon profil', !(r?.r)); }
+  const R = fvResult(), r = R?.r; if (!r) return bar + '<p class="small">Il faut au moins 2 charges.</p>' + nav(3, 'Retour aux sauts');
+  const pts = R.t.jumps.map(j => { const M = +FVW.mass + j.add; return {F: M * GRAV * (j.h / R.t.hpo + 1) / +FVW.mass, V: Math.sqrt(GRAV * j.h / 2)}; });
+  const fit = (() => { const n = pts.length, mx = pts.reduce((a, p) => a + p.V, 0) / n, my = pts.reduce((a, p) => a + p.F, 0) / n, sxy = pts.reduce((a, p) => a + (p.V - mx) * (p.F - my), 0), sxx = pts.reduce((a, p) => a + (p.V - mx) ** 2, 0), syy = pts.reduce((a, p) => a + (p.F - my) ** 2, 0); return sxx && syy ? sxy * sxy / (sxx * syy) : null; })();
+  return bar + `<div class="card"><div class="stats"><div><b>${fx(r.F0, 1)}</b><span>F0 N/kg</span></div><div><b>${fx(r.V0, 2)}</b><span>V0 m/s</span></div><div><b>${fx(r.Pmax, 1)}</b><span>Pmax W/kg</span></div></div>
+    <div class="vares" style="margin-top:12px"><div><span>Pente du profil (Sfv)</span><b>${fx(r.Sfv, 2)}</b></div><div><span>Profil optimal</span><b>${fx(r.opt, 2)}</b></div><div><span>Ton profil / l'optimal</span><b>${Math.round(r.imb * 100)} %</b></div>${fit != null ? `<div><span>Qualité de la droite (R²)</span><b style="${fit < .95 ? 'color:var(--warn)' : ''}">${fx(fit, 2)}</b></div>` : ''}</div>
+    <p class="small" style="margin:12px 0 0"><b>${esc(cap(r.verdict))}.</b> ${r.imb > 1.1 ? 'Travaille la vitesse : sauts légers et rapides, sprints, charges légères explosives.' : r.imb < .9 ? 'Travaille la force : squats lourds, charges à 80-90 %, sauts chargés.' : 'Garde l\'équilibre entre force et vitesse ; continue à faire monter la puissance.'}</p>
+    ${fit != null && fit < .95 ? '<p class="small" style="margin:8px 0 0;color:var(--warn)">Les points sont peu alignés : un essai est sûrement raté (contre-mouvement, mauvais repère). Refais la charge qui s\'écarte.</p>' : ''}</div>
+    <div class="list" style="margin-top:10px"><div class="row"><label>Profil optimal (Sfv)<span class="hint">celui de ta feuille, modifiable</span></label><input class="mini-in" inputmode="decimal" style="width:80px" value="${FVW.opt}" data-fvw="opt" data-fvopt></div></div>
+    <div class="stack" style="margin-top:14px"><button class="btn" data-fvsave>Enregistrer mon profil</button><button class="btn ghost" data-fvstep="3">Retour aux sauts</button></div>`;
+}
+function fvAdd(a, h) { if (!(h > 0)) return; (FVW.tries[a] ||= []).push(+h.toFixed(1)); FVW.best[a] = Math.max(...FVW.tries[a]); }
+async function fvSave() {
+  fvGrab(); const R = fvResult(); if (!R?.r) return;
+  S.tset = {...(S.tset || {}), tests: [...tests(), R.t]};
+  if (await dbSet('settings/training', S.tset)) { toast('Profil force-vitesse enregistré'); closePane(); renderMod(); }
+}
+document.addEventListener('click', e => {
+  const at = q => e.target.closest?.(q); let b;
+  if (at('[data-t5start]')) { T5 = null; t5Pane(); return; }
+  if (at('[data-tsymstart]')) { symPane(); return; }
+  if (at('[data-tfvstart]')) { fvPane(); return; }
+  if (at('[data-tplyo]')) { testLab(); return; }
+  if (at('[data-reststop]')) { PREST.end = 0; clearInterval(PREST.t); const el = $('#rest-box'); if (el) el.innerHTML = ''; return; }
+  if ((b = at('[data-restgo]'))) { restStart(+b.dataset.rest); return; }
+  if (T5 && (b = at('[data-t5ex]'))) { t5Pane(b.dataset.t5ex); return; }
+  if (T5 && (b = at('[data-t5w]'))) { const i = +b.dataset.t5w; if (!T5.done.includes(i)) T5.done.push(i); paneRender(); restStart(+b.dataset.rest); return; }
+  if (T5 && (b = at('[data-t5ok]'))) { const kg = +String($('#t5-try')?.value || '').replace(',', '.'); if (!(kg > 0)) { toast('Indique la charge'); return; } T5.tries.push({kg, ok: b.dataset.t5ok === '1'}); paneRender(); restStart(240); return; }
+  if (T5 && at('[data-t5save]')) { t5Save(); return; }
+  if (SYMD && at('[data-symsave]')) { symSave(); return; }
+  if (FVW && (b = at('[data-fvstep]'))) { fvGrab(); FVW.step = +b.dataset.fvstep; paneRender(); $('#pane-scroll').scrollTop = 0; return; }
+  if (FVW && (b = at('[data-fvfilm]'))) { fvGrab(); const a = +b.dataset.fvfilm; vaPane('sj', {add: a, onSave: j => { fvAdd(a, +j.h); restStart(120); } }); return; }
+  if (FVW && at('[data-fvsave]')) { fvSave(); return; }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (T5 && t.matches?.('[data-t5exp]')) { T5.exp = r25(+String(t.value).replace(',', '.') || 0) || null; paneRender(); return; }
+  if (SYMD && t.matches?.('[data-symv]')) { const [ex, sd] = t.dataset.symv.split('.'); SYMD[ex][sd] = String(t.value).replace(',', '.'); paneRender(); return; }
+  if (FVW && t.matches?.('[data-fvw]')) { fvGrab(); paneRender(); return; }
+  if (FVW && t.matches?.('[data-fvh]')) { fvAdd(+t.dataset.fvh, +String(t.value).replace(',', '.')); paneRender(); restStart(120); return; }
 });
 // A file shared from My Jump lands in the service worker, which keeps it in the 'jump-share' cache and opens ./?jumpshare=1.
 async function jumpShareCheck() {
@@ -3845,14 +4024,26 @@ function tBody() {
 // Profil: the athlete, the tests, the max of each lift.
 function tProfile() {
   const nMax = EX.filter(e => e.t === 'gym' && e.u === 'kg' && rmTest(e.id)).length;
+  const last5 = tests().filter(x => x.type === '5rm').sort((a, b) => b.date.localeCompare(a.date))[0];
+  const lastSym = tests().filter(x => x.type === 'sym').sort((a, b) => b.date.localeCompare(a.date))[0];
+  const fv = lastTest('fv'), fvr = fv ? fvProfile(fv) : null, cmj = jBest('cmj');
+  const ago = d => { const n = daysBetween(d, TODAY); return n > 56 ? 'à refaire (' + Math.round(n / 7) + ' sem.)' : 'fait le ' + fmtShort(d); };
+  const row = (attr, title, sub) => `<button class="rowbtn" ${attr}><span><b>${title}</b><span class="meta">${sub}</span></span>${ICON.chev}</button>`;
   return `
     <header class="top"><div class="sub">Ton profil d'athlète</div><h1>Profil</h1></header>
     ${sprinterCard()}
+    <div class="sec-label">Tests</div>
+    <div class="list">
+      ${row('data-t5start', 'Test 5RM', esc(last5 ? ago(last5.date) + ' · ' : '') + 'squat, hip thrust, soulevé, développé couché · protocole guidé')}
+      ${row('data-tsymstart', 'Test de symétrie gauche / droite', esc(lastSym ? ago(lastSym.date) + ' · ' : '') + 'mollets, tibial, quadriceps, ischios, adducteurs, moyen fessier')}
+      ${row('data-tfvstart', 'Test profil force-vitesse', esc(fvr ? `${ago(fv.date)} · ${Math.round(fvr.imb * 100)} % de l'optimal · ` : '') + 'squat jumps chargés filmés · méthode Samozino')}
+      ${row('data-tplyo', 'Tests pliométriques', esc(cmj ? 'CMJ ' + fx(+cmj.h, 1) + ' cm · ' : '') + 'CMJ, squat jump, drop jump, RSI, 10/5, pogo, une jambe')}
+      ${row('data-vatest="sprint"', 'Tests de sprint', '10, 20, 30, 60 m et 5-0-5 · chronométrés à la vidéo')}
+    </div>
+    <div class="sec-label">Mes résultats</div>
     <div class="stack">
-      <button class="banner" data-ttests style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Tests</b><br><span class="small muted">5RM, symétrie gauche/droite, profil force-vitesse</span></span>${ICON.chev}</button>
       <button class="banner" data-rmlist style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Mes max</b><br><span class="small muted">${nMax ? nMax + ' max testés · ' : ''}les charges de tes séances en découlent</span></span>${ICON.chev}</button>
-      <button class="banner" data-tlab style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Tests filmés</b><br><span class="small muted">CMJ, squat jump, drop jump, RSI, 10/5, pogo, une jambe, sprint · au ralenti</span></span>${ICON.chev}</button>
-      <button class="banner" data-tjumps style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Mes max en saut</b><br><span class="small muted">${(() => { const b = jBest('cmj'), ck = cmjCheck(); return b ? 'CMJ ' + fx(+b.h, 1) + ' cm' + (ck && ck.d <= -5 ? ' · fatigue détectée' : '') + ' · ' : ''; })()}tes records de saut et de sprint · import My Jump</span></span>${ICON.chev}</button>
+      <button class="banner" data-tjumps style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Mes max en saut</b><br><span class="small muted">${(() => { const ck = cmjCheck(); return cmj ? 'CMJ ' + fx(+cmj.h, 1) + ' cm' + (ck && ck.d <= -5 ? ' · fatigue détectée' : '') + ' · ' : ''; })()}tes records de saut et de sprint · import My Jump</span></span>${ICON.chev}</button>
     </div>`;
 }
 /* ---------- pane: a second sheet for Training and Fuel, with a stack (a picker can open over an editor) ---------- */
