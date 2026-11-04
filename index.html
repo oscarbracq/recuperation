@@ -255,6 +255,10 @@ textarea{width:100%;font:inherit;color:var(--fg);background:var(--card2);border:
 .ptr .spin{width:22px;height:22px;border-radius:50%;border:2.5px solid var(--line);border-top-color:var(--blue);transition:transform .2s}
 .ptr.ready{color:var(--blue)} .ptr.ready .spin{transform:rotate(180deg)}
 .ptr.busy .spin{animation:spin .8s linear infinite}
+/* While it loads, the wheel floats in its own space just above the tab bar, then fades away. */
+.ptr-float{position:fixed;left:50%;bottom:calc(var(--tbh,64px) + 18px);z-index:21;width:40px;height:40px;margin-left:-20px;border-radius:50%;display:grid;place-items:center;background:var(--card);box-shadow:0 4px 14px rgba(0,0,0,.25);opacity:0;transform:scale(.6);transition:opacity .25s,transform .25s;pointer-events:none}
+.ptr-float.on{opacity:1;transform:none}
+.ptr-float .spin{width:20px;height:20px;border-radius:50%;border:2.5px solid var(--line);border-top-color:var(--blue);animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.ptr.busy .spin{animation:none;border-color:var(--blue)}}
 .conns{display:grid;grid-template-columns:repeat(4,1fr);text-align:center}
@@ -572,7 +576,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=32"></script>
+<script src="supabase-db.js?v=33"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
@@ -1598,7 +1602,7 @@ document.addEventListener('touchend', () => {
   if (ptr.y0 == null) return;
   const go = ptr.d > PTR_GO; ptr.y0 = null; ptr.d = 0;
   const el = ptrEl(), w = el?.closest('.wrap'); if (el) el.classList.remove('ready', 'pull');
-  if (w) { w.style.transition = 'transform .4s cubic-bezier(.32,.72,0,1)'; w.style.transform = go ? 'translateY(-44px)' : ''; }
+  if (w) { w.style.transition = 'transform .4s cubic-bezier(.32,.72,0,1)'; w.style.transform = ''; }
   if (go && PREFS.haptic) navigator.vibrate?.(12);
   if (go) refreshAll();
 });
@@ -1606,7 +1610,9 @@ async function refreshAll() {
   if (ptr.busy) return;
   if (!S.db) { toast('Ouvre la page connecté à ton compte'); return; }
   ptr.busy = true;
-  const el = ptrEl(); if (el) el.classList.add('busy');
+  let fl = $('#ptr-float');
+  if (!fl) { document.body.insertAdjacentHTML('beforeend', '<div class="ptr-float" id="ptr-float" aria-hidden="true"><span class="spin"></span></div>'); fl = $('#ptr-float'); }
+  requestAnimationFrame(() => fl.classList.add('on'));
   // The installed app asks Garmin and Withings right away (RECUP_SYNC); elsewhere the request waits for the hourly cloud check.
   // Either way the request is left so the cloud sync also refreshes the advice.
   let msg = 'Demande envoyée · Garmin et Withings relus dans l\'heure', failed = false;
@@ -1619,7 +1625,7 @@ async function refreshAll() {
   try { (await navigator.serviceWorker?.getRegistration?.())?.update(); } catch (e) {}
   REST = null;
   setTimeout(() => {
-    ptr.busy = false; const w = ptrEl()?.closest('.wrap'); if (w) w.style.transform = ''; render();
+    ptr.busy = false; $('#ptr-float')?.classList.remove('on'); render();
     toast(failed ? 'Actualisation impossible, vérifie ta connexion' : msg);
   }, 400);
 }
