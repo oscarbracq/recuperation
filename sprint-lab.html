@@ -359,6 +359,56 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .scanv i{position:absolute;left:12%;right:12%;top:50%;height:2px;background:#ff453a;box-shadow:0 0 12px #ff453a}
 .supp summary{list-style:none;cursor:pointer}
 .supp summary::-webkit-details-marker{display:none}
+.demo{position:relative;border-radius:18px;overflow:hidden;background:#fff;aspect-ratio:4/3;margin:0 0 12px}
+.demo img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.demo img.b{opacity:0}
+.demo.on img.b{animation:demoflip 1.6s steps(1) infinite}
+@keyframes demoflip{0%{opacity:0}50%{opacity:1}}
+.demo .play{position:absolute;right:12px;bottom:12px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;display:grid;place-items:center;backdrop-filter:blur(8px)}
+.demo .play svg{width:20px;height:20px}
+.demo .is,.demo.on .ip{display:none}
+.demo.on .is{display:block}
+.wkc{display:block;width:100%;text-align:left;color:inherit}
+.wkc .week small{display:block;font-size:.5625rem;color:var(--fg2);min-height:.8em;margin-top:2px}
+.pane.fixed header::before{display:none}
+.sheet header .close[hidden]{display:none}
+.edx h3{justify-content:flex-start}
+.edx h3 small{margin-left:auto}
+.mini-in.big{font:700 1.25rem var(--display);padding:10px 2px}
+.edrow label{font-size:.6875rem}
+.tempo{display:grid;grid-template-columns:auto repeat(4,1fr);gap:6px;align-items:end;margin-top:8px}
+.tempo>span{font-size:.6875rem;font-weight:600;color:var(--fg2);text-transform:uppercase;letter-spacing:.04em;padding-bottom:10px}
+.tempo label{display:flex;flex-direction:column;gap:3px;font-size:.5625rem;color:var(--fg2);text-align:center;font-weight:600}
+.edx{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;transition:box-shadow .2s}
+.edx.lift{position:relative;z-index:5;box-shadow:0 18px 40px rgba(0,0,0,.35);transition:none;opacity:.95}
+.edx.dropb{box-shadow:0 -3px 0 var(--accent)}
+.edx.dropa{box-shadow:0 3px 0 var(--accent)}
+.edx .grip{color:var(--fg3);margin-right:6px;letter-spacing:-2px}
+.edx .tools{align-items:center}
+.whenb{display:flex;flex-direction:column;gap:8px}
+.wkrow{display:grid;grid-template-columns:40px 1fr 40px;align-items:center;text-align:center}
+.wkrow button{height:36px;border-radius:10px;font-size:1.375rem;color:var(--accent)}
+.wkrow b small{display:block;font-size:.75rem;color:var(--fg2);font-weight:500}
+.pldays .pdot{display:block;width:5px;height:5px;border-radius:50%;background:var(--accent);margin:2px auto 0}
+.pldays button[aria-pressed="true"] .pdot{background:#fff}
+.wbox .chip small{color:var(--fg2);font-weight:500;margin-left:4px}
+.wbox .chip[aria-pressed="true"] small{color:rgba(255,255,255,.8)}
+.wkc .stats{grid-template-columns:1fr 1fr}
+.wtxt p{margin:6px 0 0}
+.dual{width:100%;height:auto;display:block}
+.mrows{display:flex;flex-direction:column;margin-top:6px}
+.mrow{display:grid;grid-template-columns:1fr 110px 44px 54px;gap:8px;align-items:center;padding:5px 0;border-top:1px solid var(--line);font-size:.8125rem}
+.mrow:first-child{border-top:0}
+.mrow b{text-align:right;font-variant-numeric:tabular-nums}
+.mrow small{text-align:right;color:var(--fg2);font-variant-numeric:tabular-nums}
+.spk{width:110px;height:26px}
+.bald{border-top:1px solid var(--line);padding:2px 0}
+.bald:first-of-type{border-top:0}
+.bald summary{list-style:none;display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:baseline;padding:10px 0;cursor:pointer;font-size:.875rem}
+.bald summary::-webkit-details-marker{display:none}
+.bald summary em{font-style:normal;font-size:.75rem;color:var(--good);font-weight:600}
+.bald.off summary em{color:var(--bad)}
+.bald p{margin:0 0 8px}
 .pldays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:12px}
 .pldays button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;border-radius:12px;background:var(--card2);color:var(--fg2);font-size:.6875rem;font-weight:600}
 .pldays button b{font:700 1rem var(--display);color:var(--fg)}
@@ -397,6 +447,9 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--bar);backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);border-top:1px solid var(--line);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
 .tabbar nav{max-width:600px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
 #tb-N nav{grid-template-columns:repeat(5,1fr)}
+#tb-T nav{grid-template-columns:repeat(6,1fr)}
+#tb-T button{font-size:.625rem}
+.wrap{padding-bottom:calc(var(--tbh,calc(64px + env(safe-area-inset-bottom,0px))) + 28px)}
 .tbottle{min-width:0}
 .tbottle>span:nth-child(2){min-width:0}
 .tabbar button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;font-size:.6875rem;font-weight:500;color:var(--fg3);transition:color .15s}
@@ -658,9 +711,11 @@ details.slow[open]>summary h2::after{content:" ▴"}
 <div id="mod-T" class="mod" hidden><div class="wrap"><section id="t-view"></section></div>
 <div class="tabbar" id="tb-T"><nav role="tablist" aria-label="Sections">
   <button role="tab" data-mtab="today" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>Aujourd'hui</button>
-  <button role="tab" data-mtab="progress" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 4-7 5 5"/><path d="M3 21h18"/></svg>Tendances</button>
+  <button role="tab" data-mtab="progress" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 4-7 5 5"/><path d="M3 21h18"/></svg>Progrès</button>
   <button role="tab" data-mtab="sessions" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Séances</button>
   <button role="tab" data-mtab="library" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/></svg>Exercices</button>
+  <button role="tab" data-mtab="body" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.5" r="2"/><path d="M5 9h14M12 9v6M9 22l3-7 3 7"/></svg>Mon corps</button>
+  <button role="tab" data-mtab="profile" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Profil</button>
 </nav></div>
 </div>
 <div id="mod-N" class="mod" hidden><div class="wrap"><section id="f-view"></section></div>
@@ -801,7 +856,7 @@ function maxPain(k) { const v = Object.values(pains(k)); return v.length ? Math.
 function painActive() { for (let i = 0; i < 14; i++) if ((maxPain(addDays(TODAY, -i)) ?? 0) > 0) return true; return false; }
 const COMMON_PAINS = ['Dos', 'Ischios', 'Quadriceps', 'Mollet', 'Tendon d\'Achille', 'Genou', 'Cheville', 'Hanche', 'Épaule'];
 // A day with a planned session is a high day; otherwise the high days chosen in Training's week planner.
-const highDay = k => (typeof planFor === 'function' && planFor(k)) ? true : (S.profile?.schedule?.highDays || [1, 3, 5]).includes(new Date(k + 'T12:00:00').getDay());
+const highDay = k => (typeof planFor === 'function' && planFor(k)) ? true : typeof dayPlan === 'function' ? dayPlan(k).some(b => b.c === 'muscu' || b.c === 'athle') : [1, 3, 5].includes(new Date(k + 'T12:00:00').getDay());
 // Effort levels use Whoop's strain bands (light < 10, moderate 10-14, strenuous 14-18, all out 18-21).
 const EFFORT = [[0, 10, 'Léger'], [10, 14, 'Modéré'], [14, 18, 'Soutenu'], [18, 21, 'Maximal']];
 const effortLevel = v => (EFFORT.find(([a, b]) => v < b) || EFFORT[3])[2];
@@ -2307,7 +2362,7 @@ sheetEl.addEventListener('touchend', () => {
   let d = null, y = 0;
   const set = (v, anim = true) => { y = v; el.classList.toggle('drag', !anim); el.style.setProperty('--sy', v + 'px'); $('#scrim').style.opacity = anim ? '' : String(Math.max(0, Math.min(1, 1 - v / el.offsetHeight))); };
   el.addEventListener('touchstart', e => {
-    if (e.target.closest('.chartbox, input, textarea, select')) return;
+    if (e.target.closest('.chartbox, input, textarea, select') || P.stack.at(-1)?.fixed) return;
     const t = e.touches[0].clientY; d = {y0: t, start: y, active: false, last: t, t: performance.now(), v: 0};
   }, {passive: true});
   el.addEventListener('touchmove', e => {
@@ -2426,7 +2481,7 @@ function footer() {
     ${S.req && !window.RECUP_SYNC && (!last('garmin') || S.req > last('garmin')) ? `<p class="small muted" style="text-align:center;margin:6px 0 0">Mise à jour demandée à ${new Date(S.req).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}, en cours dans l'heure.</p>` : ''}
     <button class="ptr${ptr.busy && !ptr.silent ? ' busy' : ''}" data-ptr aria-label="Actualiser les données"><span class="spin"></span></button></div>`;
 }
-document.addEventListener('touchstart', e => { if (S.mod === 'R' && !S.sheet && !P.stack.length && atBottom()) ptr.y0 = e.touches[0].clientY; }, {passive: true});
+document.addEventListener('touchstart', e => { if ((S.mod === 'R' || (S.mod === 'T' && S.ttab === 'today') || (S.mod === 'N' && S.ftab === 'journal')) && !S.sheet && !P.stack.length && atBottom()) ptr.y0 = e.touches[0].clientY; }, {passive: true});
 document.addEventListener('touchmove', e => {
   if (ptr.y0 == null || ptr.busy) return;
   ptr.d = Math.max(0, ptr.y0 - e.touches[0].clientY);
@@ -2726,6 +2781,14 @@ const EX = [
   ['dbhip', 'Dead bug + hip thrust', 'gym', 'Tronc', 'Abdominaux, fessiers', 'Kettlebell et élastique : enchaîne le dead bug et la montée de bassin.', 'kg'],
   ['pogo', 'Pogo jumps', 'gym', 'Pliométrie', 'Raideur de cheville', 'Petits rebonds sur l\'avant du pied, genoux presque tendus, contacts très courts.', 's']
 ].map(([id, n, t, cat, m, c, u]) => ({id, n, t, cat, m, c, u}));
+// English name, equipment and demo pictures (free-exercise-db, public domain) for each exercise; then the rest of the library.
+const EX_EN = {"squat":["Back squat","Barre","Barbell_Squat"],"fsquat":["Front squat","Barre","Front_Squat_Clean_Grip"],"bss":["Bulgarian split squat","Haltères","Split_Squat_with_Dumbbells"],"stepup":["Step-up","Haltères","Dumbbell_Step_Ups"],"lunge":["Walking lunge","Haltères","Barbell_Walking_Lunge"],"hbdl":["Trap bar deadlift","Barre hexagonale","Trap_Bar_Deadlift"],"rdl":["Romanian deadlift","Barre","Romanian_Deadlift"],"sldl":["Single-leg deadlift","Kettlebell","Kettlebell_One-Legged_Deadlift"],"hipthrust":["Hip thrust","Barre","Barbell_Hip_Thrust"],"nordic":["Nordic hamstring curl","Poids du corps","Floor_Glute-Ham_Raise"],"legcurl":["Leg curl","Machine","Lying_Leg_Curls"],"calf":["Standing calf raise","Machine","Standing_Calf_Raises"],"tib":["Tibialis raise","Poids du corps",""],"copen":["Copenhagen plank","Banc",""],"hipflex":["Banded hip flexion","Élastique","Hip_Flexion_with_Band"],"pclean":["Power clean","Barre","Power_Clean"],"hclean":["Hang clean","Barre","Hang_Clean"],"psnatch":["Power snatch","Barre","Power_Snatch_from_Blocks"],"jsquat":["Loaded jump squat","Barre","Freehand_Jump_Squat"],"boxjump":["Box jump","Box","Front_Box_Jump"],"hurdlehop":["Hurdle hops","Haies","Hurdle_Hops"],"dropjump":["Drop jump","Box","Linear_Depth_Jump"],"bounds":["Alternate bounds","Poids du corps","Alternate_Leg_Diagonal_Bound"],"medball":["Medicine ball throw","Médecine-ball","Medicine_Ball_Scoop_Throw"],"bench":["Bench press","Barre","Barbell_Bench_Press_-_Medium_Grip"],"ohp":["Overhead press","Barre","Standing_Military_Press"],"pullup":["Pull-up","Barre de traction","Pullups"],"row":["Barbell row","Barre","Bent_Over_Barbell_Row"],"dips":["Dips","Barres parallèles","Dips_-_Triceps_Version"],"pallof":["Pallof press","Poulie","Pallof_Press"],"plank":["Plank","Poids du corps","Plank"],"legraise":["Hanging leg raise","Barre de traction","Hanging_Leg_Raise"],"legpress":["Leg press","Machine","Leg_Press"],"halfsquat":["Half squat","Barre","Barbell_Squat"],"deadlift":["Deadlift","Barre","Barbell_Deadlift"],"legext":["Leg extension","Machine","Leg_Extensions"],"adductor":["Adductor machine","Machine","Thigh_Adductor"],"glutecable":["Cable glute kickback","Poulie","One-Legged_Cable_Kickback"],"cablecrunch":["Cable crunch","Poulie","Cable_Crunch"],"lumbar":["Back extension","Banc","Hyperextensions_Back_Extensions"],"pecdeck":["Pec deck","Machine","Butterfly"],"mpress":["Machine shoulder press","Machine","Machine_Shoulder_Military_Press"],"farmer":["Farmer carry","Haltères","Farmers_Walk"],"chair":["Captain's chair knee raise","Machine","Knee_Hip_Raise_On_Parallel_Bars"],"hrow":["Seated cable row","Poulie","Seated_Cable_Rows"],"pulldown":["Lat pulldown","Poulie","Full_Range-Of-Motion_Lat_Pulldown"],"tibkb":["Kettlebell tibialis raise","Kettlebell",""],"abwheel":["Ab wheel rollout","Roulette","Ab_Roller"],"curl":["Biceps curl","Haltères","Dumbbell_Bicep_Curl"],"triext":["Triceps extension","Poulie","Triceps_Pushdown"],"latraise":["Lateral raise","Haltères","Side_Lateral_Raise"],"frontraise":["Front raise","Haltères","Front_Dumbbell_Raise"],"reardelt":["Rear delt fly","Haltères","Seated_Bent-Over_Rear_Delt_Raise"],"deadbug":["Dead bug","Poids du corps","Dead_Bug"],"dbhip":["Dead bug + hip thrust","Kettlebell",""],"pogo":["Pogo jumps","Poids du corps",""],"warmup":["Warm-up","Poids du corps",""],"askip":["A-skip","Poids du corps",""],"bskip":["B-skip","Poids du corps",""],"highknees":["High knees","Poids du corps",""],"buttkicks":["Butt kicks","Poids du corps","Single_Leg_Butt_Kick"],"wickets":["Wickets","Lattes",""],"strides":["Strides","Poids du corps",""],"start3":["3-point start","Poids du corps","Linear_3-Part_Start_Technique"],"blocks":["Block start","Blocs de départ",""],"accel":["Standing start acceleration","Poids du corps","Linear_Acceleration_Wall_Drill"],"fly":["Flying sprint","Poids du corps",""],"speedend":["Speed endurance","Poids du corps",""],"tempo":["Tempo run","Poids du corps",""],"hill":["Hill sprint","Poids du corps",""],"sled":["Sled sprint","Traîneau","Sled_Drag_-_Harness"]};
+const EX_MORE = [["boxsquat","Box squat","Box squat","Bas du corps","Barre","kg","Box_Squat","Assieds-toi juste sur la box sans te relâcher, puis remonte en explosant."],["pausesquat","Squat pause","Pause squat","Bas du corps","Barre","kg","Barbell_Full_Squat","2 s immobile en bas, tension gardée, puis remonte vite."],["goblet","Goblet squat","Goblet squat","Bas du corps","Kettlebell","kg","Goblet_Squat","Charge contre la poitrine, coudes entre les genoux en bas."],["hacksquat","Hack squat","Hack squat","Bas du corps","Machine","kg","Hack_Squat","Dos plaqué, descends profond, genoux dans l'axe."],["smithsquat","Squat à la Smith","Smith machine squat","Bas du corps","Smith","kg","Smith_Machine_Squat","Pieds légèrement devant la barre, descente contrôlée."],["pistol","Pistol squat","Pistol squat","Bas du corps","Poids du corps","pc","Smith_Machine_Pistol_Squat","Sur une jambe, l'autre tendue devant, descends le plus bas possible."],["splitsquat","Fente statique","Split squat","Bas du corps","Haltères","kg","Split_Squat_with_Dumbbells","Pieds fixes, descends à la verticale, genou arrière qui frôle le sol."],["revlunge","Fente arrière","Reverse lunge","Bas du corps","Haltères","kg","Dumbbell_Rear_Lunge","Recule une jambe, buste droit, pousse sur le talon avant pour revenir."],["latlunge","Fente latérale","Lateral lunge","Bas du corps","Haltères","kg","Barbell_Side_Split_Squat","Grand pas sur le côté, fesses en arrière, jambe opposée tendue."],["stepuphi","Step-up genou haut","Step-up with knee drive","Bas du corps","Haltères","kg","Step-up_with_Knee_Raise","Monte sur la box et termine genou haut, comme en course."],["sissy","Sissy squat","Sissy squat","Bas du corps","Poids du corps","pc","","Genoux vers l'avant, buste aligné avec les cuisses, descente lente."],["wallsit","Chaise contre le mur","Wall sit","Bas du corps","Poids du corps","s","","Cuisses à l'horizontale, dos plaqué au mur."],["spanish","Spanish squat","Spanish squat","Prévention","Élastique","s","","Élastique derrière les genoux, tibias verticaux, descends en isométrie. Soulage le tendon rotulien."],["legpress1","Presse à une jambe","Single-leg press","Bas du corps","Machine","kg","Leg_Press","Une jambe au centre du plateau, bassin collé au siège."],["legext1","Leg extension une jambe","Single-leg extension","Bas du corps","Machine","kg","Single-Leg_Leg_Extension","Monte vite, 1 s en haut, descente en 3 s."],["sumodl","Soulevé de terre sumo","Sumo deadlift","Chaîne postérieure","Barre","kg","Sumo_Deadlift","Pieds larges, mains entre les jambes, pousse le sol en écartant les genoux."],["deficitdl","Soulevé de terre en déficit","Deficit deadlift","Chaîne postérieure","Barre","kg","Deficit_Deadlift","Debout sur un disque, même technique, plus d'amplitude au départ."],["rackpull","Rack pull","Rack pull","Chaîne postérieure","Barre","kg","Rack_Pulls","Barre au niveau des genoux, verrouille les hanches en haut."],["goodmorning","Good morning","Good morning","Chaîne postérieure","Barre","kg","Good_Morning","Barre sur le dos, genoux souples, recule les hanches dos plat."],["dbrdl","Soulevé de terre roumain aux haltères","Dumbbell Romanian deadlift","Chaîne postérieure","Haltères","kg","Stiff-Legged_Dumbbell_Deadlift","Haltères le long des cuisses, hanches en arrière, dos neutre."],["kbswing","Swing kettlebell","Kettlebell swing","Chaîne postérieure","Kettlebell","kg","One-Arm_Kettlebell_Swings","Charnière de hanche explosive, la kettlebell flotte à hauteur d'épaules."],["ghr","Glute-ham raise","Glute-ham raise","Chaîne postérieure","Machine","pc","Glute_Ham_Raise","Genoux derrière le coussin, remonte avec les ischios, hanches tendues."],["seatcurl","Leg curl assis","Seated leg curl","Chaîne postérieure","Machine","kg","Seated_Leg_Curl","Buste penché vers l'avant pour étirer les ischios, descente en 3 s."],["ballcurl","Leg curl sur ballon","Swiss ball leg curl","Chaîne postérieure","Ballon","pc","Ball_Leg_Curl","Bassin haut, ramène le ballon sous les fesses avec les talons."],["slider","Leg curl glissé","Slider hamstring curl","Chaîne postérieure","Poids du corps","pc","Platform_Hamstring_Slides","Talons sur des patins, bassin haut, glisse lentement vers l'avant."],["glutebridge","Pont fessier","Glute bridge","Chaîne postérieure","Barre","kg","Barbell_Glute_Bridge","Au sol, pousse dans les talons, serre les fessiers 1 s en haut."],["slbridge","Pont fessier une jambe","Single-leg glute bridge","Chaîne postérieure","Poids du corps","pc","Single_Leg_Glute_Bridge","Bassin bien horizontal, une jambe en l'air."],["reversehyper","Reverse hyper","Reverse hyperextension","Chaîne postérieure","Machine","kg","Reverse_Hyperextension","Buste à plat, monte les jambes tendues jusqu'à l'alignement."],["pullthrough","Pull-through à la poulie","Cable pull-through","Chaîne postérieure","Poulie","kg","Pull_Through","Dos à la poulie, corde entre les jambes, pousse les hanches vers l'avant."],["hipabd","Abducteurs à la machine","Hip abductor machine","Prévention","Machine","kg","Thigh_Abductor","Écarte les genoux en contrôle, moyen fessier."],["monster","Monster walk","Monster walk","Prévention","Élastique","pc","Monster_Walk","Élastique aux chevilles, petits pas en diagonale, genoux ouverts."],["cableadd","Adducteurs à la poulie","Cable hip adduction","Prévention","Poulie","kg","Cable_Hip_Adduction","Ramène la jambe vers l'intérieur en contrôle."],["seatcalf","Mollets assis","Seated calf raise","Bas du corps","Machine","kg","Seated_Calf_Raise","Genoux pliés : travaille le soléaire. Pause en bas."],["slcalf","Mollet une jambe","Single-leg calf raise","Bas du corps","Haltères","kg","Dumbbell_Seated_One-Leg_Calf_Raise","Sur une marche, amplitude complète, 1 s en haut."],["legpresscalf","Mollets à la presse","Leg press calf raise","Bas du corps","Machine","kg","Calf_Press_On_The_Leg_Press_Machine","Avant du pied sur le bas du plateau, pousse avec les chevilles."],["isocalf","Mollet isométrique","Isometric calf hold","Prévention","Machine","s","","Sur la pointe, tiens 30 à 45 s lourd. Protège le tendon d'Achille."],["clean","Épaulé","Squat clean","Haltérophilie","Barre","kg","Clean","Tire la barre, passe dessous en squat complet."],["hangsnatch","Hang snatch","Hang snatch","Haltérophilie","Barre","kg","Snatch","Départ au-dessus des genoux, extension rapide, réception bras tendus."],["cleanpull","Tirage d'épaulé","Clean pull","Haltérophilie","Barre","kg","Clean_Pull","Extension complète hanches-genoux-chevilles, haussement d'épaules, sans passer dessous."],["snatchpull","Tirage d'arraché","Snatch pull","Haltérophilie","Barre","kg","Snatch_Pull","Prise large, même extension que l'arraché."],["pushpress","Push press","Push press","Haltérophilie","Barre","kg","Push_Press_-_Behind_the_Neck","Petite flexion des genoux, impulsion des jambes, bras tendus au-dessus."],["pushjerk","Jerk","Split jerk","Haltérophilie","Barre","kg","Split_Jerk","Impulsion, passe sous la barre en fente, bras verrouillés."],["dbsnatch","Arraché à un bras","Dumbbell snatch","Haltérophilie","Haltères","kg","","Haltère entre les pieds, une extension et le bras se tend au-dessus de la tête."],["kbclean","Épaulé kettlebell","Kettlebell clean","Haltérophilie","Kettlebell","kg","One-Arm_Kettlebell_Clean","La kettlebell s'enroule autour du poignet sans claquer l'avant-bras."],["trapjump","Saut à la barre hexagonale","Trap bar jump","Pliométrie","Barre hexagonale","kg","","Charge légère, saute le plus haut possible, réception amortie."],["landminepress","Landmine press","Landmine press","Haut du corps","Landmine","kg","","Barre fixée au sol, pousse en diagonale vers le haut."],["landmine180","Rotations landmine","Landmine 180","Tronc","Landmine","kg","Landmine_180s","Bras tendus, fais passer la barre d'une hanche à l'autre, bassin stable."],["cmj","Saut vertical (CMJ)","Countermovement jump","Pliométrie","Poids du corps","pc","Freehand_Jump_Squat","Flexion rapide et saut maximal, mains sur les hanches."],["broadjump","Saut en longueur sans élan","Broad jump","Pliométrie","Poids du corps","pc","Standing_Long_Jump","Bras qui balancent, saute loin, réception pieds parallèles."],["tuckjump","Saut genoux poitrine","Tuck jump","Pliométrie","Poids du corps","pc","Knee_Tuck_Jump","Genoux à la poitrine à chaque saut, contacts courts."],["splitjump","Fentes sautées","Split jump","Pliométrie","Poids du corps","pc","Split_Jump","Change de jambe en l'air, réception en fente stable."],["latbound","Bonds latéraux","Lateral bound","Pliométrie","Poids du corps","pc","Lateral_Bound","Pousse sur le côté, réception sur une jambe, tiens 1 s."],["slhop","Sauts sur une jambe","Single-leg hops","Pliométrie","Poids du corps","pc","Single-Leg_Hop_Progression","Sauts enchaînés sur une jambe, cheville raide."],["depthjump","Depth jump","Depth jump","Pliométrie","Box","pc","Depth_Jump_Leap","Tombe de la box et saute le plus haut possible, contact court."],["skips","Skips en hauteur","Power skips","Pliométrie","Poids du corps","pc","Fast_Skipping","Skip avec un maximum de hauteur, bras qui montent."],["ankleh","Sauts de cheville","Ankle hops","Pliométrie","Poids du corps","pc","","Genoux presque tendus, rebonds rapides sur l'avant du pied."],["mbslam","Slam de médecine-ball","Medicine ball slam","Pliométrie","Médecine-ball","pc","One-Arm_Medicine_Ball_Slam","Monte la balle au-dessus de la tête et lance-la au sol de toutes tes forces."],["mbchest","Passe de poitrine","Medicine ball chest pass","Pliométrie","Médecine-ball","pc","Medicine_Ball_Chest_Pass","Pousse la balle vers l'avant le plus fort possible."],["mbrot","Lancer rotatif","Rotational medicine ball throw","Pliométrie","Médecine-ball","pc","Medicine_Ball_Full_Twist","De profil au mur, rotation des hanches puis du buste, lance."],["mbback","Lancer arrière par-dessus la tête","Backward overhead throw","Pliométrie","Médecine-ball","pc","Backward_Medicine_Ball_Throw","Flexion puis extension explosive, la balle part loin derrière toi."],["plyopush","Pompes sautées","Plyo push-up","Pliométrie","Poids du corps","pc","Plyo_Push-up","Pousse assez fort pour décoller les mains."],["inclinebench","Développé incliné","Incline bench press","Haut du corps","Barre","kg","Barbell_Incline_Bench_Press_-_Medium_Grip","Banc à 30°, barre au haut des pectoraux."],["dbbench","Développé couché haltères","Dumbbell bench press","Haut du corps","Haltères","kg","Dumbbell_Bench_Press","Omoplates serrées, haltères qui descendent à hauteur de poitrine."],["dbincline","Développé incliné haltères","Incline dumbbell press","Haut du corps","Haltères","kg","Incline_Dumbbell_Press","Banc à 30°, coudes à 45° du corps."],["closebench","Développé couché prise serrée","Close-grip bench press","Haut du corps","Barre","kg","Close-Grip_Barbell_Bench_Press","Mains largeur d'épaules, coudes près du corps."],["floorpress","Floor press","Floor press","Haut du corps","Barre","kg","Floor_Press","Allongé au sol, les coudes touchent le sol à chaque répétition."],["dbohp","Développé épaules haltères","Dumbbell shoulder press","Haut du corps","Haltères","kg","Dumbbell_Shoulder_Press","Assis ou debout, pousse sans cambrer."],["arnold","Arnold press","Arnold press","Haut du corps","Haltères","kg","Arnold_Dumbbell_Press","Paumes vers toi en bas, tourne les poignets en montant."],["pushup","Pompes","Push-up","Haut du corps","Poids du corps","pc","Pushups","Corps gainé, poitrine qui frôle le sol."],["dippec","Dips buste penché","Chest dips","Haut du corps","Barres parallèles","pc","Dips_-_Chest_Version","Buste incliné vers l'avant pour cibler les pectoraux."],["cablefly","Écarté à la poulie","Cable fly","Haut du corps","Poulie","kg","Cable_Crossover","Bras légèrement fléchis, ramène les mains devant toi."],["dbfly","Écarté haltères","Dumbbell fly","Haut du corps","Haltères","kg","Dumbbell_Flyes","Descends les bras en arc jusqu'à l'étirement, sans aller trop bas."],["machinechest","Développé à la machine","Machine chest press","Haut du corps","Machine","kg","Machine_Bench_Press","Poignées à hauteur de poitrine, pousse sans verrouiller."],["pushdownrope","Extension triceps à la corde","Rope triceps pushdown","Haut du corps","Poulie","kg","Triceps_Pushdown_-_Rope_Attachment","Coudes fixes, écarte la corde en bas."],["skull","Barre au front","Skull crusher","Haut du corps","Barre EZ","kg","EZ-Bar_Skullcrusher","Coudes vers le plafond, la barre descend vers le front."],["ohtri","Extension triceps au-dessus de la tête","Overhead triceps extension","Haut du corps","Haltères","kg","Standing_Dumbbell_Triceps_Extension","Haltère derrière la tête, coudes serrés, déplie les bras."],["kickback","Kickback triceps","Triceps kickback","Haut du corps","Haltères","kg","Tricep_Dumbbell_Kickback","Buste penché, coude collé, tends le bras vers l'arrière."],["chinup","Tractions supination","Chin-up","Haut du corps","Barre de traction","pc","Chin-Up","Paumes vers toi, menton au-dessus de la barre."],["wpullup","Tractions lestées","Weighted pull-up","Haut du corps","Barre de traction","kg","Pullups","Lest à la ceinture, amplitude complète."],["dbrow","Rowing haltère un bras","One-arm dumbbell row","Haut du corps","Haltères","kg","One-Arm_Dumbbell_Row","Genou et main sur le banc, tire le coude vers la hanche."],["pendlay","Rowing Pendlay","Pendlay row","Haut du corps","Barre","kg","Bent_Over_Barbell_Row","Buste parallèle au sol, la barre repart du sol à chaque répétition."],["tbar","Rowing T-bar","T-bar row","Haut du corps","Landmine","kg","T-Bar_Row_with_Handle","Poitrine haute, tire la poignée vers le ventre."],["invrow","Rowing inversé","Inverted row","Haut du corps","Poids du corps","pc","Inverted_Row","Sous une barre ou aux anneaux, corps gainé, poitrine à la barre."],["chestrow","Rowing poitrine appuyée","Chest-supported row","Haut du corps","Haltères","kg","Dumbbell_Incline_Row","Ventre sur un banc incliné, tire sans élan."],["facepull","Face pull","Face pull","Prévention","Poulie","kg","Face_Pull","Corde à hauteur des yeux, tire vers le visage en écartant les mains."],["pullapart","Écarté à l'élastique","Band pull-apart","Prévention","Élastique","pc","Band_Pull_Apart","Bras tendus, écarte l'élastique jusqu'à la poitrine."],["extrot","Rotation externe d'épaule","External rotation","Prévention","Poulie","kg","External_Rotation_with_Cable","Coude au corps, tourne l'avant-bras vers l'extérieur."],["straightpd","Pull-over à la poulie","Straight-arm pulldown","Haut du corps","Poulie","kg","Straight-Arm_Pulldown","Bras tendus, ramène la barre vers les cuisses."],["shrug","Haussements d'épaules","Shrug","Haut du corps","Haltères","kg","Dumbbell_Shrug","Monte les épaules vers les oreilles, 1 s en haut."],["hammer","Curl marteau","Hammer curl","Haut du corps","Haltères","kg","Hammer_Curls","Pouces vers le haut, coudes fixes."],["barcurl","Curl barre","Barbell curl","Haut du corps","Barre","kg","Barbell_Curl","Coudes fixes, sans balancer le buste."],["preacher","Curl au pupitre","Preacher curl","Haut du corps","Barre EZ","kg","Preacher_Curl","Bras appuyés sur le pupitre, descente complète."],["upright","Tirage menton","Upright row","Haut du corps","Haltères","kg","Standing_Dumbbell_Upright_Row","Coudes qui montent jusqu'aux épaules, pas plus haut."],["cablelat","Élévations latérales à la poulie","Cable lateral raise","Haut du corps","Poulie","kg","Cable_Seated_Lateral_Raise","Tension continue, monte jusqu'à l'horizontale."],["sideplank","Gainage latéral","Side plank","Tronc","Poids du corps","s","Side_Bridge","Corps aligné, bassin haut."],["rkcplank","Gainage RKC","RKC plank","Tronc","Poids du corps","s","Plank","Coudes vers les pieds, tout serré à fond : 10 à 20 s suffisent."],["hollow","Hollow hold","Hollow hold","Tronc","Poids du corps","s","","Bas du dos plaqué, jambes et épaules décollées."],["russian","Russian twist","Russian twist","Tronc","Médecine-ball","pc","Russian_Twist","Buste incliné, tourne d'un côté à l'autre."],["woodchop","Bûcheron à la poulie","Cable wood chop","Tronc","Poulie","kg","Standing_Cable_Wood_Chop","Rotation du haut vers le bas en diagonale, hanches qui suivent."],["revcrunch","Crunch inversé","Reverse crunch","Tronc","Poids du corps","pc","Reverse_Crunch","Enroule le bassin vers la poitrine, sans élan."],["crunch","Crunch","Crunch","Tronc","Poids du corps","pc","Crunches","Enroule le haut du dos, regard vers le plafond."],["vup","V-up","V-up","Tronc","Poids du corps","pc","Jackknife_Sit-Up","Mains et pieds se rejoignent au-dessus du ventre."],["birddog","Bird dog","Bird dog","Tronc","Poids du corps","pc","","À quatre pattes, tends bras et jambe opposés sans bouger le dos."],["suitcase","Suitcase carry","Suitcase carry","Tronc","Kettlebell","kg","Farmers_Walk","Une seule charge, marche droit sans pencher."],["stirpot","Stir the pot","Stir the pot","Tronc","Ballon","pc","","Avant-bras sur le ballon, petits cercles sans bouger le bassin."],["mtclimber","Mountain climbers","Mountain climbers","Tronc","Poids du corps","s","Mountain_Climbers","En planche, genoux vers la poitrine en alternance rapide."],["toesbar","Pieds à la barre","Toes to bar","Tronc","Barre de traction","pc","Hanging_Leg_Raise","Suspendu, monte les pieds jusqu'à la barre en contrôle."],["nordicrev","Nordic inversé","Reverse Nordic","Prévention","Poids du corps","pc","","À genoux, bascule le buste en arrière hanches tendues."],["copenshort","Copenhague court","Short-lever Copenhagen","Prévention","Banc","s","","Genou posé sur le banc : version plus facile à tenir."],["hipairplane","Avion de hanche","Hip airplane","Prévention","Poids du corps","pc","","Sur une jambe, buste penché, tourne le bassin vers l'extérieur puis l'intérieur."],["soleusbent","Soléaire genou plié","Bent-knee calf raise","Prévention","Haltères","kg","Dumbbell_Seated_One-Leg_Calf_Raise","Genou plié à 45°, monte sur la pointe en contrôle."],["psoasmarch","Marche du soldat à l'élastique","Banded psoas march","Prévention","Élastique","pc","Hip_Flexion_with_Band","Allongé, élastique aux pieds, monte un genou à 90° en alternance."],["anklealph","Proprioception cheville","Single-leg balance","Prévention","Poids du corps","s","Balance_Board","Sur une jambe, yeux fermés ou sur coussin instable."],["sledpush","Poussée de traîneau","Sled push","Bas du corps","Traîneau","kg","Sled_Push","Buste incliné, petits pas puissants."],["sleddrag","Traîneau marche arrière","Backward sled drag","Bas du corps","Traîneau","kg","Backward_Drag","Recule en tirant, genoux qui passent devant les pieds."],["battlerope","Cordes ondulatoires","Battle ropes","Haut du corps","Cordes","s","Battling_Ropes","Vagues rapides et régulières, genoux fléchis."],["tireflip","Retournement de pneu","Tire flip","Chaîne postérieure","Pneu","pc","Tire_Flip","Poitrine contre le pneu, pousse avec les jambes puis bascule."],["wallmarch","Drill mur d'accélération","Wall drill","Échauffement et gammes","Poids du corps","g","Linear_Acceleration_Wall_Drill","Corps incliné contre le mur, alterne les genoux comme en départ."],["straightleg","Jambes tendues","Straight-leg bounds","Échauffement et gammes","Poids du corps","g","","Jambes tendues, griffe le sol sous le bassin."],["carioca","Pas chassés croisés","Carioca","Échauffement et gammes","Poids du corps","g","Carioca_Quick_Step","Croise devant puis derrière en te déplaçant de côté, hanches qui tournent."],["flyin","Sprint lancé chronométré","Timed flying sprint","Vitesse max","Poids du corps","m","","Zone lancée de 10 à 30 m chronométrée, après 20 à 30 m d'élan."],["accel2","Départ accroupi","Crouch start","Accélération","Poids du corps","m","Linear_3-Part_Start_Technique","Départ des deux mains au sol, sans blocs."],["resband","Sprint résisté à l'élastique","Band-resisted sprint","Résistance","Élastique","m","","Un partenaire retient l'élastique, posture d'accélération."],["stairs","Montées d'escaliers","Stair sprints","Résistance","Poids du corps","m","Power_Stairs","Une marche sur deux, genou haut, bras actifs."],["curve","Sprint en virage","Bend sprint","Vitesse max","Poids du corps","m","","Penche le corps vers l'intérieur, bras extérieur plus ample."],["split","Course en fréquence","Overspeed / frequency runs","Vitesse max","Poids du corps","m","","Petites foulées très rapides puis relâche dans la foulée normale."]];
+const TRACK_CATS = ['Échauffement et gammes', 'Accélération', 'Vitesse max', 'Endurance de vitesse', 'Résistance', 'Tempo'];
+const MUS_NAME = {glutes: 'Fessiers', hams: 'Ischios', quads: 'Quadriceps', calves: 'Mollets', adduct: 'Adducteurs', psoas: 'Psoas', tib: 'Tibial antérieur', erect: 'Lombaires', abs: 'Abdominaux', obl: 'Obliques', lats: 'Dos', rhomb: 'Haut du dos', shoul: 'Épaules', pecs: 'Pectoraux', tri: 'Triceps', bi: 'Biceps'};
+const MUSC_MORE = {"boxsquat":{"quads":1.0,"glutes":1.0,"hams":0.5,"erect":0.5},"pausesquat":{"quads":1.0,"glutes":1.0,"adduct":0.5,"erect":0.5},"goblet":{"quads":1.0,"glutes":0.75,"abs":0.25},"hacksquat":{"quads":1.0,"glutes":0.5},"smithsquat":{"quads":1.0,"glutes":0.75},"pistol":{"quads":1.0,"glutes":0.75,"abs":0.25},"splitsquat":{"quads":1.0,"glutes":1.0,"adduct":0.25},"revlunge":{"quads":1.0,"glutes":1.0,"hams":0.25},"latlunge":{"adduct":1.0,"quads":0.75,"glutes":0.75},"stepuphi":{"quads":1.0,"glutes":1.0,"psoas":0.5},"sissy":{"quads":1.0},"wallsit":{"quads":1.0,"glutes":0.25},"spanish":{"quads":1.0},"legpress1":{"quads":1.0,"glutes":0.75},"legext1":{"quads":1.0},"sumodl":{"glutes":1.0,"adduct":0.75,"quads":0.75,"hams":0.5,"erect":0.75},"deficitdl":{"glutes":1.0,"hams":0.75,"erect":1.0,"quads":0.5},"rackpull":{"erect":1.0,"glutes":0.75,"hams":0.5,"lats":0.25},"goodmorning":{"hams":1.0,"erect":1.0,"glutes":0.5},"dbrdl":{"hams":1.0,"glutes":1.0,"erect":0.5},"kbswing":{"glutes":1.0,"hams":0.75,"erect":0.5,"shoul":0.25},"ghr":{"hams":1.0,"glutes":0.5,"calves":0.25},"seatcurl":{"hams":1.0},"ballcurl":{"hams":1.0,"glutes":0.5},"slider":{"hams":1.0,"glutes":0.5},"glutebridge":{"glutes":1.0,"hams":0.5},"slbridge":{"glutes":1.0,"hams":0.5},"reversehyper":{"glutes":1.0,"hams":0.75,"erect":0.75},"pullthrough":{"glutes":1.0,"hams":0.75},"hipabd":{"glutes":1.0},"monster":{"glutes":1.0},"cableadd":{"adduct":1.0},"seatcalf":{"calves":1.0},"slcalf":{"calves":1.0},"legpresscalf":{"calves":1.0},"isocalf":{"calves":1.0},"clean":{"glutes":1.0,"hams":0.75,"quads":1.0,"erect":0.75,"shoul":0.5,"rhomb":0.5,"calves":0.5},"hangsnatch":{"glutes":1.0,"hams":0.75,"quads":0.5,"erect":0.75,"shoul":0.75,"rhomb":0.5},"cleanpull":{"glutes":1.0,"hams":0.75,"quads":0.5,"erect":0.75,"rhomb":0.5,"calves":0.5},"snatchpull":{"glutes":1.0,"hams":0.75,"erect":0.75,"rhomb":0.5,"calves":0.5},"pushpress":{"shoul":1.0,"tri":0.75,"quads":0.5,"glutes":0.5},"pushjerk":{"shoul":1.0,"tri":0.75,"quads":0.75,"glutes":0.5},"dbsnatch":{"glutes":1.0,"hams":0.5,"shoul":0.75,"erect":0.5},"kbclean":{"glutes":1.0,"hams":0.5,"shoul":0.5},"trapjump":{"quads":1.0,"glutes":1.0,"calves":0.75},"landminepress":{"shoul":1.0,"pecs":0.5,"tri":0.5,"obl":0.25},"landmine180":{"obl":1.0,"abs":0.5,"shoul":0.25},"cmj":{"quads":1.0,"glutes":1.0,"calves":0.75},"broadjump":{"glutes":1.0,"quads":1.0,"hams":0.5,"calves":0.5},"tuckjump":{"quads":1.0,"calves":0.75,"psoas":0.5},"splitjump":{"quads":1.0,"glutes":1.0,"calves":0.5},"latbound":{"glutes":1.0,"adduct":0.75,"quads":0.5,"calves":0.5},"slhop":{"calves":1.0,"quads":0.75,"glutes":0.75},"depthjump":{"quads":1.0,"glutes":0.75,"calves":1.0},"skips":{"glutes":0.75,"calves":1.0,"psoas":0.5,"quads":0.5},"ankleh":{"calves":1.0,"tib":0.5},"mbslam":{"lats":0.75,"abs":1.0,"shoul":0.5},"mbchest":{"pecs":1.0,"tri":0.75,"shoul":0.5},"mbrot":{"obl":1.0,"abs":0.5,"glutes":0.5,"shoul":0.5},"mbback":{"glutes":1.0,"hams":0.5,"erect":0.75,"shoul":0.5},"plyopush":{"pecs":1.0,"tri":0.75,"shoul":0.5},"inclinebench":{"pecs":1.0,"shoul":0.75,"tri":0.5},"dbbench":{"pecs":1.0,"tri":0.5,"shoul":0.5},"dbincline":{"pecs":1.0,"shoul":0.75,"tri":0.5},"closebench":{"tri":1.0,"pecs":0.75,"shoul":0.25},"floorpress":{"tri":1.0,"pecs":0.75},"dbohp":{"shoul":1.0,"tri":0.75},"arnold":{"shoul":1.0,"tri":0.5},"pushup":{"pecs":1.0,"tri":0.75,"shoul":0.5,"abs":0.25},"dippec":{"pecs":1.0,"tri":0.75,"shoul":0.5},"cablefly":{"pecs":1.0,"shoul":0.25},"dbfly":{"pecs":1.0},"machinechest":{"pecs":1.0,"tri":0.5},"pushdownrope":{"tri":1.0},"skull":{"tri":1.0},"ohtri":{"tri":1.0},"kickback":{"tri":1.0},"chinup":{"lats":1.0,"bi":1.0,"rhomb":0.5},"wpullup":{"lats":1.0,"bi":0.75,"rhomb":0.5},"dbrow":{"lats":1.0,"rhomb":0.75,"bi":0.5},"pendlay":{"lats":1.0,"rhomb":1.0,"erect":0.5,"bi":0.5},"tbar":{"lats":1.0,"rhomb":1.0,"bi":0.5},"invrow":{"lats":1.0,"rhomb":1.0,"bi":0.5},"chestrow":{"lats":1.0,"rhomb":1.0,"bi":0.5},"facepull":{"shoul":1.0,"rhomb":1.0},"pullapart":{"shoul":1.0,"rhomb":1.0},"extrot":{"shoul":1.0},"straightpd":{"lats":1.0,"abs":0.25},"shrug":{"rhomb":1.0,"shoul":0.5},"hammer":{"bi":1.0},"barcurl":{"bi":1.0},"preacher":{"bi":1.0},"upright":{"shoul":1.0,"rhomb":0.5},"cablelat":{"shoul":1.0},"sideplank":{"obl":1.0,"abs":0.5,"glutes":0.25},"rkcplank":{"abs":1.0,"obl":0.5,"glutes":0.5},"hollow":{"abs":1.0,"psoas":0.5},"russian":{"obl":1.0,"abs":0.5},"woodchop":{"obl":1.0,"abs":0.5,"shoul":0.25},"revcrunch":{"abs":1.0,"psoas":0.25},"crunch":{"abs":1.0},"vup":{"abs":1.0,"psoas":0.75},"birddog":{"erect":0.75,"glutes":0.5,"abs":0.5},"suitcase":{"obl":1.0,"abs":0.5,"shoul":0.25},"stirpot":{"abs":1.0,"obl":0.5},"mtclimber":{"abs":0.75,"psoas":0.75,"shoul":0.25},"toesbar":{"abs":1.0,"psoas":0.75,"lats":0.25},"nordicrev":{"quads":1.0},"copenshort":{"adduct":1.0,"obl":0.5},"hipairplane":{"glutes":1.0,"hams":0.25},"soleusbent":{"calves":1.0},"psoasmarch":{"psoas":1.0,"abs":0.5},"anklealph":{"calves":0.75,"tib":0.75},"sledpush":{"quads":1.0,"glutes":1.0,"calves":0.75},"sleddrag":{"quads":1.0,"tib":0.5},"battlerope":{"shoul":1.0,"abs":0.5},"tireflip":{"glutes":1.0,"hams":0.75,"erect":0.75,"quads":0.75,"shoul":0.5},"wallmarch":{"psoas":1.0,"glutes":0.5,"calves":0.5},"straightleg":{"hams":1.0,"glutes":0.5,"calves":0.5},"carioca":{"adduct":0.75,"obl":0.5,"calves":0.5}};
+for (const [id, n, en, cat, eq, u, img, c] of EX_MORE) EX.push({id, n, t: TRACK_CATS.includes(cat) ? 'track' : 'gym', cat, m: Object.entries(MUSC_MORE[id] || {}).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k]) => MUS_NAME[k]).join(', '), c, u, en, eq, img});
+for (const e of EX) if (EX_EN[e.id]) [e.en, e.eq, e.img] = EX_EN[e.id];
 const EXI = Object.fromEntries(EX.map(e => [e.id, e]));
 const exOf = id => EXI[id] || {id, n: id, t: 'gym', cat: '', m: '', c: '', u: 'kg'};
 // Track efforts that count as sprint volume for Reload: at least 90 % and not drills, warm-up or tempo.
@@ -2755,6 +2818,7 @@ const MUSC = {
   tibkb: {tib: 1}, abwheel: {abs: 1, lats: .25}, curl: {bi: 1}, triext: {tri: 1}, latraise: {shoul: 1}, frontraise: {shoul: 1}, reardelt: {shoul: .75, rhomb: .75},
   deadbug: {abs: 1, obl: .5}, dbhip: {glutes: 1, abs: .75}, pogo: {calves: 1, tib: .5}
 };
+Object.assign(MUSC, MUSC_MORE);
 // Running: Oscar's own coefficients (sheet "Charge en Athlétisme"), shifted by the kind of running:
 // starts load the quads and glutes more, top speed the hamstrings, calves and psoas.
 const RUN_BASE = {hams: 1, glutes: 1, calves: 1, psoas: .9, quads: .8, adduct: .8, tib: .7, shoul: .7, obl: .6, abs: .6, erect: .6, lats: .5, tri: .3, bi: .3, pecs: .3, rhomb: .3};
@@ -2886,15 +2950,17 @@ const allPlans = () => [...myPlans(), ...TDV_PLANS, ...BUILTIN, ...BACKUP];
 const planById = id => allPlans().find(p => p.id === id);
 // Session n of his programme = (season week - 1) x 3 + slot (Monday 1, Wednesday 2, Friday 3); repeated ones share a sheet.
 function tdvPlanFor(k) {
-  const slot = {1: 1, 3: 2, 5: 3}[dow(k)]; if (!slot || !TDV_PLANS.length) return null;
+  if (!TDV_PLANS.length || typeof dayPlan !== 'function' || !planHas(k, 'muscu')) return null;
+  const mon = monday(k), gymDays = [0, 1, 2, 3, 4, 5, 6].map(i => addDays(mon, i)).filter(d => planHas(d, 'muscu'));
+  const slot = Math.min(3, gymDays.indexOf(k) + 1); if (slot < 1) return null;
   const n = (seasonWeek(k) - 1) * 3 + slot;
   const id = n < 1 || n > 36 ? null : n <= 6 ? 's0' + n : n <= 18 ? ['s09', 's07', 's08'][n % 3] : n <= 21 ? 's19' : 's' + n;
   return id ? planById('tdv-' + id) : null;
 }
-const planFor = k => planById(S.tset.week?.[dow(k)]) || tdvPlanFor(k);
+const planFor = k => planById(S.tset.dated?.[k]) || planById(S.tset.week?.[dow(k)]) || tdvPlanFor(k);
 const logs = () => Object.values(S.logs).filter(l => !l.deleted).sort((a, b) => (b.date + (b.start || '')).localeCompare(a.date + (a.start || '')));
 const logsOn = k => logs().filter(l => l.date === k);
-function estMin(p) { return Math.round(p.items.reduce((s, it) => s + (it.min || 0) + (it.sets || it.reps || 0) * (((it.rest || 60) + (it.dist ? it.dist / 6 : 40)) / 60), 0) / 5) * 5; }
+function estMin(p) { return Math.round(((p.warm ? warmMin(p.warm) : 0) + (p.cool?.min || 0) + p.items.reduce((s, it) => s + (it.min || 0) + (it.sets || it.reps || 0) * (((it.rest || 60) + (it.dist ? it.dist / 6 : 40)) / 60), 0)) / 5) * 5; }
 const unitOf = it => it.u || (exOf(it.ex).u === 's' ? 's' : 'reps');
 function itemText(it) {
   const e = exOf(it.ex);
@@ -3235,39 +3301,57 @@ document.addEventListener('click', async e => {
 
 /* ---------- Training ---------- */
 function vT() {
-  const body = {today: tToday, sessions: tSessions, library: tLibrary, progress: tProgress}[S.ttab]();
+  const body = ({today: tToday, sessions: tSessions, library: tLibrary, progress: tProgress, body: tBody, profile: tProfile}[S.ttab] || tToday)();
   return trfMark() + body;
 }
+function weekKind(mon, kind) {
+  const c = kind === 'gym' ? 'muscu' : 'athle', days = [];
+  let n = 0, done = 0, vol = 0;
+  for (let i = 0; i < 7; i++) {
+    const k = addDays(mon, i), b = dayPlan(k).find(x => x.c === c), L = logsOn(k).filter(l => l.kind === kind), pl = planFor(k);
+    const planned = !!b || (pl && pl.kind === kind);
+    if (planned) n++; if (L.length) done++;
+    vol += L.reduce((a, l) => a + (kind === 'gym' ? l.tonnage || 0 : l.sprintM || 0), 0);
+    days.push({k, i, planned, done: L.length > 0, at: b?.a});
+  }
+  return {days, n, done, vol};
+}
+function weekCard(kind) {
+  const w = weekKind(monday(TODAY), kind), gym = kind === 'gym';
+  return `<button class="card wkc" data-tplan><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Cette semaine · ${gym ? 'Musculation' : 'Sprint'}</span><span class="small muted">Planning ›</span></div>
+    <div class="week">${w.days.map(d => `<span class="${d.k === TODAY ? 'today' : ''}">${DOW[d.i]}<i class="${d.done ? 'done' : d.planned ? 'plan' : ''}">${d.done ? '✓' : +d.k.slice(8)}</i><small>${d.planned && d.at ? tfr(d.at) : ''}</small></span>`).join('')}</div>
+    <div class="stats" style="margin-top:12px"><div><b>${w.done}/${w.n}</b><span>séances</span></div><div><b>${gym ? fx(w.vol / 1000, 1) + ' t' : fx(w.vol) + ' m'}</b><span>${gym ? 'soulevées' : 'sprintés'}</span></div></div></button>`;
+}
+function coachCard(rec, tgt) {
+  const L = [...(rec ? [[zoneOf(rec.score) === 'bad' ? 'bad' : zoneOf(rec.score) === 'mid' ? 'mid' : 'good', `Récupération ${rec.score} % : ${tgt.text}`]] : []), ...methodCoach()];
+  return L.length ? `<div class="card"><span class="eyebrow">Conseil du coach</span>${L.map(([z, t]) => `<p class="malert ${z === 'bad' ? '' : z === 'mid' ? 'mid' : 'ok'}">${esc(t)}</p>`).join('')}</div>` : '';
+}
 function tToday() {
-  const kG = lastKey('hrv'), rec = kG ? recovery(kG) : null, z = zoneOf(rec?.score);
+  const kG = lastKey('hrv'), rec = kG ? recovery(kG) : null;
   const p = planFor(TODAY), done = logsOn(TODAY);
   const tgt = effortTarget(rec?.score, !!p || highDay(TODAY));
-  const mon = monday(TODAY);
-  const week = [0, 1, 2, 3, 4, 5, 6].map(i => { const k = addDays(mon, i), d = logsOn(k).length, pl = planFor(k); return `<span class="${k === TODAY ? 'today' : ''}">${DOW[i]}<i class="${d ? 'done' : pl ? 'plan' : ''}">${d ? '✓' : +k.slice(8)}</i></span>`; }).join('');
-  const wk = weekTotals(mon);
   const wA = !done.length && !S.live ? watchSession(TODAY, p) : null;
   const ask = wA ? `<article class="card"><span class="chiptag">Reçue de ta montre</span><div class="bigname">${esc(wA.name || (ACT[wA.type] || [wA.type])[0])}</div>
       <p class="small muted">${esc(wA.start || '')} · ${fx(wA.min)} min${wA.avgHr ? ' · FC moyenne ' + wA.avgHr : ''}</p>
       <p class="small" style="margin-top:8px">${p ? `Séance validée. Dis-moi ce que tu as fait par rapport à « ${esc(p.name)} » : tout est déjà rempli comme prévu, corrige seulement ce qui a changé.` : 'Séance validée. Note ce que tu as fait pour la garder dans ton historique.'}</p>
       <div style="margin-top:14px"><button class="btn" data-tgfill="${esc(wA.start || '')}">Remplir ma séance</button></div></article>` : '';
   const live = S.live ? `<button class="banner" data-tlive style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Séance en cours</b><br><span class="small muted">${esc(S.live.name)}</span></span><span class="chiptag">Reprendre</span></button>` : '';
-  const main = done.length ? `<article class="card"><span class="chiptag">${TICK.replace('<svg', '<svg width="12" height="12"')} Fait aujourd'hui</span>${done.map(l => `<div class="bigname">${esc(l.name)}</div><p class="small muted">${l.min} min · RPE ${l.rpe}/10${l.tonnage ? ' · ' + fx(l.tonnage) + ' kg soulevés' : ''}${l.sprintM ? ' · ' + fx(l.sprintM) + ' m de sprint' : ''}</p>`).join('')}<p class="small" style="margin-top:10px">Bravo. La séance est déjà comptée dans ton effort du jour sur ${modName('R')}.</p></article>`
-    : p ? `<article class="card"><span class="chiptag">${p.kind === 'gym' ? 'Musculation' : 'Piste'} · ${estMin(p)} min</span><div class="bigname">${esc(p.name)}</div><p class="small muted">${esc(p.desc || '')}</p>
+  const main = done.length ? `<article class="card"><span class="chiptag">${TICK.replace('<svg', '<svg width="12" height="12"')} Fait</span>${done.map(l => `<div class="bigname">${esc(l.name)}</div><p class="small muted">${l.min} min · RPE ${l.rpe}/10${l.tonnage ? ' · ' + fx(l.tonnage) + ' kg soulevés' : ''}${l.sprintM ? ' · ' + fx(l.sprintM) + ' m de sprint' : ''}</p>`).join('')}</article>`
+    : p ? `<article class="card"><span class="chiptag">Aujourd'hui · ${p.kind === 'gym' ? 'Musculation' : 'Piste'} · ${estMin(p)} min</span><div class="bigname">${esc(p.name)}</div><p class="small muted">${esc(p.desc || '')}</p>
         <ul class="exl">${p.items.map(it => `<li><span>${esc(exOf(it.ex).n)}</span><span>${itemText(it)}</span></li>`).join('')}</ul>
-        <div style="margin-top:14px"><button class="btn" data-tstart="${p.id}">Commencer la séance</button></div></article>`
-    : `<article class="card empty"><b>Pas de séance prévue aujourd'hui</b>Profite de la récupération, ou choisis une séance.<div class="stack" style="margin-top:14px"><button class="btn ghost" data-ttab="sessions">Choisir une séance</button><button class="btn ghost" data-tplan>Planifier ma semaine</button></div></article>`;
+        <div style="margin-top:14px"><button class="btn" data-tstart="${p.id}">Commencer la séance</button></div></article>` : '';
   return `
     <header class="top"><div class="sub">${fmtDay(TODAY)} · semaine ${seasonWeek(TODAY)}</div><p class="pmsg">${esc(trainMsg(p, done))}</p>${seasonLine()}${(() => { const n = planFor(addDays(TODAY, 1)); return n ? `<p class="small muted" style="margin:6px 0 0">Demain : ${esc(n.name)}</p>` : ''; })()}</header>
-    <div class="stack">${live}${ask}${diagHtml(methodCoach(), 'Coach')}
-      ${painActive() && !done.length && !S.live ? `<div class="card"><span class="eyebrow">Douleur notée</span><p class="small" style="margin:6px 0 10px">Si courir n'est pas possible aujourd'hui, prends une séance de secours.</p><div class="stack">${BACKUP.map(b => `<button class="btn ghost" data-tplanv="${b.id}">${esc(b.name)}</button>`).join('')}</div></div>` : ''}
-      <div class="card" style="display:flex;gap:12px;align-items:center"><span class="pill ${z}"><i></i>${rec ? rec.score + ' %' : modName('R')}</span><span class="small">${rec ? esc(tgt.text) : 'Ta récupération du matin s\'affichera ici pour ajuster la séance.'}</span></div>
+    <div class="stack">${live}${ask}
+      ${weekCard('gym')}${weekCard('track')}
+      ${coachCard(rec, tgt)}
       ${main}
-      <div class="card"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Cette semaine</span><button class="small" style="color:var(--accent);font-weight:600" data-tplan>Planning</button></div><div class="week">${week}</div>
-        <div class="stats" style="margin-top:12px"><div><b>${wk.n}</b><span>séances</span></div><div><b>${fx(wk.tonnage / 1000, 1)} t</b><span>soulevées</span></div><div><b>${fx(wk.sprintM)} m</b><span>de sprint</span></div></div></div>
+      ${painActive() && !done.length && !S.live ? `<div class="card"><span class="eyebrow">Douleur notée</span><p class="small" style="margin:6px 0 10px">Si courir n'est pas possible aujourd'hui, prends une séance de secours.</p><div class="stack">${BACKUP.map(b => `<button class="btn ghost" data-tplanv="${b.id}">${esc(b.name)}</button>`).join('')}</div></div>` : ''}
     </div>
     <h2>Charge <small>7 derniers jours</small>${editBtn('load')}</h2>${secHtml('load')}
     ${recentLogs()}
-    ${recentSessions().replace('Séances récentes', 'Activités de la montre')}`;
+    ${recentSessions().replace('Séances récentes', 'Activités de la montre')}
+    ${footer()}`;
 }
 function weekTotals(mon) {
   let n = 0, tonnage = 0, sprintM = 0;
@@ -3279,31 +3363,25 @@ function recentLogs() {
   return `<h2>Dernières séances</h2><div class="list">${L.map(l => `<button class="rowbtn" data-tlog="${l.id}"><span><b>${esc(l.name)}</b><span class="meta">${esc(cap(fmtShort(l.date)))} · ${l.min} min · RPE ${l.rpe}</span></span><span class="kc">${l.kind === 'gym' ? fx((l.tonnage || 0) / 1000, 1) + ' t' : fx(l.sprintM || 0) + ' m'}</span></button>`).join('')}</div>`;
 }
 function tSessions() {
+  if (S.tkind === 'class') S.tkind = 'gym';
   const k = S.tkind, mine = myPlans().filter(p => p.kind === k), base = BUILTIN.filter(p => p.kind === k);
   const row = p => `<button class="rowbtn" data-tplanv="${p.id}"><span><b>${esc(p.name)}</b><span class="meta">${p.items.length} exercices · ${estMin(p)} min${p.desc ? ' · ' + esc(p.desc) : ''}</span></span>${ICON.chev}</button>`;
   return `
     <header class="top"><div class="sub">Programmes et séances</div><h1>Séances</h1></header>
-    <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Piste'], ['class', 'Mes cours']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
-    ${k === 'class' ? '<p class="small muted" style="margin:10px 4px 0">Mode coach : prépare tes cours collectifs (circuit, renfo, stretching) avec la bibliothèque d\'exercices et ses consignes.</p>' : ''}
+    <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Piste']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
     <h2>Mes séances</h2><div class="list">${mine.map(row).join('')}<button class="addbtn" data-tnew>+ Créer une séance</button></div>
     ${k === 'gym' && TDV_PLANS.length ? `<h2>Mon programme <small>Train de vie performance</small></h2><div class="list">${TDV_PLANS.map(row).join('')}</div>` : ''}
     ${base.length ? `<h2>Programmes TNR <small>à dupliquer et adapter</small></h2><div class="list">${base.map(row).join('')}</div>` : ''}
     <div style="margin-top:16px"><button class="btn ghost" data-tplan>Planifier ma semaine</button></div>`;
 }
 function tLibrary() {
-  const cats = [...new Set(EX.map(e => e.cat))];
   return `
-    <header class="top"><div class="sub">${EX.length} exercices, consignes et records</div><h1>Exercices</h1></header>
-    <button class="banner" data-rmlist style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;margin-bottom:12px"><span><b>Mes max</b><br><span class="small muted">Un 1RM par exercice, et la charge pour tes répétitions et ton RPE</span></span>${ICON.chev}</button>
-    <input class="search" type="search" placeholder="Rechercher un exercice" value="${esc(S.lib.q)}" data-tlibq aria-label="Rechercher un exercice">
-    <div class="chipsx">${['', ...cats].map(c => `<button class="chip" data-tlibc="${esc(c)}" aria-pressed="${S.lib.cat === c}">${c || 'Tous'}</button>`).join('')}</div>
+    <header class="top"><div class="sub">${EX.length} exercices, en français ou en anglais</div><h1>Exercices</h1></header>
+    <input class="search" type="search" placeholder="Rechercher, en français ou en anglais" value="${esc(S.lib.q)}" data-tlibq aria-label="Rechercher un exercice">
+    <div data-libf>${exFilters(S.lib, 'any')}</div>
     <div class="list" id="t-libl">${libRows()}</div>`;
 }
-function libRows() {
-  const q = S.lib.q.trim().toLowerCase();
-  const list = EX.filter(e => (!S.lib.cat || e.cat === S.lib.cat) && (!q || (e.n + ' ' + e.m).toLowerCase().includes(q)));
-  return list.map(e => { const b = bestE1rm(e.id); return `<button class="rowbtn" data-tex="${e.id}"><span><b>${esc(e.n)}</b><span class="meta">${esc(e.cat)} · ${esc(e.m)}</span></span>${b ? `<span class="kc">${fx(b)} kg</span>` : ICON.chev}</button>`; }).join('') || '<div class="empty small">Aucun exercice trouvé.</div>';
-}
+function libRows() { return exRows(exSearch(S.lib.q, 'any', {cat: S.lib.cat, eq: S.lib.eq}), 'data-tex'); }
 const MAIN_LIFTS = ['squat', 'pclean', 'hipthrust', 'rdl', 'hbdl', 'bench', 'fsquat'];
 function sprinterCard() {
   const p = S.profile || {};
@@ -3311,32 +3389,112 @@ function sprinterCard() {
       <div class="pbs">${[['60 m', p.sprinter?.pb60], ['100 m', p.sprinter?.pb100]].map(([d, t]) => `<div><b class="num">${t ? esc(String(t).replace('.', '″')) : '–'}</b><span>${d}</span></div>`).join('')}</div></div>
     <p class="note" style="text-align:left">${p.sprinter?.source ? `Mis à jour automatiquement depuis ta fiche athlétisme${p.sprinter.updatedAt ? ', le ' + esc(fmtShort(p.sprinter.updatedAt.slice(0, 10))) : ''}.` : 'Ces résultats seront remplis automatiquement depuis ta fiche athlétisme, puis plus tard par ton appli d\'entraînement.'} Taille : ${p.height ? fx(p.height) + ' cm' : '–'}.</p>`;
 }
+function tBuckets(gran) {
+  const out = [];
+  if (gran === 'day') for (let i = 13; i >= 0; i--) { const k = addDays(TODAY, -i); out.push({a: k, b: k, lab: DOW[(dow(k) + 6) % 7], tip: cap(fmtShort(k))}); }
+  else if (gran === 'month') for (let i = 11; i >= 0; i--) { const d = new Date(TODAY.slice(0, 7) + '-15T12:00:00'); d.setMonth(d.getMonth() - i); const a = key(d).slice(0, 8) + '01', e = new Date(d.getFullYear(), d.getMonth() + 1, 0, 12); out.push({a, b: key(e), lab: d.toLocaleDateString('fr-FR', {month: 'narrow'}), tip: d.toLocaleDateString('fr-FR', {month: 'long', year: 'numeric'})}); }
+  else if (gran === 'year') for (let i = 3; i >= 0; i--) { const y = +TODAY.slice(0, 4) - i; out.push({a: y + '-01-01', b: y + '-12-31', lab: String(y), tip: String(y)}); }
+  else { const mon = monday(TODAY); for (let i = 11; i >= 0; i--) { const m = addDays(mon, -7 * i); out.push({a: m, b: addDays(m, 6), lab: 'S' + seasonWeek(m), tip: 'Semaine ' + seasonWeek(m)}); } }
+  return out;
+}
+// Each log split into muscu and sprint: volume, intensity, and per muscle the load and the load at full intensity.
+function logSplit(l) {
+  const r = {ton: 0, gW: 0, gR: 0, m: 0, mW: 0, mD: 0, gL: 0, sL: 0, mus: {}};
+  const add = (k, v, full) => { const x = r.mus[k] ||= {v: 0, f: 0}; x.v += v; x.f += full; };
+  for (const it of l.items || []) {
+    const e = exOf(it.ex), c = musCoef(it.ex);
+    if (it.sets) {
+      const rm = rmOf(it.ex)?.kg, secs = it.u === 's' || (!it.u && e.u === 's');
+      for (const st of it.sets) {
+        const reps = secs ? (+st.reps || 0) / 3 : (+st.reps || 0), inten = +st.kg > 0 && rm && e.u === 'kg' ? Math.min(1.05, +st.kg / rm) : .6;
+        r.ton += (+st.kg || 0) * (+st.reps || 0); if (rm && +st.kg > 0 && !ACCESSORY(e)) { r.gW += inten * reps; r.gR += reps; }
+        for (const k in c) { add(k, reps * inten * c[k], reps * c[k]); r.gL += reps * inten * c[k]; }
+      }
+    } else if (it.reps) {
+      const [fs, di] = RUN_FS[e.cat] || [1, .8], inten = (+it.pct || 0) / 100 || di, sprint = e.cat !== 'Échauffement et gammes' && it.ex !== 'warmup';
+      for (const x of it.reps) { const d = +x.dist || 0; if (sprint) { r.m += d; r.mW += inten * d; r.mD += d; } for (const k in c) { add(k, d / 10 * inten * fs * c[k], d / 10 * fs * c[k]); r.sL += d / 10 * inten * fs * c[k]; } }
+    }
+  }
+  return r;
+}
+function bucketStats(B) {
+  return B.map(b => {
+    const t = {ton: 0, gW: 0, gR: 0, m: 0, mW: 0, mD: 0, gL: 0, sL: 0, mus: {}};
+    for (const l of logs()) if (l.date >= b.a && l.date <= b.b) { const r = logSplit(l); for (const k of ['ton', 'gW', 'gR', 'm', 'mW', 'mD', 'gL', 'sL']) t[k] += r[k]; for (const k in r.mus) { const x = t.mus[k] ||= {v: 0, f: 0}; x.v += r.mus[k].v; x.f += r.mus[k].f; } }
+    const gI = t.gR ? t.gW / t.gR * 100 : null, sI = t.mD ? t.mW / t.mD * 100 : null, L = t.gL + t.sL;
+    return {...b, ...t, gI, sI, vol: L, int: L ? ((gI ?? 60) * t.gL + (sI ?? 80) * t.sL) / L : null};
+  });
+}
+// Bars = volume, line = intensity, on one chart.
+function dualChart(pts, vKey, iKey, vUnit, vDiv = 1) {
+  const W0 = 340, H = 150, L = 8, R = 8, T = 14, Bm = 22, n = pts.length, bw = (W0 - L - R) / n;
+  const vs = pts.map(p => (p[vKey] || 0) / vDiv), vmax = Math.max(1, ...vs), is = pts.map(p => p[iKey]), ilo = Math.min(...is.filter(x => x != null), 100) - 5, ihi = Math.max(...is.filter(x => x != null), 0) + 5;
+  const y = v => T + (H - T - Bm) * (1 - v / vmax), yi = v => T + (H - T - Bm) * (1 - (v - ilo) / Math.max(1, ihi - ilo));
+  const bars = vs.map((v, i) => `<rect x="${(L + i * bw + bw * .18).toFixed(1)}" y="${y(v).toFixed(1)}" width="${(bw * .64).toFixed(1)}" height="${(H - Bm - y(v)).toFixed(1)}" rx="3" fill="var(--accent)" opacity=".35"><title>${esc(pts[i].tip)} : ${fx(v, vDiv > 1 ? 1 : 0)} ${vUnit}${is[i] != null ? ' · ' + fx(is[i]) + ' %' : ''}</title></rect>`).join('');
+  const line = is.map((v, i) => v == null ? null : `${(L + i * bw + bw / 2).toFixed(1)},${yi(v).toFixed(1)}`).filter(Boolean);
+  const labs = pts.map((p, i) => i % Math.ceil(n / 7) === 0 || i === n - 1 ? `<text x="${(L + i * bw + bw / 2).toFixed(1)}" y="${H - 6}" text-anchor="middle" font-size="9" fill="var(--fg2)">${esc(p.lab)}</text>` : '').join('');
+  return `<svg viewBox="0 0 ${W0} ${H}" class="dual" role="img" aria-label="Volume et intensité">${bars}${line.length > 1 ? `<polyline points="${line.join(' ')}" fill="none" stroke="var(--fg)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>` : ''}${line.map(pt => `<circle cx="${pt.split(',')[0]}" cy="${pt.split(',')[1]}" r="2.5" fill="var(--fg)"/>`).join('')}${labs}</svg>`;
+}
+const spark = (vals, w = 110, h = 26) => { const v = vals.map(x => x || 0), mx = Math.max(1e-6, ...v); return `<svg viewBox="0 0 ${w} ${h}" class="spk"><polyline points="${v.map((x, i) => `${(i / Math.max(1, v.length - 1) * (w - 4) + 2).toFixed(1)},${(h - 3 - x / mx * (h - 6)).toFixed(1)}`).join(' ')}" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linejoin="round"/></svg>`; };
 function tProgress() {
-  const L = logs();
-  if (!L.length) return `<header class="top"><div class="sub">Records et volume</div><h1>Tendances</h1></header>${sprinterCard()}<button class="banner" data-ttests style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;margin-bottom:12px"><span><b>Tests</b><br><span class="small muted">5RM, symétrie gauche/droite, profil force-vitesse</span></span>${ICON.chev}</button><div class="card empty"><b>Tes progrès apparaîtront ici</b>Termine ta première séance : charges, records et volume se calculent tout seuls.</div>`;
-  const lifts = MAIN_LIFTS.filter(id => bestE1rm(id));
-  if (!lifts.includes(S.prog) && lifts.length) S.prog = lifts[0];
-  // Best time per track exercise and distance.
+  const L = logs(), gran = S.tgran || 'week', view = S.tview || 'all';
+  const seg = `<div class="seg" role="group" aria-label="Période">${[['day', 'Jour'], ['week', 'Semaine'], ['month', 'Mois'], ['year', 'Année']].map(([v, l]) => `<button type="button" data-tgran="${v}" aria-pressed="${gran === v}">${l}</button>`).join('')}</div>`;
+  if (!L.length) return `<header class="top"><div class="sub">Intensité et volume</div><h1>Progrès</h1></header><div class="card empty"><b>Tes progrès apparaîtront ici</b>Termine ta première séance : intensité, volume et charge par muscle se calculent tout seuls.</div>`;
+  const B = bucketStats(tBuckets(gran)), last = B.at(-1), prev = B.at(-2);
+  const V = {all: ['vol', 'int', 'unités de charge', 1, 'Muscu et sprint ensemble, avec ta charge par muscle.'], gym: ['ton', 'gI', 't', 1000, 'Tonnage, et intensité = charge moyenne en % de ton max.'], track: ['m', 'sI', 'm', 1, 'Mètres de sprint, et intensité = % moyen de ta vitesse.']}[view];
+  const kv = (lab, a, b, n, u) => `<div><b>${a == null ? '–' : fx(a, n) + (u ? ' ' + u : '')}</b><span>${lab}${a != null && b ? ' · ' + sgn(pct(a, b)) : ''}</span></div>`;
   const bests = {};
   for (const l of L) for (const it of l.items) if (it.reps) for (const r of it.reps) if (+r.t > 0 && +r.dist > 0) { const kk = it.ex + '|' + r.dist; if (!bests[kk] || +r.t < bests[kk].t) bests[kk] = {ex: it.ex, dist: +r.dist, t: +r.t, date: l.date, shoes: l.shoes, cond: l.cond}; }
-  const weeks = [], mon = monday(TODAY);
-  for (let i = 7; i >= 0; i--) { const m = addDays(mon, -7 * i), w = weekTotals(m); weeks.push({k: m, v: w.tonnage / 1000, s: w.sprintM, lab: 'S' + seasonWeek(m), tip: 'Semaine ' + seasonWeek(m)}); }
-  const hist = S.prog ? exHistory(S.prog).slice().reverse().map(({date, it}) => ({k: date, v: Math.max(...(it.sets || []).map(s => e1rm(+s.kg, +s.reps)), 0) || null, tip: cap(fmtShort(date))})) : [];
+  const musRows = MUS.filter(([k]) => B.some(b => b.mus[k]?.v)).map(([k, n]) => { const v = B.map(b => b.mus[k]?.v || 0), x = last.mus[k], y = prev?.mus[k]; return `<div class="mrow"><span>${esc(n)}</span>${spark(v)}<b>${x ? Math.round(x.v / x.f * 100) + ' %' : '–'}</b><small>${x && y?.v ? sgn(pct(x.v, y.v)) : '–'}</small></div>`; }).join('');
   return `
-    <header class="top"><div class="sub">Records et volume</div><h1>Tendances</h1></header>
-    ${sprinterCard()}
-    <div class="stack">${diagHtml(trainingDiag(), 'Diagnostic')}<button class="banner" data-ttests style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Tests</b><br><span class="small muted">5RM, symétrie gauche/droite, profil force-vitesse</span></span>${ICON.chev}</button>${bodyCard()}${musCard()}
-      ${lifts.length ? `<div class="card"><div class="chead" style="margin-bottom:6px"><span class="eyebrow">Max estimé</span><b class="num">${fx(bestE1rm(S.prog))} kg</b></div>
-        <div class="chipsx">${lifts.map(id => `<button class="chip" data-tprog="${id}" aria-pressed="${S.prog === id}">${esc(exOf(id).n)}</button>`).join('')}</div>
-        ${hist.length > 1 ? chart(hist, {color: 'var(--accent)', dec: 0, unit: 'kg'}) : '<p class="small muted">Encore une séance avec cet exercice pour voir la courbe.</p>'}
-        <p class="small muted" style="margin-top:8px">Calculé à partir de ta meilleure série de chaque séance (formule d'Epley) : pas besoin de tester ton max.</p></div>` : ''}
-      ${(() => { const km = {}; for (const l of L) if (l.shoes) for (const it of l.items || []) for (const r of it.reps || []) km[l.shoes] = (km[l.shoes] || 0) + (+r.dist || 0) / 1000; const e = Object.entries(km); return e.length ? `<div class="card"><span class="eyebrow">Chaussures</span><ul class="exl">${e.map(([n, v]) => `<li><span>${esc(n)}</span><span>${fx(v, 1)} km${/Pointes/.test(n) && v > 300 ? ' · à surveiller' : /Running/.test(n) && v > 600 ? ' · à changer bientôt' : ''}</span></li>`).join('')}</ul></div>` : ''; })()}
+    <header class="top"><div class="sub">Intensité et volume</div><h1>Progrès</h1></header>
+    ${seg}
+    <div class="stack" style="margin-top:12px">
+      <div class="card"><div class="chead" style="margin-bottom:8px"><span class="eyebrow">Intensité et volume</span></div>
+        <div class="seg" role="group" aria-label="Vue">${[['all', 'Tout'], ['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button type="button" data-tview="${v}" aria-pressed="${view === v}">${l}</button>`).join('')}</div>
+        <div style="margin-top:12px">${dualChart(B, V[0], V[1], V[2], V[3])}</div>
+        <div class="legend"><span><i style="background:var(--accent);opacity:.35"></i>Volume</span><span><i style="background:var(--fg)"></i>Intensité</span></div>
+        <div class="stats" style="margin-top:10px">${kv('volume', last[V[0]] / V[3], prev ? prev[V[0]] / V[3] : null, V[3] > 1 ? 1 : 0, V[2] === 'unités de charge' ? '' : V[2])}${kv('intensité', last[V[1]], prev?.[V[1]], 0, '%')}</div>
+        ${view === 'all' ? `<p class="small" style="margin:10px 0 0">${last.gL + last.sL ? `Part de la charge : musculation ${Math.round(last.gL / (last.gL + last.sL) * 100)} %, sprint ${Math.round(last.sL / (last.gL + last.sL) * 100)} %.` : 'Rien sur cette période.'}</p>` : ''}
+        <p class="small muted" style="margin:6px 0 0">${V[4]}</p></div>
+      <div class="card"><span class="eyebrow">Tonnage en musculation</span><p class="small muted" style="margin:4px 0 30px">Charge × répétitions de toutes tes séries, en tonnes.</p>${chart(B.map(b => ({k: b.a, v: b.ton / 1000, lab: b.lab, tip: b.tip})), {color: 'var(--accent)', bars: true, dec: 1, unit: 't'})}</div>
+      <div class="card"><span class="eyebrow">Sprint</span><p class="small muted" style="margin:4px 0 30px">Mètres de sprint, sans les gammes ni l'échauffement. Règle : pas plus de +15 % d'une semaine à l'autre.</p>${chart(B.map(b => ({k: b.a, v: b.m, lab: b.lab, tip: b.tip})), {color: 'var(--accent)', bars: true, dec: 0, unit: 'm'})}</div>
+      ${musRows ? `<div class="card"><div class="chead"><span class="eyebrow">Chaque muscle</span><span class="small muted">volume · intensité · évolution</span></div><div class="mrows">${musRows}</div></div>` : ''}
+      ${diagHtml(trainingDiag(), 'Diagnostic')}
       ${Object.keys(bests).length ? `<div class="card"><span class="eyebrow">Meilleurs chronos</span><ul class="exl">${Object.values(bests).sort((a, b) => a.dist - b.dist).map(b => `<li><span>${esc(exOf(b.ex).n)} ${b.dist} m</span><span>${fx(b.t, 2)} s · ${fx(b.dist / b.t * 3.6, 1)} km/h${b.shoes ? ' · ' + esc(b.shoes) : ''}${b.cond ? ' · ' + esc(b.cond) : ''}</span></li>`).join('')}</ul></div>` : ''}
-      <div class="card"><span class="eyebrow">Tonnage par semaine</span><p class="small muted" style="margin:4px 0 30px">Charge × répétitions de toutes tes séries de musculation, en tonnes.</p>${chart(weeks, {color: 'var(--accent)', bars: true, dec: 1, unit: 't'})}</div>
-      <div class="card"><span class="eyebrow">Sprint par semaine</span><p class="small muted" style="margin:4px 0 30px">Mètres courus à 90 % et plus. La règle : pas plus de +15 % d'une semaine à l'autre.</p>${chart(weeks.map(w => ({...w, v: w.s})), {color: 'var(--accent)', bars: true, dec: 0, unit: 'm'})}</div>
+      ${(() => { const km = {}; for (const l of L) if (l.shoes) for (const it of l.items || []) for (const r of it.reps || []) km[l.shoes] = (km[l.shoes] || 0) + (+r.dist || 0) / 1000; const e = Object.entries(km); return e.length ? `<div class="card"><span class="eyebrow">Chaussures</span><ul class="exl">${e.map(([n, v]) => `<li><span>${esc(n)}</span><span>${fx(v, 1)} km${/Pointes/.test(n) && v > 300 ? ' · à surveiller' : /Running/.test(n) && v > 600 ? ' · à changer bientôt' : ''}</span></li>`).join('')}</ul></div>` : ''; })()}
     </div>`;
 }
-
+// Mon corps: the body, the balance between opposite groups (with what to do), left/right, the load per muscle.
+const BAL_TXT = {
+  'Ischios / quadriceps': ['Charge des ischios par rapport aux quadriceps sur 7 jours. Pour un sprinteur, au moins 0,6 et plus c\'est mieux : des ischios forts protègent des déchirures en vitesse.', 'Ajoute 2 à 3 séries de nordic, leg curl ou soulevé de terre roumain, et enlève un peu de volume de squat ou de presse.'],
+  'Chaîne arrière / avant': ['Fessiers, ischios, lombaires et mollets contre quadriceps, psoas, abdos et tibial. Le sprint demande une chaîne arrière forte : au moins 0,8.', 'Plus de hip thrust, de soulevé de terre et de mollets ; moins d\'exercices de quadriceps isolés.'],
+  'Tirage / poussée': ['Dos et biceps contre pectoraux, épaules et triceps. Entre 0,67 et 1,5 pour garder des épaules saines.', 'Rééquilibre avec du rowing, des tractions ou des face pulls, ou à l\'inverse du développé si le tirage domine.']};
+function tBody() {
+  const st = musState(), bal = musBalance(st), v = Object.fromEntries(st.map(x => [x.k, x]));
+  const sides = {'Ischios / quadriceps': [['hams'], ['quads']], 'Chaîne arrière / avant': [['glutes', 'hams', 'erect', 'calves'], ['quads', 'psoas', 'abs', 'tib']], 'Tirage / poussée': [['lats', 'rhomb', 'bi'], ['pecs', 'shoul', 'tri']]};
+  const sym = SYM.map(([ex, n]) => { const d = rmTest(ex, '|D')?.kg, g = rmTest(ex, '|G')?.kg; return d && g ? {n, d, g, gap: Math.abs(d - g) / Math.max(d, g) * 100} : null; }).filter(Boolean);
+  return `
+    <header class="top"><div class="sub">Charge, équilibres et symétrie</div><h1>Mon corps</h1></header>
+    <div class="stack">${bodyCard() || '<div class="card empty"><b>Ton corps se colorera ici</b>Dès ta première séance enregistrée.</div>'}
+      ${bal.length ? `<div class="card"><span class="eyebrow">Équilibres · 7 jours</span>${bal.map(b => { const [a, c] = sides[b.n], T = BAL_TXT[b.n]; return `<details class="bald${b.off ? ' off' : ''}"><summary><span>${esc(b.n)}</span><b>${fx(b.r, 2)}</b><em>${b.off ? 'à rééquilibrer' : 'correct'}</em></summary>
+        <p class="small">${esc(T[0])}</p><p class="small muted">${a.map(k => esc(v[k].n) + ' ' + fx(v[k].week)).join(' · ')} <b>contre</b> ${c.map(k => esc(v[k].n) + ' ' + fx(v[k].week)).join(' · ')}</p>${b.off ? `<p class="small"><b>Que faire :</b> ${esc(T[1])}</p>` : ''}</details>`; }).join('')}</div>` : ''}
+      ${sym.length ? `<div class="card"><span class="eyebrow">Gauche / droite</span>${sym.map(x => `<div class="musrow"><span>${esc(x.n)}</span><span class="small">D ${x.d} · G ${x.g}</span><b style="${x.gap > 10 ? 'color:var(--bad)' : ''}">${fx(x.gap, 1)} %</b></div>`).join('')}<p class="small muted" style="margin-top:6px">Au-delà de 10 % d'écart, travaille d'abord le côté faible. Tes tests se notent dans Profil.</p></div>` : ''}
+      ${musCard()}
+    </div>`;
+}
+// Profil: the athlete, the tests, the max of each lift.
+function tProfile() {
+  const nMax = EX.filter(e => e.t === 'gym' && e.u === 'kg' && rmTest(e.id)).length;
+  return `
+    <header class="top"><div class="sub">Ton profil d'athlète</div><h1>Profil</h1></header>
+    ${sprinterCard()}
+    <div class="stack">
+      <button class="banner" data-ttests style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Tests</b><br><span class="small muted">5RM, symétrie gauche/droite, profil force-vitesse</span></span>${ICON.chev}</button>
+      <button class="banner" data-rmlist style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Mes max</b><br><span class="small muted">${nMax ? nMax + ' max testés · ' : ''}les charges de tes séances en découlent</span></span>${ICON.chev}</button>
+      <div class="card"><span class="eyebrow">My Jump</span><p class="small" style="margin:6px 0 0">My Jump ne partage pas ses mesures avec d'autres applis. Note la hauteur de tes sauts dans Tests : elle alimente ton profil force-vitesse. Un saut vertical (CMJ) par semaine, toujours dans les mêmes conditions, montre aussi ta fatigue nerveuse : une baisse de plus de 5 % = alléger.</p></div>
+    </div>`;
+}
 /* ---------- pane: a second sheet for Training and Fuel, with a stack (a picker can open over an editor) ---------- */
 const P = {stack: [], live: false};
 function openPane(view) { P.stack.push(view); paneShow(); }
@@ -3345,6 +3503,8 @@ function paneShow() {
   P.live = !!v.live;
   $('#pane-title').textContent = v.title || '';
   const l = $('#pn-left'); l.textContent = v.left?.label || ''; $('#pn-foot').hidden = !v.left;
+  const x = $('#pn-close'); x.hidden = !v.fixed; x.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
+  $('#pane').classList.toggle('fixed', !!v.fixed);
   paneRender(); $('#pane-scroll').scrollTop = 0;
   $('#scrim').classList.add('on'); $('#pane').classList.add('on'); document.body.style.overflow = 'hidden';
   if (v.focus) setTimeout(() => $(v.focus)?.focus(), 350);
@@ -3365,7 +3525,9 @@ function planView(id) {
     const p = planById(id); if (!p) return '';
     const mine = !BUILTIN.includes(p);
     return `<div class="dhead"><span class="chiptag">${p.kind === 'gym' ? 'Musculation' : 'Piste'} · ${estMin(p)} min</span><div class="bigname" style="font-size:1.75rem">${esc(p.name)}</div><p class="small muted">${esc(p.desc || '')}</p></div>
+      ${warmText(p.warm).length ? `<div class="card wtxt"><span class="eyebrow">Échauffement · ${warmMin(p.warm)} min</span>${warmText(p.warm).map(t => `<p class="small">${esc(t)}</p>`).join('')}</div>` : ''}
       <div class="list">${p.items.map(it => { const e = exOf(it.ex), sg = suggest(it); return `<button class="rowbtn" data-tex="${it.ex}"><span><b>${esc(e.n)}</b><span class="meta">${itemText(it)}${it.rest ? ' · récup ' + fmtRest(it.rest) : ''}${sg ? ' · ' + fx(sg.kg, sg.kg % 1 ? 1 : 0) + ' kg proposés' : ''}</span></span>${ICON.chev}</button>`; }).join('')}</div>
+      ${coolText(p.cool).length ? `<div class="card wtxt" style="margin-top:12px"><span class="eyebrow">Retour au calme</span>${coolText(p.cool).map(t => `<p class="small">${esc(t)}</p>`).join('')}</div>` : ''}
       ${p.kind === 'gym' ? capsLine(planCheck(p.items)) : ''}
       <div class="stack" style="margin-top:16px"><button class="btn" data-tstart="${p.id}">Commencer</button>
       <button class="btn ghost" data-tedit="${p.id}">${mine ? 'Modifier' : 'Dupliquer et adapter'}</button>
@@ -3374,37 +3536,231 @@ function planView(id) {
 }
 const fmtRest = s => s >= 60 ? `${Math.floor(s / 60)} min${s % 60 ? ' ' + (s % 60) + ' s' : ''}` : s + ' s';
 let ED = null;
-function editPlan(id) {
-  const p = id ? planById(id) : null, mine = p && !BUILTIN.includes(p);
-  ED = p ? structuredClone(p) : {kind: S.tkind, name: '', desc: '', items: []};
-  if (!mine) { ED.id = uid(); if (p) ED.name = p.name + ' (ma version)'; }
-  openPane({title: mine ? 'Modifier la séance' : 'Nouvelle séance', left: {label: 'Enregistrer', fn: savePlan}, render: editBody, onClose: () => { ED = null; }});
+// Rest typed as he says it: 90 → 90 s, 2 → 2 min, 1,30 or 1:30 or 1'30 → 1 min 30 s, 1,5 → 1 min 30 s.
+function parseRest(v) {
+  const t = String(v || '').trim().toLowerCase().replace(/\s+/g, ''); if (!t) return null;
+  let m = t.match(/^(\d+)(?:min|m|'|:|,|\.|h)(\d*)s?$/);
+  if (m) { const a = +m[1], b = m[2]; return a * 60 + (b === '' ? 0 : b.length === 1 && /[,.]/.test(t) ? +b * 6 : +b); }
+  m = t.match(/^(\d+)s?$/); if (m) { const n = +m[1]; return /s$/.test(t) || n > 10 ? n : n * 60; }
+  return null;
+}
+const restIn = s => s == null ? '' : s < 60 ? s + ' s' : `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+// The name and the goal follow what is in the session.
+const GRP = {'Haut du corps': 'haut', 'Bas du corps': 'bas', 'Chaîne postérieure': 'bas', 'Pliométrie': 'plio', 'Haltérophilie': 'halt', 'Tronc': 'tronc', 'Prévention': 'prev'};
+const GRP_N = {haut: 'haut du corps', bas: 'bas du corps', plio: 'pliométrie', halt: 'haltérophilie', tronc: 'gainage', prev: 'prévention'};
+function sessionAuto(ed) {
+  const its = ed.items.filter(it => it.ex !== 'warmup');
+  if (!its.length) return {name: '', desc: ''};
+  if (ed.kind === 'track') {
+    const w = {}; for (const it of its) { const c = exOf(it.ex).cat; if (c !== 'Échauffement et gammes') w[c] = (w[c] || 0) + (+it.reps || 1) * (+it.dist || 30); }
+    const top = Object.entries(w).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Échauffement et gammes';
+    const N = {'Accélération': ['Séance accélération', 'Améliorer tes 30 premiers mètres'], 'Vitesse max': ['Séance vitesse maximale', 'Élever ta vitesse de pointe'], 'Endurance de vitesse': ['Séance endurance de vitesse', 'Tenir ta vitesse jusqu\'au bout de la course'],
+      'Résistance': ['Séance sprints résistés', 'Puissance horizontale en accélération'], 'Tempo': ['Séance tempo', 'Capacité aérobie et récupération active'], 'Échauffement et gammes': ['Séance technique de course', 'Placement et coordination de la foulée']}[top];
+    return {name: N[0], desc: N[1]};
+  }
+  const w = {}; let pw = 0, pn = 0, rw = 0, rn = 0;
+  for (const it of its) {
+    const g = GRP[exOf(it.ex).cat] || 'bas', n = +it.sets || 1; w[g] = (w[g] || 0) + n;
+    if (it.pct) { pw += it.pct * n; pn += n; }
+    if (it.reps && unitOf(it) !== 's') { rw += it.reps * n; rn += n; }
+  }
+  const tot = Object.values(w).reduce((a, b) => a + b, 0), L = Object.entries(w).sort((a, b) => b[1] - a[1]), [g1, v1] = L[0], g2 = L[1]?.[0];
+  const share = v1 / tot, pct = pn ? pw / pn : null, reps = rn ? rw / rn : null;
+  const power = (w.plio || 0) + (w.halt || 0) >= tot * .4;
+  const q = power ? 'puissance' : pct >= 80 || (reps && reps <= 5) ? 'force' : reps >= 8 && reps <= 15 ? 'volume' : '';
+  let zone;
+  if ((w.haut || 0) >= tot * .3 && (w.bas || 0) >= tot * .3) zone = 'corps complet';
+  else if (share >= .8) zone = GRP_N[g1];
+  else if (share >= .55) zone = 'principalement ' + GRP_N[g1];
+  else zone = GRP_N[g1] + ' et ' + GRP_N[g2];
+  const name = cap(`séance ${zone}`) + (q && !['plio', 'halt'].includes(g1) ? ' · ' + q : '');
+  const D = {force: 'Développer ta force maximale', puissance: 'Gagner en explosivité (force-vitesse)', volume: 'Construire du muscle et de la base'};
+  const desc = g1 === 'prev' && share >= .5 ? 'Renforcer pour éviter les blessures' : g1 === 'tronc' && share >= .5 ? 'Stabilité et transmission des forces par le tronc'
+    : (D[q] || 'Travail général') + (zone === 'corps complet' ? ', tout le corps' : ['haut', 'bas'].includes(g1) ? ' du ' + GRP_N[g1] : '');
+  return {name, desc};
+}
+/* ---------- warm-up (cardio, joint mobility, activation) proposed from the session; cool-down from the recovery library ---------- */
+const WARM_G = [['cardio', 'Cardio', 'monter la température et le cœur'], ['mob', 'Mobilité articulaire', 'lubrifier les articulations dans tous les angles'], ['act', 'Activation', 'réveiller les muscles de la séance']];
+// [id, name, group, dose, muscles, minutes, for track only]
+const WARM = [
+  ['w_row', 'Rameur', 'cardio', '5 min', {}, 5], ['w_bike', 'Vélo', 'cardio', '5 min', {}, 5], ['w_ski', 'SkiErg', 'cardio', '4 min', {}, 4], ['w_ab', 'Assault bike', 'cardio', '4 min', {}, 4],
+  ['w_rope', 'Corde à sauter', 'cardio', '3 min', {calves: 1}, 3], ['w_jog', 'Footing léger', 'cardio', '8 min', {calves: .5, hams: .5}, 8], ['w_jj', 'Jumping jacks', 'cardio', '2 min', {}, 2],
+  ['m_ank', 'Cheville, genou au mur', 'mob', '10 par côté', {calves: 1, tib: 1}, 1], ['m_hipc', 'Cercles de hanche', 'mob', '10 par côté', {glutes: 1, adduct: 1, psoas: 1}, 1],
+  ['m_9090', 'Hanches 90/90', 'mob', '8 bascules', {glutes: 1, adduct: .75}, 2], ['m_swing', 'Balanciers de jambe avant-arrière', 'mob', '10 par jambe', {hams: 1, psoas: 1}, 1],
+  ['m_swl', 'Balanciers de jambe latéraux', 'mob', '10 par jambe', {adduct: 1, glutes: .5}, 1], ['m_wgs', 'Le plus grand étirement du monde', 'mob', '4 par côté', {psoas: 1, hams: .75, obl: .75}, 2],
+  ['m_tsp', 'Rotations thoraciques', 'mob', '8 par côté', {erect: .75, obl: 1, lats: .5}, 1], ['m_cc', 'Chat-vache', 'mob', '10', {erect: 1, abs: .5}, 1],
+  ['m_band', 'Tour d\'épaules à la bande', 'mob', '10', {shoul: 1, pecs: .75, lats: .75}, 1], ['m_arm', 'Cercles de bras', 'mob', '10 par sens', {shoul: 1}, 1], ['m_wri', 'Poignets et coudes', 'mob', '30 s', {tri: .5, bi: .5}, 1],
+  ['a_bridge', 'Pont fessier', 'act', '2 × 10', {glutes: 1, hams: .5}, 1], ['a_monster', 'Monster walk', 'act', '2 × 10 pas', {glutes: 1}, 1], ['a_gm', 'Good morning au poids du corps', 'act', '10', {hams: 1, erect: .75}, 1],
+  ['a_squat', 'Squat au poids du corps', 'act', '10', {quads: 1, glutes: .5}, 1], ['a_lunge', 'Fentes au poids du corps', 'act', '6 par jambe', {quads: 1, glutes: 1}, 1], ['a_pogo', 'Pogo jumps', 'act', '2 × 15', {calves: 1, tib: .5}, 1],
+  ['a_march', 'Marche du soldat à l\'élastique', 'act', '10 par jambe', {psoas: 1}, 1], ['a_bug', 'Dead bug', 'act', '8 par côté', {abs: 1}, 1], ['a_plank', 'Gainage', 'act', '30 s', {abs: 1, obl: .5}, 1],
+  ['a_cop', 'Copenhague court', 'act', '15 s par côté', {adduct: 1}, 1], ['a_pull', 'Écarté à l\'élastique', 'act', '15', {shoul: 1, rhomb: 1}, 1], ['a_push', 'Pompes lentes', 'act', '8', {pecs: 1, tri: .75}, 1],
+  ['a_scap', 'Tractions scapulaires', 'act', '8', {lats: 1, rhomb: 1}, 1], ['a_skip', 'Gammes : A-skip, B-skip', 'act', '2 × 20 m', {psoas: 1, calves: 1, hams: .5}, 2, true],
+  ['a_strides', 'Lignes droites progressives', 'act', '3 × 60 m', {hams: 1, glutes: .75, calves: .75}, 3, true]
+].map(([id, n, g, dose, mus, min, trk]) => ({id, n, g, dose, mus, min, trk}));
+const WX = Object.fromEntries(WARM.map(w => [w.id, w]));
+function sessionMus(ed) {
+  const m = {};
+  for (const it of ed.items || []) { const c = exOf(it.ex).t === 'track' ? RUN_BASE : musCoef(it.ex), n = +it.sets || +it.reps || 1; for (const k in c) m[k] = (m[k] || 0) + c[k] * n; }
+  return m;
+}
+function warmSuggest(ed) {
+  const m = sessionMus(ed), trk = ed.kind === 'track', sc = w => Object.entries(w.mus).reduce((a, [k, v]) => a + (m[k] || 0) * v, 0);
+  const out = {};
+  for (const [g] of WARM_G) {
+    let L = WARM.filter(w => w.g === g && (!w.trk || trk));
+    if (g === 'cardio') L = L.sort((a, b) => (trk ? (b.id === 'w_jog') - (a.id === 'w_jog') : (a.id === 'w_jog') - (b.id === 'w_jog')));
+    else L = L.sort((a, b) => (trk ? (b.trk || 0) - (a.trk || 0) : 0) || sc(b) - sc(a));
+    out[g] = L.map(w => [w.id, w.n, w.g, w.dose]);
+  }
+  return out;
+}
+const warmDefault = ed => { const s = warmSuggest(ed); return [s.cardio[0][0], ...s.mob.slice(0, 3).map(x => x[0]), ...s.act.slice(0, 3).map(x => x[0])]; };
+const warmMin = w => (w?.sel || []).reduce((a, id) => a + (WX[id]?.min || 0), 0);
+function coolSuggest(ed) {
+  const m = sessionMus(ed), sc = r => r.mus.reduce((a, k) => a + (m[k] || 0), 0);
+  const br = ['r_coh', 'r_box', 'r_478', 'r_sigh'].map(id => RX[id]);
+  const st = RLIB.map(r => RX[r[0]]).filter(r => r.kind === 'etir' || r.kind === 'mob').sort((a, b) => sc(b) - sc(a)).slice(0, 6);
+  return [...br, ...st];
+}
+const coolDefault = ed => ['r_coh', ...coolSuggest(ed).filter(x => x.kind !== 'respi').slice(0, 2).map(x => x.id)];
+const warmText = w => w?.sel?.length ? WARM_G.map(([g, lab]) => { const L = w.sel.map(id => WX[id]).filter(x => x && x.g === g); return L.length ? `${lab} : ${L.map(x => x.n.toLowerCase() + ' (' + x.dose + ')').join(', ')}` : ''; }).filter(Boolean) : [];
+const coolText = c => c?.sel?.length ? [`${c.min} min : ${c.sel.map(id => RX[id]?.n.toLowerCase()).filter(Boolean).join(', ')}`] : [];
+document.addEventListener('change', e => { const t = e.target; if (!t.dataset?.edrest || !ED) return; const v = parseRest(t.value); ED.items[+t.dataset.edrest].rest = v; t.value = restIn(v); });
+document.addEventListener('click', e => {
+  if (!ED) return; const at = q => e.target.closest(q); let b;
+  if ((b = at('[data-edwk]'))) { ED.wk = addDays(ED.wk, +b.dataset.edwk); paneRender(); return; }
+  if ((b = at('[data-eddate]'))) { ED.date = ED.date === b.dataset.eddate ? null : b.dataset.eddate; paneRender(); return; }
+  if (at('[data-edwarm]')) { ED.warm = {sel: warmDefault(ED)}; paneRender(); return; }
+  if (at('[data-edwarmx]')) { delete ED.warm; paneRender(); return; }
+  if (at('[data-edwmore]')) { ED.warm.more = !ED.warm.more; paneRender(); return; }
+  if ((b = at('[data-edws]'))) { const id = b.dataset.edws, L = ED.warm.sel; ED.warm.sel = L.includes(id) ? L.filter(x => x !== id) : [...L, id]; paneRender(); return; }
+  if (at('[data-edcool]')) { ED.cool = {min: 10, sel: coolDefault(ED)}; paneRender(); return; }
+  if (at('[data-edcoolx]')) { delete ED.cool; paneRender(); return; }
+  if ((b = at('[data-edcm]'))) { ED.cool.min = +b.dataset.edcm; paneRender(); return; }
+  if ((b = at('[data-edcs]'))) { const id = b.dataset.edcs, L = ED.cool.sel; ED.cool.sel = L.includes(id) ? L.filter(x => x !== id) : [...L, id]; paneRender(); return; }
+});
+// Long press on an exercise, then slide it where it goes.
+let EDD = null;
+document.addEventListener('touchstart', e => {
+  const box = e.target.closest('#ed-list .edx'); if (!box || !ED || e.target.closest('input,button,select,textarea')) return;
+  const y = e.touches[0].clientY;
+  EDD = {box, i: +box.dataset.edi, y0: y, y, on: false};
+  EDD.t = setTimeout(() => { if (!EDD) return; EDD.on = true; box.classList.add('lift'); navigator.vibrate?.(10); }, 380);
+}, {passive: true});
+document.addEventListener('touchmove', e => {
+  if (!EDD) return; const y = e.touches[0].clientY;
+  if (!EDD.on) { if (Math.abs(y - EDD.y0) > 8) { clearTimeout(EDD.t); EDD = null; } return; }
+  e.preventDefault(); EDD.y = y; EDD.box.style.transform = `translateY(${y - EDD.y0}px)`;
+  const L = [...document.querySelectorAll('#ed-list .edx')].filter(b => b !== EDD.box);
+  L.forEach(b => b.classList.remove('dropb', 'dropa'));
+  const to = L.findIndex(b => { const r = b.getBoundingClientRect(); return y < r.top + r.height / 2; });
+  if (to >= 0) L[to].classList.add('dropb'); else L.at(-1)?.classList.add('dropa');
+}, {passive: false});
+document.addEventListener('touchend', () => {
+  if (!EDD) return; clearTimeout(EDD.t); const d = EDD; EDD = null; if (!d.on) return;
+  const L = [...document.querySelectorAll('#ed-list .edx')].filter(b => b !== d.box);
+  let to = L.findIndex(b => { const r = b.getBoundingClientRect(); return d.y < r.top + r.height / 2; }); if (to < 0) to = L.length;
+  const it = ED.items.splice(d.i, 1)[0]; ED.items.splice(to, 0, it); paneRender();
+});
+function editPlan(id, date) {
+  const p = id ? planById(id) : null, mine = p && !BUILTIN.includes(p) && !TDV_PLANS.includes(p);
+  ED = p ? structuredClone(p) : {kind: S.tkind === 'track' ? 'track' : 'gym', name: '', desc: '', items: []};
+  if (ED.kind === 'class') ED.kind = 'gym';
+  if (!mine) { ED.id = uid(); ED.autoName = true; ED.autoDesc = true; }
+  else { ED.autoName ??= false; ED.autoDesc ??= false; }
+  ED.date = date || Object.entries(S.tset.dated || {}).find(([, v]) => v === ED.id)?.[0] || (mine ? null : TODAY);
+  ED.wk = ED.date ? monday(ED.date) : monday(TODAY);
+  openPane({title: mine ? 'Modifier la séance' : 'Nouvelle séance', fixed: true, left: {label: 'Enregistrer', fn: savePlan}, render: editBody, onClose: () => { ED = null; }});
+}
+function whenRow() {
+  const wk = ED.wk, sw = seasonWeek(wk);
+  return `<div class="whenb"><div class="wkrow"><button type="button" data-edwk="-7" aria-label="Semaine précédente">‹</button><b>Semaine ${sw} <small>${esc(fmtShort(wk))} – ${esc(fmtShort(addDays(wk, 6)))}</small></b><button type="button" data-edwk="7" aria-label="Semaine suivante">›</button></div>
+    <div class="pldays">${[0, 1, 2, 3, 4, 5, 6].map(i => { const k = addDays(wk, i), b = dayPlan(k).find(x => x.c === (ED.kind === 'track' ? 'athle' : 'muscu')); return `<button type="button" data-eddate="${k}" aria-pressed="${ED.date === k}"><span>${DOW[i]}</span><b>${+k.slice(8)}</b>${b ? '<i class="pdot"></i>' : ''}</button>`; }).join('')}</div>
+    <span class="hint">${ED.date ? 'Le ' + esc(fmtDay(ED.date)) + (dayPlan(ED.date).find(x => x.c === (ED.kind === 'track' ? 'athle' : 'muscu')) ? ', sur ton créneau du planning' : '') : 'Sans date : touche un jour. Le point = ' + (ED.kind === 'track' ? 'athlétisme' : 'musculation') + ' dans ton planning.'}</span></div>`;
+}
+function warmBox() {
+  if (!ED.warm) return `<button class="btn ghost" data-edwarm>+ Ajouter un échauffement</button>`;
+  const sug = warmSuggest(ED), sel = ED.warm.sel || [];
+  return `<div class="exbox wbox"><h3>Échauffement<small>${warmMin(ED.warm)} min</small></h3>
+    ${WARM_G.map(([g, lab, why]) => `<div class="sec-label" style="margin:10px 0 4px">${lab}<small style="text-transform:none;letter-spacing:0;font-weight:500"> · ${why}</small></div><div class="chips2b">${sug[g].filter((x, j) => j < (ED.warm.more ? 99 : g === 'cardio' ? 4 : 5) || sel.includes(x[0])).map(x => `<button type="button" class="chip" data-edws="${x[0]}" aria-pressed="${sel.includes(x[0])}">${esc(x[1])} <small>${esc(x[3])}</small></button>`).join('')}</div>`).join('')}
+    <div class="tools"><button type="button" data-edwmore>${ED.warm.more ? 'Moins de choix' : 'Plus de choix'}</button><button type="button" class="rm" data-edwarmx>Retirer l'échauffement</button></div></div>`;
+}
+function coolBox() {
+  if (!ED.cool) return `<button class="btn ghost" data-edcool>+ Ajouter un retour au calme</button>`;
+  const sug = coolSuggest(ED), sel = ED.cool.sel || [];
+  return `<div class="exbox wbox"><h3>Retour au calme<small>${ED.cool.min} min</small></h3>
+    <div class="chips2b" style="margin-top:8px">${[5, 10, 15, 20].map(m => `<button type="button" class="chip" data-edcm="${m}" aria-pressed="${ED.cool.min === m}">${m} min</button>`).join('')}</div>
+    <div class="chips2b" style="margin-top:8px">${sug.map(x => `<button type="button" class="chip" data-edcs="${x.id}" aria-pressed="${sel.includes(x.id)}">${esc(x.n)} <small>${x.min} min</small></button>`).join('')}</div>
+    <div class="tools"><button type="button" class="rm" data-edcoolx>Retirer le retour au calme</button></div></div>`;
 }
 function editBody() {
   if (!ED) return '';
-  const trk = ED.kind === 'track';
-  const num = (i, f, v, ph) => `<input class="mini-in" inputmode="numeric" data-ed="${i}.${f}" value="${v ?? ''}" placeholder="${ph}">`;
+  const trk = ED.kind === 'track', A = sessionAuto(ED);
+  const num = (i, f, v, ph) => `<input class="mini-in big" inputmode="decimal" data-ed="${i}.${f}" value="${v ?? ''}" placeholder="${ph}">`;
+  const rest = (i, v, ph) => `<input class="mini-in big" inputmode="decimal" data-edrest="${i}" value="${restIn(v)}" placeholder="${ph}">`;
   return `<div class="stack" style="margin-top:16px">
-    <div class="field"><label class="eyebrow" for="ed-name">Nom</label><input id="ed-name" data-ed="name" value="${esc(ED.name)}" placeholder="Ex. Force jambes"></div>
-    <div class="field"><label class="eyebrow" for="ed-desc">Objectif</label><input id="ed-desc" data-ed="desc" value="${esc(ED.desc || '')}" placeholder="Ex. Squat lourd"></div>
-    <div class="seg" role="group">${[['gym', 'Musculation'], ['track', 'Piste'], ['class', 'Cours collectif']].map(([v, l]) => `<button type="button" data-edkind="${v}" aria-pressed="${ED.kind === v}">${l}</button>`).join('')}</div>
-    ${ED.items.map((it, i) => { const e = exOf(it.ex); return `<div class="exbox" style="margin:0"><h3>${esc(e.n)}<small>${esc(e.cat)}</small></h3>
+    <div class="seg" role="group">${[['gym', 'Musculation'], ['track', 'Piste']].map(([v, l]) => `<button type="button" data-edkind="${v}" aria-pressed="${ED.kind === v}">${l}</button>`).join('')}</div>
+    ${whenRow()}
+    <div class="field"><label class="eyebrow" for="ed-name">Nom${ED.autoName ? ' · rempli tout seul' : ''}</label><input id="ed-name" data-ed="name" value="${esc(ED.autoName ? A.name : ED.name)}" placeholder="Ajoute des exercices : le nom se remplit"></div>
+    <div class="field"><label class="eyebrow" for="ed-desc">Objectif${ED.autoDesc ? ' · rempli tout seul' : ''}</label><input id="ed-desc" data-ed="desc" value="${esc(ED.autoDesc ? A.desc : ED.desc || '')}" placeholder="Il suit la logique de tes exercices"></div>
+    ${warmBox()}
+    <div id="ed-list">${ED.items.map((it, i) => { const e = exOf(it.ex), rm = !trk && e.u === 'kg' ? rmOf(it.ex)?.kg : null, kg = rm && it.pct ? r25(rm * it.pct / 100 * recFactor().k) : null; return `<div class="exbox edx" data-edi="${i}"><h3><span class="grip" aria-hidden="true">⋮⋮</span>${esc(e.n)}<small>${esc(e.eq || e.cat)}</small></h3>
       ${it.ex === 'warmup' ? `<div class="edrow" style="grid-template-columns:1fr"><label>Minutes${num(i, 'min', it.min, '15')}</label></div>`
-        : trk || e.t === 'track' ? `<div class="edrow"><label>Répét.${num(i, 'reps', it.reps, '4')}</label><label>Distance m${num(i, 'dist', it.dist, '30')}</label><label>Intensité %${num(i, 'pct', it.pct, '95')}</label><label>Récup s${num(i, 'rest', it.rest, '180')}</label></div>`
-        : `<div class="seg useg" role="group" aria-label="Compter en">${[['reps', 'Répétitions'], ['s', 'Secondes']].map(([v, l]) => `<button type="button" data-edu="${i}.${v}" aria-pressed="${unitOf(it) === v}">${l}</button>`).join('')}</div><div class="edrow"><label>Séries${num(i, 'sets', it.sets, '4')}</label><label>${unitOf(it) === 's' ? 'Secondes' : 'Répét.'}${num(i, 'reps', it.reps, '5')}</label><label>% du max${num(i, 'pct', it.pct, '–')}</label><label>Récup s${num(i, 'rest', it.rest, '120')}</label></div>`}
-      <div class="tools"><button type="button" data-edmv="${i}.-1">Monter</button><button type="button" data-edmv="${i}.1">Descendre</button><button type="button" class="rm" data-edrm="${i}">Retirer</button></div></div>`; }).join('')}
+        : trk || e.t === 'track' ? `<div class="edrow"><label>Répét.${num(i, 'reps', it.reps, '4')}</label><label>Distance m${num(i, 'dist', it.dist, '30')}</label><label>Intensité %${num(i, 'pct', it.pct, '95')}</label><label>Récup${rest(i, it.rest, '3:00')}</label></div>`
+        : `<div class="seg useg" role="group" aria-label="Compter en">${[['reps', 'Répétitions'], ['s', 'Secondes']].map(([v, l]) => `<button type="button" data-edu="${i}.${v}" aria-pressed="${unitOf(it) === v}">${l}</button>`).join('')}</div>
+          <div class="edrow"><label>Séries${num(i, 'sets', it.sets, '4')}</label><label>${unitOf(it) === 's' ? 'Secondes' : 'Répét.'}${num(i, 'reps', it.reps, '5')}</label><label>% du max${num(i, 'pct', it.pct, '–')}</label><label>Récup${rest(i, it.rest, '2:00')}</label></div>
+          <div class="tempo"><span>Tempo</span>${['Excentrique', 'Pause bas', 'Concentrique', 'Pause haut'].map((l, j) => `<label>${l}<input class="mini-in" inputmode="numeric" data-edt="${i}.${j}" value="${(it.tempo || [])[j] ?? ''}" placeholder="–"></label>`).join('')}</div>
+          ${kg ? `<p class="sug">≈ ${fx(kg, kg % 1 ? 1 : 0)} kg à ${it.pct} % de ton max (${fx(rm)} kg)${recFactor().why}</p>` : rm ? `<p class="hint">Ton max : ${fx(rm)} kg. Mets un % pour avoir la charge.</p>` : ''}`}
+      <div class="tools"><span class="hint">Appuie longuement pour déplacer</span><button type="button" class="rm" data-edrm="${i}">Retirer</button></div></div>`; }).join('')}</div>
     ${ED.items.length ? capsLine(planCheck(ED.items)) : ''}
     <button class="btn ghost" data-edadd>+ Ajouter un exercice</button>
-    <p class="small muted">Le % du max se calcule sur ton max estimé à partir de tes séances. Laisse vide pour les exercices au poids du corps.</p></div>`;
+    ${coolBox()}
+    <p class="small muted">Récup : tape 90 pour 90 s, 2 pour 2 min, 1,30 pour 1 min 30. Le % du max se calcule sur ton max (test ou estimation de tes séances).</p></div>`;
 }
+const EQUIPS = ['Barre', 'Haltères', 'Kettlebell', 'Machine', 'Poulie', 'Poids du corps', 'Élastique', 'Médecine-ball', 'Barre hexagonale', 'Landmine', 'Barre EZ', 'Smith', 'Box', 'Banc', 'Barre de traction', 'Barres parallèles', 'Traîneau', 'Ballon', 'Haies'];
+const exGroups = kind => [...new Set(EX.filter(e => kind === 'any' || e.t === kind).map(e => e.cat))];
+// Returns [exercise, name to show] for a query: French match first, else English.
+function exSearch(q, kind, f = {}) {
+  const w = normName(q || '');
+  return EX.filter(e => (kind === 'any' || e.t === kind) && (!f.cat || e.cat === f.cat) && (!f.eq || e.eq === f.eq) && e.id !== 'warmup').map(e => {
+    if (!w.length) return [e, e.n];
+    const fr = normName(e.n + ' ' + (e.m || '')).join(' '), enN = normName(e.en || '').join(' ');
+    if (w.every(x => fr.includes(x))) return [e, e.n];
+    if (e.en && w.every(x => enN.includes(x))) return [e, e.en];
+    return null;
+  }).filter(Boolean);
+}
+function recentEx(kind) {
+  const seen = [];
+  for (const l of logs()) for (const it of l.items || []) if (!seen.includes(it.ex) && (kind === 'any' || exOf(it.ex).t === kind)) seen.push(it.ex);
+  for (const pl of myPlans()) for (const it of pl.items || []) if (!seen.includes(it.ex) && (kind === 'any' || exOf(it.ex).t === kind)) seen.push(it.ex);
+  return seen.filter(id => EXI[id] && id !== 'warmup').slice(0, 12);
+}
+const exMax = id => { const r = exOf(id).u === 'kg' ? rmOf(id) : null; return r ? `max ${fx(r.kg)} kg${r.src === 'auto' ? ' (estimé)' : ''}` : ''; };
+function exFilters(f, kind) {
+  return `<div class="chipsx">${['', ...exGroups(kind)].map(c => `<button class="chip" data-exf="cat.${esc(c)}" aria-pressed="${(f.cat || '') === c}">${c || 'Tous'}</button>`).join('')}</div>
+    <div class="chipsx">${['', ...EQUIPS.filter(q => EX.some(e => e.eq === q && (kind === 'any' || e.t === kind)))].map(q => `<button class="chip" data-exf="eq.${esc(q)}" aria-pressed="${(f.eq || '') === q}">${q || 'Tout matériel'}</button>`).join('')}</div>`;
+}
+function exRows(list, attr) {
+  const cats = [...new Set(list.map(([e]) => e.cat))];
+  return cats.map(c => `<div class="sec-label">${esc(c)}</div><div class="list">${list.filter(([e]) => e.cat === c).map(([e, n]) => `<button class="rowbtn" ${attr}="${e.id}"><span><b>${esc(n)}</b><span class="meta">${esc([e.eq, e.m].filter(Boolean).join(' · '))}${exMax(e.id) ? ' · ' + exMax(e.id) : ''}</span></span>${attr === 'data-pk' ? '<span class="kc">+</span>' : ICON.chev}</button>`).join('')}</div>`).join('') || '<div class="empty small">Aucun exercice trouvé.</div>';
+}
+document.addEventListener('click', e => { const d = e.target.closest('[data-demo]'); if (d) d.classList.toggle('on'); });
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-exf]'); if (!b) return;
+  const [k, ...v] = b.dataset.exf.split('.'), val = v.join('.');
+  const pk = P.stack.at(-1)?.filt;
+  if (pk && b.closest('#pane-body')) { pk[k] = pk[k] === val ? '' : val; paneRender(); const q = $('#pk-q'); if (q) { q.value = pk.q; } return; }
+  S.lib[k] = S.lib[k] === val ? '' : val; renderMod(true);
+});
 function pickExercise(kind, onPick) {
-  // Typing only redraws the list, so the keyboard stays open.
-  const rows = q => {
-    const list = EX.filter(e => (kind === 'any' || e.t === kind) && (!q || (e.n + ' ' + e.cat).toLowerCase().includes(q.toLowerCase())));
-    return [...new Set(list.map(e => e.cat))].map(c => `<div class="sec-label">${esc(c)}</div><div class="list">${list.filter(e => e.cat === c).map(e => `<button class="rowbtn" data-pk="${e.id}"><span><b>${esc(e.n)}</b><span class="meta">${esc(e.m)}</span></span><span class="kc">+</span></button>`).join('')}</div>`).join('') || '<div class="empty small">Aucun exercice trouvé.</div>';
+  const F = {q: '', cat: '', eq: ''};
+  const rows = () => {
+    const rec = !F.q && !F.cat && !F.eq ? recentEx(kind) : [];
+    return (rec.length ? `<div class="sec-label">Récents</div><div class="list">${rec.map(id => { const e = exOf(id); return `<button class="rowbtn" data-pk="${id}"><span><b>${esc(e.n)}</b><span class="meta">${esc(e.eq || e.cat)}${exMax(id) ? ' · ' + exMax(id) : ''}</span></span><span class="kc">+</span></button>`; }).join('')}</div>` : '') + exRows(exSearch(F.q, kind, F), 'data-pk');
   };
-  openPane({title: 'Ajouter un exercice', focus: '#pk-q', render: () => `<div style="margin-top:14px"><input class="search" id="pk-q" type="search" placeholder="Rechercher" data-pkq aria-label="Rechercher"></div><div id="pk-res">${rows('')}</div>`,
-    pick: id => { closePane(); onPick(id); }, setQ: v => { $('#pk-res').innerHTML = rows(v); }});
+  openPane({title: 'Ajouter un exercice', render: () => `<div style="margin-top:14px"><input class="search" id="pk-q" type="search" placeholder="Rechercher, en français ou en anglais" data-pkq aria-label="Rechercher" value="${esc(F.q)}"></div>${exFilters(F, kind)}<div id="pk-res">${rows()}</div>`,
+    pick: id => { closePane(); onPick(id); }, setQ: v => { F.q = v; $('#pk-res').innerHTML = rows(); }, filt: F});
 }
 function defaultItem(id) {
   const e = exOf(id);
@@ -3414,11 +3770,16 @@ function defaultItem(id) {
 }
 async function savePlan() {
   if (!ED) return;
-  ED.name = (ED.name || '').trim() || 'Ma séance';
   if (!ED.items.length) { toast('Ajoute au moins un exercice'); return; }
-  const doc = {...ED, updatedAt: new Date().toISOString()};
+  const A = sessionAuto(ED);
+  if (ED.autoName) ED.name = A.name; if (ED.autoDesc) ED.desc = A.desc;
+  ED.name = (ED.name || '').trim() || 'Ma séance';
+  const {date, wk, ...doc0} = ED, doc = {...doc0, updatedAt: new Date().toISOString()};
   S.plans[doc.id] = doc;
   await dbSet('plans/' + doc.id, doc);
+  const dated = Object.fromEntries(Object.entries(S.tset.dated || {}).filter(([, v]) => v !== doc.id));
+  if (date) dated[date] = doc.id;
+  S.tset = {...S.tset, dated}; await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()});
   closePane(); if (P.stack.length) closePane();
   toast('Séance enregistrée'); planView(doc.id);
 }
@@ -3426,10 +3787,9 @@ function weekPlanner() {
   openPane({title: 'Planning de la semaine', render: () => {
     const opts = sel => `<option value="">Repos</option>${['gym', 'track'].map(k => `<optgroup label="${k === 'gym' ? 'Musculation' : 'Piste'}">${allPlans().filter(p => p.kind === k).map(p => `<option value="${p.id}"${p.id === sel ? ' selected' : ''}>${esc(p.name)}</option>`).join('')}</optgroup>`).join('')}`;
     return `<p class="small muted" style="margin:16px 4px 10px">Une séance par jour. Elle s'affiche dans ${modName('T')} le jour venu, compte comme jour d'entraînement pour ${modName('R')}, et ajuste tes objectifs dans ${modName('N')}.</p>
-      <div class="list">${[1, 2, 3, 4, 5, 6, 0].map(d => `<div class="row"><label for="wk-${d}" style="flex:none;width:96px">${DAYS[d]}</label><select id="wk-${d}" class="mini-in" style="text-align:left" data-tweek="${d}">${opts(S.tset.week?.[d])}</select></div>`).join('')}</div>
-      <div class="sec-label">Jours intenses (méthode high-low)</div>
-      <div class="list"><div class="row col"><span class="hint">Les jours avec une séance sont des jours intenses. Pour les autres, choisis ici : intense ou récupération. Sert à l'objectif d'effort et aux glucides.</span>
-        <div class="chips" style="display:flex;gap:6px;flex-wrap:wrap">${[1, 2, 3, 4, 5, 6, 0].map(wd => `<button type="button" class="chip" data-whd="${wd}" aria-pressed="${(S.profile?.schedule?.highDays || [1, 3, 5]).includes(wd)}" style="min-width:40px">${DAYS[wd].slice(0, 1).toUpperCase()}</button>`).join('')}</div></div></div>`;
+      <div class="list">${[1, 2, 3, 4, 5, 6, 0].map(d => `<div class="row"><label for="wk-${d}" style="flex:none;width:96px">${DAYS[d]}<span class="hint">${weekPlan(d).filter(b => b.c === 'muscu' || b.c === 'athle').map(b => (b.c === 'muscu' ? 'Muscu ' : 'Sprint ') + tfr(b.a)).join(' · ') || 'repos'}</span></label><select id="wk-${d}" class="mini-in" style="text-align:left" data-tweek="${d}">${opts(S.tset.week?.[d])}</select></div>`).join('')}</div>
+      <div class="stack" style="margin-top:12px"><button class="btn ghost" data-hplan>Changer les jours et les heures dans mon planning</button></div>
+      <p class="note" style="text-align:left">Les jours de muscu et de sprint viennent de ton planning : si tu y déplaces un bloc, il se déplace ici aussi. Ce sont tes jours intenses (méthode high-low).</p>`;
   }});
 }
 
@@ -3437,7 +3797,7 @@ function weekPlanner() {
 function startSession(id) {
   if (S.live) { toast('Une séance est déjà en cours : termine-la d\'abord'); openLive(); return; }
   const p = planById(id); if (!p) return;
-  S.live = {id: uid(), plan: p.id, name: p.name, kind: p.kind, date: TODAY, start: new Date().toISOString(), items: p.items.map(liveItem)};
+  S.live = {id: uid(), plan: p.id, name: p.name, kind: p.kind, date: TODAY, start: new Date().toISOString(), items: p.items.map(liveItem), warm: p.warm || null, cool: p.cool || null};
   saveLive(); closeAllPanes(); openLive();
 }
 function liveItem(it) {
@@ -3466,7 +3826,10 @@ function liveBody() {
   const gA = L.garmin;
   const doneSets = L.items.reduce((s, it) => s + (it.sets || it.reps).filter(x => x.done).length, 0), all = L.items.reduce((s, it) => s + (it.sets || it.reps).length, 0);
   const back = (L.removed || []).map((r, n) => `<button data-tlback="${n}" aria-label="Remettre ${esc(exOf(r.item.ex).n)} dans la séance"><b>${esc(exOf(r.item.ex).n)}</b> · retiré · toucher pour remettre</button>`).join('');
-  return `<div class="livehead"><span class="chiptag">${L.kind === 'gym' ? 'Musculation' : L.kind === 'class' ? 'Cours collectif' : 'Piste'} · ${doneSets}/${all}</span>${gA ? `<b>${fx(gA.min)} min</b>` : ''}</div>
+  const wt = warmText(L.warm), ct = coolText(L.cool);
+  return `${wt.length ? `<details class="card wtxt" style="margin-top:12px"><summary class="eyebrow">Échauffement · ${warmMin(L.warm)} min</summary>${wt.map(t => `<p class="small">${esc(t)}</p>`).join('')}</details>` : ''}
+    ${ct.length ? `<details class="card wtxt" style="margin-top:8px"><summary class="eyebrow">Retour au calme, à la fin</summary>${ct.map(t => `<p class="small">${esc(t)}</p>`).join('')}</details>` : ''}
+    <div class="livehead"><span class="chiptag">${L.kind === 'gym' ? 'Musculation' : L.kind === 'class' ? 'Cours collectif' : 'Piste'} · ${doneSets}/${all}</span>${gA ? `<b>${fx(gA.min)} min</b>` : ''}</div>
     ${L.kind === 'track' ? `<div class="edrow" style="margin-top:10px;grid-template-columns:1fr 1fr"><label>Chaussures<select class="mini-in" data-lmeta="shoes">${['', 'Pointes carbone', 'Pointes', 'Running fractionné', 'Running long'].map(o => `<option${(L.shoes || '') === o ? ' selected' : ''}>${o}</option>`).join('')}</select></label><label>Conditions<select class="mini-in" data-lmeta="cond">${['', 'Piste, vent favorable', 'Piste, sans vent', 'Piste, vent contraire', 'Indoor', 'Pluie'].map(o => `<option${(L.cond || '') === o ? ' selected' : ''}>${o}</option>`).join('')}</select></label></div>` : ''}
     ${L.fill ? `<p class="small muted" style="margin:10px 4px 0">Tout est rempli comme prévu. Corrige ce qui a changé et décoche ce que tu n'as pas fait.</p>` : ''}
     ${L.items.map((it, i) => liveBox(it, i)).join('')}
@@ -3584,7 +3947,9 @@ function exView(id) {
   openPane({title: 'Exercice', render: () => {
     const e = exOf(id), h = exHistory(id), b = bestE1rm(id);
     const pts = h.slice().reverse().map(({date, it}) => ({k: date, v: it.sets ? Math.max(0, ...it.sets.map(s => e1rm(+s.kg, +s.reps))) || null : Math.min(...it.reps.map(r => +r.t || 99)) < 99 ? Math.min(...it.reps.map(r => +r.t || 99)) : null, tip: cap(fmtShort(date))}));
-    return `<div class="dhead"><div class="eyebrow" style="color:var(--accent)">${esc(e.cat)}</div><div class="bigname" style="font-size:1.75rem">${esc(e.n)}</div><p class="small muted">${esc(e.m)}</p></div>
+    const IMG = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/';
+    return `<div class="dhead"><div class="eyebrow" style="color:var(--accent)">${esc(e.cat)}</div><div class="bigname" style="font-size:1.75rem">${esc(e.n)}</div><p class="small muted">${esc([e.en && e.en !== e.n ? e.en : '', e.eq, e.m].filter(Boolean).join(' · '))}</p></div>
+      ${e.img ? `<div class="demo" data-demo><img src="${IMG}${e.img}/0.jpg" alt="" loading="lazy"><img class="b" src="${IMG}${e.img}/1.jpg" alt="" loading="lazy"><button class="play" aria-label="Lancer ou arrêter la démonstration"><svg class="ip" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg><svg class="is" viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/></svg></button></div>` : ''}
       <div class="card why">${esc(e.c)}</div>
       ${e.t === 'gym' && e.u === 'kg' ? rmBlock(id) : ''}
       ${b ? `<div class="stats" style="margin-top:12px"><div><b>${fx(b)} kg</b><span>max estimé</span></div><div><b>${h.length}</b><span>séances</span></div><div><b>${esc(short(h[0].date))}</b><span>dernière fois</span></div></div>` : ''}
@@ -3758,7 +4123,7 @@ function fJournal() {
       ${waterCard(k, g)}
       <div class="card"><span class="eyebrow">Aliment de la semaine</span><p style="margin:6px 0 0"><b>${esc(weekFood()[0])}</b></p><p class="small muted" style="margin:4px 0 0">${esc(weekFood()[1])}.</p></div>
     </div>
-    <p class="note">Objectifs de la semaine calculés sur ton poids Withings (${fx(g.w, 1)} kg) et ta dépense. Détail dans Objectifs.</p>`;
+    <p class="note">Objectifs de la semaine calculés sur ton poids Withings (${fx(g.w, 1)} kg) et ta dépense. Détail dans Objectifs.</p>${footer()}`;
 }
 function fProgress() {
   const ws = weekStart(TODAY), prev = addDays(ws, -7), E = energyWeek(TODAY), Ep = energyWeek(prev);
@@ -4119,6 +4484,8 @@ document.addEventListener('click', e => {
   if ((b = at('[data-tkind]'))) { S.tkind = b.dataset.tkind; saveUi(); renderMod(); return; }
   if ((b = at('[data-tlibc]'))) { S.lib.cat = b.dataset.tlibc; renderMod(); return; }
   if ((b = at('[data-tprog]'))) { S.prog = b.dataset.tprog; saveUi(); renderMod(true); return; }
+  if ((b = at('[data-tgran]'))) { S.tgran = b.dataset.tgran; renderMod(true); return; }
+  if ((b = at('[data-tview]'))) { S.tview = b.dataset.tview; renderMod(true); return; }
   if ((b = at('[data-tplanv]'))) { planView(b.dataset.tplanv); return; }
   if (at('[data-tnew]')) { editPlan(null); return; }
   if (at('[data-tplan]')) { weekPlanner(); return; }
@@ -4209,7 +4576,8 @@ document.addEventListener('input', e => {
     if (f === 'kg') for (let n = +j + 1; n < arr.length; n++) if (!arr[n].done && (arr[n].kg === '' || arr[n].kg === old)) { arr[n].kg = v; const el = document.querySelector(`[data-lv="${i}.${n}.kg"]`); if (el) el.value = v; }
     saveLive();
   }
-  else if (d.ed) { const [i, f] = d.ed.split('.'); if (f) ED.items[i][f] = t.value === '' ? null : +t.value; else ED[i] = t.value; }
+  else if (d.ed) { const [i, f] = d.ed.split('.'); if (f) ED.items[i][f] = t.value === '' ? null : +t.value.replace(',', '.') || null; else { ED[i] = t.value; if (i === 'name') ED.autoName = false; if (i === 'desc') ED.autoDesc = false; } }
+  else if (d.edt && ED) { const [i, j] = d.edt.split('.'); const tp = [...(ED.items[i].tempo || ['', '', '', ''])]; tp[j] = t.value === '' ? '' : +t.value; ED.items[i].tempo = tp.some(x => x !== '') ? tp : undefined; }
   else if (d.finrpe !== undefined) t.nextElementSibling.textContent = t.value;
   else if (d.fprot !== undefined) t.nextElementSibling.textContent = fx(+t.value, 1);
 });
