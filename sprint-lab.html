@@ -371,6 +371,16 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .wkc{display:block;width:100%;text-align:left;color:inherit}
 .wkc .week small{display:block;font-size:.5625rem;color:var(--fg2);min-height:.8em;margin-top:2px}
 .pane.fixed header::before{display:none}
+.vabox{position:relative;overflow:hidden;border-radius:14px;background:#000;margin-top:14px}
+.vabox video{width:100%;max-height:46vh;display:block;object-fit:contain;transition:transform .2s}
+.vainfo{text-align:center;font-size:.9rem;margin:8px 0 2px;font-variant-numeric:tabular-nums}
+.var{width:100%;margin:6px 0 8px;accent-color:var(--accent)}
+.vactl{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.vactl button{min-height:46px;border-radius:12px;border:0;background:var(--card2,rgba(255,255,255,.08));color:inherit;font:inherit;font-weight:700;font-size:1rem}
+.vamk{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-top:12px}
+.vam{display:flex;flex-direction:column;gap:3px;text-align:left;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:transparent;color:inherit;font:inherit}
+.vam span{font-size:.78rem;opacity:.75}.vam[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent)}
+.vares{display:grid;gap:8px}.vares div{display:flex;justify-content:space-between;gap:10px}.vares span{opacity:.75}
 .sheet header .close[hidden]{display:none}
 .edx h3{justify-content:flex-start}
 .edx h3 small{margin-left:auto}
@@ -1239,7 +1249,7 @@ function testsPane() {
       <div class="sec-label">Profil force-vitesse <small>squat jump, méthode Samozino</small></div>
       <div class="list"><div class="row"><label>Masse (kg)</label><input class="mini-in" inputmode="decimal" style="width:80px" value="${fv?.mass || (w ? fx(w, 1).replace(',', '.') : '')}" data-fv="mass"></div>
         <div class="row"><label>Distance de poussée (m)<span class="hint">jambe tendue − hauteur de départ</span></label><input class="mini-in" inputmode="decimal" style="width:80px" value="${fv?.hpo || ''}" data-fv="hpo"></div>
-        ${[0, 20, 40, 60].map((a, i) => `<div class="row"><label>Saut avec +${a} kg<span class="hint">hauteur en m</span></label><input class="mini-in" inputmode="decimal" style="width:80px" value="${fv?.jumps?.[i]?.h || ''}" data-fvj="${i}" data-add="${a}"></div>`).join('')}
+        ${[0, 20, 40, 60].map((a, i) => `<div class="row"><label>Saut avec +${a} kg<span class="hint">hauteur en m</span></label><input class="mini-in" inputmode="decimal" style="width:80px" value="${fv?.jumps?.[i]?.h || sjAt(a) || ''}" data-fvj="${i}" data-add="${a}"></div>`).join('')}
         <div class="row"><label>Profil optimal (Sfv)<span class="hint">celui de ta feuille, modifiable</span></label><input class="mini-in" inputmode="decimal" style="width:80px" value="${fv?.opt || -12.65}" data-fv="opt"></div></div>
       ${fvr ? `<div class="card" style="margin-top:10px"><div class="stats"><div><b>${fx(fvr.F0, 1)}</b><span>F0 N/kg</span></div><div><b>${fx(fvr.V0, 2)}</b><span>V0 m/s</span></div><div><b>${fx(fvr.Pmax, 1)}</b><span>Pmax W/kg</span></div></div><p class="small" style="margin:10px 0 0">Profil à ${Math.round(fvr.imb * 100)} % de l'optimal : <b>${esc(fvr.verdict)}</b>.${due(fv) ? ' À refaire.' : ''}</p></div>` : ''}
       <div style="margin-top:12px"><button class="btn" data-tsavetests>Enregistrer les tests</button></div>`;
@@ -1266,13 +1276,18 @@ async function saveTests() {
 const JTYPES = [
   ['cmj', 'CMJ', 'h', 'contre-mouvement, mains sur les hanches'], ['abk', 'CMJ bras libres', 'h', 'Abalakov'], ['sj', 'Squat jump', 'h', 'départ arrêté, sans élan'],
   ['cmju', 'CMJ sur une jambe', 'h', 'gauche et droite'], ['dj', 'Drop jump', 'rsi', 'RSI = hauteur ÷ temps de contact'], ['pogo', 'Pogo jumps', 'rsi', 'rebonds, chevilles raides'],
-  ['box', 'Box jump', 'box', 'hauteur de la box'], ['broad', 'Saut en longueur sans élan', 'd', 'pieds joints'], ['triple', 'Triple bond', 'd', 'sans élan']
+  ['rsimod', 'RSI modifié', 'rsi', 'hauteur du CMJ ÷ temps jusqu\'au décollage'], ['rj105', 'Test 10/5', 'rsi', 'moyenne des 5 meilleurs RSI sur 10 rebonds'],
+  ['box', 'Box jump', 'box', 'hauteur de la box'], ['broad', 'Saut en longueur sans élan', 'd', 'pieds joints'], ['triple', 'Triple bond', 'd', 'sans élan'],
+  ['spr10', 'Sprint 10 m', 'time', 'départ arrêté'], ['spr20', 'Sprint 20 m', 'time', 'départ arrêté'], ['spr30', 'Sprint 30 m', 'time', 'départ arrêté'],
+  ['spr60', 'Sprint 60 m', 'time', 'départ arrêté'], ['s505', '5-0-5', 'time', 'changement de direction']
 ];
 const JT = Object.fromEntries(JTYPES.map(([id, n, m, hint]) => [id, {id, n, m, hint}]));
 let JUMPS = null; // null until settings/jumps has loaded
 const jumps = () => JUMPS || [];
-const jVal = j => JT[j.type]?.m === 'rsi' ? +j.rsi || (+j.h || 0) / 1000 : JT[j.type]?.m === 'box' ? +j.box || 0 : JT[j.type]?.m === 'd' ? +j.d || 0 : +j.h || 0;
+const jVal = j => JT[j.type]?.m === 'time' ? (+j.t > 0 ? 1 / +j.t : 0) : JT[j.type]?.m === 'rsi' ? +j.rsi || (+j.h || 0) / 1000 : JT[j.type]?.m === 'box' ? +j.box || 0 : JT[j.type]?.m === 'd' ? +j.d || 0 : +j.h || 0;
 const jFmt = j => { const m = JT[j.type]?.m;
+  if (m === 'time') return `${fx(+j.t, 2)} s`;
+  if (j.type === 'rsimod') return `RSI mod ${fx(+j.rsi, 2)}${j.h ? ` · ${fx(+j.h, 1)} cm` : ''}`;
   if (m === 'rsi' && !j.rsi) return `${fx(+j.h, 1)} cm${j.tc ? ` · ${Math.round(j.tc)} ms` : ''}`;
   if (m === 'rsi') return `RSI ${fx(+j.rsi, 2)}${j.h ? ` · ${fx(+j.h, 1)} cm` : ''}${j.tc ? ` · ${Math.round(j.tc)} ms` : ''}`;
   if (m === 'box') return `${fx(+j.box)} cm`;
@@ -1347,9 +1362,11 @@ function jumpsPane() {
     const f = (k, lab, unit) => `<div class="row"><label for="jf-${k}">${lab}</label><span><input class="mini-in" id="jf-${k}" inputmode="decimal" style="width:80px" data-jf="${k}" value="${esc(JF[k] ?? '')}"> ${unit}</span></div>`;
     const sym = (() => { const g = jBest('cmju', 'G'), d = jBest('cmju', 'D'); if (!g || !d) return ''; const gap = Math.abs(g.h - d.h) / Math.max(g.h, d.h) * 100;
       return `<p class="small" style="margin:8px 4px 0">Écart gauche / droite : <b>${fx(gap, 1)} %</b>${gap > 10 ? ' : au-dessus de 10 %, travaille la jambe faible.' : ' : équilibré.'}</p>`; })();
-    return `<p class="small muted" style="margin:16px 4px 8px">Tes records de saut. Le chiffre à droite est ton meilleur, le dernier est en dessous.</p>
+    return `<p class="small muted" style="margin:16px 4px 8px">Tes records. Le chiffre à droite est ton meilleur, le dernier est en dessous.</p>
+      <button class="btn" data-tlab style="margin-bottom:12px">Faire un test filmé</button>
       ${ck ? `<div class="card" style="margin-bottom:10px"><span class="eyebrow">Forme du jour</span><p class="small" style="margin:6px 0 0">${esc(ck.txt)}</p></div>` : ''}
-      <div class="list">${JTYPES.map(row).join('')}</div>${sym}
+      <div class="sec-label">Sauts</div><div class="list">${JTYPES.filter(x => x[2] !== 'time').map(row).join('')}</div>${sym}
+      <div class="sec-label">Sprint</div><div class="list">${JTYPES.filter(x => x[2] === 'time').map(row).join('')}</div>
       <div class="sec-label">Importer de My Jump</div>
       <div class="card"><p class="small" style="margin:0 0 10px">Dans My Jump : ouvre tes résultats › <b>Exporter (CSV)</b> › <b>Partager</b> › choisis <b>TNR Athletics</b>. Les sauts arrivent ici tout seuls. Sinon, enregistre le fichier puis touche le bouton.</p>
         <button class="btn ghost" data-jimp>Choisir le fichier My Jump</button><input type="file" id="j-file" accept=".csv,.txt,text/csv,text/plain,text/comma-separated-values" hidden></div>
@@ -1358,16 +1375,16 @@ function jumpsPane() {
       <div class="list">
         <div class="row"><label for="jf-date">Date</label><input type="date" id="jf-date" class="mini-in" data-jf="date" value="${JF.date || TODAY}"></div>
         ${JF.type === 'cmju' ? `<div class="row"><span class="l">Jambe</span><div class="seg" role="group">${[['G', 'Gauche'], ['D', 'Droite']].map(([v, l]) => `<button type="button" data-jside="${v}" aria-pressed="${(JF.side || 'G') === v}">${l}</button>`).join('')}</div></div>` : ''}
-        ${t.m === 'h' ? f('h', 'Hauteur', 'cm') : t.m === 'rsi' ? f('h', 'Hauteur', 'cm') + f('tc', 'Temps de contact', 'ms') + f('rsi', 'Ou RSI direct', '') : t.m === 'box' ? f('box', 'Hauteur de la box', 'cm') : f('d', 'Distance', 'cm')}
+        ${t.m === 'h' ? f('h', 'Hauteur', 'cm') : t.m === 'rsi' ? f('h', 'Hauteur', 'cm') + f('tc', 'Temps de contact', 'ms') + f('rsi', 'Ou RSI direct', '') : t.m === 'box' ? f('box', 'Hauteur de la box', 'cm') : t.m === 'time' ? f('t', 'Temps', 's') : f('d', 'Distance', 'cm')}
       </div>
       <div style="margin-top:12px"><button class="btn" data-jadd>Ajouter</button></div>
-      ${jumps().length ? `<div class="sec-label">Historique</div><div class="list">${jumps().slice(0, 30).map(j => `<div class="row"><span class="l">${esc(JT[j.type]?.n || j.type)}<span class="hint">${esc(fmtShort(j.date))}${j.src === 'myjump' ? ' · My Jump' : ''}</span></span><span>${esc(jFmt(j))} <button type="button" class="chip" data-jdel="${j.id}" aria-label="Supprimer">×</button></span></div>`).join('')}</div>` : ''}`;
+      ${jumps().length ? `<div class="sec-label">Historique</div><div class="list">${jumps().slice(0, 30).map(j => `<div class="row"><span class="l">${esc(JT[j.type]?.n || j.type)}<span class="hint">${esc(fmtShort(j.date))}${j.src === 'myjump' ? ' · My Jump' : j.src === 'video' ? ' · vidéo' : ''}${j.add ? ' · +' + j.add + ' kg' : ''}${j.k ? ' · raideur ' + fx(j.k, 1) + ' kN/m' : ''}${j.P ? ' · ' + fx(j.P) + ' W' : ''}</span></span><span>${esc(jFmt(j))} <button type="button" class="chip" data-jdel="${j.id}" aria-label="Supprimer">×</button></span></div>`).join('')}</div>` : ''}`;
   }});
 }
 function jumpAdd() {
   document.querySelectorAll('#pane-body [data-jf]').forEach(i => { JF[i.dataset.jf] = i.dataset.jf === 'date' ? i.value : String(i.value).replace(',', '.'); });
   const t = JT[JF.type], j = {id: uid(), type: JF.type, date: JF.date || TODAY, src: 'manual'};
-  for (const k of ['h', 'tc', 'rsi', 'box', 'd']) { const v = +JF[k]; if (v > 0) j[k] = v; }
+  for (const k of ['h', 'tc', 'rsi', 'box', 'd', 't']) { const v = +JF[k]; if (v > 0) j[k] = v; }
   if (t.m === 'rsi' && !j.rsi && j.h && j.tc) j.rsi = +((j.h / 100) / (j.tc / 1000)).toFixed(2);
   if (JF.type === 'cmju') j.side = JF.side || 'G';
   if (!(jVal(j) > 0)) { toast(t.m === 'rsi' ? 'Il faut la hauteur et le temps de contact, ou le RSI' : 'Il manque la mesure'); return; }
@@ -1386,6 +1403,208 @@ document.addEventListener('click', e => {
 document.addEventListener('change', async e => {
   if (e.target.id !== 'j-file' || !e.target.files?.[0]) return;
   const txt = await e.target.files[0].text(); e.target.value = ''; importJumps(txt);
+});
+
+/* ---------- the test lab: jumps and sprints timed on a slow-motion video, frame by frame ----------
+   Method (validated against force plates, Balsalobre-Fernández et al. 2015): film in slow motion, mark by hand the
+   frames where the feet leave and touch the ground; time = frames ÷ capture speed. Everything else is computed:
+   height from flight time h = g·t²/8 (Bosco 1983); RSI = height ÷ contact time; RSI modifié = height ÷ time to take-off
+   (Ebben & Petushek 2010); vertical stiffness from contact and flight times (Dalleau 2004); peak power from height and
+   mass (Sayers 1999); 10/5 test = mean of the 5 best RSI (Harper 2011); force-velocity profile from loaded squat jumps (Samozino 2008).
+   The video never leaves the phone: only the numbers are saved. */
+const GRAV = 9.81;
+const hOfTf = tf => GRAV * tf * tf / 8 * 100; // cm
+const FILM = {
+  jump: 'Pose le téléphone au sol ou sur un support à 1 à 1,5 m, bien de côté ou de face, cadré sur tes pieds. Filme en mode Ralenti (240 images/s, sinon 120).',
+  rules: 'Pour que la mesure soit juste : jambes tendues et pointes de pieds en l\'air, atterris sur les mêmes jambes tendues. Plier les genoux en vol rallonge le temps de vol et gonfle la hauteur.',
+  sprint: 'Place le téléphone sur un pied, de côté, au niveau de la ligne d\'arrivée, perpendiculaire à la piste, avec la ligne de départ aussi dans le cadre (donc loin, ou sur 5 à 10 m). Filme en Ralenti.'
+};
+const VT = {
+  cmj: {n: 'CMJ', what: 'Saut vertical avec contre-mouvement, mains sur les hanches. Ta force explosive de référence.', film: 'jump', marks: [['to', 'Décollage', 'première image où les deux pieds ont quitté le sol'], ['ld', 'Atterrissage', 'première image où un pied retouche le sol']]},
+  abk: {n: 'CMJ bras libres', what: 'Le même saut avec l\'élan des bras (Abalakov). L\'écart avec le CMJ montre ta coordination des bras.', film: 'jump', marks: 'cmj'},
+  sj: {n: 'Squat jump', what: 'Départ arrêté genoux à 90° pendant 2 s, sans redescendre. Avec des charges (+20, +40, +60 kg), il donne ton profil force-vitesse.', film: 'jump', marks: 'cmj', load: true},
+  cmju: {n: 'CMJ sur une jambe', what: 'Une jambe puis l\'autre : l\'écart gauche/droite montre ton asymétrie.', film: 'jump', marks: 'cmj', side: true},
+  rsimod: {n: 'RSI modifié', what: 'Un CMJ où l\'on mesure aussi le temps entre le début de la descente et le décollage : ta capacité à sauter haut et vite.', film: 'jump', marks: [['st', 'Début de la descente', 'première image où les hanches commencent à descendre'], ['to', 'Décollage', 'première image où les deux pieds ont quitté le sol'], ['ld', 'Atterrissage', 'première image où un pied retouche le sol']]},
+  dj: {n: 'Drop jump', what: 'Tombe d\'une box (30 à 40 cm) et rebondis le plus haut et le plus vite possible. Donne contact, RSI et raideur.', film: 'jump', drop: true, marks: [['c', 'Contact', 'première image où les pieds touchent le sol après la chute'], ['to', 'Décollage', 'première image où les deux pieds ont quitté le sol'], ['ld', 'Atterrissage', 'première image où un pied retouche le sol']]},
+  rj105: {n: 'Test 10/5', what: 'Un saut puis 10 rebonds enchaînés, le plus haut avec le moins de contact. On garde la moyenne de tes 5 meilleurs RSI.', film: 'jump', seq: true},
+  pogo: {n: 'Pogo jumps', what: 'Rebonds chevilles raides, genoux presque tendus. Donne contact, RSI et raideur de cheville.', film: 'jump', seq: true},
+  sprint: {n: 'Sprint chronométré', what: 'Ton temps sur 10, 20, 30 ou 60 m, ou un 5-0-5, sans cellules.', film: 'sprint', dist: true, marks: [['st', 'Départ', 'première image où le pied arrière quitte le sol'], ['ar', 'Arrivée', 'première image où le buste passe la ligne']]}
+};
+const vtMarks = id => { const m = VT[id].marks; return typeof m === 'string' ? VT[m].marks : m; };
+const bodyKg = () => { const w = VAL.weight ? VAL.weight(lastKey('weight') || TODAY) : null; return w || null; };
+let VA = null;
+function testLab() {
+  openPane({title: 'Tests filmés', render: () => `<p class="small muted" style="margin:16px 4px 8px">Filme au ralenti, repère les images de décollage et d'atterrissage, l'appli calcule tout. La vidéo reste sur ton téléphone.</p>
+    <div class="list">${Object.entries(VT).map(([id, t]) => { const last = jLast(id === 'sprint' ? 'spr30' : id); return `<button class="rowbtn" data-vatest="${id}"><span><b>${esc(t.n)}</b><span class="meta">${esc(t.what)}</span></span>${ICON.chev}</button>`; }).join('')}</div>
+    <div class="card" style="margin-top:12px"><span class="eyebrow">Bien filmer</span><p class="small" style="margin:6px 0 0">${esc(FILM.jump)}</p><p class="small" style="margin:6px 0 0">${esc(FILM.rules)}</p></div>`});
+}
+function vaPane(id) {
+  if (VA?.url) URL.revokeObjectURL(VA.url);
+  VA = {test: id, url: null, fileFps: null, capFps: null, frame: 0, n: 0, marks: {}, seq: [], add: 0, side: 'G', drop: 30, dist: 30, zoom: false, ox: 50, oy: 80, cur: 0};
+  const t = VT[id];
+  openPane({title: t.n, fixed: true, keep: true, onClose: vaStop, render: vaRender, mount: vaMount, refresh: vaUI});
+}
+function vaStop() { const v = $('#va-v'); if (v) { v.pause(); v.removeAttribute('src'); v.load(); } if (VA?.url) URL.revokeObjectURL(VA.url); VA = null; }
+function vaRender() {
+  const t = VT[VA.test];
+  if (!VA.url) return `<p class="small" style="margin:16px 4px 8px">${esc(t.what)}</p>
+    <div class="card"><span class="eyebrow">Filmer</span><p class="small" style="margin:6px 0 0">${esc(FILM[t.film])}</p>${t.film === 'jump' ? `<p class="small" style="margin:6px 0 0">${esc(FILM.rules)}</p>` : ''}
+      <p class="small muted" style="margin:6px 0 0">Le plus précis : ouvre l'Appareil photo du téléphone en mode <b>Ralenti</b>, filme, puis choisis la vidéo ici.</p></div>
+    <div class="stack" style="margin-top:12px"><button class="btn" data-vapick="gal">Choisir une vidéo au ralenti</button><button class="btn ghost" data-vapick="cam">Filmer maintenant</button></div>
+    <input type="file" id="va-gal" accept="video/*" hidden><input type="file" id="va-cam" accept="video/*" capture="environment" hidden>`;
+  return `<div class="vabox" id="va-box"><video id="va-v" playsinline muted preload="auto"></video></div>
+    <div class="vainfo" id="va-info">Chargement de la vidéo…</div>
+    <input type="range" id="va-r" class="var" min="0" max="1" step="1" value="0" aria-label="Position dans la vidéo">
+    <div class="vactl"><button type="button" data-vaf="-10" aria-label="10 images en arrière">−10</button><button type="button" data-vaf="-1" aria-label="Image précédente">−1</button><button type="button" data-vaplay aria-label="Lecture lente">▶</button><button type="button" data-vaf="1" aria-label="Image suivante">+1</button><button type="button" data-vaf="10" aria-label="10 images en avant">+10</button><button type="button" data-vazoom aria-label="Zoom sur les pieds">🔍</button></div>
+    <div id="va-panel"></div>`;
+}
+async function vaFps(v) {
+  if (!('requestVideoFrameCallback' in HTMLVideoElement.prototype)) return null;
+  const ts = []; v.muted = true; v.playbackRate = .25;
+  await new Promise(res => { const cb = (now, md) => { ts.push(md.mediaTime); if (ts.length < 30) v.requestVideoFrameCallback(cb); else res(); }; v.requestVideoFrameCallback(cb); v.play().catch(res); setTimeout(res, 5000); });
+  v.pause();
+  const d = []; for (let i = 1; i < ts.length; i++) { const x = ts[i] - ts[i - 1]; if (x > .0004) d.push(x); }
+  if (d.length < 5) return null;
+  d.sort((a, b) => a - b); const fps = 1 / d[Math.floor(d.length * .2)];
+  const best = [24, 25, 30, 48, 50, 60, 90, 100, 120, 200, 240, 480, 960].reduce((a, c) => Math.abs(c - fps) < Math.abs(a - fps) ? c : a);
+  return Math.abs(best - fps) / best < .1 ? best : Math.round(fps);
+}
+function vaMount() {
+  const v = $('#va-v'); if (!v || !VA?.url) return;
+  v.src = VA.url;
+  v.addEventListener('loadedmetadata', async () => {
+    if (!isFinite(v.duration)) { v.currentTime = 1e9; await new Promise(r => { v.addEventListener('durationchange', r, {once: true}); setTimeout(r, 3000); }); v.currentTime = 0; }
+    if (!VA) return;
+    if (!VA.fileFps) { VA.fileFps = (await vaFps(v)) || 30; VA.capFps = VA.capFps || (VA.fileFps >= 100 ? VA.fileFps : null); }
+    VA.n = Math.max(1, Math.floor(v.duration * VA.fileFps) - 1); $('#va-r').max = VA.n; vaSeek(VA.frame); vaUI();
+  }, {once: true});
+  v.addEventListener('seeked', vaInfo);
+  v.addEventListener('pause', () => { if (!VA) return; VA.frame = Math.min(VA.n, Math.floor(v.currentTime * VA.fileFps)); vaInfo(); });
+  v.addEventListener('click', e => { if (!VA?.zoom) return; const r = v.getBoundingClientRect(); VA.ox = (e.clientX - r.left) / r.width * 100; VA.oy = (e.clientY - r.top) / r.height * 100; vaZoom(); });
+  $('#va-r').addEventListener('input', e => vaSeek(+e.target.value));
+}
+function vaSeek(f) { const v = $('#va-v'); if (!v || !VA?.fileFps) return; v.pause(); VA.frame = clamp(Math.round(f), 0, VA.n); v.currentTime = (VA.frame + .5) / VA.fileFps; vaInfo(); }
+function vaZoom() { const v = $('#va-v'); if (v) { v.style.transformOrigin = `${VA.ox}% ${VA.oy}%`; v.style.transform = VA.zoom ? 'scale(2.6)' : ''; } }
+function vaInfo() {
+  const el = $('#va-info'); if (!el || !VA) return;
+  const r = $('#va-r'); if (r) r.value = VA.frame;
+  el.innerHTML = VA.fileFps ? `Image <b>${VA.frame}</b> / ${VA.n}${VA.capFps ? ` · ${fx(VA.frame / VA.capFps * 1000)} ms réels` : ''}` : 'Chargement de la vidéo…';
+}
+// The numbers, from the marked frames (frames ÷ capture speed = seconds).
+function vaCompute() {
+  const t = VT[VA.test], cap = VA.capFps, M = VA.marks, m = bodyKg(), out = {rows: [], warn: [], rec: null};
+  if (!cap) return out;
+  const sec = (a, b) => (b - a) / cap, plaus = tf => { if (tf < .15 || tf > .95) out.warn.push('Temps de vol peu plausible : vérifie la vitesse de capture et tes repères.'); };
+  const prec = (h, tf) => 2 * h / tf / cap; // ±1 frame on the flight time → ± cm
+  if (t.seq) {
+    const q = [...VA.seq].sort((a, b) => a - b); const jumps = [];
+    for (let i = 1; i + 1 < q.length; i += 2) { // q = décollage, atterrissage, décollage, atterrissage…
+      const ld = q[i], to = q[i + 1], ld2 = q[i + 2]; if (ld2 == null) break;
+      const tc = sec(ld, to), tf = sec(to, ld2), h = hOfTf(tf); jumps.push({tc, tf, h, rsi: h / 100 / tc});
+    }
+    if (!jumps.length) return out;
+    const pick = VA.test === 'rj105' ? [...jumps].sort((a, b) => b.rsi - a.rsi).slice(0, 5) : jumps;
+    const avg = k => pick.reduce((a, j) => a + j[k], 0) / pick.length;
+    const tc = avg('tc'), tf = avg('tf'), h = avg('h'), rsi = avg('rsi'), k = m ? dalleau(m, tc, tf) : null;
+    out.rows.push(['RSI', fx(rsi, 2)], ['Contact moyen', fx(tc * 1000) + ' ms'], ['Hauteur moyenne', fx(h, 1) + ' cm'], ['Rebonds mesurés', String(jumps.length)]);
+    if (k) out.rows.push(['Raideur', fx(k, 1) + ' kN/m']);
+    if (VA.test === 'rj105' && jumps.length < 5) out.warn.push('Le test 10/5 se calcule sur 5 rebonds au moins : continue à marquer.');
+    if (tc > .25 && VA.test === 'pogo') out.warn.push('Contacts au-dessus de 250 ms : ce sont plutôt des sauts que des pogos.');
+    out.rec = {type: VA.test, rsi: +rsi.toFixed(2), tc: Math.round(tc * 1000), h: +h.toFixed(1), n: jumps.length, ...(k ? {k: +k.toFixed(1)} : {})};
+    return out;
+  }
+  if (VA.test === 'sprint') {
+    if (M.st == null || M.ar == null || M.ar <= M.st) return out;
+    const s = sec(M.st, M.ar), d = VA.dist === '505' ? null : +VA.dist;
+    out.rows.push(['Temps', fx(s, 2) + ' s'], ...(d ? [['Vitesse moyenne', fx(d / s, 2) + ' m/s · ' + fx(d / s * 3.6, 1) + ' km/h']] : []), ['Précision', '± ' + fx(1 / cap * 1000) + ' ms']);
+    out.rec = {type: VA.dist === '505' ? 's505' : 'spr' + VA.dist, t: +s.toFixed(3)};
+    return out;
+  }
+  if (M.to == null || M.ld == null || M.ld <= M.to) return out;
+  const tf = sec(M.to, M.ld), h = hOfTf(tf); plaus(tf);
+  out.rows.push(['Hauteur', fx(h, 1) + ' cm'], ['Temps de vol', fx(tf * 1000) + ' ms']);
+  const rec = {type: VA.test, h: +h.toFixed(1), tf: Math.round(tf * 1000)};
+  if (VA.test === 'rsimod') {
+    if (M.st == null || M.st >= M.to) { out.warn.push('Marque aussi le début de la descente.'); return out; }
+    const ttt = sec(M.st, M.to), r = h / 100 / ttt; out.rows.push(['Temps jusqu\'au décollage', fx(ttt * 1000) + ' ms'], ['RSI modifié', fx(r, 2)]); Object.assign(rec, {rsi: +r.toFixed(2), ttt: Math.round(ttt * 1000)});
+  }
+  if (VA.test === 'dj') {
+    if (M.c == null || M.c >= M.to) { out.warn.push('Marque aussi le contact après la chute.'); return out; }
+    const tc = sec(M.c, M.to), r = h / 100 / tc, k = m ? dalleau(m, tc, tf) : null;
+    out.rows.push(['Contact', fx(tc * 1000) + ' ms'], ['RSI', fx(r, 2)], ...(k ? [['Raideur', fx(k, 1) + ' kN/m']] : []));
+    Object.assign(rec, {tc: Math.round(tc * 1000), rsi: +r.toFixed(2), drop: +VA.drop || null, ...(k ? {k: +k.toFixed(1)} : {})});
+  }
+  if (['cmj', 'abk', 'sj', 'cmju'].includes(VA.test) && m && !VA.add) { const P = 60.7 * h + 45.3 * m - 2055; if (P > 0) { out.rows.push(['Puissance max', fx(P) + ' W · ' + fx(P / m, 1) + ' W/kg']); rec.P = Math.round(P); } }
+  if (VA.test === 'sj' && VA.add) rec.add = +VA.add;
+  if (VA.test === 'cmju') rec.side = VA.side;
+  out.rows.push(['Précision', '± ' + fx(prec(h, tf), 1) + ' cm (± 1 image)']);
+  out.rec = rec; return out;
+}
+// Vertical stiffness from contact and flight times (Dalleau et al. 2004), in kN/m.
+const dalleau = (m, tc, tf) => m * Math.PI * (tf + tc) / (tc * tc * ((tf + tc) / Math.PI - tc / 4)) / 1000;
+function vaUI() {
+  const el = $('#va-panel'); if (!el || !VA) return; vaInfo();
+  const t = VT[VA.test], R = vaCompute(), ff = VA.fileFps;
+  const capChips = [30, 60, 120, 240, 480, 960].map(c => `<button type="button" class="chip" data-vacap="${c}" aria-pressed="${VA.capFps === c}">${c}</button>`).join('');
+  const marks = t.seq
+    ? `<div class="vamk"><button type="button" class="btn" data-vaseq>${VA.seq.length % 2 === 0 ? 'Marquer un décollage' : 'Marquer un atterrissage'}</button><button type="button" class="btn ghost" data-vaundo ${VA.seq.length ? '' : 'disabled'}>Annuler le dernier</button></div>
+       <p class="small muted" style="margin:6px 4px 0">Marque dans l'ordre : décollage du premier saut, puis à chaque rebond atterrissage puis décollage, et le dernier atterrissage. ${VA.seq.length} repère${VA.seq.length > 1 ? 's' : ''}.</p>`
+    : `<div class="vamk">${vtMarks(VA.test).map(([k, l, hint]) => `<button type="button" class="vam" data-vamark="${k}" aria-pressed="${VA.marks[k] != null}"><b>${l}</b><span>${VA.marks[k] != null ? 'image ' + VA.marks[k] + ' · <u data-vago="' + k + '">revoir</u>' : esc(hint)}</span></button>`).join('')}</div>`;
+  const opts = [
+    t.load ? `<div class="row"><span class="l">Charge ajoutée</span><div class="seg" role="group">${[0, 20, 40, 60].map(a => `<button type="button" data-vaadd="${a}" aria-pressed="${+VA.add === a}">${a ? '+' + a : 'Sans'}</button>`).join('')}</div></div>` : '',
+    t.side ? `<div class="row"><span class="l">Jambe</span><div class="seg" role="group">${[['G', 'Gauche'], ['D', 'Droite']].map(([v, l]) => `<button type="button" data-vaside="${v}" aria-pressed="${VA.side === v}">${l}</button>`).join('')}</div></div>` : '',
+    t.drop ? `<div class="row"><label for="va-drop">Hauteur de la box</label><span><input id="va-drop" class="mini-in" inputmode="numeric" style="width:70px" value="${VA.drop}" data-vadrop> cm</span></div>` : '',
+    t.dist ? `<div class="row col"><span class="l">Distance</span><div class="seg" role="group">${[['10', '10 m'], ['20', '20 m'], ['30', '30 m'], ['60', '60 m'], ['505', '5-0-5']].map(([v, l]) => `<button type="button" data-vadist="${v}" aria-pressed="${String(VA.dist) === v}">${l}</button>`).join('')}</div></div>` : ''
+  ].filter(Boolean).join('');
+  el.innerHTML = `${marks}
+    <div class="sec-label">Vitesse de capture <small>${ff ? 'fichier lu à ' + ff + ' images/s' : ''}</small></div>
+    <div class="chipsx">${capChips}</div>
+    <p class="small muted" style="margin:4px 4px 0">${VA.capFps ? (VA.capFps < 100 ? 'Vidéo normale : la mesure sera imprécise (± 2 à 4 cm). Filme en Ralenti pour un vrai test.' : 'C\'est la vitesse à laquelle le téléphone a filmé (mode Ralenti : 240 en général).') : 'Choisis la vitesse à laquelle tu as filmé : en mode Ralenti, c\'est en général 240.'}</p>
+    ${opts ? `<div class="list" style="margin-top:10px">${opts}</div>` : ''}
+    ${R.rows.length ? `<div class="card" style="margin-top:12px"><div class="vares">${R.rows.map(([l, v]) => `<div><span>${esc(l)}</span><b>${esc(v)}</b></div>`).join('')}</div></div>` : ''}
+    ${R.warn.map(w => `<p class="small" style="margin:8px 4px 0;color:var(--warn)">${esc(w)}</p>`).join('')}
+    <div class="stack" style="margin-top:12px"><button class="btn" data-vasave ${R.rec ? '' : 'disabled'}>Enregistrer le résultat</button><button class="btn ghost" data-vanew>Autre vidéo</button></div>`;
+}
+async function vaSave() {
+  const R = vaCompute(); if (!R.rec) return;
+  const j = {id: uid(), date: TODAY, src: 'video', ...R.rec};
+  if (await saveJumps([...jumps(), j])) {
+    const b = jBest(j.type, j.side); toast(b && b.id === j.id ? `Nouveau record : ${jFmt(j)}` : `Enregistré : ${jFmt(j)}`, 4000);
+    VA.marks = {}; VA.seq = []; vaUI();
+  }
+}
+// the latest squat jump with a given load, from the videos, for the force-velocity profile (in m)
+function sjAt(add) {
+  const l = jumps().filter(j => j.type === 'sj' && (+j.add || 0) === add && +j.h > 0).sort((a, b) => b.date.localeCompare(a.date));
+  if (!l.length) return null; const d = l[0].date; return Math.max(...l.filter(j => j.date === d).map(j => +j.h)) / 100;
+}
+document.addEventListener('click', e => {
+  const at = q => e.target.closest?.(q); let b;
+  if (at('[data-tlab]')) { testLab(); return; }
+  if ((b = at('[data-vatest]'))) { vaPane(b.dataset.vatest); return; }
+  if (!VA) return;
+  if ((b = at('[data-vapick]'))) { $(b.dataset.vapick === 'cam' ? '#va-cam' : '#va-gal')?.click(); return; }
+  if ((b = at('[data-vago]'))) { e.stopPropagation(); vaSeek(VA.marks[b.dataset.vago]); return; }
+  if ((b = at('[data-vaf]'))) { vaSeek(VA.frame + +b.dataset.vaf); return; }
+  if (at('[data-vaplay]')) { const v = $('#va-v'); if (!v) return; if (v.paused) { v.playbackRate = .25; v.play(); } else v.pause(); return; }
+  if (at('[data-vazoom]')) { VA.zoom = !VA.zoom; vaZoom(); return; }
+  if ((b = at('[data-vamark]'))) { VA.marks[b.dataset.vamark] = VA.frame; vaUI(); return; }
+  if (at('[data-vaseq]')) { if (VA.seq.length && VA.frame <= Math.max(...VA.seq)) { toast('Avance après le repère précédent'); return; } VA.seq.push(VA.frame); vaUI(); return; }
+  if (at('[data-vaundo]')) { VA.seq.pop(); vaUI(); return; }
+  if ((b = at('[data-vacap]'))) { VA.capFps = +b.dataset.vacap; vaUI(); return; }
+  if ((b = at('[data-vaadd]'))) { VA.add = +b.dataset.vaadd; vaUI(); return; }
+  if ((b = at('[data-vaside]'))) { VA.side = b.dataset.vaside; vaUI(); return; }
+  if ((b = at('[data-vadist]'))) { VA.dist = b.dataset.vadist; vaUI(); return; }
+  if (at('[data-vasave]')) { vaSave(); return; }
+  if (at('[data-vanew]')) { const id = VA.test; closePane(); vaPane(id); return; }
+});
+document.addEventListener('change', e => {
+  if (!VA) return;
+  if ((e.target.id === 'va-gal' || e.target.id === 'va-cam') && e.target.files?.[0]) {
+    VA.url = URL.createObjectURL(e.target.files[0]); VA.fileFps = null; VA.capFps = null; VA.frame = 0; VA.marks = {}; VA.seq = [];
+    const v = P.stack.at(-1); v.shown = false; paneRender(); return;
+  }
+  if (e.target.matches?.('[data-vadrop]')) { VA.drop = +e.target.value || 30; vaUI(); }
 });
 // A file shared from My Jump lands in the service worker, which keeps it in the 'jump-share' cache and opens ./?jumpshare=1.
 async function jumpShareCheck() {
@@ -3632,7 +3851,8 @@ function tProfile() {
     <div class="stack">
       <button class="banner" data-ttests style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Tests</b><br><span class="small muted">5RM, symétrie gauche/droite, profil force-vitesse</span></span>${ICON.chev}</button>
       <button class="banner" data-rmlist style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Mes max</b><br><span class="small muted">${nMax ? nMax + ' max testés · ' : ''}les charges de tes séances en découlent</span></span>${ICON.chev}</button>
-      <button class="banner" data-tjumps style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Mes max en saut</b><br><span class="small muted">${(() => { const b = jBest('cmj'), ck = cmjCheck(); return b ? 'CMJ ' + fx(+b.h, 1) + ' cm' + (ck && ck.d <= -5 ? ' · fatigue détectée' : '') + ' · ' : ''; })()}CMJ, drop jump, pogo, box, longueur · import My Jump</span></span>${ICON.chev}</button>
+      <button class="banner" data-tlab style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Tests filmés</b><br><span class="small muted">CMJ, squat jump, drop jump, RSI, 10/5, pogo, une jambe, sprint · au ralenti</span></span>${ICON.chev}</button>
+      <button class="banner" data-tjumps style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Mes max en saut</b><br><span class="small muted">${(() => { const b = jBest('cmj'), ck = cmjCheck(); return b ? 'CMJ ' + fx(+b.h, 1) + ' cm' + (ck && ck.d <= -5 ? ' · fatigue détectée' : '') + ' · ' : ''; })()}tes records de saut et de sprint · import My Jump</span></span>${ICON.chev}</button>
     </div>`;
 }
 /* ---------- pane: a second sheet for Training and Fuel, with a stack (a picker can open over an editor) ---------- */
@@ -3645,11 +3865,11 @@ function paneShow() {
   const l = $('#pn-left'); l.textContent = v.left?.label || ''; $('#pn-foot').hidden = !v.left;
   const x = $('#pn-close'); x.hidden = !v.fixed; x.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
   $('#pane').classList.toggle('fixed', !!v.fixed);
-  paneRender(); $('#pane-scroll').scrollTop = 0;
+  v.shown = false; paneRender(); $('#pane-scroll').scrollTop = 0;
   $('#scrim').classList.add('on'); $('#pane').classList.add('on'); document.body.style.overflow = 'hidden';
   if (v.focus) setTimeout(() => $(v.focus)?.focus(), 350);
 }
-function paneRender() { const v = P.stack.at(-1); if (v) { $('#pane-body').innerHTML = v.render(); initCharts($('#pane-body')); } }
+function paneRender() { const v = P.stack.at(-1); if (!v) return; if (v.keep && v.shown) { v.refresh?.(); return; } $('#pane-body').innerHTML = v.render(); initCharts($('#pane-body')); if (v.keep) { v.shown = true; v.mount?.(); } }
 function closePane() {
   const v = P.stack.pop(); v?.onClose?.();
   if (P.stack.length) { paneShow(); return; }
