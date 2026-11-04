@@ -371,6 +371,11 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 /* Inside a part: its name in small letters at the top. Scrolling down, the other letters fade and the initial
    grows into the same square as on the home page, centred; swipe that square down to go back home. */
 .mm-space{height:34px;margin:0 auto 12px}
+details.slow{margin-top:6px}
+details.slow>summary{list-style:none;cursor:pointer}
+details.slow>summary::-webkit-details-marker{display:none}
+details.slow>summary h2::after{content:" ▾";color:var(--fg3);font-size:.8em}
+details.slow[open]>summary h2::after{content:" ▴"}
 /* The part's name, big and white at the top of the page. Pulled down from the top: the other letters fade and the
    initial comes to the centre; pulled down again: it follows the thumb, the page fades, and it flies back home. */
 .modmark{position:absolute;left:0;right:0;top:0;z-index:38;pointer-events:none}
@@ -595,14 +600,15 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=38"></script>
+<script src="supabase-db.js?v=39"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js');
   navigator.serviceWorker.addEventListener('controllerchange', () => { if (had) location.reload(); });
 }</script>
-<script>const $ = s => document.querySelector(s);
+<script>
+const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const key = d => { const z = new Date(d.getTime() - d.getTimezoneOffset()*60000); return z.toISOString().slice(0,10); };
 const addDays = (k, n) => { const d = new Date(k + 'T12:00:00'); d.setDate(d.getDate() + n); return key(d); };
@@ -703,7 +709,8 @@ function pains(k) { const p = {...(M(k, 'pains') || {})}; if (M(k, 'pain') != nu
 function maxPain(k) { const v = Object.values(pains(k)); return v.length ? Math.max(...v) : null; }
 function painActive() { for (let i = 0; i < 14; i++) if ((maxPain(addDays(TODAY, -i)) ?? 0) > 0) return true; return false; }
 const COMMON_PAINS = ['Dos', 'Ischios', 'Quadriceps', 'Mollet', 'Tendon d\'Achille', 'Genou', 'Cheville', 'Hanche', 'Épaule'];
-const highDay = k => (S.profile?.schedule?.highDays || [1, 3, 5]).includes(new Date(k + 'T12:00:00').getDay());
+// A day with a planned session is a high day; otherwise the high days chosen in Training's week planner.
+const highDay = k => (typeof planFor === 'function' && planFor(k)) ? true : (S.profile?.schedule?.highDays || [1, 3, 5]).includes(new Date(k + 'T12:00:00').getDay());
 // Effort levels use Whoop's strain bands (light < 10, moderate 10-14, strenuous 14-18, all out 18-21).
 const EFFORT = [[0, 10, 'Léger'], [10, 14, 'Modéré'], [14, 18, 'Soutenu'], [18, 21, 'Maximal']];
 const effortLevel = v => (EFFORT.find(([a, b]) => v < b) || EFFORT[3])[2];
@@ -899,7 +906,7 @@ function METRICS() {
       sci: 'Le FFMI (fat-free mass index) mesure ta masse maigre rapportée à ta taille : c\'est le meilleur chiffre unique pour dire « athlétique ». Repères chez l\'homme : 18 à 20 dans la moyenne, 21 à 22 athlétique, 23 et plus très musclé (Kouri, 1995). Les sprinteurs de haut niveau sont souvent entre 22 et 24. Il monte quand tu gagnes du muscle sans gras, ce qui en fait un bon objectif pour toi.'}
   ];
   list.push(
-    {id: 'vo2', sec: 'cond', lab: 'VO2max', icon: 'lungs', c: 'var(--teal)', unit: 'ml/kg/min', dec: 1, k: kG, avg: true, value: () => VAL.vo2(kG),
+    {id: 'vo2', sec: 'garmin', est: true, lab: 'VO2max', icon: 'lungs', c: 'var(--teal)', unit: 'ml/kg/min', dec: 1, k: kG, avg: true, value: () => VAL.vo2(kG),
       extra: () => { const g = lastGarmin('vo2'); return g ? `Garmin estime ${fx(g)}` : 'calculée sur tes FC'; },
       sci: 'Consommation maximale d\'oxygène, le meilleur marqueur de la condition cardiorespiratoire. Calculée ici sur tes mesures brutes avec la méthode d\'Uth (2004) : 15,3 × FC max / FC de repos. C\'est une estimation (± 10 %) : elle bouge surtout quand ta FC de repos change. Garmin utilise une autre méthode (allure et FC en course), affichée pour comparaison.'},
     {id: 'physio', sec: 'cond', lab: 'Âge physiologique', icon: 'heart', c: 'var(--good)', unit: 'ans', dec: 0, k: kG, avg: true, value: () => physioAge(kG)?.age ?? null,
@@ -911,7 +918,7 @@ function METRICS() {
   );
   const T = S.profile?.targets || {};
   for (const m of list) if (T[m.id] != null) m.target = T[m.id];
-  if (painActive()) list.push({id: 'pain', sec: 'load', lab: 'Douleur', icon: 'spine', c: 'var(--bad)', unit: '/10', k: TODAY, bars: true, min0: true,
+  if (painActive()) list.push({id: 'pain', sec: 'rec', lab: 'Douleur', icon: 'spine', c: 'var(--bad)', unit: '/10', k: TODAY, bars: true, min0: true,
     value: () => { const k = lastKey('pain'); return k ? maxPain(k) : null; },
     extra: () => { const k = lastKey('pain'); const p = k ? pains(k) : {}; return Object.entries(p).filter(([, v]) => v > 0).map(([l, v]) => `${l} ${v}`).join(' · ') || 'aucune aujourd\'hui'; },
     colorFn: v => v >= 3 ? 'var(--bad)' : v >= 1 ? 'var(--warn)' : 'var(--good)',
@@ -1036,7 +1043,7 @@ function effScale(v) {
   const left = `calc((100% - ${3 * (EFFORT.length - 1)}px) * ${(v / 21).toFixed(4)} + ${3 * i}px)`;
   const near = a => Math.abs(a - v) < 1.6;
   return `<div class="effscale" aria-label="Effort du jour : ${fx(v, 1)} sur 21">${EFFORT.map(([a, b]) => `<span style="flex:${b - a}"><i${near(a) ? ' hidden' : ''}>${a}</i></span>`).join('')}<em${near(21) ? ' hidden' : ''}>21</em>
-    <b class="you" style="left:${left}"><s></s>${fx(v, 1)}</b></div>`;
+    <b class="you" style="left:${left}"><s></s></b></div>`;
 }
 
 /* ---------- views ---------- */
@@ -1061,16 +1068,15 @@ function vToday() {
         </div>
         <div class="state"><span class="pill ${z}"><i></i>${ZONE[z]}</span><p class="small muted" style="width:100%;text-align:center">${ZONE_SUB[z]}${rec?.ill ? ' · possible début d\'infection' : ''}</p></div>
         <div class="target"><span class="eyebrow">${high ? 'Jour d\'entraînement' : 'Jour de récupération'} · objectif d'effort</span><b>${tgt.lvl[2]} <span class="muted">· ${tgt.lvl[0]} à ${tgt.lvl[1]} sur 21</span></b><div class="effbar">${EFFORT.map(([a, b, n]) => `<span class="${n === tgt.lvl[2] ? 'on' : ''}" style="flex:${b - a}">${n}</span>`).join('')}</div>${effScale(effT)}</div>
-        ${A?.summary ? `<p class="summary">${esc(A.summary)}</p>` : `<p class="summary muted">${esc(tgt.text)}</p>`}
+        ${A?.summary ? `<p class="summary">${esc(A.summary)}</p>` : ''}
         ${(A?.today?.length || !aiOn()) ? `<div class="todo"><div class="eyebrow">À faire aujourd'hui</div><ul>${(A?.today?.length ? A.today : baseTodo(tgt)).slice(0, 3).map((t, i) => `<li><b>${i + 1}</b><span>${esc(t)}</span></li>`).join('')}</ul></div>` : ''}
       </article>
       <button class="btn" id="open-entry"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>${S.manual[TODAY] ? 'Modifier ma journée' : 'Noter ma journée'}</button>
     </div>
     <h2>Récupération <small>${kG ? 'nuit du ' + esc(fmtShort(kG)) : ''}</small></h2><div class="grid">${sec('rec')}</div>
-    <h2>Charge <small>7 derniers jours</small></h2><div class="grid">${sec('load')}</div>
-    <h2>Condition physique</h2><div class="grid">${sec('cond')}</div>
-    <h2>Composition <small>moyennes 7 jours</small></h2><div class="grid">${sec('comp')}</div>
-    ${recentSessions()}
+    <details class="slow"><summary><h2>Mesures de fond <small>composition et condition</small></h2></summary>
+      <h2>Composition <small>moyennes 7 jours</small></h2><div class="grid">${sec('comp')}</div>
+      <h2>Condition physique</h2><div class="grid">${sec('cond')}</div></details>
     <p class="note">Mesures brutes Garmin et Withings, synchronisées ${S.syncedAt ? 'le ' + esc(new Date(S.syncedAt).toLocaleString('fr-FR', {weekday: 'long', hour: '2-digit', minute: '2-digit'})) : 'chaque matin'}. Touche une donnée pour voir son historique.</p>`;
 }
 function recentSessions() {
@@ -1313,15 +1319,10 @@ function vProfile() {
   const p = S.profile || {};
   return `
     <header class="top"><div class="sub">Semaine ${seasonWeek(TODAY)} de la saison</div><h1>Profil</h1></header>
-    <div class="card sprinter"><div><span class="eyebrow">Profil sprinteur</span><b>${esc(p.sprinter?.level || 'Niveau à renseigner')}</b></div>
-      <div class="pbs">${[['60 m', p.sprinter?.pb60], ['100 m', p.sprinter?.pb100]].map(([d, t]) => `<div><b class="num">${t ? esc(String(t).replace('.', '″')) : '–'}</b><span>${d}</span></div>`).join('')}</div></div>
-    <p class="note" style="text-align:left">${p.sprinter?.source ? `Mis à jour automatiquement depuis ta fiche athlétisme${p.sprinter.updatedAt ? ', le ' + esc(fmtShort(p.sprinter.updatedAt.slice(0, 10))) : ''}.` : 'Ces résultats seront remplis automatiquement depuis ta fiche athlétisme, puis plus tard par ton appli d\'entraînement.'} Taille : ${p.height ? fx(p.height) + ' cm' : '–'}.</p>
     <h2>Objectifs et contexte</h2>
     <div class="list">
       <div class="row col"><label for="pf-injury">Blessure et contraintes<span class="hint">Consignes du médecin ou du kiné</span></label><textarea id="pf-injury" rows="3">${esc(p.injury || '')}</textarea></div>
-      <div class="row col"><label for="pf-nutrition">Plan alimentaire actuel<span class="hint">Calories, macros, repas types</span></label><textarea id="pf-nutrition" rows="3">${esc(p.nutrition || '')}</textarea></div>
       <div class="row col"><label for="pf-notes">À savoir pour les analyses<span class="hint">Événements, voyages, maladie</span></label><textarea id="pf-notes" rows="2">${esc(p.notes || '')}</textarea></div>
-      <div class="row col"><span class="l">Jours d'entraînement<span class="hint">Les autres jours sont des jours de récupération. Sert à l'objectif d'effort.</span></span><div class="chips" style="display:flex;gap:6px;flex-wrap:wrap">${['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => { const wd = (i + 1) % 7; return `<button type="button" class="chip" data-hd="${wd}" aria-pressed="${(p.schedule?.highDays || [1, 3, 5]).includes(wd)}" style="min-width:40px">${d}</button>`; }).join('')}</div></div>
     </div>
     <div style="margin-top:12px"><button class="btn ghost" id="pf-save">Enregistrer le profil</button></div>
     <h2>Les calculs</h2>
@@ -1461,12 +1462,8 @@ function noteBody(k) {
     <div class="list" style="margin-top:16px"><div class="row"><label for="e-date">Date</label><input type="date" id="e-date" value="${k}" max="${TODAY}"></div></div>
     <div class="sec-label">Activités du jour</div>
     ${(G(k, 'acts') || []).length ? `<div class="list">${(G(k, 'acts') || []).slice().sort((a, b) => (a.start || '').localeCompare(b.start || '')).map(a => { const [name, ic] = ACT[a.type] || [a.type, 'load']; const lvl = runLevel(a); return `<div class="sess"><span class="ic">${ICON[ic]}</span><span><b>${esc(a.name || name)}${lvl ? ' · ' + PHASES[lvl][0].toLowerCase() : ''}</b><span class="meta">${esc(a.start || '')} · ${fx(a.min)} min${a.km ? ' · ' + fx(a.km, 1) + ' km' : ''}${a.avgHr ? ' · FC ' + a.avgHr + ' / ' + a.maxHr : ''}${a.vmax && lvl ? ' · ' + fx(a.vmax, 1) + ' km/h max' : ''}</span></span><span class="eff">${fx(toEffort(trimpOf(a)), 1)}</span></div>`; }).join('')}</div><p class="note" style="text-align:left;margin-top:6px">Enregistré par la montre, effort sur 21 à droite.${G(k, 'bikeKm') ? ` Vélo total, trajets compris : ${fx(G(k, 'bikeKm'), 1)} km.` : ''}</p>` : '<p class="note" style="text-align:left;margin-top:0">Aucune activité enregistrée par la montre ce jour-là.</p>'}
-    <div class="sec-label">Musculation</div>
-    ${gA ? watch(gA) : ''}
-    <div class="list">${slider('e-grpe', 'RPE de la séance', 'gymRpe', 0, 10, '0 = pas de muscu · 10 = effort maximal', 0)}${numRow('e-gmin', 'Durée', 'gymMin', gA ? 'remplie par la montre' : 'par défaut 90 min', 'min')}</div>
-    <div class="sec-label">Sprint</div>
-    ${tA ? watch(tA) : ''}
-    <div class="list">${slider('e-trpe', 'RPE de la séance', 'trackRpe', 0, 10, '0 = pas de sprint', 0)}${numRow('e-tmin', 'Durée', 'trackMin', tA ? 'remplie par la montre' : 'par défaut 75 min', 'min')}${numRow('e-sprint', 'Mètres de sprint', 'sprintM', 'au-delà de 90 % de ta vitesse max', 'm')}${numRow('e-jumps', 'Contacts de sauts', 'jumps', 'bonds, pliométrie', 'nb')}</div>
+    <div class="sec-label">Séances</div>
+    <p class="note" style="text-align:left">${logsOn(k).length ? 'Séance notée dans Training : ' + logsOn(k).map(l => esc(l.name) + ' · RPE ' + l.rpe).join(', ') + '.' : 'Tes séances de muscu et de piste se notent dans Training : elles arrivent ici toutes seules.'}</p>
     <div class="sec-label">Alimentation</div>
     <div class="list"><div class="row col"><div class="seg" role="group" aria-label="Alimentation" id="e-nut">${NUTRITION.map(([l], i) => `<button type="button" data-nut="${i}" aria-pressed="${(draft.nutrition ?? 0) === i}">${l}</button>`).join('')}</div><span class="hint" id="e-nut-hint">${NUTRITION[draft.nutrition ?? 0][1]}. Précise dans la note si besoin.</span></div></div>
     <div class="sec-label">Douleur ou gêne</div>
@@ -1574,8 +1571,7 @@ async function saveNote() {
 }
 async function saveProfile() {
   if (!S.db) { toast('Non enregistré : ouvre la page connecté à ton compte'); return; }
-  const p = {...(S.profile || {}), injury: $('#pf-injury').value.trim(), nutrition: $('#pf-nutrition').value.trim(), notes: $('#pf-notes').value.trim(), updatedAt: new Date().toISOString()};
-  p.schedule = {...(p.schedule || {}), highDays: [...document.querySelectorAll('[data-hd][aria-pressed="true"]')].map(b => +b.dataset.hd)};
+  const p = {...(S.profile || {}), injury: $('#pf-injury').value.trim(), notes: $('#pf-notes').value.trim(), updatedAt: new Date().toISOString()};
   try { await S.db.doc('profile/main').set(p); toast('Profil enregistré'); } catch (e) { toast('Échec de l\'enregistrement, réessaie'); }
 }
 
@@ -1608,6 +1604,13 @@ document.addEventListener('click', e => {
   const gr = e.target.closest('[data-gran]'); if (gr) { S.gran = gr.dataset.gran; S.off = 0; try { localStorage.setItem('sl-gran', S.gran); } catch (err) {} render(); }
   const of = e.target.closest('[data-off]'); if (of && !of.disabled) { S.off = Math.max(0, S.off + +of.dataset.off); render(); }
   if (e.target.closest('#pf-save')) saveProfile();
+  const whd = e.target.closest('[data-whd]');
+  if (whd) {
+    const d = +whd.dataset.whd, cur = new Set(S.profile?.schedule?.highDays || [1, 3, 5]);
+    cur.has(d) ? cur.delete(d) : cur.add(d);
+    S.profile = {...(S.profile || {}), schedule: {...(S.profile?.schedule || {}), highDays: [...cur].sort()}, updatedAt: new Date().toISOString()};
+    dbSet('profile/main', S.profile); paneRender(); renderMod();
+  }
   const nut = e.target.closest('[data-nut]');
   if (nut) { draft.nutrition = +nut.dataset.nut; document.querySelectorAll('#e-nut [data-nut]').forEach(b => b.setAttribute('aria-pressed', b === nut)); $('#e-nut-hint').textContent = NUTRITION[draft.nutrition][1] + '. Précise dans la note si besoin.'; }
   const rg = e.target.closest('[data-region]'); if (rg) { draft._region = draft._region === rg.dataset.region ? null : rg.dataset.region; $('#e-pains').innerHTML = painSection(); }
@@ -1801,7 +1804,9 @@ function mmHome() {
   tl.style.opacity = '0';
   const b = tl.getBoundingClientRect();
   const to = `translate(${b.left + b.width / 2 - fw / 2}px,${b.top + b.height / 2 - fh / 2}px) scale(1)`;
-  home.animate([{opacity: 0}, {opacity: 1}], {duration: 650, easing: 'ease-out'});
+  const tint = {T: '#3A0B0B', N: '#06301A', R: '#0B1E4A'}[m] || '#000';
+  home.animate([{backgroundColor: tint}, {backgroundColor: '#000'}], {duration: 900, easing: 'ease-out'});
+  $('#home-view').animate([{opacity: 0}, {opacity: 1}], {duration: 650, easing: 'ease-out'});
   fly.style.transform = to;
   let over = false;
   const end = () => { if (over) return; over = true; tl.style.opacity = ''; fly.classList.remove('on'); setTimeout(() => fly.remove(), 260); };
@@ -2223,6 +2228,11 @@ document.addEventListener('change', async e => {
   NOTIF_BUSY = false; paneRender();
 });
 document.addEventListener('change', e => {
+  if (!e.target.matches?.('[data-fplannote]')) return;
+  S.profile = {...(S.profile || {}), nutrition: e.target.value.trim(), updatedAt: new Date().toISOString()};
+  dbSet('profile/main', S.profile); toast('Plan enregistré');
+});
+document.addEventListener('change', e => {
   const t = e.target; if (!t.matches?.('[data-hntime]') || !t.value) return;
   const times = [...notifTimes()]; times[+t.dataset.hntime] = t.value; saveNotifTimes(times);
 });
@@ -2307,7 +2317,9 @@ function tToday() {
       <div class="card"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Cette semaine</span><button class="small" style="color:var(--accent);font-weight:600" data-tplan>Planning</button></div><div class="week">${week}</div>
         <div class="stats" style="margin-top:12px"><div><b>${wk.n}</b><span>séances</span></div><div><b>${fx(wk.tonnage / 1000, 1)} t</b><span>soulevées</span></div><div><b>${fx(wk.sprintM)} m</b><span>de sprint</span></div></div></div>
     </div>
-    ${recentLogs()}`;
+    <h2>Charge <small>7 derniers jours</small></h2><div class="grid">${METRICS().filter(m => m.sec === 'load').map(tile).join('')}</div>
+    ${recentLogs()}
+    ${recentSessions().replace('Séances récentes', 'Activités de la montre')}`;
 }
 function weekTotals(mon) {
   let n = 0, tonnage = 0, sprintM = 0;
@@ -2343,9 +2355,15 @@ function libRows() {
   return list.map(e => { const b = bestE1rm(e.id); return `<button class="rowbtn" data-tex="${e.id}"><span><b>${esc(e.n)}</b><span class="meta">${esc(e.cat)} · ${esc(e.m)}</span></span>${b ? `<span class="kc">${fx(b)} kg</span>` : ICON.chev}</button>`; }).join('') || '<div class="empty small">Aucun exercice trouvé.</div>';
 }
 const MAIN_LIFTS = ['squat', 'pclean', 'hipthrust', 'rdl', 'hbdl', 'bench', 'fsquat'];
+function sprinterCard() {
+  const p = S.profile || {};
+  return `<div class="card sprinter"><div><span class="eyebrow">Profil sprinteur</span><b>${esc(p.sprinter?.level || 'Niveau à renseigner')}</b></div>
+      <div class="pbs">${[['60 m', p.sprinter?.pb60], ['100 m', p.sprinter?.pb100]].map(([d, t]) => `<div><b class="num">${t ? esc(String(t).replace('.', '″')) : '–'}</b><span>${d}</span></div>`).join('')}</div></div>
+    <p class="note" style="text-align:left">${p.sprinter?.source ? `Mis à jour automatiquement depuis ta fiche athlétisme${p.sprinter.updatedAt ? ', le ' + esc(fmtShort(p.sprinter.updatedAt.slice(0, 10))) : ''}.` : 'Ces résultats seront remplis automatiquement depuis ta fiche athlétisme, puis plus tard par ton appli d\'entraînement.'} Taille : ${p.height ? fx(p.height) + ' cm' : '–'}.</p>`;
+}
 function tProgress() {
   const L = logs();
-  if (!L.length) return `<header class="top"><div class="sub">Records et volume</div><h1>Progrès</h1></header><div class="card empty"><b>Tes progrès apparaîtront ici</b>Termine ta première séance : charges, records et volume se calculent tout seuls.</div>`;
+  if (!L.length) return `<header class="top"><div class="sub">Records et volume</div><h1>Progrès</h1></header>${sprinterCard()}<div class="card empty"><b>Tes progrès apparaîtront ici</b>Termine ta première séance : charges, records et volume se calculent tout seuls.</div>`;
   const lifts = MAIN_LIFTS.filter(id => bestE1rm(id));
   if (!lifts.includes(S.prog) && lifts.length) S.prog = lifts[0];
   // Best time per track exercise and distance.
@@ -2356,6 +2374,7 @@ function tProgress() {
   const hist = S.prog ? exHistory(S.prog).slice().reverse().map(({date, it}) => ({k: date, v: Math.max(...(it.sets || []).map(s => e1rm(+s.kg, +s.reps)), 0) || null, tip: cap(fmtShort(date))})) : [];
   return `
     <header class="top"><div class="sub">Records et volume</div><h1>Progrès</h1></header>
+    ${sprinterCard()}
     <div class="stack">
       ${lifts.length ? `<div class="card"><div class="chead" style="margin-bottom:6px"><span class="eyebrow">Max estimé</span><b class="num">${fx(bestE1rm(S.prog))} kg</b></div>
         <div class="chipsx">${lifts.map(id => `<button class="chip" data-tprog="${id}" aria-pressed="${S.prog === id}">${esc(exOf(id).n)}</button>`).join('')}</div>
@@ -2454,7 +2473,10 @@ function weekPlanner() {
   openPane({title: 'Planning de la semaine', render: () => {
     const opts = sel => `<option value="">Repos</option>${['gym', 'track'].map(k => `<optgroup label="${k === 'gym' ? 'Musculation' : 'Piste'}">${allPlans().filter(p => p.kind === k).map(p => `<option value="${p.id}"${p.id === sel ? ' selected' : ''}>${esc(p.name)}</option>`).join('')}</optgroup>`).join('')}`;
     return `<p class="small muted" style="margin:16px 4px 10px">Une séance par jour. Elle s'affiche dans ${modName('T')} le jour venu, compte comme jour d'entraînement pour ${modName('R')}, et ajuste tes objectifs dans ${modName('N')}.</p>
-      <div class="list">${[1, 2, 3, 4, 5, 6, 0].map(d => `<div class="row"><label for="wk-${d}" style="flex:none;width:96px">${DAYS[d]}</label><select id="wk-${d}" class="mini-in" style="text-align:left" data-tweek="${d}">${opts(S.tset.week?.[d])}</select></div>`).join('')}</div>`;
+      <div class="list">${[1, 2, 3, 4, 5, 6, 0].map(d => `<div class="row"><label for="wk-${d}" style="flex:none;width:96px">${DAYS[d]}</label><select id="wk-${d}" class="mini-in" style="text-align:left" data-tweek="${d}">${opts(S.tset.week?.[d])}</select></div>`).join('')}</div>
+      <div class="sec-label">Jours intenses (méthode high-low)</div>
+      <div class="list"><div class="row col"><span class="hint">Les jours avec une séance sont des jours intenses. Pour les autres, choisis ici : intense ou récupération. Sert à l'objectif d'effort et aux glucides.</span>
+        <div class="chips" style="display:flex;gap:6px;flex-wrap:wrap">${[1, 2, 3, 4, 5, 6, 0].map(wd => `<button type="button" class="chip" data-whd="${wd}" aria-pressed="${(S.profile?.schedule?.highDays || [1, 3, 5]).includes(wd)}" style="min-width:40px">${DAYS[wd].slice(0, 1).toUpperCase()}</button>`).join('')}</div></div></div>`;
   }});
 }
 
@@ -2729,6 +2751,7 @@ function fGoals() {
   const g = fuelGoal(TODAY), gt = fuelGoal(TODAY, true), gr = fuelGoal(TODAY, false);
   return `
     <header class="top"><div class="sub">Calculés pour toi, modifiables</div><h1>Objectifs</h1></header>
+    <div class="list" style="margin-bottom:12px"><div class="row col"><label for="fg-plan">Mon plan alimentaire<span class="hint">Ce que tu manges en ce moment, à quoi tu fais attention. Claude s'en sert dans les analyses.</span></label><textarea id="fg-plan" rows="3" data-fplannote>${esc(S.profile?.nutrition || '')}</textarea></div></div>
     <div class="list"><div class="row col"><span class="l">Ton objectif</span><div class="seg" role="group">${[['cut', 'Perdre du gras'], ['maintain', 'Maintenir'], ['gain', 'Prendre du muscle']].map(([v, l]) => `<button type="button" data-fgoal="${v}" aria-pressed="${g.goal === v}">${l}</button>`).join('')}</div></div>
       <div class="row col"><label for="fg-prot">Protéines<span class="hint">En g par kg de poids. Recommandé aux sprinteurs : 1,6 à 2,2.</span></label><div class="rangeline"><input type="range" id="fg-prot" min="1.4" max="2.6" step="0.1" value="${S.fset.protein || 2}" data-fprot><output>${fx(S.fset.protein || 2, 1)}</output></div></div>
       <div class="row"><label for="fg-kcal">Calories fixées à la main<span class="hint">Vide = calcul automatique. Sinon ± 250 kcal selon le type de jour.</span></label><input type="number" inputmode="numeric" id="fg-kcal" class="mini-in" style="width:100px" value="${S.fset.kcal || ''}" placeholder="auto" data-fkcal></div>
