@@ -340,6 +340,14 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .rmcalc{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:8px;align-items:end;margin-top:10px}
 .rmcalc label{font-size:.75rem;color:var(--fg2);display:flex;flex-direction:column;gap:4px}
 .rmcalc output{font:700 1.5rem/1 var(--display);text-align:center;padding:8px 0}
+.edlink{float:right;margin-top:4px;font:600 .8125rem var(--font,inherit);letter-spacing:0;color:var(--accent)}
+.grid.editing .tile{pointer-events:none;opacity:.9}
+.edt{position:relative;animation:wiggle .5s ease-in-out infinite alternate}
+.edtools{position:absolute;right:6px;top:6px;display:flex;gap:4px;z-index:2}
+.edtools button{width:28px;height:28px;border-radius:50%;background:var(--fg);color:var(--bg);font-size:.8125rem;font-weight:700}
+.addtile{display:grid;place-items:center;min-height:110px;border:2px dashed var(--line);background:transparent;color:var(--fg2);font-weight:600}
+@keyframes wiggle{from{transform:rotate(-.6deg)}to{transform:rotate(.6deg)}}
+@media (prefers-reduced-motion:reduce){.edt{animation:none}}
 .rout{display:flex;flex-direction:column;gap:2px;margin-top:8px}
 .rout button{display:flex;align-items:center;gap:10px;padding:8px 2px;text-align:left;font-size:.875rem;color:var(--fg)}
 .rout i{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-style:normal;font-size:.75rem;font-weight:700;color:#fff;transition:background .15s,border-color .15s}
@@ -644,7 +652,7 @@ details.slow[open]>summary h2::after{content:" ▴"}
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=44"></script>
+<script src="supabase-db.js?v=45"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
@@ -687,6 +695,7 @@ const VAL = {
   weight: k => W(k, 'weight'), fat: k => W(k, 'fatPct'), muscle: k => W(k, 'muscleKg'),
   // VO2max estimated from raw heart rates (Uth et al. 2004): 15,3 × FC max / FC repos (7-day mean). Garmin's own estimate is kept apart for comparison.
   vo2: k => { const r = avgN('rhr', 7, k); return r ? 15.3 * S.hrMax / r : null; },
+  gvo2: k => G(k, 'vo2') ?? null,
   pwv: k => W(k, 'pwv'),
   physio: k => physioAge(k)?.age ?? null,
   // Normalised fat-free mass index (Kouri 1995): lean mass / height², adjusted to a 1,80 m reference.
@@ -950,7 +959,7 @@ function METRICS() {
       sci: 'Le FFMI (fat-free mass index) mesure ta masse maigre rapportée à ta taille : c\'est le meilleur chiffre unique pour dire « athlétique ». Repères chez l\'homme : 18 à 20 dans la moyenne, 21 à 22 athlétique, 23 et plus très musclé (Kouri, 1995). Les sprinteurs de haut niveau sont souvent entre 22 et 24. Il monte quand tu gagnes du muscle sans gras, ce qui en fait un bon objectif pour toi.'}
   ];
   list.push(
-    {id: 'vo2', sec: 'garmin', est: true, lab: 'VO2max', icon: 'lungs', c: 'var(--teal)', unit: 'ml/kg/min', dec: 1, k: kG, avg: true, value: () => VAL.vo2(kG),
+    {id: 'vo2', sec: 'cond', lab: 'VO2max', icon: 'lungs', c: 'var(--teal)', unit: 'ml/kg/min', dec: 1, k: kG, avg: true, value: () => VAL.vo2(kG),
       extra: () => { const g = lastGarmin('vo2'); return g ? `Garmin estime ${fx(g)}` : 'calculée sur tes FC'; },
       sci: 'Consommation maximale d\'oxygène, le meilleur marqueur de la condition cardiorespiratoire. Calculée ici sur tes mesures brutes avec la méthode d\'Uth (2004) : 15,3 × FC max / FC de repos. C\'est une estimation (± 10 %) : elle bouge surtout quand ta FC de repos change. Garmin utilise une autre méthode (allure et FC en course), affichée pour comparaison.'},
     {id: 'physio', sec: 'cond', lab: 'Âge physiologique', icon: 'heart', c: 'var(--good)', unit: 'ans', dec: 0, k: kG, avg: true, value: () => physioAge(kG)?.age ?? null,
@@ -967,6 +976,7 @@ function METRICS() {
     extra: () => { const k = lastKey('pain'); const p = k ? pains(k) : {}; return Object.entries(p).filter(([, v]) => v > 0).map(([l, v]) => `${l} ${v}`).join(' · ') || 'aucune aujourd\'hui'; },
     colorFn: v => v >= 3 ? 'var(--bad)' : v >= 1 ? 'var(--warn)' : 'var(--good)',
     sci: 'Règle de la douleur utilisée en rééducation : jusqu\'à 2/10 pendant l\'effort, si elle est revenue au calme le lendemain matin, tu peux continuer. À 3/10 ou plus, ou si elle augmente d\'un jour à l\'autre, réduis la charge sur cette zone et parles-en à ton kiné. Cette tuile disparaît d\'elle-même après 14 jours sans douleur.'});
+  if (kG && G(kG, 'vo2') != null) list.push({id: 'gvo2', sec: 'garmin', est: true, lab: 'VO2max Garmin', icon: 'lungs', c: 'var(--teal)', unit: 'ml/kg/min', dec: 0, k: kG, avg: true, value: () => G(kG, 'vo2'), sub: 'estimation Garmin'});
   return list.filter(m => !(m.hideIfEmpty && !sumN(m.id, 28)) && !(m.hideIf && m.hideIf()));
 }
 function lastGarmin(f) { for (let i = 0; i < 90; i++) { const x = G(addDays(TODAY, -i), f); if (x != null) return x; } return null; }
@@ -1264,7 +1274,9 @@ function homeLines() {
   return L;
 }
 function homeSyn() {
-  return `<div class="hm-syn">${homeLines().map(([h, t, why]) => [h, cap(t), why]).map(([h, t, why]) => `<details><summary><b>${esc(h)}</b><span>${esc(t)}</span><span class="q">Pourquoi</span></summary><p>${esc(why)}</p></details>`).join('')}</div>
+  // With the AI on, Claude's own wording of the six lines (analysis.home) replaces the rules' wording; the reasons stay.
+  const ai = AN()?.home;
+  return `<div class="hm-syn">${homeLines().map(([h, t, why], i) => [h, cap((Array.isArray(ai) && ai[i]) || t), why]).map(([h, t, why]) => `<details><summary><b>${esc(h)}</b><span>${esc(t)}</span><span class="q">Pourquoi</span></summary><p>${esc(why)}</p></details>`).join('')}</div>
     <button class="hm-ask" data-hask>Interagir avec Claude</button>`;
 }
 // "Interagir": everything the app knows right now, handed to Oscar's own Claude (free, no API key).
@@ -1400,6 +1412,31 @@ function recDiag() {
   if (h7 && h28 && h7 > h28 * 1.05) out.push(['good', `VFC moyenne en hausse (+${Math.round((h7 / h28 - 1) * 100)} % sur 28 jours) : ton corps encaisse bien.`]);
   return out;
 }
+
+/* ---------- your own layout: move, remove or add tiles in each section (kept in settings/app) ---------- */
+const LAY = () => S.app?.layout || {};
+function secList(name) {
+  const ms = METRICS(), byId = Object.fromEntries(ms.map(m => [m.id, m]));
+  const ids = LAY()[name] || ms.filter(m => m.sec === name).map(m => m.id);
+  return ids.map(id => byId[id]).filter(Boolean);
+}
+function secHtml(name) {
+  const ed = S.edit === name, L = secList(name);
+  return `<div class="grid${ed ? ' editing' : ''}">${L.map((m, i) => ed ? `<div class="edt">${tile(m)}<span class="edtools"><button data-lmv="${name}.${i}.-1" aria-label="Avancer">←</button><button data-lmv="${name}.${i}.1" aria-label="Reculer">→</button><button data-ldel="${name}.${i}" aria-label="Enlever">✕</button></span></div>` : tile(m)).join('')}${ed ? `<button class="tile addtile" data-ladd="${name}">+ Ajouter une tuile</button>` : ''}</div>`;
+}
+const editBtn = name => `<button class="edlink" data-ledit="${name}">${S.edit === name ? 'Terminé' : 'Modifier'}</button>`;
+async function saveLayout(name, ids) {
+  S.app = {...(S.app || {}), layout: {...LAY(), [name]: ids}};
+  render(); renderMod();
+  await dbSet('settings/app', {...S.app, updatedAt: new Date().toISOString()});
+}
+function tileCatalog(name) {
+  openPane({title: 'Ajouter une tuile', render: () => {
+    const have = secList(name).map(m => m.id), rest = METRICS().filter(m => !have.includes(m.id));
+    return `<p class="small muted" style="margin:16px 4px 8px">Les tuiles que tu n'as pas dans cette section. Les estimations Garmin sont marquées : ce ne sont pas des mesures brutes.</p>
+      <div class="list">${rest.map(m => `<button class="rowbtn" data-lpick="${name}.${m.id}"><span><b>${esc(m.lab)}</b><span class="meta">${m.est ? 'estimation Garmin' : 'mesure ou calcul de l\'appli'}</span></span><span class="kc">+</span></button>`).join('') || '<div class="empty small">Tout est déjà affiché.</div>'}</div>`;
+  }});
+}
 function vToday() {
   const A = AN(), kG = lastKey('hrv');
   const rec = kG ? recovery(kG) : null, z = zoneOf(rec?.score);
@@ -1428,10 +1465,10 @@ function vToday() {
       ${routineCard()}${careCard()}${diagHtml(recDiag(), 'Tendances')}
       <button class="btn" id="open-entry"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>${S.manual[TODAY] ? 'Modifier ma journée' : 'Noter ma journée'}</button>
     </div>
-    <h2>Récupération <small>${kG ? 'nuit du ' + esc(fmtShort(kG)) : ''}</small></h2><div class="grid">${sec('rec')}</div>
+    <h2>Récupération <small>${kG ? 'nuit du ' + esc(fmtShort(kG)) : ''}</small>${editBtn('rec')}</h2>${secHtml('rec')}
     <details class="slow"><summary><h2>Mesures de fond <small>composition et condition</small></h2></summary>
-      <h2>Composition <small>moyennes 7 jours</small></h2><div class="grid">${sec('comp')}</div>
-      <h2>Condition physique</h2><div class="grid">${sec('cond')}</div></details>
+      <h2>Composition <small>moyennes 7 jours</small>${editBtn('comp')}</h2>${secHtml('comp')}
+      <h2>Condition physique${editBtn('cond')}</h2>${secHtml('cond')}</details>
     <p class="note">Mesures brutes Garmin et Withings, synchronisées ${S.syncedAt ? 'le ' + esc(new Date(S.syncedAt).toLocaleString('fr-FR', {weekday: 'long', hour: '2-digit', minute: '2-digit'})) : 'chaque matin'}. Touche une donnée pour voir son historique.</p>`;
 }
 function recentSessions() {
@@ -1961,6 +1998,11 @@ document.addEventListener('click', e => {
   const gr = e.target.closest('[data-gran]'); if (gr) { S.gran = gr.dataset.gran; S.off = 0; try { localStorage.setItem('sl-gran', S.gran); } catch (err) {} render(); }
   const of = e.target.closest('[data-off]'); if (of && !of.disabled) { S.off = Math.max(0, S.off + +of.dataset.off); render(); }
   if (e.target.closest('#pf-save')) saveProfile();
+  const le = e.target.closest('[data-ledit]'); if (le) { S.edit = S.edit === le.dataset.ledit ? null : le.dataset.ledit; render(); renderMod(true); return; }
+  const lm = e.target.closest('[data-lmv]'); if (lm) { const [n, i, d] = lm.dataset.lmv.split('.'), ids = secList(n).map(m => m.id), a = +i, b = a + +d; if (b >= 0 && b < ids.length) { [ids[a], ids[b]] = [ids[b], ids[a]]; saveLayout(n, ids); } return; }
+  const ld = e.target.closest('[data-ldel]'); if (ld) { const [n, i] = ld.dataset.ldel.split('.'), ids = secList(n).map(m => m.id); ids.splice(+i, 1); saveLayout(n, ids); return; }
+  const la = e.target.closest('[data-ladd]'); if (la) { tileCatalog(la.dataset.ladd); return; }
+  const lp = e.target.closest('[data-lpick]'); if (lp) { const [n, id] = lp.dataset.lpick.split('.'); saveLayout(n, [...secList(n).map(m => m.id), id]); closePane(); return; }
   const rt = e.target.closest('[data-rout]'); if (rt) toggleRoutine(TODAY, rt.dataset.rout);
   const whd = e.target.closest('[data-whd]');
   if (whd) {
@@ -2817,7 +2859,7 @@ function tToday() {
       <div class="card"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Cette semaine</span><button class="small" style="color:var(--accent);font-weight:600" data-tplan>Planning</button></div><div class="week">${week}</div>
         <div class="stats" style="margin-top:12px"><div><b>${wk.n}</b><span>séances</span></div><div><b>${fx(wk.tonnage / 1000, 1)} t</b><span>soulevées</span></div><div><b>${fx(wk.sprintM)} m</b><span>de sprint</span></div></div></div>
     </div>
-    <h2>Charge <small>7 derniers jours</small></h2><div class="grid">${METRICS().filter(m => m.sec === 'load').map(tile).join('')}</div>
+    <h2>Charge <small>7 derniers jours</small>${editBtn('load')}</h2>${secHtml('load')}
     ${recentLogs()}
     ${recentSessions().replace('Séances récentes', 'Activités de la montre')}`;
 }
@@ -2835,10 +2877,11 @@ function tSessions() {
   const row = p => `<button class="rowbtn" data-tplanv="${p.id}"><span><b>${esc(p.name)}</b><span class="meta">${p.items.length} exercices · ${estMin(p)} min${p.desc ? ' · ' + esc(p.desc) : ''}</span></span>${ICON.chev}</button>`;
   return `
     <header class="top"><div class="sub">Programmes et séances</div><h1>Séances</h1></header>
-    <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Piste']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
+    <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Piste'], ['class', 'Mes cours']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
+    ${k === 'class' ? '<p class="small muted" style="margin:10px 4px 0">Mode coach : prépare tes cours collectifs (circuit, renfo, stretching) avec la bibliothèque d\'exercices et ses consignes.</p>' : ''}
     <h2>Mes séances</h2><div class="list">${mine.map(row).join('')}<button class="addbtn" data-tnew>+ Créer une séance</button></div>
     ${k === 'gym' && TDV_PLANS.length ? `<h2>Mon programme <small>Train de vie performance</small></h2><div class="list">${TDV_PLANS.map(row).join('')}</div>` : ''}
-    <h2>Programmes TNR <small>à dupliquer et adapter</small></h2><div class="list">${base.map(row).join('')}</div>
+    ${base.length ? `<h2>Programmes TNR <small>à dupliquer et adapter</small></h2><div class="list">${base.map(row).join('')}</div>` : ''}
     <div style="margin-top:16px"><button class="btn ghost" data-tplan>Planifier ma semaine</button></div>`;
 }
 function tLibrary() {
@@ -2881,6 +2924,7 @@ function tProgress() {
         <div class="chipsx">${lifts.map(id => `<button class="chip" data-tprog="${id}" aria-pressed="${S.prog === id}">${esc(exOf(id).n)}</button>`).join('')}</div>
         ${hist.length > 1 ? chart(hist, {color: 'var(--accent)', dec: 0, unit: 'kg'}) : '<p class="small muted">Encore une séance avec cet exercice pour voir la courbe.</p>'}
         <p class="small muted" style="margin-top:8px">Calculé à partir de ta meilleure série de chaque séance (formule d'Epley) : pas besoin de tester ton max.</p></div>` : ''}
+      ${(() => { const km = {}; for (const l of L) if (l.shoes) for (const it of l.items || []) for (const r of it.reps || []) km[l.shoes] = (km[l.shoes] || 0) + (+r.dist || 0) / 1000; const e = Object.entries(km); return e.length ? `<div class="card"><span class="eyebrow">Chaussures</span><ul class="exl">${e.map(([n, v]) => `<li><span>${esc(n)}</span><span>${fx(v, 1)} km${/Pointes/.test(n) && v > 300 ? ' · à surveiller' : /Running/.test(n) && v > 600 ? ' · à changer bientôt' : ''}</span></li>`).join('')}</ul></div>` : ''; })()}
       ${Object.keys(bests).length ? `<div class="card"><span class="eyebrow">Meilleurs chronos</span><ul class="exl">${Object.values(bests).sort((a, b) => a.dist - b.dist).map(b => `<li><span>${esc(exOf(b.ex).n)} ${b.dist} m</span><span>${fx(b.t, 2)} s · ${fx(b.dist / b.t * 3.6, 1)} km/h${b.shoes ? ' · ' + esc(b.shoes) : ''}${b.cond ? ' · ' + esc(b.cond) : ''}</span></li>`).join('')}</ul></div>` : ''}
       <div class="card"><span class="eyebrow">Tonnage par semaine</span><p class="small muted" style="margin:4px 0 30px">Charge × répétitions de toutes tes séries de musculation, en tonnes.</p>${chart(weeks, {color: 'var(--accent)', bars: true, dec: 1, unit: 't'})}</div>
       <div class="card"><span class="eyebrow">Sprint par semaine</span><p class="small muted" style="margin:4px 0 30px">Mètres courus à 90 % et plus. La règle : pas plus de +15 % d'une semaine à l'autre.</p>${chart(weeks.map(w => ({...w, v: w.s})), {color: 'var(--accent)', bars: true, dec: 0, unit: 'm'})}</div>
@@ -2937,7 +2981,7 @@ function editBody() {
   return `<div class="stack" style="margin-top:16px">
     <div class="field"><label class="eyebrow" for="ed-name">Nom</label><input id="ed-name" data-ed="name" value="${esc(ED.name)}" placeholder="Ex. Force jambes"></div>
     <div class="field"><label class="eyebrow" for="ed-desc">Objectif</label><input id="ed-desc" data-ed="desc" value="${esc(ED.desc || '')}" placeholder="Ex. Squat lourd"></div>
-    <div class="seg" role="group">${[['gym', 'Musculation'], ['track', 'Piste']].map(([v, l]) => `<button type="button" data-edkind="${v}" aria-pressed="${ED.kind === v}">${l}</button>`).join('')}</div>
+    <div class="seg" role="group">${[['gym', 'Musculation'], ['track', 'Piste'], ['class', 'Cours collectif']].map(([v, l]) => `<button type="button" data-edkind="${v}" aria-pressed="${ED.kind === v}">${l}</button>`).join('')}</div>
     ${ED.items.map((it, i) => { const e = exOf(it.ex); return `<div class="exbox" style="margin:0"><h3>${esc(e.n)}<small>${esc(e.cat)}</small></h3>
       ${it.ex === 'warmup' ? `<div class="edrow" style="grid-template-columns:1fr"><label>Minutes${num(i, 'min', it.min, '15')}</label></div>`
         : trk || e.t === 'track' ? `<div class="edrow"><label>Répét.${num(i, 'reps', it.reps, '4')}</label><label>Distance m${num(i, 'dist', it.dist, '30')}</label><label>Intensité %${num(i, 'pct', it.pct, '95')}</label><label>Récup s${num(i, 'rest', it.rest, '180')}</label></div>`
@@ -3016,7 +3060,7 @@ function liveBody() {
   const gA = L.garmin;
   const doneSets = L.items.reduce((s, it) => s + (it.sets || it.reps).filter(x => x.done).length, 0), all = L.items.reduce((s, it) => s + (it.sets || it.reps).length, 0);
   const back = (L.removed || []).map((r, n) => `<button data-tlback="${n}" aria-label="Remettre ${esc(exOf(r.item.ex).n)} dans la séance"><b>${esc(exOf(r.item.ex).n)}</b> · retiré · toucher pour remettre</button>`).join('');
-  return `<div class="livehead"><span class="chiptag">${L.kind === 'gym' ? 'Musculation' : 'Piste'} · ${doneSets}/${all}</span>${gA ? `<b>${fx(gA.min)} min</b>` : ''}</div>
+  return `<div class="livehead"><span class="chiptag">${L.kind === 'gym' ? 'Musculation' : L.kind === 'class' ? 'Cours collectif' : 'Piste'} · ${doneSets}/${all}</span>${gA ? `<b>${fx(gA.min)} min</b>` : ''}</div>
     ${L.kind === 'track' ? `<div class="edrow" style="margin-top:10px;grid-template-columns:1fr 1fr"><label>Chaussures<select class="mini-in" data-lmeta="shoes">${['', 'Pointes carbone', 'Pointes', 'Running fractionné', 'Running long'].map(o => `<option${(L.shoes || '') === o ? ' selected' : ''}>${o}</option>`).join('')}</select></label><label>Conditions<select class="mini-in" data-lmeta="cond">${['', 'Piste, vent favorable', 'Piste, sans vent', 'Piste, vent contraire', 'Indoor', 'Pluie'].map(o => `<option${(L.cond || '') === o ? ' selected' : ''}>${o}</option>`).join('')}</select></label></div>` : ''}
     ${L.fill ? `<p class="small muted" style="margin:10px 4px 0">Tout est rempli comme prévu. Corrige ce qui a changé et décoche ce que tu n'as pas fait.</p>` : ''}
     ${L.items.map((it, i) => liveBox(it, i)).join('')}
