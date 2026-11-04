@@ -282,6 +282,25 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .zoom .chip{background:var(--card);font-size:.8125rem;padding:7px 11px}
 .watch{display:flex;align-items:center;gap:8px;font-size:.8125rem;color:var(--good);margin:0 16px 8px}
 .watch svg{width:16px;height:16px;flex:none}
+.mbody{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.mbody svg{width:100%;height:auto;max-height:330px}
+.mbody .mz{cursor:pointer;transition:opacity .2s}
+.mbody .mz.sel{stroke:var(--fg);stroke-width:2}
+.mbody figcaption{text-align:center;font-size:.6875rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--fg2)}
+.mlegend{display:flex;gap:12px;justify-content:center;font-size:.75rem;color:var(--fg2);margin-top:4px}
+.mlegend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.malert{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--bad) 12%,transparent);font-size:.8125rem;line-height:1.4}
+.malert.mid{background:color-mix(in srgb,var(--warn) 14%,transparent)}
+.hm-syn{max-width:400px;margin:18px auto 0;display:flex;flex-direction:column;gap:2px;text-align:left}
+.hm-syn details{border-radius:12px;transition:background .2s}
+.hm-syn details[open]{background:rgba(255,255,255,.06)}
+.hm-syn summary{list-style:none;display:flex;gap:10px;align-items:baseline;padding:6px 8px;cursor:pointer;font-size:.875rem;line-height:1.4;color:rgba(255,255,255,.86)}
+.hm-syn summary::-webkit-details-marker{display:none}
+.hm-syn summary b{flex:none;width:62px;font-size:.625rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+.hm-syn summary .q{margin-left:auto;flex:none;font-size:.6875rem;color:rgba(255,255,255,.35)}
+.hm-syn details p{margin:0;padding:0 8px 8px 80px;font-size:.75rem;line-height:1.45;color:rgba(255,255,255,.6)}
+.hm-ask{display:block;margin:10px auto 0;padding:9px 18px;border-radius:99px;background:rgba(255,255,255,.1);color:#fff;font-size:.8125rem;font-weight:600}
+.hm-head{overflow-y:auto;max-height:calc(100% - 260px);-webkit-overflow-scrolling:touch}
 .caps{display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:6px;margin-top:10px}
 .caps span{background:var(--card2);border-radius:12px;padding:8px 6px;text-align:center;font:700 1rem/1.1 var(--display);font-variant-numeric:tabular-nums}
 .caps small{display:block;font:600 .625rem/1.2 var(--text,inherit);color:var(--fg2);margin-top:3px}
@@ -983,6 +1002,122 @@ function fuelMsg(k) {
   return `${fx(-left)} kcal au-dessus de l'objectif.` + prot;
 }
 /* ---------- greeting: one short line, like a mate saying hi; picked by time of day and stable for the day ---------- */
+
+/* ---------- the body: each muscle coloured by its load over the period, against its limit ---------- */
+// [muscle, cx offset from the middle (0 = centre), cy, rx, ry] on a 200 × 400 figure, front and back.
+const MZ = {front: [['shoul', 42, 84, 11, 9], ['pecs', 18, 97, 16, 11], ['bi', 47, 120, 6, 14], ['abs', 0, 138, 11, 27], ['obl', 27, 142, 6, 20],
+  ['psoas', 13, 192, 7, 9], ['quads', 21, 243, 12, 33], ['adduct', 8, 232, 5, 19], ['tib', 22, 322, 5, 25]],
+  back: [['shoul', 42, 84, 11, 9], ['rhomb', 12, 94, 9, 10], ['lats', 27, 124, 10, 22], ['tri', 47, 120, 6, 14], ['erect', 7, 152, 5, 27],
+  ['glutes', 18, 198, 16, 14], ['hams', 20, 252, 11, 30], ['calves', 21, 318, 9, 24]]};
+function musPeriod(gran) {
+  const days = {day: 1, week: 7, month: 30, year: 365}[gran] || 7, from = addDays(TODAY, -(days - 1)), sum = {}, by = {};
+  for (const l of logs()) {
+    if (l.date < from || l.date > TODAY) continue;
+    const m = logMuscle(l);
+    for (const k in m) { sum[k] = (sum[k] || 0) + m[k]; }
+    for (const it of l.items || []) for (const k in musCoef(it.ex)) { (by[k] ||= {})[it.ex] = (by[k][it.ex] || 0) + 1; }
+  }
+  return Object.fromEntries(MUS.map(([k]) => [k, {load: sum[k] || 0, pct: (sum[k] || 0) / (musLimit(k) * days / 7) * 100, ex: Object.entries(by[k] || {}).sort((a, b) => b[1] - a[1]).map(([e]) => e)}]));
+}
+function musFigure(view, per, sel) {
+  const limb = (x1, y1, x2, y2, w) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--card2)" stroke-width="${w}" stroke-linecap="round"/>`;
+  let s = `<circle cx="100" cy="36" r="20" fill="var(--card2)"/><rect x="92" y="52" width="16" height="16" rx="5" fill="var(--card2)"/><path d="M60 74 Q100 64 140 74 L134 140 Q129 172 128 204 L72 204 Q71 172 66 140 Z" fill="var(--card2)"/>`;
+  for (const sx of [-1, 1]) s += limb(100 + sx * 42, 82, 100 + sx * 48, 150, 19) + limb(100 + sx * 48, 150, 100 + sx * 52, 205, 15) + limb(100 + sx * 18, 206, 100 + sx * 21, 285, 27) + limb(100 + sx * 21, 285, 100 + sx * 21, 360, 19);
+  const col = {good: 'var(--good)', mid: 'var(--warn)', bad: 'var(--bad)'};
+  for (const [k, dx, cy, rx, ry] of MZ[view]) {
+    const x = per[k], op = x.load ? Math.min(1, .35 + x.pct / 140) : .12, c = x.load ? col[musZone(x.pct)] : 'var(--fg3)';
+    for (const sx of dx ? [-1, 1] : [0]) s += `<ellipse class="mz${sel === k ? ' sel' : ''}" data-mz="${k}" cx="${100 + sx * dx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${c}" fill-opacity="${op.toFixed(2)}"><title>${esc(MUSI[k].n)}</title></ellipse>`;
+  }
+  return `<figure style="margin:0"><svg viewBox="0 0 200 400" role="img" aria-label="${view === 'front' ? 'Face' : 'Dos'}">${s}</svg><figcaption>${view === 'front' ? 'Face' : 'Dos'}</figcaption></figure>`;
+}
+// What to watch: a muscle over its limit, still loaded from the last days, or groups out of balance.
+function musAlerts() {
+  const st = musState(), out = [];
+  for (const x of st.filter(x => x.pct >= 100).sort((a, b) => b.pct - a.pct)) out.push({z: 'bad', k: x.k, t: `${x.n} à ${Math.round(x.pct)} % de ta limite sur 7 jours : allège ${x.k === 'hams' || x.k === 'calves' || x.k === 'psoas' ? 'la vitesse max et la pliométrie' : 'les exercices qui le chargent'} jusqu'à ce qu'il redescende.`});
+  for (const x of st.filter(x => x.pct >= 75 && x.pct < 100 && x.fatPct >= 80)) out.push({z: 'mid', k: x.k, t: `${x.n} encore chargés des derniers jours (${Math.round(x.pct)} %) : pas de séance lourde dessus demain.`});
+  for (const b of musBalance(st).filter(b => b.off)) out.push({z: 'mid', t: `Déséquilibre ${b.n.toLowerCase()} (${fx(b.r, 2)}) : rééquilibre dans les prochaines séances.`});
+  return out;
+}
+function bodyCard() {
+  const gran = S.mgran || 'week', per = musPeriod(gran), sel = S.msel, al = musAlerts();
+  if (!MUS.some(([k]) => per[k].load) && !logs().length) return '';
+  const d = sel ? per[sel] : null;
+  return `<div class="card"><div class="chead"><span class="eyebrow">Ton corps</span></div>
+    <div class="seg" role="group" aria-label="Période" style="margin-top:8px">${[['day', 'Jour'], ['week', 'Semaine'], ['month', 'Mois'], ['year', 'Année']].map(([v, l]) => `<button type="button" data-mgran="${v}" aria-pressed="${gran === v}">${l}</button>`).join('')}</div>
+    <div class="mbody">${musFigure('front', per, sel)}${musFigure('back', per, sel)}</div>
+    <div class="mlegend"><span><i style="background:var(--good)"></i>sous 75 %</span><span><i style="background:var(--warn)"></i>75 à 100 %</span><span><i style="background:var(--bad)"></i>au-delà</span></div>
+    ${d ? `<p class="small" style="margin:10px 4px 0"><b>${esc(MUSI[sel].n)}</b> · ${Math.round(d.pct)} % de ta limite${d.ex.length ? ' · ' + d.ex.slice(0, 4).map(e => esc(exOf(e).n)).join(', ') : ' · pas travaillé sur la période'}</p>` : '<p class="small muted" style="margin:10px 4px 0;text-align:center">Touche un muscle pour le détail.</p>'}
+    ${al.slice(0, 3).map(a => `<p class="malert ${a.z}">${esc(a.t)}</p>`).join('')}</div>`;
+}
+
+/* ---------- home: where the three parts meet, in six short lines; each one says why ---------- */
+function homeLines() {
+  const kG = lastKey('hrv'), rec = kG ? recovery(kG) : null, z = zoneOf(rec?.score);
+  const sl = kG ? VAL.sleepH(kG) : null, hrv = kG ? G(kG, 'hrv') : null, hb = kG ? base('hrv', kG) : null;
+  const effY = effortDay(addDays(TODAY, -1)), eff7 = avgN('effort', 7), eff28 = avgN('effort', 28);
+  const p = planFor(TODAY), done = logsOn(TODAY), high = highDay(TODAY), tgt = effortTarget(rec?.score, high);
+  const g = fuelGoal(TODAY), t = dayTotals(TODAY), d = fday(TODAY), wL = (d.water || 0) * .25, wG = g.water * .25;
+  const L = [];
+  // 1. State
+  L.push(['État', rec ? `Récupération ${rec.score} %${sl != null ? `, nuit de ${fx(sl, 1)} h` : ''}${hrv != null && hb ? (hrv < hb.m - hb.sd * .5 ? ', VFC sous ta norme' : hrv > hb.m + hb.sd * .5 ? ', VFC au-dessus de ta norme' : ', VFC dans ta norme') : ''}.` : 'Récupération en calibrage : encore quelques nuits.',
+    rec ? `VFC ${hrv ?? '–'} ms (ta base ${hb ? fx(hb.m) : '–'} ms), sommeil ${sl != null ? fx(sl, 1) : '–'} h sur ${fx(SLEEP_NEED, 1)} h visées, FC repos ${G(kG, 'rhr') ?? '–'}. La récupération pèse VFC 45 %, sommeil 35 %, FC repos 20 %.` : 'Il faut au moins 7 nuits de mesures pour avoir ta base.']);
+  // 2. Load
+  const trend = eff7 != null && eff28 ? (eff7 - eff28) / eff28 * 100 : null;
+  let run = 0; for (let i = 1; i < 6; i++) { if (highDay(addDays(TODAY, -i)) && (effortDay(addDays(TODAY, -i)) || 0) >= 10) run++; else break; }
+  L.push(['Charge', `${effY != null ? `Hier ${fx(effY, 1)}/21` : 'Hier rien de mesuré'}${trend != null ? `, semaine ${trend > 15 ? 'plus lourde' : trend < -15 ? 'plus légère' : 'dans ta moyenne'} (${trend > 0 ? '+' : ''}${Math.round(trend)} %)` : ''}${run >= 2 ? `, ${run} jours intenses d'affilée` : ''}.`,
+    `Effort moyen 7 jours ${eff7 != null ? fx(eff7, 1) : '–'}, 28 jours ${eff28 != null ? fx(eff28, 1) : '–'} sur 21. En high-low, un jour intense est suivi d'un jour calme.`]);
+  // 3. Today
+  const today = S.live ? `Séance en cours : ${S.live.name}.` : done.length ? `Séance faite : ${done[0].name}.` : p ? `${p.name} : ${z === 'bad' ? 'qualité seulement, coupe 30 à 40 % du volume' : z === 'mid' ? 'garde la qualité, coupe 20 % du volume' : 'charges normales'}.` : high ? `Jour intense sans séance prévue : vise ${tgt.lvl[0]} à ${tgt.lvl[1]} sur 21.` : 'Jour de récupération : mobilité, marche, rien d\'intense.';
+  L.push(['Séance', today, `Objectif d'effort ${tgt.lvl[2].toLowerCase()} (${tgt.lvl[0]} à ${tgt.lvl[1]} sur 21), calculé avec ta récupération et ton jour ${high ? 'intense' : 'de récupération'}. ${recFactor().why ? 'Les charges proposées sont baissées' + recFactor().why.replace(' · ', ' : ') + '.' : ''}`]);
+  // 4. Food
+  L.push(['Assiette', `${high ? 'Jour intense' : 'Jour calme'} : ${fx(g.kcal)} kcal dont ${fx(g.c)} g de glucides. Protéines ${fx(t.p)}/${fx(g.p)} g, eau ${fx(wL, 1)}/${fx(wG, 1)} L.`,
+    `Tes besoins de base (Mifflin-St Jeor) × activité, protéines ${fx(S.fset.protein || 2, 1)} g/kg, plus de glucides les jours intenses pour remplir tes réserves.`]);
+  // 5. Tonight
+  const wd = new Date(TODAY + 'T12:00:00').getDay(), sauna = wd === 4 || wd === 6, al = musAlerts(), tight = al.find(a => a.k);
+  L.push(['Ce soir', `${sauna ? 'Sauna, ' : ''}${tight ? `10 min sur ${MUSI[tight.k].n.toLowerCase()} (pistolet ou rouleau), ` : high ? 'rouleau et mobilité 10 min, ' : ''}coucher vers ${S.profile?.bed || '22 h 00'} pour tes ${fx(SLEEP_NEED, 0)} h.`,
+    `Tiré de ton planning (sauna jeudi et samedi) et de la fatigue par muscle. Ton heure de coucher se règle dans Recovery.`]);
+  // 6. Watch
+  const watch = al[0]?.t || (hrv != null && hb && [0, 1, 2, 3].every(i => { const v = G(addDays(kG, -i), 'hrv'); return v != null && v < hb.m; }) ? 'VFC sous ta base depuis 4 nuits : garde une journée calme.' : null)
+    || (painActive() ? 'Une douleur est notée ces 14 derniers jours : surveille-la avant les séances rapides.' : null) || 'Rien d\'anormal : continue comme ça.';
+  L.push(['À surveiller', watch, 'Charge par muscle sur 7 jours contre tes limites, équilibre entre groupes opposés, tendance de la VFC et douleurs notées.']);
+  return L;
+}
+function homeSyn() {
+  return `<div class="hm-syn">${homeLines().map(([h, t, why]) => [h, cap(t), why]).map(([h, t, why]) => `<details><summary><b>${esc(h)}</b><span>${esc(t)}</span><span class="q">Pourquoi</span></summary><p>${esc(why)}</p></details>`).join('')}</div>
+    <button class="hm-ask" data-hask>Interagir avec Claude</button>`;
+}
+// "Interagir": everything the app knows right now, handed to Oscar's own Claude (free, no API key).
+function claudeContext() {
+  const lines = homeLines().map(([h, t]) => `- ${h} : ${t}`).join('\n');
+  const days = [...Array(7)].map((_, i) => addDays(TODAY, -i)).map(k => { const r = recovery(k); return `${k} : récup ${r?.score ?? '–'} %, sommeil ${VAL.sleepH(k) != null ? fx(VAL.sleepH(k), 1) : '–'} h, VFC ${G(k, 'hrv') ?? '–'}, FC repos ${G(k, 'rhr') ?? '–'}, effort ${effortDay(k) != null ? fx(effortDay(k), 1) : '–'}/21, kcal ${fx(dayTotals(k).kcal)} / prot ${fx(dayTotals(k).p)} g`; }).join('\n');
+  const ses = logs().filter(l => l.date >= addDays(TODAY, -13)).map(l => `${l.date} ${l.name} (${l.min} min, RPE ${l.rpe}) : ` + (l.items || []).map(it => exOf(it.ex).n + ' ' + (it.sets ? it.sets.map(x => (x.kg ? x.kg + ' kg × ' : '') + x.reps + (it.u === 's' ? ' s' : '')).join(', ') : it.reps.map(r => r.dist + ' m').join(', '))).join(' ; ')).join('\n');
+  const mus = musState().filter(x => x.week > 0).sort((a, b) => b.pct - a.pct).map(x => `${x.n} ${Math.round(x.pct)} %`).join(', ');
+  const next = [0, 1, 2, 3].map(i => { const k = addDays(TODAY, i), pl = planFor(k); return `${k} : ${pl ? pl.name : highDay(k) ? 'jour intense' : 'récupération'}`; }).join('\n');
+  return `Je suis Oscar, sprinteur (objectif haut niveau) et coach. Méthode high-low, dimanche off. Voici l'état actuel de mon appli TNR Athletics. Réponds en français, court et concret.
+
+Synthèse du jour :
+${lines}
+
+7 derniers jours :
+${days}
+
+Séances des 14 derniers jours :
+${ses || 'aucune'}
+
+Charge par muscle sur 7 jours (% de ma limite) : ${mus || 'rien'}
+
+Prochains jours :
+${next}
+${S.profile?.injury ? '\nContraintes : ' + S.profile.injury : ''}${S.profile?.notes ? '\nÀ savoir : ' + S.profile.notes : ''}${S.profile?.nutrition ? '\nPlan alimentaire : ' + S.profile.nutrition : ''}
+
+Ma question : `;
+}
+async function askClaude() {
+  const text = claudeContext();
+  try { if (navigator.share) { await navigator.share({title: 'TNR Athletics', text}); return; } } catch (e) { if (e?.name === 'AbortError') return; }
+  try { await navigator.clipboard.writeText(text); toast('Contexte copié : colle-le dans Claude et pose ta question'); } catch (e) {}
+  window.open('https://claude.ai/new', '_blank');
+}
 function homeGreeting() {
   const n = S.profile?.name || 'Oscar', h = new Date().getHours(), kG = lastKey('hrv'), rec = kG ? recovery(kG) : null, z = rec ? zoneOf(rec.score) : null;
   const sl = kG ? VAL.sleepH(kG) : null, done = logsOn(TODAY).length || (G(TODAY, 'acts') || []).some(a => ['strength_training', 'track_running'].includes(a.type));
@@ -2021,9 +2156,10 @@ const musZone = pct => pct >= 100 ? 'bad' : pct >= 75 ? 'mid' : 'good';
 // Balance between opposite groups over 7 days (sprinter: the back chain should not lag behind the front).
 function musBalance(st = musState()) {
   const v = Object.fromEntries(st.map(x => [x.k, x.week])), sum = ks => ks.reduce((a, k) => a + (v[k] || 0), 0);
-  const pairs = [['Ischios / quadriceps', sum(['hams']), sum(['quads']), .8], ['Chaîne arrière / avant', sum(['glutes', 'hams', 'erect', 'calves']), sum(['quads', 'psoas', 'abs', 'tib']), 1.2],
-    ['Tirage / poussée', sum(['lats', 'rhomb', 'bi']), sum(['pecs', 'shoul', 'tri']), 1]];
-  return pairs.filter(([, a, b]) => a + b > 20).map(([n, a, b, target]) => { const r = b ? a / b : 9; return {n, r, target, off: r < target * .67 || r > target * 1.6}; });
+  // [name, back side, front side, lowest and highest ratio that stay fine]: a sprinter's back chain may be stronger, not weaker.
+  const pairs = [['Ischios / quadriceps', sum(['hams']), sum(['quads']), .6, 99], ['Chaîne arrière / avant', sum(['glutes', 'hams', 'erect', 'calves']), sum(['quads', 'psoas', 'abs', 'tib']), .8, 99],
+    ['Tirage / poussée', sum(['lats', 'rhomb', 'bi']), sum(['pecs', 'shoul', 'tri']), .67, 1.5]];
+  return pairs.filter(([, a, b]) => a + b > 20).map(([n, a, b, lo, hi]) => { const r = b ? a / b : 9; return {n, r, off: r < lo || r > hi}; });
 }
 
 /* ---------- session caps (Oscar's sheets): 30 sets, 500 reps, 30 minutes of real effort, intensity under 85 % in a strength block ---------- */
@@ -2168,7 +2304,7 @@ function vHome() {
   return `<div class="hm-glow${s ? ' on' : ''}" id="hm-glow" style="--gc:${c || '#000'};left:${HP.x}"></div>
     <div class="hm${s ? ' sel' : ''}" id="hm">
       <button class="hm-gear" data-hmenu aria-label="Menu">${BARS}</button>
-      <header class="hm-head"><div class="sub">${fmtDay(TODAY)}</div><h1 class="hello">${esc(homeGreeting())}</h1></header>
+      <header class="hm-head"><div class="sub">${fmtDay(TODAY)}</div><h1 class="hello">${esc(homeGreeting())}</h1>${homeSyn()}</header>
       <div class="hm-info" id="hm-info" aria-live="polite">${homeInfo(s)}</div>
       <div class="hm-dock">${HOME_K.map(([m, col]) => `<button class="hm-k${s === m ? ' on' : ''}" data-k="${m}" style="--mc:${col}" aria-label="${modName(m)} : touche puis glisse vers le haut pour ouvrir"><span class="l">${m}</span><span class="n">${modName(m)}</span></button>`).join('')}</div>
     </div>`;
@@ -2482,7 +2618,7 @@ function tProgress() {
   return `
     <header class="top"><div class="sub">Records et volume</div><h1>Progrès</h1></header>
     ${sprinterCard()}
-    <div class="stack">${musCard()}
+    <div class="stack">${bodyCard()}${musCard()}
       ${lifts.length ? `<div class="card"><div class="chead" style="margin-bottom:6px"><span class="eyebrow">Max estimé</span><b class="num">${fx(bestE1rm(S.prog))} kg</b></div>
         <div class="chipsx">${lifts.map(id => `<button class="chip" data-tprog="${id}" aria-pressed="${S.prog === id}">${esc(exOf(id).n)}</button>`).join('')}</div>
         ${hist.length > 1 ? chart(hist, {color: 'var(--accent)', dec: 0, unit: 'kg'}) : '<p class="small muted">Encore une séance avec cet exercice pour voir la courbe.</p>'}
@@ -3038,6 +3174,9 @@ document.addEventListener('click', e => {
   if ((b = at('[data-edu]'))) { const [i, u] = b.dataset.edu.split('.'); ED.items[+i].u = u; if (u === 's' && !ED.items[+i].reps) ED.items[+i].reps = 30; paneRender(); return; }
   if ((b = at('[data-tgfill]'))) { fillFromWatch(b.dataset.tgfill); return; }
   if (at('[data-rmlist]')) { rmList(); return; }
+  if (at('[data-hask]')) { askClaude(); return; }
+  if ((b = at('[data-mgran]'))) { S.mgran = b.dataset.mgran; renderMod(true); return; }
+  if ((b = at('[data-mz]'))) { S.msel = S.msel === b.dataset.mz ? null : b.dataset.mz; renderMod(true); return; }
   if (at('[data-mlims]')) { musLimits(); return; }
   if (at('[data-tladd]')) { pickExercise('any', id => { S.live.items.push(liveItem(defaultItem(id))); saveLive(); paneRender(); }); return; }
   if (at('[data-tfinish]')) { finishPane(); return; }
