@@ -487,9 +487,11 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .plg-axis{position:absolute;left:0;top:0;bottom:0;width:36px}
 .plg-axis span{position:absolute;right:4px;transform:translateY(-50%);font:600 .625rem var(--display);color:var(--fg3,var(--fg2));font-variant-numeric:tabular-nums}
 .plg-col{position:relative;flex:1;min-width:0;border-left:1px solid var(--line)}
-.plg-col.today{background:color-mix(in srgb,var(--accent) 5%,transparent)}
+.plg-col.pltoday{background:color-mix(in srgb,var(--accent) 5%,transparent)}
+.plfs i{width:auto;height:auto;border-radius:0;background:none;margin:0;display:block}
 .plg-h{position:absolute;left:0;right:0;border-top:1px solid var(--line);opacity:.6}
 .plg-now{position:absolute;left:0;right:0;border-top:2px solid var(--bad);z-index:2;pointer-events:none}
+.plfs .plg-now{height:0}
 .plg-now::before{content:"";position:absolute;left:-4px;top:-5px;width:8px;height:8px;border-radius:50%;background:var(--bad)}
 .plg-b{position:absolute;left:3px;right:3px;display:flex;flex-direction:column;justify-content:flex-start;gap:1px;overflow:hidden;text-align:left;padding:4px 7px;border-radius:8px;background:color-mix(in srgb,var(--pc) 22%,var(--card));border-left:3px solid var(--pc);color:var(--fg);touch-action:pan-y;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .plg-b b{font-size:.75rem;font-weight:600;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -497,17 +499,17 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .plg-b.short{padding:0 7px;justify-content:center}
 .plg-b.short b{font-size:.625rem}
 .plg-b.lift{z-index:5;box-shadow:0 10px 26px rgba(0,0,0,.35);background:color-mix(in srgb,var(--pc) 40%,var(--card));transition:none}
-.plfs.week .plg-b{left:1px;right:1px;padding:2px 4px;border-radius:5px;border-left-width:2px}
-.plfs.week .plg-b b{font-size:.5625rem;white-space:normal}
-.plfs.week .plg-b small{font-size:.5rem}
+.plfs.plw .plg-b{left:1px;right:1px;padding:2px 4px;border-radius:5px;border-left-width:2px}
+.plfs.plw .plg-b b{font-size:.5625rem;white-space:normal}
+.plfs.plw .plg-b small{font-size:.5rem}
 .plg-head{display:flex;padding-left:40px;padding-bottom:4px}
 .plg-head span{flex:1;text-align:center;font-size:.6875rem;font-weight:600;color:var(--fg2)}
 .plg-head span b{color:var(--fg);font-family:var(--display)}
-.plg-head span.today{color:var(--accent)}
+.plg-head span.pltoday{color:var(--accent)}
 .plg-leg{display:none;flex-wrap:wrap;gap:4px 12px;padding:8px 0 2px;font-size:.625rem;color:var(--fg2)}
-.plfs.week .plg-leg{display:flex}
+.plfs.plw .plg-leg{display:flex}
 .plg-leg span{display:flex;align-items:center;gap:4px}
-.plg-leg i{width:8px;height:8px;border-radius:2px}
+.plfs .plg-leg i{width:8px;height:8px;border-radius:2px}
 .plb{display:grid;grid-template-columns:52px 1fr;gap:10px;align-items:start;text-align:left;padding:8px 10px;border-radius:12px;background:color-mix(in srgb,var(--pc) 16%,var(--card));border-left:4px solid var(--pc);color:var(--fg)}
 .plb .t{font:600 .75rem/1.25 var(--display);color:var(--fg2);font-variant-numeric:tabular-nums}
 .plb .t small{font-weight:500;opacity:.8}
@@ -845,7 +847,7 @@ details.slow[open]>summary h2::after{content:" ▴"}
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=54"></script>
+<script src="supabase-db.js?v=55"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
@@ -2445,17 +2447,17 @@ function plfsRender() {
   const used = [...new Set(all.map(x => x.c))].filter(c => PCAT[c]);
   const hours = []; for (let t = t0; t <= t1; t += 60) hours.push(t);
   const nowM = new Date().getHours() * 60 + new Date().getMinutes();
-  const col = ({wd, k, L}) => `<div class="plg-col${k === TODAY ? ' today' : ''}" data-plcol="${wd}">${hours.map(t => `<i class="plg-h" style="top:${(t - t0) * K}px"></i>`).join('')}
+  const col = ({wd, k, L}) => `<div class="plg-col${k === TODAY ? ' pltoday' : ''}" data-plcol="${wd}">${hours.map(t => `<i class="plg-h" style="top:${(t - t0) * K}px"></i>`).join('')}
       ${L.map(x => { const a = tmin(x.a), b = tmin(x.b), h = (b - a) * K, short = h < 30; return `<button class="plg-b${short ? ' short' : ''}" data-plb="${plIdx(x, wd, k)}" data-plwd="${wd}" style="--pc:${PCAT[x.c]?.[1] || '#888'};top:${(a - t0) * K}px;height:${Math.max(h - 1, 8)}px"><b>${esc(x.n)}</b>${short ? '' : `<small>${x.a} – ${x.b}${x.date ? ' · ce jour' : ''}</small>`}</button>`; }).join('')}
       ${k === TODAY && nowM >= t0 ? `<i class="plg-now" style="top:${(nowM - t0) * K}px"></i>` : ''}</div>`;
   const own = !!PLN().week?.[PLAN_UI.wd];
-  el.className = 'plfs on ' + (week ? 'week' : 'day') + (plRot() ? ' rot' : '');
+  el.className = 'plfs on ' + (week ? 'plw' : 'pld1') + (plRot() ? ' rot' : '');
   el.innerHTML = `<div class="plfs-in">
     <header class="plfs-top"><button class="plfs-ic" data-plx aria-label="Fermer le planning"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       <div class="plfs-t"><b>Mon planning</b><small>${week ? 'Semaine type · garde le doigt sur un bloc pour le glisser' : DAYS_FR[PLAN_UI.wd] + ' · garde le doigt sur un bloc pour le glisser'}</small></div>
       <button class="plfs-ic" data-plturn aria-label="${week ? 'Revenir à la journée' : 'Voir toute la semaine, téléphone tourné'}" aria-pressed="${week}">${ICON_TURN}</button></header>
     ${week ? '' : `<div class="pldays">${PL_ORDER.map(d => `<button data-pld="${d}" aria-pressed="${d === PLAN_UI.wd}"><span>${DAYS_FR[d].slice(0, 3)}</span><b>${+plDay(d).slice(8)}</b></button>`).join('')}</div>`}
-    ${week ? `<div class="plg-head"><span></span>${lists.map(d => `<span class="${d.k === TODAY ? 'today' : ''}">${DAYS_FR[d.wd].slice(0, 3)} <b>${+d.k.slice(8)}</b></span>`).join('')}</div>` : ''}
+    ${week ? `<div class="plg-head"><span></span>${lists.map(d => `<span class="${d.k === TODAY ? 'pltoday' : ''}">${DAYS_FR[d.wd].slice(0, 3)} <b>${+d.k.slice(8)}</b></span>`).join('')}</div>` : ''}
     <div class="plg-scroll"><div class="plg" style="height:${H + 8}px"><div class="plg-axis">${hours.map(t => `<span style="top:${(t - t0) * K}px">${String(t / 60 % 24).padStart(2, '0')} h</span>`).join('')}</div>${lists.map(col).join('')}</div>
       ${week ? '' : `<div class="stack" style="margin:14px 0 24px"><button class="btn ghost" data-pladd>+ Ajouter un bloc</button>${own ? '<button class="btn ghost" data-plreset>Revenir au planning de mon fichier</button>' : ''}</div>`}</div>
     <div class="plg-leg">${used.map(c => `<span><i style="background:${PCAT[c][1]}"></i>${esc(PCAT[c][0])}</span>`).join('')}</div>
@@ -2499,7 +2501,9 @@ function plDragInit(el) {
     const d = D; D = null;
     if (!d?.live) return;
     // The click that follows the lift must not open the editor.
-    el.addEventListener('click', ev => { ev.stopPropagation(); ev.preventDefault(); }, {capture: true, once: true});
+    const swallow = ev => { ev.stopPropagation(); ev.preventDefault(); };
+    el.addEventListener('click', swallow, {capture: true, once: true});
+    setTimeout(() => el.removeEventListener('click', swallow, {capture: true}), 400);
     d.b.classList.remove('lift');
     if (!d.min && !d.day) { d.b.style.transform = ''; return; }
     await plMove(d.b.dataset.plb, +d.b.dataset.plwd, d.min, d.day);
