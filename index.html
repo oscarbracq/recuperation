@@ -363,6 +363,23 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 :root[data-theme="dark"][data-mod="N"]{--accent:#34D27A;--accent-soft:rgba(52,210,122,.18);--aura1:#15803D;--aura2:#047857;--aura3:#166534;--top:#052613}
 :root[data-theme="dark"][data-mod="home"]{--aura1:#1D4ED8;--aura2:#B91C1C;--aura3:#15803D;--top:#05070F}
 .trfmark{display:block;margin:0 auto 10px;padding:4px 10px;font:700 .75rem/1 var(--display);letter-spacing:.32em;text-indent:.32em;color:var(--fg2)}
+/* Inside a part: its name in small letters at the top. Scrolling down, the other letters fade and the initial
+   grows into the same square as on the home page, centred; swipe that square down to go back home. */
+.mm-space{height:20px;margin:0 auto 10px}
+.modmark{--p:0;position:fixed;left:0;right:0;top:0;z-index:38;pointer-events:none}
+:root[data-mod="home"] .modmark{display:none}
+.mm-line{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 24px);height:20px;display:flex;justify-content:center;align-items:center;font:700 .75rem/1 var(--display);letter-spacing:.32em;text-indent:.32em;text-transform:uppercase;color:var(--fg2);pointer-events:auto;cursor:pointer}
+.mm-line .g{opacity:calc(1 - var(--p) * 6)}
+.mm-line .r{opacity:calc(1 - var(--p) * 1.6)}
+.modmark.big .mm-line{pointer-events:none}
+.mm-sq{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + 8px);width:80px;height:92px;margin-left:-40px}
+.mm-k{position:absolute;inset:0;display:grid;place-items:center;font:800 4.5rem/1 var(--display);letter-spacing:-.02em;color:color-mix(in srgb,var(--fg) calc(var(--p) * 100%),var(--fg2));opacity:min(1,calc(var(--p) * 6));transform-origin:50% 50%;will-change:transform;touch-action:none}
+.mm-k::before{content:"";position:absolute;inset:-2px -4px;border-radius:26px;z-index:-1;border:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--bg));box-shadow:0 0 0 5px color-mix(in srgb,var(--accent) 20%,transparent),0 12px 44px color-mix(in srgb,var(--accent) 40%,transparent);opacity:var(--p)}
+.modmark.big .mm-k{pointer-events:auto;cursor:grab}
+.mm-k.back{transition:transform .45s cubic-bezier(.32,.72,0,1)}
+.mm-k.leave{transition:transform .35s cubic-bezier(.4,0,1,1),opacity .3s;opacity:0}
+.mm-hint{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 108px);text-align:center;font-size:.6875rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--fg2);opacity:0;transition:opacity .25s}
+.modmark.drag .mm-hint{opacity:1}
 /* Home: a black page and the three letters within reach of the thumb. Press one: it lights up in its colour and
    that colour rises from under it into the black. Swipe it up to open that part of the app. */
 :root[data-mod="home"],:root[data-mod="home"]:not([data-theme="light"]),:root[data-theme="dark"][data-mod="home"]{--top:#000}
@@ -517,10 +534,11 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
 <div id="mod-home" class="mod"><section id="home-view"></section></div>
+<div class="modmark" id="modmark"><div class="mm-line" data-home role="button" aria-label="Retour à l'accueil"><span class="g"></span><span class="r"></span></div><div class="mm-sq"><div class="mm-k" aria-label="Glisse vers le bas pour revenir à l'accueil"></div></div><div class="mm-hint">↓ Glisse pour l'accueil</div></div>
 <button class="backhome" data-home aria-label="Retour à l'accueil"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
 <div id="mod-R" class="mod" hidden>
 <div class="wrap">
-  <button class="trfmark" data-home aria-label="Retour à l'accueil">TNR</button>
+  <div class="mm-space" aria-hidden="true"></div>
   <section id="v-today"></section>
   <section id="v-trends" hidden></section>
   <section id="v-reports" hidden></section>
@@ -574,7 +592,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=34"></script>
+<script src="supabase-db.js?v=35"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
@@ -1640,6 +1658,54 @@ const ptrEl = () => $('#v-' + S.tab + ' [data-ptr]');
 document.addEventListener('click', e => { if (e.target.closest('[data-ptr]')) refreshAll(); });
 
 // The back arrow hides while reading down the page and returns as soon as the page goes back up.
+const MM_NAME = {T: 'Training', N: 'Nutrition', R: 'Recovery'}, MM = {p: 0, dx: 0, dy: 0, s0: 1 / 6, drag: null};
+function mmMeasure() {
+  const g = $('#modmark .g'), q = $('#modmark .mm-sq'); if (!g || !q || S.mod === 'home') return;
+  const a = g.getBoundingClientRect(), b = q.getBoundingClientRect(), ls = parseFloat(getComputedStyle(g).letterSpacing) || 0;
+  if (!a.width) return;
+  MM.dx = a.left + (a.width - ls) / 2 - (b.left + b.width / 2); MM.dy = a.top + a.height / 2 - (b.top + b.height / 2);
+  MM.s0 = parseFloat(getComputedStyle(g).fontSize) / parseFloat(getComputedStyle($('#modmark .mm-k')).fontSize); mmPaint();
+}
+function mmSet(mod) {
+  const n = MM_NAME[mod]; if (!n) return;
+  $('#modmark .g').textContent = n[0]; $('#modmark .r').textContent = n.slice(1); $('#modmark .mm-k').textContent = n[0];
+  $('#modmark .mm-k').classList.remove('leave', 'back'); $('#modmark .mm-k').style.opacity = '';
+  MM.p = 0; requestAnimationFrame(mmMeasure);
+}
+function mmPaint(extraY = 0) {
+  const m = $('#modmark'), k = $('#modmark .mm-k'); if (!m || !k) return;
+  const p = MM.p, e = 1 - Math.pow(1 - p, 3), sc = MM.s0 + (1 - MM.s0) * e;
+  m.style.setProperty('--p', e.toFixed(3)); m.classList.toggle('big', p > .6);
+  k.style.transform = `translate(${(1 - e) * MM.dx}px,${(1 - e) * MM.dy + extraY}px) scale(${sc})`;
+}
+let mmRaf = 0;
+addEventListener('scroll', () => { if (mmRaf || S.mod === 'home') return; mmRaf = requestAnimationFrame(() => { mmRaf = 0; if (MM.drag) return; MM.p = Math.max(0, Math.min(1, scrollY / 130)); mmPaint(); }); }, {passive: true});
+addEventListener('resize', () => requestAnimationFrame(mmMeasure));
+document.fonts?.ready.then(() => mmMeasure());
+document.addEventListener('pointerdown', e => {
+  const k = e.target.closest('.mm-k'); if (!k || !$('#modmark').classList.contains('big')) return;
+  MM.drag = {id: e.pointerId, y0: e.clientY, dy: 0, ly: e.clientY, lt: performance.now(), v: 0};
+  k.classList.remove('back'); k.setPointerCapture?.(e.pointerId); $('#modmark').classList.add('drag');
+  if (PREFS.haptic) navigator.vibrate?.(8);
+});
+document.addEventListener('pointermove', e => {
+  const d = MM.drag; if (!d || e.pointerId !== d.id) return;
+  const now = performance.now(); d.v = (e.clientY - d.ly) / Math.max(1, now - d.lt); d.ly = e.clientY; d.lt = now;
+  d.dy = Math.max(0, e.clientY - d.y0); d.dy = d.dy < 140 ? d.dy : 140 + (d.dy - 140) * .4; mmPaint(d.dy);
+});
+const mmEnd = e => {
+  const d = MM.drag; if (!d || e.pointerId !== d.id) return;
+  MM.drag = null; $('#modmark').classList.remove('drag');
+  const k = $('#modmark .mm-k');
+  if (d.dy > 90 || (d.dy > 30 && d.v > .5)) {
+    if (PREFS.haptic) navigator.vibrate?.(14);
+    k.classList.add('leave'); mmPaint(innerHeight * .6);
+    setTimeout(() => { go('home'); k.classList.remove('leave'); }, 320);
+    return;
+  }
+  k.classList.add('back'); mmPaint(); setTimeout(() => k.classList.remove('back'), 460);
+};
+document.addEventListener('pointerup', mmEnd); document.addEventListener('pointercancel', mmEnd);
 let lastScrollY = 0;
 addEventListener('scroll', () => { const y = scrollY, a = $('.backhome'); if (a) a.classList.toggle('away', y > 60 && y > lastScrollY); lastScrollY = y; }, {passive: true});
 
@@ -1695,7 +1761,7 @@ try { S.live = JSON.parse(localStorage.getItem('trf-live') || 'null'); } catch (
 const saveUi = () => { try { localStorage.setItem('trf-ui', JSON.stringify({ttab: S.ttab, tkind: S.tkind, prog: S.prog, ftab: S.ftab, lang: S.lang})); } catch (e) {} };
 const saveLive = () => { try { S.live ? localStorage.setItem('trf-live', JSON.stringify(S.live)) : localStorage.removeItem('trf-live'); } catch (e) {} };
 const TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
-const trfMark = () => '<button class="trfmark" data-home aria-label="Retour à l\'accueil">TNR</button>';
+const trfMark = () => '<div class="mm-space" aria-hidden="true"></div>';
 async function dbSet(path, data) {
   if (!S.db) { toast('Non enregistré : ouvre l\'appli connecté à ton compte'); return false; }
   try { await S.db.doc(path).set(data); return true; } catch (e) { toast('Échec de l\'enregistrement, réessaie'); return false; }
@@ -1861,7 +1927,7 @@ function suggest(it) {
 
 /* ---------- module switching ---------- */
 function go(mod, push = true) {
-  S.mod = mod; document.documentElement.dataset.mod = mod; syncBars();
+  S.mod = mod; document.documentElement.dataset.mod = mod; syncBars(); mmSet(mod);
   // Opening a part from the home page always lands on its first page.
   if (push && mod !== 'home') { if (mod === 'R') S.tab = 'today'; if (mod === 'T') S.ttab = 'today'; if (mod === 'N') { S.ftab = 'journal'; S.fday = TODAY; } }
   ['home', 'T', 'N', 'R'].forEach(m => { $('#mod-' + m).hidden = m !== mod; });
