@@ -778,7 +778,7 @@ details.slow[open]>summary h2::after{content:" ▴"}
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=48"></script>
+<script src="supabase-db.js?v=49"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
@@ -2454,7 +2454,7 @@ function setTab(t) {
   try { localStorage.setItem('sl-tab', t); } catch (e) {}
 }
 let toastT;
-function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), 2200); }
+function toast(t, ms = 2200) { const el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), ms); }
 
 document.querySelector('.tabbar').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) setTab(b.dataset.tab); });
 document.addEventListener('click', e => {
@@ -4314,13 +4314,19 @@ async function scanStart(onCode) {
     const F = window.Html5QrcodeSupportedFormats;
     SCAN.h5 = new Html5Qrcode('scan-h5', {formatsToSupport: [F.EAN_13, F.EAN_8, F.UPC_A, F.UPC_E], verbose: false});
     await SCAN.h5.start({facingMode: 'environment'}, {fps: 10, qrbox: {width: 250, height: 110}}, c => { scanStop(); onCode(c); });
-  } catch (e) { scanStop(); toast('Caméra indisponible : tape le numéro sous le code-barres'); }
+  } catch (e) {
+    scanStop();
+    const no = e && (e.name === 'NotAllowedError' || e.name === 'SecurityError' || /permission/i.test(String(e)));
+    toast(no ? 'Caméra refusée : autorise l\'appareil photo pour ce site (cadenas à côté de l\'adresse › Autorisations), puis réessaie' : 'Caméra indisponible : tape le numéro sous le code-barres', 5000);
+  }
 }
 async function offProduct(code) {
-  const r = await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}.json?fields=product_name,brands,nutriments,product_quantity,quantity`);
+  const r = await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}.json?fields=product_name,brands,nutriments,product_quantity,quantity,serving_quantity`);
   const j = await r.json(); if (j.status !== 1 || !j.product) return null;
   const P = j.product, n = P.nutriments || {};
-  return {n: P.product_name || '', brand: (P.brands || '').split(',')[0].trim(), kcal: Math.round(+n['energy-kcal_100g'] || (+n.energy_100g || 0) / 4.184), p: +(+n.proteins_100g || 0).toFixed(1), c: +(+n.carbohydrates_100g || 0).toFixed(1), f: +(+n.fat_100g || 0).toFixed(1), pack: Math.round(+P.product_quantity || 0) || null};
+  const p = +(+n.proteins_100g || 0).toFixed(1), c = +(+n.carbohydrates_100g || 0).toFixed(1), f = +(+n.fat_100g || 0).toFixed(1);
+  const kcal = Math.round(+n['energy-kcal_100g'] || (+n.energy_100g || 0) / 4.184 || p * 4 + c * 4 + f * 9);
+  return {n: P.product_name || '', brand: (P.brands || '').split(',')[0].trim(), kcal, p, c, f, pack: Math.round(+P.product_quantity || 0) || null, serving: Math.round(+P.serving_quantity || 0) || null};
 }
 /* ---------- the menu: swaps that keep the macros, the Sunday shopping list with its cost, the bottles ---------- */
 const allFoods = () => [...myFoods(), ...FOODS];
@@ -4444,8 +4450,17 @@ async function saveDay(k, d) { delete d.fromPlan; S.fuel[k] = d; renderMod(); aw
 let OFF = {q: '', res: [], t: null};
 function addFood(meal) {
   let q = '';
-  openPane({title: 'Ajouter un aliment', focus: '#ff-q', render: () => `
-    <div style="margin-top:14px"><input class="search" id="ff-q" type="search" placeholder="Rechercher : poulet, skyr, riz…" value="${esc(q)}" data-ffq aria-label="Rechercher un aliment"></div>
+  const onCode = async code => {
+    const mine = myFoods().find(f => f.code === code); if (mine) { qtyPane(mine, meal); return; }
+    toast('Recherche du produit…');
+    let o = null; try { o = await offProduct(code); } catch (e) { toast('Pas de réseau : remplis l\'étiquette à la main'); newFood('', null, {code}); return; }
+    if (!o || !o.kcal) { toast('Produit inconnu : remplis l\'étiquette à la main'); newFood(o?.n || '', null, {code}); return; }
+    const f = {id: uid(), n: ((o.n || 'Produit') + (o.brand && !(o.n || '').includes(o.brand) ? ' ' + o.brand : '')).trim(), code, kcal: o.kcal, p: o.p, c: o.c, f: o.f, g: o.serving || (o.pack && o.pack <= 250 ? o.pack : 100), pack: o.pack};
+    S.foods[f.id] = f; dbSet('foods/' + f.id, {...f, updatedAt: new Date().toISOString()});
+    toast('Trouvé et rangé dans Mes aliments'); qtyPane(f, meal);
+  };
+  openPane({title: 'Ajouter un aliment', focus: '#ff-q', onClose: scanStop, scan: () => scanStart(onCode), render: () => `
+    <div style="margin-top:14px;display:flex;gap:8px"><input class="search" id="ff-q" type="search" placeholder="Rechercher : poulet, skyr, riz…" value="${esc(q)}" data-ffq aria-label="Rechercher un aliment" style="flex:1"><button type="button" class="chip" data-nfscan aria-label="Scanner un code-barres" style="flex:none">${SCANIC.replace('<svg', '<svg width="22" height="18"')}</button></div><div id="scan-box"></div>
     <div class="chipsx">${MEALS.map(([m, l]) => `<button class="chip" data-fmeal="${m}" aria-pressed="${m === meal}">${l}</button>`).join('')}</div>
     <div class="fres" id="ff-res">${foodResults(q)}</div>`,
   setQ: v => { q = v; $('#ff-res').innerHTML = foodResults(q); onlineSearch(q); }, setMeal: m => { meal = m; paneRender(); }, meal: () => meal});
@@ -4506,7 +4521,7 @@ function qtyPane(f, meal, editIndex) {
   del: async () => { const d = structuredClone(fday(S.fday)); d.items.splice(editIndex, 1); closeAllPanes(); await saveDay(S.fday, d); toast('Retiré du journal'); }});
 }
 function newFood(name, id, opt = {}) {
-  const f = id ? {...S.foods[id]} : {id: uid(), n: name || '', kcal: '', p: '', c: '', f: '', g: 100};
+  const f = id ? {...S.foods[id]} : {id: uid(), n: name || '', kcal: '', p: '', c: '', f: '', g: 100, ...(opt.code ? {code: opt.code} : {})};
   const grab = () => document.querySelectorAll('#pane-body [data-nf]').forEach(el => { f[el.dataset.nf] = ['n', 'code', 'brand'].includes(el.dataset.nf) ? el.value.trim() : +String(el.value).replace(',', '.') || 0; });
   const fill = async code => {
     grab(); f.code = code; paneRender(); toast('Recherche du produit…');
