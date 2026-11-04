@@ -137,7 +137,11 @@ async function recupGetDb() {
     state: async () => {
       if (!('Notification' in window) || !(await pushReady())) return 'unsupported';
       if (Notification.permission === 'denied') return 'denied';
-      return (await (await pushReady()).pushManager.getSubscription()) && Notification.permission === 'granted' ? 'on' : 'off';
+      const sub = await (await pushReady()).pushManager.getSubscription();
+      if (!sub || Notification.permission !== 'granted') return 'off';
+      // The phone re-sends its subscription each time, so the server list heals itself if it was lost.
+      notify({subscribe: sub.toJSON()}).catch(() => {});
+      return 'on';
     },
     on: async () => {
       if (await Notification.requestPermission() !== 'granted') return 'denied';
@@ -154,7 +158,11 @@ async function recupGetDb() {
       if (sub) { await notify({unsubscribe: sub.endpoint}).catch(() => {}); await sub.unsubscribe(); }
       return 'off';
     },
-    test: () => notify({test: true})
+    test: async () => {
+      const sub = await (await pushReady())?.pushManager.getSubscription();
+      if (sub) await notify({subscribe: sub.toJSON()});
+      return notify({test: true});
+    }
   };
   const back = new URLSearchParams(location.search);
   if (back.get('state') === 'withings') {
