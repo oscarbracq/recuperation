@@ -355,7 +355,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 /* The home square comes back little by little while the letter is carried home. */
 .mm-title .i::before{content:"";position:absolute;left:50%;top:50%;width:1.25em;height:1.42em;margin:-.71em 0 0 -.625em;border-radius:.4em;border:.04em solid var(--mc,var(--accent));background:color-mix(in srgb,var(--mc,var(--accent)) 14%,transparent);box-shadow:0 0 0 .08em color-mix(in srgb,var(--mc,var(--accent)) 20%,transparent),0 .2em .7em color-mix(in srgb,var(--mc,var(--accent)) 50%,transparent);opacity:var(--b);z-index:-1;pointer-events:none}
 .pmsg{margin:6px 0 0;font:600 1.1875rem/1.3 var(--display);letter-spacing:-.01em;color:var(--fg);text-wrap:balance}
-.mm-title.anim span{transition:transform .45s cubic-bezier(.32,.72,0,1),opacity .35s}
+.mm-title.anim span{transition:transform .6s cubic-bezier(.25,.8,.25,1),opacity .45s}
 .mod.mm-fade{transition:opacity .3s}
 /* Home: a black page and the three letters within reach of the thumb. Press one: it lights up in its colour and
    that colour rises from under it into the black. Swipe it up to open that part of the app. */
@@ -961,7 +961,7 @@ function fuelMsg(k) {
   const g = fuelGoal(k), t = dayTotals(k), left = Math.round(g.kcal - t.kcal), today = k === TODAY;
   if (!t.kcal) return today ? 'Ton plan est prêt : ajuste au fil des repas.' : 'Rien de noté ce jour-là.';
   const prot = t.p >= g.p ? ` Protéines validées (${fx(t.p)} g).` : '';
-  if (Math.abs(left) <= 100) return 'Objectif atteint : ton carburant est au bon niveau.' + prot;
+  if (Math.abs(left) <= 100) return 'Objectif atteint pour aujourd\'hui.' + prot;
   if (left > 0) return (today ? `Encore ${fx(left)} kcal pour ton objectif.` : `Il manquait ${fx(left)} kcal ce jour-là.`) + prot;
   return `${fx(-left)} kcal au-dessus de l'objectif.` + prot;
 }
@@ -1697,7 +1697,7 @@ function mmPaint(f, anim) {
 }
 // The letter follows the thumb with a light spring, so it glides under it instead of jumping.
 function mmFollow() {
-  MM.x += (MM.tx - MM.x) * .32; MM.y += (MM.ty - MM.y) * .32;
+  MM.x += (MM.tx - MM.x) * .14; MM.y += (MM.ty - MM.y) * .14;
   mmPaint(1);
   if (MM.d || Math.hypot(MM.tx - MM.x, MM.ty - MM.y) > .5) MM.raf = requestAnimationFrame(mmFollow); else MM.raf = 0;
 }
@@ -1713,16 +1713,21 @@ document.addEventListener('touchmove', e => {
   if (!d.on) {
     if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
     // Name shown: only a pull down from the top moves it. Initial centred: it goes wherever the thumb goes.
-    if (!MM.focus && (dy <= 0 || Math.abs(dx) > Math.abs(dy))) { MM.d = null; return; }
-    d.on = true; d.y0 = t.clientY;
+    if (dy <= 0 || Math.abs(dx) > Math.abs(dy)) {
+      // Pushing the page up to read it: the whole name comes back and the page scrolls as usual.
+      if (MM.focus && dy < 0) { MM.focus = false; MM.x = MM.y = MM.tx = MM.ty = 0; mmPaint(0, true); }
+      MM.d = null; return;
+    }
+    if (MM.focus && dy < 16) return;
+    d.on = true; d.y0 = t.clientY; d.x0 = t.clientX;
     if (!MM.focus) MM.dx = mmMeasure();
-    else { d.ox = -(MM.bx + MM.dx); d.oy = -MM.by; if (!MM.raf) MM.raf = requestAnimationFrame(mmFollow); }
+    else if (!MM.raf) MM.raf = requestAnimationFrame(mmFollow);
   }
   e.preventDefault();
   const now = performance.now(); d.v = (t.clientY - d.ly) / Math.max(1, now - d.lt); d.ly = t.clientY; d.lt = now;
   if (!MM.focus) { d.dy = Math.max(0, t.clientY - d.y0); mmPaint(Math.min(1, d.dy / 110)); return; }
-  // Carried: the letter's centre goes under the thumb.
-  MM.tx = t.clientX + d.ox; MM.ty = t.clientY + d.oy;
+  // Carried: the letter moves with the thumb, from where it is, gently.
+  MM.tx = (t.clientX - d.x0) * .9; MM.ty = Math.max(-40, t.clientY - d.y0) * .9;
 }, {passive: false});
 const mmEnd = () => {
   const d = MM.d; MM.d = null;
@@ -1735,7 +1740,7 @@ const mmEnd = () => {
     return;
   }
   // Let go: carried far enough, it goes back to its own place on the home page; otherwise back to the centre.
-  if (Math.hypot(MM.tx, MM.ty) > 70) { cancelAnimationFrame(MM.raf); MM.raf = 0; mmHome(); return; }
+  if (MM.ty > 110 || Math.hypot(MM.tx, MM.ty) > 140) { cancelAnimationFrame(MM.raf); MM.raf = 0; mmHome(); return; }
   MM.tx = MM.ty = 0; if (!MM.raf) MM.raf = requestAnimationFrame(mmFollow);
 };
 document.addEventListener('touchend', mmEnd); document.addEventListener('touchcancel', mmEnd);
@@ -1763,12 +1768,12 @@ function mmHome() {
   tl.style.opacity = '0';
   const b = tl.getBoundingClientRect();
   const to = `translate(${b.left + b.width / 2 - fw / 2}px,${b.top + b.height / 2 - fh / 2}px) scale(1)`;
-  home.animate([{opacity: 0}, {opacity: 1}], {duration: 450, easing: 'ease-out'});
+  home.animate([{opacity: 0}, {opacity: 1}], {duration: 650, easing: 'ease-out'});
   fly.style.transform = to;
   let over = false;
   const end = () => { if (over) return; over = true; tl.style.opacity = ''; fly.classList.remove('on'); setTimeout(() => fly.remove(), 260); };
-  fly.animate([{transform: from}, {transform: to}], {duration: 560, easing: 'cubic-bezier(.32,.72,0,1)'}).onfinish = end;
-  setTimeout(end, 700);   // in case the phone pauses the animation
+  fly.animate([{transform: from}, {transform: to}], {duration: 750, easing: 'cubic-bezier(.25,.8,.25,1)'}).onfinish = end;
+  setTimeout(end, 900);   // in case the phone pauses the animation
 }
 let lastScrollY = 0;
 addEventListener('scroll', () => { const y = scrollY, a = $('.backhome'); if (a) a.classList.toggle('away', y > 60 && y > lastScrollY); lastScrollY = y; }, {passive: true});
@@ -2025,7 +2030,7 @@ function vHome() {
   return `<div class="hm-glow${s ? ' on' : ''}" id="hm-glow" style="--gc:${c || '#000'};left:${HP.x}"></div>
     <div class="hm${s ? ' sel' : ''}" id="hm">
       <button class="hm-gear" data-hmenu aria-label="Menu">${BARS}</button>
-      <header class="hm-head"><div class="sub">${fmtDay(TODAY)}</div><h1 class="hello">${esc(homeGreeting())}</h1>${homeSummary()}</header>
+      <header class="hm-head"><div class="sub">${fmtDay(TODAY)}</div><h1 class="hello">${esc(homeGreeting())}</h1></header>
       <div class="hm-info" id="hm-info" aria-live="polite">${homeInfo(s)}</div>
       <div class="hm-dock">${HOME_K.map(([m, col]) => `<button class="hm-k${s === m ? ' on' : ''}" data-k="${m}" style="--mc:${col}" aria-label="${modName(m)} : touche puis glisse vers le haut pour ouvrir"><span class="l">${m}</span><span class="n">${modName(m)}</span></button>`).join('')}</div>
     </div>`;
