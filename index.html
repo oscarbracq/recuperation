@@ -572,7 +572,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=31"></script>
+<script src="supabase-db.js?v=32"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
@@ -2009,7 +2009,7 @@ function homeSettings() {
   notifLoad();
 }
 /* Notifications: a short summary on the phone at 9 h (night, recovery, advice) and 20 h (effort vs target, tonight). */
-let NOTIF = null;
+let NOTIF = null, NOTIF_BUSY = false;
 async function notifLoad() {
   try { NOTIF = window.RECUP_PUSH ? await window.RECUP_PUSH.state() : 'unsupported'; } catch (e) { NOTIF = 'off'; }
   if (P.stack.length) paneRender();
@@ -2032,11 +2032,11 @@ function notifSection() {
       <div class="row col"><span class="hint">Avant 14 h : bilan du matin. À partir de 14 h : bilan du soir. Envoyée à 5 minutes près, juste après une synchro Garmin et Withings.</span><button class="btn ghost" data-hnotiftest>M'envoyer une notification de test</button></div>` : ''}</div>`;
 }
 document.addEventListener('change', async e => {
-  const t = e.target; if (!t.matches?.('[data-hnotif]') || !window.RECUP_PUSH) return;
-  t.disabled = true;
+  const t = e.target; if (!t.matches?.('[data-hnotif]') || !window.RECUP_PUSH || NOTIF_BUSY) return;
+  NOTIF_BUSY = true; t.disabled = true;
   try { NOTIF = t.checked ? await window.RECUP_PUSH.on() : await window.RECUP_PUSH.off(); toast(NOTIF === 'on' ? 'Notifications activées' : NOTIF === 'denied' ? 'Notifications refusées par le téléphone' : 'Notifications coupées'); }
   catch (err) { NOTIF = await window.RECUP_PUSH.state().catch(() => 'off'); toast('Activation impossible pour l\'instant'); }
-  paneRender();
+  NOTIF_BUSY = false; paneRender();
 });
 document.addEventListener('change', e => {
   const t = e.target; if (!t.matches?.('[data-hntime]') || !t.value) return;
@@ -2052,8 +2052,8 @@ document.addEventListener('click', e => {
 document.addEventListener('click', async e => {
   const b = e.target.closest('[data-hnotiftest]'); if (!b || !window.RECUP_PUSH) return;
   b.disabled = true;
-  try { const r = await window.RECUP_PUSH.test(); toast(r.results?.some(x => x.status < 300) ? 'Notification envoyée' : 'Envoi impossible pour l\'instant'); }
-  catch (err) { toast('Envoi impossible pour l\'instant'); }
+  try { const r = await window.RECUP_PUSH.test(); toast(r.results?.some(x => x.status < 300) ? 'Notification envoyée' : 'Envoi impossible : ' + (r.skipped || 'réponse ' + (r.results?.[0]?.status ?? '?'))); }
+  catch (err) { toast('Envoi impossible : ' + (err.message || 'pas de réponse')); }
   b.disabled = false;
 });
 /* Connexions: Oscar pastes his own Garmin and Withings keys; they go to the private table and never come back. */
