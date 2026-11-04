@@ -3991,7 +3991,8 @@ const FOODS = [
   ['Barre de céréales', 400, 6, 68, 11, 25, 'barre'], ['Biscuits secs', 450, 7, 72, 15, 30, '4 biscuits'], ['Croissant', 406, 8, 45, 21, 60, 'croissant'], ['Pain au chocolat', 414, 7, 46, 22, 65, 'pain au chocolat'],
   ['Pizza', 266, 11, 33, 10, 300, 'demi-pizza'], ['Burger', 254, 13, 28, 10, 220, 'burger'], ['Sandwich jambon-beurre', 255, 11, 32, 9, 250, 'sandwich'], ['Makis', 150, 5, 28, 2, 180, '6 makis'],
   ['Quiche lorraine', 270, 10, 18, 18, 150, 'part'], ['Lasagnes', 160, 9, 14, 7, 300, 'part'], ['Hachis parmentier', 140, 8, 11, 7, 300, 'part'], ['Glace', 207, 3.5, 24, 11, 100, '2 boules'], ['Chips', 536, 6.6, 53, 34, 30, 'petit paquet'],
-  ['Whey', 380, 75, 8, 6, 30, 'dose'], ['Boisson d\'effort', 25, 0, 6, 0, 500, 'gourde'], ['Gel énergétique', 270, 0, 67, 0, 32, 'gel'], ['Soda', 42, 0, 10.6, 0, 330, 'canette'], ['Bière', 43, 0.5, 3.6, 0, 250, 'demi']
+  ['Whey', 380, 75, 8, 6, 30, 'dose'], ['Boisson d\'effort', 25, 0, 6, 0, 500, 'gourde'], ['Gel énergétique', 270, 0, 67, 0, 32, 'gel'], ['Soda', 42, 0, 10.6, 0, 330, 'canette'], ['Bière', 43, 0.5, 3.6, 0, 250, 'demi'],
+  ['Bœuf maigre cuit', 170, 28, 0, 6, 140, 'portion'], ['Légumes pour couscous', 30, 1, 5, 0.3, 250, 'portion']
 ].map(([n, kcal, p, c, f, g, unit], i) => ({id: 'b' + i, n, kcal, p, c, f, g, unit}));
 const MEALS = [['breakfast', 'Petit-déjeuner'], ['lunch', 'Déjeuner'], ['snack', 'Collation'], ['dinner', 'Dîner']];
 const foodById = id => S.foods[id] || FOODS.find(f => f.id === id);
@@ -3999,7 +4000,30 @@ const myFoods = () => Object.values(S.foods).filter(f => !f.deleted).sort((a, b)
 // A day nobody has written yet starts from his food plan (Train de vie performance): every "aliment 125 g"
 // of its four meals becomes a journal line. Nothing is saved until he changes something, so a day he filled
 // by hand is never rewritten, and days before the plan arrived stay empty.
-const FUEL_PLAN_FROM = '2026-11-03';
+const FUEL_PLAN_FROM = '2026-11-02';
+// What he ate before the app knew his plan: the progression of his food plan, week by week of the season
+// (season week 1 = Monday 31 August). His own list numbers them 1-2, 4-5, 6-7, 8, 9, 10: it skips week 3,
+// so its "semaine 10" is season week 9. Each block is eaten twice a day: A at breakfast and snack, B at lunch and dinner.
+const HIST_A = (pain) => [['Cerneaux de noix', 15], ['Skyr', 450], ['Compote sans sucre ajouté', 100], ['Pain complet', pain], ['Chocolat noir 85 %', 11]];
+const HIST_B = (base, bg, meat, mg, veg) => [[base, bg], [meat, mg], [veg, 260], ['Sauce soja salée', 16], ['Huile d\'olive', 7]];
+const FUEL_HIST = [
+  ['2026-08-31', '2026-09-13', HIST_A(150), HIST_B('Riz blanc cuit', 300, 'Blanc de poulet cuit', 140, 'Ratatouille')],
+  ['2026-09-14', '2026-09-27', HIST_A(75), HIST_B('Riz blanc cuit', 300, 'Blanc de poulet cuit', 140, 'Ratatouille')],
+  ['2026-09-28', '2026-10-11', HIST_A(75), HIST_B('Riz blanc cuit', 250, 'Blanc de poulet cuit', 140, 'Ratatouille')],
+  ['2026-10-12', '2026-10-18', HIST_A(150), HIST_B('Riz blanc cuit', 300, 'Bœuf maigre cuit', 140, 'Ratatouille')],
+  ['2026-10-19', '2026-10-25', HIST_A(150), HIST_B('Riz blanc cuit', 300, 'Blanc de poulet cuit', 140, 'Ratatouille')],
+  ['2026-10-26', '2026-11-01', HIST_A(150), HIST_B('Pâtes cuites', 260, 'Blanc de poulet cuit', 160, 'Légumes pour couscous')]
+];
+const HIST_CACHE = {};
+function histItems(k) {
+  const w = FUEL_HIST.findIndex(([a, b]) => k >= a && k <= b); if (w < 0) return null;
+  if (HIST_CACHE[w]) return HIST_CACHE[w];
+  const [, , A, B] = FUEL_HIST[w], items = [];
+  const add = (list, meal) => { for (const [n, g] of list) { const f = FOODS.find(x => x.n === n); if (!f) continue; const r = g / 100;
+    items.push({n: f.n, g, kcal: Math.round(f.kcal * r), p: +(f.p * r).toFixed(1), c: +(f.c * r).toFixed(1), f: +(f.f * r).toFixed(1), meal, food: f.id}); } };
+  add(A, 'breakfast'); add(B, 'lunch'); add(A, 'snack'); add(B, 'dinner');
+  return (HIST_CACHE[w] = items);
+}
 const PLAN_ITEMS = {src: null, items: []};
 const normName = s => s.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '').split(/[\s']+/).filter(Boolean);
 function planItems() {
@@ -4020,7 +4044,13 @@ function planItems() {
   return items;
 }
 const planFills = k => S.fset.planFill !== false && k >= FUEL_PLAN_FROM && k <= TODAY && planItems().length > 0;
-const fday = k => S.fuel[k] || (planFills(k) ? {items: structuredClone(planItems()), water: 0, fromPlan: true} : {items: [], water: 0});
+function fday(k) {
+  const d = S.fuel[k];
+  if (d && (d.items?.length || k >= FUEL_PLAN_FROM)) return d;
+  const h = S.fset.planFill !== false && k < FUEL_PLAN_FROM && histItems(k);
+  if (h) return {water: 0, ...(d || {}), items: structuredClone(h), fromPlan: true, hist: true};
+  return d || (planFills(k) ? {items: structuredClone(planItems()), water: 0, fromPlan: true} : {items: [], water: 0});
+}
 function dayTotals(k) {
   const t = {kcal: 0, p: 0, c: 0, f: 0};
   for (const it of fday(k).items || []) { t.kcal += it.kcal; t.p += it.p; t.c += it.c; t.f += it.f; }
@@ -4103,7 +4133,7 @@ function fJournal() {
   const macro = (lab, v, goal, color) => `<div class="macro" style="--mc:${color}"><span>${lab}</span><b>${fx(v)}<small> / ${fx(goal)} g</small></b><div class="bar"><i style="width:${clamp(v / goal * 100, 0, 100)}%"></i></div></div>`;
   const y = fday(addDays(k, -1)).items || [];
   return `
-    <header class="top"><div class="sub">${fmtDay(TODAY)}</div><p class="pmsg">${esc(fuelMsg(S.fday))}</p></header>
+    <header class="top"><div class="sub">${fmtDay(TODAY)} · semaine ${seasonWeek(TODAY)}</div><p class="pmsg">${esc(fuelMsg(S.fday))}</p></header>
     <div class="card" style="padding:8px 12px"><div class="daynav"><button data-fdayoff="-1" aria-label="Jour précédent">‹</button><b>${esc(title)}</b><button data-fdayoff="1" aria-label="Jour suivant" ${k >= TODAY ? 'disabled' : ''}>›</button></div></div>
     <div class="stack" style="margin-top:12px">
       <article class="card">
@@ -4113,7 +4143,7 @@ function fJournal() {
         <div class="macros">${macro('Protéines', t.p, g.p, '#E0352B')}${macro('Glucides', t.c, g.c, '#2F7BF5')}${macro('Lipides', t.f, g.f, '#E8900A')}</div>
         ${(() => { const A = fuelAdvice(k); return `<p class="summary">${esc(A.word)}</p><div class="todo"><div class="eyebrow">À faire aujourd'hui</div><ul><li><b>1</b><span>${esc(A.todo)}</span></li></ul></div>`; })()}
       </article>
-      ${d.fromPlan ? '<p class="small muted" style="margin:0 4px">Rempli avec ton plan alimentaire. Change seulement ce qui diffère : touche un aliment pour modifier la quantité ou le retirer.</p>' : ''}
+      ${d.fromPlan ? '<p class="small muted" style="margin:0 4px">' + (d.hist ? `Rempli avec ton plan de la semaine ${seasonWeek(k)}.` : 'Rempli avec ton plan alimentaire.') + ' Change seulement ce qui diffère : touche un aliment pour modifier la quantité ou le retirer.</p>' : ''}
       ${MEALS.map(([m, lab]) => { const its = (d.items || []).map((it, i) => ({...it, i})).filter(it => it.meal === m), kc = its.reduce((s, it) => s + it.kcal, 0);
         const hasY = y.some(it => it.meal === m), hasP = k >= FUEL_PLAN_FROM && planItems().some(it => it.meal === m);
         const tm = dayPlan(k).filter(x => x.c === 'alim')[MEALS.findIndex(x => x[0] === m)]?.a;
