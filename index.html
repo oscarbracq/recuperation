@@ -340,6 +340,12 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .rmcalc{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:8px;align-items:end;margin-top:10px}
 .rmcalc label{font-size:.75rem;color:var(--fg2);display:flex;flex-direction:column;gap:4px}
 .rmcalc output{font:700 1.5rem/1 var(--display);text-align:center;padding:8px 0}
+.rout{display:flex;flex-direction:column;gap:2px;margin-top:8px}
+.rout button{display:flex;align-items:center;gap:10px;padding:8px 2px;text-align:left;font-size:.875rem;color:var(--fg)}
+.rout i{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-style:normal;font-size:.75rem;font-weight:700;color:#fff;transition:background .15s,border-color .15s}
+.rout button[aria-pressed="true"]{color:var(--fg2)}
+.rout button[aria-pressed="true"] i{background:var(--good);border-color:var(--good)}
+.ill{background:color-mix(in srgb,var(--bad) 14%,var(--card));}
 .bottles{display:flex;gap:10px;margin-top:12px}
 .bottles button{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border-radius:14px;background:var(--card2);font-size:.75rem;font-weight:600;color:var(--fg2)}
 .bottles .bt{width:22px;height:40px;border-radius:7px 7px 9px 9px;border:2px solid var(--line);position:relative}
@@ -638,7 +644,7 @@ details.slow[open]>summary h2::after{content:" ▴"}
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=43"></script>
+<script src="supabase-db.js?v=44"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
@@ -1249,8 +1255,8 @@ function homeLines() {
     `Tes besoins de base (Mifflin-St Jeor) × activité, protéines ${fx(S.fset.protein || 2, 1)} g/kg, plus de glucides les jours intenses pour remplir tes réserves.`]);
   // 5. Tonight
   const wd = new Date(TODAY + 'T12:00:00').getDay(), sauna = wd === 4 || wd === 6, al = musAlerts(), tight = al.find(a => a.k);
-  L.push(['Ce soir', `${sauna ? 'Sauna, ' : ''}${tight ? `10 min sur ${MUSI[tight.k].n.toLowerCase()} (pistolet ou rouleau), ` : high ? 'rouleau et mobilité 10 min, ' : ''}coucher vers ${S.profile?.bed || '22 h 00'} pour tes ${fx(SLEEP_NEED, 0)} h.`,
-    `Tiré de ton planning (sauna jeudi et samedi) et de la fatigue par muscle. Ton heure de coucher se règle dans Recovery.`]);
+  L.push(['Ce soir', `${sauna ? 'Sauna, ' : ''}${tight ? `10 min sur ${MUSI[tight.k].n.toLowerCase()} (pistolet ou rouleau), ` : high ? 'rouleau et mobilité 10 min, ' : ''}coucher vers ${bedGoal().replace(':', ' h ')} pour tes ${fx(sleepGoal(), 0)} h.`,
+    `Tiré de ton planning (sauna jeudi et samedi) et de la fatigue par muscle. Ton heure de coucher et ton besoin de sommeil se règlent dans le Profil de Recovery.`]);
   // 6. Watch
   const watch = al[0]?.t || (hrv != null && hb && [0, 1, 2, 3].every(i => { const v = G(addDays(kG, -i), 'hrv'); return v != null && v < hb.m; }) ? 'VFC sous ta base depuis 4 nuits : garde une journée calme.' : null)
     || (painActive() ? 'Une douleur est notée ces 14 derniers jours : surveille-la avant les séances rapides.' : null) || 'Rien d\'anormal : continue comme ça.';
@@ -1334,6 +1340,66 @@ function effScale(v) {
 }
 
 /* ---------- views ---------- */
+
+/* ---------- Recovery: the day's routine from Oscar's planning, care with his own kit, bed time, trends ---------- */
+const sleepGoal = () => +S.profile?.sleepGoal || 9;
+const bedGoal = () => S.profile?.bed || '22:00';
+// His week (Train de vie performance): intense days Mon/Wed/Fri, calm days Tue/Thu/Sat with sauna Thu and Sat, Sunday off.
+function routineOf(k) {
+  const wd = new Date(k + 'T12:00:00').getDay(), high = highDay(k);
+  if (S.profile?.routine?.[wd]) return S.profile.routine[wd];
+  if (wd === 0) return ['Temps calme, sans écran', 'Courses et préparation des repas', 'Coucher à l\'heure'];
+  const base = ['Routine de mobilité du matin', 'Respiration Wim Hof', 'Douche froide', 'Collagène + vitamine C'];
+  return high ? [...base, 'Rouleau et mobilité 10 min le soir', 'Coucher à l\'heure']
+    : [...base.slice(1), 'Mobilité passive', 'Mobilité active', ...(wd === 4 || wd === 6 ? ['Sauna'] : []), 'Temps calme', 'Coucher à l\'heure'];
+}
+const routineDone = k => S.manual[k]?.routine || {};
+async function toggleRoutine(k, item) {
+  const m = {...(S.manual[k] || {}), date: k}, r = {...(m.routine || {})};
+  r[item] ? delete r[item] : r[item] = true; m.routine = r; S.manual[k] = m; render();
+  await dbSet('manual/' + k, m);
+}
+// Care for the most loaded muscles, with what Oscar owns.
+const CARE = {calves: 'Pistolet tête chaude 2 min par mollet, puis balle de golf sous le pied 1 min', hams: 'Rouleau 90 s par jambe, puis pistolet en vibration 1 min',
+  quads: 'Rouleau 90 s par cuisse, genou plié', glutes: 'Balle de tennis 60 s par fessier, sur le tapis', adduct: 'Rouleau à l\'intérieur de la cuisse 60 s, étirement doux',
+  psoas: 'Fente basse 2 × 45 s par côté', erect: 'Rouleau haut du dos et chat-vache × 10', tib: 'Pistolet en vibration 1 min le long du tibia, à côté de l\'os',
+  lats: 'Rouleau sous l\'aisselle 60 s par côté', shoul: 'Balle contre le mur 60 s par épaule', rhomb: 'Balle entre les omoplates contre le mur 60 s',
+  pecs: 'Balle sur le pectoral contre le mur 45 s', abs: 'Cobra et enfant, 5 respirations chacun', obl: 'Rotation au sol 5 fois par côté', tri: 'Étirement bras derrière la tête 30 s', bi: 'Étirement bras tendu contre le mur 30 s'};
+// "Anti temps mort": what to do with the time, no screen.
+const ANTI = [['10 à 45 min', 'Marche régénérante en plein air'], ['15 min', 'Cohérence cardiaque'], ['15 à 30 min', 'Automassage global au rouleau'],
+  ['15 à 30 min', 'Entretien des pointes et du matériel'], ['15 à 30 min', 'Bain de soleil dehors'], ['45 min à 1 h', 'Session complète de relâchement du bas du corps'], ['45 min à 1 h', 'Activité manuelle calme']];
+function careCard() {
+  const st = musState().filter(x => x.week > 0).sort((a, b) => b.fatPct - a.fatPct).slice(0, 2);
+  const hot = new Date().getHours() < 14 ? 'Crème chaude avant la séance' : 'Crème froide après une séance intense ou sur une zone qui tire';
+  const anti = ANTI[Math.abs(daysBetween('2026-01-01', TODAY)) % ANTI.length];
+  return `<div class="card"><span class="eyebrow">Récup conseillée</span>
+    ${st.length ? st.map(x => `<p class="small" style="margin:8px 0 0"><b>${esc(x.n)}</b> (${Math.round(x.pct)} % sur 7 j) · ${esc(CARE[x.k])}.</p>`).join('') : '<p class="small" style="margin:8px 0 0">Pas de muscle chargé : rouleau global 10 min si tu as le temps.</p>'}
+    <p class="small muted" style="margin:8px 0 0">${esc(hot)}. Temps libre : ${esc(anti[1].toLowerCase())} (${esc(anti[0])}).</p></div>`;
+}
+const hm2min = t => { const m = String(t || '').match(/(\d{1,2}):(\d{2})/); if (!m) return null; let v = +m[1] * 60 + +m[2]; if (v < 12 * 60) v += 24 * 60; return v; };
+function sleepLine() {
+  const kG = lastKey('sleepH'), goal = bedGoal(), gv = hm2min(goal), bed = kG ? hm2min(G(kG, 'bed')) : null;
+  let debt = 0, n = 0; for (let i = 0; i < 7; i++) { const v = VAL.sleepH(addDays(TODAY, -i)); if (v != null) { debt += Math.max(0, sleepGoal() - v); n++; } }
+  const gap = bed != null && gv != null ? bed - gv : null;
+  return `<p class="small muted" style="margin:10px 0 0">Coucher visé ${esc(goal.replace(':', ' h '))}${gap != null ? ` · cette nuit ${gap > 0 ? '+' : ''}${gap} min` : ''}${n ? ` · dette 7 j : ${fx(Math.floor(debt))} h ${String(Math.round((debt % 1) * 60)).padStart(2, '0')} sur tes ${fx(sleepGoal(), 0)} h` : ''}</p>`;
+}
+function routineCard() {
+  const k = TODAY, L = routineOf(k), d = routineDone(k), n = L.filter(x => d[x]).length;
+  return `<div class="card"><div class="chead"><span class="eyebrow">Ta routine du jour</span><b class="num">${n}/${L.length}</b></div>
+    <div class="rout">${L.map(x => `<button data-rout="${esc(x)}" aria-pressed="${!!d[x]}"><i>${d[x] ? '✓' : ''}</i>${esc(x)}</button>`).join('')}</div>${sleepLine()}</div>`;
+}
+// Trends over 7 to 28 days, from the raw numbers.
+function recDiag() {
+  const out = [], kG = lastKey('hrv'); if (!kG) return out;
+  const hb = base('hrv', kG, 60), rb = base('rhr', kG, 60);
+  if (hb) { let d = 0; for (let i = 0; i < 7; i++) { const v = G(addDays(kG, -i), 'hrv'); if (v != null && v < hb.m - hb.sd * .5) d++; else break; } if (d >= 3) out.push(['mid', `VFC sous ta norme depuis ${d} nuits : garde la journée calme et soigne le sommeil.`]); }
+  if (rb) { const r7 = avgN('rhr', 7, kG); if (r7 != null && r7 > rb.m + rb.sd * .5) out.push(['mid', `FC au repos en hausse sur 7 jours (${fx(r7)} contre ${fx(rb.m)} bpm) : fatigue ou début de maladie possible.`]); }
+  let short = 0; for (let i = 0; i < 7; i++) { const v = VAL.sleepH(addDays(TODAY, -i)); if (v != null && v < sleepGoal() - 1) short++; }
+  if (short >= 3) out.push(['mid', `${short} nuits à plus d'une heure sous tes ${fx(sleepGoal(), 0)} h cette semaine : couche-toi plus tôt ce soir.`]);
+  const h7 = avgN('hrv', 7, kG), h28 = avgN('hrv', 28, kG);
+  if (h7 && h28 && h7 > h28 * 1.05) out.push(['good', `VFC moyenne en hausse (+${Math.round((h7 / h28 - 1) * 100)} % sur 28 jours) : ton corps encaisse bien.`]);
+  return out;
+}
 function vToday() {
   const A = AN(), kG = lastKey('hrv');
   const rec = kG ? recovery(kG) : null, z = zoneOf(rec?.score);
@@ -1353,11 +1419,13 @@ function vToday() {
           <button class="ringbtn main" data-metric="recovery">${ring(rec?.score, 100, ZCOL[z], 'lg')}<b class="num">${rec ? rec.score + '<small>%</small>' : '–'}</b><span>Récupération</span></button>
           <button class="ringbtn" data-metric="effort">${ring(effT || effY, 21, 'var(--blue)', 'sm')}<b class="num">${fx(effT || effY, 1)}</b><span>Effort ${effT ? 'du jour' : 'hier'}</span></button>
         </div>
-        <div class="state"><span class="pill ${z}"><i></i>${ZONE[z]}</span><p class="small muted" style="width:100%;text-align:center">${ZONE_SUB[z]}${rec?.ill ? ' · possible début d\'infection' : ''}</p></div>
+        <div class="state"><span class="pill ${z}"><i></i>${ZONE[z]}</span><p class="small muted" style="width:100%;text-align:center">${ZONE_SUB[z]}</p></div>
         <div class="target"><span class="eyebrow">${high ? 'Jour d\'entraînement' : 'Jour de récupération'} · objectif d'effort</span><b>${tgt.lvl[2]} <span class="muted">· ${tgt.lvl[0]} à ${tgt.lvl[1]} sur 21</span></b><div class="effbar">${EFFORT.map(([a, b, n]) => `<span class="${n === tgt.lvl[2] ? 'on' : ''}" style="flex:${b - a}">${n}</span>`).join('')}</div>${effScale(effT)}</div>
         ${A?.summary ? `<p class="summary">${esc(A.summary)}</p>` : ''}
         ${(A?.today?.length || !aiOn()) ? `<div class="todo"><div class="eyebrow">À faire aujourd'hui</div><ul>${(A?.today?.length ? A.today : baseTodo(tgt)).slice(0, 3).map((t, i) => `<li><b>${i + 1}</b><span>${esc(t)}</span></li>`).join('')}</ul></div>` : ''}
       </article>
+      ${rec?.ill ? '<div class="card ill"><b>Possible début d\'infection</b><p class="small" style="margin:6px 0 0">Ta respiration ou ta température de peau de la nuit sortent de ta normale. Journée calme, hydrate-toi, et pas d\'intensité tant que ça ne redescend pas.</p></div>' : ''}
+      ${routineCard()}${careCard()}${diagHtml(recDiag(), 'Tendances')}
       <button class="btn" id="open-entry"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>${S.manual[TODAY] ? 'Modifier ma journée' : 'Noter ma journée'}</button>
     </div>
     <h2>Récupération <small>${kG ? 'nuit du ' + esc(fmtShort(kG)) : ''}</small></h2><div class="grid">${sec('rec')}</div>
@@ -1611,6 +1679,8 @@ function vProfile() {
       <div class="row col"><label for="pf-injury">Blessure et contraintes<span class="hint">Consignes du médecin ou du kiné</span></label><textarea id="pf-injury" rows="3">${esc(p.injury || '')}</textarea></div>
       <div class="row col"><label for="pf-notes">À savoir pour les analyses<span class="hint">Événements, voyages, maladie</span></label><textarea id="pf-notes" rows="2">${esc(p.notes || '')}</textarea></div>
     </div>
+    <div class="list" style="margin-top:12px"><div class="row"><label for="pf-bed">Heure de coucher visée</label><input type="time" id="pf-bed" class="mini-in" value="${esc(bedGoal())}" data-pfq="bed"></div>
+      <div class="row"><label for="pf-sg">Besoin de sommeil<span class="hint">en heures</span></label><input id="pf-sg" class="mini-in" inputmode="decimal" style="width:70px" value="${sleepGoal()}" data-pfq="sleepGoal"></div></div>
     <div style="margin-top:12px"><button class="btn ghost" id="pf-save">Enregistrer le profil</button></div>
     <h2>Les calculs</h2>
     <div class="card small muted stack">
@@ -1891,6 +1961,7 @@ document.addEventListener('click', e => {
   const gr = e.target.closest('[data-gran]'); if (gr) { S.gran = gr.dataset.gran; S.off = 0; try { localStorage.setItem('sl-gran', S.gran); } catch (err) {} render(); }
   const of = e.target.closest('[data-off]'); if (of && !of.disabled) { S.off = Math.max(0, S.off + +of.dataset.off); render(); }
   if (e.target.closest('#pf-save')) saveProfile();
+  const rt = e.target.closest('[data-rout]'); if (rt) toggleRoutine(TODAY, rt.dataset.rout);
   const whd = e.target.closest('[data-whd]');
   if (whd) {
     const d = +whd.dataset.whd, cur = new Set(S.profile?.schedule?.highDays || [1, 3, 5]);
@@ -2649,6 +2720,11 @@ document.addEventListener('change', e => {
   if (t.matches?.('[data-rmset]')) { saveRm(t.dataset.rmset, +String(t.value).replace(',', '.') || 0).then(() => { paneRender(); toast('Max enregistré'); }); return; }
   if (t.matches?.('[data-rmc]')) { const v = loadFor(t.dataset.rmc, +$('#rmc-r').value, +$('#rmc-p').value); $('#rmc-o').textContent = v != null ? fx(v, v % 1 ? 1 : 0) + ' kg' : '–'; return; }
   if (t.matches?.('[data-mlim]')) { S.tset = {...(S.tset || {}), limits: {...(S.tset?.limits || {}), [t.dataset.mlim]: +t.value || MUSI[t.dataset.mlim].l}}; dbSet('settings/training', S.tset); renderMod(); return; }
+});
+document.addEventListener('change', e => {
+  const t = e.target; if (!t.matches?.('[data-pfq]')) return;
+  const v = t.dataset.pfq === 'sleepGoal' ? +String(t.value).replace(',', '.') || 9 : t.value;
+  S.profile = {...(S.profile || {}), [t.dataset.pfq]: v, updatedAt: new Date().toISOString()}; dbSet('profile/main', S.profile); render(); renderMod();
 });
 document.addEventListener('change', e => {
   if (!e.target.matches?.('[data-fplannote]')) return;
