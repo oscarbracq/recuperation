@@ -410,6 +410,7 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .restb b{font-size:1.8rem;font-variant-numeric:tabular-nums}
 .fvsteps{display:flex;justify-content:center;gap:8px;margin:16px 0 6px}.fvsteps span{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:.8rem;font-weight:700;background:rgba(255,255,255,.08)}
 .fvsteps span.on{background:var(--accent);color:#fff}.fvsteps span.ok{background:color-mix(in srgb,var(--accent) 35%,transparent)}
+.sugg{padding:12px 14px}
 .vares{display:grid;gap:8px}.vares div{display:flex;justify-content:space-between;gap:10px}.vares span{opacity:.75}
 .sheet header .close[hidden]{display:none}
 .edx h3{justify-content:flex-start}
@@ -792,7 +793,7 @@ details.slow[open]>summary h2::after{content:" ▴"}
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=52"></script>
+<script src="supabase-db.js?v=53"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
@@ -2341,15 +2342,81 @@ const RACT = [['respi', 'Respiration', ['Cohérence cardiaque', 'Respiration car
   ['massage', 'Massage', ['Pistolet, tête chaude', 'Pistolet, vibration', 'Pistolet', 'Rouleau', 'Balle', 'Kiné ou masseur']],
   ['froid', 'Froid', ['Douche froide', 'Bain froid', 'Contraste chaud / froid', 'Crème froide']],
   ['chaud', 'Chaud', ['Douche chaude', 'Sauna', 'Bain chaud', 'Crème chauffante']],
-  ['etir', 'Étirements et mobilité', ['Étirements', 'Mobilité active', 'Mobilité passive', 'Yoga', 'Bande élastique']],
-  ['actif', 'Récupération active', ['Marche', 'Vélo léger', 'Natation douce']],
-  ['autre', 'Autre', ['Sieste', 'Compression', 'Temps calme sans écran']]];
+  ['etir', 'Étirements', ['Étirements statiques', 'Étirements dynamiques', 'Contracté-relâché (PNF)', 'Yoga', 'Sangle']],
+  ['mob', 'Mobilité', ['Mobilité active', 'Mobilité passive', 'Rotations articulaires contrôlées', 'Bande élastique', 'Mobilité thoracique', 'Mobilité de cheville']],
+  ['cardio', 'Cardio très léger', ['Vélo zone 1', 'Marche', 'Natation souple', 'Footing très lent']],
+  ['autre', 'Autre', ['Sieste', 'Compression', 'Jambes surélevées', 'Temps calme sans écran']]];
+// What the week asks for: each kind of activity of the last 7 days loads its own muscles, so it gets its own care.
+const KADV = {
+  bike: {n: 'Vélo', mus: 'quadriceps, fléchisseurs de hanche, fessiers', items: [
+    ['massage', 'Rouleau', 6, ['quads'], 'Rouleau sur les quadriceps et le TFL, lentement, 90 s par zone en restant sur les points durs.'],
+    ['etir', 'Étirements statiques', 6, ['psoas'], 'Fente basse genou au sol, bassin rétroversé, 2 × 45 s par côté : le vélo garde la hanche fléchie longtemps.'],
+    ['mob', 'Mobilité active', 5, ['psoas', 'glutes'], 'Extension de hanche et 90/90 avec rotation, 8 par côté, pour sortir de la posture fléchie.']]},
+  hike: {n: 'Marche en montagne', mus: 'quadriceps (descente excentrique), mollets', items: [
+    ['froid', 'Bain froid', 10, ['quads', 'calves'], '10 min à 10-15 °C dans les 24 h : c\'est après un long effort excentrique que le froid réduit le mieux les courbatures.'],
+    ['massage', 'Pistolet, tête chaude', 8, ['quads', 'calves'], '2 min par quadriceps et par mollet, sous le seuil de douleur.'],
+    ['mob', 'Mobilité de cheville', 5, ['calves'], 'Genou au mur, 10 par côté, puis montées sur pointes lentes.']]},
+  walk: {n: 'Marche longue', mus: 'mollets, pieds', items: [
+    ['massage', 'Balle', 4, ['calves'], 'Balle sous le pied 1 min par côté, puis pistolet sur le mollet 1 min.'],
+    ['mob', 'Mobilité de cheville', 4, ['calves'], 'Genou au mur 10 par côté.']]},
+  track: {n: 'Athlétisme', mus: 'ischios, mollets, fléchisseurs de hanche', items: [
+    ['massage', 'Pistolet, vibration', 6, ['hams', 'calves'], 'Ischios et mollets, 1 min par zone en vibration douce : on relâche sans écraser un muscle qui a travaillé vite.'],
+    ['mob', 'Mobilité active', 8, ['psoas', 'hams'], 'Balanciers de jambe, fente avec rotation, ischios en dynamique. Pas d\'étirement statique long dans les 24 h avant une séance de vitesse.'],
+    ['autre', 'Jambes surélevées', 10, [], 'Jambes contre le mur 10 min, respiration nasale lente : le retour veineux et le système nerveux redescendent.']]},
+  run: {n: 'Course', mus: 'mollets, tendon d\'Achille, pieds', items: [
+    ['massage', 'Balle', 4, ['calves'], 'Balle sous le pied 1 min par côté, pistolet sur le mollet 1 min, jamais sur le tendon.'],
+    ['etir', 'Étirements statiques', 4, ['calves'], 'Mollet genou tendu puis genou fléchi, 30 s chacun par côté.']]},
+  gym: {n: 'Musculation', mus: '', items: []},
+  swim: {n: 'Natation', mus: 'épaules, dorsaux, pectoraux', items: [
+    ['massage', 'Balle', 5, ['pecs', 'shoul'], 'Balle sur le pectoral et l\'arrière de l\'épaule contre le mur, 45 s par zone.'],
+    ['mob', 'Mobilité thoracique', 5, ['lats'], 'Rotations thoraciques au sol et chat-vache, 8 de chaque.'],
+    ['etir', 'Étirements statiques', 4, ['lats'], 'Grand dorsal au cadre de porte, 2 × 30 s par côté.']]},
+  team: {n: 'Sport collectif', mus: 'adducteurs, ischios, chevilles', items: [
+    ['massage', 'Rouleau', 5, ['adduct', 'hams'], 'Rouleau à l\'intérieur de la cuisse et sur les ischios, 60 s par zone.'],
+    ['mob', 'Mobilité active', 5, ['adduct'], 'Ouverture de hanche en quadrupédie et fente latérale lente, 8 par côté.']]}
+};
+function actKindOf(type, min) { const t = String(type || '').toLowerCase();
+  return /cycl|bik|bike/.test(t) ? 'bike' : /hik|mountain|trek/.test(t) ? 'hike' : /walk/.test(t) ? (min >= 90 ? 'hike' : 'walk') : /swim/.test(t) ? 'swim'
+    : /track/.test(t) ? 'track' : /run/.test(t) ? 'run' : /strength|gym|muscu/.test(t) ? 'gym' : /team|soccer|foot|basket|rugby|hand|volley/.test(t) ? 'team' : null; }
+// The week, most recent first: watch activities, activities added by hand, sessions logged in Training.
+function weekEvents() {
+  const ev = [];
+  for (let i = 0; i < 7; i++) { const k = addDays(TODAY, -i), w = i <= 1 ? 1 : i <= 3 ? .7 : .4;
+    for (const a of G(k, 'acts') || []) { const kind = actKindOf(a.type, a.min || 0); if (kind && (a.min || 0) >= 15) ev.push({k, kind, min: a.min || 0, km: a.km, dose: (a.min || 0) * w}); }
+    for (const a of M(k, 'acts') || []) { const kind = actKindOf(a.t, a.min || 0); if (kind) ev.push({k, kind, min: a.min || 0, km: a.km, dose: (a.min || 0) * w * (a.rpe || 5) / 5}); }
+    for (const l of logsOn(k)) { const kind = l.kind === 'track' ? 'track' : 'gym'; if (!ev.some(e => e.k === k && e.kind === kind)) ev.push({k, kind, min: l.min || 75, dose: (l.min || 75) * w * 1.2}); }
+  }
+  return ev;
+}
+function recovSuggest() {
+  const ev = weekEvents(), by = {};
+  for (const e of ev) { const b = by[e.kind] ||= {kind: e.kind, dose: 0, min: 0, days: new Set(), last: e.k}; b.dose += e.dose; b.min += e.min; b.days.add(e.k); if (e.k > b.last) b.last = e.k; }
+  const top = Object.values(by).sort((a, b) => b.dose - a.dose).slice(0, 2), out = [];
+  const when = k => k === TODAY ? 'aujourd\'hui' : k === addDays(TODAY, -1) ? 'hier' : fmtShort(k);
+  for (const b of top) {
+    const why = `${KADV[b.kind].n} ${b.days.size > 1 ? b.days.size + ' fois cette semaine' : when(b.last)} · ${Math.floor(b.min / 60) ? Math.floor(b.min / 60) + ' h ' : ''}${Math.round(b.min % 60)} min`;
+    if (b.kind === 'gym') {
+      for (const x of musState().filter(x => x.week > 0).sort((a, c) => c.fatPct - a.fatPct).slice(0, 2))
+        out.push({cat: 'massage', t: 'Automassage ' + x.n.toLowerCase(), min: 5, zone: [x.k], how: CARE[x.k] + '.', why: `${why} · ${x.n.toLowerCase()} à ${Math.round(x.pct)} % de ta charge max`});
+      out.push({cat: 'froid', t: 'Pas de bain froid tout de suite', min: 0, zone: [], how: 'Attends 4 à 6 h après la muscu avant le froid : juste après, il freine le gain de force et de masse (Roberts 2015). Douche chaude ou sauna à la place.', why, info: true});
+      continue;
+    }
+    for (const [cat, t, min, zone, how] of KADV[b.kind].items) out.push({cat, t, min, zone, how, why: why + ' · ' + KADV[b.kind].mus});
+  }
+  const rec = typeof recovery === 'function' ? recovery(lastKey('hrv') || TODAY) : null;
+  if (rec && rec.score < 50) out.push({cat: 'respi', t: 'Respiration nasale lente', min: 10, zone: [], how: '6 respirations par minute, expiration plus longue que l\'inspiration, au coucher.', why: `Récupération à ${rec.score} % : on fait redescendre le système nerveux`});
+  return {list: out.slice(0, 6), empty: !top.length};
+}
 let RA = null;
 function recovAdd() {
-  RA = {cat: 'respi', t: 'Cohérence cardiaque', min: 10, zone: []};
+  RA = {cat: 'respi', t: 'Cohérence cardiaque', min: 10, zone: [], sug: recovSuggest()};
   openPane({title: 'Activité de récup', left: {label: 'Enregistrer', fn: recovSave}, render: () => {
-    const c = RACT.find(x => x[0] === RA.cat), zoned = ['massage', 'etir', 'froid', 'chaud'].includes(RA.cat);
-    return `<p class="small muted" style="margin:16px 4px 8px">Ce que tu as fait pour récupérer. L'appli le garde pour tes tendances et ses conseils.</p>
+    const c = RACT.find(x => x[0] === RA.cat), zoned = ['massage', 'etir', 'mob', 'froid', 'chaud'].includes(RA.cat), sg = RA.sug;
+    return `<div class="sec-label" style="margin-top:16px">Proposé d'après ta semaine</div>
+      ${sg.empty ? '<p class="small muted" style="margin:0 4px 8px">Rien de chargé ces 7 derniers jours : choisis librement ci-dessous.</p>' : `<div class="stack">${sg.list.map((x, i) => `<div class="card sugg"><b>${esc(x.t)}${x.min ? ' · ' + x.min + ' min' : ''}</b><p class="small" style="margin:4px 0 0">${esc(x.how)}</p><p class="small muted" style="margin:4px 0 0">${esc(x.why)}</p>
+        ${x.info ? '' : `<div class="rbtns" style="margin-top:8px"><button type="button" class="chip" data-rsdo="${i}">Je l'ai fait</button><button type="button" class="chip" data-rsplan="${i}">Planifier</button></div>`}</div>`).join('')}</div>`}
+      <button type="button" class="btn ghost" data-rplan style="margin-top:10px">Une routine complète, placée dans mon planning</button>
+      <div class="sec-label">Ou note ce que tu as fait</div>
       <div class="chips2b" style="margin-bottom:10px">${RACT.map(([k, n]) => `<button type="button" class="chip" data-rac="${k}" aria-pressed="${RA.cat === k}">${esc(n)}</button>`).join('')}</div>
       <div class="list"><div class="row col"><span class="l">Type</span><div class="chips2b">${c[2].map(t => `<button type="button" class="chip" data-rat="${esc(t)}" aria-pressed="${RA.t === t}">${esc(t)}</button>`).join('')}</div></div>
         ${zoned ? `<div class="row col"><span class="l">Où<span class="hint">Facultatif, plusieurs choix possibles</span></span><div class="chips2b">${MUS.map(([k, n]) => `<button type="button" class="chip" data-raz="${k}" aria-pressed="${RA.zone.includes(k)}">${esc(n)}</button>`).join('')}</div></div>` : ''}
@@ -2392,12 +2459,21 @@ function recovCard() {
   const r = todayRoutine(), L = S.manual[TODAY]?.recov || [];
   return `<div class="card"><span class="eyebrow">Récupération</span>
     ${r ? `<div class="rnext"><b>${r.routine.done ? 'Routine faite' : 'Routine prévue à ' + tfr(r.a)}</b><span class="small muted">${r.routine.min} min · ${esc(CHAINS.find(c => c[0] === r.routine.focus)?.[1] || '')}</span></div>${r.routine.done ? '' : routineHtml(r.routine) + '<button class="btn ghost" data-rdone style="margin-top:10px">C\'est fait</button>'}` : ''}
-    ${L.length ? `<p class="small" style="margin:10px 0 0"><b>Fait aujourd'hui</b> · ${L.map(a => esc(a.t) + ' ' + a.min + ' min').join(' · ')}</p>` : ''}
-    <div class="rbtns"><button class="chip" data-radd>+ Activité de récup</button><button class="chip" data-rplan>+ Planifier une routine</button></div></div>`;
+
+    <div class="rbtns"><button class="chip" data-radd>+ Activité de récup</button></div></div>
+    ${L.length ? `<div class="sec-label">Fait aujourd'hui</div><div class="list">${L.map((a, i) => `<div class="row"><span class="l">${esc(a.t)}${a.min ? ' · ' + a.min + ' min' : ''}<span class="hint">${esc([RACT.find(x => x[0] === a.cat)?.[1] || (a.cat === 'routine' ? 'Routine' : ''), (a.zone || []).map(z => MUSI[z]?.n.toLowerCase()).filter(Boolean).join(', '), a.at || ''].filter(Boolean).join(' · '))}</span></span><button type="button" class="chip" data-rdel="${i}" aria-label="Retirer ${esc(a.t)}">×</button></div>`).join('')}</div>` : ''}`;
 }
 document.addEventListener('click', e => {
   const at = q => e.target.closest(q); let b;
   if (at('[data-radd]')) { recovAdd(); return; }
+  if ((b = at('[data-rdel]'))) { const k = TODAY, m = {...(S.manual[k] || {}), date: k}; m.recov = (m.recov || []).filter((_, i) => i !== +b.dataset.rdel); S.manual[k] = m; render(); dbSet('manual/' + k, m).then(() => toast('Retiré')); return; }
+  if (RA && (b = at('[data-rsdo]'))) { const x = RA.sug.list[+b.dataset.rsdo]; const k = TODAY, m = {...(S.manual[k] || {}), date: k};
+    m.recov = [...(m.recov || []), {cat: x.cat, t: x.t, min: x.min, zone: x.zone, at: new Date().toTimeString().slice(0, 5)}]; S.manual[k] = m; closePane(); render(); dbSet('manual/' + k, m).then(() => toast(x.t + ' noté')); return; }
+  if (RA && (b = at('[data-rsplan]'))) { const x = RA.sug.list[+b.dataset.rsplan]; const min = Math.max(5, x.min);
+    const sl = [...freeSlots(TODAY, min).map(y => ({...y, k: TODAY})), ...freeSlots(addDays(TODAY, 1), min).map(y => ({...y, k: addDays(TODAY, 1)}))][0];
+    if (!sl) { toast('Pas de créneau libre aujourd\'hui ni demain'); return; }
+    const ex = {...(PLN().extra || {})}; ex[sl.k] = [...(ex[sl.k] || []), {a: sl.a, b: tstr(tmin(sl.a) + min), n: x.t, c: 'recup'}];
+    closePane(); savePlanning({extra: ex}).then(() => toast(`${x.t} placé ${sl.k === TODAY ? 'aujourd\'hui' : 'demain'} à ${tfr(sl.a)}`)); return; }
   if (at('[data-rplan]')) { routinePlan(); return; }
   if (at("[data-rdone]")) { routineFinish(); return; }
   if (RA && (b = at('[data-rac]'))) { RA.cat = b.dataset.rac; RA.t = RACT.find(x => x[0] === RA.cat)[2][0]; RA.zone = []; paneRender(); return; }
@@ -2433,7 +2509,7 @@ function vToday() {
         ${(A?.today?.length || !aiOn()) ? `<div class="todo"><div class="eyebrow">À faire aujourd'hui</div><ul>${(A?.today?.length ? A.today : baseTodo(tgt)).slice(0, 3).map((t, i) => `<li><b>${i + 1}</b><span>${esc(t)}</span></li>`).join('')}</ul></div>` : ''}
       </article>
       ${rec?.ill ? '<div class="card ill"><b>Possible début d\'infection</b><p class="small" style="margin:6px 0 0">Ta respiration ou ta température de peau de la nuit sortent de ta normale. Journée calme, hydrate-toi, et pas d\'intensité tant que ça ne redescend pas.</p></div>' : ''}
-      ${careCard()}${recovCard()}${diagHtml(recDiag(), 'Tendances')}
+      ${careCard()}${diagHtml(recDiag(), 'Tendances')}${recovCard()}
     </div>
     <h2>Récupération <small>${kG ? 'nuit du ' + esc(fmtShort(kG)) : ''}</small>${editBtn('rec')}</h2>${secHtml('rec')}
     <details class="slow"><summary><h2>Mesures de fond <small>condition physique</small></h2></summary>
@@ -2621,9 +2697,11 @@ function vReports() {
       ${r.state ? `<span class="pill ${esc(r.state)}" style="margin-top:8px"><i></i>${esc(r.stateLabel || '')}</span>` : ''}
       <h3>${esc(r.headline || '')}</h3>
       ${r.summary ? `<p>${esc(r.summary)}</p>` : ''}
+      ${r.followup ? `<section><div class="tag acc">Tes décisions de la semaine dernière</div><p>${esc(r.followup)}</p></section>` : ''}
+      ${r.insights?.length ? `<section><div class="tag acc">Analyse</div>${list(r.insights)}</section>` : ''}
       ${r.wins?.length ? `<section><div class="tag good">Ce qui avance</div>${list(r.wins)}</section>` : ''}
       ${r.alerts?.length ? `<section><div class="tag warn">Points d'attention</div>${list(r.alerts)}</section>` : ''}
-      ${r.actions?.length ? `<section><div class="tag acc">Plan d'action semaine prochaine</div>${list(r.actions)}</section>` : ''}
+      ${r.decisions?.length ? `<section><div class="tag acc">Décisions pour la semaine prochaine</div>${list(r.decisions)}</section>` : r.actions?.length ? `<section><div class="tag acc">Plan d'action semaine prochaine</div>${list(r.actions)}</section>` : ''}
       ${r.nutrition?.length ? `<section><div class="tag good">Ajustements nutrition</div>${list(r.nutrition)}</section>` : ''}
       ${r.injury ? `<section><div class="tag bad">Blessure et reprise</div><p>${esc(r.injury)}</p></section>` : ''}
     </article>`).join('') : `<div class="card empty"><b>Premier bilan vendredi soir</b>Chaque vendredi, Claude analyse ta semaine et dépose ici un bilan avec un plan d'action pour la semaine suivante.</div>`;
@@ -2701,7 +2779,8 @@ function vProfile() {
     <h2>Objectifs et contexte</h2>
     <div class="list">
       <div class="row col"><label for="pf-injury">Blessure et contraintes<span class="hint">Consignes du médecin ou du kiné</span></label><textarea id="pf-injury" rows="3">${esc(p.injury || '')}</textarea></div>
-      <div class="row col"><label for="pf-notes">À savoir pour les analyses<span class="hint">Événements, voyages, maladie</span></label><textarea id="pf-notes" rows="2">${esc(p.notes || '')}</textarea></div>
+      <div class="row col"><label for="pf-pro">Contexte professionnel<span class="hint">Ton métier de coach, tes horaires, ce qui pèse sur ta semaine</span></label><textarea id="pf-pro" rows="3">${esc(p.pro ?? p.notes ?? '')}</textarea></div>
+      <div class="row col"><label for="pf-notes">À savoir pour les analyses<span class="hint">Événements, voyages, maladie</span></label><textarea id="pf-notes" rows="2">${esc(p.pro == null ? '' : p.notes || '')}</textarea></div>
     </div>
     <div style="margin-top:12px"><button class="btn ghost" id="pf-save">Enregistrer le profil</button></div>
     <h2>Les calculs</h2>
@@ -2969,7 +3048,7 @@ async function saveNote() {
 }
 async function saveProfile() {
   if (!S.db) { toast('Non enregistré : ouvre la page connecté à ton compte'); return; }
-  const p = {...(S.profile || {}), injury: $('#pf-injury').value.trim(), notes: $('#pf-notes').value.trim(), updatedAt: new Date().toISOString()};
+  const p = {...(S.profile || {}), injury: $('#pf-injury').value.trim(), pro: $('#pf-pro').value.trim(), notes: $('#pf-notes').value.trim(), updatedAt: new Date().toISOString()};
   try { await S.db.doc('profile/main').set(p); toast('Profil enregistré'); } catch (e) { toast('Échec de l\'enregistrement, réessaie'); }
 }
 
