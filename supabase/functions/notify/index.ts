@@ -202,8 +202,19 @@ Deno.serve(async req => {
   }
   if (!allowed) return json({error: 'non autorisé'}, 401);
   const body = await req.json().catch(() => ({}));
-  if (!st.cronKey) { st.cronKey = b64u(crypto.getRandomValues(new Uint8Array(24))); await putPrivate('push', st); }
-  if (token && body.keepToken) { st.syncToken = token; await putPrivate('push', st); return json({kept: true}); }
+  // The cron job reads both from the private table: its own key, and the public anon key the gateway asks for.
+  if (!st.cronKey || (!st.anonKey && Deno.env.get('SUPABASE_ANON_KEY'))) {
+    st.cronKey ||= b64u(crypto.getRandomValues(new Uint8Array(24))); st.anonKey ||= Deno.env.get('SUPABASE_ANON_KEY');
+    await putPrivate('push', st);
+  }
+  // supabase-notify-token.ps1 hands over the ingest token, and the public anon key it was let in with.
+  if (token && body.keepToken) {
+    st.syncToken = token;
+    const anon = (req.headers.get('Authorization') || '').replace(/^Bearer /, '');
+    if (anon.startsWith('eyJ')) st.anonKey = anon;
+    await putPrivate('push', st);
+    return json({kept: true, anonKey: !!st.anonKey});
+  }
   const now = new Date(), TODAY = parisDay(now), hm = parisHM(now), hour = +hm.slice(0, 2);
 
   if (body.key) return json({key: (await vapidKeys(st)).pub});
@@ -232,7 +243,7 @@ Deno.serve(async req => {
   const syncToken = token || st.syncToken;
   if (syncToken && !body.test) {
     try {
-      const r = await fetch(Deno.env.get('SUPABASE_URL') + '/functions/v1/sync', {method: 'POST', headers: {'x-recup-token': syncToken, 'Content-Type': 'application/json'}, body: '{}', signal: AbortSignal.timeout(40000)});
+      const r = await fetch(Deno.env.get('SUPABASE_URL') + '/functions/v1/sync', {method: 'POST', headers: {'x-recup-token': syncToken, Authorization: 'Bearer ' + (st.anonKey || Deno.env.get('SUPABASE_ANON_KEY') || ''), 'Content-Type': 'application/json'}, body: '{}', signal: AbortSignal.timeout(40000)});
       sync = await r.json().catch(() => r.status);
     } catch (e) { sync = String(e); }
   }
