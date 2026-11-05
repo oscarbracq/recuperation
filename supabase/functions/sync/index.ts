@@ -74,9 +74,9 @@ async function mergeMonths(collection: string, days: Record<string, Record<strin
 }
 
 async function syncGarmin(nDays: number, debug: boolean) {
-  // Access pass: from the personal API key Oscar pasted in the app's settings (recup_private.garmin.apiKey),
-  // else the 24 h pass the cloud sync used to renew there.
-  let jwt = '';
+  // Access pass: from the personal API key Oscar pasted in the app's settings (recup_private.garmin.apiKey).
+  // Each success also keeps that 24 h pass as a spare, used if Garmin refuses the key for a moment.
+  let jwt = '', keyErr = '';
   const priv = (await getPrivate('garmin')) || {};
   const key = priv.apiKey || Deno.env.get('GARMIN_API_KEY');
   if (key) {
@@ -84,13 +84,20 @@ async function syncGarmin(nDays: number, debug: boolean) {
     if (tr.ok) {
       jwt = (await tr.text()).trim();
       try { const j = JSON.parse(jwt); jwt = j.token || j.accessToken || j.access_token || jwt; } catch { /* raw JWT */ }
-    } else if (!priv.jwt) throw new Error('clé API Garmin refusée (' + tr.status + ')');
+      // Garmin keys live one year from their creation: the first day a key works stands for that date.
+      const keyId = (await sha256(key)).slice(0, 16);
+      const keyAddedAt = priv.keyId === keyId && priv.keyAddedAt ? priv.keyAddedAt : new Date().toISOString();
+      Object.assign(priv, {jwt, exp: jwtExp(jwt), keyId, keyAddedAt, keyOkAt: new Date().toISOString()});
+      await putPrivate('garmin', priv);
+    } else keyErr = 'clé API Garmin refusée (' + tr.status + ')';
   }
   if (!jwt) {
-    if (!priv.jwt) throw new Error('pass Garmin pas encore installé');
-    if (priv.exp && priv.exp * 1000 < Date.now()) throw new Error('pass Garmin expiré');
+    if (!priv.jwt) throw new Error(keyErr || 'clé API Garmin pas encore installée');
+    if (priv.exp && priv.exp * 1000 < Date.now()) throw new Error(keyErr || 'pass Garmin expiré');
     jwt = priv.jwt;
   }
+  // 360 days rather than 365: a margin for the day or two between creating the key and pasting it.
+  const keyExpires = priv.keyExpires || (priv.keyAddedAt ? new Date(Date.parse(priv.keyAddedAt) + 360 * 864e5).toISOString() : undefined);
   const get = async (p: string) => {
     const r = await fetch(GARMIN + p, {headers: {Authorization: 'Bearer ' + jwt, Accept: 'application/json'}});
     if (!r.ok) throw new Error(r.status + ' ' + p.split('?')[0]);
@@ -149,7 +156,7 @@ async function syncGarmin(nDays: number, debug: boolean) {
   }
   for (const d of Object.values(days)) { clean(d); if (Array.isArray(d.acts) && !d.acts.length) delete d.acts; }
   const n = await mergeMonths('garmin', days, doc => { if (hrMax > ((doc.hrMax as number) || 0)) doc.hrMax = hrMax; });
-  return debug ? {days: n, raw} : {days: n};
+  return debug ? {days: n, keyExpires, keyErr, raw} : {days: n, keyExpires, keyErr: keyErr || undefined};
 }
 
 async function syncWithings(nDays: number) {
@@ -183,6 +190,29 @@ async function syncWithings(nDays: number) {
   }
   for (const [k, v] of Object.entries(pwv)) (days[k] ||= {}).pwv = v;
   return {days: await mergeMonths('withings', days)};
+}
+
+const jwtExp = (t: string) => { try { return JSON.parse(atob(t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))).exp; } catch { return undefined; } };
+// The app shows analysis/latest.syncWarning. A key that no longer works, or one with 14 days left, puts a Garmin
+// message there on every sync (so the morning analysis cannot wipe it); a working key clears it.
+// deno-lint-ignore no-explicit-any
+async function garminWarning(g: PromiseSettledResult<any>) {
+  let msg = '';
+  const how = 'crée-en une nouvelle sur connect.garmin.com (Paramètres > Clé API personnelle) et colle-la dans l\'appli, Réglages > Connexions.';
+  if (g.status === 'rejected') {
+    // Another failure (Garmin down, network): leave the message as it is.
+    if (!/clé|pass/.test(String(g.reason?.message || g.reason))) return;
+    msg = 'Garmin : ta clé API ne marche plus, ' + how;
+  }
+  else if (g.value.keyErr) msg = 'Garmin : ta clé API ne marche plus (le pass de secours tient jusqu\'à demain), ' + how;
+  else if (g.value.keyExpires) {
+    const end = Date.parse(g.value.keyExpires as string);
+    if (end - Date.now() < 14 * 864e5) msg = `Garmin : ta clé API expire vers le ${new Intl.DateTimeFormat('fr-FR', {timeZone: 'Europe/Paris', day: 'numeric', month: 'long'}).format(end)}, ` + how;
+  }
+  const a = (await getDoc('analysis', 'latest')) || {};
+  const cur = String(a.syncWarning || ''), mine = !cur || /^Garmin/.test(cur);
+  if (msg && mine && cur !== msg) await putDoc('analysis', 'latest', {...a, syncWarning: msg});
+  else if (!msg && cur && /^Garmin/.test(cur)) { delete a.syncWarning; await putDoc('analysis', 'latest', a); }
 }
 
 // Withings sign-in, last step: the app sends back the one-time code Withings gave it, exchanged here
@@ -224,6 +254,8 @@ Deno.serve(async req => {
   const [g, w] = await Promise.allSettled([syncGarmin(nDays, debug), syncWithings(nDays)]);
   if (g.status === 'fulfilled') { out.garmin = g.value; status.garmin = now; } else out.garmin = {error: String(g.reason?.message || g.reason)};
   if (w.status === 'fulfilled') { out.withings = w.value; status.withings = now; } else out.withings = {error: String(w.reason?.message || w.reason)};
+  if (g.status === 'fulfilled' && g.value.keyExpires) status.garminKeyExpires = g.value.keyExpires;
   await putDoc('status', 'sync', status);
+  await garminWarning(g);
   return json(out);
 });
