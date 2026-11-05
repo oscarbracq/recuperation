@@ -201,11 +201,14 @@ async function sessionWatch(st: any, TODAY: string, hm: string, token: string | 
   }
   const S = await loadData();
   const acts = (S.g[TODAY]?.acts || []).filter((a: any) => /strength|track/.test(a.type) && (a.min || 0) >= 10);
-  const logged = Object.values(S.training || {}).some((l: any) => l?.date === TODAY);
-  const seen: string[] = st.seen?.[TODAY] || [], a = acts.find((x: any) => !seen.includes(x.start));
+  // Already noted: an RPE in the day journal (written by hand or by a Training session) for that kind of session.
+  const man = S.manual?.[TODAY] || {};
+  const noted = (a: any) => /strength/.test(a.type) ? !!man.gymRpe : !!man.trackRpe;
+  const logged = acts.length > 0 && acts.every(noted);
+  const seen: string[] = st.seen?.[TODAY] || [], a = acts.find((x: any) => !seen.includes(x.start) && !noted(x));
   if (!a || logged) return {watched: hm, acts: acts.length, logged};
   st.seen = {[TODAY]: [...seen, a.start]}; await putPrivate('push', st);
-  const results = await sendAll(st, {title: `Séance reçue · ${/strength/.test(a.type) ? 'Musculation' : 'Piste'} ${Math.round(a.min)} min`, body: 'Ta séance est validée. Note ce que tu as fait : tout est déjà rempli comme prévu.', tag: 'tnr-session', url: './'});
+  const results = await sendAll(st, {title: `Séance reçue · ${/strength/.test(a.type) ? 'Musculation' : 'Sprint'} ${Math.round(a.min)} min`, body: 'Note ton RPE à chaud : la durée est déjà remplie par ta montre.', tag: 'tnr-rpe', url: './?rpe=1'});
   return {sessionNotified: a.start, results};
 }
 
