@@ -480,6 +480,33 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .plg-head span{flex:1;text-align:center;font-size:.6875rem;font-weight:600;color:var(--fg2)}
 .plg-head span b{color:var(--fg);font-family:var(--display)}
 .plg-head span.pltoday{color:var(--accent)}
+.plw-info{display:flex;align-items:center;gap:8px;min-height:30px;padding:0 4px 8px;font-size:.8125rem;white-space:nowrap;overflow:hidden}
+.plfs .plw-info i{width:14px;height:14px;border-radius:4px;flex:none}
+.plw-info b{font-weight:700}
+.plw-info span{color:var(--fg2);overflow:hidden;text-overflow:ellipsis}
+.plw-info small{margin-left:auto;padding-left:10px;color:var(--fg2);font-size:.6875rem;overflow:hidden;text-overflow:ellipsis}
+.plw-g{flex:1;min-height:0;display:flex}
+.plw-days{width:40px;flex:none;display:flex;flex-direction:column}
+.plw-days span{flex:1;display:flex;flex-direction:column;justify-content:center;font-size:.6875rem;color:var(--fg2);font-weight:600;line-height:1.15}
+.plw-days span:first-child{flex:0 0 18px}
+.plw-days b{color:var(--fg);font-family:var(--display)}
+.plw-days span.pltoday,.plw-days span.pltoday b{color:var(--accent)}
+.plw-vp{flex:1;min-width:0;overflow:hidden;position:relative;touch-action:none;-webkit-user-select:none;user-select:none}
+.plw-c{position:absolute;top:0;bottom:0;left:0;display:flex;flex-direction:column;will-change:transform}
+.plw-hours{flex:0 0 18px;position:relative}
+.plw-hours span{position:absolute;top:1px;padding-left:3px;font:600 .625rem var(--display);color:var(--fg2);white-space:nowrap}
+.plw-r{flex:1;position:relative;border-top:1px solid var(--line)}
+.plw-r:last-child{border-bottom:1px solid var(--line)}
+.plw-r.pltoday{background:color-mix(in srgb,var(--accent) 7%,transparent)}
+.plfs .plw-l{position:absolute;top:0;bottom:0;border-left:1px solid var(--line);opacity:.55}
+.plfs .plw-now{position:absolute;top:0;bottom:0;border-left:2px solid var(--bad);z-index:4;pointer-events:none}
+.plw-b{position:absolute;top:2px;bottom:2px;background:var(--pc);border-radius:3px;padding:0 4px;display:flex;align-items:center;overflow:hidden;font-size:.6875rem;font-weight:600;text-align:left;-webkit-touch-callout:none}
+.plw-b > b{white-space:nowrap;font-weight:600}
+.plw-b.sel{box-shadow:0 0 0 2px var(--fg),0 4px 14px rgba(0,0,0,.35);z-index:3;overflow:visible}
+.plw-b.lift{z-index:5;box-shadow:0 0 0 2px var(--fg),0 10px 24px rgba(0,0,0,.45)}
+.plw-hd{position:absolute;top:50%;width:26px;height:36px;margin-top:-18px;display:grid;place-items:center;z-index:2}
+.plw-hd.a{left:-13px}.plw-hd.b{right:-13px}
+.plw-hd::after{content:"";width:6px;height:22px;border-radius:3px;background:var(--fg);box-shadow:0 0 0 2px var(--bg)}
 .plg-leg{display:none;flex-wrap:wrap;gap:4px 12px;padding:8px 0 2px;font-size:.625rem;color:var(--fg2)}
 .plfs.plw .plg-leg{display:flex}
 .plg-leg span{display:flex;align-items:center;gap:4px}
@@ -2198,7 +2225,7 @@ function homeGreeting() {
     return pick([`Bonjour ${n} !`, `Bien réveillé, ${n} ?`], 'g');
   }
   if (done) return h < 18 ? pick([`Séance faite, bien joué ${n}`, `Bien bossé, ${n} !`], 'g') : pick([`Bien bossé aujourd'hui, ${n}`, `Journée validée, ${n}`, `Place à la récup, ${n}`], 'g');
-  if (plan && h < 20) return pick([`Prêt pour ta séance, ${n} ?`, `${plan.kind === 'track' ? 'Piste' : 'Muscu'} au programme, ${n}`], 'g');
+  if (plan && h < 20) return pick([`Prêt pour ta séance, ${n} ?`, `${plan.kind === 'track' ? 'Sprint' : 'Muscu'} au programme, ${n}`], 'g');
   if (h >= 18) return eff >= 14 ? pick([`Grosse journée, ${n}`, `Bien bossé, ${n}`], 'g') : pick([`Bonsoir ${n} !`, `Belle soirée, ${n}`, `Repose-toi bien, ${n}`], 'g');
   return z === 'bad' ? pick([`Journée calme, ${n}`, `On récupère, ${n}`], 'g') : pick([`Quoi de neuf, ${n} ?`, `Ça roule, ${n} ?`], 'g');
 }
@@ -2390,7 +2417,7 @@ function planningPane() {
     el = document.createElement('div'); el.id = 'plfs'; el.className = 'plfs'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Mon planning');
     document.body.appendChild(el); plDragInit(el);
   }
-  PLFS.on = true; PLFS.mode = 'day'; PLFS.scrolled = false;
+  PLFS.on = true; PLFS.mode = 'day'; PLFS.scrolled = false; PLW.px = null; PLW.sel = null;
   el.classList.add('on'); document.body.style.overflow = 'hidden';
   try { history.pushState({mod: S.mod, plan: true}, ''); } catch (e) {}
   plfsRender();
@@ -2405,6 +2432,7 @@ const plRot = () => PLFS.mode === 'week' && innerHeight > innerWidth;
 addEventListener('resize', () => { if (PLFS.on) plfsRender(); });
 function plfsRender() {
   const el = $('#plfs'); if (!el || !PLFS.on) return;
+  if (PLFS.mode === 'week') { plwRender(el); return; }
   const old = el.querySelector('.plg-scroll'), keep = old ? old.scrollTop : null;
   const week = PLFS.mode === 'week', days = week ? PL_ORDER : [PLAN_UI.wd];
   const lists = days.map(wd => ({wd, k: plDay(wd), L: dayPlan(plDay(wd))}));
@@ -2436,6 +2464,7 @@ function plfsRender() {
 }
 // Press and hold, then slide: the block follows the finger in 5-minute steps and is saved when the finger lifts.
 function plDragInit(el) {
+  plwInit(el);
   let D = null, timer = null;
   const pt = e => ({x: e.clientX, y: e.clientY});
   // In the sideways view the page is turned a quarter: the finger's left-right is the grid's up-down.
@@ -2477,6 +2506,115 @@ function plDragInit(el) {
   });
   el.addEventListener('pointercancel', () => { clearTimeout(timer); if (D?.live) { D.b.classList.remove('lift'); D.b.style.transform = ''; } D = null; });
 }
+// The week, sideways, like his "Train de vie performance" sheet: Monday to Sunday in rows from top to bottom, time from left
+// to right, plain colour boxes. Names are always written flat, and only when they fit. A touch says what a box is (no window);
+// the selected box gets two handles to stretch it; a long press moves it (to another day too); the thumb slides through the day.
+const PLW = {px: null, sel: null};
+const plInk = hex => { const h = String(hex).replace('#', ''); const [r, g, b] = [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)); return (r * 299 + g * 587 + b * 114) / 1000 > 160 ? '#111' : '#fff'; };
+function plwSpan(x, edge, min) {
+  let a = tmin(x.a), b = tmin(x.b);
+  if (edge === 'a') a = Math.max(0, Math.min(b - PL_STEP, a + min));
+  else if (edge === 'b') b = Math.min(24 * 60, Math.max(a + PL_STEP, b + min));
+  else { const len = b - a; a = Math.max(0, Math.min(24 * 60 - len, a + min)); b = a + len; }
+  return [a, b];
+}
+function plwInfoHtml(x, wd, a, b) {
+  return x ? `<i style="background:${PCAT[x.c]?.[1] || '#888'}"></i><b>${esc(x.n)}</b><span>${DAYS_FR[wd]} · ${tfr(tstr(a))} – ${tfr(tstr(b))} · ${b - a >= 60 ? Math.floor((b - a) / 60) + ' h' + ((b - a) % 60 ? ' ' + String((b - a) % 60).padStart(2, '0') : '') : (b - a) + ' min'}</span><small>Tire un bord pour changer la durée · garde le doigt pour déplacer</small>`
+    : '<span>Touche une case pour voir ce que c\'est · glisse avec le pouce pour parcourir la journée</span>';
+}
+function plwRender(el) {
+  const lists = PL_ORDER.map(wd => ({wd, k: plDay(wd), L: dayPlan(plDay(wd))}));
+  const all = lists.flatMap(d => d.L);
+  const t0 = Math.max(0, Math.floor(Math.min(7 * 60, ...all.map(x => tmin(x.a))) / 60) * 60), t1 = 24 * 60;
+  const hours = []; for (let t = t0; t < t1; t += 60) hours.push(t);
+  const nowM = new Date().getHours() * 60 + new Date().getMinutes();
+  const sel = PLW.sel, sx = sel && plBlockOf(sel.i, sel.wd);
+  if (sel && !sx) PLW.sel = null;
+  el.className = 'plfs on plw' + (plRot() ? ' rot' : '');
+  const row = ({wd, k, L}) => `<div class="plw-r${k === TODAY ? ' pltoday' : ''}">${hours.map(t => `<i class="plw-l" style="left:calc(${t - t0}px * var(--k))"></i>`).join('')}
+    ${L.map(x => { const a = tmin(x.a), b = tmin(x.b), i = plIdx(x, wd, k), on = sx && sel.wd === wd && String(sel.i) === String(i), c = PCAT[x.c]?.[1] || '#888';
+      return `<button class="plw-b${on ? ' sel' : ''}" data-plrb="${i}" data-plwd="${wd}" aria-label="${esc(x.n)}, ${x.a} – ${x.b}" style="--pc:${c};color:${plInk(c)};left:calc(${a - t0}px * var(--k));width:calc(${b - a}px * var(--k) - 1px)"><b>${esc(x.n)}</b>${on ? '<span class="plw-hd a" data-plh="a"></span><span class="plw-hd b" data-plh="b"></span>' : ''}</button>`; }).join('')}
+    ${k === TODAY && nowM >= t0 ? `<i class="plw-now" style="left:calc(${nowM - t0}px * var(--k))"></i>` : ''}</div>`;
+  el.innerHTML = `<div class="plfs-in">
+    <header class="plfs-top"><button class="plfs-ic" data-plx aria-label="Fermer le planning"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <div class="plfs-t"><b>Mon planning</b><small>Semaine type</small></div>
+      <button class="plfs-ic" data-plturn aria-label="Revenir à la journée" aria-pressed="true">${ICON_TURN}</button></header>
+    <div class="plw-info">${sx ? plwInfoHtml(sx, sel.wd, tmin(sx.a), tmin(sx.b)) : plwInfoHtml(null)}</div>
+    <div class="plw-g"><div class="plw-days"><span></span>${lists.map(d => `<span class="${d.k === TODAY ? 'pltoday' : ''}">${DAYS_FR[d.wd].slice(0, 3)}<b>${+d.k.slice(8)}</b></span>`).join('')}</div>
+      <div class="plw-vp"><div class="plw-c"><div class="plw-hours">${hours.map(t => `<span style="left:calc(${t - t0}px * var(--k))">${t / 60} h</span>`).join('')}</div>${lists.map(row).join('')}</div></div></div>
+  </div>`;
+  const vp = el.querySelector('.plw-vp'), c = el.querySelector('.plw-c'), W = vp.offsetWidth || 600;
+  // About nine hours across the screen; the thumb slides through the rest of the day.
+  const K = Math.max(W / (t1 - t0), W / (9 * 60));
+  c.style.setProperty('--k', K); c.style.width = (t1 - t0) * K + 'px';
+  el.dataset.t0 = t0; el.dataset.k = K;
+  // A name is written only when it fits whole in its box.
+  el.querySelectorAll('.plw-b > b').forEach(n => { if (n.scrollWidth > n.parentElement.clientWidth - 6) n.style.visibility = 'hidden'; });
+  if (PLW.px == null) PLW.px = (Math.max(Math.min(nowM - 90, 21 * 60), 7 * 60) - t0) * K;
+  plwSetPx(el, PLW.px);
+}
+function plwSetPx(el, v) {
+  const vp = el.querySelector('.plw-vp'), c = el.querySelector('.plw-c'); if (!vp || !c) return;
+  PLW.px = Math.max(0, Math.min(c.offsetWidth - vp.offsetWidth, v));
+  c.style.transform = `translateX(${-PLW.px}px)`;
+}
+function plwInit(el) {
+  let D = null, timer = null, raf = 0;
+  const pt = e => ({x: e.clientX, y: e.clientY});
+  const local = (p, q) => plRot() ? {dx: q.y - p.y, dy: -(q.x - p.x)} : {dx: q.x - p.x, dy: q.y - p.y};
+  const wk = () => PLFS.mode === 'week';
+  const show = d => { const x = plBlockOf(d.b.dataset.plrb, +d.b.dataset.plwd); if (!x) return null;
+    const [a, b] = plwSpan(x, d.edge, d.min), wd = PL_ORDER[(PL_ORDER.indexOf(+d.b.dataset.plwd) + (d.day || 0) + 70) % 7];
+    const box = el.querySelector('.plw-info'); if (box) box.innerHTML = plwInfoHtml(x, wd, a, b); return [a, b]; };
+  el.addEventListener('pointerdown', e => {
+    if (!wk() || !e.target.closest('.plw-vp')) return;
+    cancelAnimationFrame(raf); clearTimeout(timer);
+    const h = e.target.closest('[data-plh]'), b = e.target.closest('.plw-b');
+    D = {p0: pt(e), px0: PLW.px, b, edge: h?.dataset.plh, mode: h ? 'size' : 'pan', moved: false, t: performance.now(), lx: 0, v: 0, min: 0, day: 0};
+    try { el.setPointerCapture(e.pointerId); } catch (err) {}
+    if (b && !h) timer = setTimeout(() => { if (D && !D.moved) { D.mode = 'move'; D.moved = true; b.classList.add('lift'); if (PREFS.haptic) navigator.vibrate?.(15); show(D); } }, 400);
+  });
+  el.addEventListener('pointermove', e => {
+    if (!D || !wk()) return;
+    const d = local(D.p0, pt(e)), K = +el.dataset.k, t0 = +el.dataset.t0;
+    if (D.mode === 'pan') {
+      if (!D.moved && Math.hypot(d.dx, d.dy) < 7) return;
+      D.moved = true; clearTimeout(timer);
+      const now = performance.now(), dt = Math.max(1, now - D.t); D.v = .7 * ((D.lx - d.dx) / dt) + .3 * D.v; D.t = now; D.lx = d.dx;
+      plwSetPx(el, D.px0 - d.dx); return;
+    }
+    D.min = Math.round(d.dx / K / PL_STEP) * PL_STEP;
+    if (D.mode === 'size') { D.moved = true; const s2 = show(D); if (s2) { D.b.style.left = (s2[0] - t0) * K + 'px'; D.b.style.width = (s2[1] - s2[0]) * K - 1 + 'px'; } return; }
+    const rh = el.querySelector('.plw-r')?.offsetHeight || 1;
+    D.day = Math.round(d.dy / rh);
+    D.b.style.transform = `translate(${D.min * K}px,${D.day * rh}px)`; show(D);
+  });
+  el.addEventListener('pointerup', async () => {
+    clearTimeout(timer); const d = D; D = null; if (!d || !wk()) return;
+    if (d.mode === 'pan') {
+      if (!d.moved) { PLW.sel = d.b ? {i: d.b.dataset.plrb, wd: +d.b.dataset.plwd} : null; if (d.b && PREFS.haptic) navigator.vibrate?.(8); plfsRender(); return; }
+      let v = d.v * 16; const step = () => { if (Math.abs(v) < .5) return; plwSetPx(el, PLW.px + v); v *= .93; raf = requestAnimationFrame(step); };
+      if (performance.now() - d.t < 80) raf = requestAnimationFrame(step); return;
+    }
+    if (d.mode === 'size') { if (d.min) await plResize(d.b.dataset.plrb, +d.b.dataset.plwd, d.edge, d.min); else plfsRender(); return; }
+    d.b.classList.remove('lift');
+    if (d.min || d.day) { PLW.sel = null; await plMove(d.b.dataset.plrb, +d.b.dataset.plwd, d.min, d.day); }
+    else { PLW.sel = {i: d.b.dataset.plrb, wd: +d.b.dataset.plwd}; plfsRender(); }
+  });
+  el.addEventListener('pointercancel', () => { clearTimeout(timer); const d = D; D = null; if (d && d.mode !== 'pan') plfsRender(); });
+}
+async function plResize(i, wd, edge, min) {
+  const x = plBlockOf(i, wd); if (!x) return;
+  const [a, b] = plwSpan(x, edge, min), nx = {...x, a: tstr(a), b: tstr(b)}; delete nx.date;
+  if (String(i).startsWith('x')) {
+    const k = plDay(wd), ex = {...(PLN().extra || {})}, l = [...(ex[k] || [])]; l[+String(i).slice(1)] = {...l[+String(i).slice(1)], a: nx.a, b: nx.b}; ex[k] = l;
+    PLW.sel = {i, wd}; await savePlanning({extra: ex});
+  } else {
+    const week = {...(PLN().week || {})}, L = weekPlan(wd); L[+i] = nx; L.sort((p, q) => p.a.localeCompare(q.a));
+    week[wd] = L; PLW.sel = {i: String(L.indexOf(nx)), wd}; await savePlanning({week});
+  }
+  toast(`${x.n} : ${tfr(nx.a)} – ${tfr(nx.b)}`);
+}
 function plBlockOf(i, wd) { const k = plDay(wd); return String(i).startsWith('x') ? (PLN().extra?.[k] || [])[+String(i).slice(1)] : weekPlan(wd)[+i]; }
 function plShiftLabel(d) {
   const x = plBlockOf(d.b.dataset.plb, +d.b.dataset.plwd); if (!x) return '';
@@ -2501,7 +2639,7 @@ async function plMove(i, wd, min, dayShift) {
 document.addEventListener('click', e => {
   if (!PLFS.on || !e.target.closest('#plfs')) return;
   if (e.target.closest('[data-plx]')) { plfsClose(); return; }
-  if (e.target.closest('[data-plturn]')) { PLFS.mode = PLFS.mode === 'week' ? 'day' : 'week'; PLFS.scrolled = false; plfsRender(); return; }
+  if (e.target.closest('[data-plturn]')) { PLFS.mode = PLFS.mode === 'week' ? 'day' : 'week'; PLFS.scrolled = false; PLW.px = null; PLW.sel = null; plfsRender(); return; }
   if (e.target.closest('[data-pld]')) plfsRender();
 });
 addEventListener('keydown', e => { if (e.key === 'Escape' && PLFS.on && !P.stack.length) plfsClose(); });
@@ -3218,7 +3356,7 @@ function noteBody(k) {
     <div id="e-acts">${noteActs()}</div>
     ${(G(k, 'acts') || []).length ? `<div class="list">${(G(k, 'acts') || []).slice().sort((a, b) => (a.start || '').localeCompare(b.start || '')).map(a => { const [name, ic] = ACT[a.type] || [a.type, 'load']; const lvl = runLevel(a); return `<div class="sess"><span class="ic">${ICON[ic]}</span><span><b>${esc(a.name || name)}${lvl ? ' · ' + PHASES[lvl][0].toLowerCase() : ''}</b><span class="meta">${esc(a.start || '')} · ${fx(a.min)} min${a.km ? ' · ' + fx(a.km, 1) + ' km' : ''}${a.avgHr ? ' · FC ' + a.avgHr + ' / ' + a.maxHr : ''}${a.vmax && lvl ? ' · ' + fx(a.vmax, 1) + ' km/h max' : ''}</span></span><span class="eff">${fx(toEffort(trimpOf(a)), 1)}</span></div>`; }).join('')}</div><p class="note" style="text-align:left;margin-top:6px">Enregistré par la montre, effort sur 21 à droite.${G(k, 'bikeKm') ? ` Vélo total, trajets compris : ${fx(G(k, 'bikeKm'), 1)} km.` : ''}</p>` : '<p class="note" style="text-align:left;margin-top:0">Aucune activité enregistrée par la montre ce jour-là.</p>'}
     <div class="sec-label">Séances</div>
-    <p class="note" style="text-align:left">${logsOn(k).length ? 'Séance notée dans Training : ' + logsOn(k).map(l => esc(l.name) + ' · RPE ' + l.rpe).join(', ') + '.' : 'Tes séances de muscu et de piste se notent dans Training : elles arrivent ici toutes seules.'}</p>
+    <p class="note" style="text-align:left">${logsOn(k).length ? 'Séance notée dans Training : ' + logsOn(k).map(l => esc(l.name) + ' · RPE ' + l.rpe).join(', ') + '.' : 'Tes séances de muscu et de sprint se notent dans Training : elles arrivent ici toutes seules.'}</p>
     <div class="sec-label">Alimentation</div>
     <div class="list"><div class="row col"><div class="seg" role="group" aria-label="Alimentation" id="e-nut">${NUTRITION.map(([l], i) => `<button type="button" data-nut="${i}" aria-pressed="${(draft.nutrition ?? 0) === i}">${l}</button>`).join('')}</div><span class="hint" id="e-nut-hint">${NUTRITION[draft.nutrition ?? 0][1]}. Précise dans la note si besoin.</span></div></div>
     <div class="sec-label">Douleur ou gêne</div>
@@ -4267,7 +4405,7 @@ function tToday() {
       <div style="margin-top:14px"><button class="btn" data-tgfill="${esc(wA.start || '')}">Remplir ma séance</button></div></article>` : '';
   const live = S.live ? `<button class="banner" data-tlive style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Séance en cours</b><br><span class="small muted">${esc(S.live.name)}</span></span><span class="chiptag">Reprendre</span></button>` : '';
   const main = done.length ? `<article class="card"><span class="chiptag">${TICK.replace('<svg', '<svg width="12" height="12"')} Fait</span>${done.map(l => `<div class="bigname">${esc(l.name)}</div><p class="small muted">${l.min} min · RPE ${l.rpe}/10${l.tonnage ? ' · ' + fx(l.tonnage) + ' kg soulevés' : ''}${l.sprintM ? ' · ' + fx(l.sprintM) + ' m de sprint' : ''}</p>`).join('')}</article>`
-    : p ? `<article class="card"><span class="chiptag">Aujourd'hui · ${p.kind === 'gym' ? 'Musculation' : 'Piste'} · ${estMin(p)} min</span><div class="bigname">${esc(p.name)}</div><p class="small muted">${esc(p.desc || '')}</p>
+    : p ? `<article class="card"><span class="chiptag">Aujourd'hui · ${p.kind === 'gym' ? 'Musculation' : 'Sprint'} · ${estMin(p)} min</span><div class="bigname">${esc(p.name)}</div><p class="small muted">${esc(p.desc || '')}</p>
         <ul class="exl">${p.items.map(it => `<li><span>${esc(exOf(it.ex).n)}</span><span>${itemText(it)}</span></li>`).join('')}</ul>
         <div style="margin-top:14px"><button class="btn" data-tstart="${p.id}">Commencer la séance</button></div></article>` : '';
   return `
@@ -4298,7 +4436,7 @@ function tSessions() {
   const row = p => `<button class="rowbtn" data-tplanv="${p.id}"><span><b>${esc(p.name)}</b><span class="meta">${p.items.length} exercices · ${estMin(p)} min${p.desc ? ' · ' + esc(p.desc) : ''}</span></span>${ICON.chev}</button>`;
   return `
     <header class="top"><div class="sub">Programmes et séances</div><h1>Séances</h1></header>
-    <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Piste']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
+    <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
     <h2>Mes séances</h2><div class="list">${mine.map(row).join('')}<button class="addbtn" data-tnew>+ Créer une séance</button></div>
     ${k === 'gym' && TDV_PLANS.length ? `<h2>Mon programme <small>Train de vie performance</small></h2><div class="list">${TDV_PLANS.map(row).join('')}</div>` : ''}
     ${base.length ? `<h2>Programmes TNR <small>à dupliquer et adapter</small></h2><div class="list">${base.map(row).join('')}</div>` : ''}
@@ -4470,7 +4608,7 @@ function planView(id) {
   openPane({title: 'Séance', render: () => {
     const p = planById(id); if (!p) return '';
     const mine = !BUILTIN.includes(p);
-    return `<div class="dhead"><span class="chiptag">${p.kind === 'gym' ? 'Musculation' : 'Piste'} · ${estMin(p)} min</span><div class="bigname" style="font-size:1.75rem">${esc(p.name)}</div><p class="small muted">${esc(p.desc || '')}</p></div>
+    return `<div class="dhead"><span class="chiptag">${p.kind === 'gym' ? 'Musculation' : 'Sprint'} · ${estMin(p)} min</span><div class="bigname" style="font-size:1.75rem">${esc(p.name)}</div><p class="small muted">${esc(p.desc || '')}</p></div>
       ${warmText(p.warm).length ? `<div class="card wtxt"><span class="eyebrow">Échauffement · ${warmMin(p.warm)} min</span>${warmText(p.warm).map(t => `<p class="small">${esc(t)}</p>`).join('')}</div>` : ''}
       <div class="list">${p.items.map(it => { const e = exOf(it.ex), sg = suggest(it); return `<button class="rowbtn" data-tex="${it.ex}"><span><b>${esc(e.n)}</b><span class="meta">${itemText(it)}${it.rest ? ' · récup ' + fmtRest(it.rest) : ''}${sg ? ' · ' + fx(sg.kg, sg.kg % 1 ? 1 : 0) + ' kg proposés' : ''}</span></span>${ICON.chev}</button>`; }).join('')}</div>
       ${coolText(p.cool).length ? `<div class="card wtxt" style="margin-top:12px"><span class="eyebrow">Retour au calme</span>${coolText(p.cool).map(t => `<p class="small">${esc(t)}</p>`).join('')}</div>` : ''}
@@ -4526,7 +4664,7 @@ function sessionAuto(ed) {
   return {name, desc};
 }
 /* ---------- warm-up (cardio, joint mobility, activation) proposed from the session; cool-down from the recovery library ---------- */
-const WARM_G = [['cardio', 'Cardio', 'monter la température et le cœur'], ['mob', 'Mobilité articulaire', 'lubrifier les articulations dans tous les angles'], ['act', 'Activation', 'réveiller les muscles de la séance']];
+const WARM_G = [['cardio', 'Cardio', 'monter la température et le cœur'], ['mob', 'Mobilité articulaire', 'lubrifier les articulations dans tous les angles'], ['act', 'Activation', 'réveiller les muscles de la séance'], ['prog', 'Courses progressives', 'monter en vitesse jusqu\'au sprint']];
 // [id, name, group, dose, muscles, minutes, for track only]
 const WARM = [
   ['w_row', 'Rameur', 'cardio', '5 min', {}, 5, 'gym'], ['w_bike', 'Vélo', 'cardio', '5 min', {}, 5, 'gym'], ['w_ski', 'SkiErg', 'cardio', '4 min', {}, 4, 'gym'], ['w_ab', 'Assault bike', 'cardio', '4 min', {}, 4, 'gym'],
@@ -4541,7 +4679,7 @@ const WARM = [
   ['a_march', 'Marche du soldat à l\'élastique', 'act', '10 par jambe', {psoas: 1}, 1], ['a_bug', 'Dead bug', 'act', '8 par côté', {abs: 1}, 1], ['a_plank', 'Gainage', 'act', '30 s', {abs: 1, obl: .5}, 1],
   ['a_cop', 'Copenhague court', 'act', '15 s par côté', {adduct: 1}, 1], ['a_pull', 'Écarté à l\'élastique', 'act', '15', {shoul: 1, rhomb: 1}, 1, 'gym'], ['a_push', 'Pompes lentes', 'act', '8', {pecs: 1, tri: .75}, 1, 'gym'],
   ['a_scap', 'Tractions scapulaires', 'act', '8', {lats: 1, rhomb: 1}, 1, 'gym'], ['a_skip', 'Gammes : A-skip, B-skip', 'act', '2 × 20 m', {psoas: 1, calves: 1, hams: .5}, 2, true],
-  ['a_strides', 'Lignes droites progressives', 'act', '3 × 60 m', {hams: 1, glutes: .75, calves: .75}, 3, true],
+  ['a_strides', 'Lignes droites progressives', 'prog', '3 × 60 m', {hams: 1, glutes: .75, calves: .75}, 3, true],
   ['w_ell', 'Elliptique', 'cardio', '5 min', {}, 5, 'gym'], ['w_tread', 'Tapis de course', 'cardio', '5 min', {calves: .5}, 5, 'gym'], ['w_stair', 'Escalier ou stepper', 'cardio', '4 min', {quads: .5, glutes: .5}, 4, 'gym'],
   ['w_shadow', 'Shadow boxing', 'cardio', '3 min', {shoul: .5}, 3, 'gym'], ['w_knees', 'Montées de genoux sur place', 'cardio', '1 min', {psoas: 1}, 1], ['w_butt', 'Talons-fesses sur place', 'cardio', '1 min', {hams: .5}, 1],
   ['w_shuffle', 'Pas chassés', 'cardio', '2 × 20 m', {adduct: .75, glutes: .5}, 2], ['w_back', 'Course arrière légère', 'cardio', '2 × 30 m', {quads: .75, calves: .5}, 2, true], ['w_cod', 'Footing avec changements de direction', 'cardio', '4 min', {adduct: .5, calves: .5}, 4, true],
@@ -4558,7 +4696,11 @@ const WARM = [
   ['a_bounds', 'Bonds courts', 'act', '2 × 20 m', {glutes: 1, hams: .75, calves: .75}, 2, true], ['a_cskip', 'Gammes : C-skip, talons-fesses dynamiques', 'act', '2 × 20 m', {hams: 1, psoas: .75}, 2, true], ['a_arms', 'Bras de sprint', 'act', '2 × 15 s', {shoul: .75}, 1, true],
   ['a_wall', 'Wall drill', 'act', '3 × 10 s', {psoas: 1, glutes: .75, calves: .5}, 2, true], ['a_toes', 'Marche sur pointes', 'act', '20 m', {calves: 1}, 1], ['a_slrdl', 'Soulevé de terre sur une jambe au poids du corps', 'act', '6 par côté', {hams: 1, glutes: 1}, 1],
   ['a_bmarch', 'Pont fessier en marche', 'act', '10', {glutes: 1, hams: .75, abs: .5}, 1], ['a_gob', 'Goblet squat léger', 'act', '8', {quads: 1, glutes: .75}, 1, 'gym'], ['a_air', 'Avion sur une jambe (hip airplane)', 'act', '4 par côté', {glutes: 1, adduct: .5}, 1],
-  ['a_hollow', 'Hollow hold', 'act', '20 s', {abs: 1}, 1]
+  ['a_hollow', 'Hollow hold', 'act', '20 s', {abs: 1}, 1],
+  // "Sprint Warmup" by JB Morin (youtu.be/mcV4l_T9n44): 30 min, in three blocks of 10 as his video describes them.
+  ['jbm_mob', 'Mobilité (routine de JB Morin)', 'mob', '10 min', {psoas: 1, hams: 1, glutes: .75, adduct: .75, calves: .5}, 10, true],
+  ['jbm_drill', 'Gammes (routine de JB Morin)', 'act', '10 min', {psoas: 1, calves: 1, hams: .75}, 10, true],
+  ['jbm_prog', 'Courses progressives (routine de JB Morin)', 'prog', '10 min', {hams: 1, glutes: .75, calves: .75}, 10, true]
 ].map(([id, n, g, dose, mus, min, ctx]) => ({id, n, g, dose, mus, min, trk: ctx === true || ctx === 'trk', gymOnly: ctx === 'gym'}));
 const WX = Object.fromEntries(WARM.map(w => [w.id, w]));
 function sessionMus(ed) {
@@ -4570,14 +4712,14 @@ function warmSuggest(ed) {
   const m = sessionMus(ed), trk = ed.kind === 'track', sc = w => Object.entries(w.mus).reduce((a, [k, v]) => a + (m[k] || 0) * v, 0);
   const out = {};
   for (const [g] of WARM_G) {
-    let L = WARM.filter(w => w.g === g && (!w.trk || trk) && !(trk && w.gymOnly));
+    let L = WARM.filter(w => w.g === g && (!w.trk || trk) && !(trk && w.gymOnly) && !w.id.startsWith('jbm_'));
     if (g === 'cardio') L = L.sort((a, b) => (trk ? (b.id === 'w_jog') - (a.id === 'w_jog') : (a.id === 'w_jog') - (b.id === 'w_jog')));
     else L = L.sort((a, b) => (trk ? (b.trk || 0) - (a.trk || 0) : 0) || sc(b) - sc(a));
     out[g] = L.map(w => [w.id, w.n, w.g, w.dose]);
   }
   return out;
 }
-const warmDefault = ed => { const s = warmSuggest(ed); return [s.cardio[0][0], ...s.mob.slice(0, 3).map(x => x[0]), ...s.act.slice(0, 3).map(x => x[0])]; };
+const warmDefault = ed => { const s = warmSuggest(ed); return [s.cardio[0][0], ...s.mob.slice(0, 3).map(x => x[0]), ...s.act.slice(0, 3).map(x => x[0]), ...(s.prog || []).slice(0, 1).map(x => x[0])]; };
 const warmMin = w => (w?.sel || []).reduce((a, id) => a + (WX[id]?.min || 0), 0);
 function coolSuggest(ed) {
   const m = sessionMus(ed), sc = r => r.mus.reduce((a, k) => a + (m[k] || 0), 0);
@@ -4586,13 +4728,14 @@ function coolSuggest(ed) {
   return [...br, ...st];
 }
 const coolDefault = ed => ['r_coh', ...coolSuggest(ed).filter(x => x.kind !== 'respi').slice(0, 2).map(x => x.id)];
-const warmText = w => w?.sel?.length ? WARM_G.map(([g, lab]) => { const L = w.sel.map(id => WX[id]).filter(x => x && x.g === g); return L.length ? `${lab} : ${L.map(x => x.n.toLowerCase() + ' (' + x.dose + ')').join(', ')}` : ''; }).filter(Boolean) : [];
+const warmText = w => w?.sel?.length ? WARM_G.map(([g, lab]) => { const L = w.sel.map(id => WX[id]).filter(x => x && x.g === g); return L.length ? `${lab} : ${L.map(x => x.n[0].toLowerCase() + x.n.slice(1) + ' (' + x.dose + ')').join(', ')}` : ''; }).filter(Boolean) : [];
 const coolText = c => c?.sel?.length ? [`${c.min} min : ${c.sel.map(id => RX[id]?.n.toLowerCase()).filter(Boolean).join(', ')}`] : [];
 document.addEventListener('change', e => { const t = e.target; if (!t.dataset?.edrest || !ED) return; const v = parseRest(t.value); ED.items[+t.dataset.edrest].rest = v; t.value = restIn(v); });
 document.addEventListener('click', e => {
   if (!ED) return; const at = q => e.target.closest(q); let b;
   if ((b = at('[data-edwk]'))) { ED.wk = addDays(ED.wk, +b.dataset.edwk); paneRender(); return; }
   if ((b = at('[data-eddate]'))) { ED.date = ED.date === b.dataset.eddate ? null : b.dataset.eddate; paneRender(); return; }
+  if (at('[data-edwarmjbm]')) { ED.warm = {sel: JBM_WARM.slice()}; paneRender(); return; }
   if (at('[data-edwarm]')) { ED.warm = {sel: warmDefault(ED)}; paneRender(); return; }
   if (at('[data-edwarmx]')) { delete ED.warm; paneRender(); return; }
   if ((b = at('[data-edwadd]'))) { warmPick(b.dataset.edwadd); return; }
@@ -4645,12 +4788,16 @@ function whenRow() {
     <div class="pldays">${[0, 1, 2, 3, 4, 5, 6].map(i => { const k = addDays(wk, i), b = dayPlan(k).find(x => x.c === (ED.kind === 'track' ? 'athle' : 'muscu')); return `<button type="button" data-eddate="${k}" aria-pressed="${ED.date === k}"><span>${DOW[i]}</span><b>${+k.slice(8)}</b>${b ? '<i class="pdot"></i>' : ''}</button>`; }).join('')}</div>
     <span class="hint">${ED.date ? 'Le ' + esc(fmtDay(ED.date)) + (dayPlan(ED.date).find(x => x.c === (ED.kind === 'track' ? 'athle' : 'muscu')) ? ', sur ton créneau du planning' : '') : 'Sans date : touche un jour. Le point = ' + (ED.kind === 'track' ? 'athlétisme' : 'musculation') + ' dans ton planning.'}</span></div>`;
 }
-const WARM_ADD = {cardio: '+ Ajouter du cardio', mob: '+ Ajouter de la mobilité', act: '+ Ajouter une activation'};
+const WARM_ADD = {cardio: '+ Ajouter du cardio', mob: '+ Ajouter de la mobilité', act: '+ Ajouter une activation', prog: '+ Ajouter une course progressive'};
+const JBM_WARM = ['jbm_mob', 'jbm_drill', 'jbm_prog'];
 function warmBox() {
-  if (!ED.warm) return `<button class="btn ghost" data-edwarm>+ Ajouter un échauffement</button>`;
+  if (!ED.warm) return ED.kind === 'track'
+    ? `<div class="stack"><button class="btn ghost" data-edwarmjbm>+ Échauffement sprint de JB Morin · 30 min</button><button class="btn ghost" data-edwarm>+ Échauffement sur mesure</button></div>`
+    : `<button class="btn ghost" data-edwarm>+ Ajouter un échauffement</button>`;
   const sel = ED.warm.sel || [];
   return `<div class="exbox wbox"><h3>Échauffement<small>${warmMin(ED.warm)} min</small></h3>
-    ${WARM_G.map(([g, lab, why]) => { const L = sel.map(id => WX[id]).filter(x => x && x.g === g);
+    ${sel.some(id => id.startsWith('jbm_')) ? '<p class="hint" style="margin:6px 0 0">Routine « Sprint Warmup » de JB Morin, faite avant ses tests de sprint : 10 min de mobilité, 10 min de gammes, 10 min de courses progressives. <a href="https://youtu.be/mcV4l_T9n44" target="_blank" rel="noopener">Voir la vidéo</a></p>' : ''}
+    ${WARM_G.filter(([g]) => g !== 'prog' || ED.kind === 'track' || sel.some(id => WX[id]?.g === 'prog')).map(([g, lab, why]) => { const L = sel.map(id => WX[id]).filter(x => x && x.g === g);
       return `<div class="sec-label" style="margin:12px 0 4px">${lab}<small style="text-transform:none;letter-spacing:0;font-weight:500"> · ${why}</small></div>
       ${L.length ? `<div class="wtl">${L.map(x => `<div class="wti"><span><b>${esc(x.n)}</b><small>${esc(x.dose)}</small></span><button type="button" class="wx" data-edws="${x.id}" aria-label="Retirer ${esc(x.n)}">×</button></div>`).join('')}</div>` : ''}
       <button type="button" class="addln" data-edwadd="${g}">${WARM_ADD[g]}</button>`; }).join('')}
@@ -4682,7 +4829,7 @@ function editBody() {
   const num = (i, f, v, ph) => `<input class="mini-in big" inputmode="decimal" data-ed="${i}.${f}" value="${v ?? ''}" placeholder="${ph}">`;
   const rest = (i, v, ph) => `<input class="mini-in big" inputmode="decimal" data-edrest="${i}" value="${restIn(v)}" placeholder="${ph}">`;
   return `<div class="stack" style="margin-top:16px">
-    <div class="seg" role="group">${[['gym', 'Musculation'], ['track', 'Piste']].map(([v, l]) => `<button type="button" data-edkind="${v}" aria-pressed="${ED.kind === v}">${l}</button>`).join('')}</div>
+    <div class="seg" role="group">${[['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button type="button" data-edkind="${v}" aria-pressed="${ED.kind === v}">${l}</button>`).join('')}</div>
     ${whenRow()}
     <div class="field"><label class="eyebrow" for="ed-name">Nom${ED.autoName ? ' · rempli tout seul' : ''}</label><input id="ed-name" data-ed="name" value="${esc(ED.autoName ? A.name : ED.name)}" placeholder="Ajoute des exercices : le nom se remplit"></div>
     <div class="field"><label class="eyebrow" for="ed-desc">Objectif${ED.autoDesc ? ' · rempli tout seul' : ''}</label><input id="ed-desc" data-ed="desc" value="${esc(ED.autoDesc ? A.desc : ED.desc || '')}" placeholder="Il suit la logique de tes exercices"></div>
@@ -4778,7 +4925,7 @@ function sessionsPlanning() {
     const body = weeks.map(w => { const rows = [];
       for (let i = 0; i < 7; i++) { const k = addDays(w, i), p = planFor(k); if (!p) continue;
         const b = dayPlan(k).find(x => x.c === (p.kind === 'track' ? 'athle' : 'muscu')), done = logsOn(k).length > 0;
-        rows.push(`<button class="rowbtn" data-tplanv="${p.id}"><span><b>${esc(cap(fmtShort(k)))}${b ? ' · ' + tfr(b.a) : ''}</b><span class="meta">${p.kind === 'track' ? 'Piste' : 'Muscu'} · ${esc(p.name)} · ${estMin(p)} min${dated[k] ? '' : ' · séance type du jour'}</span></span>${done ? '<span class="chiptag">Fait</span>' : k < TODAY ? '<span class="small muted">passé</span>' : ICON.chev}</button>`); }
+        rows.push(`<button class="rowbtn" data-tplanv="${p.id}"><span><b>${esc(cap(fmtShort(k)))}${b ? ' · ' + tfr(b.a) : ''}</b><span class="meta">${p.kind === 'track' ? 'Sprint' : 'Muscu'} · ${esc(p.name)} · ${estMin(p)} min${dated[k] ? '' : ' · séance type du jour'}</span></span>${done ? '<span class="chiptag">Fait</span>' : k < TODAY ? '<span class="small muted">passé</span>' : ICON.chev}</button>`); }
       return `<div class="sec-label">Semaine ${seasonWeek(w)} <small>${esc(fmtShort(w))} – ${esc(fmtShort(addDays(w, 6)))}</small></div>${rows.length ? `<div class="list">${rows.join('')}</div>` : '<p class="small muted" style="margin:0 4px">Aucune séance programmée.</p>'}`; }).join('');
     return `<div style="margin-top:8px">${body}</div>
       <div class="stack" style="margin-top:16px"><button class="btn ghost" data-tplan>Séance type pour chaque jour</button><button class="btn ghost" data-hplan>Mes jours et mes heures</button></div>
@@ -4787,7 +4934,7 @@ function sessionsPlanning() {
 }
 function weekPlanner() {
   openPane({title: 'Planning de la semaine', render: () => {
-    const opts = sel => `<option value="">Repos</option>${['gym', 'track'].map(k => `<optgroup label="${k === 'gym' ? 'Musculation' : 'Piste'}">${allPlans().filter(p => p.kind === k).map(p => `<option value="${p.id}"${p.id === sel ? ' selected' : ''}>${esc(p.name)}</option>`).join('')}</optgroup>`).join('')}`;
+    const opts = sel => `<option value="">Repos</option>${['gym', 'track'].map(k => `<optgroup label="${k === 'gym' ? 'Musculation' : 'Sprint'}">${allPlans().filter(p => p.kind === k).map(p => `<option value="${p.id}"${p.id === sel ? ' selected' : ''}>${esc(p.name)}</option>`).join('')}</optgroup>`).join('')}`;
     return `<p class="small muted" style="margin:16px 4px 10px">Une séance par jour. Elle s'affiche dans ${modName('T')} le jour venu, compte comme jour d'entraînement pour ${modName('R')}, et ajuste tes objectifs dans ${modName('N')}.</p>
       <div class="list">${[1, 2, 3, 4, 5, 6, 0].map(d => `<div class="row"><label for="wk-${d}" style="flex:none;width:96px">${DAYS[d]}<span class="hint">${weekPlan(d).filter(b => b.c === 'muscu' || b.c === 'athle').map(b => (b.c === 'muscu' ? 'Muscu ' : 'Sprint ') + tfr(b.a)).join(' · ') || 'repos'}</span></label><select id="wk-${d}" class="mini-in" style="text-align:left" data-tweek="${d}">${opts(S.tset.week?.[d])}</select></div>`).join('')}</div>
       <div class="stack" style="margin-top:12px"><button class="btn ghost" data-hplan>Changer les jours et les heures dans mon planning</button></div>
@@ -4831,7 +4978,7 @@ function liveBody() {
   const wt = warmText(L.warm), ct = coolText(L.cool);
   return `${wt.length ? `<details class="card wtxt" style="margin-top:12px"><summary class="eyebrow">Échauffement · ${warmMin(L.warm)} min</summary>${wt.map(t => `<p class="small">${esc(t)}</p>`).join('')}</details>` : ''}
     ${ct.length ? `<details class="card wtxt" style="margin-top:8px"><summary class="eyebrow">Retour au calme, à la fin</summary>${ct.map(t => `<p class="small">${esc(t)}</p>`).join('')}</details>` : ''}
-    <div class="livehead"><span class="chiptag">${L.kind === 'gym' ? 'Musculation' : L.kind === 'class' ? 'Cours collectif' : 'Piste'} · ${doneSets}/${all}</span>${gA ? `<b>${fx(gA.min)} min</b>` : ''}</div>
+    <div class="livehead"><span class="chiptag">${L.kind === 'gym' ? 'Musculation' : L.kind === 'class' ? 'Cours collectif' : 'Sprint'} · ${doneSets}/${all}</span>${gA ? `<b>${fx(gA.min)} min</b>` : ''}</div>
     ${L.kind === 'track' ? `<div class="edrow" style="margin-top:10px;grid-template-columns:1fr 1fr"><label>Chaussures<select class="mini-in" data-lmeta="shoes">${['', 'Pointes carbone', 'Pointes', 'Running fractionné', 'Running long'].map(o => `<option${(L.shoes || '') === o ? ' selected' : ''}>${o}</option>`).join('')}</select></label><label>Conditions<select class="mini-in" data-lmeta="cond">${['', 'Piste, vent favorable', 'Piste, sans vent', 'Piste, vent contraire', 'Indoor', 'Pluie'].map(o => `<option${(L.cond || '') === o ? ' selected' : ''}>${o}</option>`).join('')}</select></label></div>` : ''}
     ${L.fill ? `<p class="small muted" style="margin:10px 4px 0">Tout est rempli comme prévu. Corrige ce qui a changé et décoche ce que tu n'as pas fait.</p>` : ''}
     ${L.items.map((it, i) => liveBox(it, i)).join('')}
@@ -4907,7 +5054,7 @@ async function feedReload(k) {
 function logView(id) {
   openPane({title: 'Séance', render: () => {
     const l = S.logs[id]; if (!l) return '';
-    return `<div class="dhead"><span class="chiptag">${l.kind === 'gym' ? 'Musculation' : 'Piste'}</span><div class="bigname" style="font-size:1.625rem">${esc(l.name)}</div><p class="small muted">${esc(cap(fmtDay(l.date)))}</p></div>
+    return `<div class="dhead"><span class="chiptag">${l.kind === 'gym' ? 'Musculation' : 'Sprint'}</span><div class="bigname" style="font-size:1.625rem">${esc(l.name)}</div><p class="small muted">${esc(cap(fmtDay(l.date)))}</p></div>
       <div class="stats"><div><b>${l.min} min</b><span>durée</span></div><div><b>${l.rpe}/10</b><span>RPE</span></div><div><b>${l.kind === 'gym' ? fx(l.tonnage / 1000, 1) + ' t' : fx(l.sprintM) + ' m'}</b><span>${l.kind === 'gym' ? 'soulevées' : 'de sprint'}</span></div></div>
       <div class="list" style="margin-top:12px">${l.items.map(it => `<div class="rowbtn" style="display:block"><b>${esc(exOf(it.ex).n)}</b><span class="meta">${it.sets ? it.sets.map(s => (s.kg ? fx(s.kg, s.kg % 1 ? 1 : 0) + ' kg × ' : '') + s.reps).join(' · ') : it.reps.map(r => r.dist + ' m' + (r.t ? ' en ' + fx(r.t, 2) + ' s' : '')).join(' · ')}</span></div>`).join('')}</div>
       ${l.note ? `<h2>Note</h2><div class="card why">${esc(l.note)}</div>` : ''}
@@ -4939,7 +5086,7 @@ function musCard() {
   return `<div class="card"><div class="chead"><span class="eyebrow">Charge par muscle · 7 jours</span><button class="small" style="color:var(--accent);font-weight:600" data-mlims>Limites</button></div>
     ${st.filter(x => x.week > 0).sort((a, b) => b.pct - a.pct).map(x => `<div class="musrow"><span>${esc(x.n)}</span><span class="bar"><i style="width:${Math.min(100, x.pct).toFixed(0)}%;background:${col[musZone(x.pct)]}"></i></span><b>${Math.round(x.pct)} %</b></div>`).join('')}
     ${bal.length ? `<div class="sec-label" style="margin-top:8px">Équilibre</div>${bal.map(b => `<p class="small" style="margin:4px 0;${b.off ? 'color:var(--bad)' : ''}">${esc(b.n)} : ${fx(b.r, 2)} ${b.off ? '· déséquilibré' : '· correct'}</p>`).join('')}` : ''}
-    <p class="small muted" style="margin-top:8px">Muscu : répétitions × intensité × part du muscle. Piste : mètres ÷ 10 × intensité × facteur de stress × part du muscle, tes coefficients.</p></div>`;
+    <p class="small muted" style="margin-top:8px">Muscu : répétitions × intensité × part du muscle. Sprint : mètres ÷ 10 × intensité × facteur de stress × part du muscle, tes coefficients.</p></div>`;
 }
 function musLimits() {
   openPane({title: 'Limites par muscle', render: () => `<p class="small muted" style="margin:16px 4px 6px">Charge maximale sur 7 jours pour chaque muscle. Au-delà, l'appli te prévient.</p>
