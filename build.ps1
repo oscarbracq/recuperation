@@ -13,9 +13,10 @@ $page = $page.Replace("const db = window.claude?.use ? await window.claude.use('
 
 $head = @'
 <!doctype html>
-<html lang="fr">
+<html lang="fr" translate="no">
 <head>
 <meta charset="utf-8">
+<meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -42,7 +43,7 @@ img{max-width:100%}
 '@
 $scripts = @'
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=60"></script>
+<script src="supabase-db.js?v=61"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
