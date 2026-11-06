@@ -900,6 +900,19 @@ details.slow[open]>summary h2::after{content:" ▴"}
 .chip.relink{margin:2px 0 6px 56px;font-size:.75rem}
 .nextses{outline:2px solid color-mix(in srgb,var(--accent) 55%,transparent);outline-offset:-2px}.donel .doneses{opacity:.45}
 .plfilt{margin-top:8px}
+#e-date{min-width:175px;flex:none;width:auto;text-align:right}
+.painbtns{display:grid;grid-template-columns:repeat(11,1fr);gap:4px;margin-top:6px}.painbtns button{height:36px;border-radius:10px;background:var(--card2);font-weight:700;font-size:.875rem;color:var(--fg2)}
+.painbtns button[aria-pressed="true"]{background:var(--blue,#2F7BF5);color:#fff}.painbtns button.hi[aria-pressed="true"]{background:var(--bad)}.painl .hint{display:block;margin-top:8px}
+.zoom .zhide{display:block;margin:10px auto 0;color:var(--fg2)}
+.parts .prow{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}.parts .prow:first-of-type{border-top:0}
+.parts .prow span{font-weight:600;font-size:.875rem;text-transform:uppercase;letter-spacing:.03em}.parts .prow small{display:block;text-transform:none;letter-spacing:0;font-weight:400;color:var(--fg3);font-size:.75rem;margin-top:2px}
+.parts .prow b{font-variant-numeric:tabular-nums;font-size:1.0625rem}.ar{font-style:normal;font-size:.75rem;width:14px;text-align:center}.ar.up{color:var(--good)}.ar.dn{color:var(--warn)}.ar.eq,.ar.neu{color:var(--fg3)}
+.parts .prow:has(.lv){grid-template-columns:1fr 64px 52px}.lv{display:flex;gap:3px}.lv s{flex:1;height:4px;border-radius:2px;background:var(--card2)}.lv.low s:nth-child(1){background:var(--warn)}.lv.ok s:nth-child(2){background:var(--fg2)}.lv.opt s:nth-child(3){background:var(--good)}
+.parts .prow:has(.lv) b{text-align:right}.lvleg{display:flex;justify-content:center;gap:14px;font-size:.75rem;color:var(--fg2);margin-top:8px;padding:6px;border-radius:10px;background:var(--card2)}.lvleg i{display:inline-block;width:12px;height:4px;border-radius:2px;margin-right:5px;vertical-align:middle}.lvleg .low{background:var(--warn)}.lvleg .ok{background:var(--fg2)}.lvleg .opt{background:var(--good)}
+.pfoot{font-size:.75rem;color:var(--fg3);margin:8px 0 0;text-align:center}
+.impl{display:flex;justify-content:space-between;font-size:.6875rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--fg2);margin-bottom:6px}.impact .pos{color:var(--good)}.impact .neg{color:var(--warn)}
+.imp{padding:10px 12px;border-radius:12px;background:var(--card2);margin-top:6px}.imh{display:flex;justify-content:space-between;font-size:.8125rem;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.imb{position:relative;height:6px;margin-top:8px;border-radius:3px;background:repeating-linear-gradient(-45deg,transparent 0 3px,color-mix(in srgb,var(--fg3) 30%,transparent) 3px 5px)}.imb i{position:absolute;top:0;bottom:0;border-radius:3px}.imb i.pos{background:var(--good)}.imb i.neg{background:var(--warn)}.imb s{position:absolute;left:50%;top:-2px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:var(--fg)}
 .gymrow{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 4px;border-top:1px solid var(--line)}.gymrow:first-of-type{border-top:0}.gymrow .meta{display:block;font-size:.8125rem;color:var(--fg2)}.gymrow i{color:var(--accent);font-style:normal;font-weight:700}.gymrow.on b{color:var(--accent)}
 .chainr{display:grid;gap:4px;margin-top:10px;font-size:.8125rem;color:var(--fg2)}.chainr b{color:var(--fg);margin-left:6px}
 .setrow.hd{font-size:.625rem;color:var(--fg3);text-transform:uppercase;letter-spacing:.05em;font-weight:600;text-align:center}
@@ -1013,15 +1026,14 @@ details.slow[open]>summary h2::after{content:" ▴"}
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=59"></script>
+<script src="supabase-db.js?v=60"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js');
   navigator.serviceWorker.addEventListener('controllerchange', () => { if (had) location.reload(); });
 }</script>
-<script>
-const $ = s => document.querySelector(s);
+<script>const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const key = d => { const z = new Date(d.getTime() - d.getTimezoneOffset()*60000); return z.toISOString().slice(0,10); };
 const addDays = (k, n) => { const d = new Date(k + 'T12:00:00'); d.setDate(d.getDate() + n); return key(d); };
@@ -1123,6 +1135,8 @@ const ZONE = {good: 'Récupération élevée', warn: 'Récupération modérée',
 // Pains are temporary and free-form: {label: 0-10} per day. The legacy single `pain` field still counts.
 function pains(k) { const p = {...(M(k, 'pains') || {})}; if (M(k, 'pain') != null && !Object.keys(p).length) p['Dos'] = M(k, 'pain'); return p; }
 function maxPain(k) { const v = Object.values(pains(k)); return v.length ? Math.max(...v) : null; }
+// "Cuisse (arrière) G" → "cuisse arrière gauche".
+const painWords = l => String(l).replace(/[()]/g, '').replace(/ G$/, ' gauche').replace(/ D$/, ' droite').replace(/\s+/g, ' ').toLowerCase();
 function painActive() { for (let i = 0; i < 14; i++) if ((maxPain(addDays(TODAY, -i)) ?? 0) > 0) return true; return false; }
 const COMMON_PAINS = ['Dos', 'Ischios', 'Quadriceps', 'Mollet', 'Tendon d\'Achille', 'Genou', 'Cheville', 'Hanche', 'Épaule'];
 // A day with a planned session is a high day; otherwise the high days chosen in Training's week planner.
@@ -2338,7 +2352,7 @@ function homePara() {
   const C = [];
   // Each line joins the parts it concerns (dots: T training, N nutrition, R recovery); the score orders them.
   const hurt = [TODAY, addDays(TODAY, -1)].flatMap(k => Object.entries(pains(k)).filter(([, v]) => v >= 3).map(([n]) => n));
-  if (hurt.length) C.push({s: 96, c: ['R', 'T'], t: `Douleur notée (${[...new Set(hurt)].slice(0, 2).join(', ').toLowerCase()}) : ${p && !done.length ? p.name + ' sans sprint maximal ni pliométrie sur cette zone' : 'rien d\'intense sur cette zone'}, et note son évolution ce soir.`});
+  if (hurt.length) C.push({s: 96, c: ['R', 'T'], t: `Douleur notée à surveiller, ${[...new Set(hurt)].slice(0, 2).map(painWords).join(' et ')} : ${p && !done.length ? p.name + ' sans sprint maximal ni pliométrie sur cette zone' : 'rien d\'intense sur cette zone'}, et note son évolution ce soir.`});
   if (rec && z === 'bad') C.push({s: 92, c: ['R', 'T', 'N'], t: `Ton corps n'a pas fini de récupérer (${rec.score} %${vfc ? ', ' + vfc : ''})${p && !done.length ? ` : ${p.name} en qualité seulement, 30 à 40 % de volume en moins` : ' : journée calme'}, et garde tous les glucides de ton plan pour recharger.`});
   else if (rec && z === 'mid' && p && !done.length) C.push({s: 72, c: ['R', 'T'], t: `Récupération moyenne (${rec.score} %) : ${p.name}, qualité gardée et 20 % de volume en moins.`});
   else if (rec && p && !done.length) C.push({s: 58, c: ['R', 'T'], t: `Bien rechargé (${rec.score} %) : ${p.name}, charges normales, tu peux pousser.`});
@@ -3214,6 +3228,7 @@ function vToday() {
         ${A?.summary ? `<p class="summary">${esc(A.summary)}</p>` : ''}
       </article>
       ${coachRecovery(rec, tgt, kG)}
+      ${recParts(kG)}${sleepParts(kG)}${effortParts()}
       ${rec?.ill ? '<div class="card ill"><b>Possible début d\'infection</b><p class="small" style="margin:6px 0 0">Ta respiration ou ta température de peau de la nuit sortent de ta normale. Journée calme, hydrate-toi, et pas d\'intensité tant que ça ne redescend pas.</p></div>' : ''}
       ${careCard()}${diagHtml(recDiag(), 'Tendances')}${recovCard()}
     </div>
@@ -3421,6 +3436,80 @@ function testoCard() {
       ${f(null, `Moments solo : ${mast} sur 7 jours, noté pour info. Les études ne montrent qu'un effet faible et passager (Exton 2001 ; Jiang 2003 : petit pic vers le 7e jour d'abstinence, puis retour à la normale), aucun effet durable : l'appli n'en tire rien.`)}</ul>
     <p class="small muted" style="margin:10px 0 0">La testostérone n'est pas l'hormone de croissance : ce sont deux hormones différentes. Toutes deux montent avec le sommeil profond et l'entraînement en force.</p></div>`;
 }
+// Each marker of the night against the 30 days before, with the direction that is good for it.
+const arrowOf = (v, m, better, eps) => v == null || m == null ? '' : Math.abs(v - m) < eps ? '<i class="ar eq">●</i>' : `<i class="ar ${(v > m) === (better === 'high') ? 'up' : 'dn'}">${v > m ? '▲' : '▼'}</i>`;
+function recParts(kG) {
+  if (!kG) return '';
+  const p30 = f => mean(series(f, 30, addDays(kG, -1)).map(x => x.v).filter(v => v != null));
+  const R = [['VFC', G(kG, 'hrv'), p30('hrv'), 'high', 2, v => fx(v) + ' ms'], ['FC au repos', G(kG, 'rhr'), p30('rhr'), 'low', 1, v => fx(v) + ' bpm'],
+    ['Respiration', G(kG, 'resp'), p30('resp'), 'low', .3, v => fx(v, 1) + ' /min'], ['Performance du sommeil', sleepScore(kG)?.score, mean([...Array(30)].map((_, i) => sleepScore(addDays(kG, -1 - i))?.score).filter(v => v != null)), 'high', 2, v => fx(v) + ' %']];
+  const up = R.filter(r => r[1] != null && r[2] != null && Math.abs(r[1] - r[2]) >= r[4]), good = up.filter(r => (r[1] > r[2]) === (r[3] === 'high')), bad = up.filter(r => !good.includes(r));
+  const txt = !up.length ? 'Tout est dans tes valeurs habituelles : ton corps est stable.' : `${good.length ? good.map((r, i) => i ? r[0].replace(/^(Respiration|Performance)/, x => x.toLowerCase()) : r[0]).join(', ').replace(/, ([^,]*)$/, ' et $1') + (good.length > 1 ? ' vont' : ' va') + ' dans le bon sens' : ''}${good.length && bad.length ? ', mais ' : ''}${bad.length ? bad.map(r => r[0].toLowerCase()).join(', ') + (bad.length > 1 ? ' sont' : ' est') + ' moins bon' + (bad.length > 1 ? 's' : '') + ' que d\'habitude' : ''}.`;
+  return `<div class="card parts"><span class="eyebrow">Ta récupération en détail</span>${R.filter(r => r[1] != null).map(r => `<div class="prow"><span>${r[0]}</span><b>${r[5](r[1])}</b>${arrowOf(r[1], r[2], r[3], r[4])}</div>`).join('')}
+    <p class="pfoot">▲▼ cette nuit par rapport à tes 30 derniers jours · vert = dans le bon sens</p><p class="small" style="margin:8px 0 0">${esc(txt.charAt(0).toUpperCase() + txt.slice(1))}</p></div>`;
+}
+// Sleep performance: hours against your need (half), regularity of bed and wake times over 7 nights (a quarter),
+// efficiency = asleep ÷ (asleep + awake) (a quarter). Below 70 % short, 70 to 85 % enough, above optimal.
+function sleepScore(k) {
+  const h = VAL.sleepH(k); if (h == null) return null;
+  const hrs = clamp(h / sleepGoal() * 100, 0, 100);
+  const bs = [], ws = []; for (let i = 0; i < 7; i++) { const d = addDays(k, -i), b = hm2min(G(d, 'bed')), w = G(d, 'wake') ? tmin(G(d, 'wake')) : null; if (b != null) bs.push(b); if (w != null) ws.push(w); }
+  const mad = a => { if (a.length < 3) return null; const m = mean(a); return mean(a.map(x => Math.abs(x - m))); };
+  const mb = mad(bs), mw = mad(ws), reg = mb != null && mw != null ? clamp(100 - (mb + mw) / 2 * 1.2, 0, 100) : null;
+  const aw = G(k, 'awakeS'), eff = aw != null ? clamp(G(k, 'sleepS') / (G(k, 'sleepS') + aw) * 100, 0, 100) : null;
+  const parts = [[hrs, .5], [reg, .25], [eff, .25]].filter(x => x[0] != null), w = parts.reduce((a, x) => a + x[1], 0);
+  return {score: Math.round(parts.reduce((a, x) => a + x[0] * x[1], 0) / w), hrs, reg, eff, mb, mw};
+}
+const lvl3 = v => v == null ? '' : v >= 85 ? 'opt' : v >= 70 ? 'ok' : 'low';
+function sleepParts(kG) {
+  const s = kG ? sleepScore(kG) : null; if (!s) return '';
+  const row = (n, v, hint) => v == null ? '' : `<div class="prow"><span>${n}<small>${hint}</small></span><i class="lv ${lvl3(v)}"><s></s><s></s><s></s></i><b>${Math.round(v)} %</b></div>`;
+  const weak = [['les heures', s.hrs], ['la régularité', s.reg], ['l\'efficacité', s.eff]].filter(x => x[1] != null).sort((a, b) => a[1] - b[1])[0];
+  return `<div class="card parts"><div class="chead"><span class="eyebrow">Performance du sommeil</span><b class="num">${s.score} %</b></div>
+    ${row('Heures par rapport au besoin', s.hrs, `${hmH(VAL.sleepH(kG))} sur ${hmH(sleepGoal())}`)}${row('Régularité', s.reg, s.mb != null ? `coucher ±${Math.round(s.mb)} min, lever ±${Math.round(s.mw)} min sur 7 nuits` : '')}${row('Efficacité', s.eff, 'temps endormi sur temps au lit')}
+    <div class="lvleg"><span><i class="low"></i>Insuffisant</span><span><i class="ok"></i>Suffisant</span><span><i class="opt"></i>Optimal</span></div>
+    <p class="small" style="margin:8px 0 0">${s.score >= 85 ? 'Excellente nuit : continue exactement comme ça.' : `Ta nuit est ${s.score >= 70 ? 'suffisante' : 'insuffisante'}. Le levier le plus simple : ${weak[0]}${weak[0] === 'la régularité' ? ', te coucher et te lever à la même heure chaque jour' : weak[0] === 'les heures' ? ', te coucher un peu plus tôt' : ', moins d\'écran et une chambre fraîche'}.`}</p></div>`;
+}
+// The effort of the day taken apart, against the daily average of the last 30 days.
+function effortParts() {
+  const k = effortDay(TODAY) ? TODAY : addDays(TODAY, -1);
+  const parts = d => { let lo = 0, hi = 0; for (const a of G(d, 'acts') || []) { if (GYM_RE.test(a.type)) continue; const x = a.avgHr ? a.avgHr / S.hrMax : .6; (x >= .8 ? (hi += a.min || 0) : (lo += a.min || 0)); }
+    for (const t of G(d, 'trips') || []) lo += t.min || 0;
+    const gym = M(d, 'gymRpe') ? M(d, 'gymMin') || 90 : logsOn(d).filter(l => l.kind === 'gym').reduce((s, l) => s + (l.min || 0), 0);
+    return {lo, hi, gym, sp: M(d, 'sprintM') || logsOn(d).reduce((s, l) => s + (l.sprintM || 0), 0)}; };
+  const t = parts(k), av = f => mean([...Array(30)].map((_, i) => parts(addDays(k, -1 - i))[f]));
+  const hm = m => `${Math.floor(m / 60)}:${String(Math.round(m % 60)).padStart(2, '0')}`;
+  const R = [['Activité modérée', 'FC sous 80 % de ta max', t.lo, av('lo'), hm], ['Activité intense', 'FC au-dessus de 80 % de ta max', t.hi, av('hi'), hm], ['Musculation', 'temps de séance', t.gym, av('gym'), hm], ['Sprint', 'mètres au-dessus de 90 %', t.sp, av('sp'), v => fx(v) + ' m']];
+  const e = effortDay(k); if (!e && !R.some(r => r[2])) return '';
+  return `<div class="card parts"><div class="chead"><span class="eyebrow">Effort ${k === TODAY ? 'du jour' : 'd\'hier'} en détail</span><b class="num">${fx(e, 1)}<small> /21</small></b></div>
+    ${R.map(r => `<div class="prow"><span>${r[0]}<small>${r[1]}</small></span><b>${r[4](r[2])}</b>${arrowOf(r[2], r[3], 'high', .5).replace(/ up| dn/, ' neu')}</div>`).join('')}
+    <p class="pfoot">▲▼ par rapport à ta moyenne par jour des 30 derniers jours</p>
+    <p class="small" style="margin:8px 0 0">${e >= 18 ? 'Effort maximal : ton corps a besoin d\'une vraie nuit et d\'une journée calme derrière.' : e >= 14 ? 'Effort soutenu : ton système cardiovasculaire et tes muscles ont bien travaillé.' : e >= 10 ? 'Effort modéré : bonne dose sans entamer ta récupération.' : 'Effort léger : parfait pour un jour de récupération.'}</p></div>`;
+}
+// What his habits do to his recovery, like Whoop's journal insights: over the last 90 days, the average recovery of the
+// morning after a day with the habit, against the mornings after a day without it. It shows a link, not a proof.
+function impactCard() {
+  const B = [['Coucher avant 23 h 30', k => { const b = hm2min(G(addDays(k, 1), 'bed')); return b == null ? null : b <= 23 * 60 + 30; }],
+    ['Nuit de 8 h 30 ou plus', k => { const h = VAL.sleepH(addDays(k, 1)); return h == null ? null : h >= 8.5; }],
+    ['Eau : objectif atteint', k => S.manual[k] ? waterOf(k).L >= 2 : null], ['Écart alimentaire', k => S.manual[k] ? M(k, 'nutrition') > 0 : null],
+    ['Effort de 14 ou plus', k => { const e = effortDay(k); return e == null ? null : e >= 14; }], ['Séance de musculation', k => !!(M(k, 'gymRpe') || logsOn(k).some(l => l.kind === 'gym'))],
+    ['Séance de sprint', k => !!(M(k, 'trackRpe') || logsOn(k).some(l => l.kind === 'track'))], ['Douleur notée', k => S.manual[k] ? (maxPain(k) || 0) > 0 : null],
+    ['Moment solo', k => S.manual[k] ? !!M(k, 'mast') : null]];
+  const items = new Set(); for (let i = 1; i <= 90; i++) Object.keys(routineDone(addDays(TODAY, -i))).forEach(x => items.add(x));
+  for (const x of items) B.push([x, k => S.manual[k] ? !!routineDone(k)[x] : null]);
+  const out = [];
+  for (const [n, f] of B) {
+    const yes = [], no = [];
+    for (let i = 1; i <= 90; i++) { const k = addDays(TODAY, -i), r = recovery(addDays(k, 1))?.score; if (r == null) continue; const v = f(k); if (v === true) yes.push(r); else if (v === false) no.push(r); }
+    if (yes.length >= 3 && no.length >= 3) out.push([n, (mean(yes) / mean(no) - 1) * 100, yes.length]);
+  }
+  if (!out.length) return `<div class="card"><span class="eyebrow">Impact de tes habitudes</span><p class="small muted" style="margin:6px 0 0">Encore quelques jours de questionnaire : il faut au moins 3 jours avec et 3 jours sans chaque habitude.</p></div>`;
+  out.sort((a, b) => b[1] - a[1]); const mx = Math.max(10, ...out.map(x => Math.abs(x[1])));
+  return `<div class="card impact"><div class="chead"><span class="eyebrow">Impact de tes habitudes sur ta récupération</span></div><p class="small muted" style="margin:2px 0 8px">90 derniers jours · actualisé chaque jour</p>
+    <div class="impl"><span class="neg">▼ N'aide pas</span><span>% d'impact</span><span class="pos">Aide ▲</span></div>
+    ${out.map(([n, v, c]) => `<div class="imp"><div class="imh"><span>${esc(n)}</span><b class="${v >= 0 ? 'pos' : 'neg'}">${v >= 0 ? '+' : '−'}${fx(Math.abs(v))} %</b></div><div class="imb"><i class="${v >= 0 ? 'pos' : 'neg'}" style="${v >= 0 ? 'left:50%' : 'right:50%'};width:${(Math.abs(v) / mx * 50).toFixed(1)}%"></i><s></s></div></div>`).join('')}
+    ${detailsBox('Pour chaque habitude : ta récupération moyenne le lendemain des jours où tu l\'as faite, comparée aux lendemains des jours sans. Il faut au moins 3 jours de chaque. C\'est un lien observé sur tes données, pas une preuve : une séance intense et une nuit courte arrivent souvent ensemble.')}</div>`;
+}
 function vTrends() {
   const ORDER = ['hrv', 'rhr', 'sleepH', 'recovery', 'effort', 'sprint', 'resp', 'pain', 'runKm', 'bikeKm', 'vo2', 'pwv', 'physio', 'gvo2'];
   const ms = METRICS().filter(m => m.sec !== 'comp' && !(m.id === 'sprint' && !sumN('sprint', 90))).sort((a, b) => (ORDER.indexOf(a.id) + 1 || 99) - (ORDER.indexOf(b.id) + 1 || 99)).map(m => ({...m, src: SRC[m.id]}));
@@ -3436,7 +3525,7 @@ function vTrends() {
     <header class="top"><div class="sub">Des plus utiles et fiables aux moins utiles</div><h1>Tendances</h1></header>
     ${granSeg()}
     <div class="card" style="margin-top:10px;padding:8px 12px">${periodNav(P)}</div>
-    <div class="stack" style="margin-top:12px">${ms.map((m, j) => (j === ti ? testo : '') + card(m)).join('')}${ti >= ms.length ? testo : ''}</div>`;
+    <div class="stack" style="margin-top:12px">${impactCard()}${ms.map((m, j) => (j === ti ? testo : '') + card(m)).join('')}${ti >= ms.length ? testo : ''}</div>`;
 }
 document.addEventListener('click', e => { if (!e.target.closest('[data-testo]')) return; TESTO_OPEN = !TESTO_OPEN; render(); });
 
@@ -3685,10 +3774,10 @@ function painSection() {
     ${bodySvg(view)}
     ${r ? `<div class="zoom"><div class="zh"><b>${esc(r[1])}${sideTxt}</b><button type="button" class="chip" data-struct="${esc(zoneKey)}" data-stype="zone" aria-pressed="${zoneKey in draft.pains}">${zoneKey in draft.pains ? 'Zone notée ✓' : 'Noter la zone'}</button></div>
       ${draft._precise ? `<span class="eyebrow">Muscles et tendons</span><div class="chips2b">${r[6].map(st => chip(st, 'muscle')).join('')}</div>
-        <span class="eyebrow">Articulations et os</span><div class="chips2b">${r[7].map(st => chip(st, 'joint')).join('')}</div>` : `<button type="button" class="linkbtn" data-eprecise>Préciser le muscle ou l'articulation</button>`}</div>`
+        <span class="eyebrow">Articulations et os</span><div class="chips2b">${r[7].map(st => chip(st, 'joint')).join('')}</div>` : `<button type="button" class="linkbtn" data-eprecise>Préciser le muscle ou l'articulation</button>`}<button type="button" class="linkbtn zhide" data-region="${esc(draft._region)}">Masquer</button></div>`
     : '<span class="hint" style="text-align:center">D = droite, G = gauche. Les zones notées sont en rouge.</span>'}</div>
-    ${Object.entries(draft.pains).map(([l, v]) => `<div class="row col painl"><span class="l" style="display:flex;justify-content:space-between;align-items:center;gap:8px">${esc(l)}<button type="button" class="chip" data-spot="${esc(l)}" style="padding:4px 10px;font-size:.75rem">Retirer</button></span><div class="rangeline"><input type="range" min="0" max="10" value="${v}" data-pain="${esc(l)}" aria-label="Douleur ${esc(l)}"><output>${v}</output></div></div>`).join('')}
-    ${Object.keys(draft.pains).length ? '<span class="hint" style="padding:0 4px">0 = rien · 1-2 = gêne tolérable · 3 et plus = réduis la charge sur cette zone</span>' : ''}`;
+    ${Object.entries(draft.pains).map(([l, v]) => `<div class="row col painl"><span class="l" style="display:flex;justify-content:space-between;align-items:center;gap:8px">${esc(l)}<button type="button" class="chip" data-spot="${esc(l)}" style="padding:4px 10px;font-size:.75rem">Retirer</button></span><div class="painbtns" role="group" aria-label="Douleur ${esc(l)} sur 10">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<button type="button" data-painset="${esc(l)}|${n}" aria-pressed="${+v === n}" class="${n >= 3 ? 'hi' : ''}">${n}</button>`).join('')}</div>
+      ${l === Object.keys(draft.pains).at(-1) ? '<span class="hint">0 = rien · 1-2 = gêne tolérable · 3 et plus = réduis la charge sur cette zone</span>' : ''}</div>`).join('')}`;
 }
 // Activities he adds himself (no watch, or a second session): type, minutes, RPE, distance. They count in the effort.
 const MAN_ACT = [['gym', 'Musculation'], ['track', 'Athlétisme'], ['run', 'Course'], ['bike', 'Vélo'], ['swim', 'Natation'], ['walk', 'Marche'], ['class', 'Cours collectif'], ['mob', 'Mobilité'], ['team', 'Sport collectif'], ['other', 'Autre']];
@@ -3993,6 +4082,7 @@ document.addEventListener('click', e => {
     return;
   }
   const rg = e.target.closest('[data-region]'); if (rg) { draft._region = draft._region === rg.dataset.region ? null : rg.dataset.region; $('#e-pains').innerHTML = painSection(); }
+  const ps = e.target.closest('[data-painset]'); if (ps) { const i = ps.dataset.painset.lastIndexOf('|'); draft.pains[ps.dataset.painset.slice(0, i)] = +ps.dataset.painset.slice(i + 1); $('#e-pains').innerHTML = painSection(); }
   const st = e.target.closest('[data-struct]') || e.target.closest('[data-spot]');
   if (st) { const l = st.dataset.struct || st.dataset.spot; if (l in draft.pains) { delete draft.pains[l]; delete draft.painTypes[l]; } else { draft.pains[l] = 1; draft.painTypes[l] = st.dataset.stype || 'muscle'; } $('#e-pains').innerHTML = painSection(); }
   const bv = e.target.closest('[data-bview]'); if (bv) { draft._view = bv.dataset.bview; draft._region = null; $('#e-pains').innerHTML = painSection(); }
@@ -6142,8 +6232,8 @@ function fJournal() {
     <div class="card" style="padding:8px 12px"><div class="daynav"><button data-fdayoff="-1" aria-label="Jour précédent">‹</button><b>${esc(title)}</b><button data-fdayoff="1" aria-label="Jour suivant" ${k >= TODAY ? 'disabled' : ''}>›</button></div></div>
     <div class="stack" style="margin-top:12px">
       <article class="card">
-        <div class="calring"><div class="rw">${ring(t.kcal, g.kcal, 'var(--accent)', 'lg')}<b>${fx(Math.abs(left))}<small>${left >= 0 ? 'restantes' : 'en trop'}</small></b></div>
-          <div class="calrows"><div><span class="muted">Objectif</span><b>${fx(g.kcal)}</b></div><div><span class="muted">Mangé</span><b>${fx(t.kcal)}</b></div><div><span class="muted">Restant</span><b style="color:${left >= 0 ? 'var(--accent)' : 'var(--warn)'}">${fx(left)}</b></div></div></div>
+        <div class="calring"><div class="rw">${ring(t.kcal, g.kcal, 'var(--accent)', 'lg')}<b>${fx(Math.abs(left))}<small>${left >= 0 ? 'kcal restantes' : 'kcal en trop'}</small></b></div>
+          <div class="calrows"><div><span class="muted">Objectif du jour</span><b>${fx(g.kcal)} kcal</b></div><div><span class="muted">Déjà mangé</span><b>${fx(t.kcal)} kcal</b></div><div><span class="muted">${left >= 0 ? 'Reste à manger' : 'Au-dessus de l\'objectif'}</span><b style="color:${left >= 0 || left > -100 ? 'var(--accent)' : 'var(--warn)'}">${left >= 0 ? fx(left) : '+' + fx(-left)} kcal</b></div></div></div>
         <div class="macros">${macro('Protéines', t.p, g.p, '#E0352B')}${macro('Glucides', t.c, g.c, '#2F7BF5')}${macro('Lipides', t.f, g.f, '#E8900A')}</div>
       </article>
       ${k === TODAY ? coachNutrition(k) : ''}
