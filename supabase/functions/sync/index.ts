@@ -143,18 +143,19 @@ async function syncGarmin(nDays: number, debug: boolean) {
     if (a.maxHR > hrMax) hrMax = a.maxHR;
     const d = day(k);
     // The API returns every activity of the day, so the day's list and bike totals are rebuilt from scratch.
-    if (!seen.has(k)) { seen.add(k); d.acts = []; d.bikeKm = undefined; d.bikeMin = undefined; }
+    if (!seen.has(k)) { seen.add(k); d.acts = []; d.trips = []; d.bikeKm = undefined; d.bikeMin = undefined; }
     const min = r1((a.movingDuration || a.duration || 0) / 60) || 0, type = a.activityType?.typeKey || 'other';
     // Bike totals include commutes: he gets around by bike, so it is real daily load.
     if (/cycling|biking/.test(type)) { d.bikeKm = r1(((d.bikeKm as number) || 0) + (a.distance || 0) / 1000); d.bikeMin = Math.round(((d.bikeMin as number) || 0) + min); }
     // Short bike/walk rides under 12 min are commutes: too little load to matter, too much noise.
-    if (min < 12 && /cycling|biking|walking/.test(type)) continue;
+    // They still go in "trips" (shown one by one in the app, paired as round trips) but never in the load.
+    if (min < 12 && /cycling|biking|walking/.test(type)) { (d.trips as unknown[]).push(clean({type, start: String(a.startTimeLocal || '').slice(11, 16), min, km: a.distance ? r1(a.distance / 1000) : undefined})); continue; }
     const o: Record<string, unknown> = {type, start: String(a.startTimeLocal || '').slice(11, 16), min, km: a.distance ? r1(a.distance / 1000) : undefined,
       avgHr: a.averageHR ? Math.round(a.averageHR) : undefined, maxHr: a.maxHR ? Math.round(a.maxHR) : undefined};
     if (/running|track/.test(type)) { o.name = a.activityName; o.vmax = a.maxSpeed ? r1(a.maxSpeed * 3.6) : undefined; }
     (d.acts as unknown[]).push(clean(o));
   }
-  for (const d of Object.values(days)) { clean(d); if (Array.isArray(d.acts) && !d.acts.length) delete d.acts; }
+  for (const d of Object.values(days)) { clean(d); if (Array.isArray(d.acts) && !d.acts.length) delete d.acts; if (Array.isArray(d.trips) && !d.trips.length) delete d.trips; }
   const n = await mergeMonths('garmin', days, doc => { if (hrMax > ((doc.hrMax as number) || 0)) doc.hrMax = hrMax; });
   return debug ? {days: n, keyExpires, keyErr, raw} : {days: n, keyExpires, keyErr: keyErr || undefined};
 }
