@@ -200,15 +200,16 @@ async function sessionWatch(st: any, TODAY: string, hm: string, token: string | 
     try { await fetch(Deno.env.get('SUPABASE_URL') + '/functions/v1/sync', {method: 'POST', headers: {'x-recup-token': syncToken, Authorization: 'Bearer ' + (st.anonKey || Deno.env.get('SUPABASE_ANON_KEY') || ''), 'Content-Type': 'application/json'}, body: '{}', signal: AbortSignal.timeout(40000)}); } catch (_) { /* the check still runs on what is there */ }
   }
   const S = await loadData();
-  const acts = (S.g[TODAY]?.acts || []).filter((a: any) => /strength|track/.test(a.type) && (a.min || 0) >= 10);
+  const acts = (S.g[TODAY]?.acts || []).filter((a: any) => (a.min || 0) >= 10);
   // Already noted: an RPE in the day journal (written by hand or by a Training session) for that kind of session.
   const man = S.manual?.[TODAY] || {};
-  const noted = (a: any) => /strength/.test(a.type) ? !!man.gymRpe : !!man.trackRpe;
+  const noted = (a: any) => !!man.actRpe?.[a.start] || (/strength/.test(a.type) ? !!man.gymRpe : /track/.test(a.type) ? !!man.trackRpe : false);
   const logged = acts.length > 0 && acts.every(noted);
   const seen: string[] = st.seen?.[TODAY] || [], a = acts.find((x: any) => !seen.includes(x.start) && !noted(x));
   if (!a || logged) return {watched: hm, acts: acts.length, logged};
   st.seen = {[TODAY]: [...seen, a.start]}; await putPrivate('push', st);
-  const results = await sendAll(st, {title: `Séance reçue · ${/strength/.test(a.type) ? 'Musculation' : 'Sprint'} ${Math.round(a.min)} min`, body: 'Note ton RPE à chaud : la durée est déjà remplie par ta montre.', tag: 'tnr-rpe', url: './?rpe=1'});
+  const kind = /strength/.test(a.type) ? 'Musculation' : /track/.test(a.type) ? 'Sprint' : (a.name || 'Activité');
+  const results = await sendAll(st, {title: `${kind} reçue · ${Math.round(a.min)} min`, body: 'Note ton RPE à chaud dans le questionnaire du jour : la durée est déjà remplie par ta montre.', tag: 'tnr-rpe', url: './?rpe=1'});
   return {sessionNotified: a.start, results};
 }
 
