@@ -175,8 +175,10 @@ details.cdet>span{display:block;margin-top:4px}
 .btr .l{display:flex;flex-direction:column;font-size:.875rem}.btr b{font-size:.875rem;min-width:44px;text-align:right}.btr b.warn{color:var(--warn)}
 .tgcard{display:flex;justify-content:space-between;align-items:center;width:100%;padding:12px 16px;color:var(--fg)}
 .sefrise{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:4px;margin:4px 0 6px}
-.sefrise span{display:flex;flex-direction:column;align-items:center;padding:6px 0;border-radius:8px;background:color-mix(in srgb,var(--bc) 22%,var(--card));border-bottom:3px solid var(--bc)}
-.sefrise span.now{box-shadow:0 0 0 2px var(--fg)}.sefrise b{font-size:.8125rem}.sefrise small{font-size:.5625rem;color:var(--fg2)}
+.cpair{border-top:1px solid var(--line);padding:6px 0}.cpair:first-of-type{border-top:0}.cpair>summary{list-style:none;cursor:pointer}.cpair>summary::-webkit-details-marker{display:none}.cpair .o{color:var(--accent);font-weight:600}.cpair[open] .o{display:none}.cpair em{font-style:normal;font-weight:600}.cpair em.bad{color:var(--bad)}.cpair em.ok{color:var(--good)}
+.sewh{display:flex;justify-content:space-between;align-items:center;width:100%}.sefrise{width:100%}
+.sefrise span,.sefrise button{display:flex;color:var(--fg);flex-direction:column;align-items:center;padding:6px 0;border-radius:8px;background:color-mix(in srgb,var(--bc) 22%,var(--card));border-bottom:3px solid var(--bc)}
+.sefrise .now{box-shadow:0 0 0 2px var(--fg)}.sefrise b{font-size:.8125rem}.sefrise small{font-size:.5625rem;color:var(--fg2)}
 .seblk{border-radius:16px;background:var(--card);margin-bottom:8px;padding:6px 10px;border-left:4px solid var(--bc);transition:transform .15s,box-shadow .2s;touch-action:pan-y}
 .seblk.lift{z-index:5;position:relative;box-shadow:0 12px 28px rgba(0,0,0,.35);transition:none}
 .sebh{display:flex;align-items:center;gap:8px;padding:6px 0}.sebh b{flex:none}.sex{width:30px;height:30px;border-radius:50%;background:var(--card2);color:var(--fg2);font-size:1.125rem}
@@ -583,6 +585,8 @@ svg.body.sil .rg.on{stroke:none;fill:transparent}
 .bald.off summary em{color:var(--bad)}
 .bald p{margin:0 0 8px}
 .pldays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:12px}
+.plnav{display:flex;align-items:flex-start;gap:2px}.plnav .pldays{flex:1;min-width:0}.plarr{flex:none;width:22px;height:48px;display:grid;place-items:center;font:600 1.5rem var(--display);color:var(--accent);line-height:1}
+.plwkn{display:flex;align-items:center;justify-content:center;gap:6px}.plwkn .plarr{height:22px;width:26px;font-size:1.25rem}
 .pldays button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;border-radius:12px;background:var(--card2);color:var(--fg2);font-size:.6875rem;font-weight:600}
 .pldays button b{font:700 1rem var(--display);color:var(--fg)}
 .pldays button[aria-pressed="true"]{background:var(--accent);color:#fff}
@@ -628,8 +632,8 @@ svg.body.sil .rg.on{stroke:none;fill:transparent}
 .plw-info span{color:var(--fg2);overflow:hidden;text-overflow:ellipsis}
 .plw-info small{margin-left:auto;padding-left:10px;color:var(--fg2);font-size:.6875rem;overflow:hidden;text-overflow:ellipsis}
 .plw-g{flex:1;min-height:0;display:flex}
-.plw-days{width:40px;flex:none;display:flex;flex-direction:column}
-.plw-days span{flex:1;display:flex;flex-direction:column;justify-content:center;font-size:.6875rem;color:var(--fg2);font-weight:600;line-height:1.15}
+.plw-days{width:50px;flex:none;display:flex;flex-direction:column}
+.plw-days span{flex:1;display:flex;flex-direction:row;align-items:center;gap:3px;white-space:nowrap;justify-content:flex-start;font-size:.6875rem;color:var(--fg2);font-weight:600;line-height:1.15}
 .plw-days span:first-child{flex:0 0 18px}
 .plw-days b{color:var(--fg);font-family:var(--display)}
 .plw-days span.pltoday,.plw-days span.pltoday b{color:var(--accent)}
@@ -643,7 +647,7 @@ svg.body.sil .rg.on{stroke:none;fill:transparent}
 .plfs .plw-l{position:absolute;top:0;bottom:0;border-left:1px solid var(--line);opacity:.55}
 .plfs .plw-now{position:absolute;top:0;bottom:0;border-left:2px solid var(--bad);z-index:4;pointer-events:none}
 .plw-b{position:absolute;top:2px;bottom:2px;background:var(--pc);border-radius:3px;padding:0 4px;display:flex;align-items:center;overflow:hidden;font-size:.6875rem;font-weight:600;text-align:left;-webkit-touch-callout:none}
-.plw-b > b{white-space:nowrap;font-weight:600}
+.plw-b > b{white-space:nowrap;font-weight:600;overflow:hidden;display:block;line-height:1.1}.plw-b{padding:0 2px}
 .plw-b.sel{box-shadow:0 0 0 2px var(--fg),0 4px 14px rgba(0,0,0,.35);z-index:3;overflow:visible}
 .plw-b.lift{z-index:5;box-shadow:0 0 0 2px var(--fg),0 10px 24px rgba(0,0,0,.45)}
 .plw-hd{position:absolute;top:50%;width:26px;height:36px;margin-top:-18px;display:grid;place-items:center;z-index:2}
@@ -890,7 +894,7 @@ details.slow[open]>summary h2::after{content:" ▴"}
 .setrow{display:grid;grid-template-columns:22px 1fr 1fr 1fr 40px;gap:6px;align-items:center}
 .setrow.e6{grid-template-columns:18px 40px 1fr 1fr 50px 40px;gap:5px}.setrow .eff{padding-left:2px;padding-right:2px}
 .hdtog{font:inherit;font-size:.6875rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);border-radius:8px;padding:5px 4px;white-space:nowrap}
-.edrow .hdtog{display:block;margin-bottom:4px;text-transform:none;letter-spacing:0;font-size:.75rem}
+.edrow .hdtog{display:block;margin:0;padding:0 4px;height:22px;line-height:22px;text-transform:none;letter-spacing:0;font-size:.75rem}div.edrow>label{display:grid;grid-template-rows:22px auto;align-items:center}
 .ramp{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;font-size:.8125rem;color:var(--fg2);margin:8px 0 2px}.ramp b{color:var(--fg);font-weight:600}
 .exn{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.varbtn{font:600 .75rem var(--font);color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);padding:3px 8px;border-radius:999px}
 .cnote{width:100%;margin-top:10px;font-size:.875rem;border-radius:12px}
@@ -901,7 +905,15 @@ details.slow[open]>summary h2::after{content:" ▴"}
 .coach .ctag{font-size:.75rem;color:var(--fg3);font-style:italic}
 .sess.stack{box-shadow:0 5px 0 -2px var(--card2),0 9px 0 -4px color-mix(in srgb,var(--card2) 70%,transparent)}.grp .kids{padding:4px 0 8px 18px;display:grid;gap:4px}.grp .kids .chip{justify-self:start;margin:4px 0 0 4px}
 .chip.relink{margin:2px 0 6px 56px;font-size:.75rem}
-.nextses{outline:2px solid color-mix(in srgb,var(--accent) 55%,transparent);outline-offset:-2px}.donel .doneses{opacity:.45}
+.list.nextl{box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 60%,transparent)}
+.xsel{position:fixed;inset:0;z-index:95;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;opacity:0;transition:opacity .2s}.xsel.on{opacity:1}
+.xsel-card{width:min(560px,100%);max-height:70vh;overflow:auto;background:var(--card);color:var(--fg);border-radius:22px 22px 0 0;padding:8px 0 calc(12px + env(safe-area-inset-bottom,0px));transform:translateY(30px);transition:transform .25s cubic-bezier(.32,.72,0,1)}.xsel.on .xsel-card{transform:none}
+.xsel-card button{display:flex;justify-content:space-between;align-items:center;width:100%;padding:15px 22px;font-size:1rem;color:var(--fg);text-align:left;border-top:1px solid var(--line)}.xsel-card button:first-child{border-top:0}
+.xsel-card button[aria-selected="true"]{color:var(--accent);font-weight:600}.xsel-card i{font-style:normal}
+input[type=date].mini-in,input[type=date]{min-width:165px;flex:none}
+.btnrow{display:flex;gap:10px}.btnrow>.btn{flex:1;min-width:0}
+.pnext{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;margin:12px 0 0;padding:12px 16px;border-radius:16px;background:color-mix(in srgb,var(--accent) 20%,var(--card));color:var(--fg);text-align:left}
+.pnext small{display:block;font-size:.6875rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}.pnext b{font:700 1.25rem var(--display)}.pnext>svg{width:14px;height:14px;color:var(--accent);flex:none}.donel .doneses{opacity:.45}
 .plfilt{margin-top:8px}
 #e-date{min-width:175px;flex:none;width:auto;text-align:right}
 .painbtns{display:grid;grid-template-columns:repeat(11,1fr);gap:4px;margin-top:6px}.painbtns button{height:36px;border-radius:10px;background:var(--card2);font-weight:700;font-size:.875rem;color:var(--fg2)}
@@ -1036,7 +1048,7 @@ details.slow[open]>summary h2::after{content:" ▴"}
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=61"></script>
+<script src="supabase-db.js?v=62"></script>
 <script>if ('serviceWorker' in navigator) {
   // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
   const had = !!navigator.serviceWorker.controller;
@@ -1485,11 +1497,10 @@ function seasonPane() {
     return `<div class="seg" role="group" style="margin:16px 0 10px">${Object.entries(SEASON_TPL).map(([k, t]) => `<button type="button" data-stpl="${k}" aria-pressed="${(se.kind || 'hiver') === k}">${t.name}</button>`).join('')}</div>
       <div class="list"><div class="row"><label for="se-start">Début</label><input type="date" id="se-start" class="mini-in" value="${se.start}" data-se="start"></div>
         <div class="row"><label for="se-comp">Compétition visée</label><input type="date" id="se-comp" class="mini-in" value="${se.comp || ''}" data-se="comp"></div></div>
-      <div class="sec-label">Planning des semaines <small>${tot} semaines</small></div>
-      <div class="sefrise">${weeks.map(x => `<span style="--bc:${SE_COL[x.i % SE_COL.length]}" class="${x.w === wNow ? 'now' : ''}"><b>${x.w + 1}</b><small>${esc(fmtShort(x.k).replace(/^\S+ /, ''))}</small></span>`).join('')}</div>
-      <div class="sec-label">Blocs <small>garde le doigt sur un bloc pour le déplacer</small></div>
+      <div class="sec-label">Blocs <small>${tot} semaines · touche une semaine pour ses séances</small></div>
       <div id="se-blocks">${se.blocks.map((b, i) => `<div class="seblk" data-seblk="${i}" style="--bc:${SE_COL[i % SE_COL.length]}"><div class="sebh"><span class="grip" aria-hidden="true">⋮⋮</span><b>Bloc ${i + 1}</b><input class="mini-in" style="text-align:left;flex:1" value="${esc(String(b[0]).replace(/^Bloc \d+\s*[:·-]\s*/, ''))}" data-seb="${i}.0" aria-label="Nom du bloc"><button type="button" class="sex" data-sedel="${i}" aria-label="Supprimer le bloc ${i + 1}">×</button></div>
-        <div class="row"><label>Semaines</label><span class="stepper"><button type="button" data-sew="${i}.-1" aria-label="Une semaine de moins">−</button><b class="num">${b[1]}</b><button type="button" data-sew="${i}.1" aria-label="Une semaine de plus">+</button></span></div>
+        <div class="row col"><div class="sewh"><label>Semaines</label><span class="stepper"><button type="button" data-sew="${i}.-1" aria-label="Une semaine de moins">−</button><b class="num">${b[1]}</b><button type="button" data-sew="${i}.1" aria-label="Une semaine de plus">+</button></span></div>
+          <div class="sefrise">${weeks.filter(x => x.i === i).map(x => `<button type="button" data-sewk="${x.k}" style="--bc:${SE_COL[x.i % SE_COL.length]}" class="${x.w === wNow ? 'now' : ''}"><b>${x.w + 1}</b><small>${esc(fmtShort(x.k).replace(/^\S+ /, ''))}</small></button>`).join('')}</div></div>
         <div class="row col"><label>Objectif</label><input class="mini-in" style="text-align:left;width:100%" value="${esc(b[2])}" data-seb="${i}.2" aria-label="Objectif du bloc"></div></div>`).join('')}</div>
       <div class="stack" style="margin-top:12px"><button class="btn ghost" data-seadd>+ Ajouter un bloc</button><button class="btn" data-sesave>Enregistrer ma saison</button></div>`;
   }, onClose: () => { SE_DRAFT = null; }});
@@ -1499,6 +1510,7 @@ document.addEventListener('click', e => {
   if (t) { const se = seDraft(); se.kind = t.dataset.stpl; se.blocks = SEASON_TPL[se.kind].blocks.map(b => [...b]); paneRender(); return; }
   if (d) { const se = seDraft(); if (se.blocks.length <= 1) { toast('Garde au moins un bloc'); return; } se.blocks.splice(+d.dataset.sedel, 1); paneRender(); return; }
   if (w) { const [i, x] = w.dataset.sew.split('.').map(Number), se = seDraft(); se.blocks[i][1] = Math.max(1, (+se.blocks[i][1] || 1) + x); paneRender(); }
+  const wk = e.target.closest('[data-sewk]'); if (wk) { const n = Math.round(daysBetween(monday(TODAY), monday(wk.dataset.sewk)) / 7); closeAllPanes(); planningPane({pf: 'T', title: 'Planning de séance', wk: n}); }
 });
 // Long press on a block, then slide it up or down to change the order.
 (() => {
@@ -2675,12 +2687,12 @@ const DAYS_FR = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 
 const PL_STEP = 5, PL_ORDER = [1, 2, 3, 4, 5, 6, 0];
 const PLFS = {on: false, mode: 'day'};
 const PLD = {sel: null};
-const plMonday = () => addDays(TODAY, -((wdOf(TODAY) + 6) % 7));
+const plMonday = () => addDays(TODAY, -((wdOf(TODAY) + 6) % 7) + 7 * (PLFS.wk || 0));
 const plDay = wd => addDays(plMonday(), (wd + 6) % 7);
 const plIdx = (x, wd, k) => x.date ? 'x' + (PLN().extra[k] || []).findIndex(y => y.a === x.a && y.n === x.n) : weekPlan(wd).findIndex(y => y.a === x.a && y.n === x.n);
 const ICON_TURN = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="3" width="8" height="14" rx="1.6" transform="rotate(-35 12 10)"/><path d="M3 13a9 9 0 0 0 7 8"/><path d="M8 21h2.4v-2.4"/><path d="M21 11a9 9 0 0 0-7-8"/><path d="M16 3h-2.4v2.4"/></svg>';
 function planningPane(opt = {}) {
-  PLAN_UI = {wd: wdOf(TODAY)}; PLD.sel = null; PLFS.pf = opt.pf || ''; PLFS.only = PFILT[PLFS.pf] || null; PLFS.title = opt.title || 'Mon planning';
+  PLAN_UI = {wd: opt.wk ? 1 : wdOf(TODAY)}; PLD.sel = null; PLFS.wk = opt.wk || 0; PLFS.pf = opt.pf || ''; PLFS.only = PFILT[PLFS.pf] || null; PLFS.title = opt.title || 'Mon planning';
   let el = $('#plfs');
   if (!el) {
     el = document.createElement('div'); el.id = 'plfs'; el.className = 'plfs'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Mon planning');
@@ -2719,9 +2731,9 @@ function plfsRender() {
   el.className = 'plfs on ' + (week ? 'plw' : 'pld1') + (plRot() ? ' rot' : '');
   el.innerHTML = `<div class="plfs-in">
     <header class="plfs-top"><button class="plfs-ic" data-plx aria-label="Fermer le planning"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-      <div class="plfs-t"><b>${esc(PLFS.title || 'Mon planning')}</b><small>${DAYS_FR[PLAN_UI.wd]} · semaine ${seasonWeek(plDay(PLAN_UI.wd))}</small></div>
+      <div class="plfs-t"><b>${esc(PLFS.title || 'Mon planning')}</b><small>${esc(cap(fmtShort(plDay(PLAN_UI.wd))))} · semaine ${seasonWeek(plDay(PLAN_UI.wd))}</small></div>
       <button class="plfs-ic" data-plturn aria-label="${week ? 'Revenir à la journée' : 'Voir toute la semaine, téléphone tourné'}" aria-pressed="${week}">${ICON_TURN}</button></header>
-    ${week ? '' : plSeasonSeg() + `<div class="pldays">${PL_ORDER.map(d => `<button data-pld="${d}" aria-pressed="${d === PLAN_UI.wd}"><span>${DAYS_FR[d].slice(0, 3)}</span><b>${+plDay(d).slice(8)}</b></button>`).join('')}</div>
+    ${week ? '' : plSeasonSeg() + `<div class="plnav"><button type="button" class="plarr" data-plwk="-1" aria-label="Semaine précédente">‹</button><div class="pldays">${PL_ORDER.map(d => `<button data-pld="${d}" aria-pressed="${d === PLAN_UI.wd}"><span>${DAYS_FR[d].slice(0, 3)}</span><b>${+plDay(d).slice(8)}</b></button>`).join('')}</div><button type="button" class="plarr" data-plwk="1" aria-label="Semaine suivante">›</button></div>
     <div class="plw-info pld-info">${(() => { const x = PLD.sel != null ? plBlockOf(PLD.sel, PLAN_UI.wd) : null; if (!x) return '<span>Touche un bloc pour le voir · garde le doigt pour le déplacer</span>'; const sp = (x.c === 'muscu' || x.c === 'athle') ? planFor(plDay(PLAN_UI.wd)) : null;
       return `<i style="background:${PCAT[x.c]?.[1] || '#888'}"></i><b>${esc(x.n)}${sp ? ' · ' + esc(sp.name) : ''}</b><span>${tfr(x.a)} – ${tfr(x.b)}</span>${sp ? `<button class="chip" data-tplanv="${sp.id}"${sp.n ? ` data-tn="${sp.n}"` : ''}>Voir la séance</button>` : ''}<button class="chip" data-plb="${PLD.sel}">Modifier</button>`; })()}</div>`}
     ${week ? `<div class="plg-head"><span></span>${lists.map(d => `<span class="${d.k === TODAY ? 'pltoday' : ''}">${DAYS_FR[d.wd].slice(0, 3)} <b>${+d.k.slice(8)}</b></span>`).join('')}</div>` : ''}
@@ -2824,7 +2836,7 @@ function plwRender(el) {
     ${k === TODAY && nowM >= t0 ? `<i class="plw-now" style="left:calc(${nowM - t0}px * var(--k))"></i>` : ''}</div>`;
   el.innerHTML = `<div class="plfs-in">
     <header class="plfs-top"><button class="plfs-ic" data-plx aria-label="Fermer le planning"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-      <div class="plfs-t"><b>${esc(PLFS.title || 'Mon planning')}</b><small>Semaine ${seasonWeek(plMonday())} · ${['saison', 'été'][+(PLN().saison === 'ete')] === 'été' ? 'saison estivale' : 'saison hivernale'}</small></div>
+      <div class="plfs-t"><b>${esc(PLFS.title || 'Mon planning')}</b><small class="plwkn"><button type="button" class="plarr" data-plwk="-1" aria-label="Semaine précédente">‹</button>Semaine ${seasonWeek(plMonday())} · ${esc(fmtShort(plMonday()).replace(/^\S+ /, ''))}<button type="button" class="plarr" data-plwk="1" aria-label="Semaine suivante">›</button></small></div>
       <button class="plfs-ic" data-plturn aria-label="Revenir à la journée" aria-pressed="true">${ICON_TURN}</button></header>
     ${plSeasonSeg()}<div class="plw-info">${sx ? plwInfoHtml(sx, sel.wd, tmin(sx.a), tmin(sx.b)) : plwInfoHtml(null)}</div>
     <div class="plw-g"><div class="plw-days"><span></span>${lists.map(d => `<span class="${d.k === TODAY ? 'pltoday' : ''}">${DAYS_FR[d.wd].slice(0, 3)}<b>${+d.k.slice(8)}</b></span>`).join('')}</div>
@@ -2836,11 +2848,12 @@ function plwRender(el) {
   c.style.setProperty('--k', K); c.style.width = (t1 - t0) * K + 'px';
   el.dataset.t0 = t0; el.dataset.k = K;
   // A name is written only when it fits whole in its box.
-  el.querySelectorAll('.plw-b > b').forEach(n => { if (n.scrollWidth > n.parentElement.clientWidth - 6) n.style.visibility = 'hidden'; });
+  // Every name is written: the text shrinks to fit its box, on one line.
+  el.querySelectorAll('.plw-b > b').forEach(n => { const w = n.parentElement.clientWidth - 4; let f = 11; n.style.fontSize = f + 'px'; while (n.scrollWidth > w && f > 5) { f -= .5; n.style.fontSize = f + 'px'; } });
   if (PLW.px == null) PLW.px = (Math.max(Math.min(nowM - 90, 21 * 60), 7 * 60) - t0) * K;
   plwSetPx(el, PLW.px);
 }
-function plSeasonSeg() { const v = PLN().saison === 'ete' ? 'ete' : 'hiver'; return `<div class="seg plfilt" role="group" aria-label="Afficher">${[['', 'Tout'], ['T', 'Training'], ['N', 'Nutrition'], ['R', 'Recovery']].map(([k, l]) => `<button type="button" data-plf="${k}" aria-pressed="${(PLFS.pf || '') === k}">${l}</button>`).join('')}</div><div class="seg plsaison" role="group" aria-label="Saison">${[['hiver', 'Saison hivernale'], ['ete', 'Saison estivale']].map(([k, l]) => `<button type="button" data-plsaison="${k}" aria-pressed="${v === k}">${l}</button>`).join('')}</div>`; }
+function plSeasonSeg() { const v = PLN().saison === 'ete' ? 'ete' : 'hiver'; return `<div class="seg plfilt" role="group" aria-label="Afficher">${[['', 'Tout'], ['T', 'Training'], ['N', 'Nutrition'], ['R', 'Recovery']].map(([k, l]) => `<button type="button" data-plf="${k}" aria-pressed="${(PLFS.pf || '') === k}">${l}</button>`).join('')}</div><div hidden class="seg plsaison" role="group" aria-label="Saison">${[['hiver', 'Saison hivernale'], ['ete', 'Saison estivale']].map(([k, l]) => `<button type="button" data-plsaison="${k}" aria-pressed="${v === k}">${l}</button>`).join('')}</div>`; }
 document.addEventListener('click', e => { const b = e.target.closest('[data-plf]'); if (!b) return; PLFS.pf = b.dataset.plf; PLFS.only = PFILT[PLFS.pf] || null; PLD.sel = null; PLW.sel = null; plfsRender(); });
 document.addEventListener('click', e => { const b = e.target.closest('[data-plsaison]'); if (!b) return; PLD.sel = null; PLW.sel = null; savePlanning({saison: b.dataset.plsaison}); toast(b.dataset.plsaison === 'ete' ? 'Planning d\'été : il part de ton planning d\'hiver' : 'Planning d\'hiver'); });
 function plwSetPx(el, v) {
@@ -2951,12 +2964,13 @@ document.addEventListener('click', e => {
   if (!PLFS.on || !e.target.closest('#plfs')) return;
   if (e.target.closest('[data-plx]')) { plfsClose(); return; }
   if (e.target.closest('[data-plturn]')) { PLFS.mode = PLFS.mode === 'week' ? 'day' : 'week'; PLFS.scrolled = false; PLW.px = null; PLW.sel = null; plfsRender(); return; }
-  if (e.target.closest('[data-pld]')) plfsRender();
+  const d = e.target.closest('[data-pld]'); if (d) { PLAN_UI.wd = +d.dataset.pld; PLD.sel = null; plfsRender(); return; }
+  const w = e.target.closest('[data-plwk]'); if (w) { PLFS.wk = (PLFS.wk || 0) + +w.dataset.plwk; PLD.sel = null; PLW.sel = null; PLFS.scrolled = false; plfsRender(); }
 });
 addEventListener('keydown', e => { if (e.key === 'Escape' && PLFS.on && !P.stack.length) plfsClose(); });
 let PB = null;
 function blockEdit(i) {
-  const wd = PLAN_UI.wd, monday = addDays(TODAY, -((wdOf(TODAY) + 6) % 7)), k = addDays(monday, (wd + 6) % 7);
+  const wd = PLAN_UI.wd, k = plDay(wd);
   const extra = String(i).startsWith('x'), list = extra ? (PLN().extra?.[k] || []) : weekPlan(wd), idx = extra ? +String(i).slice(1) : +i;
   const blk = i === 'new' ? BLK('15:00', '15:30', '', 'recup') : {...list[idx]};
   PB = {wd, k, extra, idx: i === 'new' ? -1 : idx, blk, copy: []};
@@ -4525,7 +4539,7 @@ const EX_FR = {fsquat: 'Squat avant', stepup: 'Montée sur banc', copen: 'Gainag
 for (const e of EX) if (EX_FR[e.id]) { if (!e.en || e.en === e.n) e.en = e.n; e.n = EX_FR[e.id]; }
 // Dead bug and hip thrust are two exercises: the old combined one stays only for his history.
 for (const e of EX) if (e.id === 'dbhip') e.hide = true;
-// Machines of his three gyms (Domyos Marcq-en-Barœul, Domyos Lille, Club de Marcq) and the variants he uses.
+// Machines of his three gyms (Decathlon Marcq-en-Barœul, Decathlon Lille, Club de Marcq) and the variants he uses.
 const EX_NEW = [
   ['legext_iso1', 'Leg extension une jambe, isométrie', 'Bas du corps', 'Machine', 'kg', 'Genou à 60-90°, tu pousses contre le boudin sans bouger, à la charge d\'un 5RM. Le temps se note en secondes.'],
   ['legcurl1', 'Leg curl une jambe', 'Chaîne postérieure', 'Machine', 'kg', 'Une jambe à la fois, bassin collé au banc, remontée rapide, descente contrôlée.'],
@@ -4645,11 +4659,16 @@ const ACCESSORY = e => ['Prévention', 'Tronc'].includes(e.cat);
 
 /* ---------- maxima: a 1RM for every exercise (a test wins, otherwise the best set) and the load for reps × RPE ---------- */
 const UNI = ['bss', 'stepup', 'lunge', 'sldl', 'legext', 'legcurl', 'calf', 'copen', 'glutecable', 'tibkb', 'adductor'];
-const rmTest = (ex, side = '') => S.tset?.rm?.[ex + side] || null;
-function rmOf(ex, side = '') {
-  const t = rmTest(ex, side) || (side ? rmTest(ex) : null);
-  if (t) return {kg: +t.kg, src: 'test', date: t.date};
-  const a = bestE1rm(ex); return a ? {kg: a, src: 'auto'} : null;
+// Machines and cables differ from one gym to the next: their max is kept per gym. Free weights are the same everywhere.
+const MACH = new Set('legext legext1 legext_iso1 legcurl legcurl1 legcurl_iso1 seatcurl adductor hipabd hacksquat pendulum legpress legpress1 legpresscalf calf seatcalf isocalf machinechest mpress hrow pulldown pecdeck hipthrust_m multihip_ext multihip_flex kickback_m obliquemach crunchmach curlmach trimach isoadd_chair isoabd_chair'.split(' '));
+const machineEx = id => MACH.has(id) || /Machine|Poulie/.test(exOf(id).eq || '');
+let GYM_CTX = null;
+const curGym = () => S.live?.gym || GYM_CTX || null;
+const rmTest = (ex, side = '', g = curGym()) => (machineEx(ex) && g ? S.tset?.rm?.[ex + side + '@' + g] : S.tset?.rm?.[ex + side]) || null;
+function rmOf(ex, side = '', g = curGym()) {
+  const t = rmTest(ex, side, g) || (side ? rmTest(ex, '', g) : null);
+  if (t) return {kg: +t.kg, src: 'test', date: t.date, g: machineEx(ex) ? g : null};
+  const a = bestE1rm(ex, g); return a ? {kg: a, src: 'auto', g: machineEx(ex) ? g : null} : null;
 }
 // % of the max for a number of reps at an RPE (reps in reserve = 10 − RPE), the same Epley curve as the estimate.
 const pctFor = (reps, rpe) => { const n = reps + (10 - rpe); return n <= 1 ? 1 : 1 / (1 + n / 30); };
@@ -4728,11 +4747,15 @@ function musState(end = TODAY) {
 }
 const musZone = pct => pct >= 100 ? 'bad' : pct >= 75 ? 'mid' : 'good';
 // Balance between opposite groups over 7 days (sprinter: the back chain should not lag behind the front).
+// Muscle against its antagonist. Ranges: what keeps a sprinter healthy (ischios at least 0,6 of the quadriceps; adductors at
+// least 0,8 of the abductors, Tyler 2001; hip extensors above flexors), else a broad band around 1.
+const MPAIRS = [['Ischios / quadriceps', ['hams'], ['quads'], .6, 99], ['Fessiers / psoas', ['glutes'], ['psoas'], .8, 99], ['Adducteurs / moyen fessier', ['adduct'], ['gmed'], .8, 1.8],
+  ['Mollets / tibial antérieur', ['calves', 'soleus'], ['tib'], 1, 99], ['Lombaires / abdominaux', ['erect', 'ql'], ['abs', 'obl', 'transv'], .6, 1.6], ['Dos / pectoraux', ['lats', 'rhomb', 'traps'], ['pecs'], .8, 2.5],
+  ['Biceps / triceps', ['bi'], ['tri'], .5, 1.5]];
 function musBalance(st = musState()) {
   const v = Object.fromEntries(st.map(x => [x.k, x.week])), sum = ks => ks.reduce((a, k) => a + (v[k] || 0), 0);
   // [name, back side, front side, lowest and highest ratio that stay fine]: a sprinter's back chain may be stronger, not weaker.
-  const pairs = [['Ischios / quadriceps', sum(['hams']), sum(['quads']), .6, 99], ['Chaîne arrière / avant', sum(['glutes', 'hams', 'erect', 'calves']), sum(['quads', 'psoas', 'abs', 'tib']), .8, 99],
-    ['Tirage / poussée', sum(['lats', 'rhomb', 'bi']), sum(['pecs', 'shoul', 'tri']), .67, 1.5]];
+  const pairs = MPAIRS.map(([n, a, b, lo, hi]) => [n, sum(a), sum(b), lo, hi]);
   return pairs.filter(([, a, b]) => a + b > 20).map(([n, a, b, lo, hi]) => { const r = b ? a / b : 9; return {n, r, off: r < lo || r > hi}; });
 }
 
@@ -4805,10 +4828,10 @@ function tdvNumFor(k) {
   return last.n + j;
 }
 const tdvTitle = p => (p.name || '').split(' · ').slice(1).join(' · ') || p.name;
-function tdvNum(n) { const id = tdvId(n), p = id ? planById('tdv-' + id) : null; return p ? {...p, n, name: `Séance ${n} · ${tdvTitle(p)}`} : null; }
+function tdvNum(n) { const id = tdvId(n), p = id ? planById('tdv-' + id) : null; return p ? {...p, n, name: `Séance ${n}`, title: tdvTitle(p)} : null; }
 function tdvPlanFor(k) { const n = tdvNumFor(k); return n ? tdvNum(n) : null; }
 const planFor = k => planById(S.tset.dated?.[k]) || planById(S.tset.week?.[dow(k)]) || tdvPlanFor(k);
-const logs = () => Object.values(S.logs).filter(l => !l.deleted).sort((a, b) => (b.date + (b.start || '')).localeCompare(a.date + (a.start || '')));
+const logs = () => Object.values(S.logs).filter(l => !l.deleted && ((l.name = (l.name || '').replace(/^(Séance \d+) · .*$/, '$1')), true)).sort((a, b) => (b.date + (b.start || '')).localeCompare(a.date + (a.start || '')));
 const logsOn = k => logs().filter(l => l.date === k);
 function estMin(p) { return Math.round(((p.warm ? warmMin(p.warm) : 0) + (p.cool?.min || 0) + p.items.reduce((s, it) => s + (it.min || 0) + (it.sets || it.reps || 0) * (((it.rest || 60) + (it.dist ? it.dist / 6 : 40)) / 60), 0)) / 5) * 5; }
 const unitOf = it => it.u || (exOf(it.ex).u === 's' ? 's' : 'reps');
@@ -4821,8 +4844,8 @@ function itemText(it) {
 }
 
 /* ---------- history, records and suggested loads ---------- */
-function exHistory(id) { const out = []; for (const l of logs()) for (const it of l.items) if (it.ex === id) out.push({date: l.date, it}); return out; }
-function bestE1rm(id) { let b = 0; for (const {it} of exHistory(id)) if (unitOf(it) !== 's') for (const s of it.sets || []) b = Math.max(b, e1rm(+s.kg, +s.reps)); return b; }
+function exHistory(id, g = curGym()) { const m = g && machineEx(id), out = []; for (const l of logs()) { if (m && l.gym !== g) continue; for (const it of l.items) if (it.ex === id) out.push({date: l.date, it, gym: l.gym || null}); } return out; }
+function bestE1rm(id, g = curGym()) { let b = 0; for (const {it} of exHistory(id, g)) if (unitOf(it) !== 's') for (const s of it.sets || []) b = Math.max(b, e1rm(+s.kg, +s.reps)); return b; }
 function lastText(id) {
   const h = exHistory(id)[0]; if (!h) return '';
   if (h.it.sets) { const s = h.it.sets; return `Dernière fois (${short(h.date)}) : ${s.map(x => (x.kg ? fx(x.kg, x.kg % 1 ? 1 : 0) + ' × ' : '') + x.reps + (unitOf(h.it) === 's' ? ' s' : '')).join(', ')}`; }
@@ -5180,6 +5203,32 @@ function coachBox(who, L) {
   const [title, tag] = COACH[who] || [who, ''], top = L.filter(Boolean).sort((a, b) => ZRANK[a[0]] - ZRANK[b[0]]).slice(0, 3);
   return top.length ? `<div class="card coach coach-${who}"><div class="chead"><span class="eyebrow">${esc(title)}</span><span class="ctag">${esc(tag)}</span></div>${top.map(([z, t, h]) => `<p class="malert ${z === 'bad' ? '' : z === 'mid' ? 'mid' : 'ok'}">${esc(t)}${h ? '<br>' + h : ''}</p>`).join('')}</div>` : '';
 }
+// The pain, the session it touches, and for each exercise that loads the zone the first adaptation, written out.
+const painTxt = l => l.replace(/[()]/g, '').replace(/ G$/, ' gauche').replace(/ D$/, ' droite').toLowerCase();
+function painCoach() {
+  const P = painNow().sort((a, b) => b.v - a.v); if (!P.length) return null;
+  const top = P[0], today = planFor(TODAY) && !logsOn(TODAY).length, p = today ? planFor(TODAY) : planFor(addDays(TODAY, 1));
+  const head = `Douleur notée : ${painTxt(top.l)}, ${top.v}/10.`;
+  if (!p) return ['mid', `${head} Pas de séance prévue d'ici demain : bouge la zone sans douleur et note son évolution ce soir.`];
+  const hits = p.items.map(it => ({it, pf: painFor(it.ex)})).filter(x => x.pf && exOf(x.it.ex).t !== 'test');
+  if (!hits.length) return ['good', `${head} Aucun exercice de ta ${p.name} ${today ? 'd\'aujourd\'hui' : 'de demain'} ne charge cette zone : fais-la normalement et surveille la douleur à l'échauffement.`];
+  const lines = hits.slice(0, 4).map(({it, pf}) => { let L = []; try { L = adaptList(liveItem(structuredClone(it)), pf); } catch (e) {} const a = L[0]; return a ? `${exOf(it.ex).n} : ${a.t.charAt(0).toLowerCase() + a.t.slice(1)}` : null; }).filter(Boolean);
+  return ['bad', `${head} Dans ta ${p.name} ${today ? 'd\'aujourd\'hui' : 'de demain'} : ${lines.join(' ; ')}.${hits.length > 4 ? ` Et ${hits.length - 4} autre${hits.length > 5 ? 's' : ''} exercice${hits.length > 5 ? 's' : ''}.` : ''} En séance, un toucher sur l'adaptation l'applique.`];
+}
+(() => {
+  let T0 = null;
+  const open = sel => {
+    const ov = document.createElement('div'); ov.className = 'xsel';
+    ov.innerHTML = `<div class="xsel-card" role="listbox" aria-label="${esc(sel.getAttribute('aria-label') || 'Choisir')}">${[...sel.options].map((o, i) => `<button type="button" role="option" data-xi="${i}" aria-selected="${o.selected}"${o.disabled ? ' disabled' : ''}><span>${esc(o.text)}</span>${o.selected ? '<i>✓</i>' : ''}</button>`).join('')}</div>`;
+    document.body.appendChild(ov); requestAnimationFrame(() => ov.classList.add('on'));
+    const close = () => { ov.classList.remove('on'); setTimeout(() => ov.remove(), 220); };
+    ov.addEventListener('click', e => { const b = e.target.closest('[data-xi]'); if (b && +b.dataset.xi !== sel.selectedIndex) { sel.selectedIndex = +b.dataset.xi; sel.dispatchEvent(new Event('input', {bubbles: true})); sel.dispatchEvent(new Event('change', {bubbles: true})); } close(); });
+  };
+  const ok = s => s && !s.multiple && !s.disabled;
+  document.addEventListener('touchstart', e => { const s = e.target.closest?.('select'); T0 = ok(s) ? {s, x: e.touches[0].clientX, y: e.touches[0].clientY} : null; }, {capture: true, passive: true});
+  document.addEventListener('touchend', e => { const s = e.target.closest?.('select'); if (!T0 || T0.s !== s) return; const t = e.changedTouches[0], moved = Math.hypot(t.clientX - T0.x, t.clientY - T0.y) > 10; T0 = null; if (moved) return; e.preventDefault(); s.blur(); open(s); }, {capture: true, passive: false});
+  document.addEventListener('mousedown', e => { const s = e.target.closest?.('select'); if (!ok(s)) return; e.preventDefault(); s.blur(); open(s); }, true);
+})();
 function hrvLowDays() {
   const kG = lastKey('hrv'), hb = kG ? base('hrv', kG, 60) : null; if (!hb) return 0;
   let low = 0; for (let i = 0; i < 14; i++) { const v = avgN('hrv', 7, addDays(TODAY, -i)); if (v != null && v < hb.m - hb.sd * .5) low++; }
@@ -5198,14 +5247,14 @@ function coachCard() {
   const e7 = avgN('effort', 7), e28 = avgN('effort', 28), r = e7 != null && e28 ? e7 / e28 : null;
   if (lightOn()) L.push(['mid', `Semaine allégée jusqu'au ${fmtShort(S.app.light)} : toutes les charges proposées sont baissées de 10 %.`, '<button type="button" class="chip" data-light="off">Revenir au plan normal</button>']);
   else if (hrvLowDays() >= 10) L.push(['bad', 'Ton coach Recovery voit ta VFC sous ta normale depuis deux semaines. Je te propose une semaine allégée : −10 % sur toutes les charges pendant 7 jours. C\'est toi qui décides.', '<button type="button" class="chip" data-light="on">Prendre la semaine allégée</button>']);
-  if (painActive()) L.push(['bad', 'Une douleur est notée : on ne force pas dessus. Dans ta séance, chaque exercice qui touche la zone te propose une adaptation, prends-la.']);
+  const pc = painCoach(); if (pc) L.push(pc);
   if (r != null && r > 1.3) L.push(['bad', `Ta charge de la semaine dépasse de ${Math.round((r - 1) * 100)} % ta moyenne du mois. Au-delà de 30 %, le risque de blessure grimpe : on lève le pied sur le volume.`]);
   for (const x of musState().filter(x => x.pct >= 100).slice(0, 1)) L.push(['bad', `${x.n} à ${Math.round(x.pct)} % de sa limite sur 7 jours. On l'épargne à la prochaine séance.`]);
   for (const [z, t] of methodCoach().filter(([, t]) => !/VFC/.test(t))) L.push([z, t]);
   const nx = planFor(addDays(TODAY, 1)) || planFor(TODAY);
   if (nx) { const sq = nx.items.find(it => it.kg && exOf(it.ex).u === 'kg' && !ACCESSORY(exOf(it.ex))), h = sq ? exHistory(sq.ex).find(x => x.date <= addDays(TODAY, -6)) : null, prev = h?.it.sets ? Math.max(...h.it.sets.map(x => +x.kg || 0)) : 0, up = prev && sq.kg > prev ? (sq.kg / prev - 1) * 100 : 0;
     L.push([up > 3.5 ? 'mid' : 'good', up > 3.5 ? `${nx.name} : ${fx(sq.kg, 1)} kg au ${exOf(sq.ex).n.toLowerCase()}, soit +${fx(up, 1)} %. C'est plus que tes 2,5 à 3 % par semaine : valide d'abord ta montée en charge.` : `Prochaine séance : ${nx.name}. Tu connais le plan, on l'exécute proprement.`]); }
-  if (n) L.push([d >= n - left ? 'good' : 'mid', d >= n - left ? `${d} séance${d > 1 ? 's' : ''} sur ${n} cette semaine, rien de raté. On continue comme ça.` : `${d} séance${d > 1 ? 's' : ''} sur ${n} cette semaine et ${n - d - left} manquée${n - d - left > 1 ? 's' : ''}. On ne la rattrape pas en doublant : on reprend le fil.`]);
+  if (n) L.push([d >= n - left ? 'good' : 'mid', d >= n - left ? `${d} séance${d > 1 ? 's' : ''} sur ${n} cette semaine, rien de raté. On continue comme ça.` : `${d} séance${d > 1 ? 's' : ''} sur ${n} cette semaine et ${n - d - left} manquée${n - d - left > 1 ? 's' : ''}. On ne ${n - d - left > 1 ? 'les' : 'la'} rattrape pas en doublant : on reprend le fil.`]);
   return coachBox('T', L);
 }
 function coachRecovery(rec, tgt, kG) {
@@ -5245,7 +5294,7 @@ function tToday() {
         <ul class="exl">${p.items.map(it => `<li><span>${esc(exOf(it.ex).n)}</span><span>${itemText(it)}</span></li>`).join('')}</ul>
         <div style="margin-top:14px"><button class="btn" data-tplanv="${p.id}"${p.n ? ` data-tn="${p.n}"` : ''}>Voir la séance</button></div></article>` : '';
   return `
-    <header class="top"><div class="sub">${fmtDay(TODAY)} · semaine ${seasonWeek(TODAY)}</div><p class="pmsg">${esc(trainMsg(p, done))}</p>${seasonLine()}${(() => { const n = planFor(addDays(TODAY, 1)); return n ? `<p class="small muted" style="margin:6px 0 0">Demain : ${esc(n.name)}</p>` : ''; })()}</header>
+    <header class="top"><div class="sub">${fmtDay(TODAY)} · semaine ${seasonWeek(TODAY)}</div>${p && !done.length && !S.live ? `<button class="pnext" data-tplanv="${p.id}"${p.n ? ` data-tn="${p.n}"` : ''}><span><small>Au programme</small><b>${esc(p.name)}</b></span>${ICON.chev}</button>` : `<p class="pmsg">${esc(trainMsg(p, done))}</p>`}${seasonLine()}${(() => { const n = planFor(addDays(TODAY, 1)); return n ? `<p class="small muted" style="margin:6px 0 0">Demain : ${esc(n.name)}</p>` : ''; })()}</header>
     <div class="stack">${live}${ask}
       ${weekCard('gym')}${weekCard('track')}
       ${coachCard()}
@@ -5271,7 +5320,7 @@ function progList() {
   let nd = null; for (let i = 0; i < 21 && !nd; i++) { const d = addDays(TODAY, i); if (tdvNumFor(d) === nx) nd = d; }
   const r = (n, cls = '') => { const p = tdvNum(n); return `<button class="rowbtn${cls}" data-tplanv="${p.id}" data-tn="${n}"><span><b>${esc(p.name)}</b><span class="meta">${p.items.length} exercices · ${estMin(p)} min${p.desc ? ' · ' + esc(p.desc) : ''}</span></span>${ICON.chev}</button>`; };
   const next = nums.filter(n => n === nx), after = nums.filter(n => n > nx), done = nums.filter(n => n <= last).reverse();
-  return `${next.length ? `<h2>Prochaine séance${nd ? ` <small>${esc(cap(fmtShort(nd)))}</small>` : ''}</h2><div class="list">${next.map(n => r(n, ' nextses')).join('')}</div>` : ''}
+  return `${next.length ? `<h2>Prochaine séance${nd ? ` <small>${esc(cap(fmtShort(nd)))}</small>` : ''}</h2><div class="list nextl">${next.map(n => r(n, ' nextses')).join('')}</div>` : ''}
     ${after.length ? `<h2>Mon programme <small>à venir</small></h2><div class="list">${after.map(n => r(n)).join('')}</div>` : ''}
     ${done.length ? `<h2>Séances faites</h2><div class="list donel">${done.map(n => r(n, ' doneses')).join('')}</div>` : ''}`;
 }
@@ -5382,26 +5431,41 @@ function tProgress() {
 // Mon corps: the body, the balance between opposite groups (with what to do), left/right, the load per muscle.
 const BAL_TXT = {
   'Ischios / quadriceps': ['Charge des ischios par rapport aux quadriceps {P}. Pour un sprinteur, au moins 0,6 et plus c\'est mieux : des ischios forts protègent des déchirures en vitesse.', 'Ajoute 2 à 3 séries de nordic, leg curl ou soulevé de terre roumain, et enlève un peu de volume de squat ou de presse.'],
-  'Chaîne arrière / avant': ['Fessiers, ischios, lombaires et mollets contre quadriceps, psoas, abdos et tibial. Le sprint demande une chaîne arrière forte : au moins 0,8.', 'Plus de hip thrust, de soulevé de terre et de mollets ; moins d\'exercices de quadriceps isolés.'],
-  'Tirage / poussée': ['Dos et biceps contre pectoraux, épaules et triceps. Entre 0,67 et 1,5 pour garder des épaules saines.', 'Rééquilibre avec du rowing, des tractions ou des face pulls, ou à l\'inverse du développé si le tirage domine.']};
+  'Fessiers / psoas': ['Les extenseurs de la hanche (fessiers) contre ses fléchisseurs (psoas) {P}. En sprint, les deux travaillent à chaque foulée ; les fessiers restent au-dessus.', 'Si le psoas domine : plus de hip thrust et de fentes. Si les fessiers écrasent tout et que la hanche tire devant : ajoute des montées de genou lestées.'],
+  'Adducteurs / moyen fessier': ['L\'intérieur de la cuisse contre l\'extérieur de la hanche {P}. Des adducteurs trop faibles par rapport aux abducteurs (moins de 0,8) multiplient les pubalgies et déchirures de l\'aine (Tyler 2001).', 'Sous 0,8 : Copenhague, adducteurs à la machine. Au-dessus de 1,8 : abductions et pont latéral pour le moyen fessier.'],
+  'Mollets / tibial antérieur': ['Les muscles qui poussent le pied vers le bas contre celui qui le relève {P}. Le tibial reste plus petit, mais il doit travailler : il amortit chaque appui.', 'Ajoute des relevés de pointe de pied (tibial à la kettlebell) 2 fois par semaine.'],
+  'Lombaires / abdominaux': ['L\'arrière du tronc contre l\'avant {P}. Avec ta spondylolyse, l\'équilibre compte : des abdos et un transverse solides protègent les lombaires.', 'Si les lombaires dominent : plus de gainage et de dead bug, moins d\'extensions. Si les abdos dominent : un peu de travail du dos en isométrie.'],
+  'Dos / pectoraux': ['Les muscles qui tirent les épaules en arrière contre ceux qui les tirent en avant {P}. Un dos au moins aussi chargé que les pectoraux garde les épaules saines.', 'Ajoute du rowing ou des tractions, ou à l\'inverse du développé si le dos domine largement.'],
+  'Biceps / triceps': ['L\'avant du bras contre l\'arrière {P}. En sprint, les bras rythment la foulée : les deux comptent.', 'Rééquilibre avec du curl ou des extensions triceps selon le côté qui manque.']};
 const PER_TXT = {day: 'aujourd\'hui', week: 'sur 7 jours', month: 'sur 30 jours', year: 'sur 12 mois', all: 'depuis le début'};
 const GRAN_TXT = {day: 'aujourd\'hui', week: '7 jours', month: '30 jours', year: '12 mois', all: 'depuis le début'};
 function musPer() { const per = musPeriod(S.mgran || 'week'); return MUS.map(([k, n]) => ({k, n, week: per[k].load, pct: per[k].pct, lim: musLimit(k)})); }
 // Chains: muscles that work together along the body. The data, side by side; the ratios that matter for a sprinter.
 const MCHAINS = [['Postérieure', ['glutes', 'hams', 'erect', 'calves', 'soleus', 'ql']], ['Antérieure', ['quads', 'psoas', 'abs', 'tib', 'pecs']], ['Latérale', ['gmed', 'obl', 'ql', 'pero', 'piri']],
   ['Médiale', ['adduct']], ['Tirage (haut du corps)', ['lats', 'rhomb', 'traps', 'bi', 'rotat']], ['Poussée (haut du corps)', ['pecs', 'shoul', 'tri', 'serr']], ['Tronc profond', ['transv', 'ql', 'erect']], ['Pied et cheville', ['foot', 'pero', 'tib', 'soleus']]];
+const CHAIN_TXT = {'Postérieure': 'Fessiers, ischios, érecteurs, mollets, soléaire, carré des lombes. Le moteur du sprint : elle pousse le sol vers l\'arrière et étend la hanche.',
+  'Antérieure': 'Quadriceps, psoas, abdominaux, tibial, pectoraux. Elle ramène la jambe vers l\'avant et encaisse l\'impact à chaque appui.',
+  'Latérale': 'Moyen fessier, obliques, carré des lombes, fibulaires, pelvi-trochantériens. Elle tient le bassin à plat quand tu es sur une jambe.',
+  'Médiale': 'Adducteurs. Ils stabilisent le bassin et le genou et participent au retour de la jambe.',
+  'Tirage (haut du corps)': 'Grand dorsal, rhomboïdes, trapèzes, biceps, coiffe. Tient les épaules en arrière et donne le balancier des bras.',
+  'Poussée (haut du corps)': 'Pectoraux, épaules, triceps, dentelé. Pousse vers l\'avant ; en sprint, le bras qui part devant.',
+  'Tronc profond': 'Transverse, carré des lombes, érecteurs. Le gainage qui transmet la force des jambes sans perte.',
+  'Pied et cheville': 'Muscles du pied, fibulaires, tibial, soléaire. Le premier ressort au contact du sol.'};
+// Agonist against antagonist; the pair with the most volume first, and in each pair the bigger side first.
+const CPAIRS = [['Postérieure', 'Antérieure', .8, 99], ['Latérale', 'Médiale', null, null], ['Tirage (haut du corps)', 'Poussée (haut du corps)', .67, 1.5], ['Tronc profond', null], ['Pied et cheville', null]];
 function chainCard(st) {
-  const v = Object.fromEntries(st.map(x => [x.k, x.week])), L = MCHAINS.map(([n, ks]) => [n, ks.reduce((a, k) => a + (v[k] || 0), 0)]), max = Math.max(1, ...L.map(x => x[1]));
-  if (!L.some(x => x[1] > 0)) return '';
-  const r = (a, b) => { const x = L.find(y => y[0] === a)[1], y = L.find(z => z[0] === b)[1]; return y ? fx(x / y, 2) : '–'; };
-  return `<div class="card"><span class="eyebrow">Équilibre des chaînes · ${GRAN_TXT[S.mgran || 'week']}</span>
-    ${L.map(([n, x]) => `<div class="musrow"><span>${esc(n)}</span><span class="bar"><i style="width:${(x / max * 100).toFixed(0)}%;background:var(--accent)"></i></span><b>${fx(x)}</b></div>`).join('')}
-    <div class="chainr"><span>Postérieure / antérieure <b>${r('Postérieure', 'Antérieure')}</b></span><span>Latérale / médiale <b>${r('Latérale', 'Médiale')}</b></span><span>Tirage / poussée <b>${r('Tirage (haut du corps)', 'Poussée (haut du corps)')}</b></span></div>
-    ${detailsBox('Somme des charges des muscles de chaque chaîne sur la période. Un même muscle peut appartenir à deux chaînes (le carré des lombes est latéral et profond).')}</div>`;
+  const v = Object.fromEntries(st.map(x => [x.k, x.week])), C = Object.fromEntries(MCHAINS.map(([n, ks]) => [n, ks.reduce((a, k) => a + (v[k] || 0), 0)])), max = Math.max(1, ...Object.values(C));
+  if (!Object.values(C).some(x => x > 0)) return '';
+  const P = CPAIRS.map(([a, b, lo, hi]) => ({a, b, lo, hi, tot: C[a] + (b ? C[b] : 0)})).sort((x, y) => y.tot - x.tot);
+  const bar = n => `<div class="musrow"><span>${esc(n)}</span><span class="bar"><i style="width:${(C[n] / max * 100).toFixed(0)}%;background:var(--accent)"></i></span><b>${fx(C[n])}</b></div>`;
+  return `<div class="card"><span class="eyebrow">Équilibre des chaînes · ${GRAN_TXT[S.mgran || 'week']}</span><p class="small muted" style="margin:4px 0 6px">Chaque chaîne face à son antagoniste, de la paire la plus chargée à la moins chargée.</p>
+    ${P.map(x => { const [f, s] = x.b && C[x.b] > C[x.a] ? [x.b, x.a] : [x.a, x.b], r = x.b && C[x.b] ? C[x.a] / C[x.b] : null, off = r != null && x.lo != null && (r < x.lo || r > x.hi);
+      return `<details class="cpair"><summary>${bar(f)}${s ? bar(s) : ''}${r != null ? `<p class="small" style="margin:2px 0 0">${esc(x.a.replace(' (haut du corps)', ''))} / ${esc(x.b.replace(' (haut du corps)', '').toLowerCase())} <b>${fx(r, 2)}</b>${x.lo != null ? ` · <em class="${off ? 'bad' : 'ok'}">${off ? 'à rééquilibrer' : 'correct'}</em>` : ''} <span class="o">· détails</span></p>` : `<p class="small muted" style="margin:2px 0 0">Chaîne de stabilité, sans antagoniste <span class="o">· détails</span></p>`}</summary>
+        <p class="small">${esc(CHAIN_TXT[f])}</p>${s ? `<p class="small">${esc(CHAIN_TXT[s])}</p>` : ''}${x.a === 'Latérale' ? '<p class="small muted">Pas de norme : la chaîne latérale compte 5 muscles contre 1. Compare-la à toi-même d\'une période à l\'autre.</p>' : ''}${x.lo != null ? `<p class="small muted">Repère : entre ${fx(x.lo, 2)} et ${x.hi > 50 ? 'plus' : fx(x.hi, 1)}.</p>` : ''}</details>`; }).join('')}</div>`;
 }
 function tBody() {
   const st = musPer(), bal = musBalance(st), v = Object.fromEntries(st.map(x => [x.k, x]));
-  const sides = {'Ischios / quadriceps': [['hams'], ['quads']], 'Chaîne arrière / avant': [['glutes', 'hams', 'erect', 'calves'], ['quads', 'psoas', 'abs', 'tib']], 'Tirage / poussée': [['lats', 'rhomb', 'bi'], ['pecs', 'shoul', 'tri']]};
+  const sides = Object.fromEntries(MPAIRS.map(([n, a, b]) => [n, [a, b]]));
   const sym = SYM.map(([ex, n]) => { const d = rmTest(ex, '|D')?.kg, g = rmTest(ex, '|G')?.kg; return d && g ? {n, d, g, gap: Math.abs(d - g) / Math.max(d, g) * 100} : null; }).filter(Boolean);
   return `
     <header class="top"><div class="sub">Charge, équilibres et symétrie</div><h1>Mon corps</h1></header>
@@ -5452,7 +5516,7 @@ function paneShow() {
   const l = $('#pn-left'); l.textContent = v.left?.label || ''; $('#pn-foot').hidden = !v.left;
   const x = $('#pn-close'); x.hidden = !v.fixed; x.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
   $('#pane').classList.toggle('fixed', !!v.fixed);
-  const side = !!P.stack[0]?.side; $('#pane').classList.toggle('side', side); $('#pn-back').hidden = !(side || P.stack.length > 1);
+  const side = !!P.stack[0]?.side; $('#pane').classList.toggle('side', side); $('#pn-back').hidden = !!v.fixed || !(side || P.stack.length > 1);
   v.shown = false; paneRender(); $('#pane-scroll').scrollTop = 0;
   $('#scrim').classList.add('on'); $('#pane').classList.add('on'); document.body.style.overflow = 'hidden';
   if (v.focus) setTimeout(() => $(v.focus)?.focus(), 350);
@@ -5469,13 +5533,13 @@ function closeAllPanes() { while (P.stack.length) P.stack.pop(); P.live = false;
 
 /* ---------- plan view, editor and weekly planning ---------- */
 // His three gyms and what they have (as he listed it). A session shows where it can be done whole.
-const GYMS = [['dmarcq', 'Domyos Marcq-en-Barœul'], ['dlille', 'Domyos Lille'], ['cmarcq', 'Club de Marcq']];
+const GYMS = [['dmarcq', 'Decathlon Marcq-en-Barœul'], ['dlille', 'Decathlon Lille'], ['cmarcq', 'Club de Marcq']];
 const GYM_EQ = {
   dmarcq: 'rack halt bench incline decline legext legcurl_ly legcurl_seat adductor abductor isochair stairs treadmill poulie tirage_h tirage_v pendulum hacksquat multihip kickback_m oblique_m crunch_m crunch_disk nordic ghd floor hipthrust_plat box band pecdeck tirage_h_plate smith calf_seat lumbar pullup rings bike airbike skierg rower curl_m abwheel swiss romaine dips iso_rack sled step medball kb'.split(' '),
   dlille: 'rower skierg treadmill runner sled floor rack pullup dips kb wallball medball swiss halt tirage_v tirage_h poulie step bench incline smith hacksquat legpress romaine crunch_disk legext legcurl_ly adductor abductor shoulder_m tirage_h_plate pecdeck stairs bike airbike trx band sliders hipthrust_m box kickback_m tri_m iso_rack'.split(' '),
   cmarcq: 'sled poulie tirage_h tirage_v shoulder_m curl_m hipthrust_plat bench legext legcurl_ly adductor tbar pecdeck tri_m rack halt wallball medball kb abwheel swiss romaine dips pullup airbike rower skierg lumbar treadmill calf_stand legpress hacksquat smith floor step trx band box'.split(' ')};
 const EQ_NEED = {legext: ['legext'], legext1: ['legext'], legext_iso1: ['legext'], legcurl: ['legcurl_ly', 'legcurl_seat'], legcurl1: ['legcurl_ly', 'legcurl_seat'], legcurl_iso1: ['legcurl_ly', 'legcurl_seat'], seatcurl: ['legcurl_seat'],
-  adductor: ['adductor'], hipabd: ['abductor'], hacksquat: ['hacksquat', 'pendulum'], pendulum: ['pendulum'], legpress: ['legpress'], legpress1: ['legpress'], legpresscalf: ['legpress'], calf: ['calf_stand', 'smith'],
+  adductor: ['adductor'], hipabd: ['abductor'], hacksquat: ['hacksquat', 'pendulum'], pendulum: ['pendulum'], legpress: ['legpress'], legpress1: ['legpress'], legpresscalf: ['legpress'], calf: ['calf_stand'],
   seatcalf: ['calf_seat'], isocalf: ['calf_stand', 'smith', 'legpress'], ghr: ['ghd'], nordic: ['nordic', 'ghd'], reversehyper: ['revhyper'], machinechest: ['chest_m'], mpress: ['shoulder_m'], hrow: ['tirage_h', 'tirage_h_plate'],
   pulldown: ['tirage_v'], pecdeck: ['pecdeck'], lumbar: ['lumbar', 'ghd', 'romaine'], hipthrust_m: ['hipthrust_m'], hipthrust: ['hipthrust_plat', 'bench', 'hipthrust_m'], multihip_ext: ['multihip'], multihip_flex: ['multihip'],
   kickback_m: ['kickback_m'], obliquemach: ['oblique_m'], crunchmach: ['crunch_m', 'crunch_disk'], isoadd_chair: ['isochair'], isoabd_chair: ['isochair'], curlmach: ['curl_m'], trimach: ['tri_m'], declinebench: ['decline'],
@@ -5495,8 +5559,9 @@ function gymSub(ex, g) {
 function gymCard(p) {
   if (p.kind !== 'gym') return '';
   const F = gymFit(p.items), sel = S.tset?.gymPlan?.[p.id] || '', dist = S.app?.gymDist || {};
-  return `<div class="card gymc" style="margin-top:12px"><span class="eyebrow">Où faire cette séance</span>${F.map(f => `<button class="gymrow${sel === f.g ? ' on' : ''}" data-gympick="${esc(p.id)}|${f.g}" aria-pressed="${sel === f.g}"><span><b>${esc(f.name)}</b><span class="meta">${dist[f.g] ? esc(dist[f.g]) + ' · ' : ''}${f.miss.length ? 'il manque : ' + f.miss.map(x => esc(exOf(x).n)).join(', ') : 'tout est faisable'}</span></span><i>${sel === f.g ? '✓' : ''}</i></button>`).join('')}
-    <p class="small muted" style="margin:6px 2px 0">Choisis ta salle : pendant la séance, un exercice qu'elle n'a pas te propose un remplaçant.</p></div>`;
+  const full = F.filter(f => !f.miss.length), show = full.length ? full : F;
+  return `<div class="card gymc" style="margin-top:12px"><span class="eyebrow">Où faire cette séance</span>${full.length ? '' : '<p class="small" style="margin:6px 2px">Aucune salle n\'a tout : il faudra remplacer un exercice.</p>'}${show.map(f => `<button class="gymrow${sel === f.g ? ' on' : ''}" data-gympick="${esc(p.id)}|${f.g}" aria-pressed="${sel === f.g}"><span><b>${esc(f.name)}</b><span class="meta">${dist[f.g] ? esc(dist[f.g]) + ' · ' : ''}${f.miss.length ? 'il manque : ' + f.miss.map(x => esc(exOf(x).n)).join(', ') : 'tout est faisable'}</span></span><i>${sel === f.g ? '✓' : ''}</i></button>`).join('')}
+    <p class="small muted" style="margin:6px 2px 0">${full.length ? `Seulement les salles où tout est faisable sans rien remplacer${full.length < F.length ? ' (pas ' + F.filter(f => f.miss.length).map(f => esc(f.name) + ' : ' + f.miss.map(x => esc(exOf(x).n).toLowerCase()).join(', ')).join(' ; ') + ')' : ''}. Tes max sur machine sont ceux de la salle choisie.` : 'Pendant la séance, un exercice que la salle n\'a pas te propose un remplaçant.'}</p></div>`;
 }
 document.addEventListener('click', async e => {
   const b = e.target.closest('[data-gympick]'); if (!b) return;
@@ -5507,6 +5572,7 @@ document.addEventListener('click', async e => {
 function planView(id, n) {
   openPane({title: 'Séance', render: () => {
     const p = (n ? tdvNum(+n) : null) || planById(id); if (!p) return '';
+    GYM_CTX = S.tset?.gymPlan?.[p.id] || null;
     const mine = !BUILTIN.includes(p);
     return `<div class="dhead"><span class="chiptag">${p.kind === 'gym' ? 'Musculation' : 'Sprint'} · ${estMin(p)} min</span><div class="bigname" style="font-size:1.75rem">${esc(p.name)}</div><p class="small muted">${esc(p.desc || '')}</p></div>
       ${warmText(p.warm).length ? `<div class="card wtxt"><span class="eyebrow">Échauffement · ${warmMin(p.warm)} min</span>${warmText(p.warm).map(t => `<p class="small">${esc(t)}</p>`).join('')}</div>` : ''}
@@ -5515,7 +5581,7 @@ function planView(id, n) {
       ${p.kind === 'gym' ? capsLine(planCheck(p.items)) : ''}
       ${gymCard(p)}
       <div class="stack" style="margin-top:16px"><button class="btn" data-tstart="${p.id}"${p.n ? ` data-tn="${p.n}"` : ''}>Commencer</button>
-      <button class="btn ghost" data-tedit="${p.id}">${mine ? 'Modifier' : 'Dupliquer et adapter'}</button>${mine ? `<button class="btn ghost" data-tdup="${p.id}">Dupliquer</button>` : ''}
+      <div class="btnrow"><button class="btn ghost" data-tedit="${p.id}">${mine ? 'Modifier' : 'Dupliquer et adapter'}</button>${mine ? `<button class="btn ghost" data-tdup="${p.id}">Dupliquer</button>` : ''}</div>
       ${mine ? `<button class="btn ghost" data-tdel="${p.id}" style="color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent)">Supprimer</button>` : ''}</div>`;
   }});
 }
@@ -5540,7 +5606,7 @@ function sessionAuto(ed) {
     const w = {}; for (const it of its) { const c = exOf(it.ex).cat; if (c !== 'Échauffement et gammes') w[c] = (w[c] || 0) + (+it.reps || 1) * (+it.dist || 30); }
     const top = Object.entries(w).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Échauffement et gammes';
     const N = {'Accélération': ['Séance accélération', 'Améliorer tes 30 premiers mètres'], 'Vitesse max': ['Séance vitesse maximale', 'Élever ta vitesse de pointe'], 'Endurance de vitesse': ['Séance endurance de vitesse', 'Tenir ta vitesse jusqu\'au bout de la course'],
-      'Résistance': ['Séance sprints résistés', 'Puissance horizontale en accélération'], 'Tempo': ['Séance tempo', 'Capacité aérobie et récupération active'], 'Échauffement et gammes': ['Séance technique de course', 'Placement et coordination de la foulée']}[top];
+      'Résistance': ['Séance sprints résistés', 'Puissance horizontale en accélération'], 'Tempo': ['Séance tempo', 'Capacité aérobie et récupération active'], 'Échauffement et gammes': ['Séance technique de course', 'Placement et coordination de la foulée']}[top] || ['Séance de sprint', 'Vitesse et technique de course'];
     return {name: N[0], desc: N[1]};
   }
   const w = {}; let pw = 0, pn = 0, rw = 0, rn = 0;
@@ -5720,7 +5786,7 @@ function warmBox() {
   if (!ED.warm) return `<button class="btn ghost" data-edwarm>+ Ajouter un échauffement</button>`;
   const sel = ED.warm.sel || [];
   return `<div class="exbox wbox"><h3>Échauffement<small>${warmMin(ED.warm)} min</small></h3>
-    <div class="chips2b" style="margin-top:8px">${WARM_PRESETS.map(([id, n]) => `<button type="button" class="chip" data-edwp="${id}" aria-pressed="${ED.warm.preset === id}">${n}</button>`).join('')}</div>
+    <div class="chips2b" style="margin-top:8px"${ED.kind === 'track' ? '' : ' hidden'}>${WARM_PRESETS.filter(([id]) => ED.kind === 'track' || id === 'auto').map(([id, n]) => `<button type="button" class="chip" data-edwp="${id}" aria-pressed="${ED.warm.preset === id}">${n}</button>`).join('')}</div>
     ${ED.warm.preset === 'jbm' ? '<p class="hint" style="margin:6px 2px 0">« Sprint Warmup » de JB Morin : 10 min de mobilité, 10 de gammes, 10 de courses progressives. <a href="https://youtu.be/mcV4l_T9n44" target="_blank" rel="noopener">Vidéo</a></p>' : ''}
     ${WARM_G.filter(([g]) => g !== 'prog' || ED.kind === 'track' || sel.some(id => WX[id]?.g === 'prog')).map(([g, lab, why]) => { const L = sel.map(id => WX[id]).filter(x => x && x.g === g);
       return `<div class="sec-label" style="margin:12px 0 4px">${lab}<small style="text-transform:none;letter-spacing:0;font-weight:500"> · ${why}</small></div>
@@ -5765,12 +5831,12 @@ function editBody() {
     <div id="ed-list"${ED.items.length ? '' : ' hidden'}>${(LBL = itemLabels(ED.items), '')}${ED.items.map((it, i) => { const e = exOf(it.ex), rm = !trk && e.u === 'kg' ? rmOf(it.ex)?.kg : null, kg = rm && it.pct ? r25(rm * it.pct / 100 * recFactor().k) : null; return `<div class="exbox edx${it.link ? ' linked' : ''}" data-edi="${i}"><h3><span class="grip" aria-hidden="true">⋮⋮</span>${LBL[i] ? `<span class="exlbl">${LBL[i]}</span>` : ''}${esc(e.n)}<small>${esc(e.eq || e.cat)}</small></h3>
       ${e.t === 'test' ? `<div class="edrow" style="grid-template-columns:1fr"><label>Essais${num(i, 'reps', it.reps, '3')}</label></div><p class="hint" style="margin:4px 2px 0">Fait juste après l'échauffement. Pendant la séance, « Lancer le test » ouvre le protocole ; le résultat va dans Profil › Tests.</p>`
       : it.ex === 'warmup' ? `<div class="edrow" style="grid-template-columns:1fr"><label>Minutes${num(i, 'min', it.min, '15')}</label></div>`
-        : trk || e.t === 'track' ? `<div class="edrow"><label>Répét.${num(i, 'reps', it.reps, '4')}</label><label>Distance m${num(i, 'dist', it.dist, '30')}</label><label>Intensité %${num(i, 'pct', it.pct, '95')}</label><label>Récup${rest(i, it.rest, '3:00')}</label></div>`
+        : e.t === 'track' ? `<div class="edrow"><label>Répét.${num(i, 'reps', it.reps, '4')}</label><label>Distance m${num(i, 'dist', it.dist, '30')}</label><label>Intensité %${num(i, 'pct', it.pct, '95')}</label><label>Récup${rest(i, it.rest, '3:00')}</label></div>`
         : `<div class="edrow"><label>Séries${num(i, 'sets', it.sets, '3')}</label><label><button type="button" class="hdtog" data-edu="${i}.${unitOf(it) === 's' ? 'reps' : 's'}">${unitOf(it) === 's' ? 'Secondes' : 'Répét.'} ⇄</button>${num(i, 'reps', it.reps, '10')}</label><label>% du max${num(i, 'pct', it.pct, '–')}</label><label>Récup${rest(i, it.rest, '3:00')}</label></div>
           <div class="tempo"><span>Tempo</span>${['Excentrique', 'Pause bas', 'Concentrique', 'Pause haut'].map((l, j) => `<label>${l}<input class="mini-in" inputmode="numeric" data-edt="${i}.${j}" value="${(it.tempo || [])[j] ?? ''}" placeholder="–"></label>`).join('')}</div>
           ${kg ? `<p class="sug">≈ ${fx(kg, kg % 1 ? 1 : 0)} kg à ${it.pct} % de ton max (${fx(rm)} kg)${recFactor().why}</p>` : rm ? `<p class="hint">Ton max : ${fx(rm)} kg. Mets un % pour avoir la charge.</p>` : ''}`}
       ${exOf(it.ex).t === 'test' ? '' : `<div class="field exnote"><input class="mini-in" data-ednote="${i}" value="${esc(it.note || '')}" placeholder="Note (ex. en chaussettes, prise large…)" aria-label="Note sur l'exercice"></div>`}
-      ${LBL[i] ? `<div class="mlink">${i > 0 && LBL[i - 1] ? `<button type="button" class="chip" data-edlink="${i}" aria-pressed="${!!it.link}">${it.link ? 'Enchaîné avec ' + LBL[i - 1] : 'Enchaîner avec ' + LBL[i - 1]}</button>` : ''}${!it.link ? `<select class="mini-in msel" data-edmeth="${i}" aria-label="Méthode">${METHODS.map(m => `<option value="${m[0]}"${(it.meth || '') === m[0] ? ' selected' : ''}>${esc(m[1])}</option>`).join('')}</select>` : ''}</div>${!it.link && it.meth ? `<p class="hint" style="margin:4px 2px 0">${esc(METHX[it.meth]?.[2] || '')}</p>` : ''}` : ''}
+      ${LBL[i] ? `<div class="mlink">${i > 0 && LBL[i - 1] ? `<button type="button" class="chip" data-edlink="${i}" aria-pressed="${!!it.link}">${it.link ? 'Enchaîné avec ' + LBL[i - 1] : 'Enchaîner avec ' + LBL[i - 1]}</button>` : ''}</div>` : ''}
       <div class="tools"><span class="hint">Appuie longuement pour déplacer</span><button type="button" class="rm" data-edrm="${i}">Retirer</button></div></div>`; }).join('')}</div>
     ${ED.items.length ? capsLine(planCheck(ED.items)) : ''}
     <div class="addrow"><button class="btn ghost" data-edadd>+ Ajouter un exercice</button><button class="btn ghost" data-edtest>+ Ajouter un test</button></div>
@@ -5910,7 +5976,8 @@ function weekPlanner() {
 function startSession(id, n) {
   if (S.live) { toast('Une séance est déjà en cours : termine-la d\'abord'); openLive(); return; }
   const p = (n ? tdvNum(+n) : null) || planById(id); if (!p) return;
-  S.live = {id: uid(), plan: p.id, name: p.name, kind: p.kind, date: TODAY, start: new Date().toISOString(), items: p.items.map(liveItem), warm: p.warm || null, cool: p.cool || null};
+  const gym = S.tset?.gymPlan?.[p.id] || null; GYM_CTX = gym;
+  S.live = {id: uid(), plan: p.id, name: p.name, kind: p.kind, date: TODAY, start: new Date().toISOString(), gym, items: p.items.map(liveItem), warm: p.warm || null, cool: p.cool || null};
   saveLive(); closeAllPanes(); openLive();
 }
 function liveItem(it) {
@@ -6059,10 +6126,12 @@ function finishPane() {
     <div class="dhead"><div class="eyebrow">${esc(L.name)}</div><div class="big num">${min}<small>min</small></div></div>
     <div class="list"><div class="row col"><label for="fin-rpe">Difficulté ressentie (RPE)<span class="hint">${auto ? `Moyenne de tes ${sr.length} séries ${fx(mAll, 1)}, tiers le plus dur ${fx(mTop, 1)} : RPE de séance ${auto}. Les séries dures comptent plus que la moyenne, car le RPE d'une séance noté après coup est plus haut que la moyenne de ses séries (Day et al. 2004). RIR converti : RPE = 10 − RIR. Tu peux l'ajuster.` : '1 = très facile · 10 = effort maximal'}</span></label><div class="rangeline"><input type="range" id="fin-rpe" min="1" max="10" value="${rpe}" data-finrpe><output>${rpe}</output></div></div>
     <div class="row"><label for="fin-min">Durée<span class="hint">${L.garmin ? 'enregistrée par ta montre' : span ? 'de ta première à ta dernière série, échauffement compris' : 'modifiable'}</span></label><input type="number" inputmode="numeric" id="fin-min" value="${min}" style="width:90px;text-align:right" class="mini-in"></div></div>
+    ${L.kind === 'gym' ? `<div class="sec-label">Salle</div><div class="chips2b">${GYMS.map(([g, n]) => `<button type="button" class="chip" data-fingym="${g}" aria-pressed="${L.gym === g}">${esc(n)}</button>`).join('')}</div>` : ''}
     <div class="sec-label">Note</div><textarea id="fin-note" rows="3" placeholder="Sensations, douleurs, consignes du coach…">${esc(L.note || '')}</textarea>
     <p class="note" style="text-align:left">En enregistrant, la séance est ajoutée à « Ma journée » dans ${modName('R')} : elle compte dans ton effort du jour et dans ta récupération.</p>
     <div style="margin-top:14px"><button class="btn" data-tsave>Enregistrer la séance</button></div>`});
 }
+document.addEventListener('click', e => { const b = e.target.closest('[data-fingym]'); if (!b || !S.live) return; const note = $('#fin-note')?.value; S.live.gym = S.live.gym === b.dataset.fingym ? null : b.dataset.fingym; if (note != null) S.live.note = note; const rv = $('#fin-rpe')?.value, mv = $('#fin-min')?.value; saveLive(); paneRender(); if (rv && $('#fin-rpe')) { $('#fin-rpe').value = rv; $('#fin-rpe').nextElementSibling.value = rv; } if (mv && $('#fin-min')) $('#fin-min').value = mv; });
 async function saveLive2() {
   const L = S.live; if (!L) return;
   const rpe = +($('#fin-rpe')?.value || 7), min = +($('#fin-min')?.value || 1), note = ($('#fin-note')?.value || '').trim();
@@ -6071,7 +6140,7 @@ async function saveLive2() {
   if (!items.length) { toast('Valide au moins une série avec ✓'); return; }
   const tonnage = items.reduce((s, it) => s + (it.u === 's' ? 0 : (it.sets || []).reduce((a, x) => a + x.kg * x.reps, 0)), 0);
   const sprintM = items.reduce((s, it) => s + (it.reps && SPRINT_CATS.includes(exOf(it.ex).cat) && (it.pct ?? 100) >= 90 ? it.reps.reduce((a, r) => a + r.dist, 0) : 0), 0);
-  const doc = {id: L.id, plan: L.plan, name: L.name, kind: L.kind, date: L.date, start: L.start, min, rpe, note, items, shoes: L.shoes || null, cond: L.cond || null, tonnage: Math.round(tonnage), sprintM, updatedAt: new Date().toISOString()};
+  const doc = {id: L.id, plan: L.plan, name: L.name, kind: L.kind, gym: L.gym || null, date: L.date, start: L.start, min, rpe, note, items, shoes: L.shoes || null, cond: L.cond || null, tonnage: Math.round(tonnage), sprintM, updatedAt: new Date().toISOString()};
   S.logs[doc.id] = doc;
   if (!await dbSet('training/' + doc.id, doc)) return;
   await feedReload(L.date);
@@ -6092,17 +6161,31 @@ async function feedReload(k) {
   S.manual[k] = m;
   await dbSet('manual/' + k, m);
 }
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-loggym]'); if (!b) return;
+  const [id, g] = b.dataset.loggym.split('|'), l = S.logs[id]; if (!l) return;
+  l.gym = l.gym === g ? null : g; paneRender(); renderMod(); toast(l.gym ? 'Séance notée à ' + gymName(g) : 'Salle retirée');
+  await dbSet('training/' + l.id, l);
+});
 function logView(id) {
   openPane({title: 'Séance', render: () => {
     const l = S.logs[id]; if (!l) return '';
     return `<div class="dhead"><span class="chiptag">${l.kind === 'gym' ? 'Musculation' : 'Sprint'}</span><div class="bigname" style="font-size:1.625rem">${esc(l.name)}</div><p class="small muted">${esc(cap(fmtDay(l.date)))}</p></div>
       <div class="stats"><div><b>${l.min} min</b><span>durée</span></div><div><b>${l.rpe}/10</b><span>RPE</span></div><div><b>${l.kind === 'gym' ? fx(l.tonnage / 1000, 1) + ' t' : fx(l.sprintM) + ' m'}</b><span>${l.kind === 'gym' ? 'soulevées' : 'de sprint'}</span></div></div>
       <div class="list" style="margin-top:12px">${l.items.map(it => `<div class="rowbtn" style="display:block"><b>${esc(exOf(it.ex).n)}</b><span class="meta">${it.sets ? it.sets.map(s => (s.kg ? fx(s.kg, s.kg % 1 ? 1 : 0) + ' kg × ' : '') + s.reps).join(' · ') : it.reps.map(r => r.dist + ' m' + (r.t ? ' en ' + fx(r.t, 2) + ' s' : '')).join(' · ')}</span></div>`).join('')}</div>
+      ${l.kind === 'gym' ? `<div class="card" style="margin-top:12px"><span class="eyebrow">Salle</span><div class="chips2b" style="margin-top:8px">${GYMS.map(([g, n]) => `<button type="button" class="chip" data-loggym="${l.id}|${g}" aria-pressed="${l.gym === g}">${esc(n)}</button>`).join('')}</div><p class="small muted" style="margin:6px 2px 0">Les charges sur machine de cette séance comptent pour le max de cette salle.</p></div>` : ''}
       ${l.note ? `<h2>Note</h2><div class="card why">${esc(l.note)}</div>` : ''}
       <div style="margin-top:16px"><button class="btn ghost" data-tlogdel="${l.id}" style="color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent)">Supprimer cette séance</button></div>`;
   }});
 }
+function rmBlockGyms(id) {
+  const r = g => rmOf(id, '', g), row = ([g, n]) => { const t = rmTest(id, '', g), x = r(g); return `<div class="row"><span class="l">${esc(n)}<span class="hint">${x ? (x.src === 'test' ? 'test du ' + esc(fmtShort(x.date)) : 'estimé avec tes séances dans cette salle') : 'pas encore de donnée ici'}</span></span><input class="mini-in" inputmode="decimal" placeholder="${x ? fx(x.kg, x.kg % 1 ? 1 : 0) : 'kg'}" value="${t ? t.kg : ''}" data-rmset="${id}@${g}" style="width:84px;text-align:right"></div>`; };
+  const old = bestE1rm(id, null) && !GYMS.some(([g]) => r(g)) ? bestE1rm(id, null) : null;
+  return `<div class="card" style="margin-top:12px"><span class="eyebrow">Ton max, salle par salle</span><p class="small muted" style="margin:4px 0 8px">Une machine ne pèse pas pareil d'une salle à l'autre : chaque salle garde son max, pour ne jamais te proposer une charge faite ailleurs.</p>
+    <div class="list">${GYMS.map(row).join('')}</div>${old ? `<p class="small muted" style="margin:8px 2px 0">Avant le suivi par salle : ${fx(old, old % 1 ? 1 : 0)} kg estimés, salle non notée.</p>` : ''}</div>`;
+}
 function rmBlock(id) {
+  if (machineEx(id)) return rmBlockGyms(id);
   const sides = UNI.includes(id) ? ['', ' D', ' G'] : [''];
   const row = sd => { const t = rmTest(id, sd.trim() ? '|' + sd.trim() : ''); return `<label>${sd ? 'Jambe ' + (sd.trim() === 'D' ? 'droite' : 'gauche') : 'Test (1RM)'}<input class="mini-in" inputmode="decimal" placeholder="kg" value="${t ? t.kg : ''}" data-rmset="${id}${sd.trim() ? '|' + sd.trim() : ''}"></label>`; };
   const r = rmOf(id), reps = [1, 2, 3, 4, 5, 6, 8, 10, 12, 15], rpes = [10, 9.5, 9, 8.5, 8, 7.5, 7, 6];
@@ -6117,7 +6200,7 @@ function rmList() {
   openPane({title: 'Mes max', render: () => {
     const ex = EX.filter(e => e.t === 'gym' && e.u === 'kg'), cats = [...new Set(ex.map(e => e.cat))];
     return `<p class="small muted" style="margin:16px 4px 6px">Un max par exercice : ton test s'il existe, sinon l'estimation de ta meilleure série. Touche un exercice pour noter un test ou calculer une charge.</p>
-      ${cats.map(c => `<div class="sec-label">${esc(c)}</div><div class="list">${ex.filter(e => e.cat === c).map(e => { const r = rmOf(e.id); return `<button class="rowbtn" data-tex="${e.id}"><span><b>${esc(e.n)}</b><span class="meta">${r ? (r.src === 'test' ? 'test du ' + esc(fmtShort(r.date)) : 'estimé') : 'pas encore de donnée'}${UNI.includes(e.id) && (rmTest(e.id, '|D') || rmTest(e.id, '|G')) ? ' · D ' + (rmTest(e.id, '|D')?.kg ?? '–') + ' / G ' + (rmTest(e.id, '|G')?.kg ?? '–') : ''}</span></span><span class="kc">${r ? fx(r.kg, r.kg % 1 ? 1 : 0) + ' kg' : '–'}</span></button>`; }).join('')}</div>`).join('')}`;
+      ${cats.map(c => `<div class="sec-label">${esc(c)}</div><div class="list">${ex.filter(e => e.cat === c).map(e => { if (machineEx(e.id)) { const per = GYMS.map(([g, n]) => [n, rmOf(e.id, '', g)]).filter(x => x[1]); return `<button class="rowbtn" data-tex="${e.id}"><span><b>${esc(e.n)}</b><span class="meta">${per.length ? per.map(([n, x]) => esc(n.replace('Decathlon ', '')) + ' ' + fx(x.kg, x.kg % 1 ? 1 : 0) + ' kg').join(' · ') : 'max par salle · pas encore de donnée'}</span></span><span class="kc">${per.length === 1 ? fx(per[0][1].kg, per[0][1].kg % 1 ? 1 : 0) + ' kg' : per.length ? per.length + ' salles' : '–'}</span></button>`; } const r = rmOf(e.id, '', null); return `<button class="rowbtn" data-tex="${e.id}"><span><b>${esc(e.n)}</b><span class="meta">${r ? (r.src === 'test' ? 'test du ' + esc(fmtShort(r.date)) : 'estimé') : 'pas encore de donnée'}${UNI.includes(e.id) && (rmTest(e.id, '|D') || rmTest(e.id, '|G')) ? ' · D ' + (rmTest(e.id, '|D')?.kg ?? '–') + ' / G ' + (rmTest(e.id, '|G')?.kg ?? '–') : ''}</span></span><span class="kc">${r ? fx(r.kg, r.kg % 1 ? 1 : 0) + ' kg' : '–'}</span></button>`; }).join('')}</div>`).join('')}`;
   }});
 }
 // The load on each muscle over 7 days, against its weekly limit, and the balance between opposite groups.
