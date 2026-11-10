@@ -3405,7 +3405,7 @@ async function gactGet(id) {
 const hms = s => { s = Math.round(s || 0); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return h ? `${h}:${String(m).padStart(2, '0')}:${String(x).padStart(2, '0')}` : `${m}:${String(x).padStart(2, '0')}`; };
 const paceOf = kmh => kmh > 1 ? hms(3600 / kmh).replace(/^0:/, '') + ' /km' : '–';
 // Heart-rate zones as % of his max (5 classic zones, ACSM).
-const HRZ = [['Z1 · récup', .5, '#64D2FF'], ['Z2 · endurance', .6, '#30D158'], ['Z3 · tempo', .7, '#FFD60A'], ['Z4 · seuil', .8, '#FF9F0A'], ['Z5 · max', .9, '#FF453A']];
+const HRZ = [['Sous Z1', 0, '#8E8E93'], ['Z1 · récup', .5, '#64D2FF'], ['Z2 · endurance', .6, '#30D158'], ['Z3 · tempo', .7, '#FFD60A'], ['Z4 · seuil', .8, '#FF9F0A'], ['Z5 · max', .9, '#FF453A']];
 function actPane(r) {
   const view = {title: r.kind === 'gym' ? 'Musculation' : r.kind === 'track' ? 'Sprint' : r.name, ar: r, render: () => actBody(r)};
   openPane(view);
@@ -3430,12 +3430,14 @@ function actBody(r) {
       h += card('Fréquence cardiaque', a.avgHr ? `moy. ${a.avgHr} · max ${a.maxHr || '–'} bpm` : '', chart(series(C.hr), {color: '#FF453A', unit: 'bpm'}));
       const z = HRZ.map(() => 0); let tot = 0;
       for (let i = 1; i < n; i++) { const v = C.hr[i], dt = Math.max(0, (T[i] || 0) - (T[i - 1] || 0)); if (!v || dt > 120) continue; const x = v / S.hrMax; let zi = -1; HRZ.forEach((q, j) => { if (x >= q[1]) zi = j; }); if (zi >= 0) z[zi] += dt; tot += dt; }
-      if (tot > 0) h += card('Temps par zone cardiaque', `FC max ${S.hrMax} bpm`, HRZ.map((q, j) => `<div class="azone"><span>${q[0]}</span><span style="background:var(--card2);border-radius:5px"><i style="--c:${q[2]};width:${Math.max(z[j] ? 2 : 0, z[j] / tot * 100)}%"></i></span><em>${hms(z[j])} · ${Math.round(z[j] / tot * 100)} %</em></div>`).join('')
+      const ZL = HRZ.map((q, j) => [q, j]).filter(([, j]) => j > 0 || z[0] > 0);
+      if (tot > 0) h += card('Temps par zone cardiaque', `FC max ${S.hrMax} bpm`, ZL.map(([q, j]) => `<div class="azone"><span>${q[0]}</span><span style="background:var(--card2);border-radius:5px"><i style="--c:${q[2]};width:${Math.max(z[j] ? 2 : 0, z[j] / tot * 100)}%"></i></span><em>${hms(z[j])} · ${Math.round(z[j] / tot * 100)} %</em></div>`).join('')
         + `<p class="small muted" style="margin:8px 0 0">Zones en % de ta FC max : 50, 60, 70, 80 et 90 %. Au-dessus de 80 %, le temps compte comme activité intense dans ton effort du jour.</p>`);
     }
     if (C.spd?.some(v => v > 0)) h += card(run ? 'Vitesse et allure' : 'Vitesse', '', chart(series(C.spd), {color: 'var(--blue)', fmt: v => run ? `${fx(v, 1)} km/h · ${paceOf(v)}` : fx(v, 1) + ' km/h', min0: true}));
     if (C.alt?.some(v => v != null) && Math.max(...C.alt.filter(v => v != null)) - Math.min(...C.alt.filter(v => v != null)) >= 3) h += card('Altitude', a.elev ? `+${a.elev} m` : '', chart(series(C.alt), {color: 'var(--violet)', unit: 'm'}));
-    if (C.cad?.some(v => v > 0)) h += card('Cadence', '', chart(series(C.cad), {color: 'var(--teal)', unit: run ? 'pas/min' : 'tr/min'}));
+    // Garmin's running cadence curve counts one leg: doubled, it matches the steps per minute of the summary.
+    if (C.cad?.some(v => v > 0)) h += card('Cadence', '', chart(series(C.cad, v => run && Math.max(...C.cad.filter(Boolean)) < 140 ? v * 2 : v), {color: 'var(--teal)', unit: run ? 'pas/min' : 'tr/min'}));
     if (C.pw?.some(v => v > 0)) h += card('Puissance', '', chart(series(C.pw), {color: '#FFD60A', unit: 'W'}));
     if (C.laps?.length > 1) h += card('Tours', C.laps.length + ' tours', `<table class="alaps"><tr><th>#</th><th>Dist.</th><th>Temps</th><th>${run ? 'Allure' : 'Vitesse'}</th><th>FC</th></tr>${C.laps.map((l, i) => `<tr><td>${i + 1}</td><td>${l.km != null ? fx(l.km, 2) + ' km' : '–'}</td><td>${hms(l.s)}</td><td>${l.spd ? (run ? paceOf(l.spd) : fx(l.spd, 1) + ' km/h') : '–'}</td><td>${l.hr || '–'}</td></tr>`).join('')}</table>`);
   } else if (a.id) {
