@@ -789,7 +789,7 @@ details.slow[open]>summary h2::after{content:" ▴"}
 .hm-head .sub{color:rgba(255,255,255,.5);font-size:.9375rem}
 .hm-head .sub::first-letter{text-transform:uppercase}
 .hm-head h1{color:#fff;white-space:normal;text-wrap:balance}
-.hm-gear{position:absolute;left:12px;top:calc(16px + env(safe-area-inset-top,0px));width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:rgba(255,255,255,.55)}
+.hm-gear{position:absolute;z-index:6;left:8px;top:calc(12px + env(safe-area-inset-top,0px));width:52px;height:52px;touch-action:manipulation;border-radius:50%;display:grid;place-items:center;color:rgba(255,255,255,.55)}
 .hm-gear svg{width:22px;height:22px}
 .hm-plan{top:calc(60px + env(safe-area-inset-top,0px))}
 .hm-day{position:absolute;right:16px;top:calc(20px + env(safe-area-inset-top,0px));width:36px;height:36px;border-radius:10px;background:#fff;color:#000;display:grid;place-items:center;z-index:2}
@@ -806,6 +806,15 @@ details.slow[open]>summary h2::after{content:" ▴"}
 .dconn .eyebrow{display:block;margin:0 4px 8px}
 .dconn .conns{grid-template-columns:repeat(auto-fill,minmax(64px,1fr))}
 .drawer.on{transform:none}
+.atl{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 12px}
+.atl>div{background:var(--card);border-radius:14px;padding:10px 10px 9px;min-width:0}
+.atl b{display:block;font:600 1.125rem var(--display);font-variant-numeric:tabular-nums;white-space:nowrap}.atl b small{font-size:.75rem;font-weight:500;color:var(--fg2);margin-left:2px}
+.atl span{display:block;font-size:.6875rem;color:var(--fg2);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+.azone{display:grid;grid-template-columns:76px 1fr 64px;gap:8px;align-items:center;font-size:.8125rem;padding:5px 0}
+.azone i{display:block;height:10px;border-radius:5px;background:var(--c)}.azone em{font-style:normal;color:var(--fg2);text-align:right;font-variant-numeric:tabular-nums}
+.alaps{width:100%;border-collapse:collapse;font-size:.8125rem;font-variant-numeric:tabular-nums}.alaps th{font-weight:500;color:var(--fg2);text-align:right;padding:4px 4px 6px}.alaps td{text-align:right;padding:7px 4px;border-top:1px solid var(--line)}.alaps th:first-child,.alaps td:first-child{text-align:left}
+.ahead{display:flex;align-items:center;gap:12px;margin:2px 0 12px}.ahead .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--card2);color:var(--accent)}.ahead b{display:block;font-size:1.0625rem}.ahead span{color:var(--fg2);font-size:.875rem}
+.btr.hid{display:none}
 .drawer-scrim{position:fixed;inset:0;z-index:59;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .3s}
 .drawer-scrim.on{opacity:1;pointer-events:auto}
 .drawer h2{margin:0 0 6px;font-size:1.25rem}
@@ -3302,19 +3311,19 @@ function weekActRows(days = 7) {
     const k = addDays(TODAY, -i), gA = gymAct(k), tA = trackAct(k);
     for (const a of G(k, 'acts') || []) {
       if ((a === gA && M(k, 'gymRpe')) || (a === tA && M(k, 'trackRpe'))) continue;
-      rows.push({k, t: a.start || '', fam: ACT_FAM(a.type), km: a.km || 0, min: a.min || 0, name: a.name || ACT[a.type]?.[0] || a.type, ic: ACT[a.type]?.[1] || 'load', meta: `${fx(a.min)} min${a.km ? ' · ' + fx(a.km, 1) + ' km' : ''}${a.avgHr ? ' · FC moy. ' + a.avgHr : ''}`, eff: toEffort(trimpOf(a))});
+      rows.push({k, a, t: a.start || '', fam: ACT_FAM(a.type), km: a.km || 0, min: a.min || 0, name: a.name || ACT[a.type]?.[0] || a.type, ic: ACT[a.type]?.[1] || 'load', meta: `${fx(a.min)} min${a.km ? ' · ' + fx(a.km, 1) + ' km' : ''}${a.avgHr ? ' · FC moy. ' + a.avgHr : ''}`, eff: toEffort(trimpOf(a))});
     }
     const trips = G(k, 'trips') || [];
-    for (const a of trips) rows.push({k, t: a.start || '', fam: ACT_FAM(a.type), km: a.km || 0, min: a.min || 0, name: /cycl|bik/.test(a.type) ? 'Trajet à vélo' : 'Trajet à pied', ic: /cycl|bik/.test(a.type) ? 'bike' : 'load', meta: `${fx(a.min)} min${a.km ? ' · ' + fx(a.km, 1) + ' km' : ''}`, eff: toEffort((a.min || 0) * .6)});
+    for (const a of trips) rows.push({k, a, trip: true, t: a.start || '', fam: ACT_FAM(a.type), km: a.km || 0, min: a.min || 0, name: /cycl|bik/.test(a.type) ? 'Trajet à vélo' : 'Trajet à pied', ic: /cycl|bik/.test(a.type) ? 'bike' : 'load', meta: `${fx(a.min)} min${a.km ? ' · ' + fx(a.km, 1) + ' km' : ''}`, eff: toEffort((a.min || 0) * .6)});
     if (!trips.length) {
       // Before the sync sends each trip, only the day's total is known: one line, at the end of the day.
       const shownBike = (G(k, 'acts') || []).filter(a => /cycling|biking/.test(a.type));
       const tripKm = (G(k, 'bikeKm') || 0) - shownBike.reduce((t, a) => t + (a.km || 0), 0), tripMin = (G(k, 'bikeMin') || 0) - shownBike.reduce((t, a) => t + (a.min || 0), 0);
-      if (tripKm > .3) rows.push({k, t: '', fam: 'trips', name: 'Trajets à vélo', ic: 'bike', meta: `${fx(tripKm, 1)} km${tripMin > 0 ? ' · ' + fx(tripMin) + ' min' : ''} · total du jour`, eff: toEffort(tripMin * .6)});
+      if (tripKm > .3) rows.push({k, tot: {km: tripKm, min: tripMin}, t: '', fam: 'trips', name: 'Trajets à vélo', ic: 'bike', meta: `${fx(tripKm, 1)} km${tripMin > 0 ? ' · ' + fx(tripMin) + ' min' : ''} · total du jour`, eff: toEffort(tripMin * .6)});
     }
     const gl = logsOn(k).find(l => l.kind === 'gym'), tl = logsOn(k).find(l => l.kind === 'track');
-    if (M(k, 'gymRpe')) rows.push({k, t: gA?.start || (dayPlan(k).find(b => b.c === 'muscu')?.a) || hhmmOf(gl?.start) || '', fam: 'gym', name: gl?.name || 'Musculation', ic: 'gym', meta: `${M(k, 'gymMin') || 90} min · RPE ${M(k, 'gymRpe')}`, eff: toEffort(M(k, 'gymRpe') * (M(k, 'gymMin') || 90) / 4)});
-    if (M(k, 'trackRpe')) rows.push({k, t: tA?.start || (dayPlan(k).find(b => b.c === 'athle')?.a) || hhmmOf(tl?.start) || '', fam: 'track', name: tl?.name || 'Sprint', ic: 'bolt', meta: `${M(k, 'trackMin') || 75} min · RPE ${M(k, 'trackRpe')}${M(k, 'sprintM') ? ' · ' + M(k, 'sprintM') + ' m de sprint' : ''}`, eff: toEffort(M(k, 'trackRpe') * (M(k, 'trackMin') || 75) / 4)});
+    if (M(k, 'gymRpe')) rows.push({k, a: gA, log: gl, kind: 'gym', rpe: M(k, 'gymRpe'), dur: M(k, 'gymMin') || 90, t: gA?.start || (dayPlan(k).find(b => b.c === 'muscu')?.a) || hhmmOf(gl?.start) || '', fam: 'gym', name: gl?.name || 'Musculation', ic: 'gym', meta: `${M(k, 'gymMin') || 90} min · RPE ${M(k, 'gymRpe')}`, eff: toEffort(M(k, 'gymRpe') * (M(k, 'gymMin') || 90) / 4)});
+    if (M(k, 'trackRpe')) rows.push({k, a: tA, log: tl, kind: 'track', rpe: M(k, 'trackRpe'), dur: M(k, 'trackMin') || 75, t: tA?.start || (dayPlan(k).find(b => b.c === 'athle')?.a) || hhmmOf(tl?.start) || '', fam: 'track', name: tl?.name || 'Sprint', ic: 'bolt', meta: `${M(k, 'trackMin') || 75} min · RPE ${M(k, 'trackRpe')}${M(k, 'sprintM') ? ' · ' + M(k, 'sprintM') + ' m de sprint' : ''}`, eff: toEffort(M(k, 'trackRpe') * (M(k, 'trackMin') || 75) / 4)});
   }
   // Newest first; a line without an hour goes last in its day.
   rows.sort((a, b) => b.k.localeCompare(a.k) || (b.t || '00:00').localeCompare(a.t || '00:00'));
@@ -3330,9 +3339,10 @@ function weekActRows(days = 7) {
   }
   return out;
 }
+const AR = {}, arKey = r => { const key = [r.k, r.t, r.name, r.min || r.dur || ''].join('|'); AR[key] = r; return key; };
 function recentSessions() {
   const rows = weekActRows(); if (!rows.length) return '';
-  const one = (r, kid) => `<button class="sess${kid ? ' kid' : ''}" data-day="${r.k}"><span class="ic">${ICON[r.ic] || ICON.load}</span><span><b>${esc(r.name)}</b><span class="meta">${esc(fmtShort(r.k))}${r.t ? ' · ' + esc(tfr(r.t)) : ''} · ${esc(r.meta)}</span></span><span class="eff">${fx(r.eff, 1)}</span></button>${r.relink && !kid ? `<button class="chip relink" data-actlink="${esc(r.relink)}">Relier en aller-retour</button>` : ''}`;
+  const one = (r, kid) => `<button class="sess${kid ? ' kid' : ''}" data-day="${r.k}" data-ar="${esc(arKey(r))}"><span class="ic">${ICON[r.ic] || ICON.load}</span><span><b>${esc(r.name)}</b><span class="meta">${esc(fmtShort(r.k))}${r.t ? ' · ' + esc(tfr(r.t)) : ''} · ${esc(r.meta)}</span></span><span class="eff">${fx(r.eff, 1)}</span></button>${r.relink && !kid ? `<button class="chip relink" data-actlink="${esc(r.relink)}">Relier en aller-retour</button>` : ''}`;
   return `<h2>Séances récentes <small>7 jours · effort /21</small></h2><div class="list">${rows.map(r => r.grp ? `<div class="grp${ACT_OPEN[r.id] ? ' open' : ''}"><button class="sess stack" data-actgrp="${esc(r.id)}" aria-expanded="${!!ACT_OPEN[r.id]}"><span class="ic">${ICON[r.ic] || ICON.load}</span><span><b>${esc(r.name)}</b><span class="meta">${esc(fmtShort(r.k))} · ${esc(r.meta)}</span></span><span class="eff">${fx(r.eff, 1)}</span></button>
     ${ACT_OPEN[r.id] ? `<div class="kids">${r.kids.map(x => one(x, true)).join('')}<button class="chip" data-actunlink="${esc(r.id)}">Délier les deux trajets</button></div>` : ''}</div>` : one(r)).join('')}</div>`;
 }
@@ -3345,6 +3355,68 @@ document.addEventListener('click', async e => {
   if (u) unlink[id] = true; else delete unlink[id];
   S.app = {...(S.app || {}), unlink}; renderMod(); render(); toast(u ? 'Trajets séparés' : 'Trajets reliés');
   await dbSet('settings/app', {...S.app, updatedAt: new Date().toISOString()});
+}, true);
+
+
+/* ---------- one activity in detail, like Garmin Connect, in the app's colours ---------- */
+// Curves come from gact/<Garmin activity id>, written by the sync once per activity (300 points, no GPS track).
+const GACT = {};
+async function gactGet(id) {
+  if (!id || !S.db) return null; if (id in GACT) return GACT[id];
+  GACT[id] = undefined;
+  try { const r = S.db.doc('gact/' + id); GACT[id] = (r.one ? await r.one() : (await r.get()).data()) || null; } catch (e) { GACT[id] = null; }
+  return GACT[id];
+}
+const hms = s => { s = Math.round(s || 0); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return h ? `${h}:${String(m).padStart(2, '0')}:${String(x).padStart(2, '0')}` : `${m}:${String(x).padStart(2, '0')}`; };
+const paceOf = kmh => kmh > 1 ? hms(3600 / kmh).replace(/^0:/, '') + ' /km' : '–';
+// Heart-rate zones as % of his max (5 classic zones, ACSM).
+const HRZ = [['Z1 · récup', .5, '#64D2FF'], ['Z2 · endurance', .6, '#30D158'], ['Z3 · tempo', .7, '#FFD60A'], ['Z4 · seuil', .8, '#FF9F0A'], ['Z5 · max', .9, '#FF453A']];
+function actPane(r) {
+  const view = {title: r.kind === 'gym' ? 'Musculation' : r.kind === 'track' ? 'Sprint' : r.name, ar: r, render: () => actBody(r)};
+  openPane(view);
+  const id = r.a?.id; if (id && !(id in GACT)) gactGet(id).then(() => { if (P.stack.at(-1) === view) paneRender(); });
+}
+function actBody(r) {
+  const a = r.a || {}, C = a.id ? GACT[a.id] : null, run = /run|walk|hik/.test(a.type || '') || r.kind === 'track', bike = /cycl|bik/.test(a.type || '');
+  const ic = r.kind === 'gym' ? 'gym' : r.kind === 'track' ? 'bolt' : r.ic || ACT[a.type]?.[1] || 'load';
+  const tile = (v, u, l) => v == null || v === '' || v === 0 ? '' : `<div><b>${v}${u ? `<small>${u}</small>` : ''}</b><span>${l}</span></div>`;
+  const min = a.min || r.dur || r.tot?.min, km = a.km || r.tot?.km, spd = (a.min || r.tot?.min) && km ? km / ((a.min || r.tot.min) / 60) : null;
+  const rpe = r.rpe || M(r.k, 'actRpe')?.[a.start];
+  let h = `<div class="ahead"><span class="ic">${ICON[ic] || ICON.load}</span><span><b>${esc(r.name)}</b><span>${esc(cap(fmtDay(r.k)))}${r.t ? ' · ' + esc(tfr(r.t)) : ''}</span></span></div>
+    <div class="atl">${tile(min ? durTxt(Math.round(min)) : null, '', 'Durée')}${tile(km ? fx(km, 1) : null, ' km', 'Distance')}${tile(spd ? (run ? paceOf(spd).replace(' /km', '') : fx(spd, 1)) : null, run ? ' /km' : ' km/h', run ? 'Allure moy.' : 'Vitesse moy.')}
+      ${tile(a.avgHr, ' bpm', 'FC moy.')}${tile(a.maxHr, ' bpm', 'FC max')}${tile(a.vmax ? fx(a.vmax, 1) : null, ' km/h', 'Vitesse max')}${tile(a.elev, ' m', 'Dénivelé +')}${tile(a.cad, run ? ' pas/min' : ' tr/min', 'Cadence')}${tile(a.kcal, ' kcal', 'Calories')}
+      ${tile(rpe, '/10', 'RPE')}${tile(r.eff ? fx(r.eff, 1) : null, '/21', 'Effort')}${r.kind === 'track' && M(r.k, 'sprintM') ? tile(M(r.k, 'sprintM'), ' m', 'Sprint') : ''}</div>`;
+  if (C && C.t?.length > 2) {
+    const T = C.t, n = T.length, end = T[n - 1] || 1, step = Math.max(1, Math.ceil(n / 160)), I = [...Array(n).keys()].filter(i => i % step === 0 || i === n - 1);
+    const tip = i => hms(T[i]) + (C.dist?.[i] != null ? ' · ' + fx(C.dist[i] / 1000, 2) + ' km' : '');
+    const series = (arr, f = v => v) => I.map((i, j) => ({v: arr[i] == null || arr[i] === 0 && arr !== C.alt ? null : f(arr[i]), tip: tip(i), lab: j === 0 ? '0:00' : j === I.length - 1 ? hms(end) : undefined}));
+    const card = (t, sub, body) => `<div class="card" style="margin-top:12px"><div class="chead"><span class="eyebrow">${t}</span>${sub ? `<span class="small muted">${sub}</span>` : ''}</div>${body}</div>`;
+    if (C.hr?.some(v => v)) {
+      h += card('Fréquence cardiaque', a.avgHr ? `moy. ${a.avgHr} · max ${a.maxHr || '–'} bpm` : '', chart(series(C.hr), {color: '#FF453A', unit: 'bpm'}));
+      const z = HRZ.map(() => 0); let tot = 0;
+      for (let i = 1; i < n; i++) { const v = C.hr[i], dt = Math.max(0, (T[i] || 0) - (T[i - 1] || 0)); if (!v || dt > 120) continue; const x = v / S.hrMax; let zi = -1; HRZ.forEach((q, j) => { if (x >= q[1]) zi = j; }); if (zi >= 0) z[zi] += dt; tot += dt; }
+      if (tot > 0) h += card('Temps par zone cardiaque', `FC max ${S.hrMax} bpm`, HRZ.map((q, j) => `<div class="azone"><span>${q[0]}</span><span style="background:var(--card2);border-radius:5px"><i style="--c:${q[2]};width:${Math.max(z[j] ? 2 : 0, z[j] / tot * 100)}%"></i></span><em>${hms(z[j])} · ${Math.round(z[j] / tot * 100)} %</em></div>`).join('')
+        + `<p class="small muted" style="margin:8px 0 0">Zones en % de ta FC max : 50, 60, 70, 80 et 90 %. Au-dessus de 80 %, le temps compte comme activité intense dans ton effort du jour.</p>`);
+    }
+    if (C.spd?.some(v => v > 0)) h += card(run ? 'Vitesse et allure' : 'Vitesse', '', chart(series(C.spd), {color: 'var(--blue)', fmt: v => run ? `${fx(v, 1)} km/h · ${paceOf(v)}` : fx(v, 1) + ' km/h', min0: true}));
+    if (C.alt?.some(v => v != null) && Math.max(...C.alt.filter(v => v != null)) - Math.min(...C.alt.filter(v => v != null)) >= 3) h += card('Altitude', a.elev ? `+${a.elev} m` : '', chart(series(C.alt), {color: 'var(--violet)', unit: 'm'}));
+    if (C.cad?.some(v => v > 0)) h += card('Cadence', '', chart(series(C.cad), {color: 'var(--teal)', unit: run ? 'pas/min' : 'tr/min'}));
+    if (C.pw?.some(v => v > 0)) h += card('Puissance', '', chart(series(C.pw), {color: '#FFD60A', unit: 'W'}));
+    if (C.laps?.length > 1) h += card('Tours', C.laps.length + ' tours', `<table class="alaps"><tr><th>#</th><th>Dist.</th><th>Temps</th><th>${run ? 'Allure' : 'Vitesse'}</th><th>FC</th></tr>${C.laps.map((l, i) => `<tr><td>${i + 1}</td><td>${l.km != null ? fx(l.km, 2) + ' km' : '–'}</td><td>${hms(l.s)}</td><td>${l.spd ? (run ? paceOf(l.spd) : fx(l.spd, 1) + ' km/h') : '–'}</td><td>${l.hr || '–'}</td></tr>`).join('')}</table>`);
+  } else if (a.id) {
+    h += `<div class="card" style="margin-top:12px"><p class="small" style="margin:0">${GACT[a.id] === undefined ? 'Chargement des courbes…' : 'Les courbes de cette activité ne sont pas encore arrivées. Elles viennent avec la prochaine synchro Garmin.'}</p></div>`;
+  } else if (!r.tot) {
+    h += `<div class="card" style="margin-top:12px"><p class="small" style="margin:0">${r.a ? 'Pour l\'instant, ta montre n\'a envoyé que le résumé de cette activité. Les courbes arrivent avec la synchro Garmin, pour les 8 derniers jours.' : 'Séance notée dans ton questionnaire, sans activité enregistrée sur la montre : pas de courbe.'}</p></div>`;
+  } else h += `<p class="small muted" style="margin:4px 2px 0">Total des petits trajets du jour, envoyé avant que la montre ne détaille chaque trajet.</p>`;
+  if (r.log) h += `<button class="btn ghost" style="margin-top:14px" data-logv="${esc(r.log.id)}">Voir le détail de la séance</button>`;
+  h += `<button class="btn ghost" style="margin-top:10px" data-arnote="${r.k}">${rpe ? 'Modifier dans le questionnaire' : 'Noter le RPE dans le questionnaire'}</button>`;
+  return h;
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-ar]'), n = e.target.closest('[data-arnote]'), l = e.target.closest('[data-logv]');
+  if (b && AR[b.dataset.ar]) { e.stopPropagation(); e.preventDefault(); actPane(AR[b.dataset.ar]); return; }
+  if (n) { e.stopPropagation(); const k = n.dataset.arnote; while (P.stack.length) closePane(); openSheet('note', k); return; }
+  if (l) { e.stopPropagation(); logView(l.dataset.logv); }
 }, true);
 
 /* ---------- periods: Jour = that day, Semaine = its 7 days, Mois = its weeks, Année = its 12 months ---------- */
@@ -3546,16 +3618,20 @@ function sleepParts(kG) {
     <p class="small" style="margin:8px 0 0">${s.score >= 85 ? 'Excellente nuit : continue exactement comme ça.' : `Ta nuit est ${s.score >= 70 ? 'suffisante' : 'insuffisante'}. Le levier le plus simple : ${weak[0]}${weak[0] === 'la régularité' ? ', te coucher et te lever à la même heure chaque jour' : weak[0] === 'les heures' ? ', te coucher un peu plus tôt' : ', moins d\'écran et une chambre fraîche'}.`}</p></div>`;
 }
 // The effort of the day taken apart, against the daily average of the last 30 days.
-function effParts(d) { let lo = 0, hi = 0; for (const a of G(d, 'acts') || []) { if (GYM_RE.test(a.type)) continue; const x = a.avgHr ? a.avgHr / S.hrMax : .6; (x >= .8 ? (hi += a.min || 0) : (lo += a.min || 0)); }
-  for (const t of G(d, 'trips') || []) lo += t.min || 0;
+function effParts(d) { let lo = 0, hi = 0; const src = {lo: {}, hi: {}}, add = (w, n, m) => { src[w][n] = (src[w][n] || 0) + (m || 0); }, tA = trackAct(d), tl = logsOn(d).find(l => l.kind === 'track'), nm = a => a === tA && (M(d, 'trackRpe') || tl) ? tl?.name || 'Séance de piste' : a.name || ACT[a.type]?.[0] || 'Activité';
+  for (const a of G(d, 'acts') || []) { if (GYM_RE.test(a.type)) continue; const x = a.avgHr ? a.avgHr / S.hrMax : .6; if (x >= .8) { hi += a.min || 0; add('hi', nm(a), a.min); } else { lo += a.min || 0; add('lo', nm(a), a.min); } }
+  for (const t of G(d, 'trips') || []) { lo += t.min || 0; add('lo', /cycl|bik/.test(t.type) ? 'Trajets à vélo' : 'Trajets à pied', t.min); }
+  const gl = logsOn(d).find(l => l.kind === 'gym');
   const gym = M(d, 'gymRpe') ? M(d, 'gymMin') || 90 : logsOn(d).filter(l => l.kind === 'gym').reduce((s, l) => s + (l.min || 0), 0);
-  return {lo, hi, gym, sp: M(d, 'sprintM') || logsOn(d).reduce((s, l) => s + (l.sprintM || 0), 0)}; }
+  return {lo, hi, gym, sp: M(d, 'sprintM') || logsOn(d).reduce((s, l) => s + (l.sprintM || 0), 0), src, gymN: gl?.name || ''}; }
+const srcTxt = o => Object.entries(o).sort((a, b) => b[1] - a[1]).map(([n, m]) => `${n} ${fx(m)} min`).join(' · ');
 function effortParts() {
   const k = effortDay(TODAY) ? TODAY : addDays(TODAY, -1), parts = effParts;
   const t = parts(k), av = f => mean([...Array(30)].map((_, i) => parts(addDays(k, -1 - i))[f]));
   const hm = m => `${Math.floor(m / 60)}:${String(Math.round(m % 60)).padStart(2, '0')}`;
-  const R = [['Activité modérée', 'FC sous 80 % de ta max', t.lo, av('lo'), hm, 'lo'], ['Activité intense', 'FC au-dessus de 80 % de ta max', t.hi, av('hi'), hm, 'hi'], ['Musculation', 'temps de séance', t.gym, av('gym'), hm, 'gym'], ['Sprint', 'mètres au-dessus de 90 %', t.sp, av('sp'), v => fx(v) + ' m', 'sp']];
-  const e = effortDay(k); if (!e && !R.some(r => r[2])) return '';
+  // Only what was done shows, each line saying which activities it holds (FC split at 80 % of his max).
+  const R = [['Activité modérée', srcTxt(t.src.lo) + ' · FC sous 80 %', t.lo, av('lo'), hm, 'lo'], ['Activité intense', srcTxt(t.src.hi) + ' · FC au-dessus de 80 %', t.hi, av('hi'), hm, 'hi'], ['Musculation', t.gymN || 'temps de séance', t.gym, av('gym'), hm, 'gym'], ['Sprint', 'mètres au-dessus de 90 %', t.sp, av('sp'), v => fx(v) + ' m', 'sp']].filter(r => r[2] > 0);
+  const e = effortDay(k); if (!e && !R.length) return '';
   return `<div class="card parts"><div class="chead" data-metric="effort" role="button"><span class="eyebrow">Effort ${k === TODAY ? 'du jour' : 'd\'hier'} en détail</span><b class="num">${fx(e, 1)}<small> /21</small></b></div>
     ${R.map(r => `<button type="button" class="prow" data-part="${r[5]}"><span>${r[0]}<small>${r[1]}</small></span><b>${r[4](r[2])}</b>${arrowOf(r[2], r[3], 'high', .5).replace(/ up| dn/, ' neu')}</button>`).join('')}
     <p class="pfoot">▲▼ par rapport à ta moyenne par jour des 30 derniers jours</p>
@@ -5169,6 +5245,7 @@ function homeOpen(m) {
     if (m === 'T' && S.live) openLive();
   }, 470);
 }
+document.addEventListener('pointerup', e => { if (!e.target.closest?.('[data-hmenu]') || $('.drawer.on')) return; window.__hmT = Date.now(); openDrawer(); });
 document.addEventListener('pointerdown', e => {
   const b = e.target.closest('.hm-k');
   if (!b) { if (HP.sel && S.mod === 'home' && !HP.busy && !e.target.closest('.hm-gear,.hm-day')) homeReset(); return; }
@@ -5774,10 +5851,13 @@ function closeAllPanes() { while (P.stack.length) P.stack.pop(); P.live = false;
 
 /* ---------- plan view, editor and weekly planning ---------- */
 // His three gyms and what they have (as he listed it). A session shows where it can be done whole.
-const GYMS = [['dmarcq', 'Decathlon Marcq-en-Barœul'], ['dlille', 'Decathlon Lille'], ['cmarcq', 'Club de Marcq']];
+const GYMS = [['dmarcq', 'Decathlon Marcq-en-Barœul'], ['dlille', 'Decathlon Lille'], ['cmarcq', 'Club de Marcq'], ['maison', 'Maison']];
+// At home the bar takes 130 kg of plates at most.
+const GYM_MAX = {maison: 130};
 const GYM_EQ = {
   dmarcq: 'rack halt bench incline decline legext legcurl_ly legcurl_seat adductor abductor isochair stairs treadmill poulie tirage_h tirage_v pendulum hacksquat multihip kickback_m oblique_m crunch_m crunch_disk nordic ghd floor hipthrust_plat box band pecdeck tirage_h_plate smith calf_seat lumbar pullup rings bike airbike skierg rower curl_m abwheel swiss romaine dips iso_rack sled step medball kb'.split(' '),
   dlille: 'rower skierg treadmill runner sled floor rack pullup dips kb wallball medball swiss halt tirage_v tirage_h poulie step bench incline smith hacksquat legpress romaine crunch_disk legext legcurl_ly adductor abductor shoulder_m tirage_h_plate pecdeck stairs bike airbike trx band sliders hipthrust_m box kickback_m tri_m iso_rack'.split(' '),
+  maison: 'rack pullup floor band step'.split(' '),
   cmarcq: 'sled poulie tirage_h tirage_v shoulder_m curl_m hipthrust_plat bench legext legcurl_ly adductor tbar pecdeck tri_m rack halt wallball medball kb abwheel swiss romaine dips pullup airbike rower skierg lumbar treadmill calf_stand legpress hacksquat smith floor step trx band box'.split(' ')};
 const EQ_NEED = {legext: ['legext'], legext1: ['legext'], legext_iso1: ['legext'], legcurl: ['legcurl_ly', 'legcurl_seat'], legcurl1: ['legcurl_ly', 'legcurl_seat'], legcurl_iso1: ['legcurl_ly', 'legcurl_seat'], seatcurl: ['legcurl_seat'],
   adductor: ['adductor'], hipabd: ['abductor'], hacksquat: ['hacksquat', 'pendulum'], pendulum: ['pendulum'], legpress: ['legpress'], legpress1: ['legpress'], legpresscalf: ['legpress'], calf: ['calf_stand'],
@@ -5791,7 +5871,8 @@ const EQ_BY = {Barre: ['rack'], 'Haltères': ['halt'], Kettlebell: ['kb', 'halt'
 const eqNeed = id => EQ_NEED[id] || EQ_BY[exOf(id).eq] || [];
 const gymHas = (g, id) => { const n = eqNeed(id); return !n.length || n.some(x => GYM_EQ[g].includes(x)); };
 const gymName = g => GYMS.find(x => x[0] === g)?.[1] || '';
-function gymFit(items) { return GYMS.map(([g, name]) => ({g, name, miss: [...new Set(items.filter(it => exOf(it.ex).t === 'gym' && it.ex !== 'warmup' && !gymHas(g, it.ex)).map(it => it.ex))]})).sort((a, b) => a.miss.length - b.miss.length); }
+const missTxt = (f, items) => f.miss.map(x => esc(exOf(x).n) + (GYM_MAX[f.g] && gymHas(f.g, x) ? ` (plus de ${GYM_MAX[f.g]} kg)` : '')).join(', ');
+function gymFit(items) { return GYMS.map(([g, name]) => ({g, name, miss: [...new Set(items.filter(it => exOf(it.ex).t === 'gym' && it.ex !== 'warmup' && (!gymHas(g, it.ex) || (GYM_MAX[g] && exOf(it.ex).eq === 'Barre' && +it.kg > GYM_MAX[g]))).map(it => it.ex))]})).sort((a, b) => a.miss.length - b.miss.length); }
 // The closest exercise the gym has: same main muscles, then the same equipment.
 function gymSub(ex, g) {
   const e = exOf(ex), c = musCoef(ex), main = Object.keys(c).filter(k => c[k] >= .75);
@@ -5801,8 +5882,8 @@ function gymCard(p) {
   if (p.kind !== 'gym') return '';
   const F = gymFit(p.items), sel = S.tset?.gymPlan?.[p.id] || '', dist = S.app?.gymDist || {};
   const full = F.filter(f => !f.miss.length), show = full.length ? full : F;
-  return `<div class="card gymc" style="margin-top:12px"><span class="eyebrow">Où faire cette séance</span>${full.length ? '' : '<p class="small" style="margin:6px 2px">Aucune salle n\'a tout : il faudra remplacer un exercice.</p>'}${show.map(f => `<button class="gymrow${sel === f.g ? ' on' : ''}" data-gympick="${esc(p.id)}|${f.g}" aria-pressed="${sel === f.g}"><span><b>${esc(f.name)}</b><span class="meta">${dist[f.g] ? esc(dist[f.g]) + ' · ' : ''}${f.miss.length ? 'il manque : ' + f.miss.map(x => esc(exOf(x).n)).join(', ') : 'tout est faisable'}</span></span><i>${sel === f.g ? '✓' : ''}</i></button>`).join('')}
-    <p class="small muted" style="margin:6px 2px 0">${full.length ? `Seulement les salles où tout est faisable sans rien remplacer${full.length < F.length ? ' (pas ' + F.filter(f => f.miss.length).map(f => esc(f.name) + ' : ' + f.miss.map(x => esc(exOf(x).n).toLowerCase()).join(', ')).join(' ; ') + ')' : ''}. Tes max sur machine sont ceux de la salle choisie.` : 'Pendant la séance, un exercice que la salle n\'a pas te propose un remplaçant.'}</p></div>`;
+  return `<div class="card gymc" style="margin-top:12px"><span class="eyebrow">Où faire cette séance</span>${full.length ? '' : '<p class="small" style="margin:6px 2px">Aucune salle n\'a tout : il faudra remplacer un exercice.</p>'}${show.map(f => `<button class="gymrow${sel === f.g ? ' on' : ''}" data-gympick="${esc(p.id)}|${f.g}" aria-pressed="${sel === f.g}"><span><b>${esc(f.name)}</b><span class="meta">${dist[f.g] ? esc(dist[f.g]) + ' · ' : f.g === 'maison' ? 'chez toi, barre jusqu\'à 130 kg · ' : ''}${f.miss.length ? 'il manque : ' + missTxt(f, p.items) : 'tout est faisable'}</span></span><i>${sel === f.g ? '✓' : ''}</i></button>`).join('')}
+    <p class="small muted" style="margin:6px 2px 0">${full.length ? `Seulement les salles où tout est faisable sans rien remplacer${full.length < F.length ? ' (pas ' + F.filter(f => f.miss.length).map(f => esc(f.name) + ' : ' + missTxt(f, p.items).toLowerCase()).join(' ; ') + ')' : ''}. Tes max sur machine sont ceux de la salle choisie.` : 'Pendant la séance, un exercice que la salle n\'a pas te propose un remplaçant.'}</p></div>`;
 }
 document.addEventListener('click', async e => {
   const b = e.target.closest('[data-gympick]'); if (!b) return;
@@ -6754,6 +6835,8 @@ function fProgress() {
       ${bloodTrend()}
     </div>`;
 }
+try { S.bloodAll = localStorage.getItem('fl-blood') === '1'; } catch (e) {}
+document.addEventListener('click', e => { if (!e.target.closest('[data-fbtog]')) return; S.bloodAll = !S.bloodAll; try { localStorage.setItem('fl-blood', S.bloodAll ? '1' : '0'); } catch (err) {} renderMod(); });
 document.addEventListener('click', e => { const b = e.target.closest('[data-nunit]'); if (!b) return; S.nunit = b.dataset.nunit === 'pct' ? 'pct' : 'kg'; renderMod(); });
 // Blood tests over time: one small chart per value, a dot per bilan, a line when there are two or more.
 function bloodTrend() {
@@ -6764,8 +6847,9 @@ function bloodTrend() {
     const X = d => 8 + (new Date(d).getTime() - t0) / (t1 - t0) * 104, Y = v => 26 - (v - lo) / span * 20;
     const band = last.r[0] != null && last.r[1] != null ? `<rect x="0" y="${Y(last.r[1])}" width="120" height="${Math.max(1, Y(last.r[0]) - Y(last.r[1]))}" fill="var(--good)" opacity=".12"/>` : '';
     const svg = `<svg viewBox="0 0 120 30" width="120" height="30" aria-hidden="true">${band}${pts.length > 1 ? `<polyline fill="none" stroke="var(--fg2)" stroke-width="1.5" points="${pts.map(q => X(q.d) + ',' + Y(q.v)).join(' ')}"/>` : ''}${pts.map(q => `<circle cx="${X(q.d)}" cy="${Y(q.v)}" r="3" fill="${bioFlag(q.v, q.r) === 'ok' ? 'var(--accent)' : 'var(--warn)'}"/>`).join('')}</svg>`;
-    return `<div class="btr"><span class="l">${esc(x.n)}<span class="hint">${pts.map(q => bfx(q.v)).join(' → ')} ${x.u}</span></span>${svg}<b class="${f === 'ok' ? '' : 'warn'}">${bfx(last.v)}</b></div>`; });
-  return `<div class="card"><div class="chead" style="margin-bottom:4px"><span class="eyebrow">Prises de sang</span><button class="chip" data-fblood>Voir les bilans</button></div><p class="small muted" style="margin:0 0 8px">${L.length} bilan${L.length > 1 ? 's' : ''} : ${L.map(b => esc(fmtShort(b.date))).join(', ')} · zone verte = norme du labo</p>${rows.join('')}</div>`;
+    return {ok: f === 'ok', h: `<div class="btr${f === 'ok' && !S.bloodAll ? ' hid' : ''}"><span class="l">${esc(x.n)}<span class="hint">${pts.map(q => bfx(q.v)).join(' → ')} ${x.u}</span></span>${svg}<b class="${f === 'ok' ? '' : 'warn'}">${bfx(last.v)}</b></div>`}; });
+  const off = rows.filter(r => !r.ok).length;
+  return `<div class="card"><div class="chead" style="margin-bottom:4px"><span class="eyebrow">Prises de sang</span><button class="chip" data-fblood>Voir les bilans</button></div><p class="small muted" style="margin:0 0 8px">${L.length} bilan${L.length > 1 ? 's' : ''} : ${L.map(b => esc(fmtShort(b.date))).join(', ')} · zone verte = norme du labo</p>${S.bloodAll ? '' : `<p class="small" style="margin:0 0 6px">${off ? off + ' valeur' + (off > 1 ? 's' : '') + ' hors norme, affichée' + (off > 1 ? 's' : '') + ' ci-dessous.' : 'Toutes tes valeurs sont dans la norme du labo.'}</p>`}${rows.map(r => r.h).join('')}<button class="linkbtn" data-fbtog style="margin-top:8px">${S.bloodAll ? 'Masquer les valeurs normales' : `Afficher les ${rows.length} valeurs`}</button></div>`;
 }
 // The three macros on one chart, one line each: proteins red, fats yellow, carbohydrates orange.
 function macroChart(D) {
@@ -7345,7 +7429,7 @@ document.addEventListener('click', e => {
   const t = e.target, at = s => t.closest(s);
   let b;
   if (at('[data-home]')) { go('home'); return; }
-  if (at('[data-hmenu]')) { openDrawer(); return; }
+  if (at('[data-hmenu]')) { if (Date.now() - (window.__hmT || 0) > 600) openDrawer(); return; }
   if (at('[data-dclose]')) { closeDrawer(); return; }
   if (at('[data-hset]')) { homeSettings(); return; }
   if (at('[data-dplan]')) { closeDrawer(); planningPane(); return; }

@@ -13,18 +13,24 @@ function makeSupabaseDb(SB) {
   const cache = {};
   const listeners = new Set();
   const loading = {};
+  // What this phone wrote last, per document. A reload or a live event that left the server before
+  // that write must not bring the old version back (a note saved, then gone when coming back).
+  const mine = {};
+  const fresher = (col, id, at) => { const w = mine[col + '/' + id]; return w && (!at || Date.parse(at) < w.t) ? w : null; };
 
   async function load(col) {
     if (loading[col]) return loading[col];
     loading[col] = (async () => {
       const rows = [];
       for (let from = 0; ; from += 1000) {
-        const {data, error} = await SB.from('docs').select('id,data').eq('collection', col).range(from, from + 999);
+        const {data, error} = await SB.from('docs').select('id,data,updated_at').eq('collection', col).range(from, from + 999);
         if (error) throw error;
         rows.push(...data);
         if (data.length < 1000) break;
       }
-      cache[col] = new Map(rows.map(r => [r.id, r.data]));
+      const m = new Map(rows.map(r => { const w = fresher(col, r.id, r.updated_at); return [r.id, w ? w.data : r.data]; }));
+      for (const [key, w] of Object.entries(mine)) { const i = key.lastIndexOf('/'); if (key.slice(0, i) === col && !m.has(key.slice(i + 1))) m.set(key.slice(i + 1), w.data); }
+      cache[col] = m;
     })();
     try { await loading[col]; } finally { delete loading[col]; }
   }
@@ -40,6 +46,7 @@ function makeSupabaseDb(SB) {
   SB.channel('docs-live').on('postgres_changes', {event: '*', schema: 'public', table: 'docs'}, p => {
     const r = p.new && p.new.collection ? p.new : p.old;
     if (!r || !r.collection || !cache[r.collection]) return;
+    if (p.eventType !== 'DELETE' && fresher(r.collection, r.id, p.new.updated_at)) return;
     if (p.eventType === 'DELETE') cache[r.collection].delete(r.id); else cache[r.collection].set(r.id, p.new.data);
     notify(r.collection);
   }).subscribe();
@@ -55,8 +62,11 @@ function makeSupabaseDb(SB) {
       id, path: col + '/' + id,
       onSnapshot: (fn, err) => listen(col, id, fn, err),
       async get() { await load(col); notify(col); return docSnap(col, id); },
+      async one() { const {data, error} = await SB.from('docs').select('data').eq('collection', col).eq('id', id).maybeSingle(); if (error) throw error; return data?.data ?? null; },
       async set(data) {
-        const {error} = await SB.from('docs').upsert({collection: col, id, data, updated_at: new Date().toISOString()});
+        const at = new Date().toISOString();
+        mine[col + '/' + id] = {data, t: Date.parse(at)};
+        const {error} = await SB.from('docs').upsert({collection: col, id, data, updated_at: at});
         if (error) throw error;
         (cache[col] ||= new Map()).set(id, data);
         notify(col);
@@ -107,7 +117,7 @@ async function recupGetDb() {
   // Pull to refresh: the sync function asks Garmin and Withings right away (a few seconds).
   window.RECUP_SYNC = async () => {
     const {data: {session: s}} = await SB.auth.getSession();
-    const r = await fetch(RECUP_SUPABASE.url + '/functions/v1/sync', {method: 'POST', headers: {Authorization: 'Bearer ' + s.access_token, apikey: RECUP_SUPABASE.key}});
+    const r = await fetch(RECUP_SUPABASE.url + '/functions/v1/sync?days=8', {method: 'POST', headers: {Authorization: 'Bearer ' + s.access_token, apikey: RECUP_SUPABASE.key}});
     const j = await r.json();
     const ok = x => x && !x.error;
     const withings = ok(j.withings) ? 'Withings à jour' : /pas encore install/.test(j.withings?.error || '') ? 'Withings à connecter (Réglages)' : 'Withings indisponible';
@@ -169,7 +179,7 @@ async function recupGetDb() {
     history.replaceState(null, '', location.pathname);
     window.RECUP_WITHINGS_DONE = (async () => {
       if (!back.get('code')) return 'Connexion Withings annulée';
-      const r = await fetch(RECUP_SUPABASE.url + '/functions/v1/sync', {method: 'POST', headers: {Authorization: 'Bearer ' + session.access_token, apikey: RECUP_SUPABASE.key, 'Content-Type': 'application/json'},
+      const r = await fetch(RECUP_SUPABASE.url + '/functions/v1/sync?days=8', {method: 'POST', headers: {Authorization: 'Bearer ' + session.access_token, apikey: RECUP_SUPABASE.key, 'Content-Type': 'application/json'},
         body: JSON.stringify({withingsCode: back.get('code'), redirect: WITHINGS_REDIRECT})});
       const j = await r.json().catch(() => ({}));
       return j.linked ? 'Withings connecté' : 'Withings : ' + (j.error || 'connexion impossible');

@@ -137,7 +137,7 @@ async function syncGarmin(nDays: number, debug: boolean) {
   const acts = await get(`/activitylist-service/activities/search/activities?startDate=${first}&endDate=${today}&limit=100`);
   if (debug) raw.activity = acts[0];
   let hrMax = 0;
-  const seen = new Set<string>();
+  const seen = new Set<string>(), ids: string[] = [];
   for (const a of acts) {
     const k = String(a.startTimeLocal || '').slice(0, 10); if (!k) continue;
     if (a.maxHR > hrMax) hrMax = a.maxHR;
@@ -149,15 +149,54 @@ async function syncGarmin(nDays: number, debug: boolean) {
     if (/cycling|biking/.test(type)) { d.bikeKm = r1(((d.bikeKm as number) || 0) + (a.distance || 0) / 1000); d.bikeMin = Math.round(((d.bikeMin as number) || 0) + min); }
     // Short bike/walk rides under 12 min are commutes: too little load to matter, too much noise.
     // They still go in "trips" (shown one by one in the app, paired as round trips) but never in the load.
-    if (min < 12 && /cycling|biking|walking/.test(type)) { (d.trips as unknown[]).push(clean({type, start: String(a.startTimeLocal || '').slice(11, 16), min, km: a.distance ? r1(a.distance / 1000) : undefined})); continue; }
-    const o: Record<string, unknown> = {type, start: String(a.startTimeLocal || '').slice(11, 16), min, km: a.distance ? r1(a.distance / 1000) : undefined,
-      avgHr: a.averageHR ? Math.round(a.averageHR) : undefined, maxHr: a.maxHR ? Math.round(a.maxHR) : undefined};
+    const id = a.activityId ? String(a.activityId) : undefined; if (id) ids.push(id);
+    if (min < 12 && /cycling|biking|walking/.test(type)) { (d.trips as unknown[]).push(clean({id, type, start: String(a.startTimeLocal || '').slice(11, 16), min, km: a.distance ? r1(a.distance / 1000) : undefined,
+      avgHr: a.averageHR ? Math.round(a.averageHR) : undefined, maxHr: a.maxHR ? Math.round(a.maxHR) : undefined})); continue; }
+    const o: Record<string, unknown> = {id, type, start: String(a.startTimeLocal || '').slice(11, 16), min, km: a.distance ? r1(a.distance / 1000) : undefined,
+      avgHr: a.averageHR ? Math.round(a.averageHR) : undefined, maxHr: a.maxHR ? Math.round(a.maxHR) : undefined,
+      elev: a.elevationGain != null ? Math.round(a.elevationGain) : undefined, kcal: a.calories ? Math.round(a.calories) : undefined,
+      cad: Math.round(a.averageRunningCadenceInStepsPerMinute || a.averageBikingCadenceInRevPerMinute || 0) || undefined};
     if (/running|track/.test(type)) { o.name = a.activityName; o.vmax = a.maxSpeed ? r1(a.maxSpeed * 3.6) : undefined; }
     (d.acts as unknown[]).push(clean(o));
   }
   for (const d of Object.values(days)) { clean(d); if (Array.isArray(d.acts) && !d.acts.length) delete d.acts; if (Array.isArray(d.trips) && !d.trips.length) delete d.trips; }
   const n = await mergeMonths('garmin', days, doc => { if (hrMax > ((doc.hrMax as number) || 0)) doc.hrMax = hrMax; });
-  return debug ? {days: n, keyExpires, keyErr, raw} : {days: n, keyExpires, keyErr: keyErr || undefined};
+  const curves = await actCurves(get, ids, debug ? raw : null);
+  return debug ? {days: n, curves, keyExpires, keyErr, raw} : {days: n, curves, keyExpires, keyErr: keyErr || undefined};
+}
+
+// Curves of each activity (heart rate, speed, altitude, cadence, power) and its laps, as Garmin Connect shows them.
+// Fetched once per activity, 300 points at most, into gact/<activity id>. No GPS track: it would show where he lives.
+async function actCurves(get: (p: string) => Promise<any>, ids: string[], raw: Record<string, unknown> | null) {
+  if (!ids.length) return 0;
+  const {data: have} = await db.from('docs').select('id').eq('collection', 'gact').in('id', ids);
+  const done = new Set((have || []).map((r: {id: string}) => r.id));
+  let n = 0;
+  for (const id of ids.filter(i => !done.has(i)).slice(0, 12)) {
+    try {
+      const d = await get(`/activity-service/activity/${id}/details?maxChartSize=300&maxPolylineSize=0&maxHeatMapSize=0`);
+      if (raw && !raw.details) raw.details = {keys: (d.metricDescriptors || []).map((m: any) => m.key), first: d.activityDetailMetrics?.[0]};
+      const desc = d.metricDescriptors || [], rows = d.activityDetailMetrics || [];
+      const ix = (...k: string[]) => { for (const x of k) { const m = desc.find((q: any) => q.key === x); if (m) return m.metricsIndex as number; } return -1; };
+      const iT = ix('sumDuration', 'sumMovingDuration', 'sumElapsedDuration'), iTs = ix('directTimestamp'), iD = ix('sumDistance'), iH = ix('directHeartRate'),
+        iS = ix('directSpeed'), iA = ix('directElevation'), iC = ix('directRunCadence', 'directBikeCadence', 'directDoubleCadence'), iP = ix('directPower');
+      const col = (i: number, f: (v: number) => number) => i < 0 ? undefined : rows.map((r: any) => { const v = r.metrics?.[i]; return v == null ? null : f(v); });
+      const ts0 = iTs >= 0 ? rows[0]?.metrics?.[iTs] : null;
+      const t = iT >= 0 ? col(iT, v => Math.round(v)) : iTs >= 0 && ts0 != null ? col(iTs, v => Math.round((v - ts0) / 1000)) : undefined;
+      const doc: Record<string, unknown> = clean({t, dist: col(iD, v => Math.round(v)), hr: col(iH, v => Math.round(v)), spd: col(iS, v => Math.round(v * 36) / 10),
+        alt: col(iA, v => Math.round(v * 10) / 10), cad: col(iC, v => Math.round(v)), pw: col(iP, v => Math.round(v))});
+      try {
+        const sp = await get(`/activity-service/activity/${id}/splits`);
+        const laps = (sp.lapDTOs || []).map((l: any) => clean({km: l.distance ? Math.round(l.distance) / 1000 : undefined, s: Math.round(l.movingDuration || l.duration || 0),
+          hr: l.averageHR ? Math.round(l.averageHR) : undefined, hrMax: l.maxHR ? Math.round(l.maxHR) : undefined, spd: l.averageSpeed ? Math.round(l.averageSpeed * 36) / 10 : undefined,
+          vmax: l.maxSpeed ? Math.round(l.maxSpeed * 36) / 10 : undefined, elev: l.elevationGain != null ? Math.round(l.elevationGain) : undefined}));
+        if (laps.length) doc.laps = laps;
+      } catch { /* no laps for this activity */ }
+      doc.at = new Date().toISOString();
+      await putDoc('gact', id, doc); n++;
+    } catch (e) { if (raw) (raw.curveErr ||= [] as unknown[]) && (raw.curveErr as unknown[]).push(id + ' ' + (e as Error).message); }
+  }
+  return n;
 }
 
 async function syncWithings(nDays: number) {
