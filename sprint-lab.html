@@ -2663,7 +2663,7 @@ const PCAT = {muscu: ['Musculation', '#E5484D'], athle: ['Sprint', '#FF9F0A'], m
   respi: ['Respiration', '#4FB3BF'], mort: ['Temps mort', '#A3A3A3'], recup: ['Récupération', '#22B8A6'], quest: ['Questionnaire du jour', '#64D2FF']};
 const BLK = (a, b, n, c) => ({a, b, n, c});
 const PLAN_BASE = (() => {
-  // His sheet "Planning actuel" (Excel, Nov. 2026): only what he really does, every day. Sleep 23:15 to 8:30.
+  // His sheet "Planning actuel" (Excel, updated 10 Nov. 2026): only what he really does, every day. Sleep 23:15 to 8:30.
   const all = [BLK('00:00', '08:30', 'Sommeil', 'sommeil'), BLK('08:30', '09:00', 'Déjeuner', 'alim'), BLK('09:00', '09:30', 'Douche', 'hyg'),
     BLK('12:30', '13:00', 'Dîner', 'alim'), BLK('13:30', '14:00', 'Sieste 25 min + hertz', 'sommeil'), BLK('16:00', '16:30', 'Collation', 'alim'),
     BLK('23:00', '23:15', 'Questionnaire du jour', 'quest'), BLK('23:15', '24:00', 'Sommeil', 'sommeil')];
@@ -2676,8 +2676,10 @@ const PLAN_BASE = (() => {
     3: [...all, ...gym, BLK('18:00', '18:30', 'Déplacement', 'dep'), BLK('18:30', '20:45', 'Athlétisme', 'athle'), BLK('20:45', '21:15', 'Déplacement', 'dep'), ...eve],
     4: [...all, ...calm, BLK('18:45', '19:00', 'Déplacement', 'dep'), BLK('19:00', '20:00', 'Sauna', 'sauna'), BLK('20:00', '20:15', 'Déplacement', 'dep'), ...eve],
     5: [...all, ...gym, BLK('19:00', '19:30', 'Déplacement', 'dep'), BLK('19:30', '21:45', 'Athlétisme', 'athle'), BLK('21:45', '22:15', 'Déplacement', 'dep'), BLK('22:15', '22:45', 'Souper', 'alim'), BLK('22:45', '23:00', 'Douche', 'hyg')],
-    6: [...all, ...calm, ...eve],
-    0: [...all, BLK('09:30', '12:30', 'Course et préparation des repas', 'log'), ...calm, BLK('16:30', '17:30', 'Rasage barbe', 'hyg'), BLK('17:30', '21:30', 'Temps calme', 'calme'), ...eve]
+    // Saturday morning: shopping. Sunday: meal prep in the morning, shower before the evening, no late shower.
+    6: [...all, BLK('09:30', '11:00', 'Course', 'log'), ...calm, ...eve],
+    0: [...all, BLK('09:30', '12:30', 'Préparation des repas', 'log'), ...calm, BLK('16:30', '17:15', 'Rasage barbe', 'hyg'), BLK('17:15', '17:30', 'Douche', 'hyg'), BLK('17:30', '21:30', 'Temps calme', 'calme'),
+      BLK('21:30', '22:00', 'Souper', 'alim'), BLK('22:00', '23:00', 'Temps calme', 'calme')]
   };
   for (const d in W) W[d].sort((x, y) => x.a.localeCompare(y.a));
   return W;
