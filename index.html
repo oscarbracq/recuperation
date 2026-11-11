@@ -846,7 +846,7 @@ details.slow[open]>summary h2::after{content:" ▴"}
 .hm-pcmods,.pcmv{display:none}
 :root.pc{--pcw:68px}
 .pc body{padding-left:var(--pcw)}
-.pcnav{position:fixed;left:0;top:0;bottom:0;width:var(--pcw);overflow-x:hidden;transition:width .22s cubic-bezier(.32,.72,0,1),box-shadow .22s;z-index:46;background:var(--card);border-right:1px solid var(--line);overflow-y:auto;padding:18px 12px 16px;display:flex;flex-direction:column;gap:2px}
+.pcnav{position:fixed;left:0;top:0;bottom:0;width:var(--pcw);overflow-x:hidden;transition:width .22s cubic-bezier(.32,.72,0,1),box-shadow .22s;z-index:97;background:var(--card);border-right:1px solid var(--line);overflow-y:auto;padding:18px 12px 16px;display:flex;flex-direction:column;gap:2px}
 .pcn-brand{display:flex;align-items:baseline;gap:6px;padding:4px 10px 14px;color:var(--fg)}.pcn-brand b{font:800 1.375rem var(--display);letter-spacing:.02em}.pcn-brand span{font-size:.6875rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--fg2)}
 .pcn-i{display:flex;align-items:center;gap:11px;width:100%;padding:8px 10px;border-radius:10px;color:var(--fg);font-size:.9375rem;text-align:left;transition:background .15s}
 .pcn-i svg{width:19px;height:19px;flex:none;color:var(--fg2)}.pcn-i:hover{background:var(--card2)}
@@ -902,6 +902,10 @@ details.slow[open]>summary h2::after{content:" ▴"}
 .plw-t{display:none}.pc .plw-t{display:block;font-size:.6875rem;font-weight:500;opacity:.8;white-space:nowrap;overflow:hidden;line-height:1.1}
 .pc .plw-vp{cursor:default}
 /* v78 · session board */
+.scday{display:flex;align-items:center;justify-content:space-between;margin:14px 0 6px}.scday .nav{width:38px;height:38px;border-radius:50%;background:var(--card2);color:var(--fg);font-size:1.3rem}.scday .nav:disabled{opacity:.3}
+.scbig{display:flex;align-items:center;gap:22px;margin:6px 0 4px}.scbig .dg{position:relative;width:118px;height:118px;flex:none}.scbig .dg svg{width:100%;height:100%}.scbig .dg>b{position:absolute;inset:0;display:grid;place-items:center;font-size:1.9rem}
+.sc3{display:flex;gap:22px;flex-wrap:wrap}.sc3>div{display:flex;flex-direction:column}.sc3 b{font-size:1.6rem;line-height:1.1}.sc3 span{font-size:.75rem;color:var(--fg2)}
+.sclg{display:flex;gap:14px;margin-top:12px;font-size:.75rem;color:var(--fg2)}.sclg i{display:inline-block;width:12px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
 .sboard{padding:14px}.seg+.sboard{margin-top:14px}
 .sbnav{display:flex;align-items:center;gap:6px}.sbnav button{width:30px;height:30px;border-radius:50%;background:var(--card2);color:var(--fg);font-size:1.0625rem}.sbnav button:disabled{opacity:.3}.sbnav small{font-size:.75rem;color:var(--fg2);font-variant-numeric:tabular-nums}
 .bgrid{display:grid;gap:6px}
@@ -1393,7 +1397,7 @@ function chart(pts, o = {}) {
   const W0 = o.w || (typeof isPC === 'function' && isPC() ? 560 : 340), H = 160, L = 34, R = 10, T = 12, B = 22;
   const v = pts.filter(p => p.v != null);
   if (!v.length) return `<div class="empty small">Pas encore de valeurs sur cette période.</div>`;
-  const all = [...v.map(p => p.v), ...pts.map(p => p.raw).filter(x => x != null), ...(o.target != null ? [o.target] : [])];
+  const all = [...v.map(p => p.v), ...pts.map(p => p.raw).filter(x => x != null), ...(o.target != null ? [o.target] : []), ...(o.lines || []).flatMap(l => l.vals.filter(x => x != null))];
   let lo = Math.min(...all), hi = Math.max(...all);
   if (band) { lo = Math.min(lo, band[0]); hi = Math.max(hi, band[1]); }
   if (bars || min0) lo = Math.min(0, lo);
@@ -1422,6 +1426,7 @@ function chart(pts, o = {}) {
     if (P.length > 1) g += `<path d="M${P[0][0]} ${H - B} L${smoothD(P).slice(1)} L${P[P.length - 1][0]} ${H - B}Z" fill="${color}" opacity=".08"/>`;
     g += line(P, color, 2.2);
   }
+  for (const l of o.lines || []) { const P = l.vals.map((x, i) => x == null ? null : [X(i), Y(x)]).filter(Boolean); g += P.length > 1 ? line(P, l.color, 2.2) : P.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3.5" fill="${l.color}"/>`).join(''); }
   const id = 'c' + (++chId);
   CH[id] = {pts, X, Y, band, dec, unit, fmt, color, avgVals, W0, H, T, B};
   return `<div class="chartbox" data-ch="${id}"><svg class="chart" viewBox="0 0 ${W0} ${H}" role="img" aria-label="Graphique, glisse le doigt pour lire les valeurs">${g}<g class="sc"></g></svg><div class="bubble" hidden></div></div>`;
@@ -4426,24 +4431,42 @@ document.addEventListener('click', e => { const b = e.target.closest('[data-wtog
   document.addEventListener('pointerup', e => { if (!T || e.pointerId !== T.id) return; const {v, el} = T; T = null; const k = $('#e-date')?.value || TODAY; setWater(k, {[el.dataset.jq]: v}); const box = $('#e-water'); if (box) box.innerHTML = waterRow(k); });
   document.addEventListener('click', e => { const b = e.target.closest('[data-jtr]'); if (!b) return; const k = $('#e-date')?.value || TODAY, tr = wtr(waterOf(k).wb).slice(), i = +b.dataset.jtr; tr[i] = tr[i] === 0 ? .5 : tr[i] === .5 ? 1 : 0; setWater(k, {tr}); const box = $('#e-water'); if (box) box.innerHTML = waterRow(k); if (PREFS.haptic) navigator.vibrate?.(6); });
 })();
-// Two scores out of 100 for a day. Controllable: what he did for his goal (sessions planned and done, water, food,
-// bed and wake on time, routine). Uncontrollable: how the body answered (recovery, sleep, pain). The items are those the
-// studies tie to recovery and performance (Phillips 2017 sleep regularity; Cheuvront and Kenefick 2014 hydration; Saw 2016
-// self-reported state); the weights are a choice of the app, written below so he can judge them.
+// Two scores out of 100 for a day, each item kept for the strength of its evidence in athletes:
+// Habits (what he did): training done as planned (Raysmith and Drew 2016: >80 % of planned training completed = 7 times
+// more likely to reach the season goal), sleep regularity (Windred et al. 2024, Phillips et al. 2017), protein and food
+// to plan (Morton et al. 2018 meta-analysis: ~1.6 g/kg/day), water (Savoie et al. 2015 meta-analysis: hypohydration
+// costs ~5.5 % of strength and ~5.8 % of power).
+// Physiology (how the body answered): self-reported well-being (Saw et al. 2016 systematic review of 56 studies: more
+// sensitive to training load than objective markers), HRV against his own normal (Plews et al. 2013; Manresa-Rocamora
+// et al. 2021 meta-analysis), resting heart rate against his normal (Buchheit 2014), sleep duration against his need
+// (Craven et al. 2022 meta-analysis: sleep loss = -7.6 % of performance; duration only, watches misread sleep stages),
+// pain (OSTRC, Clarsen et al. 2020). The weights follow the strength of evidence; they are written below.
 const SC_C = '#FFD60A', SC_U = '#FF6FB5';
 const wakeGoal = k => dayPlan(k).find(x => x.c === 'sommeil' && tmin(x.a) < 6 * 60)?.b || null;
+const WELL = [['fat', 'Fatigue', 'épuisé', 'très frais'], ['sor', 'Courbatures', 'très fortes', 'aucune'], ['slq', 'Sommeil ressenti', 'très mauvais', 'excellent'], ['str', 'Stress', 'très stressé', 'très détendu'], ['mood', 'Humeur', 'très basse', 'excellente']];
+const wellOf = k => { const w = M(k, 'well') || {}, v = WELL.map(([id]) => w[id]).filter(x => x); return v.length ? mean(v) : null; };
 function dayScores(k) {
   const C = [], U = [], add = (L, w, v, n, d) => { if (v != null && !isNaN(v)) L.push({w, v: clamp(v, 0, 1), n, d}); };
+  // Habits.
   const due = [['gym', planHas(k, 'muscu') || planFor(k)?.kind === 'gym'], ['track', planHas(k, 'athle') || planFor(k)?.kind === 'track']].filter(x => x[1]).map(x => x[0]);
-  if (due.length) { const ok = due.filter(x => kindDone(k, x)).length; add(C, 25, ok / due.length, 'Séances prévues', `${ok} sur ${due.length}`); }
-  const w = waterOf(k), wg = fuelGoal(k).waterL || 2; add(C, 15, w.L / wg, 'Eau', `${fx(w.L, 1)} L sur ${fx(wg, 1)}`);
-  const nu = M(k, 'nutrition'); if (nu != null) add(C, 20, [1, .8, .5, .2][nu] ?? 1, 'Alimentation', NUTRITION[nu]?.[0]);
-  const bed = hm2min(G(addDays(k, 1), 'bed')), gb = hm2min(bedGoal(k)); if (bed != null && gb != null) add(C, 12, 1 - Math.max(0, Math.abs(bed - gb) - 15) / 60, 'Coucher à l\'heure', `${G(addDays(k, 1), 'bed')} pour ${bedGoal(k)}`);
-  const wk = G(k, 'wake'), wgo = wakeGoal(k); if (wk && wgo) add(C, 8, 1 - Math.max(0, Math.abs(tmin(wk) - tmin(wgo)) - 15) / 60, 'Lever à l\'heure', `${wk} pour ${wgo}`);
-  const R = routineOf(k), rd = routineDone(k); if (R.length && Object.keys(rd).length) add(C, 10, R.filter(x => rd[x]).length / R.length, 'Routine', `${R.filter(x => rd[x]).length} sur ${R.length}`);
-  const rec = recovery(k)?.score, sp = sleepScore(k)?.score, pn = maxPain(k);
-  add(U, 40, rec != null ? rec / 100 : null, 'Récupération', rec != null ? rec + ' %' : ''); add(U, 40, sp != null ? sp / 100 : null, 'Performance du sommeil', sp != null ? sp + ' %' : '');
-  add(U, 20, S.manual[k] ? 1 - (pn || 0) / 10 : null, 'Douleur', pn ? pn + '/10' : 'aucune');
+  const nf = k === TODAY && typeof noteFx === 'function' ? noteFx('T') : {}, freed = nf.light || nf.noGym || nf.swap || nf.travel || nf.sick;
+  const ended = k < TODAY || S.manual?.[k]?.closed;
+  if (due.length && !freed) { const ok = due.filter(x => kindDone(k, x)).length; if (ended || ok) add(C, 35, ok / due.length, 'Entraînement prévu', `${ok} sur ${due.length}`); }
+  const on = (a, g) => 1 - Math.max(0, Math.abs(a - g) - 15) / 60, reg = [], regT = [];
+  const bed = hm2min(G(addDays(k, 1), 'bed')), gb = hm2min(bedGoal(k)); if (bed != null && gb != null) { reg.push(on(bed, gb)); regT.push(`couché ${G(addDays(k, 1), 'bed')} pour ${bedGoal(k)}`); }
+  const wk = G(k, 'wake'), wgo = wakeGoal(k); if (wk && wgo) { reg.push(on(tmin(wk), tmin(wgo))); regT.push(`levé ${wk} pour ${wgo}`); }
+  if (reg.length) add(C, 25, mean(reg), 'Horaires de sommeil', regT.join(' · '));
+  const fg = fuelGoal(k), ft = dayTotals(k), nu = M(k, 'nutrition');
+  if (ft.p > 0 && fg.p) { add(C, 12, ft.p / fg.p, 'Protéines', `${Math.round(ft.p)} g sur ${fg.p}`); if (nu != null) add(C, 13, [1, .8, .5, .2][nu] ?? 1, 'Alimentation', NUTRITION[nu]?.[0]); }
+  else if (nu != null) add(C, 25, [1, .8, .5, .2][nu] ?? 1, 'Alimentation', NUTRITION[nu]?.[0]);
+  const w = waterOf(k), wg = fg.waterL || 2; add(C, 15, w.L / wg, 'Eau', `${fx(w.L, 1)} L sur ${fx(wg, 1)}`);
+  // Physiology.
+  const wl = wellOf(k); add(U, 35, wl != null ? (wl - 1) / 4 : null, 'Ressenti', wl != null ? fx(wl, 1) + ' sur 5' : '');
+  const hrv = G(k, 'hrv'), bH = base('hrv', k, 60);
+  if (hrv != null && bH) { const z = .5 * zOf(hrv, bH) + .5 * zOf(avgN('hrv', 7, k) ?? hrv, bH); add(U, 30, sig(z), 'VFC', `${Math.round(hrv)} ms · ta normale ${Math.round(bH.m)}`); }
+  const rhr = G(k, 'rhr'), bR = base('rhr', k, 60); if (rhr != null && bR) add(U, 10, sig(-zOf(rhr, bR)), 'FC de repos', `${Math.round(rhr)} bpm · ta normale ${Math.round(bR.m)}`);
+  const sh = VAL.sleepH(k); if (sh != null) add(U, 15, sh / sleepGoal(), 'Durée de sommeil', `${durTxt(Math.round(sh * 60))} sur ${sleepGoal()} h`);
+  const pn = maxPain(k); add(U, 10, S.manual[k] ? 1 - (pn || 0) / 10 : null, 'Douleur', pn ? pn + '/10' : 'aucune');
   const sc = L => L.length ? Math.round(L.reduce((a, x) => a + x.w * x.v, 0) / L.reduce((a, x) => a + x.w, 0) * 100) : null;
   return {c: sc(C), u: sc(U), C, U};
 }
@@ -4456,34 +4479,57 @@ function scoreTable(L, col) {
   const W = L.reduce((a, x) => a + x.w, 0); if (!W) return '<p class="small muted" style="margin:6px 0">Pas encore de mesure.</p>';
   return `<div class="sctab">${L.map(x => { const part = x.w / W * 100, pts = x.w * x.v / W * 100; return `<div class="scr"><span class="n"><b>${esc(x.n)}</b><small>${esc(x.d || '')}</small></span><span class="p">${Math.round(part)} %<small>de la note</small></span><span class="bar"><i style="width:${Math.round(x.v * 100)}%;background:${col}"></i></span><span class="v">${Math.round(x.v * 100)} %<small>${fx(pts, 1)} pts</small></span></div>`; }).join('')}</div>`;
 }
-let STG = 'day';
+let STG = 'day', SCK = null;
 function scorePane(k0) {
-  STG = STG || 'day';
+  STG = STG || 'day'; SCK = k0 || [...Array(14)].map((_, i) => addDays(TODAY, -i)).find(d => dayTotal(d) != null) || TODAY;
   openPane({title: 'Score de la journée', side: true, render: () => {
-    const k = k0 || [...Array(14)].map((_, i) => addDays(TODAY, -i)).find(d => dayTotal(d) != null) || TODAY, D = dayScores(k), tot = dayTotal(k);
-    const per = {day: [30, 1], week: [16, 7], month: [12, 0], year: [5, -1]}[STG];
-    const pts = [];
-    if (STG === 'day') for (let i = per[0] - 1; i >= 0; i--) { const d = addDays(TODAY, -i); pts.push({k: d, v: dayTotal(d), lab: +d.slice(8) + '', tip: cap(fmtShort(d))}); }
-    else if (STG === 'week') for (let i = per[0] - 1; i >= 0; i--) { const m = addDays(monday(TODAY), -7 * i), v = [...Array(7)].map((_, j) => dayTotal(addDays(m, j))).filter(x => x != null); pts.push({k: m, v: v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length) : null, lab: 'S' + seasonWeek(m), tip: 'Semaine du ' + fmtShort(m)}); }
-    else { const keys = Object.keys(S.manual || {}).filter(d => S.manual[d]?.closed).sort(), by = {};
-      for (const d of keys) { const g = STG === 'month' ? d.slice(0, 7) : d.slice(0, 4), v = dayTotal(d); if (v != null) (by[g] ||= []).push(v); }
-      const G0 = Object.keys(by).sort().slice(-per[0]); for (const g of G0) pts.push({k: g, v: Math.round(by[g].reduce((a, b) => a + b, 0) / by[g].length), lab: STG === 'month' ? new Date(g + '-15').toLocaleDateString('fr-FR', {month: 'short'}) : g, tip: g}); }
-    const vs = pts.map(p => p.v).filter(v => v != null), avg = vs.length ? Math.round(vs.reduce((a, b) => a + b, 0) / vs.length) : null;
-    return `<div class="scorehd"><div class="dg"><svg viewBox="0 0 64 64">${[[28, D.c, SC_C], [20.5, D.u, SC_U]].map(([r, v, c]) => { const C = 2 * Math.PI * r; return `<circle cx="32" cy="32" r="${r}" fill="none" stroke="var(--card2)" stroke-width="5"/>${v == null ? '' : `<circle cx="32" cy="32" r="${r}" fill="none" stroke="${c}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - v / 100)}" transform="rotate(-90 32 32)"/>`}`; }).join('')}</svg><b>${tot ?? '–'}</b></div>
-      <div><span class="eyebrow">${esc(cap(fmtShort(k)))}</span><p style="margin:4px 0 0"><b style="color:${SC_C}">${D.c ?? '–'}</b> habitudes · <b style="color:${SC_U}">${D.u ?? '–'}</b> physiologie</p><p class="small muted" style="margin:2px 0 0">Score total = moyenne des deux anneaux.</p></div></div>
-      <div class="card"><div class="chead" style="margin-bottom:8px"><span class="eyebrow">Tendance du score</span>${avg != null ? `<span class="small muted">moyenne ${avg}</span>` : ''}</div>
-        <div class="seg" role="group" aria-label="Période">${[['day', 'Jour'], ['week', 'Semaine'], ['month', 'Mois'], ['year', 'Année']].map(([v, l]) => `<button type="button" data-stg="${v}" aria-pressed="${STG === v}">${l}</button>`).join('')}</div>
-        <div style="margin-top:28px">${vs.length ? chart(pts, {color: SC_C, dec: 0, min0: true, avg: true}) : '<p class="small muted">Pas encore de journée enregistrée sur cette période.</p>'}</div></div>
+    const k = SCK, D = dayScores(k), tot = dayTotal(k) ?? (D.c != null && D.u != null ? Math.round((D.c + D.u) / 2) : D.c ?? D.u);
+    const avgOf = a => { a = a.filter(x => x != null); return a.length ? Math.round(a.reduce((x, y) => x + y, 0) / a.length) : null; };
+    const closed = d => !!S.manual?.[d]?.closed, ring3 = d => { const x = dayScores(d); return [dayTotal(d), x.c, x.u]; };
+    const seg = `<div class="seg" role="group" aria-label="Période">${[['day', 'Jour'], ['week', 'Semaine'], ['month', 'Mois'], ['year', 'Année']].map(([v, l]) => `<button type="button" data-stg="${v}" aria-pressed="${STG === v}">${l}</button>`).join('')}</div>`;
+    let top;
+    if (STG === 'day') {
+      top = `<div class="card">${seg}
+        <div class="scday"><button type="button" class="nav" data-sck="-1" aria-label="Jour d'avant">‹</button><span class="eyebrow">${esc(cap(fmtShort(k)))}${closed(k) ? '' : ' · en cours'}</span><button type="button" class="nav" data-sck="1" aria-label="Jour d'après"${k >= TODAY ? ' disabled' : ''}>›</button></div>
+        <div class="scbig"><div class="dg"><svg viewBox="0 0 64 64">${[[28, D.c, SC_C], [20.5, D.u, SC_U]].map(([r, v, c]) => { const C = 2 * Math.PI * r; return `<circle cx="32" cy="32" r="${r}" fill="none" stroke="var(--card2)" stroke-width="5"/>${v == null ? '' : `<circle cx="32" cy="32" r="${r}" fill="none" stroke="${c}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - v / 100)}" transform="rotate(-90 32 32)"/>`}`; }).join('')}</svg><b>${tot ?? '–'}</b></div>
+          <div class="sc3"><div><b style="color:${SC_C}">${D.c ?? '–'}</b><span>habitudes</span></div><div><b style="color:${SC_U}">${D.u ?? '–'}</b><span>physiologie</span></div></div></div>
+        <p class="small muted" style="margin:6px 0 0">Une journée est une seule mesure : pas de courbe ici. Score total = moyenne des deux anneaux${closed(k) ? '' : ' ; il est définitif quand tu enregistres la journée'}.</p></div>`;
+    } else {
+      const pts = [], hab = [], phy = [];
+      const push = (key, days, lab, tip) => { const R = days.filter(closed).map(ring3); const t = avgOf(R.map(r => r[0])), c = avgOf(R.map(r => r[1])), u = avgOf(R.map(r => r[2])); pts.push({k: key, v: t, lab, tip: tip + (t != null ? ` · habitudes ${c ?? '–'} · physiologie ${u ?? '–'}` : '')}); hab.push(c); phy.push(u); };
+      if (STG === 'week') for (let i = 11; i >= 0; i--) { const m = addDays(monday(TODAY), -7 * i); push(m, [...Array(7)].map((_, j) => addDays(m, j)).filter(d => d <= TODAY), 'S' + seasonWeek(m), 'Semaine du ' + fmtShort(m)); }
+      else { const keys = Object.keys(S.manual || {}).filter(closed).sort(), by = {};
+        for (const d of keys) (by[STG === 'month' ? d.slice(0, 7) : d.slice(0, 4)] ||= []).push(d);
+        for (const g of Object.keys(by).sort().slice(STG === 'month' ? -12 : -5)) push(g, by[g], STG === 'month' ? new Date(g + '-15').toLocaleDateString('fr-FR', {month: 'short'}) : g, STG === 'month' ? cap(new Date(g + '-15').toLocaleDateString('fr-FR', {month: 'long', year: 'numeric'})) : g); }
+      const vs = pts.map(p => p.v).filter(v => v != null);
+      top = `<div class="card"><div class="chead" style="margin-bottom:8px"><span class="eyebrow">Tendance du score</span>${vs.length ? `<span class="small muted">moyenne ${avgOf(vs)}</span>` : ''}</div>${seg}
+        <div class="sclg"><span><i style="background:var(--fg)"></i>total</span><span><i style="background:${SC_C}"></i>habitudes</span><span><i style="background:${SC_U}"></i>physiologie</span></div>
+        <div style="margin-top:22px">${vs.length ? chart(pts, {color: 'var(--fg)', dec: 0, min0: true, lines: [{vals: hab, color: SC_C}, {vals: phy, color: SC_U}]}) : '<p class="small muted">Pas encore de journée enregistrée sur cette période.</p>'}</div>
+        <p class="small muted" style="margin:6px 0 0">Moyenne des journées enregistrées de chaque ${STG === 'week' ? 'semaine' : STG === 'month' ? 'mois' : 'année'}. Le détail ci-dessous est celui du ${esc(fmtShort(k))}.</p></div>`;
+    }
+    return `<div class="stack">${top}
       <div class="card"><div class="chead" style="margin-bottom:6px"><span class="eyebrow" style="color:${SC_C}">Habitudes · ${D.c ?? '–'}</span><span class="small muted">ce que tu as fait</span></div>${scoreTable(D.C, SC_C)}</div>
       <div class="card"><div class="chead" style="margin-bottom:6px"><span class="eyebrow" style="color:${SC_U}">Physiologie · ${D.u ?? '–'}</span><span class="small muted">comment ton corps a répondu</span></div>${scoreTable(D.U, SC_U)}</div>
-      <p class="note" style="text-align:left">« Part de la note » : le poids de la variable dans l'anneau. « Atteint » : où tu en es sur cette variable. Les points = part × atteint ; leur somme fait la note. Régularité du sommeil (Phillips et coll. 2017), hydratation (Cheuvront et Kenefick 2014), ressenti quotidien (Saw et coll. 2016). Les poids sont un choix de l'appli.</p>`;
+      <p class="note" style="text-align:left">« Part de la note » : le poids de l'élément dans l'anneau, fixé selon la solidité des preuves. « Atteint » : où tu en es. Points = part × atteint ; leur somme fait la note. Si un élément manque (pas de questionnaire, montre non portée), les autres se partagent sa part.</p>
+      <details class="hidebox"><summary><span class="o">Pourquoi ces éléments</span><span class="c">Masquer</span></summary><div class="small" style="text-align:left;line-height:1.5">
+        <p><b style="color:${SC_C}">Entraînement prévu</b> · chez des athlètes d'athlétisme d'élite suivis 5 ans, ceux qui font plus de 80 % des semaines prévues ont 7 fois plus de chances d'atteindre leur objectif (Raysmith et Drew 2016). Il ne compte qu'une fois la journée finie, et pas quand ta note t'en libère.</p>
+        <p><b style="color:${SC_C}">Horaires de sommeil</b> · la régularité du coucher et du lever prédit mieux la santé que la durée seule (Windred et coll. 2024, 61 000 personnes).</p>
+        <p><b style="color:${SC_C}">Protéines et alimentation</b> · autour de 1,6 g/kg/j, les gains de muscle et de force plafonnent (Morton et coll. 2018, méta-analyse de 49 essais).</p>
+        <p><b style="color:${SC_C}">Eau</b> · déshydraté, tu perds environ 5,5 % de force et 5,8 % de puissance (Savoie et coll. 2015, méta-analyse). La quantité bue n'est qu'un repère, d'où sa petite part.</p>
+        <p><b style="color:${SC_U}">Ressenti</b> · fatigue, courbatures, sommeil ressenti, stress, humeur : chez les athlètes, ces réponses suivent la charge d'entraînement mieux que les mesures objectives (Saw et coll. 2016, revue de 56 études). D'où la plus grosse part.</p>
+        <p><b style="color:${SC_U}">VFC</b> · comparée à ta propre normale sur 60 jours, la moyenne des 7 derniers jours lissée (Plews et coll. 2013). Guider l'entraînement avec elle protège l'équilibre nerveux (Manresa-Rocamora et coll. 2021, méta-analyse), avec un petit bénéfice sur la performance.</p>
+        <p><b style="color:${SC_U}">FC de repos</b> · utile mais moins sensible que la VFC (Buchheit 2014), d'où sa petite part.</p>
+        <p><b style="color:${SC_U}">Durée de sommeil</b> · une nuit écourtée fait perdre en moyenne 7,6 % de performance (Craven et coll. 2022, méta-analyse). Seule la durée compte : les montres se trompent souvent sur les phases (profond, paradoxal).</p>
+        <p><b style="color:${SC_U}">Douleur</b> · suivie chaque jour comme dans le questionnaire de blessure OSTRC (Clarsen et coll. 2020).</p>
+        <p class="muted">Ce score résume des éléments prouvés un par un ; le score lui-même n'a pas été validé tel quel par une étude. Regarde surtout sa tendance sur plusieurs semaines.</p></div></details></div>`;
   }});
 }
+document.addEventListener('click', e => { const b = e.target.closest('[data-sck]'); if (!b || b.disabled) return; const n = addDays(SCK, +b.dataset.sck); if (n <= TODAY) { SCK = n; paneRender(); } });
 document.addEventListener('click', e => { const g = e.target.closest('[data-stg]'); if (g) { STG = g.dataset.stg; paneRender(); return; } if (e.target.closest('[data-hscore]')) { homeReset?.(); scorePane(); } });
 function scoresHtml(k) {
   const D = dayScores(k), li = L => L.map(x => `<li><b>${esc(x.n)}</b> · ${esc(x.d || '')} <span class="muted">(${Math.round(x.v * 100)} %, poids ${x.w})</span></li>`).join('');
   return `<div class="scores2">${[[D.c, SC_C, 'Habitudes'], [D.u, SC_U, 'Physiologie']].map(([v, c, l]) => `<div class="sc"><div class="w">${scoreRing(v, c)}<b>${v ?? '–'}</b></div><span>${l}</span></div>`).join('')}</div>
-    ${detailsBox(`<b style="color:${SC_C}">Habitudes</b> : ce que tu as fait pour ton objectif.${scoreTable(D.C, SC_C)}<b style="color:${SC_U}">Physiologie</b> : comment ton corps a répondu.${scoreTable(D.U, SC_U)}Les éléments sont ceux que les études relient à la récupération et à la performance : régularité du sommeil (Phillips et coll. 2017), hydratation (Cheuvront et Kenefick 2014), ressenti noté chaque jour (Saw et coll. 2016, revue systématique). Les poids sont un choix de l'appli. Le coucher compte le soir même : le score se met à jour le lendemain matin.`, true)}`;
+    ${detailsBox(`<b style="color:${SC_C}">Habitudes</b> : ce que tu as fait pour ton objectif.${scoreTable(D.C, SC_C)}<b style="color:${SC_U}">Physiologie</b> : comment ton corps a répondu.${scoreTable(D.U, SC_U)}Chaque élément est retenu pour la solidité de ses preuves chez les athlètes, et son poids suit cette solidité ; le détail et les études sont dans le score de l'accueil. Le coucher compte le soir même : le score se met à jour le lendemain matin.`, true)}`;
 }
 const noteEditable = k => k >= addDays(TODAY, -1);
 function noteRecap(k) {
@@ -4512,6 +4558,8 @@ function noteBody(k) {
     <div id="e-water">${waterRow(k)}</div>
     <div class="sec-label">Alimentation</div>
     <div class="list"><div class="row col">${(() => { const x = extraOf(k); if (draft.nutrition == null) draft.nutrition = x.L.length ? nutOfKcal(x.kcal) : 0; return `<div class="seg" role="group" aria-label="Alimentation" id="e-nut">${NUTRITION.map(([l], i) => `<button type="button" data-nut="${i}" aria-pressed="${draft.nutrition === i}">${l}</button>`).join('')}</div><span class="hint" id="e-nut-hint">${NUTRITION[draft.nutrition][1]}.</span>${x.L.length ? `<span class="hint" style="color:var(--fg)">D'après ton journal : +${fx(x.kcal)} kcal hors menu (${esc(x.L.slice(0, 3).map(([n, v]) => n.toLowerCase() + ' ' + fx(v) + ' kcal').join(', '))}).</span>` : '<span class="hint">Ton journal suit ton menu : rien en plus.</span>'}`; })()}</div></div>
+    <div class="sec-label">Comment tu te sens <small>1 = très mal · 5 = très bien</small></div>
+    <div class="list" id="e-well">${WELL.map(([id, n, lo, hi]) => `<div class="row col"><div class="row" style="padding:0;min-height:0;background:none"><label>${n}</label><span class="small muted">${lo} → ${hi}</span></div><div class="seg segsm" role="group" aria-label="${n}">${[1, 2, 3, 4, 5].map(v => `<button type="button" data-well="${id}|${v}" aria-pressed="${(draft.well || {})[id] === v}">${v}</button>`).join('')}</div></div>`).join('')}</div>
     <div class="sec-label">Douleur ou gêne</div>
     <div class="list" id="e-pains">${painSection()}</div>
     <div class="sec-label">Note</div>
@@ -4533,6 +4581,7 @@ function noteCollect() {
   if (draft.noClass) doc.noClass = true;
   for (const f of ['gymRpe', 'gymMin', 'trackRpe', 'trackMin', 'sprintM']) { if (draft[f] != null && draft[f] !== '') doc[f] = +draft[f]; }
   if (draft.mast) doc.mast = draft.mast; else delete doc.mast;
+  if (draft.well && Object.keys(draft.well).length) doc.well = {...draft.well};
   if (draft.actRpe && Object.keys(draft.actRpe).length) doc.actRpe = {...draft.actRpe};
   doc.date = k; doc.updatedAt = new Date().toISOString();
   return {k, doc};
@@ -4751,6 +4800,8 @@ document.addEventListener('click', e => {
     S.profile = {...(S.profile || {}), schedule: {...(S.profile?.schedule || {}), highDays: [...cur].sort()}, updatedAt: new Date().toISOString()};
     dbSet('profile/main', S.profile); paneRender(); renderMod();
   }
+  const wb = e.target.closest('[data-well]');
+  if (wb) { const [id, v] = wb.dataset.well.split('|'); draft.well = {...(draft.well || {})}; if (draft.well[id] === +v) delete draft.well[id]; else draft.well[id] = +v; wb.parentElement.querySelectorAll('[data-well]').forEach(b => b.setAttribute('aria-pressed', draft.well[id] === +b.dataset.well.split('|')[1])); return; }
   const nut = e.target.closest('[data-nut]');
   if (nut) { draft.nutrition = +nut.dataset.nut; document.querySelectorAll('#e-nut [data-nut]').forEach(b => b.setAttribute('aria-pressed', b === nut)); $('#e-nut-hint').textContent = NUTRITION[draft.nutrition][1] + '. Précise dans la note si besoin.'; }
   const hit = e.target.closest('svg[data-bodyhit]');
