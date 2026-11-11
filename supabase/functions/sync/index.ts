@@ -13,6 +13,8 @@ const CORS = {
 };
 // 227 = metabolic age computed by Withings (kept only to compare with our own estimate), 91 = pulse wave velocity (m/s).
 const WTYPES: Record<number, string> = {1: 'weight', 6: 'fatPct', 8: 'fatKg', 76: 'muscleKg', 77: 'waterKg', 227: 'metaAge', 91: 'pwv'};
+// Body Scan segments: 174 = fat mass, 175 = muscle mass, per measure 'position' (2 right arm, 3 left arm, 10 left leg, 11 right leg, 12 torso).
+const WSEG: Record<number, string> = {174: 'fm', 175: 'mm'}, WPOS: Record<number, string> = {2: 'ra', 3: 'la', 10: 'll', 11: 'rl', 12: 'tr'};
 
 // Server-side key, injected by Supabase (legacy name, or the newer JSON list of secret keys).
 const serverKey = () => {
@@ -210,25 +212,35 @@ async function syncWithings(nDays: number) {
   await putPrivate('withings', {...cfg, refresh_token: tj.body.refresh_token, updatedAt: new Date().toISOString()});
   const end = Math.floor(Date.now() / 1000);
   const mr = await fetch('https://wbsapi.withings.net/measure', {method: 'POST', headers: {Authorization: 'Bearer ' + tj.body.access_token}, body: new URLSearchParams({
-    action: 'getmeas', meastypes: Object.keys(WTYPES).join(','), category: '1', startdate: String(end - nDays * 86400), enddate: String(end)})});
+    action: 'getmeas', meastypes: [...Object.keys(WTYPES), ...Object.keys(WSEG)].join(','), category: '1', startdate: String(end - nDays * 86400), enddate: String(end)})});
   const mj = await mr.json();
   if (mj.status !== 0) throw new Error('mesures Withings ' + mj.status);
-  const byTime: Record<number, Record<string, number>> = {};
+  // deno-lint-ignore no-explicit-any
+  const byTime: Record<number, Record<string, any>> = {};
   for (const g of mj.body.measuregrps || []) {
     const o = byTime[g.date] ||= {};
-    for (const m of g.measures) if (WTYPES[m.type]) o[WTYPES[m.type]] = Math.round(m.value * Math.pow(10, m.unit) * 100) / 100;
+    for (const m of g.measures) {
+      const v = Math.round(m.value * Math.pow(10, m.unit) * 100) / 100;
+      if (WTYPES[m.type]) o[WTYPES[m.type]] = v;
+      else if (WSEG[m.type] && WPOS[m.position]) ((o.seg ||= {})[WSEG[m.type]] ||= {})[WPOS[m.position]] = v;
+    }
   }
-  const days: Record<string, Record<string, unknown>> = {}, pwv: Record<string, number> = {};
+  // deno-lint-ignore no-explicit-any
+  const days: Record<string, Record<string, unknown>> = {}, pwv: Record<string, number> = {}, segs: Record<string, any> = {};
   for (const t of Object.keys(byTime).map(Number).sort((a, b) => a - b)) {
     const o = byTime[t], d = new Date(t * 1000), k = parisDay(d);
     // Pulse wave velocity comes in its own measure group: keep the first reading of the day.
     if (o.pwv != null && pwv[k] == null) pwv[k] = o.pwv;
     delete o.pwv;
+    // Segments may come in their own group too: keep the first complete set of the day.
+    if (o.seg && !segs[k]) segs[k] = o.seg;
+    delete o.seg;
     // First weigh-in of the day: morning, most comparable.
     if (o.weight == null || days[k]?.weight != null) continue;
     days[k] = {...(days[k] || {}), ...o, time: parisTime(d)};
   }
   for (const [k, v] of Object.entries(pwv)) (days[k] ||= {}).pwv = v;
+  for (const [k, v] of Object.entries(segs)) (days[k] ||= {}).seg = v;
   return {days: await mergeMonths('withings', days)};
 }
 
