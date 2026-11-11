@@ -881,6 +881,9 @@ details.slow[open]>summary h2::after{content:" ▴"}
 .pcn-h{padding:6px 14px;white-space:nowrap}.pcn-g{margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}
 .nxs{margin-top:12px;padding:12px 14px;border-radius:14px;background:var(--card2);display:grid;gap:2px}.nxs b{font:600 1.0625rem var(--display)}
 .calday.on{box-shadow:inset 3px 0 0 var(--accent)}.calday.on .kc{color:var(--accent);font-weight:600}
+/* v76 · the bar below keeps its own layer: nothing moving under it can make it flicker */
+.tabbar{transform:translate3d(0,0,0);will-change:transform;contain:layout paint}
+.mod>.wrap{overflow-x:clip}
 /* v72 */
 .sheet.full .sheet-gap{display:none}.sheet.full .sheet-card{border-radius:0;max-width:none}.sheet.full header::before{display:none}.sheet.full header{cursor:default;padding-top:calc(12px + env(safe-area-inset-top,0px))}
 .sheet.full .sfoot{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 30%);padding-top:18px}
@@ -5927,28 +5930,68 @@ function painCoach() {
   document.addEventListener('click', e => { if (isT(e.target)) e.preventDefault(); }, true);
   document.addEventListener('keydown', e => { const s = isT(e.target); if (s && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); open(s); } }, true);
 })();
-/* Swipe right to left on a part's page: next tab; left to right: previous tab. */
+/* Swipe between the tabs of a part: the page follows the thumb, then slides out while the next one slides in.
+   Only transforms move (no fade, nothing redrawn while the finger moves), so the bar below never flickers;
+   a new swipe during the slide finishes the previous one at once, so left-right-left goes as fast as the thumb. */
 (() => {
-  let W = null;
+  let W = null, A = null;
   const sideScroll = el => { for (let n = el; n && n !== document.body; n = n.parentElement) if (n.scrollWidth > n.clientWidth + 4 && /(auto|scroll)/.test(getComputedStyle(n).overflowX)) return true; return false; };
+  const view = () => S.mod === 'R' ? $('#v-' + S.tab) : S.mod === 'T' ? $('#t-view') : S.mod === 'N' ? $('#f-view') : null;
+  const tabs = () => { const bar = S.mod === 'R' ? document.querySelector('.tabbar:not([id])') : $('#tb-' + S.mod); if (!bar) return null;
+    const B = [...bar.querySelectorAll('[role=tab]')].filter(b => !b.hidden && b.offsetParent !== null); return {B, i: B.findIndex(b => b.getAttribute('aria-selected') === 'true')}; };
+  const finish = () => { if (!A) return; const a = A; A = null; a.anims.forEach(x => { try { x.cancel(); } catch (e) {} }); if (a.go) a.go(); const v = view(); if (v) v.style.transform = ''; };
+  const ok = e => e.touches.length === 1 && S.mod !== 'home' && !S.sheet && !P.stack.length && !$('.drawer.on') && !PLFS.on && !HP.busy && !(typeof isPC === 'function' && isPC());
   document.addEventListener('touchstart', e => {
-    W = null;
-    if (e.touches.length !== 1 || S.mod === 'home' || S.sheet || P.stack.length || $('.drawer.on') || PLFS.on || HP.busy) return;
+    finish(); W = null;
+    if (!ok(e)) return;
     const big = e.target.closest?.('svg'); if (big && big.getBoundingClientRect().width > 120) return;
-    if (e.target.closest?.('.chartbox, input, textarea, select, .tabbar, [data-jq], .xdate, .xsel') || sideScroll(e.target)) return;
-    const t = e.touches[0]; W = {x: t.clientX, y: t.clientY, t: Date.now()};
+    if (e.target.closest?.('.chartbox, input, textarea, select, .tabbar, [data-jq], .xdate, .xsel, .bottles4, .rbtl') || sideScroll(e.target)) return;
+    const t = e.touches[0]; W = {x: t.clientX, y: t.clientY, t: performance.now(), lx: t.clientX, lt: performance.now(), v: 0, on: false};
+    // Listened on the touched element itself: even if the page is redrawn under the thumb, the gesture goes on.
+    const tg = e.target, off = () => { tg.removeEventListener('touchmove', onMove); tg.removeEventListener('touchend', onEnd); tg.removeEventListener('touchcancel', onCancel); };
+    const onEnd = () => { off(); end(); }, onCancel = () => { off(); cancel(); };
+    tg.addEventListener('touchmove', onMove, {passive: false}); tg.addEventListener('touchend', onEnd, {passive: true}); tg.addEventListener('touchcancel', onCancel, {passive: true});
   }, {passive: true});
-  document.addEventListener('touchend', e => {
-    if (!W) return; const t = e.changedTouches[0], dx = t.clientX - W.x, dy = t.clientY - W.y, dt = Date.now() - W.t; W = null;
-    if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.8 || dt > 700) return;
-    const bar = S.mod === 'R' ? document.querySelector('.tabbar:not([id])') : $('#tb-' + S.mod); if (!bar) return;
-    const B = [...bar.querySelectorAll('[role=tab]')].filter(b => !b.hidden && b.offsetParent !== null), i = B.findIndex(b => b.getAttribute('aria-selected') === 'true');
-    const nb = i < 0 ? null : B[i + (dx < 0 ? 1 : -1)]; if (!nb) return;
-    nb.click();
+  const onMove = e => {
+    if (!W) return; const t = e.touches[0], dx = t.clientX - W.x, dy = t.clientY - W.y;
+    if (!W.on) {
+      if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+      if (Math.abs(dx) < Math.abs(dy) * 1.2) { W = null; return; }   // vertical: ordinary scrolling
+      const T = tabs(); if (!T || T.i < 0) { W = null; return; }
+      W.on = true; W.T = T; W.el = view(); W.x = t.clientX; if (!W.el) { W = null; return; }
+      W.el.style.willChange = 'transform';
+    }
+    e.preventDefault();
+    const d = t.clientX - W.x, now = performance.now(); W.v = (t.clientX - W.lx) / Math.max(1, now - W.lt); W.lx = t.clientX; W.lt = now;
+    const has = W.T.B[W.T.i + (d < 0 ? 1 : -1)];
+    W.d = has ? d : d * .25;   // at the first or last tab, the page only gives a little
+    W.el.style.transform = `translate3d(${W.d}px,0,0)`;
+  };
+  const end = () => {
+    if (!W) return; const w = W; W = null; if (!w.on) return;
+    const el = w.el, d = w.d || 0, dir = d < 0 ? 1 : -1, nb = w.T.B[w.T.i + dir], vw = innerWidth;
+    el.style.willChange = '';
+    if (!nb || !(Math.abs(d) > vw * .22 || (Math.abs(w.v) > .45 && Math.sign(w.v) === Math.sign(d) && Math.abs(d) > 24))) {
+      const a = el.animate([{transform: `translate3d(${d}px,0,0)`}, {transform: 'translate3d(0,0,0)'}], {duration: 220, easing: 'cubic-bezier(.32,.72,0,1)'});
+      el.style.transform = ''; A = {anims: [a]}; a.onfinish = () => { if (A?.anims[0] === a) A = null; }; setTimeout(() => { if (A?.anims[0] === a) { a.cancel(); A = null; } }, 260); return;
+    }
     if (PREFS.haptic) navigator.vibrate?.(6);
-    const v = S.mod === 'R' ? $('#v-' + S.tab) : S.mod === 'T' ? $('#t-view') : $('#f-view');
-    v?.animate?.([{transform: `translateX(${dx < 0 ? 46 : -46}px)`, opacity: .3}, {transform: 'none', opacity: 1}], {duration: 280, easing: 'cubic-bezier(.32,.72,0,1)'});
-  }, {passive: true});
+    // Out: the page leaves with the thumb's speed; in: the next page arrives from the other side.
+    const out = el.animate([{transform: `translate3d(${d}px,0,0)`}, {transform: `translate3d(${-dir * vw}px,0,0)`}], {duration: 140, easing: 'cubic-bezier(.4,0,1,1)', fill: 'forwards'});
+    el.style.transform = '';   // the animation holds the position; nothing stays stuck on the page afterwards
+    const go = () => { nb.click(); };
+    A = {anims: [out], go};
+    // The switch does not wait on the animation alone: if the phone holds a frame back, it still happens on time.
+    const done = () => {
+      if (!A || A.anims[0] !== out) return;
+      A.go = null; out.cancel(); el.style.transform = ''; go(); window.scrollTo(0, 0);
+      const v = view(); if (!v) { A = null; return; }
+      const inn = v.animate([{transform: `translate3d(${dir * vw * .35}px,0,0)`}, {transform: 'translate3d(0,0,0)'}], {duration: 260, easing: 'cubic-bezier(.32,.72,0,1)'});
+      A = {anims: [inn]}; inn.onfinish = () => { if (A?.anims[0] === inn) A = null; }; setTimeout(() => { if (A?.anims[0] === inn) { inn.cancel(); A = null; } }, 320);
+    };
+    out.onfinish = done; setTimeout(done, 170);
+  };
+  const cancel = () => { if (W?.on && W.el) { W.el.style.transform = ''; W.el.style.willChange = ''; } W = null; };
 })();
 function hrvLowDays() {
   const kG = lastKey('hrv'), hb = kG ? base('hrv', kG, 60) : null; if (!hb) return 0;
