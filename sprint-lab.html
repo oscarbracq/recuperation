@@ -852,6 +852,8 @@ details.slow[open]>summary h2::after{content:" ▴"}
 .pcn-brand{padding:4px 8px 14px;white-space:nowrap}.pcn-brand b{font-size:1.125rem}
 .pcn-acts{gap:2px;margin:6px 0}.pcn-q svg{background:var(--fg);color:var(--bg);border-radius:6px;padding:2px;width:22px;height:22px;margin-left:-1px}
 .pcn-h{padding:6px 14px;white-space:nowrap}.pcn-g{margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}
+.nxs{margin-top:12px;padding:12px 14px;border-radius:14px;background:var(--card2);display:grid;gap:2px}.nxs b{font:600 1.0625rem var(--display)}
+.calday.on{box-shadow:inset 3px 0 0 var(--accent)}.calday.on .kc{color:var(--accent);font-weight:600}
 /* v72 */
 .sheet.full .sheet-gap{display:none}.sheet.full .sheet-card{border-radius:0;max-width:none}.sheet.full header::before{display:none}.sheet.full header{cursor:default;padding-top:calc(12px + env(safe-area-inset-top,0px))}
 .sheet.full .sfoot{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 30%);padding-top:18px}
@@ -5281,7 +5283,41 @@ function tdvNumFor(k) {
 const tdvTitle = p => (p.name || '').split(' · ').slice(1).join(' · ') || p.name;
 function tdvNum(n) { const id = tdvId(n), p = id ? planById('tdv-' + id) : null; return p ? {...p, n, name: `Séance ${n}`, title: tdvTitle(p)} : null; }
 function tdvPlanFor(k) { const n = tdvNumFor(k); return n ? tdvNum(n) : null; }
-const planFor = k => planById(S.tset.dated?.[k]) || planById(S.tset.week?.[dow(k)]) || tdvPlanFor(k);
+// A day has a session only when he placed it there (settings/training.dated): an id of a session, or 'n:32' for session 32 of his programme.
+const planOf = v => !v ? null : String(v).startsWith('n:') ? tdvNum(+String(v).slice(2)) : planById(v);
+const planFor = k => planOf(S.tset.dated?.[k]);
+const caleRef = p => p?.n ? 'n:' + p.n : p?.id;
+const caledOn = ref => Object.entries(S.tset?.dated || {}).filter(([k, v]) => v === ref && k >= TODAY).map(([k]) => k).sort();
+// The next sessions of his programme still to do, in order: they wait in the list until he places them.
+const tdvTodo = (c = 6) => { if (!TDV_PLANS.length) return []; const n0 = tdvLast().n + 1, out = []; for (let n = n0; n <= 36 && out.length < c; n++) { const p = tdvNum(n); if (p) out.push(p); } return out; };
+let CAL_REF = null;
+function calePane(ref) {
+  CAL_REF = ref;
+  openPane({title: 'Caler la séance', onClose: () => { CAL_REF = null; }, render: () => {
+    const p = planOf(CAL_REF); if (!p) return '';
+    const on = caledOn(CAL_REF), days = [...Array(21)].map((_, i) => addDays(TODAY, i));
+    const row = k => { const x = planFor(k), b = dayPlan(k).find(y => y.c === (p.kind === 'track' ? 'athle' : 'muscu')), mine = S.tset.dated?.[k] === CAL_REF;
+      return `<button type="button" class="rowbtn calday${mine ? ' on' : ''}" data-calk="${k}"><span><b>${esc(cap(fmtShort(k)))}</b><span class="meta">${b ? (p.kind === 'track' ? 'Athlé' : 'Muscu') + ' ' + tfr(b.a) + ' – ' + tfr(b.b) : 'pas de créneau ' + (p.kind === 'track' ? 'd\'athlé' : 'de muscu')}${x && !mine ? ' · déjà : ' + esc(x.name) : ''}</span></span><span class="kc">${mine ? 'Calée ✓' : x ? 'Remplacer' : 'Caler'}</span></button>`; };
+    return `<div class="dhead" style="margin-top:12px"><div class="bigname">${esc(p.name)}</div><p class="small muted">${esc(p.title || p.desc || '')}</p></div>
+      ${on.length ? `<div class="card"><span class="eyebrow">Calée le</span><p style="margin:6px 0 0">${on.map(k => esc(cap(fmtShort(k)))).join(', ')}</p><button class="btn ghost" style="margin-top:10px" data-caloff>Retirer de son jour</button></div>` : ''}
+      <p class="small muted" style="margin:12px 4px 8px">Choisis le jour. Elle n'apparaît que ce jour-là ; tant qu'elle n'est calée nulle part, elle t'attend dans tes séances, sans jamais « passer ».</p>
+      <div class="list">${days.map(row).join('')}</div>`;
+  }});
+}
+async function caleSave(k, ref) {
+  const dated = Object.fromEntries(Object.entries(S.tset.dated || {}).filter(([d, v]) => !(v === ref && d >= TODAY)));
+  if (k) dated[k] = ref;
+  S.tset = {...S.tset, dated}; renderMod(); render(); paneRender();
+  await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()});
+}
+document.addEventListener('click', async e => {
+  const at = q => e.target.closest(q); let b;
+  if ((b = at('[data-tcale]'))) { calePane(b.dataset.tcale); return; }
+  if ((b = at('[data-calnow]'))) { await caleSave(TODAY, b.dataset.calnow); toast('Séance calée aujourd\'hui'); return; }
+  if (!CAL_REF) return;
+  if ((b = at('[data-calk]'))) { const ref = CAL_REF, k = b.dataset.calk; await caleSave(k, ref); toast('Calée ' + (k === TODAY ? 'aujourd\'hui' : 'le ' + fmtShort(k))); return; }
+  if (at('[data-caloff]')) { await caleSave(null, CAL_REF); toast('Retirée : elle t\'attend dans tes séances'); }
+});
 const logs = () => Object.values(S.logs).filter(l => !l.deleted && ((l.name = (l.name || '').replace(/^(Séance \d+) · .*$/, '$1')), true)).sort((a, b) => (b.date + (b.start || '')).localeCompare(a.date + (a.start || '')));
 const logsOn = k => logs().filter(l => l.date === k);
 function estMin(p) { return Math.round(((p.warm ? warmMin(p.warm) : 0) + (p.cool?.min || 0) + (p.tech ? 15 : 0) + p.items.reduce((s, it) => s + (it.min || 0) + (it.sets || it.reps || 0) * (((it.rest || 60) + (it.dist ? it.dist / 6 : 40)) / 60) + (it.seq && it.brest ? it.brest * ((it.blocks || 1) - 1) / 60 : 0), 0)) / 5) * 5; }
@@ -5942,7 +5978,9 @@ function tToday() {
   const main = done.length ? `<article class="card"><span class="chiptag">${TICK.replace('<svg', '<svg width="12" height="12"')} Fait</span>${done.map(l => `<div class="bigname">${esc(l.name)}</div><p class="small muted">${l.min} min · RPE ${l.rpe}/10${l.tonnage ? ' · ' + fx(l.tonnage) + ' kg soulevés' : ''}${l.sprintM ? ' · ' + fx(l.sprintM) + ' m de sprint' : ''}</p>`).join('')}</article>`
     : p ? `<article class="card"><span class="chiptag">Aujourd'hui · ${p.kind === 'gym' ? 'Musculation' : 'Sprint'} · ${estMin(p)} min</span><div class="bigname">${esc(p.name)}</div><p class="small muted">${esc(p.desc || '')}</p>
         <ul class="exl">${p.items.map(it => `<li><span>${esc(exOf(it.ex).n)}</span><span>${itemText(it)}</span></li>`).join('')}</ul>
-        <div style="margin-top:14px"><button class="btn" data-tplanv="${p.id}"${p.n ? ` data-tn="${p.n}"` : ''}>Voir la séance</button></div></article>` : '';
+        <div style="margin-top:14px"><button class="btn" data-tplanv="${p.id}"${p.n ? ` data-tn="${p.n}"` : ''}>Voir la séance</button></div></article>` : (() => { const nx = tdvTodo(1)[0];
+      return `<article class="card"><span class="chiptag">Aujourd'hui</span><div class="bigname">Pas de séance calée</div><p class="small muted">Rien n'est imposé : tu cales une séance quand ta récupération et ta progression le demandent.</p>
+        ${nx ? `<div class="nxs"><span class="eyebrow">Prochaine de ton programme</span><b>${esc(nx.name)}</b><span class="small muted">${esc(nx.title || '')} · ${estMin(nx)} min</span></div><div class="btnrow" style="margin-top:12px"><button class="btn ghost" data-tplanv="${nx.id}" data-tn="${nx.n}">Voir</button><button class="btn ghost" data-tcale="n:${nx.n}">Choisir le jour</button><button class="btn" data-calnow="n:${nx.n}">Aujourd'hui</button></div>` : '<div style="margin-top:12px"><button class="btn ghost" data-mtab="sessions">Mes séances</button></div>'}</article>`; })();
   return `
     <header class="top"><div class="sub">${fmtDay(TODAY)} · semaine ${seasonWeek(TODAY)}</div>${(() => { const nx = S.live ? null : nextSess(); if (!nx) return `<p class="pmsg">${esc(trainMsg(p, done))}</p>`; const t = nx.k === TODAY; return `${done.length || kindDone(TODAY, 'gym') ? `<p class="pmsg" style="margin-bottom:10px">${esc(trainMsg(p, done.length ? done : [{}]))}</p>` : ''}<button class="pnext" data-tplanv="${nx.p.id}"${nx.p.n ? ` data-tn="${nx.p.n}"` : ''}><span><small>${t ? 'Au programme' : 'Prochaine séance · ' + esc(fmtShort(nx.k))}</small><b>${esc(nx.p.name)}</b></span>${ICON.chev}</button>`; })()}${seasonLine()}</header>
     <div class="stack">${notesBanner('T')}${live}${ask}
@@ -6239,7 +6277,7 @@ function planView(id, n) {
       ${coolText(p.cool).length ? `<div class="card wtxt" style="margin-top:12px"><span class="eyebrow">Retour au calme</span>${coolText(p.cool).map(t => `<p class="small">${esc(t)}</p>`).join('')}</div>` : ''}
       ${p.kind === 'gym' ? capsLine(planCheck(p.items)) : ''}
       ${gymCard(p)}
-      <div class="stack" style="margin-top:16px"><button class="btn" data-tstart="${p.id}"${p.n ? ` data-tn="${p.n}"` : ''}>Commencer</button>
+      <div class="stack" style="margin-top:16px">${(() => { const on = caledOn(caleRef(p)); return `<button class="btn ghost" data-tcale="${caleRef(p)}">${on.length ? 'Calée le ' + esc(fmtShort(on[0])) + ' · changer' : 'Caler à un jour'}</button>`; })()}<button class="btn" data-tstart="${p.id}"${p.n ? ` data-tn="${p.n}"` : ''}>Commencer</button>
       <div class="btnrow"><button class="btn ghost" data-tedit="${p.id}">${mine ? 'Modifier' : 'Dupliquer et adapter'}</button>${mine ? `<button class="btn ghost" data-tdup="${p.id}">Dupliquer</button>` : ''}</div>
       ${mine ? `<button class="btn ghost" data-tdel="${p.id}" style="color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent)">Supprimer</button>` : ''}</div>`;
   }});
@@ -6441,7 +6479,7 @@ function editPlan(id, date, dup = false) {
   if (dup) { ED.id = uid(); ED.autoName = false; ED.autoDesc = false; ED.name = (p.name || 'Séance') + ' (copie)'; ED.wk = monday(TODAY); }
   else if (!mine) { ED.id = uid(); ED.autoName = true; ED.autoDesc = true; }
   else { ED.autoName ??= false; ED.autoDesc ??= false; }
-  ED.date = dup ? null : date || Object.entries(S.tset.dated || {}).find(([, v]) => v === ED.id)?.[0] || (mine ? null : TODAY);
+  ED.date = dup ? null : date || Object.entries(S.tset.dated || {}).find(([, v]) => v === ED.id)?.[0] || null;
   ED.wk = ED.date ? monday(ED.date) : monday(TODAY);
   openPane({title: dup ? 'Copie de la séance' : mine ? 'Modifier la séance' : 'Nouvelle séance', fixed: true, left: {label: 'Enregistrer', fn: savePlan}, render: editBody, onClose: () => { ED = null; }});
 }
@@ -6657,11 +6695,12 @@ function sessionsPlanning() {
     const body = weeks.map(w => { const rows = [];
       for (let i = 0; i < 7; i++) { const k = addDays(w, i), p = planFor(k); if (!p) continue;
         const b = dayPlan(k).find(x => x.c === (p.kind === 'track' ? 'athle' : 'muscu')), done = logsOn(k).length > 0;
-        rows.push(`<button class="rowbtn" data-tplanv="${p.id}"><span><b>${esc(cap(fmtShort(k)))}${b ? ' · ' + tfr(b.a) : ''}</b><span class="meta">${p.kind === 'track' ? 'Sprint' : 'Muscu'} · ${esc(p.name)} · ${estMin(p)} min${dated[k] ? '' : ' · séance type du jour'}</span></span>${done ? '<span class="chiptag">Fait</span>' : k < TODAY ? '<span class="small muted">passé</span>' : ICON.chev}</button>`); }
+        rows.push(`<button class="rowbtn" data-tplanv="${p.id}"${p.n ? ` data-tn="${p.n}"` : ''}><span><b>${esc(cap(fmtShort(k)))}${b ? ' · ' + tfr(b.a) : ''}</b><span class="meta">${p.kind === 'track' ? 'Sprint' : 'Muscu'} · ${esc(p.name)} · ${estMin(p)} min</span></span>${done ? '<span class="chiptag">Fait</span>' : k < TODAY ? '<span class="small muted">passé</span>' : ICON.chev}</button>`); }
       return `<div class="sec-label">Semaine ${seasonWeek(w)} <small>${esc(fmtShort(w))} – ${esc(fmtShort(addDays(w, 6)))}</small></div>${rows.length ? `<div class="list">${rows.join('')}</div>` : '<p class="small muted" style="margin:0 4px">Aucune séance programmée.</p>'}`; }).join('');
     return `<div style="margin-top:8px">${body}</div>
-      <div class="stack" style="margin-top:16px"><button class="btn ghost" data-tplan>Séance type pour chaque jour</button><button class="btn ghost" data-hplan>Mes jours et mes heures</button></div>
-      <p class="note" style="text-align:left">Une séance placée à une date passe avant la séance type du jour. Pour placer une séance, ouvre-la puis Modifier ou Dupliquer, et choisis le jour.</p>`;
+      ${tdvTodo().length ? `<div class="sec-label">Ton programme · à caler</div><div class="list">${tdvTodo().map(x => { const on = caledOn('n:' + x.n); return `<div class="row"><button class="rowbtn" style="padding:0;background:none;flex:1" data-tplanv="${x.id}" data-tn="${x.n}"><span><b>${esc(x.name)}</b><span class="meta">${esc(x.title || '')} · ${estMin(x)} min${on.length ? ' · calée le ' + esc(fmtShort(on[0])) : ''}</span></span></button><button type="button" class="chip" data-tcale="n:${x.n}">${on.length ? 'Changer' : 'Caler'}</button></div>`; }).join('')}</div>` : ''}
+      <div class="stack" style="margin-top:16px"><button class="btn ghost" data-hplan>Mes jours et mes heures</button></div>
+      <p class="note" style="text-align:left">Plus rien n'est calé tout seul : une séance n'apparaît qu'au jour où tu l'as mise. Les autres t'attendent ici, dans l'ordre, sans jamais passer. Ouvre une séance puis « Caler à un jour ».</p>`;
   }});
 }
 function weekPlanner() {
