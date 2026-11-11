@@ -117,8 +117,11 @@ async function recupGetDb() {
   // Pull to refresh: the sync function asks Garmin and Withings right away (a few seconds).
   window.RECUP_SYNC = async () => {
     const {data: {session: s}} = await SB.auth.getSession();
-    const r = await fetch(RECUP_SUPABASE.url + '/functions/v1/sync?days=8', {method: 'POST', headers: {Authorization: 'Bearer ' + s.access_token, apikey: RECUP_SUPABASE.key}});
+    // Once: 60 days, to bring back the Body Scan segments of the past weeks.
+    let once = false; try { once = !localStorage.getItem('seg60'); } catch { /* storage blocked */ }
+    const r = await fetch(RECUP_SUPABASE.url + '/functions/v1/sync?days=' + (once ? 60 : 8), {method: 'POST', headers: {Authorization: 'Bearer ' + s.access_token, apikey: RECUP_SUPABASE.key}});
     const j = await r.json();
+    if (once && j.withings && !j.withings.error) try { localStorage.setItem('seg60', '1'); } catch { /* storage blocked */ }
     const ok = x => x && !x.error;
     const withings = ok(j.withings) ? 'Withings à jour' : /pas encore install/.test(j.withings?.error || '') ? 'Withings à connecter (Réglages)' : 'Withings indisponible';
     return (ok(j.garmin) ? 'Garmin à jour' : 'Garmin indisponible') + ' · ' + withings;

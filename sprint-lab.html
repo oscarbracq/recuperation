@@ -875,7 +875,7 @@ details.slow[open]>summary h2::after{content:" ▴"}
 .plw-t{display:none}.pc .plw-t{display:block;font-size:.6875rem;font-weight:500;opacity:.8;white-space:nowrap;overflow:hidden;line-height:1.1}
 .pc .plw-vp{cursor:default}
 /* v78 · session board */
-.sboard{padding:14px}
+.sboard{padding:14px}.seg+.sboard{margin-top:14px}
 .sbnav{display:flex;align-items:center;gap:6px}.sbnav button{width:30px;height:30px;border-radius:50%;background:var(--card2);color:var(--fg);font-size:1.0625rem}.sbnav button:disabled{opacity:.3}.sbnav small{font-size:.75rem;color:var(--fg2);font-variant-numeric:tabular-nums}
 .bgrid{display:grid;gap:6px}
 .bweek{display:grid;grid-template-columns:22px repeat(7,1fr);gap:3px;align-items:stretch}
@@ -6466,6 +6466,11 @@ function tProfile() {
   return `
     <header class="top"><div class="sub">Ton profil d'athlète</div><h1>Profil</h1></header>
     ${sprinterCard()}
+    <div class="sec-label">Mes résultats</div>
+    <div class="stack">
+      <button class="banner" data-rmlist style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Mes max</b><br><span class="small muted">${nMax ? nMax + ' max testés · ' : ''}les charges de tes séances en découlent</span></span>${ICON.chev}</button>
+      <button class="banner" data-tjumps style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Mes max en saut</b><br><span class="small muted">${(() => { const ck = cmjCheck(); return cmj ? 'CMJ ' + fx(+cmj.h, 1) + ' cm' + (ck && ck.d <= -5 ? ' · fatigue détectée' : '') + ' · ' : ''; })()}tes records de saut et de sprint · import My Jump</span></span>${ICON.chev}</button>
+    </div>
     <div class="sec-label">Tests</div>
     <div class="stack">
       ${row('data-t5start', 'Test de RM', esc(last5 ? ago(last5.date) + ' · ' : '') + 'de 1 à 5RM, ton 1RM calculé · tous tes exercices de base')}
@@ -6476,11 +6481,7 @@ function tProfile() {
       ${row('data-vatest="sprint"', 'Tests de sprint', '10, 20, 30, 60 m et 5-0-5 · chronométrés à la vidéo')}
       <button class="btn ghost" data-tmore>+ Plus de tests</button>
     </div>
-    <div class="sec-label">Mes résultats</div>
-    <div class="stack">
-      <button class="banner" data-rmlist style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Mes max</b><br><span class="small muted">${nMax ? nMax + ' max testés · ' : ''}les charges de tes séances en découlent</span></span>${ICON.chev}</button>
-      <button class="banner" data-tjumps style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Mes max en saut</b><br><span class="small muted">${(() => { const ck = cmjCheck(); return cmj ? 'CMJ ' + fx(+cmj.h, 1) + ' cm' + (ck && ck.d <= -5 ? ' · fatigue détectée' : '') + ' · ' : ''; })()}tes records de saut et de sprint · import My Jump</span></span>${ICON.chev}</button>
-    </div>`;
+`;
 }
 /* ---------- pane: a second sheet for Training and Fuel, with a stack (a picker can open over an editor) ---------- */
 const P = {stack: [], live: false};
@@ -7279,9 +7280,9 @@ function exView(id) {
 let BX = null;
 const bonusLogs = (days = 7) => logs().filter(l => l.kind === 'extra' && l.date >= addDays(TODAY, -(days - 1)));
 function bonusBlock() {
-  const L = bonusLogs();
-  const row = l => { const it = l.items?.[0] || {}; return `<button class="rowbtn" data-bxv="${esc(l.id)}"><span><b>${esc(exOf(it.ex).n)}</b><span class="meta">${esc(cap(fmtShort(l.date)))}${l.start ? ' · ' + esc(tfr(l.start)) : ''} · ${esc(setsTxt(it))} · RPE ${l.rpe}</span></span><span class="kc">${l.min} min</span></button>`; };
-  return `<h2>Exercices ajoutés à ta journée <small>hors séance · comptés dans ta charge</small></h2>
+  const L = bonusLogs(1);
+  const row = l => { const it = l.items?.[0] || {}; return `<button class="rowbtn" data-bxv="${esc(l.id)}"><span><b>${esc(exOf(it.ex).n)}</b><span class="meta">${l.start ? esc(tfr(l.start)) + ' · ' : ''}${esc(setsTxt(it))} · RPE ${l.rpe}</span></span><span class="kc">${l.min} min</span></button>`; };
+  return `<h2>Exercices ajoutés aujourd'hui <small>comptés dans ta charge</small></h2>
     <div class="list">${L.map(row).join('')}<button class="rowbtn" data-bxadd><span><b style="color:var(--accent)">+ Ajouter un exercice à la journée</b><span class="meta">Un exercice fait en dehors d'une séance</span></span><span class="kc">›</span></button></div>`;
 }
 const setsTxt = it => (it.sets || []).map(s => (s.kg ? fx(s.kg, s.kg % 1 ? 1 : 0) + ' kg × ' : '') + s.reps + (unitOf(it) === 's' ? ' s' : '')).join(', ') + (it.ct ? ' · ' + ctName(it.ct) : '');
@@ -7303,7 +7304,7 @@ function bonusBody() {
     <div class="tools"><button type="button" data-bxadds>+ Série</button></div>
     <p class="small muted" style="margin:6px 4px 0">Touche ✓ quand la série est faite : seules les séries validées comptent.</p>
     <div class="list" style="margin-top:12px"><div class="row col"><span class="l">Difficulté ressentie (RPE)<span class="hint">0 = repos, 10 = maximal</span></span><div style="display:flex;gap:12px;align-items:center"><input type="range" min="1" max="10" step="1" value="${B.rpe}" data-bxf="rpe" style="flex:1"><b class="num" id="bx-rpe">${B.rpe}</b></div></div>
-      <div class="row col"><div class="row" style="padding:0;min-height:0;background:none"><label for="bx-min">Durée totale <span class="hint">récup comprise : 10, 1 h…</span></label><input class="mini-in" id="bx-min" inputmode="text" data-bxf="min" data-dur="1" value="${B.min}" placeholder="${durTxt(est)}" style="width:96px"></div>${durChips('bx-min')}</div></div>
+      <div class="row col"><div class="row" style="padding:0;min-height:0;background:none"><label for="bx-min">Durée totale <span class="hint">récup comprise : 10, 1 h…</span></label><input class="mini-in" id="bx-min" inputmode="text" data-bxf="min" value="${B.min}" placeholder="${durTxt(est)}" style="width:96px"></div>${durChips('bx-min')}</div></div>
     <div class="sec-label">Note</div><textarea rows="2" data-bxf="note" placeholder="Où, pourquoi, sensations…">${esc(B.note)}</textarea>
     <button class="btn" style="margin-top:16px" data-bxsave>Ajouter à ma journée</button>`;
 }
@@ -7337,7 +7338,7 @@ document.addEventListener('click', async e => {
   if (at('[data-bxsave]')) {
     const B = BX, sets = B.sets.filter(s => s.done && +s.reps > 0).map(s => ({kg: +String(s.kg).replace(',', '.') || 0, reps: +s.reps, rpe: +B.rpe}));
     if (!sets.length) { toast('Valide au moins une série avec ✓'); return; }
-    const secs = B.ct === 'iso' || B.u === 's', min = parseDur(String(B.min || '')) || Math.max(2, Math.round(sets.length * (secs ? 1.5 : 2)));
+    const secs = B.ct === 'iso' || B.u === 's', min = (/^\s*\d+[.,]\d+\s*$/.test(String(B.min || '')) ? Math.max(1, Math.round(+String(B.min).replace(',', '.'))) : parseDur(String(B.min || ''))) || Math.max(2, Math.round(sets.length * (secs ? 1.5 : 2)));
     const it = {ex: B.ex, ...(secs ? {u: 's'} : {}), ...(B.ct ? {ct: B.ct} : {}), sets};
     const doc = {id: 'x' + Date.now().toString(36), kind: 'extra', name: exOf(B.ex).n, date: B.date || TODAY, start: B.start || '', min, rpe: +B.rpe, note: (B.note || '').trim(), items: [it],
       tonnage: secs ? 0 : Math.round(sets.reduce((a, x) => a + x.kg * x.reps, 0)), updatedAt: new Date().toISOString()};
