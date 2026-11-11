@@ -901,6 +901,42 @@ details.slow[open]>summary h2::after{content:" ▴"}
 .pc .plw-b:hover{filter:brightness(1.12);z-index:2}.pc .plw-b.lift{cursor:grabbing}
 .plw-t{display:none}.pc .plw-t{display:block;font-size:.6875rem;font-weight:500;opacity:.8;white-space:nowrap;overflow:hidden;line-height:1.1}
 .pc .plw-vp{cursor:default}
+/* v78 · session board */
+.sboard{padding:14px}
+.sbnav{display:flex;align-items:center;gap:6px}.sbnav button{width:30px;height:30px;border-radius:50%;background:var(--card2);color:var(--fg);font-size:1.0625rem}.sbnav button:disabled{opacity:.3}.sbnav small{font-size:.75rem;color:var(--fg2);font-variant-numeric:tabular-nums}
+.bgrid{display:grid;gap:6px}
+.bweek{display:grid;grid-template-columns:22px repeat(7,1fr);gap:3px;align-items:stretch}
+.bwk{writing-mode:vertical-rl;transform:rotate(180deg);font-size:.625rem;font-weight:700;color:var(--fg3);text-align:center;letter-spacing:.06em}
+.bcell{min-height:62px;border-radius:10px;background:var(--card2);padding:4px 3px;display:flex;flex-direction:column;gap:3px;opacity:.55;transition:background .15s,box-shadow .15s,opacity .15s}
+.bcell.slot{opacity:1;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--accent) 45%,transparent)}
+.bcell.today{box-shadow:inset 0 0 0 2px var(--accent)}.bcell.past{opacity:.3}
+.bcell.bover{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent);opacity:1}
+.bd{font-size:.625rem;color:var(--fg2);font-weight:600;line-height:1.1;display:flex;flex-wrap:wrap;gap:0 3px}.bd b{color:var(--fg)}.bd small{width:100%;font-size:.5625rem;font-weight:500}
+.bplus{flex:1;display:grid;place-items:center;color:var(--fg3);font-size:1rem}
+.bchip{position:relative;display:flex;align-items:center;gap:2px;padding:4px 5px;border-radius:7px;background:var(--accent);color:#fff;font-size:.6875rem;font-weight:700;line-height:1.1;cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation;min-width:0}
+.bchip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
+.bchip .bx{flex:none;width:16px;height:16px;border-radius:50%;background:rgba(0,0,0,.25);color:#fff;font-size:.75rem;line-height:1;display:grid;place-items:center}
+.bchip.done{background:var(--good)}.bchip.ghost{opacity:.7;cursor:default}
+.bsrc{display:flex;flex-wrap:wrap;gap:6px}
+.bchip.src{flex-direction:column;align-items:flex-start;gap:1px;padding:8px 10px;border-radius:12px;background:var(--card2);color:var(--fg);box-shadow:inset 3px 0 0 var(--accent);max-width:100%}
+.bchip.src small{font-size:.625rem;font-weight:500;color:var(--fg2)}.bchip.src.on{opacity:.55}
+.bchip.bdrag{opacity:.35}
+.bghost{position:fixed;left:0;top:0;z-index:400;pointer-events:none;opacity:.95;box-shadow:0 12px 30px rgba(0,0,0,.45);cursor:grabbing}
+body.bdragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
+.pc .bcell{min-height:84px;padding:6px}.pc .bd{font-size:.75rem}.pc .bd small{font-size:.6875rem}.pc .bchip{font-size:.8125rem;padding:6px 8px}.pc .bweek{grid-template-columns:28px repeat(7,1fr);gap:6px}.pc .bwk{font-size:.75rem}
+.pc .bcell[data-bdk]:hover{opacity:1}
+/* v78 · PC: the width is used — cards in two columns, nothing as long as on a phone */
+.pc .wrap{max-width:1480px;padding:30px 44px 70px}
+.pc :is(#t-view,#f-view,#v-today,#v-trends,#v-reports,#v-profile){columns:2 420px;column-gap:22px}
+.pc :is(#t-view,#f-view,#v-today,#v-trends,#v-reports,#v-profile)>*:not(.stack){break-inside:avoid}
+.pc :is(#t-view,#f-view,#v-today,#v-trends,#v-reports,#v-profile)>:is(header,.top,.seg,.sboard,.search,.banner,[data-libf]){column-span:all}
+.pc .stack{display:block}.pc .stack>*{break-inside:avoid;margin-bottom:12px}
+.pc :is(#t-view,#f-view,#v-today,#v-trends,#v-reports,#v-profile) h2{break-after:avoid;margin-top:14px}
+.pc :is(#t-view,#f-view,#v-today,#v-trends,#v-reports,#v-profile)>.list,.pc :is(#t-view,#f-view,#v-today,#v-trends,#v-reports,#v-profile)>.card{margin-bottom:12px}
+.pc .top h1{font-size:2.25rem}
+.pc #t-view>#t-libl{column-span:all;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));column-gap:1px;background:var(--line)}
+.pc #t-view>#t-libl>*{background:var(--card)}
+.pc .hm{max-width:1100px}
 /* v72 */
 .sheet.full .sheet-gap{display:none}.sheet.full .sheet-card{border-radius:0;max-width:none}.sheet.full header::before{display:none}.sheet.full header{cursor:default;padding-top:calc(12px + env(safe-area-inset-top,0px))}
 .sheet.full .sfoot{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 30%);padding-top:18px}
@@ -4795,7 +4831,7 @@ function mmFollow() {
   if (MM.d || Math.hypot(MM.tx - MM.x, MM.ty - MM.y) > .5) MM.raf = requestAnimationFrame(mmFollow); else MM.raf = 0;
 }
 const mmOk = e => MM_NAME[S.mod] && !S.sheet && !P.stack.length && !$('.drawer.on') && !HP.busy
-  && !e.target.closest('.chartbox, input, textarea, select, .tabbar, .sheet, .pane');
+  && !e.target.closest('.chartbox, input, textarea, select, .tabbar, .sheet, .pane, .sboard');
 document.addEventListener('touchstart', e => {
   if (e.touches.length !== 1 || !mmOk(e) || scrollY > 2) { MM.d = null; return; }
   const t = e.touches[0]; MM.d = {x0: t.clientX, y0: t.clientY, on: false, dy: 0, v: 0, ly: t.clientY, lt: performance.now()};
@@ -5978,7 +6014,7 @@ function painCoach() {
     finish(); W = null;
     if (!ok(e)) return;
     const big = e.target.closest?.('svg'); if (big && big.getBoundingClientRect().width > 120) return;
-    if (e.target.closest?.('.chartbox, input, textarea, select, .tabbar, [data-jq], .xdate, .xsel, .bottles4, .rbtl') || sideScroll(e.target)) return;
+    if (e.target.closest?.('.chartbox, input, textarea, select, .tabbar, [data-jq], .xdate, .xsel, .bottles4, .rbtl, .sboard') || sideScroll(e.target)) return;
     const t = e.touches[0]; W = {x: t.clientX, y: t.clientY, t: performance.now(), lx: t.clientX, lt: performance.now(), v: 0, on: false};
     // Listened on the touched element itself: even if the page is redrawn under the thumb, the gesture goes on.
     const tg = e.target, off = () => { tg.removeEventListener('touchmove', onMove); tg.removeEventListener('touchend', onEnd); tg.removeEventListener('touchcancel', onCancel); };
@@ -6117,13 +6153,72 @@ function recentLogs() {
 }
 function progList() {
   const last = tdvLast().n, nx = last + 1, nums = []; for (let n = 1; n <= 36; n++) if (tdvNum(n)) nums.push(n);
-  let nd = null; for (let i = 0; i < 21 && !nd; i++) { const d = addDays(TODAY, i); if (tdvNumFor(d) === nx) nd = d; }
+  const nd = caledOn('n:' + nx)[0] || null;
   const r = (n, cls = '') => { const p = tdvNum(n); return `<button class="rowbtn${cls}" data-tplanv="${p.id}" data-tn="${n}"><span><b>${esc(p.name)}</b><span class="meta">${p.items.length} exercices · ${estMin(p)} min${p.desc ? ' · ' + esc(p.desc) : ''}</span></span>${ICON.chev}</button>`; };
   const next = nums.filter(n => n === nx), after = nums.filter(n => n > nx), done = nums.filter(n => n <= last).reverse();
   return `${next.length ? `<h2>Prochaine séance${nd ? ` <small>${esc(cap(fmtShort(nd)))}</small>` : ''}</h2><div class="list nextl">${next.map(n => r(n, ' nextses')).join('')}</div>` : ''}
     ${after.length ? `<h2>Mon programme <small>à venir</small></h2><div class="list">${after.map(n => r(n)).join('')}</div>` : ''}
     ${done.length ? `<h2>Séances faites</h2><div class="list donel">${done.map(n => r(n, ' doneses')).join('')}</div>` : ''}`;
 }
+/* ---------- the session board: 4 weeks, empty until he drops a session on a day ---------- */
+const sbShort = p => p.n ? 'S' + p.n : p.name;
+function sesBoard(kind) {
+  const off = S.sbOff || 0, mon0 = addDays(monday(TODAY), 28 * off), c = kind === 'gym' ? 'muscu' : 'athle';
+  const cell = k => {
+    const p0 = planFor(k), p = p0 && p0.kind === kind ? p0 : null, b = dayPlan(k).find(x => x.c === c), past = k < TODAY, done = logsOn(k).some(l => l.kind === kind) || !!M(k, kind === 'gym' ? 'gymRpe' : 'trackRpe');
+    return `<div class="bcell${b ? ' slot' : ''}${past ? ' past' : ''}${k === TODAY ? ' today' : ''}" ${past ? '' : `data-bdk="${k}"`}><span class="bd">${DOW[(dow(k) + 6) % 7]} <b>${+k.slice(8)}</b>${b ? `<small>${tfr(b.a)}</small>` : ''}</span>
+      ${p ? `<div class="bchip${done ? ' done' : ''}" data-bref="${esc(caleRef(p))}" data-bfrom="${k}" title="${esc(p.name)}${p.title ? ' · ' + esc(p.title) : ''}"><span>${esc(sbShort(p))}</span>${past ? (done ? '<i>✓</i>' : '') : `<button type="button" class="bx" data-bx="${k}" aria-label="Retirer ${esc(p.name)} du ${esc(fmtShort(k))}">×</button>`}</div>` : done ? '<div class="bchip done ghost"><span>Faite</span><i>✓</i></div>' : past ? '' : `<span class="bplus">${b ? '+' : ''}</span>`}</div>`;
+  };
+  const weeks = [0, 1, 2, 3].map(w => addDays(mon0, 7 * w));
+  const src = [...(kind === 'gym' ? tdvTodo(8) : []), ...myPlans().filter(x => x.kind === kind)];
+  const placed = new Set(Object.entries(S.tset?.dated || {}).filter(([d]) => d >= TODAY).map(([, v]) => v));
+  return `<div class="card sboard"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Mes 4 semaines · ${kind === 'gym' ? 'musculation' : 'sprint'}</span><span class="sbnav"><button type="button" data-sboff="-1" aria-label="4 semaines avant"${off <= 0 ? ' disabled' : ''}>‹</button><small>${esc(fmtShort(weeks[0]).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(weeks[3], 6)).replace(/^\S+ /, ''))}</small><button type="button" data-sboff="1" aria-label="4 semaines après">›</button></span></div>
+    <div class="bgrid">${weeks.map(w => `<div class="bweek"><span class="bwk">S${seasonWeek(w)}</span>${[0, 1, 2, 3, 4, 5, 6].map(i => cell(addDays(w, i))).join('')}</div>`).join('')}</div>
+    <div class="sec-label" style="margin:14px 2px 6px">À caler <small>${isPC() ? 'glisse une séance sur un jour' : 'garde le doigt sur une séance, puis glisse-la sur un jour'}</small></div>
+    <div class="bsrc">${src.length ? src.map(x => { const r = caleRef(x), on = placed.has(r); return `<div class="bchip src${on ? ' on' : ''}" data-bref="${esc(r)}" title="${esc(x.name)}${x.title ? ' · ' + esc(x.title) : ''}"><span>${esc(x.n ? x.name : x.name)}</span><small>${x.title ? esc(x.title) + ' · ' : ''}${estMin(x)} min${on ? ' · calée' : ''}</small></div>`; }).join('') : '<p class="small muted" style="margin:0">Crée une séance ci-dessous : elle apparaîtra ici, prête à être calée.</p>'}</div>
+    <p class="small muted" style="margin:10px 2px 0">Touche une séance pour la voir. Une séance déjà calée se déplace en la glissant vers un autre jour ; × la remet ici. Les jours encadrés sont tes créneaux ${kind === 'gym' ? 'de muscu' : 'd\'athlé'}.</p></div>`;
+}
+// Drag and drop: with the mouse it moves at once; with the thumb, after a short hold (so the page still scrolls).
+(() => {
+  let D = null;
+  const at = (x, y) => { const g = D?.g; if (g) g.style.visibility = 'hidden'; const e = document.elementFromPoint(x, y); if (g) g.style.visibility = ''; return e?.closest?.('[data-bdk]'); };
+  const begin = () => {
+    D.on = true; if (PREFS.haptic) navigator.vibrate?.(12);
+    const r = D.el.getBoundingClientRect(), g = D.el.cloneNode(true); g.classList.add('bghost'); g.style.width = Math.min(r.width, 220) + 'px';
+    document.body.appendChild(g); D.g = g; D.el.classList.add('bdrag'); document.body.classList.add('bdragging'); move(D.x, D.y);
+  };
+  const move = (x, y) => { D.x = x; D.y = y; if (!D.on) return; D.g.style.transform = `translate(${x - 40}px,${y - 22}px)`; const t = at(x, y); if (t !== D.t) { D.t?.classList.remove('bover'); t?.classList.add('bover'); D.t = t; } };
+  const stop = () => { clearTimeout(D?.timer); if (!D) return; D.g?.remove(); D.el.classList.remove('bdrag'); D.t?.classList.remove('bover'); document.body.classList.remove('bdragging'); };
+  document.addEventListener('pointerdown', e => {
+    const el = e.target.closest?.('[data-bref]'); if (!el || e.target.closest('.bx') || e.button > 0) return;
+    D = {el, ref: el.dataset.bref, from: el.dataset.bfrom || null, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, on: false, mouse: e.pointerType === 'mouse', id: e.pointerId};
+    if (!D.mouse) D.timer = setTimeout(() => { if (D && !D.on) begin(); }, 280);
+  });
+  document.addEventListener('pointermove', e => {
+    if (!D || e.pointerId !== D.id) return;
+    if (!D.on) { const m = Math.hypot(e.clientX - D.x0, e.clientY - D.y0); if (D.mouse && m > 5) begin(); else if (!D.mouse && m > 8) { stop(); D = null; return; } }
+    if (D?.on) { e.preventDefault(); move(e.clientX, e.clientY); }
+  });
+  document.addEventListener('touchmove', e => { if (D?.on) e.preventDefault(); }, {passive: false});
+  document.addEventListener('pointerup', async e => {
+    if (!D || e.pointerId !== D.id) return; const d = D; stop(); D = null;
+    if (!d.on) { const p = planOf(d.ref); if (p) { if (p.n) planView(p.id, p.n); else planView(p.id); } return; }
+    window.__bdropT = Date.now();
+    const t = at(e.clientX, e.clientY), k = t?.dataset.bdk;
+    if (k) { if (k === d.from) return; const ex = planFor(k); await caleSave(k, d.ref); toast(`${planOf(d.ref)?.name || 'Séance'} calée le ${fmtShort(k)}${ex && caleRef(ex) !== d.ref ? ' · ' + ex.name + ' revient à caler' : ''}`); return; }
+    if (d.from) { const dated = {...(S.tset.dated || {})}; delete dated[d.from]; S.tset = {...S.tset, dated}; renderMod(); await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()}); toast('Retirée : elle t\'attend dans « À caler »'); }
+  });
+  document.addEventListener('pointercancel', () => { if (D) { stop(); D = null; } });
+  // A drop must not also count as a tap on what lies under it.
+  document.addEventListener('click', e => { if (window.__bdropT && Date.now() - window.__bdropT < 400) { e.stopPropagation(); e.preventDefault(); } }, true);
+})();
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-bx]'), o = e.target.closest('[data-sboff]');
+  if (o && !o.disabled) { S.sbOff = Math.max(0, (S.sbOff || 0) + +o.dataset.sboff); renderMod(); return; }
+  if (!b) return; e.stopPropagation();
+  const k = b.dataset.bx, dated = {...(S.tset.dated || {})}, n = planFor(k)?.name; delete dated[k]; S.tset = {...S.tset, dated}; renderMod();
+  await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()}); toast((n || 'Séance') + ' retirée du ' + fmtShort(k));
+});
 function tSessions() {
   if (S.tkind === 'class') S.tkind = 'gym';
   const k = S.tkind, mine = myPlans().filter(p => p.kind === k), base = BUILTIN.filter(p => p.kind === k);
@@ -6131,8 +6226,8 @@ function tSessions() {
   return `
     <header class="top"><div class="sub">Programmes et séances</div><h1>Séances</h1></header>
     <button class="banner" data-tseason style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;margin-bottom:8px"><span><b>${k === 'gym' ? 'Ma saison de musculation' : 'Ma saison de sprint'}</b><br><span class="small muted">${(() => { const n = seasonNow(TODAY, k === 'gym' ? 'gym' : 'track'); return n && !n.before && !n.after ? `Bloc ${n.i + 1} · ${esc(n.name)} · semaine ${n.week}/${n.of}` : k === 'gym' ? 'Tes blocs de musculation' : 'Tes blocs : PPG, PPS, pré-compétition, compétition'; })()}</span></span>${ICON.chev}</button>
-    <button class="banner" data-tsplan style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;margin-bottom:12px"><span><b>Planning de séance</b><br><span class="small muted">Ton planning avec tes séances de musculation et de sprint</span></span>${CAL.replace('<svg', '<svg width="22" height="22"')}</button>
     <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
+    ${sesBoard(k)}
     <h2>Mes séances</h2><div class="list">${mine.map(row).join('')}<button class="addbtn" data-tnew>+ Créer une séance</button></div>
     ${k === 'gym' && TDV_PLANS.length ? progList() : ''}
     ${base.length ? `<h2>Programmes <small>à dupliquer et adapter</small></h2><div class="list">${base.map(row).join('')}</div>` : ''}`;
@@ -8153,7 +8248,9 @@ setInterval(() => { if (P.live && S.live) { const b = $('#pane-body .livehead b'
 function bootTNR(db) {
   const col = (name, key) => db.collection(name).onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); S[key] = o; renderMod(); }, () => {});
   col('plans', 'plans'); col('training', 'logs'); col('fuel', 'fuel'); col('foods', 'foods');
-  db.doc('settings/training').onSnapshot(s => { S.tset = s.exists ? s.data() : {}; renderMod(); }, () => {});
+  db.doc('settings/training').onSnapshot(s => { S.tset = s.exists ? s.data() : {};
+    if (s.exists && !S.tset.board1) { const dated = Object.fromEntries(Object.entries(S.tset.dated || {}).filter(([k]) => k < TODAY)); S.tset = {...S.tset, dated, board1: TODAY}; dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()}); }
+    renderMod(); }, () => {});
   db.doc('settings/jumps').onSnapshot(s => { JUMPS = (s.exists ? s.data().list : null) || []; renderMod(); if (P.stack.length) paneRender(); }, () => {});
   jumpShareCheck();
   db.doc('settings/fuel').onSnapshot(s => { S.fset = s.exists ? s.data() : {}; renderMod(); }, () => {});
