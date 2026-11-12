@@ -3813,8 +3813,23 @@ async function awPhoneImport(txt) {
   }
   toast(`Téléphone importé : ${ks.length} jour${ks.length > 1 ? 's' : ''}`); render(); if (P.stack.length) paneRender(); return true;
 }
+// The phone through Automate (Android's own usage counters, sent every hour): package names shown as app names.
+const PKG = {'com.instagram.android': 'Instagram', 'com.google.android.youtube': 'YouTube', 'com.zhiliaoapp.musically': 'TikTok', 'com.ss.android.ugc.trill': 'TikTok', 'com.snapchat.android': 'Snapchat',
+  'com.whatsapp': 'WhatsApp', 'com.facebook.katana': 'Facebook', 'com.facebook.orca': 'Messenger', 'com.twitter.android': 'X', 'com.instagram.barcelona': 'Threads', 'com.android.chrome': 'Chrome',
+  'com.sec.android.app.sbrowser': 'Samsung Internet', 'com.netflix.mediaclient': 'Netflix', 'com.spotify.music': 'Spotify', 'com.strava': 'Strava', 'com.garmin.android.apps.connectmobile': 'Garmin Connect',
+  'com.samsung.android.messaging': 'Messages', 'com.google.android.apps.messaging': 'Messages', 'org.telegram.messenger': 'Telegram', 'com.reddit.frontpage': 'Reddit', 'tv.twitch.android.app': 'Twitch',
+  'com.discord': 'Discord', 'com.google.android.apps.maps': 'Maps', 'com.google.android.gm': 'Gmail', 'com.linkedin.android': 'LinkedIn', 'com.pinterest': 'Pinterest', 'com.amazon.avod.thirdpartyclient': 'Prime Video',
+  'com.disney.disneyplus': 'Disney+', 'com.google.android.youtube.tv': 'YouTube', 'com.android.vending': 'Play Store', 'com.sec.android.app.camera': 'Appareil photo', 'com.sec.android.gallery3d': 'Galerie'};
+const pkgName = p => PKG[p] || String(p).split('.').filter(x => !/^(com|org|net|android|app|apps|google|samsung|sec|tv)$/.test(x)).map(x => x.charAt(0).toUpperCase() + x.slice(1)).join(' ') || p;
+function phAuto(k) {
+  const x = S.screenph?.[k]; if (!x || !(+x.t > 0)) return null;
+  const apps = {}; for (const [p, v] of Object.entries(x.apps || {})) if (+v >= 30) { const n = pkgName(p); apps[n] = (apps[n] || 0) + +v; }
+  const sum = Object.values(apps).reduce((a, b) => a + b, 0); if (+x.t - sum >= 60) apps['Autres applis'] = +x.t - sum;
+  return {t: +x.t / 60, apps, sites: {}};
+}
 // Minutes on one device for a day (the phone falls back on the time typed in the questionnaire).
 function scrDev(k, d) {
+  if (d === 'ph') { const a = phAuto(k); if (a) return a; }
   const x = S.screen?.[k]?.[d];
   if (x && x.t != null) return {t: x.t / 60, apps: x.apps || {}, sites: x.sites || {}};
   if (d === 'ph') { const m = M(k, 'screen'); if (m != null) return {t: +m, apps: {}, sites: {}, manual: true}; }
@@ -3827,7 +3842,7 @@ function scrBlock() {
   const k = TODAY, ph = scrDev(k, 'ph'), pc = scrDev(k, 'pc'), tot = scrTot(k);
   const wk = []; for (let i = 1; i <= 7; i++) { const v = scrTot(addDays(k, -i)); if (v != null) wk.push(v); }
   const av = wk.length ? mean(wk) : null;
-  const top = d => { const e = d ? Object.entries(d.apps).filter(([n]) => n !== 'Autres').sort((a, b) => b[1] - a[1]).slice(0, 3) : [];
+  const top = d => { const e = d ? Object.entries(d.apps).filter(([n]) => !/^Autres/.test(n)).sort((a, b) => b[1] - a[1]).slice(0, 3) : [];
     if (e.length) return `<ol class="scr-top">${e.map(([n, v]) => `<li><span>${esc(n)}</span><b>${durTxt(Math.round(v / 60))}</b></li>`).join('')}</ol>`;
     return `<p class="scr-none">${d?.manual ? 'Noté le soir, sans le détail des applis' : d ? '' : 'Pas encore de données aujourd\'hui'}</p>`; };
   const dev = (id, lab, ic, d) => `<button type="button" class="scr-dev" data-scr="${id}"><span class="scr-lab">${ic}${lab}</span><b class="num">${d ? durTxt(Math.round(d.t)) : '–'}</b>${top(d)}</button>`;
@@ -3867,7 +3882,7 @@ function scrPane(dev) {
       ${sl.length ? `<div class="sec-label">Sites web sur l'ordinateur</div><div class="list">${sl.map(([n, v]) => `<div class="scr-row"><span class="scr-n"><span>${esc(n)}</span></span><b>${durTxt(Math.round(v))}</b><span class="scr-bar"><i style="width:${Math.max(2, v / smx * 100).toFixed(1)}%"></i></span></div>`).join('')}</div>` : ''}
       <div class="sec-label">Sources</div>
       <div class="card"><p class="small" style="margin:0">${esc(pcState)}</p>
-        <p class="small muted" style="margin:8px 0 12px">Téléphone : dans ActivityWatch, exporte tes données puis partage le fichier à TNR Athletics, ou choisis-le ici.</p>
+        <p class="small muted" style="margin:8px 0 12px">${S.screenph && Object.values(S.screenph).some(x => x.at && Date.now() - x.at * (x.at < 1e12 ? 1000 : 1) < 3 * 3600e3) ? 'Téléphone : envoyé tout seul par Automate, toutes les heures.' : 'Téléphone : il arrive tout seul quand Automate est réglé. En attendant, tu peux importer un export ActivityWatch.'}</p>
         <label class="btn ghost" style="display:block;text-align:center">Importer le fichier du téléphone<input type="file" accept=".json,application/json" data-scrfile hidden></label>
         ${AW_DESK ? '<button type="button" class="btn ghost" data-scrsync style="margin-top:8px;width:100%">Relire ActivityWatch maintenant</button>' : ''}</div>
       <p class="note">Le soir, les écrans retardent l'endormissement et raccourcissent le sommeil (Hale et Guan 2015, revue de 67 études).</p>`;
@@ -8931,6 +8946,7 @@ go('home', false);
   db.doc('requests/sync').onSnapshot(snap => { S.req = snap.exists ? snap.data().requestedAt : null; render(); }, () => {});
   db.doc('status/sync').onSnapshot(snap => { S.checked = snap.exists ? snap.data() : null; render(); }, () => {});
   db.doc('profile/main').onSnapshot(snap => { S.profile = snap.exists ? snap.data() : null; render(); }, fail);
+  db.collection('screenph').onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); S.screenph = o; render(); if (P.stack.length && SCRP.open) paneRender(); }, () => {});
   db.collection('screen').onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); S.screen = o; render(); if (P.stack.length && SCRP.open) paneRender(); }, () => {});
   bootTNR(db);
   if (AW_DESK) { setTimeout(() => awSync(true), 2500); setInterval(() => awSync(), 5 * 60e3); document.addEventListener('visibilitychange', () => { if (!document.hidden) awSync(); }); }
