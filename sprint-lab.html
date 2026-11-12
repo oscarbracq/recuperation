@@ -896,6 +896,7 @@ details.slow[open]>summary h2::after{content:" ▴"}
 .rxk{margin-top:4px}.rxk .rowbtn{width:100%}.rxk .m{flex:none;color:var(--accent);font-weight:700;font-size:.8125rem;min-width:52px}
 .bilpts{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column}.bilpts li{display:grid;grid-template-columns:8px auto 1fr;gap:10px;align-items:start;padding:9px 0;border-top:1px solid var(--line);font-size:.875rem;line-height:1.4}.bilpts li:first-child{border-top:0}.bilpts i{width:8px;height:8px;border-radius:50%;margin-top:6px}.bilpts .dots b{display:block;width:6px;height:6px;border-radius:50%;margin-top:7px;opacity:.8}
 ul.bil{margin:4px 0 0;padding-left:18px;font-size:.875rem;line-height:1.45}ul.bil li{margin:4px 0}
+.hm-acts{align-items:start!important}.hm-act:not(.hm-plus) .ic{margin:7px 0}.hm-act>span:last-child{min-height:2.5em}
 .qh{margin:26px 4px 2px;font:700 1.25rem var(--display);display:flex;flex-direction:column;gap:2px}.qh small{font:500 .8125rem var(--font, inherit);color:var(--fg2)}.qh:first-of-type{margin-top:18px}
 .wk2{display:flex;flex-direction:column;gap:12px}.pc .wk2>.card{flex:1;display:flex;flex-direction:column;justify-content:center}
 .sboard{padding:14px}.seg+.sboard{margin-top:14px}
@@ -1191,7 +1192,7 @@ input[type=date].mini-in,input[type=date]{min-width:165px;flex:none}
   <button role="tab" data-tab="today" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l4-5"/></svg>Aujourd'hui</button>
   <button role="tab" data-tab="trends" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 4-7 5 5"/><path d="M3 21h18"/></svg>Tendances</button>
   <button role="tab" data-tab="rsess" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20c-4.2 0-7.3-2.6-8.3-6.3 2.7 0 5.4 1.1 8.3 4.2 2.9-3.1 5.6-4.2 8.3-4.2-1 3.7-4.1 6.3-8.3 6.3z"/><path d="M12 17.6c-2.2-2.6-2.7-6.2 0-10.6 2.7 4.4 2.2 8 0 10.6z"/></svg>Séances</button>
-  <button role="tab" data-tab="rlib" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="4.5" r="2"/><path d="M13.5 7.5 11 13l5 2.5 1.5 5.5M11 13l-5 3.5-2 3.5M12.8 9.2l5.7-2.2"/></svg>Exercices</button>
+  <button role="tab" data-tab="rlib" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.6 1.8M9.5 2.5h5M12 2.5V6M18.6 6.9l1.5-1.5"/></svg>Exercices</button>
   <button role="tab" data-tab="reports" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.5" r="2"/><path d="M5 9l7 1.5L19 9M12 10.5V15l-3 6M12 15l3 6"/></svg>Mon corps</button>
   <button role="tab" data-tab="profile" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Profil</button>
 </nav></div>
@@ -3357,6 +3358,18 @@ document.addEventListener('click', e => {
 /* ---------- Recovery tools: what he did (logged), and routines the app builds and places in his planning ---------- */
 // [id, name, kind, muscles, chain, tool, minutes, how, variant, detail]
 const RLIB = [
+  ['h_bath', 'Bain chaud', 'chaud', [], 'all', 'Baignoire', 15, '15 min dans une eau à 38-40 °C, les épaules dans l\'eau, en respirant lentement.', 'Douche chaude longue.', 'Détend les muscles et le système nerveux ; 1 à 2 h avant le coucher, il aide aussi à s\'endormir (Haghayegh et coll. 2019). Pas juste après un choc qui a gonflé.'],
+  ['h_shower', 'Douche chaude', 'chaud', [], 'all', '', 5, '5 min d\'eau chaude sur la nuque, le dos et les jambes, en respirant lentement.', 'Bouillotte sur la zone tendue.', 'Version courte du bain chaud : sensation de détente et de muscles plus souples.'],
+  ['h_cream', 'Crème chauffante avant la séance', 'chaud', [], 'all', 'Crème chauffante', 1, 'Masse la crème 1 min sur les muscles qui vont travailler, 15 min avant l\'échauffement.', 'Un échauffement un peu plus long.', 'Chauffe la peau et donne une sensation de muscle prêt ; elle ne remplace pas l\'échauffement.'],
+  ['p_pre', 'Pistolet avant la séance', 'tissu', ['quads', 'hams', 'calves', 'glutes'], 'post', 'Pistolet', 3, 'Tête ronde, vitesse moyenne : 30 s par muscle qui va travailler (quadriceps, ischios, mollets, fessiers), en glissant lentement.', 'Rouleau 30 s par muscle.', 'Utilisé quelques minutes avant l\'effort, le pistolet gagne de l\'amplitude sans faire perdre de force ni de vitesse (Konrad et coll. 2020). C\'est là qu\'il est le plus utile.'],
+  ['p_quads', 'Pistolet quadriceps', 'tissu', ['quads'], 'ant', 'Pistolet', 2, 'Assis, jambe tendue détendue. Tête ronde, du genou vers la hanche, en restant 10 s sur les points durs. 60 s par jambe.', 'Rouleau quadriceps.', 'Après la séance, il baisse la sensation de courbatures, comme un massage court.'],
+  ['p_hams', 'Pistolet ischios', 'tissu', ['hams'], 'post', 'Pistolet', 2, 'Allongé sur le ventre ou assis au bord d\'une chaise. Vitesse basse, du genou vers la fesse, sans appuyer sur l\'arrière du genou. 60 s par jambe.', 'Rouleau ischios.', 'Les ischios du sprinteur se tendent vite : 1 min le soir des séances de vitesse.'],
+  ['p_glutes', 'Pistolet fessiers', 'tissu', ['glutes'], 'post', 'Pistolet', 2, 'Debout, poids sur l\'autre jambe. Tête ronde ou balle, petits cercles sur le fessier. 60 s par côté.', 'Balle sous les fessiers.', 'Relâche les fessiers après les côtes, les départs et le squat.'],
+  ['p_back', 'Pistolet haut du dos et trapèzes', 'tissu', ['traps', 'rhomb'], 'haut', 'Pistolet', 2, 'Tête ronde, vitesse basse, sur les trapèzes et entre les omoplates, jamais sur la colonne ni la nuque. 60 s par côté.', 'Balle contre le mur.', 'Bon après une journée assis ou de longs trajets.'],
+  ['b_ankle', 'Cheville à l\'élastique', 'mob', ['calves', 'tib'], 'post', 'Bande élastique', 2, 'Bande accrochée bas devant toi, boucle sur l\'avant de la cheville. Genou vers l\'avant, talon au sol, 15 fois par côté.', 'Cheville, genou au mur.', 'L\'élastique tire l\'os vers l\'arrière : la cheville gagne en flexion, utile pour la course et le squat.'],
+  ['b_hams', 'Ischios à l\'élastique', 'etir', ['hams'], 'post', 'Bande élastique', 2, 'Sur le dos, élastique sous le pied, monte la jambe tendue jusqu\'à sentir l\'étirement. 30 s, détends, recommence. 60 s par jambe.', 'Une sangle ou une serviette.', 'L\'élastique soutient la jambe : tu étires sans crisper le dos.'],
+  ['b_shoul2', 'Épaules à l\'élastique, ouverture', 'mob', ['rhomb', 'shoul'], 'haut', 'Bande élastique', 1, 'Bras tendus devant, élastique tenu large : écarte les bras en serrant les omoplates, 15 fois lentement.', 'Sans élastique, même mouvement.', 'Réveille le haut du dos et ouvre les épaules après une journée assis.'],
+
   ['r_res', 'Respiration de résonance 4-6', 'respi', [], 'all', '', 5, 'Inspire 4 s par le nez, expire 6 s par la bouche, lentement. Environ 6 respirations par minute.', 'Plus facile : 3 s / 5 s.', 'La respiration lente vers 6 par minute augmente la VFC et calme le stress (Laborde et coll. 2022, méta-analyse de 223 études).'],
   ['r_ext', 'Expiration longue 3-6', 'respi', [], 'all', '', 3, 'Inspire 3 s, expire deux fois plus longtemps, 6 s, comme dans une paille.', 'Si c\'est trop long : 3 s / 5 s.', 'Une expiration plus longue que l\'inspiration active le frein du cœur (nerf vague) : idéal juste après une séance.'],
   ['r_belly', 'Respiration abdominale', 'respi', [], 'all', '', 4, 'Allongé, une main sur le ventre : le ventre monte à l\'inspiration (4 s), redescend à l\'expiration (6 s). La poitrine ne bouge presque pas.', 'Assis si allongé n\'est pas possible.', 'Apprend au diaphragme à faire le travail : moins de tension dans le cou, récupération plus calme.'],
@@ -4229,9 +4242,14 @@ function vRSess() {
     <div class="card"><div class="chead"><span class="eyebrow">Fait ces 14 derniers jours</span><b class="num">${w7} min sur 7 j</b></div>${H.length ? `<div class="list" style="margin-top:8px">${H.map(a => `<div class="row"><span class="l">${esc(a.t)}<span class="hint">${esc(cap(fmtShort(a.k)))}${a.at ? ' · ' + esc(tfr(a.at)) : ''}${a.min ? ' · ' + a.min + ' min' : ''}</span></span></div>`).join('')}</div>` : '<p class="small muted" style="margin:6px 0 0">Rien de noté pour l\'instant : touche « + Activité de récup ».</p>'}</div></div>`;
 }
 // Recovery · Exercices: every kind of recovery, the best proven first; one tap guides the exercise with a timer.
+const RTOOLS = [['all', 'Tout'], ['none', 'Sans matériel', x => !x.tool], ['gun', 'Pistolet', x => /pistolet/i.test(x.tool)], ['roll', 'Rouleau ou balle', x => /rouleau|balle/i.test(x.tool)], ['band', 'Élastique', x => /bande|élastique|sangle/i.test(x.tool)], ['hc', 'Chaud et froid', x => ['chaud', 'froid'].includes(x.kind)]];
+let RTOOL = 'all';
+document.addEventListener('click', e => { const b = e.target.closest('[data-rtool]'); if (!b) return; RTOOL = b.dataset.rtool; render(); });
 function vRLib() {
-  const by = {}; for (const r of RLIB) if (RX[r[0]]) (by[r[2]] ||= []).push(RX[r[0]]);
+  const f = RTOOLS.find(x => x[0] === RTOOL)?.[2] || (() => true);
+  const by = {}; for (const r of RLIB) if (RX[r[0]] && f(RX[r[0]])) (by[r[2]] ||= []).push(RX[r[0]]);
   return `<header class="top" style="margin-bottom:6px"><div class="sub">${RLIB.length} exercices · touche pour être guidé</div><h1>Exercices</h1></header>
+    <div class="chipsx" role="group" aria-label="Matériel" style="margin-bottom:12px">${RTOOLS.map(([v, l]) => `<button type="button" class="chip" data-rtool="${v}" aria-pressed="${RTOOL === v}">${l}</button>`).join('')}</div>
     <div class="stack">${RKINDS.filter(([k]) => by[k]).map(([k, n, why]) => `<div class="card pc3"><span class="eyebrow">${esc(n)} · ${by[k].length}</span><p class="small muted" style="margin:4px 0 8px">${esc(why)}</p>
       <div class="list rxk">${by[k].map(x => `<button type="button" class="rowbtn" data-rxgo="${x.id}"><span class="m">${x.min} min</span><span style="flex:1;min-width:0"><b>${esc(x.n)}</b><span class="meta">${esc(x.tool ? x.tool + ' · ' : '')}${esc(x.how.length > 90 ? x.how.slice(0, 88) + '…' : x.how)}</span></span>${ICON.chev}</button>`).join('')}</div></div>`).join('')}</div>
     <p class="note" style="text-align:left">Les « ondes » (sons binauraux) ne sont pas proposées : leurs effets mesurés sont faibles et peu fiables (Garcia-Argibay et coll. 2019, méta-analyse).</p>`;
@@ -8640,7 +8658,7 @@ go('home', false);
   S.db = db;
   let fresh = false;
   const timer = setTimeout(() => { if (!fresh) { S.status = 'slow'; render(); } }, 10000);
-  const ok = snap => { if (!snap.metadata.fromCache && !fresh) { fresh = true; clearTimeout(timer); S.status = 'ready'; } };
+  const ok = snap => { if (!snap.metadata.fromCache && !fresh) { fresh = true; clearTimeout(timer); S.status = 'ready'; setTimeout(() => window.TNR_SPLASH?.ready('data'), 60); } };
   const fail = () => { clearTimeout(timer); S.status = 'slow'; render(); };
   const months = (col, target) => db.collection(col).onSnapshot(snap => {
     const o = {}; let synced = S.syncedAt;
@@ -8661,6 +8679,7 @@ go('home', false);
   if (new URLSearchParams(location.search).get('rpe')) { history.replaceState(history.state, '', location.pathname); const t = setInterval(() => { if (!S.manual) return; clearInterval(t); go('home', false); draft = {}; openSheet('note', TODAY); const i = SES_K.find(([kind]) => sesInfo(TODAY, kind)); if (i) { draft._ses = i[0]; $('#e-ses').innerHTML = noteSessions(TODAY); } }, 200); }
   // Back from the Withings sign-in page: say how it went, show the settings, then fetch the data.
   if (window.RECUP_WITHINGS_DONE) window.RECUP_WITHINGS_DONE.then(m => { homeSettings(); toast(m); if (/connecté/.test(m)) refreshAll(); });
-  else if (PREFS.autoSync && window.RECUP_SYNC) refreshAll();
+  else if (PREFS.autoSync && window.RECUP_SYNC) refreshAll().finally(() => window.TNR_SPLASH?.ready('sync'));
+  else window.TNR_SPLASH?.ready('sync');
 })();
 </script>
