@@ -723,7 +723,7 @@ svg.body.sil .rg.on{stroke:none;fill:transparent}
 
 /* Tab bar */
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--bar);backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);border-top:1px solid var(--line);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
-.tabbar nav{max-width:600px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.tabbar nav{max-width:600px;margin:0 auto;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
 #tb-N nav{grid-template-columns:repeat(6,1fr)}
 #tb-T nav{grid-template-columns:repeat(6,1fr)}
 #tb-T button{font-size:.625rem}
@@ -917,6 +917,12 @@ details.slow[open]>summary h2::after{content:" ▴"}
 .pc .hm-head .sub{margin-top:0}
 .pcnav .pcn-i{padding-top:calc(9px * var(--pcz, 1));padding-bottom:calc(9px * var(--pcz, 1))}.pcnav .pcn-g{margin-top:calc(8px * var(--pcz, 1));padding-top:calc(8px * var(--pcz, 1))}.pcnav .pcn-h{padding-top:calc(6px * var(--pcz, 1));padding-bottom:calc(6px * var(--pcz, 1))}.pcnav .pcn-brand{padding-bottom:calc(14px * var(--pcz, 1))}.pcnav .pcn-foot{padding-top:calc(14px * var(--pcz, 1))}
 .pcnav.tight .pcn-i{font-size:.8125rem;line-height:1.1;gap:9px}.pcnav.tight .pcn-i svg{width:16px;height:16px}.pcnav.tight .pcn-h{font-size:.625rem}.pcnav.tight .pcn-h .l{width:16px;height:16px;font-size:.625rem}.pcnav.tight .pcn-brand b{font-size:1rem}.pcnav.tight{padding-top:10px;padding-bottom:8px}
+.hm-head{-webkit-mask-image:none!important;mask-image:none!important}.hm:not(.sel) .hm-info{min-height:30px}
+.hm-plan2{position:absolute;z-index:6;right:8px;top:calc(12px + env(safe-area-inset-top,0px));width:52px;height:52px;border-radius:50%;display:grid;place-items:center;color:rgba(255,255,255,.7);touch-action:manipulation}.hm-plan2 svg{width:23px;height:23px}.pc .hm-plan2{display:none}
+.brw{position:relative;height:190px;display:grid;place-items:center;margin:6px 0}.brw i{position:absolute;width:170px;height:170px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 55%,transparent),color-mix(in srgb,var(--accent) 12%,transparent));transform:scale(.45)}.brw span{position:relative;font:700 1.125rem var(--display);color:var(--fg)}
+.rxk{margin-top:4px}.rxk .rowbtn{width:100%}.rxk .m{flex:none;color:var(--accent);font-weight:700;font-size:.8125rem;min-width:52px}
+.bilpts{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column}.bilpts li{display:grid;grid-template-columns:8px auto 1fr;gap:10px;align-items:start;padding:9px 0;border-top:1px solid var(--line);font-size:.875rem;line-height:1.4}.bilpts li:first-child{border-top:0}.bilpts i{width:8px;height:8px;border-radius:50%;margin-top:6px}.bilpts .dots b{display:block;width:6px;height:6px;border-radius:50%;margin-top:7px;opacity:.8}
+ul.bil{margin:4px 0 0;padding-left:18px;font-size:.875rem;line-height:1.45}ul.bil li{margin:4px 0}
 .qh{margin:26px 4px 2px;font:700 1.25rem var(--display);display:flex;flex-direction:column;gap:2px}.qh small{font:500 .8125rem var(--font, inherit);color:var(--fg2)}.qh:first-of-type{margin-top:18px}
 .wk2{display:flex;flex-direction:column;gap:12px}.pc .wk2>.card{flex:1;display:flex;flex-direction:column;justify-content:center}
 .sboard{padding:14px}.seg+.sboard{margin-top:14px}
@@ -1212,7 +1218,7 @@ input[type=date].mini-in,input[type=date]{min-width:165px;flex:none}
   <button role="tab" data-tab="today" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l4-5"/></svg>Aujourd'hui</button>
   <button role="tab" data-tab="trends" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 4-7 5 5"/><path d="M3 21h18"/></svg>Tendances</button>
   <button role="tab" data-tab="rsess" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20c-4.2 0-7.3-2.6-8.3-6.3 2.7 0 5.4 1.1 8.3 4.2 2.9-3.1 5.6-4.2 8.3-4.2-1 3.7-4.1 6.3-8.3 6.3z"/><path d="M12 17.6c-2.2-2.6-2.7-6.2 0-10.6 2.7 4.4 2.2 8 0 10.6z"/></svg>Séances</button>
-  <button role="tab" data-tab="rlib" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.2 3.8 5.2 6.7 5.2 9.3a5.2 5.2 0 0 1-10.4 0c0-2.6 2-5.5 5.2-9.3z"/><path d="M9.6 13.6a2.5 2.5 0 0 0 2.4 2.4"/></svg>Exercices</button>
+  <button role="tab" data-tab="rlib" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="4.5" r="2"/><path d="M13.5 7.5 11 13l5 2.5 1.5 5.5M11 13l-5 3.5-2 3.5M12.8 9.2l5.7-2.2"/></svg>Exercices</button>
   <button role="tab" data-tab="reports" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.5" r="2"/><path d="M5 9l7 1.5L19 9M12 10.5V15l-3 6M12 15l3 6"/></svg>Mon corps</button>
   <button role="tab" data-tab="profile" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Profil</button>
 </nav></div>
@@ -2651,17 +2657,73 @@ function homeFit() {
   const L = [...h.querySelectorAll('.hm-pts li')]; L.forEach(li => li.hidden = false);
   const over = () => h.scrollHeight > h.clientHeight + 2;
   let z = 1; h.style.setProperty('--hmz', 1);
-  while (over() && z > .72) { z -= .04; h.style.setProperty('--hmz', z.toFixed(2)); }
-  for (let i = L.length - 2; over() && i >= 0; i--) if (!/^Ta note/.test(L[i].textContent.trim())) L[i].hidden = true;
+  while (over() && z > .56) { z -= .03; h.style.setProperty('--hmz', z.toFixed(2)); }
+
 }
 addEventListener('resize', () => { if (S.mod === 'home') homeFit(); });
 document.fonts?.ready.then(() => { if (S.mod === 'home') homeFit(); });
+// Bilan de la semaine: from Saturday to Friday, open from Friday 20 h. Claude's analysis on top when it is there,
+// then the key point of each block (recovery, training, pain, how he felt, food, habits), against the 4 weeks before.
+let BIL = 0;
+function bilanEnd(off) { let d = TODAY; while (dow(d) !== 5 || (d === TODAY && new Date().getHours() < 20)) d = addDays(d, -1); return addDays(d, -7 * off); }
+function bilanPane() { BIL = 0; openPane({title: 'Bilan de la semaine', side: true, render: bilanHtml}); }
+document.addEventListener('click', e => { const b = e.target.closest('[data-biloff]'); if (!b || b.disabled) return; BIL = Math.max(0, BIL + +b.dataset.biloff); paneRender(); });
+function bilanHtml() {
+  const e = bilanEnd(BIL), s0 = addDays(e, -6), ks = [...Array(7)].map((_, i) => addDays(s0, i)), pk = [...Array(28)].map((_, i) => addDays(s0, -28 + i));
+  const avg = (L, f) => { const v = L.map(f).filter(x => x != null && !isNaN(x)); return v.length ? mean(v) : null; };
+  const pts = [], add = (lv, t, c) => pts.push({lv, t, c});
+  // Recovery
+  const rec = avg(ks, k => recovery(k)?.score), recP = avg(pk, k => recovery(k)?.score), red = ks.filter(k => (recovery(k)?.score ?? 99) < 34).length;
+  const hrv = avg(ks, k => G(k, 'hrv')), hrvP = avg(pk, k => G(k, 'hrv')), rhr = avg(ks, k => G(k, 'rhr')), rhrP = avg(pk, k => G(k, 'rhr'));
+  const sl = avg(ks, k => VAL.sleepH(k)), need = sleepGoal(), short = ks.filter(k => VAL.sleepH(k) != null && VAL.sleepH(k) < need - 1).length;
+  if (rec != null) add(rec < 50 || red >= 2 ? 3 : rec < 67 ? 2 : 1, `Récupération moyenne ${Math.round(rec)} %${recP != null ? ` (${rec >= recP ? '+' : '−'}${Math.round(Math.abs(rec - recP))} pts sur tes 4 semaines d'avant)` : ''}${red ? `, ${red} jour${red > 1 ? 's' : ''} en rouge` : ''}.`, 'R');
+  if (sl != null) add(short >= 3 ? 3 : sl < need - .5 ? 2 : 1, `Sommeil : ${hmH(sl)} en moyenne pour ${hmH(need)} visées${short ? `, ${short} nuit${short > 1 ? 's' : ''} à plus d'une heure de moins` : ''}.`, 'R');
+  // Training
+  const B = bucketStats([{a: s0, b: e}, {a: addDays(s0, -7), b: addDays(s0, -1)}]), w = B[0], wp = B[1];
+  const due = ks.filter(k => planHas(k, 'muscu') || planHas(k, 'athle')).length, done = ks.filter(k => kindDone(k, 'gym') || kindDone(k, 'track')).length;
+  const eff7 = avg(ks, k => effortDay(k)), eff28 = avg(pk, k => effortDay(k)), acwr = eff7 != null && eff28 ? eff7 / eff28 : null;
+  if (due || done) add(due && done < due ? 2 : 1, `Séances : ${done} faite${done > 1 ? 's' : ''}${due ? ` sur ${due} prévue${due > 1 ? 's' : ''}` : ''} · ${fx(w.ton / 1000, 1)} t de muscu, ${fx(w.m)} m de sprint${wp.ton + wp.m ? ` (semaine d'avant : ${fx(wp.ton / 1000, 1)} t, ${fx(wp.m)} m)` : ''}.`, 'T');
+  if (acwr != null) add(acwr > 1.3 ? 3 : acwr < .8 ? 2 : 1, `Charge : effort moyen ${fx(eff7, 1)} sur 21 contre ${fx(eff28, 1)} sur tes 4 semaines d'avant (rapport ${fx(acwr, 2)}). ${acwr > 1.3 ? 'Hausse trop rapide : au-dessus de 1,3 le risque de blessure monte (Gabbett 2016).' : acwr < .8 ? 'Semaine bien plus légère : normal en semaine de décharge, sinon tu perds du rythme.' : 'Dans la zone sûre, entre 0,8 et 1,3.'}`, 'T');
+  // Pain
+  const PZ = {}; for (const k of ks) for (const [l, v] of Object.entries(pains(k))) if (+v > 0) { const x = PZ[l] ||= {max: 0, n: 0}; x.max = Math.max(x.max, +v); x.n++; }
+  const pz = Object.entries(PZ).sort((a, b) => b[1].max - a[1].max);
+  add(pz.some(([, x]) => x.max >= 3) ? 3 : pz.length ? 2 : 1, pz.length ? `Douleurs : ${pz.slice(0, 3).map(([l, x]) => `${painTxt(l)} ${x.max}/10 (${x.n} jour${x.n > 1 ? 's' : ''})`).join(', ')}.` : 'Aucune douleur notée cette semaine.', 'R');
+  // How he felt (morning questionnaire)
+  const wd = ks.filter(k => wellOf(k) != null), wl = avg(ks, wellOf), wlP = avg(pk, wellOf);
+  const items = WELL.map(([id, n]) => [n, avg(ks, k => M(k, 'well')?.[id])]).filter(x => x[1] != null).sort((a, b) => a[1] - b[1]);
+  if (wd.length) add(wl < 3 ? 3 : wlP != null && wl < wlP - .4 ? 2 : 1, `Ressenti du matin : ${fx(wl, 1)} sur 5${wlP != null ? ` (avant : ${fx(wlP, 1)})` : ''}, rempli ${wd.length} jour${wd.length > 1 ? 's' : ''} sur 7${items.length ? `. Le plus bas : ${items[0][0].toLowerCase()} ${fx(items[0][1], 1)}` : ''}.`, 'R');
+  else add(2, 'Ressenti du matin jamais rempli cette semaine : c\'est le signal le plus sensible à la fatigue.', 'R');
+  // Food, water, weight
+  const nu = ks.map(k => M(k, 'nutrition')).filter(x => x != null), onPlan = nu.filter(x => x === 0).length, big = nu.filter(x => x >= 2).length;
+  const wa = avg(ks, k => waterOf(k).L), wg = fuelGoal(e).waterL || 2;
+  const wk = ks.filter(k => W(k, 'weight') != null), dW = wk.length > 1 ? W(wk.at(-1), 'weight') - W(wk[0], 'weight') : null;
+  if (nu.length) add(big >= 2 ? 2 : 1, `Alimentation : ${onPlan} jour${onPlan > 1 ? 's' : ''} au plan sur ${nu.length}${big ? `, ${big} écart${big > 1 ? 's' : ''} ou repas libre${big > 1 ? 's' : ''}` : ''}${wa != null ? ` · eau ${fx(wa, 1)} L par jour pour ${fx(wg, 1)} L` : ''}.`, 'N');
+  if (dW != null) add(Math.abs(dW) > 1 ? 2 : 1, `Poids : ${dW >= 0 ? '+' : '−'}${fx(Math.abs(dW), 1)} kg sur la semaine (${fx(W(wk.at(-1), 'weight'), 1)} kg).`, 'N');
+  // Habits: day score, screen time, recovery care
+  const sc = ks.filter(k => S.manual?.[k]?.closed).map(dayScores), hab = avg(sc, x => x.c), phy = avg(sc, x => x.u);
+  const scr = avg(ks, k => M(k, 'screen')), care = ks.reduce((t, k) => t + (S.manual[k]?.recov || []).reduce((a, x) => a + (+x.min || 0), 0), 0);
+  if (sc.length) add(hab < 60 ? 2 : 1, `Score : habitudes ${Math.round(hab)}, physiologie ${Math.round(phy)} sur ${sc.length} journée${sc.length > 1 ? 's' : ''} enregistrée${sc.length > 1 ? 's' : ''}.`, 'R');
+  add(care < 30 ? 2 : 1, `Récupération active : ${care} min de soins notés${scr != null ? ` · temps d'écran ${durTxt(Math.round(scr))} par jour` : ''}.`, 'R');
+  const worst = Math.max(...pts.map(x => x.lv)), head = worst === 3 ? 'Semaine à surveiller' : worst === 2 ? 'Semaine correcte, quelques points à ajuster' : 'Bonne semaine';
+  const R = (S.reports || []).find(r => r.date && r.date >= s0 && r.date <= addDays(e, 1)), Lst = (t, L, c) => L?.length ? `<div class="sec-label" style="color:${c}">${t}</div><ul class="bil">${L.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '';
+  const col = {1: 'var(--good)', 2: 'var(--warn)', 3: 'var(--bad)'};
+  return `<div class="card" style="margin-top:14px;padding:8px 12px"><div class="daynav"><button data-biloff="1" aria-label="Semaine d'avant">‹</button><b>Du ${esc(fmtShort(s0))} au ${esc(fmtShort(e))}</b><button data-biloff="-1" aria-label="Semaine d'après"${BIL ? '' : ' disabled'}>›</button></div></div>
+    <div class="stack" style="margin-top:12px">
+    <div class="card"><span class="eyebrow">L'essentiel · ${esc(head)}</span><ul class="bilpts">${pts.sort((a, b) => b.lv - a.lv).map(x => `<li><i style="background:${col[x.lv]}"></i><span class="dots"><b style="background:${MODC[x.c]}"></b></span><span>${esc(x.t)}</span></li>`).join('')}</ul>
+      <p class="small muted" style="margin:8px 0 0">Rouge : à corriger · orange : à surveiller · vert : bien. Chaque chiffre est comparé à tes 4 semaines d'avant.</p></div>
+    ${R ? `<div class="card"><span class="eyebrow">L'analyse de Claude · ${esc(R.title || '')}</span>${R.headline ? `<h3 style="margin:8px 0 4px">${esc(R.headline)}</h3>` : ''}${R.summary ? `<p class="small">${esc(R.summary)}</p>` : ''}
+      ${Lst('Analyses', R.insights, 'var(--fg)')}${Lst('Décisions pour la semaine prochaine', R.decisions || R.actions, 'var(--accent)')}${Lst('Ce qui avance', R.wins, 'var(--good)')}${Lst('Points d\'attention', R.alerts, 'var(--warn)')}${Lst('Nutrition', R.nutrition, '#30D158')}
+      ${R.injury ? `<div class="sec-label" style="color:var(--bad)">Douleur et reprise</div><p class="small">${esc(R.injury)}</p>` : ''}${R.followup ? `<div class="sec-label">Suivi de la semaine d'avant</div><p class="small">${esc(R.followup)}</p>` : ''}</div>`
+      : `<div class="card empty"><b>L'analyse de Claude arrive le vendredi à 20 h</b>Elle croise toute ta semaine (séances, charge, récupération, douleurs, questionnaires, repas) et propose des décisions précises pour la semaine suivante.</div>`}
+    </div>`;
+}
 // The three shortcuts sit under the card, outside its scroll: always whole on screen.
+const BILIC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="3.5" width="15" height="17" rx="3"/><path d="M8.5 16v-3M12 16V9.5M15.5 16v-5"/></svg>';
 function homeActs() {
   return `<div class="hm-acts" id="hm-acts"${HP.why ? ' hidden' : ''}>
       <button class="hm-act" data-hlog><span class="ic">${BOOK}</span><span>Journal de bord</span></button>
       <button class="hm-act hm-plus" data-hday><span class="ic"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></span><span>Questionnaire du jour</span></button>
-      <button class="hm-act" data-hplan><span class="ic">${CAL}</span><span>Planning</span></button></div>`;
+      <button class="hm-act" data-hbilan><span class="ic">${BILIC}</span><span>Bilan de la semaine</span></button></div>`;
 }
 function homeWhy() {
   HP.why = !HP.why;
@@ -3330,6 +3392,24 @@ document.addEventListener('click', e => {
 /* ---------- Recovery tools: what he did (logged), and routines the app builds and places in his planning ---------- */
 // [id, name, kind, muscles, chain, tool, minutes, how, variant, detail]
 const RLIB = [
+  ['r_res', 'Respiration de résonance 4-6', 'respi', [], 'all', '', 5, 'Inspire 4 s par le nez, expire 6 s par la bouche, lentement. Environ 6 respirations par minute.', 'Plus facile : 3 s / 5 s.', 'La respiration lente vers 6 par minute augmente la VFC et calme le stress (Laborde et coll. 2022, méta-analyse de 223 études).'],
+  ['r_ext', 'Expiration longue 3-6', 'respi', [], 'all', '', 3, 'Inspire 3 s, expire deux fois plus longtemps, 6 s, comme dans une paille.', 'Si c\'est trop long : 3 s / 5 s.', 'Une expiration plus longue que l\'inspiration active le frein du cœur (nerf vague) : idéal juste après une séance.'],
+  ['r_belly', 'Respiration abdominale', 'respi', [], 'all', '', 4, 'Allongé, une main sur le ventre : le ventre monte à l\'inspiration (4 s), redescend à l\'expiration (6 s). La poitrine ne bouge presque pas.', 'Assis si allongé n\'est pas possible.', 'Apprend au diaphragme à faire le travail : moins de tension dans le cou, récupération plus calme.'],
+  ['r_tri', 'Respiration triangle', 'respi', [], 'all', '', 3, 'Inspire 4 s, bloque 4 s, expire 4 s, sans pause à la fin.', 'Plus facile : 3 s par phase.', 'Plus douce que la respiration carrée : bonne pour se recentrer en 3 minutes.'],
+  ['n_pmr', 'Relaxation musculaire progressive', 'nerv', [], 'all', '', 12, 'Allongé. Contracte chaque groupe de muscles 5 s, puis relâche 25 s en sentant la différence.', 'Sans contracter : relâche seulement chaque zone.', 'La méthode de Jacobson : efficace sur l\'anxiété et le sommeil (méta-analyses), elle apprend à repérer et lâcher les tensions.', [['Pieds et mollets', 30, 'Pointe les pieds vers toi, serre 5 s, puis relâche complètement.'], ['Cuisses', 30, 'Serre les quadriceps et les fessiers 5 s, puis relâche.'], ['Ventre', 30, 'Rentre le ventre et serre 5 s, puis relâche et respire dans le ventre.'], ['Mains et avant-bras', 30, 'Serre les poings 5 s, puis ouvre les mains.'], ['Bras', 30, 'Plie les bras et serre les biceps 5 s, puis laisse tomber.'], ['Épaules', 30, 'Monte les épaules vers les oreilles 5 s, puis laisse-les descendre.'], ['Visage', 30, 'Serre les yeux et la mâchoire 5 s, puis relâche le front et la langue.'], ['Tout le corps', 90, 'Respire lentement et laisse le corps lourd, sans rien contracter.'], ['Retour', 60, 'Bouge doucement les doigts et les orteils, puis ouvre les yeux.']]],
+  ['n_scan', 'Scan du corps', 'nerv', [], 'all', '', 10, 'Allongé, les yeux fermés. Promène ton attention lentement dans le corps, sans rien changer : juste remarquer.', 'Assis, les yeux mi-clos.', 'Pratique de pleine conscience : chez les athlètes, elle réduit le stress perçu (Bühlmayer et coll. 2017, méta-analyse).', [['Respiration', 60, 'Sens l\'air entrer et sortir, sans le contrôler.'], ['Pieds', 60, 'Remarque les sensations des pieds : chaleur, poids, contact.'], ['Jambes', 90, 'Mollets, genoux, cuisses : où c\'est lourd, où c\'est tendu.'], ['Bassin et dos', 90, 'Le bas du dos, les fessiers, le contact avec le sol.'], ['Ventre et poitrine', 90, 'Le ventre qui monte et descend, le cœur qui ralentit.'], ['Bras et mains', 60, 'Épaules, bras, mains : laisse-les lourdes.'], ['Nuque et visage', 60, 'Mâchoire, yeux, front : relâche ce qui serre.'], ['Le corps entier', 90, 'Sens le corps en entier, puis reviens doucement.']]],
+  ['n_nsdr', 'Repos profond guidé (NSDR)', 'nerv', [], 'all', '', 15, 'Allongé, une couverture. Respiration lente, puis attention posée sur chaque partie du corps, sans dormir.', 'Une sieste de 20 min fait aussi l\'affaire.', 'Proche du yoga nidra : il calme le système nerveux et aide à récupérer d\'une nuit courte (preuves encore modestes, mais sans risque).', [['Installation', 120, 'Allonge-toi, ferme les yeux, expire longuement trois fois.'], ['Respiration lente', 180, 'Inspire 4 s, expire 6 s, sans forcer.'], ['Corps lourd', 300, 'Passe d\'une partie du corps à l\'autre et laisse chacune s\'enfoncer dans le sol.'], ['Calme', 240, 'Ne fais plus rien : observe la respiration.'], ['Retour', 60, 'Étire-toi doucement avant de te relever.']]],
+  ['n_mind', 'Pleine conscience sur le souffle', 'nerv', [], 'all', '', 5, 'Assis, dos droit. Compte tes respirations de 1 à 10, puis recommence. Si tu perds le fil, reviens à 1 sans te juger.', 'Les yeux ouverts, regard au sol.', 'Quelques minutes par jour baissent le stress perçu et améliorent la concentration (méta-analyses chez les sportifs).'],
+  ['z_nap', 'Sieste courte', 'sleep', [], 'all', '', 20, 'Allongé au calme, réveil à 20 min. Au plus tard en début d\'après-midi.', 'Juste les yeux fermés 10 min si tu ne t\'endors pas.', 'Une sieste de 20 à 30 min améliore la performance et baisse la fatigue, surtout après une nuit courte (Souabni et coll. 2021, méta-analyse).'],
+  ['z_bath', 'Bain ou douche chaude avant le coucher', 'sleep', [], 'all', '', 10, '1 h à 2 h avant de te coucher, 10 min à environ 40 °C.', 'Une douche chaude bien longue.', 'Le corps se refroidit ensuite plus vite, ce qui fait s\'endormir environ 10 min plus tôt (Haghayegh et coll. 2019, méta-analyse).'],
+  ['z_wind', 'Retour au calme avant de dormir', 'sleep', [], 'all', '', 15, 'Téléphone posé hors de la chambre, lumière basse, lecture ou respiration lente.', '5 min seulement, c\'est déjà mieux que rien.', 'Les écrans le soir retardent l\'endormissement et raccourcissent le sommeil (Hale et Guan 2015, revue de 67 études).'],
+  ['c_bike', 'Vélo très léger (récup active)', 'circ', ['quads', 'glutes', 'calves'], 'post', 'Vélo', 15, 'Pédale très facile, tu peux parler sans souffler. Le lendemain d\'une grosse séance.', 'Marche 20 min.', 'Le sang circule plus vite dans les muscles travaillés sans les fatiguer : moins de courbatures ressenties le lendemain.'],
+  ['c_legs', 'Jambes surélevées', 'circ', ['calves', 'hams'], 'post', 'Mur', 10, 'Allongé, les jambes contre le mur, détendu. Respire lentement.', 'Les pieds sur une chaise.', 'Aide le sang des jambes à remonter après une longue journée debout ou une séance de piste.'],
+  ['c_pump', 'Pompe du mollet', 'circ', ['calves', 'tib'], 'post', '', 2, 'Jambes surélevées, fléchis et tends les chevilles en rythme, une fois par seconde.', 'Assis, même mouvement.', 'Le mollet est la pompe du sang des jambes : quelques minutes suffisent à relancer le retour veineux.'],
+  ['c_comp', 'Compression', 'circ', ['calves', 'quads', 'hams'], 'post', 'Chaussettes ou collant', 60, 'Mets tes chaussettes ou ton collant de compression après la séance, 1 h ou plus.', 'Garde-les pendant le trajet du retour.', 'Porter de la compression après l\'effort aide à retrouver la force plus vite (Brown et coll. 2017, méta-analyse).'],
+  ['f_cwi', 'Bain froid', 'froid', ['quads', 'hams', 'calves'], 'post', 'Baignoire', 10, '10 min dans une eau à 10 à 15 °C, jusqu\'au bassin.', 'Douche froide 3 min sur les jambes.', 'Le meilleur effet sur les courbatures et la fatigue après un gros effort (Moore et coll. 2022, méta-analyse). À éviter juste après une séance de force qui vise le muscle.'],
+  ['f_shower', 'Douche froide', 'froid', [], 'post', '', 3, 'Termine la douche par 2 à 3 min d\'eau froide, en respirant lentement.', '30 s pour commencer.', 'Version plus courte du bain froid : sensation de fraîcheur et de récupération, effet moindre.'],
+  ['h_sauna', 'Sauna', 'chaud', [], 'all', 'Sauna', 15, '2 ou 3 passages de 10 à 15 min, avec une pause et un grand verre d\'eau entre chaque.', 'Bain chaud 15 min.', 'Détente et bien-être, et plus de volume sanguin à force d\'en faire. Les preuves sur la récupération pure restent limitées.'],
   ['r_sigh', 'Soupir physiologique', 'respi', [], 'all', '', 1, 'Deux inspirations par le nez (une longue, une courte), puis une longue expiration par la bouche. 5 fois.', 'Si ça tourne la tête : une seule inspiration, expiration lente.', 'Le moyen le plus rapide de faire baisser le stress : les petites alvéoles se rouvrent et la longue expiration ralentit le cœur.'],
   ['r_box', 'Respiration carrée', 'respi', [], 'all', '', 3, 'Inspire 4 s, bloque 4 s, expire 4 s, bloque 4 s.', 'Si 4 s c\'est long : 3 s par phase.', 'Calme le système nerveux sans endormir : bon avant une séance calme ou au retour au calme.'],
   ['r_coh', 'Cohérence cardiaque', 'respi', [], 'all', '', 5, 'Inspire 5 s par le nez, expire 5 s. 6 respirations par minute.', 'Plus facile : inspire 4 s, expire 6 s.', 'Fait basculer le corps en mode récupération (parasympathique) : ta VFC monte pendant l\'exercice.'],
@@ -3362,7 +3442,20 @@ const RLIB = [
   ['b_hip', 'Hanche à la bande', 'mob', ['psoas', 'glutes'], 'ant', 'Bande élastique', 2, 'Bande accrochée à un poteau, boucle en haut de la cuisse, recule pour la tendre, puis fente basse. 60 s par côté.', 'Sans bande : fente basse simple.', 'La bande décolle un peu la tête du fémur : l\'étirement va plus loin sans forcer.'],
   ['b_shoul', 'Bande, tour d\'épaules', 'mob', ['shoul', 'pecs', 'lats'], 'haut', 'Bande élastique', 1, 'Bande tenue large, passe les bras tendus devant puis derrière la tête. 10 fois.', 'Avec un bâton ou une serviette.', 'Écarte les mains si ça bloque.']
 ];
-const RX = Object.fromEntries(RLIB.map(r => [r[0], {id: r[0], n: r[1], kind: r[2], mus: r[3], chain: r[4], tool: r[5], min: r[6], how: r[7], alt: r[8], more: r[9]}]));
+const RX = Object.fromEntries(RLIB.map(r => [r[0], {id: r[0], n: r[1], kind: r[2], mus: r[3], chain: r[4], tool: r[5], min: r[6], how: r[7], alt: r[8], more: r[9], steps: r[10]}]));
+// Kinds of recovery, from the best proven for an athlete to the least, with the one line that says why.
+const RKINDS = [['sleep', 'Sommeil', 'Le premier levier de récupération : rien ne le remplace.'], ['respi', 'Respiration', 'Calme le système nerveux en quelques minutes : la VFC remonte.'], ['nerv', 'Récupération nerveuse', 'Relâcher la tête et les tensions : moins de stress, meilleur sommeil.'],
+  ['tissu', 'Massage et tissus', 'Le massage est la technique la plus efficace sur les courbatures et la fatigue ressentie (Dupuy et coll. 2018).'], ['froid', 'Froid', 'Efficace après un gros effort, pas juste après la muscu.'], ['circ', 'Circulation', 'Faire circuler le sang sans fatiguer : récup active, jambes surélevées, compression.'],
+  ['chaud', 'Chaud', 'Détente ; preuves plus limitées sur la récupération.'], ['mob', 'Mobilité', 'Garder l\'amplitude des articulations.'], ['etir', 'Étirements', 'Bons pour la souplesse ; ils n\'accélèrent pas la récupération (Afonso et coll. 2021).']];
+// Breathing patterns for the guide: [label, seconds].
+const BPAT = {r_sigh: [['Inspire', 2], ['Encore un peu', 1], ['Expire longuement', 6]], r_box: [['Inspire', 4], ['Bloque', 4], ['Expire', 4], ['Bloque', 4]], r_coh: [['Inspire', 5], ['Expire', 5]], r_478: [['Inspire', 4], ['Bloque', 7], ['Expire', 8]],
+  r_res: [['Inspire', 4], ['Expire', 6]], r_ext: [['Inspire', 3], ['Expire', 6]], r_belly: [['Inspire par le ventre', 4], ['Expire', 6]], r_tri: [['Inspire', 4], ['Bloque', 4], ['Expire', 4]]};
+const RCAT = {respi: 'respi', tissu: 'massage', etir: 'etir', mob: 'mob', froid: 'froid', chaud: 'chaud', circ: 'cardio', nerv: 'autre', sleep: 'autre'};
+function exSteps(x) {
+  if (x.steps) return x.steps.map(([n, sec, how]) => ({n, sec, how}));
+  const sec = x.min * 60; if (BPAT[x.id]) return [{n: x.n, how: x.how, sec, pat: BPAT[x.id]}];
+  return /par (jambe|côté|mollet|fessier|bras|pied)/i.test(x.how) ? [{n: x.n + ' · côté droit', how: x.how, sec: Math.round(sec / 2)}, {n: x.n + ' · côté gauche', how: x.how, sec: Math.round(sec / 2)}] : [{n: x.n, how: x.how, sec}];
+}
 const CHAINS = [['auto', 'Mes muscles chargés'], ['post', 'Chaîne postérieure'], ['ant', 'Chaîne antérieure'], ['lat', 'Chaîne latérale'], ['crois', 'Chaîne croisée'], ['haut', 'Haut du corps'], ['all', 'Global']];
 const CHAIN_MUS = {post: ['hams', 'calves', 'glutes', 'erect'], ant: ['quads', 'psoas', 'abs', 'tib', 'pecs'], lat: ['adduct', 'glutes', 'obl'], crois: ['obl', 'lats', 'glutes'], haut: ['lats', 'shoul', 'rhomb', 'pecs'], all: ['hams', 'quads', 'glutes', 'calves', 'psoas', 'erect']};
 // Builds a routine: a calming breath first, then for each target muscle a soft-tissue tool and a stretch or mobility move, a long breath at the end.
@@ -4091,11 +4184,11 @@ function recBlock(kind) {
     <div class="list rsteps">${L.map((x, i) => `<div class="row"><span class="l"${off.includes(i) ? ' style="opacity:.4;text-decoration:line-through"' : ''}>${esc(x.n)}<span class="hint">${esc(x.how)}</span></span><button type="button" class="chip" data-rsx="${kind}.${i}" aria-label="${off.includes(i) ? 'Remettre' : 'Retirer'}">${off.includes(i) ? '+' : '×'}</button></div>`).join('')}</div>
     <button class="btn" style="margin-top:12px" data-rsgo="${kind}"${on.length ? '' : ' disabled'}>Voir la séance</button></div>`;
 }
-function recRun(kind) {
-  const off = S.rsOff?.[kind] || [], steps = recSteps(kind).filter((_, i) => !off.includes(i)); if (!steps.length) return;
+function recRun(kind, ex) {
+  const off = S.rsOff?.[kind] || [], steps = ex ? exSteps(ex) : recSteps(kind).filter((_, i) => !off.includes(i)); if (!steps.length) return;
   clearInterval(RUN?.iv);
-  RUN = {kind, steps, i: 0, left: steps[0].sec, on: false, go: false, fin: false, done: [], t0: 0, end: 0};
-  openPane({title: kind === 'mus' ? 'Récupération musculation' : 'Récupération douleurs', side: true, onClose: () => { clearInterval(RUN?.iv); RUN = null; }, render: recRunBody});
+  RUN = {kind, ex, steps, i: 0, left: steps[0].sec, on: false, go: false, fin: false, done: [], t0: 0, end: 0};
+  openPane({title: ex ? ex.n : kind === 'mus' ? 'Récupération musculation' : 'Récupération douleurs', side: true, onClose: () => { clearInterval(RUN?.iv); RUN = null; }, render: recRunBody});
 }
 const secTxt = v => v >= 60 ? `${Math.floor(v / 60)} min${v % 60 ? ' ' + String(v % 60).padStart(2, '0') + ' s' : ''}` : v + ' s';
 const clockH = v => v >= 60 ? `<b>${Math.floor(v / 60)}</b><small>min</small><b>${String(v % 60).padStart(2, '0')}</b><small>s</small>` : `<b>${v}</b><small>s</small>`;
@@ -4109,6 +4202,8 @@ function recNext() {
 function recTick() {
   if (!RUN || !RUN.on) return;
   const left = Math.max(0, Math.ceil((RUN.end - Date.now()) / 1000));
+  const st = RUN.steps[RUN.i]; if (st.pat) { const cyc = st.pat.reduce((a, x) => a + x[1], 0), el = (st.sec * 1000 - (RUN.end - Date.now())) / 1000; let t = ((el % cyc) + cyc) % cyc, j = 0; while (t >= st.pat[j][1]) { t -= st.pat[j][1]; j++; }
+    const ball = $('#rr-ball'), ph = $('#rr-ph'); if (ball && ball.dataset.j !== String(j) + Math.floor(el / cyc)) { ball.dataset.j = String(j) + Math.floor(el / cyc); const [lab, d] = st.pat[j]; ball.style.transition = `transform ${d}s linear`; if (/^Inspire|Encore/.test(lab)) ball.style.transform = `scale(${/Encore/.test(lab) ? 1 : .9})`; else if (/^Expire/.test(lab)) ball.style.transform = 'scale(.45)'; if (ph) ph.textContent = lab; if (PREFS.haptic) navigator.vibrate?.(15); } }
   if (left !== RUN.left) { RUN.left = left; const t = $('#rr-t'); if (t) t.innerHTML = clockH(left); const p = $('#rr-p'); if (p) p.style.width = (100 - left / RUN.steps[RUN.i].sec * 100) + '%'; }
   if (left > 0) return;
   if (PREFS.haptic) navigator.vibrate?.([80, 60, 80]);
@@ -4117,8 +4212,9 @@ function recTick() {
 function recRunBody() {
   if (!RUN) return '';
   const R = RUN, tot = R.steps.reduce((a, x) => a + x.sec, 0), x = R.steps[R.i];
-  return `<div class="rr2"><div class="rr-sum"><b>${R.steps.length} étapes · ${secTxt(tot)}</b><span>${R.done.length} sur ${R.steps.length} faite${R.done.length > 1 ? 's' : ''}</span></div>
-    ${R.go && !R.fin ? `<div class="rr-now"><span class="eyebrow">Étape ${R.i + 1} sur ${R.steps.length}${R.on ? '' : ' · en pause'}</span><div class="rn">${esc(x.n)}</div><p class="rh">${esc(x.how)}</p>
+  return `<div class="rr2"><div class="rr-sum"><b>${R.steps.length} étape${R.steps.length > 1 ? 's' : ''} · ${secTxt(tot)}</b><span>${R.done.length} sur ${R.steps.length} faite${R.done.length > 1 ? 's' : ''}</span></div>
+    ${R.ex && !R.go ? `<div class="card" style="margin-bottom:10px"><p class="small" style="margin:0">${esc(R.ex.more)}</p>${R.ex.alt ? `<p class="small muted" style="margin:6px 0 0"><b>Si tu ne peux pas :</b> ${esc(R.ex.alt)}</p>` : ''}${R.ex.tool ? `<p class="small muted" style="margin:6px 0 0">Matériel : ${esc(R.ex.tool)}</p>` : ''}</div>` : ''}
+    ${R.go && !R.fin ? `<div class="rr-now"><span class="eyebrow">Étape ${R.i + 1} sur ${R.steps.length}${R.on ? '' : ' · en pause'}</span><div class="rn">${esc(x.n)}</div><p class="rh">${esc(x.how)}</p>${x.pat ? '<div class="brw"><i id="rr-ball"></i><span id="rr-ph">Prêt</span></div>' : ''}
       <div class="rt" id="rr-t" aria-live="off">${clockH(R.left)}</div><div class="rp"><i id="rr-p" style="width:${100 - R.left / x.sec * 100}%"></i></div>
       <div class="btnrow"><button class="btn ghost" data-rrp>${R.on ? 'Pause' : 'Reprendre'}</button><button class="btn ghost" data-rrn>${R.done.length < R.steps.length - 1 ? 'Étape suivante' : 'Finir l\'étape'}</button></div></div>`
     : R.fin ? '<div class="rr-now"><div class="rn">Séance terminée, bien joué.</div><p class="rh">Note-la : elle compte dans ta récupération du jour.</p></div>' : ''}
@@ -4130,12 +4226,13 @@ document.addEventListener('click', async e => {
   const at = q => e.target.closest(q); let b;
   if ((b = at('[data-rsx]'))) { const [k, i] = b.dataset.rsx.split('.'); S.rsOff = {...(S.rsOff || {})}; const L = S.rsOff[k] || []; S.rsOff[k] = L.includes(+i) ? L.filter(x => x !== +i) : [...L, +i]; render(); return; }
   if ((b = at('[data-rsgo]'))) { recRun(b.dataset.rsgo); return; }
+  if ((b = at('[data-rxgo]'))) { const x = RX[b.dataset.rxgo]; if (x) recRun('ex', x); return; }
   if (RUN && at('[data-rrstart]')) { recGo(0); return; }
   if (RUN && (b = at('[data-rrgo]'))) { recGo(+b.dataset.rrgo); return; }
   if (RUN && at('[data-rrp]')) { if (RUN.on) { RUN.left = Math.max(0, Math.ceil((RUN.end - Date.now()) / 1000)); RUN.on = false; clearInterval(RUN.iv); } else { RUN.end = Date.now() + RUN.left * 1000; RUN.on = true; clearInterval(RUN.iv); RUN.iv = setInterval(recTick, 250); } paneRender(); return; }
   if (RUN && at('[data-rrn]')) { recNext(); return; }
-  if (RUN && at('[data-rrend]')) { const min = Math.max(1, Math.round((Date.now() - RUN.t0) / 60000)), t = RUN.kind === 'mus' ? 'Séance de récupération musculation' : 'Séance de récupération douleurs'; clearInterval(RUN.iv); RUN = null; closePane();
-    const k = TODAY, m = {...(S.manual[k] || {}), date: k}; m.recov = [...(m.recov || []), {cat: 'routine', t, min, at: new Date().toTimeString().slice(0, 5)}]; S.manual[k] = m; render(); await dbSet('manual/' + k, m); toast(t + ' notée'); return; }
+  if (RUN && at('[data-rrend]')) { const min = Math.max(1, Math.round((Date.now() - RUN.t0) / 60000)), ex = RUN.ex, t = ex ? ex.n : RUN.kind === 'mus' ? 'Séance de récupération musculation' : 'Séance de récupération douleurs'; clearInterval(RUN.iv); RUN = null; closePane();
+    const k = TODAY, m = {...(S.manual[k] || {}), date: k}; m.recov = [...(m.recov || []), {cat: ex ? RCAT[ex.kind] || 'autre' : 'routine', t, min, ...(ex?.mus?.length ? {zone: ex.mus} : {}), at: new Date().toTimeString().slice(0, 5)}]; S.manual[k] = m; render(); await dbSet('manual/' + k, m); toast(t + ' notée'); return; }
   if ((b = at('[data-rbn]'))) { RB.n = +b.dataset.rbn; RB.sel = null; render(); return; }
   if ((b = at('[data-rbz]'))) { RB.sel = RB.sel === b.dataset.rbz ? null : b.dataset.rbz; render(); return; }
 });
@@ -4166,12 +4263,13 @@ function vRSess() {
     <div class="stack">${recovCard()}${recBlock('mus')}${recBlock('pain')}${careCard()}
     <div class="card"><div class="chead"><span class="eyebrow">Fait ces 14 derniers jours</span><b class="num">${w7} min sur 7 j</b></div>${H.length ? `<div class="list" style="margin-top:8px">${H.map(a => `<div class="row"><span class="l">${esc(a.t)}<span class="hint">${esc(cap(fmtShort(a.k)))}${a.at ? ' · ' + esc(tfr(a.at)) : ''}${a.min ? ' · ' + a.min + ' min' : ''}</span></span></div>`).join('')}</div>` : '<p class="small muted" style="margin:6px 0 0">Rien de noté pour l\'instant : touche « + Activité de récup ».</p>'}</div></div>`;
 }
-// Recovery · Exercices: the whole recovery library, by kind.
+// Recovery · Exercices: every kind of recovery, the best proven first; one tap guides the exercise with a timer.
 function vRLib() {
-  const by = {}; for (const r of RLIB) if (RX[r[0]]) (by[r[2]] ||= []).push(r[0]);
-  const name = k => RACT.find(x => x[0] === k)?.[1] || cap(k);
-  return `<header class="top" style="margin-bottom:6px"><div class="sub">${RLIB.length} exercices · touche pour voir comment faire</div><h1>Exercices</h1></header>
-    <div class="stack">${Object.entries(by).map(([k, ids]) => `<div class="card pc3"><span class="eyebrow">${esc(name(k))} · ${ids.length}</span>${routineHtml({ids})}</div>`).join('')}</div>`;
+  const by = {}; for (const r of RLIB) if (RX[r[0]]) (by[r[2]] ||= []).push(RX[r[0]]);
+  return `<header class="top" style="margin-bottom:6px"><div class="sub">${RLIB.length} exercices · touche pour être guidé</div><h1>Exercices</h1></header>
+    <div class="stack">${RKINDS.filter(([k]) => by[k]).map(([k, n, why]) => `<div class="card pc3"><span class="eyebrow">${esc(n)} · ${by[k].length}</span><p class="small muted" style="margin:4px 0 8px">${esc(why)}</p>
+      <div class="list rxk">${by[k].map(x => `<button type="button" class="rowbtn" data-rxgo="${x.id}"><span class="m">${x.min} min</span><span style="flex:1;min-width:0"><b>${esc(x.n)}</b><span class="meta">${esc(x.tool ? x.tool + ' · ' : '')}${esc(x.how.length > 90 ? x.how.slice(0, 88) + '…' : x.how)}</span></span>${ICON.chev}</button>`).join('')}</div></div>`).join('')}</div>
+    <p class="note" style="text-align:left">Les « ondes » (sons binauraux) ne sont pas proposées : leurs effets mesurés sont faibles et peu fiables (Garcia-Argibay et coll. 2019, méta-analyse).</p>`;
 }
 
 /* ---------- season progression, read from the data only ---------- */
@@ -5710,7 +5808,7 @@ function pcNavHtml() {
     return `<div class="pcn-g" style="--c:${col}"><div class="pcn-h"><span class="l">${m}</span><span class="t">${esc(modName(m))}</span></div>${[...bar.querySelectorAll('[role=tab]')].filter(b => !b.hidden).map(b => { const t = b.dataset[k]; return `<button class="pcn-i${cur(m) === t ? ' on' : ''}" data-pcgo="${m}|${t}|${k}">${b.querySelector('svg')?.outerHTML || ''}<span>${esc(b.textContent.trim())}</span></button>`; }).join('')}</div>`; };
   return `<div class="pcn-top"><button class="pcn-brand" data-pcgo="home||"><b>TRF</b><span>Athletics</span></button></div>
     <button class="pcn-i${S.mod === 'home' ? ' on' : ''}" data-pcgo="home||" style="--c:var(--fg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1z"/></svg><span>Accueil</span></button>
-    <div class="pcn-acts"><button class="pcn-i pcn-q" data-hday style="--c:var(--fg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span>Questionnaire du jour</span></button><button class="pcn-i" data-hplan style="--c:var(--fg)">${CAL}<span>Planning</span></button><button class="pcn-i" data-hlog style="--c:var(--fg)">${BOOK}<span>Journal de bord</span></button></div>
+    <div class="pcn-acts"><button class="pcn-i pcn-q" data-hday style="--c:var(--fg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span>Questionnaire du jour</span></button><button class="pcn-i" data-hplan style="--c:var(--fg)">${CAL}<span>Planning</span></button><button class="pcn-i" data-hbilan style="--c:var(--fg)">${BILIC}<span>Bilan de la semaine</span></button><button class="pcn-i" data-hlog style="--c:var(--fg)">${BOOK}<span>Journal de bord</span></button></div>
     ${HOME_K.map(grp).join('')}
     <div class="pcn-foot"><button class="pcn-i" data-pcref style="--c:var(--fg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg><span>Actualiser</span></button><button class="pcn-i" data-hmenu style="--c:var(--fg)">${BARS}<span>Menu et réglages</span></button></div>`;
 }
@@ -5822,6 +5920,7 @@ function vHome() {
   return `<div class="hm-glow${s ? ' on' : ''}" id="hm-glow" style="--gc:${c || '#000'};left:${HP.x}"></div>
     <div class="hm${s ? ' sel' : ''}" id="hm">
       <button class="hm-gear" data-hmenu aria-label="Menu">${BARS}</button>
+      <button class="hm-plan2" data-hplan aria-label="Planning">${CAL}</button>
       <header class="hm-head${HP.why ? ' why' : ''}" id="hm-head"><div class="sub">${fmtDay(TODAY)}</div><h1 class="hello">${esc(homeGreeting())}</h1>${homeSyn()}</header>${homeActs()}
       <div class="hm-pcmods">${HOME_K.map(([m, col]) => `<button class="hm-pcm" data-pcgo="${m}|${m === 'N' ? 'journal' : 'today'}|${m === 'R' ? 'tab' : 'mtab'}" style="--mc:${col}"><span class="l">${m}</span><span><b>${esc(modName(m))}</b><small>${esc(homeStatus(m))}</small></span></button>`).join('')}</div>
       <div class="hm-info" id="hm-info" aria-live="polite">${homeInfo(s)}</div>
@@ -8470,6 +8569,7 @@ document.addEventListener('click', e => {
   if (at('[data-hlog]')) { homeReset(); journalLog(); return; }
   if (at('[data-hday]')) { homeReset(); openSheet('note', TODAY); return; }
   if (at('[data-hplan]')) { homeReset(); planningPane(); return; }
+  if (at('[data-hbilan]')) { homeReset(); bilanPane(); return; }
   if (at('[data-fmenu]')) { menuPane(); return; }
   if (at('[data-fshop]')) { S.ftab = 'menu'; saveUi(); renderMod(true); return; }
   if (at('[data-fblood]')) { bloodPane(); return; }
