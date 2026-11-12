@@ -3742,18 +3742,34 @@ function phAuto(k) {
 }
 // Minutes on one device for a day (the phone falls back on the time typed in the questionnaire).
 // The PC through the background task (every 5 minutes, even with the app closed): raw ActivityWatch app names.
+const BROWSERS = ['Arc', 'Edge', 'Chrome', 'Firefox', 'Brave', 'Opera', 'Vivaldi'];
+const SITEN = {'youtube.com': 'YouTube', 'm.youtube.com': 'YouTube', 'mail.google.com': 'Gmail', 'google.com': 'Google (recherche)', 'google.fr': 'Google (recherche)', 'docs.google.com': 'Google Docs',
+  'drive.google.com': 'Google Drive', 'calendar.google.com': 'Google Agenda', 'claude.ai': 'Claude', 'chatgpt.com': 'ChatGPT', 'github.com': 'GitHub', 'instagram.com': 'Instagram', 'facebook.com': 'Facebook',
+  'x.com': 'X', 'twitter.com': 'X', 'netflix.com': 'Netflix', 'twitch.tv': 'Twitch', 'reddit.com': 'Reddit', 'linkedin.com': 'LinkedIn', 'outlook.live.com': 'Outlook', 'outlook.office.com': 'Outlook',
+  'tiktok.com': 'TikTok', 'web.whatsapp.com': 'WhatsApp', 'connect.garmin.com': 'Garmin Connect', 'strava.com': 'Strava', 'amazon.fr': 'Amazon', 'leboncoin.fr': 'Leboncoin', 'oscarbracq.github.io': 'TNR Athletics'};
+const siteName = d => SITEN[d] || (/\.gouv\.fr$/.test(d) ? d + ' (gouvernement)' : d);
+// Browser time is split into the sites he was on (ActivityWatch extension), the rest stays under the browser's name.
+function splitSites(apps, sites) {
+  const S0 = Object.values(sites).reduce((a, b) => a + b, 0); if (S0 < 60) return apps;
+  const out = {}, bro = Object.keys(apps).filter(n => BROWSERS.includes(n)), B = bro.reduce((t, n) => t + apps[n], 0);
+  for (const [n, v] of Object.entries(apps)) if (!BROWSERS.includes(n)) out[n] = v;
+  const f = B > 0 && S0 > B ? B / S0 : 1;
+  for (const [d, v] of Object.entries(sites)) { const n = siteName(d); out[n] = (out[n] || 0) + v * f; }
+  const rest = B - S0 * f; if (rest >= 60) out['Navigateur, autres pages'] = rest;
+  return out;
+}
 function pcAuto(k) {
   const x = S.screenpc?.[k]; if (!x) return null;
   const apps = {}; for (const [a, v] of Object.entries(x.apps || {})) { const n = awName(a); if (n && +v >= 30) apps[n] = (apps[n] || 0) + +v; }
   const t = Object.values(apps).reduce((a, b) => a + b, 0); if (t < 60) return null;
   const sites = {}; for (const [n, v] of Object.entries(x.sites || {})) if (+v >= 30) sites[n] = +v;
-  return {t: t / 60, apps, sites};
+  return {t: t / 60, apps: splitSites(apps, sites), sites};
 }
 function scrDev(k, d) {
   if (d === 'ph') { const a = phAuto(k); if (a) return a; }
   if (d === 'pc') { const a = pcAuto(k), b = S.screen?.[k]?.pc; if (a && (!b || a.t * 60 >= b.t - 120)) return a; }
   const x = S.screen?.[k]?.[d];
-  if (x && x.t != null) return {t: x.t / 60, apps: x.apps || {}, sites: x.sites || {}};
+  if (x && x.t != null) return {t: x.t / 60, apps: d === 'pc' ? splitSites(x.apps || {}, x.sites || {}) : x.apps || {}, sites: x.sites || {}};
   if (d === 'ph') { const m = M(k, 'screen'); if (m != null) return {t: +m, apps: {}, sites: {}, manual: true}; }
   return null;
 }
@@ -3801,7 +3817,7 @@ function scrPane(dev) {
       <div class="card scr-sum"><div><span class="eyebrow">Total</span><b class="num">${durTxt(Math.round(tot))}</b></div>${SCRP.per !== '1' && nd ? `<div><span class="eyebrow">Par jour</span><b class="num">${durTxt(Math.round(tot / nd))}</b></div>` : ''}<div><span class="eyebrow">Jours</span><b class="num">${nd}</b></div></div>
       <div class="sec-label">Du plus au moins utilisé</div>
       <div class="list">${list.length ? list.map(r => row(r)).join('') : '<div class="row"><span class="muted">Pas encore de détail par appli sur cette période.</span></div>'}${noDetail > 1 ? `<div class="scr-row"><span class="scr-n"><span class="muted">Sans détail (noté à la main)</span></span><b>${durTxt(Math.round(noDetail))}</b></div>` : ''}</div>
-      ${sl.length ? `<div class="sec-label">Sites web sur l'ordinateur</div><div class="list">${sl.map(([n, v]) => `<div class="scr-row"><span class="scr-n"><span>${esc(n)}</span></span><b>${durTxt(Math.round(v))}</b><span class="scr-bar"><i style="width:${Math.max(2, v / smx * 100).toFixed(1)}%"></i></span></div>`).join('')}</div>` : ''}
+      ${sl.length ? `<div class="sec-label">Sites web sur l'ordinateur</div><div class="list">${sl.map(([n, v]) => `<div class="scr-row"><span class="scr-n"><span>${esc(siteName(n))}</span></span><b>${durTxt(Math.round(v))}</b><span class="scr-bar"><i style="width:${Math.max(2, v / smx * 100).toFixed(1)}%"></i></span></div>`).join('')}</div>` : ''}
       <div class="sec-label">Sources</div>
       <div class="card"><p class="small" style="margin:0">${esc(pcState)}</p>
         <p class="small muted" style="margin:8px 0 12px">${S.screenph && Object.values(S.screenph).some(x => x.at && Date.now() - x.at * (x.at < 1e12 ? 1000 : 1) < 3 * 3600e3) ? 'Téléphone : envoyé tout seul par Automate, toutes les heures.' : 'Téléphone : il arrive tout seul quand Automate est réglé. En attendant, tu peux importer un export ActivityWatch.'}</p>

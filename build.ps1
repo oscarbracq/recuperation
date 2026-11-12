@@ -73,7 +73,10 @@ img{max-width:100%}
       x.setTransform(m, 0, 0, m, dpr * px - m * PX, dpr * py - m * PY);
       if (rev > 0) { x.globalCompositeOperation = 'destination-out'; x.globalAlpha = rev; x.fill(PN); x.globalCompositeOperation = 'source-over'; }
       x.fillStyle = '#fff'; x.globalAlpha = 1 - rev; if (rev < 1) x.fill(PN);
-      x.globalAlpha = 1; x.fill(PT); x.fill(PR, 'evenodd'); if (fa > 0) { x.globalAlpha = fa; x.fill(PA, 'evenodd'); }
+      // T and R turn into windows onto the app too, at the same pace as the N, while they fly out of the screen.
+      if (rev > 0) { x.globalCompositeOperation = 'destination-out'; x.globalAlpha = rev; x.fill(PT); x.fill(PR, 'evenodd'); x.globalCompositeOperation = 'source-over'; }
+      x.globalAlpha = 1 - rev; if (rev < 1) { x.fill(PT); x.fill(PR, 'evenodd'); }
+      if (fa > 0) { x.globalAlpha = fa; x.fill(PA, 'evenodd'); }
     }
     draw(0); document.body.appendChild(c); el.remove();
     var kill = setTimeout(function () { c.remove(); }, T + 600);
