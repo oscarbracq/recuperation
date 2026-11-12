@@ -21,31 +21,60 @@ img{max-width:100%}
 #login .logo,#setpw .logo{display:block;width:80px;height:80px;margin:0 auto 8px;border-radius:18px;box-shadow:0 0 0 1px var(--line),0 6px 18px rgba(11,23,51,.2)}
 #login input,#setpw input{font:inherit;padding:14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--fg)}
 #login .msg,#setpw .msg{font-size:.875rem;color:var(--fg2);min-height:1.4em;margin:0}
-#splash{position:fixed;inset:0;z-index:300;background:#0B1733;display:flex;align-items:center;justify-content:center;transition:background-color .45s ease .35s,opacity .35s ease .75s;pointer-events:none}
-#splash .w{display:flex;flex-direction:column;align-items:center;color:#fff;font-family:'Segoe UI Variable Display','Segoe UI',Roboto,system-ui,sans-serif;will-change:transform;transition:transform .95s cubic-bezier(.7,0,.84,0)}
-#splash .t{font-size:min(28vw,150px);font-weight:800;letter-spacing:-.01em;line-height:1}
-#splash .a{font-size:min(6.4vw,34px);font-weight:600;letter-spacing:.32em;margin:.25em 0 0 .32em;transition:opacity .25s}
-#splash.go{background-color:rgba(11,23,51,0)}#splash.go .a{opacity:0}#splash.go{opacity:0}
-@media (prefers-reduced-motion:reduce){#splash .w{transition:none}#splash{transition:opacity .3s}}
+#splash{position:fixed;inset:0;z-index:300;background:#0B1733;pointer-events:none;--d:240px;--sh:0px}
+#splash svg{position:absolute;left:50%;top:50%;width:var(--d);height:var(--d);margin:calc(var(--d) / -2 - var(--sh)) 0 0 calc(var(--d) / -2);fill:#fff}
+#splash .sp{position:absolute;left:50%;top:calc(50% - var(--sh) + var(--d) * .3);width:22px;height:22px;margin:-11px 0 0 -11px;box-sizing:border-box;border-radius:50%;border:2.5px solid rgba(255,255,255,.16);border-top-color:rgba(255,255,255,.9);animation:tnrspin .75s linear infinite,tnrfade .35s ease .15s both;transition:opacity .2s}
+#splash .sp.out{opacity:0}
+@keyframes tnrspin{to{transform:rotate(360deg)}}@keyframes tnrfade{from{opacity:0}}
 </style>
 </head>
 <body>
-<div id="splash" aria-hidden="true"><div class="w"><div class="t"><span>T</span><span class="n">N</span><span>R</span></div><div class="a">ATHLETICS</div></div></div>
+<div id="splash" aria-hidden="true"><svg viewBox="0 0 1024 1024"><path d="M236 375.25 387 375.25 387.13 375.50 387 411.67 333.95 411.75 333.90 573.75 333.75 574 289.25 574 289.03 573.75 289 411.86 288.75 411.67 236 411.67 235.83 411.50Z"/><path d="M413.49 375.25 461.25 375.25 461.50 375.42 540.08 493.75 545.09 502 549.50 509.96 550 510.25 550.16 510 549.90 504.75 549.64 488 549.64 375.50 550 375.25 591.75 375.25 591.90 375.50 591.90 573.75 591.75 574 546.75 573.94 464.95 451.50 459.91 443.25 455.25 434.88 454.87 435 455.38 457 455.40 573.75 455.25 574 413.25 573.97Z"/><path fill-rule="evenodd" d="M632 375.25 702.75 375.25 714.50 375.66 725.25 376.92 732.50 378.46 737.75 379.95 742.50 381.67 747.50 383.98 751.75 386.41 756 389.45 760 393.06 763.82 397.25 767.82 403 770.85 409 773.07 415.50 774.30 421.25 775.04 429 774.82 437.25 773.84 443.75 772.07 450.25 769.85 455.75 768.08 459.25 765.84 463 761.80 468.50 756.50 474.08 751.50 478.07 746 481.56 742 483.57 737.75 485.35 733.25 486.85 732.93 487.25 738.50 490.22 743.50 493.93 748.30 498.75 751.59 502.75 754.34 506.50 757.83 511.75 762.57 519.75 792.83 573.25 793.11 573.75 793 574 743 573.99 713.33 520 711.32 516.50 707.33 510.50 705.30 508 702.50 505.15 699 502.66 697 501.64 694 500.73 691.25 500.24 688.75 500.12 676.57 500.25 676.50 573.90 632 574 631.81 573.75ZM676.75 409.38 676.57 409.50 676.57 465.50 676.75 465.75 697.50 465.75 702.50 465.33 707.50 464.36 710.50 463.37 714.75 461.33 717.75 459.31 719.78 457.50 722.05 455 724.36 451.50 726.57 446.25 727.59 441.50 727.94 436 727.84 432.75 727.34 429.25 726.82 427 725.31 423 722.82 419 720.25 416.23 716.25 413.42 713 411.92 709 410.63 705.25 409.92 699.25 409.40Z"/><path fill-rule="evenodd" d="M669.72 609 673.50 608.88 676.50 609.16 679.50 609.90 682.50 611.20 684.75 612.70 687.25 615.06 689.05 617.50 690.33 620 685.50 622.05 683.75 622.57 682.34 620.25 681.29 619 679.75 617.65 678.50 616.88 676.75 616.15 674.50 615.66 670.75 615.62 667 616.68 664.25 618.42 661.84 621 660.10 624 659.10 627 658.60 630 658.60 634.50 659.10 637.50 659.94 640 661.14 642.25 663.03 644.50 665 646.08 667.50 647.31 671 648.11 674.50 648.12 676.25 647.83 678.50 647.05 680.50 645.84 682.84 643.50 684.25 641.26 690.71 644.25 689.82 646 688.50 647.85 686.69 649.75 684.75 651.33 682.75 652.59 680 653.80 675.50 654.80 670 654.84 666.50 654.29 662.75 653.07 659.50 651.28 656.47 648.75 653.74 645.25 651.97 641.50 650.93 637.25 650.67 634.75 650.65 631.50 651.20 626.50 652.44 622.25 654.50 618.25 656.20 616 657.75 614.38 661.25 611.72 665.25 609.91ZM731.72 609 735 608.90 737.25 609.16 739.25 609.66 741.25 610.45 743 611.46 745 613.09 746.30 614.50 747.92 617 747.75 617.30 741.75 620.15 739.90 617.75 737.75 616.13 735.25 615.37 731.75 615.37 729.75 615.92 728.50 616.62 727.34 617.75 726.64 619 726.33 620.50 726.43 622.25 727.13 624 728.03 625 729.25 625.84 731 626.61 737.75 628.46 740.25 629.43 742.50 630.66 744.25 631.96 745.51 633.25 746.78 635.25 747.55 637.25 748.05 640.25 747.80 644.25 747 646.93 745.51 649.50 743.25 651.84 741 653.28 738.25 654.30 735.25 654.84 731 654.86 728.75 654.60 726.50 654.05 724 653.07 721.50 651.57 719.46 649.75 718 647.87 716.88 645.75 723.25 642.50 725.16 645.25 726.25 646.31 727.75 647.30 729 647.85 731 648.35 734.50 648.38 736.75 647.85 738.25 647.08 739.63 645.75 740.31 644.50 740.65 643.25 740.65 641 740.08 639.25 738.75 637.59 736 635.92 727.50 633.33 724 631.56 722.31 630.25 720.95 628.75 720.19 627.50 719.42 625.50 718.95 622.25 719.19 619.25 719.72 617.25 720.99 614.75 723.07 612.50 725.75 610.70 728.25 609.67ZM290.17 609.75 298.66 609.75 315 654.05 307 654.06 303.30 644 303 643.62 285.50 643.62 281.74 654 273.67 654ZM331.11 609.75 363.43 609.75 363.44 615.75 363.25 615.94 351.25 615.95 351.05 616.25 351 654.05 343.50 654 343.40 616 331.25 615.92 331.09 615.75ZM390.36 609.75 397.84 609.75 397.85 628.25 398 628.38 418.50 628.38 418.67 628.25 418.68 609.75 426.24 609.75 426.25 654 418.67 654 418.67 635.25 418.50 634.95 398 634.95 397.85 635.25 397.85 654 390.34 654ZM456.93 609.75 464.43 609.75 464.44 647.50 464.75 647.65 481.50 647.66 481.69 648 481.69 654 481.50 654.12 456.92 654ZM507.82 609.75 531.89 609.75 531.91 615.75 531.75 616.03 515.50 616.05 515.33 616.25 515.33 628.25 515.50 628.40 530.50 628.41 530.75 628.75 530.75 634.50 530.50 634.84 515.50 634.85 515.33 635 515.33 647.50 515.50 647.80 532.75 647.83 532.91 648 532.91 654 532.75 654.11 507.81 654ZM556.11 609.75 588.43 609.75 588.44 615.75 588.25 615.94 576.25 615.95 576.05 616.25 576 654.05 568.50 654 568.40 616 556.25 615.92 556.09 615.75ZM615.36 609.75 622.84 609.75 622.75 654.10 615.34 654ZM294.25 617.25 287.50 637.29 301.04 637.25Z"/></svg><div class="sp"></div></div>
 <script>
-// Opening screen: the logo while the data and the Garmin / Withings sync arrive (about 5 s at most), then a zoom into the N.
+// Opening screen: the logo exactly as on the icon (same drawing, same size as Android's own launch screen), a small
+// spinner while the data and the Garmin / Withings sync arrive, then, as soon as it is all there, a zoom into the N:
+// the navy stays solid, the N becomes a window onto the app and grows until it fills the screen.
 (function () {
-  var t0 = Date.now(), st = {}, done = false, el = document.getElementById('splash');
-  function go() {
-    if (done || !el) return; done = true;
-    var w = el.querySelector('.w'), n = el.querySelector('.n'), r = n.getBoundingClientRect(), R = w.getBoundingClientRect();
-    // Zoom centred on the middle of the N (on its diagonal stroke): the screen turns white, then fades onto the app.
-    w.style.transformOrigin = (r.left + r.width / 2 - R.left) + 'px ' + (r.top + r.height * .5 - R.top) + 'px';
-    el.classList.add('go'); w.style.transform = 'scale(60)';
-    setTimeout(function () { el.remove(); }, 1300);
+  var el = document.getElementById('splash'), svg = el.querySelector('svg'), sp = el.querySelector('.sp');
+  var t0 = Date.now(), st = {}, done = false, ua = navigator.userAgent;
+  var vw = innerWidth, vh = innerHeight, D = Math.min(vw, vh) < 600 ? 240 : 300, sh = 0;
+  // Android draws its launch screen centred on the whole screen, status bar included: line up with it.
+  if (/Android/i.test(ua) && matchMedia('(display-mode: standalone)').matches) { var I = Math.max(0, screen.height - vh), top = Math.min(I, 32); sh = Math.max(0, (top - (I - top)) / 2); }
+  el.style.setProperty('--d', D + 'px'); el.style.setProperty('--sh', sh + 'px');
+  var PX = 504, PY = 474.6, RIN = 19; // a point in the middle of the N's diagonal, and the stroke's half width there
+  function sm(a, b, x) { x = Math.max(0, Math.min(1, (x - a) / (b - a))); return x * x * (3 - 2 * x); }
+  function zoom() {
+    if (!el.isConnected) return;
+    if (document.hidden) { el.remove(); return; }
+    var dpr = Math.min(devicePixelRatio || 1, 3), c = document.createElement('canvas'), r = svg.getBoundingClientRect();
+    c.width = Math.round(vw * dpr); c.height = Math.round(vh * dpr);
+    c.style.cssText = 'position:fixed;left:0;top:0;width:' + vw + 'px;height:' + vh + 'px;z-index:301;pointer-events:none';
+    var x = c.getContext('2d'), k = r.width / 1024, px = r.left + PX * k, py = r.top + PY * k;
+    var ps = svg.querySelectorAll('path'), PT = new Path2D(ps[0].getAttribute('d')), PN = new Path2D(ps[1].getAttribute('d')), PR = new Path2D(ps[2].getAttribute('d')), PA = new Path2D(ps[3].getAttribute('d'));
+    var far = Math.max(Math.hypot(px, py), Math.hypot(vw - px, py), Math.hypot(px, vh - py), Math.hypot(vw - px, vh - py));
+    var L = Math.log(far / (RIN * k) * 1.06), T = 1150, ts = null;
+    function draw(t) {
+      var e = t * t * t * (t * (t * 6 - 15) + 10), s = Math.exp(L * e), rev = sm(.03, .34, t), fa = 1 - sm(0, .2, t), m = dpr * s * k;
+      x.setTransform(1, 0, 0, 1, 0, 0); x.globalCompositeOperation = 'source-over'; x.globalAlpha = 1; x.fillStyle = '#0B1733'; x.fillRect(0, 0, c.width, c.height);
+      x.setTransform(m, 0, 0, m, dpr * px - m * PX, dpr * py - m * PY);
+      if (rev > 0) { x.globalCompositeOperation = 'destination-out'; x.globalAlpha = rev; x.fill(PN); x.globalCompositeOperation = 'source-over'; }
+      x.fillStyle = '#fff'; x.globalAlpha = 1 - rev; if (rev < 1) x.fill(PN);
+      x.globalAlpha = 1; x.fill(PT); x.fill(PR, 'evenodd'); if (fa > 0) { x.globalAlpha = fa; x.fill(PA, 'evenodd'); }
+    }
+    draw(0); document.body.appendChild(c); el.remove();
+    var kill = setTimeout(function () { c.remove(); }, T + 600);
+    requestAnimationFrame(function f(now) { if (ts == null) ts = now; var t = Math.min(1, (now - ts) / T); draw(t); if (t < 1) requestAnimationFrame(f); else { clearTimeout(kill); c.remove(); } });
   }
-  function check() { var e = Date.now() - t0; if (done) return; if (e > 900 && st.data && (st.sync || e > 5000)) go(); }
+  function go() {
+    if (done) return; done = true; clearInterval(iv);
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches || !window.Path2D) { el.style.transition = 'opacity .3s'; el.style.opacity = '0'; setTimeout(function () { el.remove(); }, 350); return; }
+    // The spinner goes first, then the zoom starts on a quiet frame.
+    sp.classList.add('out'); setTimeout(function () { requestAnimationFrame(function () { requestAnimationFrame(zoom); }); }, 180);
+    setTimeout(function () { if (el.isConnected) zoom(); }, 900);
+  }
+  function check() { if (!done && st.data && st.sync) go(); }
   window.TNR_SPLASH = {ready: function (k) { st[k] = 1; check(); }};
-  var iv = setInterval(function () { var l = document.getElementById('login'); if (l && !l.hidden) { go(); } check(); if (done || Date.now() - t0 > 8000) { clearInterval(iv); go(); } }, 150);
+  var iv = setInterval(function () { var l = document.getElementById('login'), s = document.getElementById('setpw'); if ((l && !l.hidden) || (s && !s.hidden) || Date.now() - t0 > 15000) go(); }, 120);
 })();
 </script>
 <div id="login" hidden><form><img class="logo" src="icon-192.png?v=tnr" alt="TNR Athletics"><h1 style="margin:0">TNR Athletics</h1><input name="email" type="email" required autocomplete="email" placeholder="ton e-mail"><input name="password" type="password" required autocomplete="current-password" placeholder="ton mot de passe"><button class="btn" type="submit">Se connecter</button><p class="msg"></p><button class="link" type="button" style="background:none;border:0;color:var(--fg2);font:inherit;font-size:.8125rem;text-decoration:underline">Pas encore de mot de passe ? Recevoir un lien par mail</button></form></div>
@@ -948,6 +977,25 @@ details.slow[open]>summary h2::after{content:" ▴"}
 .bilpts{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column}.bilpts li{display:grid;grid-template-columns:8px auto 1fr;gap:10px;align-items:start;padding:9px 0;border-top:1px solid var(--line);font-size:.875rem;line-height:1.4}.bilpts li:first-child{border-top:0}.bilpts i{width:8px;height:8px;border-radius:50%;margin-top:6px}.bilpts .dots b{display:block;width:6px;height:6px;border-radius:50%;margin-top:7px;opacity:.8}
 ul.bil{margin:4px 0 0;padding-left:18px;font-size:.875rem;line-height:1.45}ul.bil li{margin:4px 0}
 .hm-acts{align-items:start!important}.hm-act:not(.hm-plus) .ic{margin:7px 0}.hm-act>span:last-child{min-height:2.5em}
+.scr-sec{margin-top:22px}.scr-sec h2{margin:0 4px 10px}
+.scr-card{background:var(--card);border-radius:22px;padding:6px 8px 8px}
+.scr-tot{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 8px;width:100%;padding:10px 8px 12px;background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.scr-tot .eyebrow{grid-column:1}.scr-big{grid-column:1;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.scr-big b{font-size:1.875rem;letter-spacing:-.02em}
+.scr-go{grid-column:2;grid-row:1/3;font-size:1.5rem;color:var(--fg2)}
+.scr-two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.scr-dev{display:flex;flex-direction:column;gap:4px;min-width:0;padding:12px;border-radius:16px;border:0;background:var(--card2);color:inherit;font:inherit;text-align:left;cursor:pointer;transition:transform .15s}
+.scr-dev:active,.scr-tot:active{transform:scale(.98)}
+.scr-lab{display:flex;align-items:center;gap:6px;font-size:.6875rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--fg2)}.scr-lab svg{width:14px;height:14px}
+.scr-dev>b{font-size:1.25rem}
+.scr-top{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:3px}
+.scr-top li{display:flex;justify-content:space-between;gap:6px;font-size:.8125rem;min-width:0}.scr-top li span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--fg2)}.scr-top li b{font-weight:600;white-space:nowrap}
+.scr-none{margin:4px 0 0;font-size:.75rem;color:var(--fg2)}
+.scr-sum{display:flex;gap:18px;margin:12px 0 4px}.scr-sum b{display:block;font-size:1.375rem}
+.scr-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 10px;padding:10px 14px}
+.scr-row+.scr-row{border-top:1px solid var(--line)}
+.scr-n{display:flex;align-items:center;gap:8px;min-width:0}.scr-n span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.scr-d{display:inline-flex;color:var(--fg2)}.scr-d svg{width:14px;height:14px}
+.scr-bar{grid-column:1/-1;height:4px;border-radius:2px;background:var(--line);overflow:hidden}.scr-bar i{display:block;height:100%;border-radius:2px;background:#A3A3A3}
 .qh{margin:26px 4px 2px;font:700 1.25rem var(--display);display:flex;flex-direction:column;gap:2px}.qh small{font:500 .8125rem var(--font, inherit);color:var(--fg2)}.qh:first-of-type{margin-top:18px}
 .wk2{display:flex;flex-direction:column;gap:12px}.pc .wk2>.card{flex:1;display:flex;flex-direction:column;justify-content:center}
 .sboard{padding:14px}.seg+.sboard{margin-top:14px}
@@ -1080,17 +1128,20 @@ body.bdragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
 .hm-k.drag{transition:none}
 .hm-k:focus-visible{outline:none}
 .hm-k:focus-visible .l{outline:2px solid #fff;outline-offset:3px}
-.hm-glow{position:absolute;left:50%;bottom:-55vh;width:160vw;height:120vh;border-radius:50%;background:radial-gradient(closest-side,var(--gc,#000) 0%,color-mix(in srgb,var(--gc,#000) 45%,transparent) 45%,transparent 75%);opacity:0;transform:translateX(-50%) scale(.55);transition:opacity .5s ease,transform .7s cubic-bezier(.32,.72,0,1);pointer-events:none;z-index:0}
-.hm-glow.on{opacity:.9;transform:translateX(-50%) scale(var(--gs,1))}
-.hm-glow.drag{transition:opacity .2s}
-.hm-glow.go{opacity:1;transform:translateX(-50%) scale(3.2);transition:transform .55s cubic-bezier(.4,0,.2,1),opacity .2s}
+.hm-glow{position:absolute;left:50%;bottom:-55vh;width:160vw;height:120vh;transform:translateX(-50%) scale(.55);transition:transform .7s cubic-bezier(.32,.72,0,1);pointer-events:none;z-index:0}
+.hm-glow i{position:absolute;inset:0;border-radius:50%;background:radial-gradient(closest-side,var(--gc) 0%,color-mix(in srgb,var(--gc) 45%,transparent) 45%,transparent 75%);opacity:.004;will-change:opacity;transition:opacity .5s ease}
+.hm-glow.on{transform:translateX(-50%) scale(var(--gs,1))}
+.hm-glow.on[data-c="T"] i[data-g="T"],.hm-glow.on[data-c="N"] i[data-g="N"],.hm-glow.on[data-c="R"] i[data-g="R"]{opacity:.9}
+.hm-glow.drag{transition:none}.hm-glow.drag i{transition:opacity .2s}
+.hm-glow.go{transform:translateX(-50%) scale(3.2);transition:transform .55s cubic-bezier(.4,0,.2,1)}
+.hm-glow.go[data-c="T"] i[data-g="T"],.hm-glow.go[data-c="N"] i[data-g="N"],.hm-glow.go[data-c="R"] i[data-g="R"]{opacity:1;transition:opacity .2s}
 .hm.going .hm-head,.hm.going .hm-info,.hm.going .hm-gear,.hm.going .hm-day,.hm.going .hm-k:not(.on){opacity:0;transition:opacity .25s}
 .hm.going .hm-k.on{transform:translateY(-55vh) scale(1.15)!important;opacity:0;transition:transform .5s cubic-bezier(.4,0,.2,1),opacity .4s .12s}
 .mod.enter{animation:modfade .4s ease}
 .mod.enter .wrap{animation:modrise .5s cubic-bezier(.32,.72,0,1)}
 @keyframes modfade{from{opacity:0}}
 @keyframes modrise{from{transform:translateY(28px)}}
-@media (prefers-reduced-motion:reduce){.hm-k,.hm-glow,.hm-glow.go{transition:opacity .2s!important}.hm.going .hm-k.on{transform:none!important}.mod.enter,.mod.enter .wrap{animation:none}}
+@media (prefers-reduced-motion:reduce){.hm-k,.hm-glow i,.hm-glow.go i{transition:opacity .2s!important}.hm-glow,.hm-glow.go{transition:none!important}.hm.going .hm-k.on{transform:none!important}.mod.enter,.mod.enter .wrap{animation:none}}
 /* Shared pieces of Training and Fuel */
 .chiptag{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:99px;font-size:.6875rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:var(--accent-soft);color:var(--accent)}
 .bigname{font:700 1.375rem/1.15 var(--display);letter-spacing:-.015em;margin:8px 0 2px}
@@ -2493,6 +2544,7 @@ async function jumpShareCheck() {
   try {
     const c = await caches.open('jump-share'), r = await c.match('./jump-share.txt'); if (!r) return;
     const txt = await r.text(); await c.delete('./jump-share.txt');
+    if (/^\s*\{/.test(txt) && /"buckets"|"events"/.test(txt.slice(0, 4000))) { go('R'); setTab('today'); render(); if (await awPhoneImport(txt)) scrPane('ph'); return; }
     go('T'); S.ttab = 'profile'; renderMod(true); await importJumps(txt); jumpsPane();
   } catch (err) { toast('Import My Jump impossible : choisis le fichier dans Profil › Mes max en saut'); }
 }
@@ -2726,7 +2778,7 @@ function bilanHtml() {
   if (dW != null) add(Math.abs(dW) > 1 ? 2 : 1, `Poids : ${dW >= 0 ? '+' : '−'}${fx(Math.abs(dW), 1)} kg sur la semaine (${fx(W(wk.at(-1), 'weight'), 1)} kg).`, 'N');
   // Habits: day score, screen time, recovery care
   const sc = ks.filter(k => S.manual?.[k]?.closed).map(dayScores), hab = avg(sc, x => x.c), phy = avg(sc, x => x.u);
-  const scr = avg(ks, k => M(k, 'screen')), care = ks.reduce((t, k) => t + (S.manual[k]?.recov || []).reduce((a, x) => a + (+x.min || 0), 0), 0);
+  const scr = avg(ks, k => scrTot(k)), care = ks.reduce((t, k) => t + (S.manual[k]?.recov || []).reduce((a, x) => a + (+x.min || 0), 0), 0);
   if (sc.length) add(hab < 60 ? 2 : 1, `Score : habitudes ${Math.round(hab)}, physiologie ${Math.round(phy)} sur ${sc.length} journée${sc.length > 1 ? 's' : ''} enregistrée${sc.length > 1 ? 's' : ''}.`, 'R');
   add(care < 30 ? 2 : 1, `Récupération active : ${care} min de soins notés${scr != null ? ` · temps d'écran ${durTxt(Math.round(scr))} par jour` : ''}.`, 'R');
   const worst = Math.max(...pts.map(x => x.lv)), head = worst === 3 ? 'Semaine à surveiller' : worst === 2 ? 'Semaine correcte, quelques points à ajuster' : 'Bonne semaine';
@@ -3685,6 +3737,134 @@ document.addEventListener('click', e => {
   if (RP && (b = at('[data-rpf]'))) { RP.focus = b.dataset.rpf; paneRender(); return; }
   if (RP && (b = at('[data-rps]'))) { RP.slot = +b.dataset.rps; paneRender(); return; }
 });
+/* ---------- screen time: the computer from ActivityWatch (read here, on the PC, at localhost:5600), the phone from an
+   ActivityWatch export shared to the app, or typed in the evening questionnaire. One doc per day in `screen`. ---------- */
+const AW_DESK = !/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
+const AW = {busy: false, at: 0, ok: null, err: ''};
+const AWN = {explorer: 'Explorateur Windows', msedge: 'Edge', chrome: 'Chrome', firefox: 'Firefox', arc: 'Arc', claude: 'Claude', code: 'VS Code', windowsterminal: 'Terminal',
+  spotify: 'Spotify', discord: 'Discord', winword: 'Word', excel: 'Excel', powerpnt: 'PowerPoint', outlook: 'Outlook', olk: 'Outlook', teams: 'Teams', 'ms-teams': 'Teams', steam: 'Steam',
+  whatsapp: 'WhatsApp', notepad: 'Bloc-notes', blender: 'Blender', overwolf: 'Overwolf', applicationframehost: 'Applis Windows', systemsettings: 'Paramètres', vlc: 'VLC', obs64: 'OBS'};
+function awName(a) {
+  const b = String(a || '').replace(/\.(exe|tmp)$/i, '').trim(), l = b.toLowerCase();
+  if (!b || /^(lockapp|unknown|searchhost|shellexperiencehost|startmenuexperiencehost|textinputhost|loginwindow|aw-qt)$/.test(l)) return null;
+  return AWN[l] || b.charAt(0).toUpperCase() + b.slice(1);
+}
+const scrTop = (o, n = 40) => { const e = Object.entries(o).filter(([, v]) => v >= 30).sort((a, b) => b[1] - a[1]), out = Object.fromEntries(e.slice(0, n).map(([k, v]) => [k, Math.round(v)]));
+  const rest = e.slice(n).reduce((t, [, v]) => t + v, 0); if (rest >= 30) out['Autres'] = Math.round(rest); return out; };
+const dayPeriod = k => new Date(k + 'T00:00:00').toISOString() + '/' + new Date(addDays(k, 1) + 'T00:00:00').toISOString();
+async function awSync(force) {
+  if (!AW_DESK || !S.db || AW.busy || (!force && Date.now() - AW.at < 4 * 60e3)) return;
+  AW.busy = true;
+  try {
+    const base = 'http://localhost:5600/api/0/', ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 6000);
+    const bk = await fetch(base + 'buckets/', {signal: ctl.signal}).then(r => r.json()); clearTimeout(tm);
+    const ids = Object.keys(bk), afk = ids.find(i => i.startsWith('aw-watcher-afk')), win = ids.find(i => i.startsWith('aw-watcher-window')), web = ids.find(i => i.startsWith('aw-watcher-web'));
+    if (!afk || !win) throw new Error('nobucket');
+    const first = key(new Date(bk[win].created || Date.now())), had = Object.values(S.screen || {}).some(d => d.pc);
+    const days = []; for (let i = 0; i < (had ? 8 : 90); i++) { const k = addDays(TODAY, -i); if (k < first) break; days.push(k); }
+    const q = async body => (await fetch(base + 'query/', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({timeperiods: days.map(dayPeriod), query: body})})).json();
+    const act = `afk = flood(query_bucket("${afk}")); act = filter_keyvals(afk, "status", ["not-afk"]);`;
+    const apps = await q([act, `w = flood(query_bucket("${win}"));`, 'w = filter_period_intersect(w, act);', 'RETURN = merge_events_by_keys(w, ["app"]);']);
+    const sites = web ? await q([act, `b = flood(query_bucket("${web}"));`, 'b = filter_period_intersect(b, act);', 'b = split_url_events(b);', 'RETURN = merge_events_by_keys(b, ["$domain"]);']).catch(() => null) : null;
+    for (let i = 0; i < days.length; i++) {
+      const k = days[i], a = {}, w = {};
+      for (const e of apps[i] || []) { const n = awName(e.data?.app); if (n) a[n] = (a[n] || 0) + e.duration; }
+      for (const e of (sites && sites[i]) || []) { const d = String(e.data?.$domain || '').replace(/^www\./, ''); if (d) w[d] = (w[d] || 0) + e.duration; }
+      const t = Object.values(a).reduce((x, y) => x + y, 0); if (t < 60 && !S.screen?.[k]?.pc) continue;
+      const pc = {t: Math.round(t), apps: scrTop(a), ...(sites ? {sites: scrTop(w)} : {}), at: new Date().toISOString()}, cur = S.screen?.[k] || {};
+      if (cur.pc && cur.pc.t === pc.t && JSON.stringify(cur.pc.apps) === JSON.stringify(pc.apps)) continue;
+      const doc = {...cur, date: k, pc}; (S.screen ||= {})[k] = doc;
+      try { await S.db.doc('screen/' + k).set(doc); } catch (e) {}
+    }
+    AW.ok = true; AW.err = '';
+  } catch (e) { AW.ok = false; AW.err = e?.message === 'nobucket' ? 'nobucket' : 'off'; }
+  finally { AW.busy = false; AW.at = Date.now(); if (S.mod === 'R') render(); if (P.stack.length && SCRP.open) paneRender(); }
+}
+// The phone: an ActivityWatch export (JSON), shared to the app or picked as a file.
+async function awPhoneImport(txt) {
+  let j; try { j = JSON.parse(String(txt).replace(/^﻿/, '')); } catch (e) { toast('Ce fichier n\'est pas un export ActivityWatch'); return false; }
+  const bs = j.buckets || j, by = {};
+  for (const [id, b] of Object.entries(bs || {})) {
+    if (!b || !Array.isArray(b.events) || /afk|unlock|web|input/i.test(id)) continue;
+    if (!/android/i.test(id + ' ' + (b.client || '') + ' ' + (b.hostname || '')) && !/currentwindow|app/i.test(b.type || '')) continue;
+    for (const e of b.events) { const k = key(new Date(e.timestamp)), n = String(e.data?.app || e.data?.package || '').trim(); if (!n || !(e.duration > 0)) continue; ((by[k] ||= {})[n] = (by[k][n] || 0) + e.duration); }
+  }
+  const ks = Object.keys(by).sort(); if (!ks.length) { toast('Aucune donnée de téléphone dans ce fichier'); return false; }
+  for (const k of ks) {
+    const a = by[k], t = Object.values(a).reduce((x, y) => x + y, 0), cur = S.screen?.[k] || {};
+    const doc = {...cur, date: k, ph: {t: Math.round(t), apps: scrTop(a), at: new Date().toISOString(), src: 'aw'}}; (S.screen ||= {})[k] = doc;
+    try { await S.db.doc('screen/' + k).set(doc); } catch (e) {}
+  }
+  toast(`Téléphone importé : ${ks.length} jour${ks.length > 1 ? 's' : ''}`); render(); if (P.stack.length) paneRender(); return true;
+}
+// Minutes on one device for a day (the phone falls back on the time typed in the questionnaire).
+function scrDev(k, d) {
+  const x = S.screen?.[k]?.[d];
+  if (x && x.t != null) return {t: x.t / 60, apps: x.apps || {}, sites: x.sites || {}};
+  if (d === 'ph') { const m = M(k, 'screen'); if (m != null) return {t: +m, apps: {}, sites: {}, manual: true}; }
+  return null;
+}
+const scrTot = k => { const a = scrDev(k, 'ph'), b = scrDev(k, 'pc'); return a || b ? (a?.t || 0) + (b?.t || 0) : null; };
+const PH_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>';
+const PC_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>';
+function scrBlock() {
+  const k = TODAY, ph = scrDev(k, 'ph'), pc = scrDev(k, 'pc'), tot = scrTot(k);
+  const wk = []; for (let i = 1; i <= 7; i++) { const v = scrTot(addDays(k, -i)); if (v != null) wk.push(v); }
+  const av = wk.length ? mean(wk) : null;
+  const top = d => { const e = d ? Object.entries(d.apps).filter(([n]) => n !== 'Autres').sort((a, b) => b[1] - a[1]).slice(0, 3) : [];
+    if (e.length) return `<ol class="scr-top">${e.map(([n, v]) => `<li><span>${esc(n)}</span><b>${durTxt(Math.round(v / 60))}</b></li>`).join('')}</ol>`;
+    return `<p class="scr-none">${d?.manual ? 'Noté le soir, sans le détail des applis' : d ? '' : 'Pas encore de données aujourd\'hui'}</p>`; };
+  const dev = (id, lab, ic, d) => `<button type="button" class="scr-dev" data-scr="${id}"><span class="scr-lab">${ic}${lab}</span><b class="num">${d ? durTxt(Math.round(d.t)) : '–'}</b>${top(d)}</button>`;
+  return `<section class="scr-sec"><h2>Temps d'écran</h2>
+    <div class="scr-card">
+      <button type="button" class="scr-tot" data-scr="all"><span class="eyebrow">Temps d'écran total · aujourd'hui</span><span class="scr-big"><b class="num">${tot != null ? durTxt(Math.round(tot)) : '–'}</b>${av != null ? `<span class="small muted">moyenne 7 jours ${durTxt(Math.round(av))}</span>` : ''}</span><span class="scr-go" aria-hidden="true">›</span></button>
+      <div class="scr-two">${dev('ph', 'Téléphone', PH_IC, ph)}${dev('pc', 'Ordinateur', PC_IC, pc)}</div>
+    </div></section>`;
+}
+const SCRP = {open: false, dev: 'all', per: '7'};
+const SCR_PER = [['1', 'Jour'], ['7', '7 jours'], ['30', 'Mois'], ['365', 'An'], ['all', 'Tout']];
+function scrPane(dev) {
+  SCRP.dev = dev || 'all'; SCRP.open = true;
+  openPane({title: 'Temps d\'écran', onClose: () => { SCRP.open = false; }, render: () => {
+    const all = new Set([...Object.keys(S.screen || {}), ...Object.keys(S.manual || {}).filter(k => M(k, 'screen') != null)]);
+    const from = SCRP.per === 'all' ? [...all].sort()[0] || TODAY : addDays(TODAY, -(+SCRP.per - 1));
+    const devs = SCRP.dev === 'all' ? ['ph', 'pc'] : [SCRP.dev], rows = {}, sites = {};
+    let tot = 0, nd = 0, noDetail = 0;
+    for (let k = from; k <= TODAY; k = addDays(k, 1)) {
+      let any = false;
+      for (const d of devs) { const x = scrDev(k, d); if (!x) continue; any = true; tot += x.t;
+        const sum = Object.values(x.apps).reduce((a, b) => a + b, 0) / 60; if (x.t - sum > 1) noDetail += x.t - sum;
+        for (const [n, v] of Object.entries(x.apps)) { const id = d + '|' + n; rows[id] = (rows[id] || 0) + v / 60; }
+        if (d === 'pc') for (const [n, v] of Object.entries(x.sites)) sites[n] = (sites[n] || 0) + v / 60; }
+      if (any) nd++;
+    }
+    const list = Object.entries(rows).sort((a, b) => b[1] - a[1]), mx = list[0]?.[1] || 1;
+    const row = ([id, v], ic) => { const [d, n] = id.split('|'); return `<div class="scr-row"><span class="scr-n">${SCRP.dev === 'all' ? `<i class="scr-d">${d === 'ph' ? PH_IC : PC_IC}</i>` : ''}<span>${esc(n)}</span></span><b>${durTxt(Math.round(v))}</b><span class="scr-bar"><i style="width:${Math.max(2, v / mx * 100).toFixed(1)}%"></i></span></div>`; };
+    const sl = Object.entries(sites).sort((a, b) => b[1] - a[1]).slice(0, 15), smx = sl[0]?.[1] || 1;
+    const pcState = AW_DESK ? (AW.ok ? `Ordinateur relié à ActivityWatch, mis à jour à ${new Date(AW.at).toTimeString().slice(0, 5)}.` : AW.busy ? 'Lecture d\'ActivityWatch…' : AW.err === 'nobucket' ? 'ActivityWatch tourne, mais n\'a encore rien enregistré.' : 'ActivityWatch ne répond pas sur ce PC : vérifie qu\'il est lancé (icône près de l\'heure), puis autorise l\'appli à y accéder si Edge te le demande.')
+      : 'Le temps d\'ordinateur arrive tout seul quand l\'appli est ouverte sur ton PC.';
+    return `<div class="seg" role="group" aria-label="Appareil" style="margin:16px 0 8px">${[['all', 'Tout'], ['ph', 'Téléphone'], ['pc', 'Ordinateur']].map(([v, l]) => `<button type="button" data-scrdev="${v}" aria-pressed="${SCRP.dev === v}">${l}</button>`).join('')}</div>
+      <div class="seg" role="group" aria-label="Période">${SCR_PER.map(([v, l]) => `<button type="button" data-scrper="${v}" aria-pressed="${SCRP.per === v}">${l}</button>`).join('')}</div>
+      <div class="card scr-sum"><div><span class="eyebrow">Total</span><b class="num">${durTxt(Math.round(tot))}</b></div>${SCRP.per !== '1' && nd ? `<div><span class="eyebrow">Par jour</span><b class="num">${durTxt(Math.round(tot / nd))}</b></div>` : ''}<div><span class="eyebrow">Jours</span><b class="num">${nd}</b></div></div>
+      <div class="sec-label">Du plus au moins utilisé</div>
+      <div class="list">${list.length ? list.map(r => row(r)).join('') : '<div class="row"><span class="muted">Pas encore de détail par appli sur cette période.</span></div>'}${noDetail > 1 ? `<div class="scr-row"><span class="scr-n"><span class="muted">Sans détail (noté à la main)</span></span><b>${durTxt(Math.round(noDetail))}</b></div>` : ''}</div>
+      ${sl.length ? `<div class="sec-label">Sites web sur l'ordinateur</div><div class="list">${sl.map(([n, v]) => `<div class="scr-row"><span class="scr-n"><span>${esc(n)}</span></span><b>${durTxt(Math.round(v))}</b><span class="scr-bar"><i style="width:${Math.max(2, v / smx * 100).toFixed(1)}%"></i></span></div>`).join('')}</div>` : ''}
+      <div class="sec-label">Sources</div>
+      <div class="card"><p class="small" style="margin:0">${esc(pcState)}</p>
+        <p class="small muted" style="margin:8px 0 12px">Téléphone : dans ActivityWatch, exporte tes données puis partage le fichier à TNR Athletics, ou choisis-le ici.</p>
+        <label class="btn ghost" style="display:block;text-align:center">Importer le fichier du téléphone<input type="file" accept=".json,application/json" data-scrfile hidden></label>
+        ${AW_DESK ? '<button type="button" class="btn ghost" data-scrsync style="margin-top:8px;width:100%">Relire ActivityWatch maintenant</button>' : ''}</div>
+      <p class="note">Le soir, les écrans retardent l'endormissement et raccourcissent le sommeil (Hale et Guan 2015, revue de 67 études).</p>`;
+  }});
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-scr],[data-scrdev],[data-scrper],[data-scrsync]'); if (!b) return;
+  if (b.dataset.scr) { scrPane(b.dataset.scr); return; }
+  if (b.dataset.scrdev) { SCRP.dev = b.dataset.scrdev; paneRender(); return; }
+  if (b.dataset.scrper) { SCRP.per = b.dataset.scrper; paneRender(); return; }
+  if (b.dataset.scrsync != null) { awSync(true); paneRender(); }
+});
+document.addEventListener('change', async e => { const f = e.target.closest?.('[data-scrfile]'); if (!f || !f.files?.[0]) return; await awPhoneImport(await f.files[0].text()); f.value = ''; });
 function vToday() {
   const A = AN(), kG = lastKey('hrv');
   const rec = kG ? recovery(kG) : null, z = zoneOf(rec?.score);
@@ -3714,6 +3894,7 @@ function vToday() {
     </div>
     <details class="slow"><summary><h2>Mesures de fond <small>condition physique</small></h2></summary>
       <h2>Condition physique${editBtn('cond')}</h2>${secHtml('cond')}</details>
+    ${scrBlock()}
     <p class="note">Mesures brutes Garmin et Withings, synchronisées ${S.syncedAt ? 'le ' + esc(new Date(S.syncedAt).toLocaleString('fr-FR', {weekday: 'long', hour: '2-digit', minute: '2-digit'})) : 'chaque matin'}. Touche une donnée pour voir son historique.</p>`;
 }
 // Every activity of the last 7 days, newest first, each at its real hour. Two trips of the same kind on one day with
@@ -4161,9 +4342,9 @@ function vTrends() {
     <div class="stack" style="margin-top:12px">${impactCard()}${ms.map((m, j) => (j === ti ? testo : '') + card(m)).join('')}${ti >= ms.length ? testo : ''}${screenCard(P)}</div>`;
 }
 function screenCard(P) {
-  const pts = []; for (let k = P.from; k <= P.to && k <= TODAY; k = addDays(k, 1)) { const m = M(k, 'screen'); pts.push({k, v: m != null ? m / 60 : null, lab: DOW[(dow(k) + 6) % 7], tip: cap(fmtShort(k))}); }
+  const pts = []; for (let k = P.from; k <= P.to && k <= TODAY; k = addDays(k, 1)) { const m = scrTot(k); pts.push({k, v: m != null ? m / 60 : null, lab: DOW[(dow(k) + 6) % 7], tip: cap(fmtShort(k))}); }
   const v = pts.map(p => p.v).filter(x => x != null); if (!v.length) return `<div class="card"><span class="eyebrow" style="color:#A3A3A3">Temps d'écran</span><p class="small muted" style="margin:6px 0 0">Note ton temps d'écran le soir dans le questionnaire du jour (Réglages du téléphone, Bien-être numérique) : il s'affichera ici.</p></div>`;
-  return `<div class="card"><div class="chead" style="margin-bottom:6px"><span class="eyebrow" style="color:#A3A3A3">Temps d'écran · moyenne</span><b class="num">${durTxt(Math.round(mean(v) * 60))}</b></div><p class="small muted" style="margin-bottom:30px">Téléphone, noté le soir. Le soir, les écrans retardent l'endormissement et raccourcissent le sommeil (Hale et Guan 2015, revue de 67 études).</p>${S.gran === 'day' ? '' : chart(pts, {color: '#A3A3A3', dec: 1, min0: true, fmt: x => durTxt(Math.round(x * 60))})}</div>`;
+  return `<div class="card"><div class="chead" style="margin-bottom:6px"><span class="eyebrow" style="color:#A3A3A3">Temps d'écran · moyenne</span><b class="num">${durTxt(Math.round(mean(v) * 60))}</b></div><p class="small muted" style="margin-bottom:30px">Téléphone et ordinateur. Le soir, les écrans retardent l'endormissement et raccourcissent le sommeil (Hale et Guan 2015, revue de 67 études).</p>${S.gran === 'day' ? '' : chart(pts, {color: '#A3A3A3', dec: 1, min0: true, fmt: x => durTxt(Math.round(x * 60))})}</div>`;
 }
 document.addEventListener('click', e => { if (!e.target.closest('[data-testo]')) return; TESTO_OPEN = !TESTO_OPEN; render(); });
 
@@ -5959,7 +6140,7 @@ const NOTE_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 const CAL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4M8 14h2M14 14h2M8 17h2"/></svg>';
 function vHome() {
   const kG = lastKey('hrv'), rec = kG ? recovery(kG) : null, s = HP.sel, c = HOME_K.find(k => k[0] === s)?.[1];
-  return `<div class="hm-glow${s ? ' on' : ''}" id="hm-glow" style="--gc:${c || '#000'};left:${HP.x}"></div>
+  return `<div class="hm-glow${s ? ' on' : ''}" id="hm-glow" data-c="${s || ''}" style="left:${HP.x}">${HOME_K.map(([m, col]) => `<i data-g="${m}" style="--gc:${col}"></i>`).join('')}</div>
     <div class="hm${s ? ' sel' : ''}" id="hm">
       <button class="hm-gear" data-hmenu aria-label="Menu">${BARS}</button>
       <button class="hm-plan2" data-hplan aria-label="Planning">${CAL}</button>
@@ -6007,7 +6188,7 @@ function homeSelect(b) {
   HP.sel = m; HP.x = (r.left + r.width / 2) + 'px';
   $('#hm').classList.add('sel');
   document.querySelectorAll('.hm-k').forEach(k => k.classList.toggle('on', k === b));
-  g.style.setProperty('--gc', col); g.style.left = HP.x; g.style.setProperty('--gs', 1); g.classList.add('on');
+  g.dataset.c = m; g.style.left = HP.x; g.style.setProperty('--gs', 1); g.classList.add('on');
   $('#hm-info').innerHTML = homeInfo(m);
   if (PREFS.haptic) navigator.vibrate?.(8);
 }
@@ -8713,12 +8894,12 @@ setTab(S.tab);
 go('home', false);
 (async () => {
   const db = await recupGetDb();
-  if (!db) { S.status = 'offline'; render(); return; }
+  if (!db) { S.status = 'offline'; render(); window.TNR_SPLASH?.ready('data'); window.TNR_SPLASH?.ready('sync'); return; }
   S.db = db;
   let fresh = false;
-  const timer = setTimeout(() => { if (!fresh) { S.status = 'slow'; render(); } }, 10000);
+  const timer = setTimeout(() => { if (!fresh) { S.status = 'slow'; render(); window.TNR_SPLASH?.ready('data'); } }, 10000);
   const ok = snap => { if (!snap.metadata.fromCache && !fresh) { fresh = true; clearTimeout(timer); S.status = 'ready'; setTimeout(() => window.TNR_SPLASH?.ready('data'), 60); } };
-  const fail = () => { clearTimeout(timer); S.status = 'slow'; render(); };
+  const fail = () => { clearTimeout(timer); S.status = 'slow'; render(); window.TNR_SPLASH?.ready('data'); };
   const months = (col, target) => db.collection(col).onSnapshot(snap => {
     const o = {}; let synced = S.syncedAt;
     let own = null;
@@ -8734,7 +8915,9 @@ go('home', false);
   db.doc('requests/sync').onSnapshot(snap => { S.req = snap.exists ? snap.data().requestedAt : null; render(); }, () => {});
   db.doc('status/sync').onSnapshot(snap => { S.checked = snap.exists ? snap.data() : null; render(); }, () => {});
   db.doc('profile/main').onSnapshot(snap => { S.profile = snap.exists ? snap.data() : null; render(); }, fail);
+  db.collection('screen').onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); S.screen = o; render(); if (P.stack.length && SCRP.open) paneRender(); }, () => {});
   bootTNR(db);
+  if (AW_DESK) { setTimeout(() => awSync(true), 2500); setInterval(() => awSync(), 5 * 60e3); document.addEventListener('visibilitychange', () => { if (!document.hidden) awSync(); }); }
   if (new URLSearchParams(location.search).get('rpe')) { history.replaceState(history.state, '', location.pathname); const t = setInterval(() => { if (!S.manual) return; clearInterval(t); go('home', false); draft = {}; openSheet('note', TODAY); const i = SES_K.find(([kind]) => sesInfo(TODAY, kind)); if (i) { draft._ses = i[0]; $('#e-ses').innerHTML = noteSessions(TODAY); } }, 200); }
   // Back from the Withings sign-in page: say how it went, show the settings, then fetch the data.
   if (window.RECUP_WITHINGS_DONE) window.RECUP_WITHINGS_DONE.then(m => { homeSettings(); toast(m); if (/connecté/.test(m)) refreshAll(); });
