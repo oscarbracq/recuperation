@@ -3820,7 +3820,8 @@ const PKG = {'com.instagram.android': 'Instagram', 'com.google.android.youtube':
   'com.samsung.android.messaging': 'Messages', 'com.google.android.apps.messaging': 'Messages', 'org.telegram.messenger': 'Telegram', 'com.reddit.frontpage': 'Reddit', 'tv.twitch.android.app': 'Twitch',
   'com.discord': 'Discord', 'com.google.android.apps.maps': 'Maps', 'com.google.android.gm': 'Gmail', 'com.linkedin.android': 'LinkedIn', 'com.pinterest': 'Pinterest', 'com.amazon.avod.thirdpartyclient': 'Prime Video',
   'com.disney.disneyplus': 'Disney+', 'com.google.android.youtube.tv': 'YouTube', 'com.android.vending': 'Play Store', 'com.sec.android.app.camera': 'Appareil photo', 'com.sec.android.gallery3d': 'Galerie', 'com.supercell.clashroyale': 'Clash Royale', 'com.supercell.hayday': 'Hay Day', 'com.epicgames.fortnite': 'Fortnite', 'jp.pokemon.pokemontcgp': 'Pokémon TCGP', 'com.anthropic.claude': 'Claude', 'com.google.android.googlequicksearchbox': 'Google', 'com.withings.wiscale2': 'Withings', 'com.google.android.apps.youtube.music': 'YouTube Music', 'com.microsoft.office.outlook': 'Outlook', 'com.yahoo.mobile.client.android.mail': 'Yahoo Mail', 'com.microsoft.office.excel': 'Excel', 'com.samsung.android.app.notes': 'Samsung Notes'};
-const pkgName = p => PKG[p] || String(p).split('.').filter(x => !/^(com|org|net|android|app|apps|google|samsung|sec|tv)$/.test(x)).map(x => x.charAt(0).toUpperCase() + x.slice(1)).join(' ') || p;
+const pkgName = p => { if (PKG[p]) return PKG[p]; const parts = String(p).split('.').filter(x => !/^(com|org|net|io|de|fr|jp|android|app|apps|google|samsung|sec|tv|mobile|client|free|pro|prod|launcher|main|ui)$/i.test(x));
+  const w = parts.at(-1) || p; return w.charAt(0).toUpperCase() + w.slice(1); };
 function phAuto(k) {
   const x = S.screenph?.[k]; if (!x || !(+x.t > 0)) return null;
   const apps = {}; for (const [p, v] of Object.entries(x.apps || {})) if (+v >= 30) { const n = pkgName(p); apps[n] = (apps[n] || 0) + +v; }
@@ -3828,8 +3829,17 @@ function phAuto(k) {
   return {t: +x.t / 60, apps, sites: {}};
 }
 // Minutes on one device for a day (the phone falls back on the time typed in the questionnaire).
+// The PC through the background task (every 5 minutes, even with the app closed): raw ActivityWatch app names.
+function pcAuto(k) {
+  const x = S.screenpc?.[k]; if (!x) return null;
+  const apps = {}; for (const [a, v] of Object.entries(x.apps || {})) { const n = awName(a); if (n && +v >= 30) apps[n] = (apps[n] || 0) + +v; }
+  const t = Object.values(apps).reduce((a, b) => a + b, 0); if (t < 60) return null;
+  const sites = {}; for (const [n, v] of Object.entries(x.sites || {})) if (+v >= 30) sites[n] = +v;
+  return {t: t / 60, apps, sites};
+}
 function scrDev(k, d) {
   if (d === 'ph') { const a = phAuto(k); if (a) return a; }
+  if (d === 'pc') { const a = pcAuto(k), b = S.screen?.[k]?.pc; if (a && (!b || a.t * 60 >= b.t - 120)) return a; }
   const x = S.screen?.[k]?.[d];
   if (x && x.t != null) return {t: x.t / 60, apps: x.apps || {}, sites: x.sites || {}};
   if (d === 'ph') { const m = M(k, 'screen'); if (m != null) return {t: +m, apps: {}, sites: {}, manual: true}; }
@@ -8946,6 +8956,7 @@ go('home', false);
   db.doc('requests/sync').onSnapshot(snap => { S.req = snap.exists ? snap.data().requestedAt : null; render(); }, () => {});
   db.doc('status/sync').onSnapshot(snap => { S.checked = snap.exists ? snap.data() : null; render(); }, () => {});
   db.doc('profile/main').onSnapshot(snap => { S.profile = snap.exists ? snap.data() : null; render(); }, fail);
+  db.collection('screenpc').onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); S.screenpc = o; render(); if (P.stack.length && SCRP.open) paneRender(); }, () => {});
   db.collection('screenph').onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); S.screenph = o; render(); if (P.stack.length && SCRP.open) paneRender(); }, () => {});
   db.collection('screen').onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); S.screen = o; render(); if (P.stack.length && SCRP.open) paneRender(); }, () => {});
   bootTNR(db);
