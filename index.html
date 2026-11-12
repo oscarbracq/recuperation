@@ -222,7 +222,7 @@ svg.chev{width:14px;height:14px;flex:none;color:var(--fg3)}
 .chart text{fill:var(--fg2);font:10px var(--font)}
 .chart .grid{stroke:var(--line);stroke-width:1}
 .chart .scrub{stroke:var(--fg2);stroke-width:1;stroke-dasharray:3 3}
-.chartbox{position:relative;padding-top:46px}.bubble{position:absolute;top:0;transform:translate(-50%,0);background:var(--fg);color:var(--bg);border-radius:10px;padding:5px 9px;font-size:.75rem;line-height:1.3;white-space:nowrap;pointer-events:none;text-align:center;font-variant-numeric:tabular-nums}
+.chartbox{position:relative;padding-top:46px}.bubble{position:absolute;top:0;transform:translate(-50%,0);background:var(--fg);color:var(--bg);border-radius:10px;padding:5px 9px;font-size:.75rem;line-height:1.3;white-space:normal;width:max-content;max-width:100%;pointer-events:none;text-align:center;font-variant-numeric:tabular-nums}
 .bubble b{font-size:.875rem}
 .bubble em{font-style:normal;display:block;font-size:.6875rem;opacity:.75}
 .chead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:34px}
@@ -392,8 +392,8 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .hm-head.why h1.hello{position:sticky;top:-1px;z-index:3;margin-top:24px;padding:10px 0 14px;background:linear-gradient(#000 78%,rgba(0,0,0,0))}
 .hm-syn2{max-width:440px;margin:18px auto 0;text-align:left}
 .hm-card{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:26px;padding:18px 18px 16px;backdrop-filter:blur(24px) saturate(140%);-webkit-backdrop-filter:blur(24px) saturate(140%)}
-.hm-card .hm-lead{text-align:left;font:600 1rem/1.42 var(--display)}
-.hm-card .hm-pts{margin-top:12px;gap:0}.hm-card .hm-pts li{padding:10px 0;border-top:1px solid rgba(255,255,255,.07);font-size:.9rem}
+.hm-card .hm-lead{text-align:left;font:600 calc(1rem * var(--hmz, 1))/1.42 var(--display)}
+.hm-card .hm-pts{margin-top:12px;gap:0}.hm-card .hm-pts li{padding:calc(10px * var(--hmz, 1)) 0;border-top:1px solid rgba(255,255,255,.07);font-size:calc(.9rem * var(--hmz, 1))}.hm-pts li[hidden]{display:none}
 .hmg-day{display:flex;align-items:center;gap:14px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.08)}
 .hmg-day .dg{position:relative;width:64px;height:64px;flex:none}.hmg-day .dg b{position:absolute;inset:0;display:grid;place-items:center;font:700 1.0625rem var(--display);color:#fff}
 .hmg-day .dt{flex:1;min-width:0}.hmg-day .dt span{display:block;font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.5);font-weight:600}
@@ -906,9 +906,13 @@ details.slow[open]>summary h2::after{content:" ▴"}
 .scbig{display:flex;align-items:center;gap:22px;margin:6px 0 4px}.scbig .dg{position:relative;width:118px;height:118px;flex:none}.scbig .dg svg{width:100%;height:100%}.scbig .dg>b{position:absolute;inset:0;display:grid;place-items:center;font-size:1.9rem}
 .sc3{display:flex;gap:22px;flex-wrap:wrap}.sc3>div{display:flex;flex-direction:column}.sc3 b{font-size:1.6rem;line-height:1.1}.sc3 span{font-size:.75rem;color:var(--fg2)}
 .sclg{display:flex;gap:14px;margin-top:12px;font-size:.75rem;color:var(--fg2)}.sclg i{display:inline-block;width:12px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
-.bcol{display:contents}.pc .bcol{display:flex;flex-direction:column;gap:16px;min-width:0}.pc .bcol>*{margin:0!important}.pc .bcol>:last-child{flex:1}
+.bcol{display:contents}.pc .bcol{display:flex;flex-direction:column;gap:16px;min-width:0}.pc .bcol>*{margin:0!important}.pc .bcol+.bcol>:last-child{flex:1}
 .wbts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.wbt{background:var(--card2);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}.wbt>span{font-size:.75rem;font-weight:600}.wbt>b{font-size:1.35rem}.wbt>b small{font-size:.75rem;color:var(--fg2);font-weight:500}.wbt>small{font-size:.75rem}.wbt .up{color:var(--good)}.wbt .down{color:var(--bad)}
 .pc .pcsec.pclong>.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:1px;background:var(--line)}.pc .pcsec.pclong>.list>*{background:var(--card);border:0;margin:0}
+.seg+.seg,.seg+.card,.card+.seg{margin-top:12px}.pc .wbts{grid-template-columns:repeat(8,1fr)}.pc .segl button{font-size:.9375rem;padding:12px 14px}.pc .segw{grid-template-columns:260px 1fr;gap:28px}.wfood{display:flex;align-items:center;justify-content:space-between;gap:12px}.wfood .chip{flex:none}
+.segl button{display:flex;justify-content:space-between;align-items:baseline;gap:6px;padding:9px 9px;border-radius:10px;background:var(--card2);font-size:.8125rem;min-width:0;color:var(--fg);text-align:left;width:100%}.segl button span{white-space:nowrap}.segl button b{white-space:nowrap;font-variant-numeric:tabular-nums}.segl button small{display:block;font-size:.6875rem;font-weight:600}
+.segleg{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:.75rem;color:var(--fg2)}.segleg i{flex:1;max-width:160px;height:8px;border-radius:4px}
+.segc.flash{box-shadow:0 0 0 2px var(--accent)}
 .wk2{display:flex;flex-direction:column;gap:12px}.pc .wk2>.card{flex:1;display:flex;flex-direction:column;justify-content:center}
 .sboard{padding:14px}.seg+.sboard{margin-top:14px}
 .sbnav{display:flex;align-items:center;gap:6px}.sbnav button{width:30px;height:30px;border-radius:50%;background:var(--card2);color:var(--fg);font-size:1.0625rem}.sbnav button:disabled{opacity:.3}.sbnav small{font-size:.75rem;color:var(--fg2);font-variant-numeric:tabular-nums}
@@ -949,7 +953,7 @@ body.bdragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
 .pc #t-view>#t-libl{background:none;box-shadow:none;overflow:visible}.pc #t-libl>.sec-label{margin:18px 4px 8px}
 .pc #t-libl>.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1px;background:var(--line)}.pc #t-libl>.list>*{background:var(--card);border:0}
 
-.pc .pc6 .mrows{display:grid;grid-template-columns:1fr 1fr;column-gap:28px}
+.pc .pc6 .mrows{display:flex}
 .pcnt *,.pcnt *::before,.pcnt *::after{transition:none!important}
 /* v79 · PC: windows open as full pages (the slim menu stays); questionnaire and journal hide what is behind */
 .pc #pane,.pc #sheet{left:var(--pcw);right:0;width:auto;transform:none!important;opacity:0;pointer-events:none;transition:opacity .2s ease}
@@ -971,7 +975,7 @@ body.bdragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
 .jlgrid button:has(.jt){color:transparent}.jlgrid button:has(.jt) .jd{color:var(--fg2)}
 .nextc .chiptag{background:var(--card2);color:var(--fg)}
 .bchip .bx{padding:0;line-height:0}.bchip .bx svg{display:block}
-.segw{display:grid;grid-template-columns:minmax(150px,220px) 1fr;gap:16px;align-items:center;margin-top:8px}.segw svg{width:100%;height:auto}
+.segw{display:grid;grid-template-columns:minmax(96px,220px) minmax(0,1fr);gap:12px;align-items:center;margin-top:8px}.segw svg{width:100%;height:auto}
 .segl{display:grid;gap:6px}.segl div{display:flex;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:10px;background:var(--card2);font-size:.875rem}.segl b{font-variant-numeric:tabular-nums}
 /* v72 */
 .sheet.full .sheet-gap{display:none}.sheet.full .sheet-card{border-radius:0;max-width:none}.sheet.full header::before{display:none}.sheet.full header{cursor:default;padding-top:calc(12px + env(safe-area-inset-top,0px))}
@@ -1406,11 +1410,12 @@ function chart(pts, o = {}) {
   if (band) { lo = Math.min(lo, band[0]); hi = Math.max(hi, band[1]); }
   if (bars || min0) lo = Math.min(0, lo);
   const pad = (hi - lo) * .12 || 1; if (!(bars || min0)) lo -= pad; hi += pad;
+  if (o.max != null) hi = Math.max(Math.min(hi, o.max), Math.max(...all));
   // Bars sit in slots; lines run edge to edge.
   const X = bars ? (i => L + (i + .5) / pts.length * (W0 - L - R)) : (i => L + (pts.length === 1 ? (W0 - L - R) / 2 : i / (pts.length - 1) * (W0 - L - R)));
   const Y = y => T + (1 - (y - lo) / (hi - lo)) * (H - T - B);
   let g = '';
-  for (let i = 0; i <= 3; i++) { const t = lo + (hi - lo) * i / 3, y = Y(t); g += `<line class="grid" x1="${L}" x2="${W0 - R}" y1="${y}" y2="${y}"/><text x="${L - 6}" y="${y + 3}" text-anchor="end">${fx(t, hi - lo < 6 ? 1 : 0)}</text>`; }
+  for (let i = 0; i <= 3; i++) { const t = lo + (hi - lo) * i / 3, y = Y(t); g += `<line class="grid" x1="${L}" x2="${W0 - R}" y1="${y}" y2="${y}"/><text x="${L - 6}" y="${y + 3}" text-anchor="end">${fx(t, hi - lo < .6 ? 2 : hi - lo < 6 ? 1 : 0)}</text>`; }
   if (pts.length <= 12 && pts.every(p => p.lab)) pts.forEach((p, i) => g += `<text x="${X(i)}" y="${H - 6}" text-anchor="middle">${esc(p.lab)}</text>`);
   else g += `<text x="${L}" y="${H - 6}">${esc(pts[0].lab ?? short(pts[0].k))}</text><text x="${W0 - R}" y="${H - 6}" text-anchor="end">${esc(pts[pts.length - 1].lab ?? short(pts[pts.length - 1].k))}</text>`;
   pts.forEach((p, i) => { if (p.raw != null) g += `<circle cx="${X(i)}" cy="${Y(p.raw)}" r="3" fill="${color}" opacity=".3"/>`; });
@@ -1429,6 +1434,7 @@ function chart(pts, o = {}) {
     const P = pts.map((p, i) => p.v == null ? null : [X(i), Y(p.v)]).filter(Boolean);
     if (P.length > 1) g += `<path d="M${P[0][0]} ${H - B} L${smoothD(P).slice(1)} L${P[P.length - 1][0]} ${H - B}Z" fill="${color}" opacity=".08"/>`;
     g += line(P, color, 2.2);
+    if (colorFn && pts.length <= 40) pts.forEach((p, i) => { if (p.v != null) g += `<circle cx="${X(i)}" cy="${Y(p.v)}" r="3.2" fill="${colorFn(p.v)}" stroke="var(--card)" stroke-width="1.2"/>`; });
   }
   for (const l of o.lines || []) { const P = l.vals.map((x, i) => x == null ? null : [X(i), Y(x)]).filter(Boolean); g += P.length > 1 ? line(P, l.color, 2.2) : P.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3.5" fill="${l.color}"/>`).join(''); }
   const id = 'c' + (++chId);
@@ -1447,8 +1453,8 @@ function scrubTo(box, i) {
   const b = box.querySelector('.bubble'), shown = c.fmt ? c.fmt(p.v ?? v) : fx(p.v ?? v, c.dec) + (c.unit ? ' ' + c.unit : '');
   b.innerHTML = `<b>${shown}</b><em>${esc(p.tip ?? fmtShort(p.k))}${c.avgVals?.[j] != null ? ' · moy. 7 j ' + fx(c.avgVals[j], 1) : ''}${st ? ' · ' + st : ''}</em>`;
   b.hidden = false;
-  const r = box.getBoundingClientRect(), px = x / c.W0 * r.width;
-  b.style.left = clamp(px, 70, r.width - 70) + 'px';
+  const r = box.getBoundingClientRect(), px = x / c.W0 * r.width, half = Math.min(b.offsetWidth, r.width) / 2;
+  b.style.left = clamp(px, half, r.width - half) + 'px';
 }
 function initCharts(root) { root.querySelectorAll('.chartbox').forEach(b => scrubTo(b, CH[b.dataset.ch].pts.length - 1)); }
 function idxFromEvent(box, e) { const c = CH[box.dataset.ch], r = box.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width * c.W0; return Math.round((x - c.X(0)) / ((c.X(c.pts.length - 1) - c.X(0)) || 1) * (c.pts.length - 1)); }
@@ -2630,6 +2636,16 @@ function homeSyn() {
     <div class="hm-whyrow"><button class="hm-why" data-hwhy aria-expanded="${why}">${why ? 'Masquer' : 'Pourquoi'}</button><button class="hm-say" data-hsay aria-label="Écouter l'analyse">${SPEAK}</button></div>
     <div class="hm-whyw"${why ? '' : ' hidden'}><ul class="hm-whyl">${P.why.map(w => `<li>${esc(w)}</li>`).join('')}</ul><button class="hm-ask" data-hask>Interagir</button></div>`;
 }
+// Everything at a glance: the card text shrinks until it fits; only if it still does not, the least important lines go.
+function homeFit() {
+  const h = $('#hm-head'); if (!h || HP.why) return;
+  const L = [...h.querySelectorAll('.hm-pts li')]; L.forEach(li => li.hidden = false);
+  const over = () => h.scrollHeight > h.clientHeight + 2;
+  let z = 1; h.style.setProperty('--hmz', 1);
+  while (over() && z > .72) { z -= .04; h.style.setProperty('--hmz', z.toFixed(2)); }
+  for (let i = L.length - 2; over() && i >= 0; i--) if (!/^Ta note/.test(L[i].textContent.trim())) L[i].hidden = true;
+}
+addEventListener('resize', () => { if (S.mod === 'home') homeFit(); });
 // The three shortcuts sit under the card, outside its scroll: always whole on screen.
 function homeActs() {
   return `<div class="hm-acts" id="hm-acts"${HP.why ? ' hidden' : ''}>
@@ -2643,7 +2659,7 @@ function homeWhy() {
   h.classList.toggle('why', HP.why);
   const ac = $('#hm-acts'); if (ac) ac.hidden = HP.why; h.querySelector('.hm-whyw').hidden = !HP.why;
   const b = h.querySelector('[data-hwhy]'); b.textContent = HP.why ? 'Masquer' : 'Pourquoi'; b.setAttribute('aria-expanded', HP.why);
-  if (!HP.why) h.scrollTo({top: 0, behavior: 'smooth'});
+  if (!HP.why) { h.scrollTo({top: 0, behavior: 'smooth'}); homeFit(); }
 }
 // The analysis read aloud, in a French voice of the phone.
 function homeSay(btn) {
@@ -3740,7 +3756,7 @@ function metricChart(m) {
   const {P, pts} = agg(m, S.gran, S.off);
   const zone = m.zone ? [m.zone.lo, m.zone.hi] : null;
   if (S.gran === 'day') return {P, pts: [{k: P.from, v: VAL[m.id](P.from)}], zone, html: dayView(m, P.from)};
-  const asBars = m.bars || m.weekly || m.id === 'sleepH';
+  const asBars = false;
   return {P, pts, zone, html: chart(pts, {color: m.c, band: zone, bars: asBars, dec: m.dec || 0, unit: m.fmt ? '' : m.unit, fmt: m.fmt,
     colorFn: m.id === 'sleepH' ? (v => v < 8 ? 'var(--warn)' : 'var(--violet)') : m.colorFn, min0: m.min0, target: m.target})};
 }
@@ -3923,7 +3939,7 @@ function groupPane(g) {
   openPane({title, grp: true, render: () => {
     const P = periodOf(S.gran, S.off), day = S.gran === 'day', Pp = periodOf(S.gran, S.off + 1);
     const mk = id => { const [n, c, u, , fmt] = partOf(id); return {id: id === 'effort' ? 'effort' : 'p_' + id, lab: n, c, unit: '', fmt, dec: 0, bars: u !== '%' && u !== '/21'}; };
-    const ch = id => { if (day) return ''; const m = mk(id), {pts} = agg(m, S.gran, S.off); return chart(pts, {color: m.c, bars: m.bars, dec: 0, fmt: m.fmt, min0: m.bars}); };
+    const ch = id => { if (day) return ''; const m = mk(id), {pts} = agg(m, S.gran, S.off); return chart(pts, {color: m.c, dec: 0, fmt: m.fmt, min0: m.bars}); };
     const M0 = partOf(main), v0 = periodVal(main, P), pv = periodVal(main, Pp);
     return `<div style="margin:14px 0 10px">${granSeg()}</div><div class="card">${periodNav(P)}</div>
       <div class="dhead"><div class="eyebrow">${day ? esc(cap(fmtShort(P.from))) : 'Moyenne par jour · ' + esc(P.title.toLowerCase())}</div><div class="big num">${v0 == null ? '–' : M0[4](v0)}</div>${pv != null && v0 != null && !day ? `<div class="small muted">${v0 > pv * 1.03 ? 'en hausse' : v0 < pv * .97 ? 'en baisse' : 'stable'} par rapport à la période d'avant (${M0[4](pv)})</div>` : ''}</div>
@@ -4508,7 +4524,7 @@ function scorePane(k0) {
       const vs = pts.map(p => p.v).filter(v => v != null);
       top = `<div class="card"><div class="chead" style="margin-bottom:8px"><span class="eyebrow">Tendance du score</span>${vs.length ? `<span class="small muted">moyenne ${avgOf(vs)}</span>` : ''}</div>${seg}
         <div class="sclg"><span><i style="background:var(--fg)"></i>total</span><span><i style="background:${SC_C}"></i>habitudes</span><span><i style="background:${SC_U}"></i>physiologie</span></div>
-        <div style="margin-top:22px">${vs.length ? chart(pts, {color: 'var(--fg)', dec: 0, min0: true, lines: [{vals: hab, color: SC_C}, {vals: phy, color: SC_U}]}) : '<p class="small muted">Pas encore de journée enregistrée sur cette période.</p>'}</div>
+        <div style="margin-top:22px">${vs.length ? chart(pts, {color: 'var(--fg)', dec: 0, min0: true, max: 100, lines: [{vals: hab, color: SC_C}, {vals: phy, color: SC_U}]}) : '<p class="small muted">Pas encore de journée enregistrée sur cette période.</p>'}</div>
         <p class="small muted" style="margin:6px 0 0">Moyenne des journées enregistrées de chaque ${STG === 'week' ? 'semaine' : STG === 'month' ? 'mois' : 'année'}. Le détail ci-dessous est celui du ${esc(fmtShort(k))}.</p></div>`;
     }
     return `<div class="stack">${top}
@@ -4824,7 +4840,7 @@ document.addEventListener('click', e => {
   const rg = e.target.closest('[data-region]'); if (rg) { draft._region = draft._region === rg.dataset.region ? null : rg.dataset.region; $('#e-pains').innerHTML = painSection(); }
   const ps = e.target.closest('[data-painset]'); if (ps) { const i = ps.dataset.painset.lastIndexOf('|'); const pl = ps.dataset.painset.slice(0, i); draft.pains[pl] = +ps.dataset.painset.slice(i + 1); if (!draft.painAt?.[pl]) draft.painAt = {...(draft.painAt || {}), [pl]: new Date().toTimeString().slice(0, 5)}; $('#e-pains').innerHTML = painSection(); }
   const st = e.target.closest('[data-struct]') || e.target.closest('[data-spot]');
-  if (st) { const l = st.dataset.struct || st.dataset.spot; if (l in draft.pains) { delete draft.pains[l]; delete draft.painTypes[l]; } else { draft.pains[l] = 1; draft.painTypes[l] = st.dataset.stype || 'muscle'; } $('#e-pains').innerHTML = painSection(); }
+  if (st) { const l = st.dataset.struct || st.dataset.spot; if (l in draft.pains) { delete draft.pains[l]; delete draft.painTypes[l]; } else { draft.pains[l] = 1; draft.painTypes[l] = st.dataset.stype || 'muscle'; if (!draft.painAt?.[l]) draft.painAt = {...(draft.painAt || {}), [l]: new Date().toTimeString().slice(0, 5)}; } $('#e-pains').innerHTML = painSection(); }
   const bv = e.target.closest('[data-bview]'); if (bv) { draft._view = bv.dataset.bview; draft._region = null; $('#e-pains').innerHTML = painSection(); }
   const hd = e.target.closest('[data-hd]');
   if (hd) { hd.setAttribute('aria-pressed', hd.getAttribute('aria-pressed') !== 'true'); }
@@ -5741,6 +5757,7 @@ function renderMod(force) {
   if (!el) return;
   const html = S.mod === 'home' ? vHome() : S.mod === 'T' ? vT() : vF();
   if (force || el._html !== html) { el.innerHTML = html; el._html = html; initCharts(el); pcLayout(el); }
+  if (S.mod === 'home') requestAnimationFrame(homeFit);
   const bar = S.mod === 'T' ? '#tb-T' : S.mod === 'N' ? '#tb-N' : null;
   if (bar) document.querySelectorAll(bar + ' button').forEach(b => b.setAttribute('aria-selected', b.dataset.mtab === (S.mod === 'T' ? S.ttab : S.ftab)));
   if (P.stack.length && P.live) paneRender();
@@ -6397,7 +6414,7 @@ function tSessions() {
     <button class="banner" data-tseason style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;margin-bottom:8px"><span><b>${k === 'gym' ? 'Ma saison de musculation' : 'Ma saison de sprint'}</b><br><span class="small muted">${(() => { const n = seasonNow(TODAY, k === 'gym' ? 'gym' : 'track'); return n && !n.before && !n.after ? `Bloc ${n.i + 1} · ${esc(n.name)} · semaine ${n.week}/${n.of}` : k === 'gym' ? 'Tes blocs de musculation' : 'Tes blocs : PPG, PPS, pré-compétition, compétition'; })()}</span></span>${ICON.chev}</button>
     <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
     ${sesBoard(k)}
-    <h2>Mes séances</h2><div class="list">${mine.map(row).join('')}<button class="addbtn" data-tnew>+ Créer une séance</button></div>
+    <h2>Mes séances</h2><div class="list"><button class="addbtn" data-tnew>+ Créer une séance</button>${mine.map(row).join('')}</div>
     ${k === 'gym' && TDV_PLANS.length ? progList() : ''}
     ${base.length ? `<h2>Programmes <small>à dupliquer et adapter</small></h2><div class="list">${base.map(row).join('')}</div>` : ''}`;
 }
@@ -6457,13 +6474,14 @@ function bucketStats(B) {
 }
 // Bars = volume, line = intensity, on one chart.
 function dualChart(pts, vKey, iKey, vUnit, vDiv = 1) {
-  const W0 = typeof isPC === 'function' && isPC() ? 760 : 340, H = 150, L = 8, R = 8, T = 14, Bm = 22, n = pts.length, bw = (W0 - L - R) / n;
-  const vs = pts.map(p => (p[vKey] || 0) / vDiv), vmax = Math.max(1, ...vs), is = pts.map(p => p[iKey]), ilo = Math.min(...is.filter(x => x != null), 100) - 5, ihi = Math.max(...is.filter(x => x != null), 0) + 5;
-  const y = v => T + (H - T - Bm) * (1 - v / vmax), yi = v => T + (H - T - Bm) * (1 - (v - ilo) / Math.max(1, ihi - ilo));
-  const bars = vs.map((v, i) => `<rect x="${(L + i * bw + bw * .18).toFixed(1)}" y="${y(v).toFixed(1)}" width="${(bw * .64).toFixed(1)}" height="${(H - Bm - y(v)).toFixed(1)}" rx="3" fill="var(--accent)" opacity=".35"><title>${esc(pts[i].tip)} : ${fx(v, vDiv > 1 ? 1 : 0)} ${vUnit}${is[i] != null ? ' · ' + fx(is[i]) + ' %' : ''}</title></rect>`).join('');
-  const line = is.map((v, i) => v == null ? null : `${(L + i * bw + bw / 2).toFixed(1)},${yi(v).toFixed(1)}`).filter(Boolean);
-  const labs = pts.map((p, i) => i % Math.ceil(n / 7) === 0 || i === n - 1 ? `<text x="${(L + i * bw + bw / 2).toFixed(1)}" y="${H - 6}" text-anchor="middle" font-size="9" fill="var(--fg2)">${esc(p.lab)}</text>` : '').join('');
-  return `<svg viewBox="0 0 ${W0} ${H}" class="dual" role="img" aria-label="Volume et intensité">${bars}${line.length > 1 ? `<polyline points="${line.join(' ')}" fill="none" stroke="var(--fg)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>` : ''}${line.map(pt => `<circle cx="${pt.split(',')[0]}" cy="${pt.split(',')[1]}" r="2.5" fill="var(--fg)"/>`).join('')}${labs}</svg>`;
+  const W0 = typeof isPC === 'function' && isPC() ? 760 : 340, H = 160, L = 8, R = 8, T = 14, Bm = 22, n = pts.length, bw = (W0 - L - R) / n;
+  const vs = pts.map(p => (p[vKey] || 0) / vDiv), vmax = Math.max(1e-6, ...vs), is = pts.map(p => p[iKey]), imax = Math.max(100, ...is.filter(x => x != null));
+  const y = f => T + (H - T - Bm) * (1 - f), w = bw * .34, gap = bw * .04;
+  const bars = pts.map((p, i) => { const x0 = L + i * bw + bw / 2, fv = vs[i] / vmax, fi = is[i] != null ? is[i] / imax : 0, tip = `${esc(p.tip)} : ${fx(vs[i], vDiv > 1 ? 1 : 0)} ${vUnit}${is[i] != null ? ' · intensité ' + fx(is[i]) + ' %' : ''}`;
+    return `<g><title>${tip}</title><rect x="${(x0 - gap / 2 - w).toFixed(1)}" y="${y(fv).toFixed(1)}" width="${w.toFixed(1)}" height="${Math.max(vs[i] ? 1 : 0, (H - Bm - y(fv))).toFixed(1)}" rx="${Math.min(3, w / 2).toFixed(1)}" fill="var(--accent)"/>`
+      + `<rect x="${(x0 + gap / 2).toFixed(1)}" y="${y(fi).toFixed(1)}" width="${w.toFixed(1)}" height="${Math.max(is[i] ? 1 : 0, (H - Bm - y(fi))).toFixed(1)}" rx="${Math.min(3, w / 2).toFixed(1)}" fill="var(--fg)" opacity=".85"/></g>`; }).join('');
+  const labs = pts.map((p, i) => i % Math.ceil(n / 12) === 0 || i === n - 1 ? `<text x="${(L + i * bw + bw / 2).toFixed(1)}" y="${H - 6}" text-anchor="middle" font-size="9" fill="var(--fg2)">${esc(p.lab)}</text>` : '').join('');
+  return `<svg viewBox="0 0 ${W0} ${H}" class="dual" role="img" aria-label="Volume et intensité, côte à côte"><line x1="${L}" x2="${W0 - R}" y1="${H - Bm}" y2="${H - Bm}" stroke="var(--line)"/>${bars}${labs}</svg>`;
 }
 const spark = (vals, w = 110, h = 26) => { const v = vals.map(x => x || 0), mx = Math.max(1e-6, ...v); return `<svg viewBox="0 0 ${w} ${h}" class="spk"><polyline points="${v.map((x, i) => `${(i / Math.max(1, v.length - 1) * (w - 4) + 2).toFixed(1)},${(h - 3 - x / mx * (h - 6)).toFixed(1)}`).join(' ')}" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linejoin="round"/></svg>`; };
 function tProgress() {
@@ -6475,7 +6493,8 @@ function tProgress() {
   const kv = (lab, a, b, n, u) => `<div><b>${a == null ? '–' : fx(a, n) + (u ? ' ' + u : '')}</b><span>${lab}${a != null && b ? ' · ' + sgn(pct(a, b)) : ''}</span></div>`;
   const bests = {};
   for (const l of L) for (const it of l.items) if (it.reps) for (const r of it.reps) if (+r.t > 0 && +r.dist > 0) { const kk = it.ex + '|' + r.dist; if (!bests[kk] || +r.t < bests[kk].t) bests[kk] = {ex: it.ex, dist: +r.dist, t: +r.t, date: l.date, shoes: l.shoes, cond: l.cond}; }
-  const musRows = MUS.filter(([k]) => B.some(b => b.mus[k]?.v)).map(([k, n]) => { const v = B.map(b => b.mus[k]?.v || 0), x = last.mus[k], y = prev?.mus[k]; return `<div class="mrow"><span>${esc(n)}</span>${spark(v)}<b>${x ? Math.round(x.v / x.f * 100) + ' %' : '–'}</b><small>${x && y?.v ? sgn(pct(x.v, y.v)) : '–'}</small></div>`; }).join('');
+  const inten = k => { const x = last.mus[k]; return x ? x.v / x.f : -1; };
+  const musRows = MUS.filter(([k]) => B.some(b => b.mus[k]?.v)).sort((a, b) => inten(b[0]) - inten(a[0])).map(([k, n]) => { const v = B.map(b => b.mus[k]?.v || 0), x = last.mus[k], y = prev?.mus[k]; return `<div class="mrow"><span>${esc(n)}</span>${spark(v)}<b>${x ? Math.round(x.v / x.f * 100) + ' %' : '–'}</b><small>${x && y?.v ? sgn(pct(x.v, y.v)) : '–'}</small></div>`; }).join('');
   return `
     <header class="top"><div class="sub">Intensité et volume</div><h1>Tendance</h1></header>
     ${seg}
@@ -6483,7 +6502,7 @@ function tProgress() {
       <div class="card pc6"><div class="chead" style="margin-bottom:8px"><span class="eyebrow">Intensité et volume</span></div>
         <div class="seg" role="group" aria-label="Vue">${[['all', 'Tout'], ['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button type="button" data-tview="${v}" aria-pressed="${view === v}">${l}</button>`).join('')}</div>
         <div style="margin-top:12px">${dualChart(B, V[0], V[1], V[2], V[3])}</div>
-        <div class="legend"><span><i style="background:var(--accent);opacity:.35"></i>Volume</span><span><i style="background:var(--fg)"></i>Intensité</span></div>
+        <div class="legend"><span><i style="background:var(--accent)"></i>Volume</span><span><i style="background:var(--fg)"></i>Intensité</span></div>
         <div class="stats" style="margin-top:10px">${kv('volume', last[V[0]] / V[3], prev ? prev[V[0]] / V[3] : null, V[3] > 1 ? 1 : 0, V[2] === 'unités de charge' ? '' : V[2])}${kv('intensité', last[V[1]], prev?.[V[1]], 0, '%')}</div>
         ${view === 'all' ? `<p class="small" style="margin:10px 0 0">${last.gL + last.sL ? `Part de la charge : musculation ${Math.round(last.gL / (last.gL + last.sL) * 100)} %, sprint ${Math.round(last.sL / (last.gL + last.sL) * 100)} %.` : 'Rien sur cette période.'}</p>` : ''}
         <p class="small muted" style="margin:6px 0 0">${V[4]}</p></div>
@@ -6538,10 +6557,10 @@ function tBody() {
     <header class="top"><div class="sub">Charge, équilibres et symétrie</div><h1>Mon corps</h1></header>
     <div class="stack bcols"><div class="bcol pc3">${bodyCard() || '<div class="card empty"><b>Ton corps se colorera ici</b>Dès ta première séance enregistrée.</div>'}
       ${sym.length ? `<div class="card"><span class="eyebrow">Gauche / droite</span>${sym.map(x => `<div class="musrow"><span>${esc(x.n)}</span><span class="small">D ${x.d} · G ${x.g}</span><b style="${x.gap > 10 ? 'color:var(--bad)' : ''}">${fx(x.gap, 1)} %</b></div>`).join('')}<p class="small muted" style="margin-top:6px">Au-delà de 10 % d'écart, travaille d'abord le côté faible. Tes tests se notent dans Profil.</p></div>` : ''}
-      ${chainCard(st)}</div>
-      <div class="bcol pc3">${musCard(st)}
+      ${chainCard(st)}
       ${bal.length ? `<div class="card"><span class="eyebrow">Équilibres · ${GRAN_TXT[S.mgran || 'week']} · ${esc(MSRC.find(x => x[0] === (S.msrc || 'all'))[1].toLowerCase())}</span>${bal.map(b => { const [a, c] = sides[b.n], T = BAL_TXT[b.n]; return `<details class="bald${b.off ? ' off' : ''}"><summary><span>${esc(b.n)}</span><b>${fx(b.r, 2)}</b><em>${b.off ? 'à rééquilibrer' : 'correct'}</em></summary>
         <p class="small">${esc(T[0].replace('{P}', PER_TXT[S.mgran || 'week']))}</p><p class="small muted">${a.map(k => esc(v[k].n) + ' ' + fx(v[k].week)).join(' · ')} <b>contre</b> ${c.map(k => esc(v[k].n) + ' ' + fx(v[k].week)).join(' · ')}</p>${b.off ? `<p class="small"><b>Que faire :</b> ${esc(T[1])}</p>` : ''}</details>`; }).join('')}</div>` : ''}</div>
+      <div class="bcol pc3">${musCard(st)}</div>
     </div>`;
 }
 // Profil: the athlete, the tests, the max of each lift.
@@ -7622,48 +7641,46 @@ const SEGM = {fm: ['Masse grasse', '#E8900A'], mm: ['Masse musculaire', '#E0352B
 const WBM = [['weight', 'Poids', 'kg', 1, '#64D2FF', 0], ['fatPct', 'Masse grasse', '%', 1, '#E8900A', 1], ['fatKg', 'Masse grasse', 'kg', 1, '#E8900A', 1], ['muscleKg', 'Masse musculaire', 'kg', 1, '#E0352B', -1],
   ['lean', 'Masse maigre', 'kg', 1, '#30D158', -1], ['waterKg', 'Eau corporelle', 'kg', 1, '#2F7BF5', 0], ['pwv', 'Vitesse de l\'onde de pouls', 'm/s', 1, '#BF5AF2', 1], ['metaAge', 'Âge métabolique', 'ans', 0, '#A3A3A3', 1]];
 const wbVal = (k, f) => f === 'lean' ? (W(k, 'weight') != null && W(k, 'fatKg') != null ? W(k, 'weight') - W(k, 'fatKg') : null) : W(k, f) ?? null;
+// Over a year or more, one point per week (mean of its weigh-ins): the daily water swings would hide the trend.
+function wbSeries(P, get) {
+  const raw = []; for (let k = P.from; k <= P.to && k <= TODAY; k = addDays(k, 1)) { const v = get(k); if (v != null) raw.push({k, v}); }
+  if (S.gran !== 'year' && S.gran !== 'all') return raw.map(x => ({k: x.k, v: x.v, tip: cap(fmtShort(x.k))}));
+  const by = {}; for (const x of raw) (by[monday(x.k)] ||= []).push(x.v); return Object.keys(by).sort().map(m => ({k: m, v: mean(by[m]), tip: 'Semaine du ' + fmtShort(m)}));
+}
+// Usual share of each segment in the total (adults, segmental impedance): the colour shows how dense a segment is for its size.
+const SEG_REF = {ra: .065, la: .065, rl: .175, ll: .175, tr: .52};
 function fBody() {
-  const P = periodOf(S.gran, S.off), long = S.gran === 'year' || S.gran === 'all';
-  const ks = []; for (let k = P.from; k <= P.to && k <= TODAY; k = addDays(k, 1)) if (W(k, 'weight') != null || W(k, 'pwv') != null) ks.push(k);
-  // Over a year or more, one point per week (mean of its weigh-ins): the daily water swings would hide the trend.
-  const series = f => { const raw = ks.map(k => ({k, v: wbVal(k, f)})).filter(x => x.v != null); if (!long) return raw.map(x => ({k: x.k, v: x.v, tip: cap(fmtShort(x.k))}));
-    const by = {}; for (const x of raw) (by[monday(x.k)] ||= []).push(x.v); return Object.keys(by).sort().map(m => ({k: m, v: mean(by[m]), tip: 'Semaine du ' + fmtShort(m)})); };
-  const head = `<header class="top tophead"><div><div class="sub">Composition du corps · ta Withings Body Scan</div><h1>Mon corps</h1></div></header>${granSeg()}<div class="card" style="margin-top:10px;padding:8px 12px">${periodNav(P)}</div>`;
-  if (!ks.length) return head + `<div class="card empty" style="margin-top:12px"><b>Pas de pesée sur cette période</b>Change de période, ou monte sur ta balance demain matin.</div>` + fSegs(P);
-  const S2 = Object.fromEntries(WBM.map(([f]) => [f, series(f)]));
-  const tile = ([f, n, u, dec, c, dir]) => { const L = S2[f]; if (!L.length) return ''; const a = L[0].v, b = L.at(-1).v, d = L.length > 1 ? b - a : null, cls = d == null || !dir || Math.abs(d) < .05 ? '' : (d * dir < 0 ? 'up' : 'down');
-    return `<div class="wbt"><span style="color:${c}">${n}${u === '%' ? ' (%)' : ''}</span><b>${fx(b, dec)}<small> ${u === '%' ? '%' : u}</small></b>${d != null ? `<small class="${cls}">${d >= 0 ? '+' : '−'}${fx(Math.abs(d), dec)} ${u}</small>` : '<small class="muted">une pesée</small>'}</div>`; };
-  const charts = S.gran === 'day' ? '' : WBM.map(([f, n, u, dec, c]) => { const L = S2[f]; if (L.length < 2) return '';
-    return `<div class="card pc3"><div class="chead" style="margin-bottom:22px"><span class="eyebrow" style="color:${c}">${n}${u === '%' ? ' en %' : ''}</span><b class="num">${fx(L.at(-1).v, dec)} ${u}</b></div>${chart(L, {color: c, dec, unit: ' ' + u})}</div>`; }).join('');
-  const lastK = ks.at(-1);
-  return head + `<div class="stack" style="margin-top:12px">
-      <div class="card pc6"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">${S.gran === 'day' ? 'Ta pesée' : 'Dernière pesée · ' + esc(cap(fmtShort(lastK)))}${W(lastK, 'time') ? ' · ' + esc(W(lastK, 'time')) : ''}</span><span class="small muted">${S.gran === 'day' ? '' : `${ks.length} pesée${ks.length > 1 ? 's' : ''} · écart sur la période`}</span></div>
-        <div class="wbts">${WBM.map(tile).join('')}</div></div>
-      ${charts}
-    </div>
-    <p class="note" style="text-align:left">Toutes les mesures de ta balance, telles qu'elle les envoie. Masse maigre = poids − masse grasse. Vitesse de l'onde de pouls : plus elle est basse, plus tes artères sont souples. Sur une année ou plus, un point par semaine (moyenne de ses pesées). Pèse-toi le matin, à jeun, après être passé aux toilettes : c'est ce qui rend les pesées comparables.</p>
-    ${fSegs(P)}`;
-}
-function fSegs(P) {
-  const m = S.nseg || 'mm', [lab, col] = SEGM[m];
+  const P = periodOf(S.gran, S.off), m = S.nseg || 'mm', [lab, col] = SEGM[m], day = S.gran === 'day';
   const days = []; for (let k = P.from; k <= P.to && k <= TODAY; k = addDays(k, 1)) { const sg = W(k, 'seg'); if (sg?.[m]) days.push({k, sg: sg[m]}); }
-  const all = Object.keys(S.withings || {}).length ? null : null;
-  const last = days.at(-1), first = days[0];
-  const head = `<h2>Bras, jambes et tronc</h2><div class="seg" role="group" aria-label="Mesure">${Object.entries(SEGM).map(([v, [l]]) => `<button type="button" data-nseg="${v}" aria-pressed="${m === v}">${l}</button>`).join('')}</div>`;
-  if (!last) return head + `<div class="card empty pc6" style="margin-top:12px"><b>Tes segments arrivent avec la prochaine pesée</b>Ta Body Scan mesure la masse grasse et la masse musculaire de chaque bras, de chaque jambe et du tronc (impédance segmentaire à 8 électrodes). La synchro va chercher ces valeurs à chaque pesée ; elles s'afficheront ici, sur ton corps, avec leur évolution jour, semaine, mois et année.</div>`;
-  const vals = SEGS.map(([id]) => last.sg[id]).filter(v => v != null), mx = Math.max(...vals), mn = Math.min(...vals);
-  const ell = SEGS.map(([id, n, cx, cy, rx, ry]) => { const v = last.sg[id]; if (v == null) return ''; const f = mx > mn ? (v - mn) / (mx - mn) : .5; return `<ellipse cx="${cx}" cy="${cy}" rx="${rx + 4}" ry="${ry}" fill="${col}" opacity="${(.3 + f * .6).toFixed(2)}" filter="url(#soft)"/>`; }).join('');
-  const rows = SEGS.map(([id, n]) => { const pts = days.map(d => ({k: d.k, v: d.sg[id] ?? null, tip: cap(fmtShort(d.k))})), a = first.sg[id], b = last.sg[id]; if (b == null) return '';
-    const d = a != null && days.length > 1 ? b - a : null, good = m === 'mm' ? d >= 0 : d <= 0;
-    return `<div class="card segc"><div class="chead" style="margin:0"><span class="eyebrow">${n}</span><b class="num nowrap">${fx(b, 2)} kg${d != null ? ` <small class="${good ? 'up' : 'down'}">${d >= 0 ? '+' : '−'}${fx(Math.abs(d), 2)}</small>` : ''}</b></div><div style="margin-top:10px">${miniLine(pts, col)}</div></div>`; }).join('');
-  const sym = (a, b) => a && b ? Math.abs(a - b) / ((a + b) / 2) * 100 : null, sA = sym(last.sg.ra, last.sg.la), sL = sym(last.sg.rl, last.sg.ll);
-  return head + `<div class="stack" style="margin-top:12px"><div class="card segbody pc6"><span class="eyebrow">${lab} · ${esc(cap(fmtShort(last.k)))}</span>
+  const head = `<header class="top tophead"><div><div class="sub">Segment par segment · ta Withings Body Scan</div><h1>Mon corps</h1></div></header>${granSeg()}<div class="card" style="margin-top:10px;padding:8px 12px">${periodNav(P)}</div>
+    <div class="seg" role="group" aria-label="Mesure">${Object.entries(SEGM).map(([v, [l]]) => `<button type="button" data-nseg="${v}" aria-pressed="${m === v}">${l}</button>`).join('')}</div>`;
+  if (!days.length) { const any = Object.values(S.w || {}).some(d => d?.seg);
+    return head + `<div class="card empty" style="margin-top:12px"><b>${any ? 'Pas de pesée sur cette période' : 'Tes segments arrivent avec la prochaine pesée'}</b>${any ? 'Change de période, ou monte sur ta balance demain matin.' : 'Ta Body Scan mesure la masse grasse et la masse musculaire de chaque bras, de chaque jambe et du tronc. Elles s\'afficheront ici, sur ton corps, avec leur évolution.'}</div>`; }
+  const first = days[0], last = days.at(-1);
+  // The value shown: the weigh-in of the day, or the mean of the period.
+  const val = id => { if (day) return last.sg[id] ?? null; const v = days.map(d => d.sg[id]).filter(x => x != null); return v.length ? mean(v) : null; };
+  const V = Object.fromEntries(SEGS.map(([id]) => [id, val(id)])), tot = Object.values(V).reduce((a, x) => a + (x || 0), 0);
+  const dens = id => V[id] == null || !tot ? null : V[id] / tot / SEG_REF[id];
+  const ell = SEGS.map(([id, n, cx, cy, rx, ry]) => { const d = dens(id); if (d == null) return ''; return `<ellipse cx="${cx}" cy="${cy}" rx="${rx + 4}" ry="${ry}" fill="${col}" opacity="${(.18 + clamp((d - .8) / .4, 0, 1) * .77).toFixed(2)}" filter="url(#soft)"/>`; }).join('');
+  const delta = id => { const a = first.sg[id], b = last.sg[id]; return a != null && b != null && days.length > 1 ? b - a : null; };
+  const dTxt = d => d == null ? '' : `<small class="${(m === 'mm' ? d >= 0 : d <= 0) ? 'up' : 'down'}">${d >= 0 ? '+' : '−'}${fx(Math.abs(d), 2)} kg</small>`;
+  const sym = (a, b) => a && b ? Math.abs(a - b) / ((a + b) / 2) * 100 : null, sA = sym(V.ra, V.la), sL = sym(V.rl, V.ll);
+  const card = ([id, n]) => { if (V[id] == null) return ''; const pts = wbSeries(P, k => W(k, 'seg')?.[m]?.[id] ?? null);
+    return `<div class="card segc ${id === 'tr' ? 'pc6' : 'pc3'}" id="seg-${id}"><div class="chead" style="margin-bottom:${day ? 0 : 22}px"><span class="eyebrow" style="color:${col}">${n}</span><b class="num nowrap">${day ? '' : '<small class="muted">moy. </small>'}${fx(V[id], 2)} kg ${dTxt(delta(id))}</b></div>
+      ${day ? `<p class="small muted" style="margin:6px 0 0">Pesée du ${esc(fmtShort(last.k))}. Choisis Semaine, Mois ou Année pour voir sa courbe.</p>` : pts.length > 1 ? chart(pts, {color: col, dec: 2, unit: 'kg', w: id === 'tr' && isPC() ? 1160 : undefined}) : '<p class="small muted" style="margin:0">Une seule pesée sur cette période.</p>'}</div>`; };
+  return head + `<div class="stack" style="margin-top:12px">
+      <div class="card segbody pc6"><div class="chead" style="margin:0"><span class="eyebrow">${lab} · ${day ? esc(cap(fmtShort(last.k))) : `moyenne de ${days.length} pesée${days.length > 1 ? 's' : ''}`}</span><b class="num nowrap">${fx(tot, 1)} kg</b></div>
       <div class="segw"><svg viewBox="0 0 200 392" role="img" aria-label="${lab} par segment">${silBase('front')}<g clip-path="url(#silc)" pointer-events="none">${ell}</g></svg>
-      <div class="segl">${SEGS.map(([id, n]) => last.sg[id] != null ? `<div><span>${n}</span><b>${fx(last.sg[id], 2)} kg</b></div>` : '').join('')}</div></div>
-      <p class="small muted" style="margin:8px 0 0">Plus la couleur est vive, plus le segment en a. Écart gauche / droite : bras ${sA != null ? fx(sA, 1) + ' %' : '–'}, jambes ${sL != null ? fx(sL, 1) + ' %' : '–'}. Au-delà de 10 % d'écart sur les jambes, un déséquilibre de force est probable chez le sprinteur.</p></div>
-    ${rows}</div>
-    <p class="note" style="text-align:left">Mesures brutes de ta Body Scan (impédance segmentaire). Fiables pour suivre une tendance pesée après pesée, le matin à jeun ; moins précises qu'une DEXA en valeur absolue.</p>`;
+      <div class="segl">${SEGS.map(([id, n]) => V[id] != null ? `<button type="button" data-segjump="${id}"><span>${n}</span><b>${fx(V[id], 2)} kg${delta(id) != null ? dTxt(delta(id)) : ''}</b></button>` : '').join('')}</div></div>
+      <div class="segleg"><span>moins dense</span><i style="background:linear-gradient(90deg,${col}2e,${col})"></i><span>plus dense</span></div>
+      <p class="small muted" style="margin:8px 0 0">Couleur : densité du segment, sa part de ton total comparée à la part habituelle de ce segment. Touche un segment pour voir sa courbe. Écart gauche / droite : bras ${sA != null ? fx(sA, 1) + ' %' : '–'}, jambes ${sL != null ? fx(sL, 1) + ' %' : '–'} ; au-delà de 10 % sur les jambes, un déséquilibre de force est probable.</p></div>
+      ${SEGS.filter(([id]) => id === 'ra' || id === 'la').map(card).join('')}
+      ${card(SEGS.find(x => x[0] === 'tr'))}
+      ${SEGS.filter(([id]) => id === 'rl' || id === 'll').map(card).join('')}
+    </div>
+    <p class="note" style="text-align:left">Mesures brutes de ta Body Scan (impédance segmentaire). Sur une période, chaque valeur est la moyenne de tes pesées ; l'écart est celui entre la première et la dernière. Sur une année ou plus, un point par semaine. Fiables pour suivre une tendance, le matin à jeun ; moins précises qu'une DEXA en valeur absolue. Poids, eau et autres mesures : dans Tendances.</p>`;
 }
+document.addEventListener('click', e => { const b = e.target.closest('[data-segjump]'); if (!b) return; const c = $('#seg-' + b.dataset.segjump); if (!c) return; c.scrollIntoView({behavior: 'smooth', block: 'center'}); c.classList.add('flash'); setTimeout(() => c.classList.remove('flash'), 1400); });
 document.addEventListener('click', e => { const b = e.target.closest('[data-nseg]'); if (!b) return; S.nseg = b.dataset.nseg; renderMod(true); });
 function fJournal() {
   const k = S.fday, g = fuelGoal(k), t = dayTotals(k), d = fday(k), left = g.kcal - t.kcal;
@@ -7688,7 +7705,7 @@ function fJournal() {
         return `<div class="list meal"><h3>${lab}${tm ? ` <span class="mt">${tfr(tm)}</span>` : ''}<small>${kc ? fx(kc) + ' kcal' : ''}</small></h3>
           ${its.map(it => `<button class="rowbtn" data-fitem="${it.i}"><span><b>${esc(it.n)}</b><span class="meta">${fx(it.g)} g · P ${fx(it.p)} · G ${fx(it.c)} · L ${fx(it.f)}</span></span><span class="kc">${fx(it.kcal)}</span></button>`).join('')}
           <button class="addbtn" data-fadd="${m}">+ Ajouter un aliment</button>${!its.length && hasP ? `<button class="addbtn" data-fplanmeal="${m}" style="color:var(--fg2);font-weight:500">Remettre le ${lab.toLowerCase()} du plan</button>` : ''}${!its.length && hasY ? `<button class="addbtn" data-fcopy="${m}" style="color:var(--fg2);font-weight:500">Reprendre le ${lab.toLowerCase()} de la veille</button>` : ''}</div>`; }).join('')}
-      <div class="card"><span class="eyebrow">Aliment de la semaine</span><p style="margin:6px 0 0"><b>${esc(weekFood()[0])}</b></p><p class="small muted" style="margin:4px 0 0">${esc(weekFood()[1])}.</p></div>
+      <div class="card wfood"><div><span class="eyebrow">Aliment de la semaine</span><p style="margin:6px 0 0"><b>${esc(weekFood()[0])}</b></p><p class="small muted" style="margin:4px 0 0">${esc(weekFood()[1])}.</p></div><button type="button" class="chip on" data-fweek>+ Ajouter</button></div>
     </div>
     ${detailsBox(g.fromPlan ? 'Objectifs = les totaux de ton plan alimentaire, identiques chaque jour. Le calcul de ta dépense est dans Objectifs.' : `Objectifs de la semaine calculés sur ton poids Withings (${fx(g.w, 1)} kg) et ta dépense. Détail dans Objectifs.`)}${footer()}`;
 }
@@ -7704,18 +7721,24 @@ function fProgress() {
   const val = m => { const v = []; for (let k = P.from; k <= P.to && k <= TODAY; k = addDays(k, 1)) { const x = VAL[m.id](k); if (x != null) v.push(x); } return v; };
   const head = (m, sm) => { const v = val(m), now = v.at(-1), d = v.length > 1 ? now - v[0] : null;
     return `<div class="chead${sm ? ' vt' : ''}" style="margin:0"><span class="eyebrow">${m.lab}</span><b class="num nowrap">${now == null ? '–' : fx(now, m.dec) + ' ' + m.unit}${d != null ? ` <small class="${d >= 0 ? 'up' : 'down'}">${d >= 0 ? '+' : '−'}${fx(Math.abs(d), m.dec)}</small>` : ''}</b></div>`; };
-  const big = m => `<button class="card tcard" data-metric="${m.open}">${head(m)}<div style="margin-top:22px">${metricChart(m).html}</div></button>`;
+  const big = m => `<button class="card tcard pc3" data-metric="${m.open}">${head(m)}<div style="margin-top:22px">${metricChart(m).html}</div></button>`;
   const small = m => { const pts = []; for (let k = P.from; k <= P.to && k <= TODAY; k = addDays(k, 1)) pts.push({k, v: VAL[m.id](k)}); return `<button class="card tcard" data-metric="${m.open}">${head(m, true)}<div style="margin-top:10px">${miniLine(pts, m.c)}</div></button>`; };
   const days = []; for (let k = P.from; k <= P.to && k <= TODAY; k = addDays(k, 1)) days.push({k, lab: DOW[(dow(k) + 6) % 7], tip: cap(fmtShort(k)), ...dayTotals(k)});
+  const wk = Object.keys(S.w || {}).filter(k => k <= TODAY && W(k, 'weight') != null).sort(), lk = wk.at(-1), pk = wk.at(-2);
+  const tile = ([f, n, u, dec, c, dir]) => { const b = lk ? wbVal(lk, f) : null; if (b == null) return ''; const a = pk ? wbVal(pk, f) : null, d = a != null ? b - a : null, cls = d == null || !dir || Math.abs(d) < .05 ? '' : (d * dir < 0 ? 'up' : 'down');
+    return `<div class="wbt"><span style="color:${c}">${n}${u === '%' ? ' (%)' : ''}</span><b>${fx(b, dec)}<small> ${u}</small></b>${d != null ? `<small class="${cls}">${d >= 0 ? '+' : '−'}${fx(Math.abs(d), dec)} ${u}</small>` : ''}</div>`; };
+  const lastCard = lk ? `<div class="card pc6"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Dernière pesée · ${esc(cap(fmtShort(lk)))}${W(lk, 'time') ? ' · ' + esc(W(lk, 'time')) : ''}</span><span class="small muted">écart avec la pesée d'avant</span></div><div class="wbts">${WBM.map(tile).join('')}</div></div>` : '';
+  const extra = S.gran === 'day' ? '' : WBM.filter(([f]) => ['waterKg', 'pwv', 'metaAge'].includes(f)).map(([f, n, u, dec, c]) => { const L = wbSeries(P, k => wbVal(k, f)); if (L.length < 2) return '';
+    return `<div class="card pc3"><div class="chead" style="margin-bottom:22px"><span class="eyebrow" style="color:${c}">${n}</span><b class="num">${fx(L.at(-1).v, dec)} ${u}</b></div>${chart(L, {color: c, dec, unit: u})}</div>`; }).join('');
   return `
     <header class="top tophead"><div><div class="sub">Ton corps et ton assiette</div><h1>Tendances</h1></div><div class="seg unitseg" role="group" aria-label="Unité">${[['kg', 'kg'], ['pct', '%']].map(([v, l]) => `<button type="button" data-nunit="${v}" aria-pressed="${(S.nunit || 'kg') === v}">${l}</button>`).join('')}</div></header>
     ${granSeg()}
     <div class="card" style="margin-top:10px;padding:8px 12px">${periodNav(P)}</div>
     <div class="stack" style="margin-top:12px">
-      ${big(B.w)}
-      ${isPC() ? big(B.m) + big(B.f) : `<div class="two">${small(B.m)}${small(B.f)}</div>`}
-      ${big(B.l)}
-      <div class="card"><span class="eyebrow">Macros mangées</span><div class="mleg"><span style="--c:#E0352B">Protéines</span><span style="--c:#F2C200">Lipides</span><span style="--c:#F07A1A">Glucides</span></div>${macroChart(days.length > 1 ? days : [...Array(7)].map((_, i) => { const k = addDays(TODAY, i - 6); return {k, lab: DOW[(dow(k) + 6) % 7], tip: cap(fmtShort(k)), ...dayTotals(k)}; }))}</div>
+      ${lastCard}
+      ${big(B.m)}${big(B.f)}${big(B.w)}${big(B.l)}
+      ${extra}
+      <div class="card pc6"><span class="eyebrow">Macros mangées</span><div class="mleg"><span style="--c:#E0352B">Protéines</span><span style="--c:#F2C200">Lipides</span><span style="--c:#F07A1A">Glucides</span></div>${macroChart(days.length > 1 ? days : [...Array(7)].map((_, i) => { const k = addDays(TODAY, i - 6); return {k, lab: DOW[(dow(k) + 6) % 7], tip: cap(fmtShort(k)), ...dayTotals(k)}; }))}</div>
       ${bloodTrend()}
     </div>`;
 }
@@ -8225,8 +8248,8 @@ async function saveDay(k, d) { delete d.fromPlan; S.fuel[k] = d; renderMod(); aw
 
 /* ---------- Fuel: add a food ---------- */
 let OFF = {q: '', res: [], t: null};
-function addFood(meal) {
-  let q = '';
+function addFood(meal, q0) {
+  let q = q0 || '';
   const onCode = async code => {
     const mine = myFoods().find(f => f.code === code); if (mine) { qtyPane(mine, meal); return; }
     toast('Recherche du produit…');
@@ -8418,6 +8441,7 @@ document.addEventListener('click', e => {
   // Fuel
   if ((b = at('[data-fdayoff]'))) { S.fday = addDays(S.fday, +b.dataset.fdayoff); if (S.fday > TODAY) S.fday = TODAY; renderMod(); return; }
   if ((b = at('[data-fadd]'))) { addFood(b.dataset.fadd); return; }
+  if (at('[data-fweek]')) { const h = new Date().getHours(), w = weekFood()[0].toLowerCase(); addFood(h < 10 ? 'breakfast' : h < 15 ? 'lunch' : h < 19 ? 'snack' : 'dinner', (w.match(/^(foie|sardine|maquereau|épinard|brocoli|poivron|betterave|lentille|kiwi|orange|œuf)/) || [w.split(' ')[0]])[0]); setTimeout(() => P.stack.at(-1)?.setQ?.($('#ff-q')?.value || ''), 0); return; }
   if ((b = at('[data-fmeal]'))) { P.stack.at(-1).setMeal(b.dataset.fmeal); return; }
   if ((b = at('[data-fpick]'))) { pickFood(b.dataset.fpick, P.stack.at(-1).meal()); return; }
   if ((b = at('[data-fitem]'))) { const i = +b.dataset.fitem, it = fday(S.fday).items[i]; qtyPane({n: it.n, kcal: it.kcal / it.g * 100, p: it.p / it.g * 100, c: it.c / it.g * 100, f: it.f / it.g * 100, g: it.g, id: it.food}, it.meal, i); return; }
