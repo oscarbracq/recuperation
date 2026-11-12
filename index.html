@@ -3776,6 +3776,22 @@ async function awSync(force) {
       const doc = {...cur, date: k, pc}; (S.screen ||= {})[k] = doc;
       try { await S.db.doc('screen/' + k).set(doc); } catch (e) {}
     }
+    // The phone: ActivityWatch for Android sends its data into a shared folder, aw-sync brings it into this PC's server.
+    const phb = ids.find(i => /^aw-watcher-android/.test(i) && !/unlock/.test(i));
+    if (phb) {
+      const pf = key(new Date(bk[phb].created || Date.now())), hp = Object.values(S.screen || {}).some(d => d.ph?.src === 'sync'), pd = [];
+      for (let i = 0; i < (hp ? 8 : 120); i++) { const k = addDays(TODAY, -i); if (k < pf) break; pd.push(k); }
+      const pr = await (await fetch(base + 'query/', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({timeperiods: pd.map(dayPeriod), query: [`p = flood(query_bucket("${phb}"));`, 'RETURN = merge_events_by_keys(p, ["app"]);']})})).json();
+      for (let i = 0; i < pd.length; i++) {
+        const k = pd[i], a = {}; for (const e of pr[i] || []) { const n = String(e.data?.app || '').trim(); if (n) a[n] = (a[n] || 0) + e.duration; }
+        const t = Object.values(a).reduce((x, y) => x + y, 0); if (t < 60) continue;
+        const ph = {t: Math.round(t), apps: scrTop(a), at: new Date().toISOString(), src: 'sync'}, cur = S.screen?.[k] || {};
+        if (cur.ph && cur.ph.t === ph.t) continue;
+        const doc = {...cur, date: k, ph}; (S.screen ||= {})[k] = doc;
+        try { await S.db.doc('screen/' + k).set(doc); } catch (e) {}
+      }
+      AW.phone = true;
+    } else AW.phone = false;
     AW.ok = true; AW.err = '';
   } catch (e) { AW.ok = false; AW.err = e?.message === 'nobucket' ? 'nobucket' : 'off'; }
   finally { AW.busy = false; AW.at = Date.now(); if (S.mod === 'R') render(); if (P.stack.length && SCRP.open) paneRender(); }
@@ -3841,7 +3857,7 @@ function scrPane(dev) {
     const list = Object.entries(rows).sort((a, b) => b[1] - a[1]), mx = list[0]?.[1] || 1;
     const row = ([id, v], ic) => { const [d, n] = id.split('|'); return `<div class="scr-row"><span class="scr-n">${SCRP.dev === 'all' ? `<i class="scr-d">${d === 'ph' ? PH_IC : PC_IC}</i>` : ''}<span>${esc(n)}</span></span><b>${durTxt(Math.round(v))}</b><span class="scr-bar"><i style="width:${Math.max(2, v / mx * 100).toFixed(1)}%"></i></span></div>`; };
     const sl = Object.entries(sites).sort((a, b) => b[1] - a[1]).slice(0, 15), smx = sl[0]?.[1] || 1;
-    const pcState = AW_DESK ? (AW.ok ? `Ordinateur relié à ActivityWatch, mis à jour à ${new Date(AW.at).toTimeString().slice(0, 5)}.` : AW.busy ? 'Lecture d\'ActivityWatch…' : AW.err === 'nobucket' ? 'ActivityWatch tourne, mais n\'a encore rien enregistré.' : 'ActivityWatch ne répond pas sur ce PC : vérifie qu\'il est lancé (icône près de l\'heure), puis autorise l\'appli à y accéder si Edge te le demande.')
+    const pcState = AW_DESK ? (AW.ok ? `Ordinateur relié à ActivityWatch, mis à jour à ${new Date(AW.at).toTimeString().slice(0, 5)}. ${AW.phone ? 'Le téléphone arrive aussi tout seul, par la synchro ActivityWatch.' : 'Le téléphone n\'est pas encore synchronisé avec le PC.'}` : AW.busy ? 'Lecture d\'ActivityWatch…' : AW.err === 'nobucket' ? 'ActivityWatch tourne, mais n\'a encore rien enregistré.' : 'ActivityWatch ne répond pas sur ce PC : vérifie qu\'il est lancé (icône près de l\'heure), puis autorise l\'appli à y accéder si Edge te le demande.')
       : 'Le temps d\'ordinateur arrive tout seul quand l\'appli est ouverte sur ton PC.';
     return `<div class="seg" role="group" aria-label="Appareil" style="margin:16px 0 8px">${[['all', 'Tout'], ['ph', 'Téléphone'], ['pc', 'Ordinateur']].map(([v, l]) => `<button type="button" data-scrdev="${v}" aria-pressed="${SCRP.dev === v}">${l}</button>`).join('')}</div>
       <div class="seg" role="group" aria-label="Période">${SCR_PER.map(([v, l]) => `<button type="button" data-scrper="${v}" aria-pressed="${SCRP.per === v}">${l}</button>`).join('')}</div>
