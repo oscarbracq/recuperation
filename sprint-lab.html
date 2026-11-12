@@ -3673,7 +3673,7 @@ async function awSync(force) {
     const ids = Object.keys(bk), afk = ids.find(i => i.startsWith('aw-watcher-afk')), win = ids.find(i => i.startsWith('aw-watcher-window')), web = ids.find(i => i.startsWith('aw-watcher-web'));
     if (!afk || !win) throw new Error('nobucket');
     const first = key(new Date(bk[win].created || Date.now())), had = Object.values(S.screen || {}).some(d => d.pc);
-    const days = []; for (let i = 0; i < (had ? 8 : 90); i++) { const k = addDays(TODAY, -i); if (k < first) break; days.push(k); }
+    const days = []; for (let i = 0; i < (had ? 31 : 90); i++) { const k = addDays(TODAY, -i); if (k < first) break; days.push(k); }
     const q = async body => (await fetch(base + 'query/', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({timeperiods: days.map(dayPeriod), query: body})})).json();
     const act = `afk = flood(query_bucket("${afk}")); act = filter_keyvals(afk, "status", ["not-afk"]);`;
     const apps = await q([act, `w = flood(query_bucket("${win}"));`, 'w = filter_period_intersect(w, act);', 'RETURN = merge_events_by_keys(w, ["app"]);']);
@@ -3731,7 +3731,7 @@ const PKG = {'com.instagram.android': 'Instagram', 'com.google.android.youtube':
   'com.sec.android.app.sbrowser': 'Samsung Internet', 'com.netflix.mediaclient': 'Netflix', 'com.spotify.music': 'Spotify', 'com.strava': 'Strava', 'com.garmin.android.apps.connectmobile': 'Garmin Connect',
   'com.samsung.android.messaging': 'Messages', 'com.google.android.apps.messaging': 'Messages', 'org.telegram.messenger': 'Telegram', 'com.reddit.frontpage': 'Reddit', 'tv.twitch.android.app': 'Twitch',
   'com.discord': 'Discord', 'com.google.android.apps.maps': 'Maps', 'com.google.android.gm': 'Gmail', 'com.linkedin.android': 'LinkedIn', 'com.pinterest': 'Pinterest', 'com.amazon.avod.thirdpartyclient': 'Prime Video',
-  'com.disney.disneyplus': 'Disney+', 'com.google.android.youtube.tv': 'YouTube', 'com.android.vending': 'Play Store', 'com.sec.android.app.camera': 'Appareil photo', 'com.sec.android.gallery3d': 'Galerie', 'com.supercell.clashroyale': 'Clash Royale', 'com.supercell.hayday': 'Hay Day', 'com.epicgames.fortnite': 'Fortnite', 'jp.pokemon.pokemontcgp': 'Pokémon TCGP', 'com.anthropic.claude': 'Claude', 'com.google.android.googlequicksearchbox': 'Google', 'com.withings.wiscale2': 'Withings', 'com.google.android.apps.youtube.music': 'YouTube Music', 'com.microsoft.office.outlook': 'Outlook', 'com.yahoo.mobile.client.android.mail': 'Yahoo Mail'};
+  'com.disney.disneyplus': 'Disney+', 'com.google.android.youtube.tv': 'YouTube', 'com.android.vending': 'Play Store', 'com.sec.android.app.camera': 'Appareil photo', 'com.sec.android.gallery3d': 'Galerie', 'com.supercell.clashroyale': 'Clash Royale', 'com.supercell.hayday': 'Hay Day', 'com.epicgames.fortnite': 'Fortnite', 'jp.pokemon.pokemontcgp': 'Pokémon TCGP', 'com.anthropic.claude': 'Claude', 'com.google.android.googlequicksearchbox': 'Google', 'com.withings.wiscale2': 'Withings', 'com.google.android.apps.youtube.music': 'YouTube Music', 'com.microsoft.office.outlook': 'Outlook', 'com.yahoo.mobile.client.android.mail': 'Yahoo Mail', 'com.microsoft.office.excel': 'Excel', 'com.samsung.android.app.notes': 'Samsung Notes'};
 const pkgName = p => PKG[p] || String(p).split('.').filter(x => !/^(com|org|net|android|app|apps|google|samsung|sec|tv)$/.test(x)).map(x => x.charAt(0).toUpperCase() + x.slice(1)).join(' ') || p;
 function phAuto(k) {
   const x = S.screenph?.[k]; if (!x || !(+x.t > 0)) return null;
