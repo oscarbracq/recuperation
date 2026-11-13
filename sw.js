@@ -1,4 +1,4 @@
-﻿// TNR Athletics â€” offline fallback only. Every same-origin file is network-first, so the phone
+// TNR Athletics â€” offline fallback only. Every same-origin file is network-first, so the phone
 // always runs one consistent version when online; the cache only serves when there is no network.
 // Supabase data is never cached here: the app reads it live.
 const CACHE = 'recup-v96';
