@@ -484,8 +484,11 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .pchk{background:var(--card);border-radius:20px;padding:6px 0 4px}
 .pck{display:grid;grid-template-columns:52px 4px 1fr 22px;align-items:center;gap:10px;width:100%;padding:9px 14px;background:none;border:0;color:var(--fg);text-align:left;font:inherit}
 .pck .t{font-size:.75rem;color:var(--fg2)}.pck i{width:4px;height:22px;border-radius:2px;opacity:.9}.pck .n{font-size:.9375rem;transition:color .2s,opacity .2s}
-.pck .ck{width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--fg2);display:grid;place-items:center;transition:background .2s,box-shadow .2s}
-.pck.on .ck{background:#30D158;box-shadow:none}.pck.on .ck::after{content:'';width:9px;height:5px;border:2px solid #000;border-top:0;border-right:0;transform:translateY(-1px) rotate(-45deg)}
+.pck .ck,.pckm .ck{width:22px;height:22px;border-radius:6px;box-shadow:inset 0 0 0 1.5px var(--fg2);display:grid;place-items:center;transition:background .2s,box-shadow .2s}
+.pck .n small{display:block;font-size:.6875rem;color:var(--fg2)}
+.pck-meals{padding:10px 14px;display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line)}.pck-meals>span{font-size:.875rem}.pck-meals small{color:var(--fg2);font-size:.6875rem;margin-left:4px}.pck-meals>div{display:flex;flex-wrap:wrap;gap:6px}
+.pckm{display:inline-flex;align-items:center;gap:6px;padding:6px 10px 6px 6px;border-radius:10px;background:var(--card2);border:0;color:var(--fg);font:inherit;font-size:.8125rem}.pckm .ck{width:18px;height:18px;border-radius:5px;box-shadow:inset 0 0 0 1.5px var(--fg2);display:grid;place-items:center}.pckm:not(.on){color:var(--fg2);text-decoration:line-through}
+.pck.on .ck,.pckm.on .ck{background:#30D158;box-shadow:none}.pck.on .ck::after,.pckm.on .ck::after{content:'';width:9px;height:5px;border:2px solid #000;border-top:0;border-right:0;transform:translateY(-1px) rotate(-45deg)}
 .pck:not(.on) .n{color:var(--fg2);text-decoration:line-through;opacity:.7}.pck:not(.on) i{opacity:.3}
 .pck-sum{margin:2px 14px 6px;font-size:.75rem;color:var(--fg2)}
 .rbtl .rq{touch-action:none;-webkit-user-select:none;user-select:none;cursor:ns-resize}.rbtl .rq small{font-size:.6875rem}.rbtl .rq.on{box-shadow:inset 0 0 0 1.5px #40C8E0}
@@ -1097,8 +1100,11 @@ body.bdragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
 .nextc .chiptag{background:var(--card2);color:var(--fg)}
 .bchip .bx{padding:0;line-height:0}.bchip .bx svg{display:block}
 /* In a day cell the cross sits inside the chip, on its right, centred. A cell with a block is never dimmed. */
-:root:not(.pc) .sboard{padding-left:12px;padding-right:12px}:root:not(.pc) .bweek{grid-template-columns:16px repeat(7,minmax(0,1fr));gap:2px}:root:not(.pc) .bcell{padding:4px 2px}
-:root:not(.pc) .bcell .bchip{padding:3px 2px 3px 3px;gap:2px;font-size:.625rem;letter-spacing:-.01em}.bcell .bchip{gap:3px;flex:1;min-height:30px;border-radius:8px}:root:not(.pc) .bcell .bchip{margin:0 -2px}.bcell .bchip.ghost{flex:none;min-height:0}.bcell .bchip span{text-overflow:clip}.bcell .bchip .bx{width:15px;height:15px;background:rgba(0,0,0,.3)}.bcell .bchip .bx svg{width:8px;height:8px}.pc .bcell .bchip .bx{width:16px;height:16px}.pc .bcell .bchip .bx svg{width:8px;height:8px}
+:root:not(.pc) .sboard{padding-left:12px;padding-right:12px}:root:not(.pc) .bweek{grid-template-columns:12px repeat(7,minmax(0,1fr));gap:2px}:root:not(.pc) .bcell{padding:4px 3px}
+:root:not(.pc) .bcell .bchip{padding:0 1.5px 0 2.5px;gap:0;font-size:.625rem;letter-spacing:-.03em}:root:not(.pc) .bcell .bchip .bx{width:12px;height:12px}.bcell .bchip{gap:3px;flex:none;height:28px;margin-top:auto;border-radius:8px}.pc .bcell .bchip{height:34px}.bcell .bchip.ghost{height:auto}
+.bchip.miss{background:#7A1F2B;color:#fff}.chiptag.miss{background:#7A1F2B;color:#fff;display:inline-flex;align-items:center;gap:6px}.skipc{box-shadow:inset 3px 0 0 #7A1F2B}.skipb{display:flex;flex-direction:column;gap:2px;box-shadow:inset 3px 0 0 #7A1F2B}
+.btnrow.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btnrow.two .btn{width:100%}.linkcard{display:block;width:100%;background:none;border:0;padding:0;margin:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.bsrc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.pc .bsrc{grid-template-columns:repeat(4,minmax(0,1fr))}.bchip.src{width:100%;min-width:0}.bchip.src span,.bchip.src small{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bcell .bchip span{text-overflow:clip}.bcell .bchip .bx{width:13px;height:13px;background:rgba(0,0,0,.3)}.bcell .bchip .bx svg{width:7px;height:7px}.pc .bcell .bchip .bx{width:16px;height:16px}.pc .bcell .bchip .bx svg{width:8px;height:8px}
 .bcell:has(.bchip){opacity:1}.rboard .bcell{opacity:1;cursor:pointer}.rboard .bcell.past{opacity:.45;cursor:default}
 .segl button{flex-direction:column;align-items:flex-start;gap:1px;cursor:pointer}.segl button b small{margin-left:4px}
 .plg-chip{display:block;width:max-content;max-width:100%;margin-top:4px;padding:3px 8px;border-radius:7px;background:var(--pc);color:#fff;font-size:.6875rem;font-weight:700;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.25)}
@@ -1107,6 +1113,8 @@ body.bdragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
 .rtl-b.new b{font-size:.875rem;font-weight:700}
 .rtl-b.new{--pc:var(--accent);background:var(--accent);color:#fff;z-index:2;box-shadow:0 4px 14px rgba(0,0,0,.35);transition:top .2s cubic-bezier(.32,.72,0,1)}
 .rse-act{display:flex;gap:6px;flex:none}
+.rsh-top{display:grid;grid-template-columns:1fr 1fr;gap:8px}.rsh-top div{background:var(--card2);border-radius:12px;padding:10px;text-align:center}.rsh-top b{display:block;font:700 1.75rem var(--display);line-height:1.1}.rsh-top span{font-size:.75rem;color:var(--fg2)}
+.rsteps2 .row{align-items:flex-start;gap:12px}.rsteps2 .rsn{flex:none;width:24px;height:24px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:.8125rem;display:grid;place-items:center;margin-top:1px}
 .segw{display:grid;grid-template-columns:minmax(96px,220px) minmax(0,1fr);gap:12px;align-items:center;margin-top:8px}.segw svg{width:100%;height:auto}
 .segl{display:grid;gap:6px}.segl div{display:flex;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:10px;background:var(--card2);font-size:.875rem}.segl b{font-variant-numeric:tabular-nums}
 /* v72 */
@@ -1423,8 +1431,13 @@ const S = { db: null, g: {}, w: {}, manual: {}, analysis: null, reports: [], pro
 // Season weeks run Monday to Sunday; week 1 is the week of 31 August 2026 unless the profile says otherwise.
 function seasonWeek(k) { const s = S.profile?.seasonStart || '2026-08-31'; return Math.floor((new Date(k + 'T12:00:00') - new Date(s + 'T12:00:00')) / 6048e5) + 1; }
 const GYM_RE = /strength|fitness_equipment|hiit|cardio_training|training/;
-function gymAct(k) { return (G(k, 'acts') || []).find(a => GYM_RE.test(a.type)); }
-function trackAct(k) { return (G(k, 'acts') || []).find(a => /track/.test(a.type) || (/running/.test(a.type) && (a.start || '') >= '16:00')); }
+// The watch's activity that is the same session as the one started in the app: it began around the same time
+// (from 45 min before to 3 h after the app's start). Otherwise, for sprint: a track run, a run that reached sprint
+// speed (24 km/h or more), or an evening run.
+function actOfLog(k, kind, A) { const l = (typeof logsOn === 'function' ? logsOn(k) : []).find(x => x.kind === kind && x.start); if (!l) return null; const d = new Date(l.start), m = d.getHours() * 60 + d.getMinutes();
+  return A.find(a => a.start && /^\d\d:\d\d/.test(a.start) && (() => { const s = +a.start.slice(0, 2) * 60 + +a.start.slice(3, 5); return s >= m - 45 && s <= m + 180; })()) || null; }
+function gymAct(k) { const A = (G(k, 'acts') || []).filter(a => GYM_RE.test(a.type)); return actOfLog(k, 'gym', A) || A[0]; }
+function trackAct(k) { const A = (G(k, 'acts') || []).filter(a => /running|track/.test(a.type)); return actOfLog(k, 'track', A) || A.find(a => /track/.test(a.type)) || A.find(a => (a.vmax || 0) >= 24) || A.find(a => (a.start || '') >= '16:00'); }
 
 /* ---------- metrics ---------- */
 const G = (k, f) => S.g[k]?.[f];
@@ -3130,7 +3143,7 @@ const BLK = (a, b, n, c) => ({a, b, n, c});
 const PLAN_BASE = (() => {
   // His sheet "Planning actuel" (Excel, updated 10 Nov. 2026): only what he really does, every day. Sleep 23:15 to 8:30.
   const all = [BLK('00:00', '08:30', 'Sommeil', 'sommeil'), BLK('08:30', '09:00', 'Déjeuner', 'alim'), BLK('09:00', '09:30', 'Douche', 'hyg'),
-    BLK('12:30', '13:00', 'Dîner', 'alim'), BLK('13:30', '14:00', 'Sieste 25 min + hertz', 'sommeil'), BLK('16:00', '16:30', 'Collation', 'alim'),
+    BLK('12:30', '13:00', 'Dîner', 'alim'), BLK('13:30', '14:00', 'Sieste', 'sommeil'), BLK('16:00', '16:30', 'Collation', 'alim'),
     BLK('23:00', '23:15', 'Questionnaire du jour', 'quest'), BLK('23:15', '24:00', 'Sommeil', 'sommeil')];
   const eve = [BLK('21:30', '22:00', 'Souper', 'alim'), BLK('22:00', '22:45', 'Temps calme', 'calme'), BLK('22:45', '23:00', 'Douche', 'hyg')];
   const gym = [BLK('09:30', '10:00', 'Déplacement', 'dep'), BLK('10:00', '12:00', 'Musculation', 'muscu'), BLK('12:00', '12:30', 'Déplacement', 'dep'), BLK('13:00', '13:30', 'Douche', 'hyg')];
@@ -4710,7 +4723,7 @@ function rsBoard() {
   const off = S.rbOff || 0, mon0 = addDays(monday(TODAY), 28 * off), weeks = [0, 1, 2, 3].map(w => addDays(mon0, 7 * w));
   const cell = k => { const s = rsDayOf(k), past = k < TODAY, done = (S.manual[k]?.recov || []).length > 0;
     return `<div class="bcell${past ? ' past' : ''}${k === TODAY ? ' today' : ''}" ${past ? '' : `data-rdk="${k}"`}><span class="bd">${DOW[(dow(k) + 6) % 7]} <b>${+k.slice(8)}</b></span>
-      ${s ? `<div class="bchip rchip${done ? ' done' : ''}" data-rref="${esc(s.id)}" data-rfrom="${k}" title="${esc(s.name)}"><span>${esc(rsShort(s))}</span>${past ? '' : `<button type="button" class="bx" data-rx="${k}" aria-label="Retirer ${esc(s.name)} du ${esc(fmtShort(k))}"><svg viewBox="0 0 12 12" width="9" height="9" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>`}</div>` : done ? '<div class="bchip rchip done ghost"><span>Faite</span><i>✓</i></div>' : '<span class="bplus"></span>'}</div>`; };
+      ${s ? `<div class="bchip rchip${done ? ' done' : past ? ' miss' : ''}" data-rref="${esc(s.id)}" data-rfrom="${k}" title="${esc(s.name)}"><span>${esc(rsShort(s))}</span>${past ? '' : `<button type="button" class="bx" data-rx="${k}" aria-label="Retirer ${esc(s.name)} du ${esc(fmtShort(k))}"><svg viewBox="0 0 12 12" width="9" height="9" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>`}</div>` : done ? '<div class="bchip rchip done ghost"><span>Faite</span><i>✓</i></div>' : '<span class="bplus"></span>'}</div>`; };
   const chip = s => { const used = Object.entries(S.app?.rdated || {}).some(([k, v]) => v === s.id && k >= TODAY); return `<div class="bchip src rchip${used ? ' on' : ''}" data-rref="${esc(s.id)}" title="${esc(s.name)}"><span>${esc(s.name)}</span><small>${esc(rsGoal(s) || (s.day ? 'faite pour ta journée' : s.items.length + ' exercice' + (s.items.length > 1 ? 's' : '')))} · ${rsDur(s)} min${used ? ' · calée' : ''}</small></div>`; };
   return `<div class="card sboard rboard"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Mes 4 semaines · récupération</span><span class="sbnav"><button type="button" data-rboff="-1" aria-label="4 semaines avant"${off <= 0 ? ' disabled' : ''}>‹</button><small>${esc(fmtShort(weeks[0]).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(weeks[3], 6)).replace(/^\S+ /, ''))}</small><button type="button" data-rboff="1" aria-label="4 semaines après">›</button></span></div>
     <div class="bgrid">${weeks.map(w => `<div class="bweek"><span class="bwk">S${seasonWeek(w)}</span>${[0, 1, 2, 3, 4, 5, 6].map(i => cell(addDays(w, i))).join('')}</div>`).join('')}</div>
@@ -4727,12 +4740,24 @@ function rsView(id, from) {
   openPane({title: rsById(id)?.name || 'Séance', render: () => { const s = rsById(id); if (!s) return '<p class="small muted" style="margin-top:16px">Séance supprimée.</p>';
     const steps = s.day ? recSteps(s.day).map(x => ({n: x.n, how: x.how, min: Math.round(x.sec / 60)})) : s.items.map(i => RX[i]).filter(Boolean);
     const on = Object.entries(S.app?.rdated || {}).filter(([k, v]) => v === id && k >= TODAY).map(([k]) => cap(fmtShort(k)));
-    const tot = Math.round(steps.reduce((a, x) => a + (+x.min || 0), 0));
-    return `<div class="card" style="margin-top:14px"><span class="eyebrow">Objectif</span><p style="margin:4px 0 0">${s.day ? (rsGoal(s) ? (s.day === 'mus' ? 'Détendre : ' : 'Soulager : ') + esc(rsGoal(s)) : 'Rien à soigner aujourd\'hui') : esc(s.goal || 'Ta séance de récupération')}</p><p class="small muted" style="margin:6px 0 0">${tot ? tot + ' min · ' : ''}${steps.length} exercice${steps.length > 1 ? 's' : ''}${s.day ? ' · refaite chaque jour par l\'appli' : ''}${on.length ? ' · calée ' + esc(on.join(', ')) : ''}</p></div>
-      <div class="list">${steps.map(x => `<div class="row"><span class="l">${esc(x.n)}<span class="hint">${x.min ? x.min + ' min · ' : ''}${esc(x.how || '')}</span></span></div>`).join('') || '<div class="row"><span class="muted">Rien à faire aujourd\'hui pour cette séance.</span></div>'}</div>
+    const tot = Math.round(steps.reduce((a, x) => a + (+x.min || 0), 0)), I = rsInfo(s, steps);
+    return `<div class="card rsh" style="margin-top:14px"><div class="rsh-top"><div><b>${tot || '–'}</b><span>min</span></div><div><b>${steps.length}</b><span>exercice${steps.length > 1 ? 's' : ''}</span></div></div>
+        ${I.meth.length ? `<div class="sec-label" style="margin:12px 0 6px">Méthodes</div><div class="chipsx">${I.meth.map(m => `<span class="chip">${esc(m)}</span>`).join('')}</div>` : ''}
+        ${I.zones.length ? `<div class="sec-label" style="margin:12px 0 6px">${s.day === 'pain' ? 'Zones soulagées' : 'Muscles détendus'}</div><p style="margin:0">${esc(I.zones.join(', '))}</p>` : ''}
+        <p class="small muted" style="margin:12px 0 0">${s.day ? 'Refaite chaque jour par l\'appli, d\'après ' + (s.day === 'pain' ? 'tes douleurs notées ces 3 derniers jours' : 'tes dernières séances') + '.' : 'Ta séance.'}${on.length ? ' Calée le ' + esc(on.join(', ').toLowerCase().replace(/\.$/, '')) + '.' : ''}</p></div>
+      <div class="sec-label" style="margin-top:18px">Déroulé</div>
+      <div class="list rsteps2">${steps.map((x, i) => `<div class="row"><span class="rsn">${i + 1}</span><span class="l"><b>${esc(x.n)}</b><span class="hint">${esc(x.how || '')}</span></span>${x.min ? `<span class="kc">${x.min} min</span>` : ''}</div>`).join('') || '<div class="row"><span class="muted">Rien à faire aujourd\'hui pour cette séance.</span></div>'}</div>
       <div class="btnrow" style="margin-top:14px"><button class="btn" data-rsgo2="${esc(id)}"${steps.length ? '' : ' disabled'}>Lancer</button>${s.day ? '' : `<button class="btn ghost" data-rsdup="${esc(id)}">${s.auto ? 'Dupliquer et modifier' : 'Modifier'}</button>`}</div>
       ${from && from >= TODAY ? `<button class="btn ghost" style="margin-top:10px;width:100%" data-rx="${from}">Retirer du ${esc(fmtShort(from))}</button>` : ''}
       ${!s.auto && !s.day ? `<button class="btn ghost" style="margin-top:10px;width:100%;color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent)" data-rsdel="${esc(id)}">Supprimer cette séance</button>` : ''}`; }});
+}
+// What a session works with and on: its methods (massage gun, roller, breathing…) and the muscles or zones it eases.
+function rsInfo(s, steps) {
+  const M0 = [[/pistolet/i, 'Pistolet de massage'], [/rouleau/i, 'Rouleau'], [/balle/i, 'Balle'], [/étir/i, 'Étirement doux'], [/respir/i, 'Respiration'], [/mobilit/i, 'Mobilité douce'], [/contraction|contracte/i, 'Contraction légère'], [/chaleur|chaud|bouillotte/i, 'Chaleur'], [/froid|glace/i, 'Froid']];
+  if (!s.day) return {meth: [...new Set(s.items.map(i => RKINDS.find(k => k[0] === RX[i]?.kind)?.[1]).filter(Boolean))], zones: [...new Set(s.items.flatMap(i => RX[i]?.mus || []).map(m => MUSI[m]?.n).filter(Boolean))]};
+  const txt = steps.map(x => x.n + ' ' + (x.how || '')).join(' '), meth = M0.filter(([r]) => r.test(txt)).map(([, l]) => l);
+  const zones = s.day === 'mus' ? steps.filter(x => !/^Respiration/.test(x.n)).map(x => x.n) : [...new Set(steps.map(x => x.n.split(' · ')[1]).filter(Boolean))];
+  return {meth, zones};
 }
 // Making a session: a name, then the exercises in the order touched (any of the Exercices tab).
 let RSE = null;
@@ -5119,7 +5144,7 @@ function noteSessions(k) {
     const min = draft[fM] ?? (i.L.length ? i.L.reduce((t, l) => t + l.min, 0) : i.a ? Math.round(i.a.min) : null);
     const rpe = draft[fR], open = draft._ses === kind;
     const m = kind === 'track' ? (draft.sprintM ?? (i.L.reduce((t, l) => t + (l.sprintM || 0), 0) || null)) : null;
-    const src = i.L.length ? 'notée dans Training' : i.a ? 'enregistrée par ta montre' + (i.a.start ? ' à ' + i.a.start : '') : i.plan ? 'prévue à ' + tfr(i.plan.a) : 'prévue';
+    const src = i.L.length && i.a ? `Training + ta montre${i.a.avgHr ? ' · FC moy. ' + i.a.avgHr : ''}` : i.L.length ? 'notée dans Training' : i.a ? 'enregistrée par ta montre' + (i.a.start ? ' à ' + i.a.start : '') : kindSkip(k, kind) ? 'pas faite' : i.plan ? 'prévue à ' + tfr(i.plan.a) : 'prévue';
     const name0 = i.L[0]?.name || i.pl?.name || '', name = name0.match(/Séance \d+/)?.[0] || name0.split(' · ')[0];
     return `<div class="sesrow${open ? ' open' : ''}"><button type="button" class="seshd" data-eses="${kind}" aria-expanded="${open}"><span class="ic">${ICON[kind === 'gym' ? 'gym' : 'bolt']}</span><span class="st"><b>${lab}${name ? ' · ' + esc(name) : ''}</b><span class="meta">${esc(src)}${min ? ' · ' + fx(min) + ' min' : ''}${m ? ' · ' + fx(m) + ' m' : ''}</span></span><span class="sesst${rpe ? ' ok' : ''}">${rpe ? 'RPE ' + rpe : 'Noter'}</span></button>
       ${open ? `<div class="sesform"><div class="row"><label for="es-${fM}">Durée<span class="hint">${i.L.length ? 'chronométrée dans Training' : i.a && !i.L.length ? 'remplie par ta montre' : '100, 1 h 40 ou 1:40'}</span></label><input id="es-${fM}" class="mini-in" inputmode="text" data-esf="${fM}" data-dur="1" value="${min ? durTxt(min) : ''}" placeholder="1 h 40"></div>
@@ -5130,7 +5155,9 @@ function noteSessions(k) {
   return rows || '<p class="note" style="text-align:left;margin-top:0">Pas de séance de muscu ni de sprint ce jour-là.</p>';
 }
 function watchActs(k) {
-  const acts = (G(k, 'acts') || []).slice().sort((a, b) => (a.start || '').localeCompare(b.start || '')), R = draft.actRpe || {};
+  // The watch activities that are the day's muscu or sprint session are already in those rows above.
+  const gA = sesInfo(k, 'gym')?.L.length ? gymAct(k) : null, tA = sesInfo(k, 'track')?.L.length ? trackAct(k) : null;
+  const acts = (G(k, 'acts') || []).filter(a => a !== gA && a !== tA).slice().sort((a, b) => (a.start || '').localeCompare(b.start || '')), R = draft.actRpe || {};
   return acts.map(a => { const [name, ic] = ACT[a.type] || [a.type, 'load'], lvl = runLevel(a), id = a.start || name, r = R[id], open = draft._wa === id;
     return `<div class="sesrow${open ? ' open' : ''}"><button type="button" class="seshd" data-ewa="${esc(id)}" aria-expanded="${open}"><span class="ic">${ICON[ic]}</span><span class="st"><b>${esc(a.name || name)}${lvl ? ' · ' + PHASES[lvl][0].toLowerCase() : ''}</b><span class="meta">${esc(a.start || '')} · ${fx(a.min)} min${a.km ? ' · ' + fx(a.km, 1) + ' km' : ''}${a.avgHr ? ' · FC ' + a.avgHr : ''}</span></span><span class="sesst${r ? ' ok' : ''}">${r ? 'RPE ' + r : 'Noter'}</span></button>
       ${open ? `<div class="sesform"><div class="row col"><span class="l">Effort ressenti (RPE)<span class="hint">1 = très facile · 10 = maximal</span></span><div class="rpes">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(v => `<button type="button" data-ewr="${esc(id)}|${v}" aria-pressed="${r === v}">${v}</button>`).join('')}</div></div>${r ? `<p class="small muted" style="margin:6px 4px 0">Charge : ${r} × ${fx(a.min)} min = ${fx(r * a.min)} UA (session-RPE de Foster). Elle remplace l'estimation par la fréquence cardiaque.</p>` : ''}</div>` : ''}</div>`; }).join('');
@@ -5270,13 +5297,21 @@ function noteRecap(k) {
 }
 // The day's planning as a small checklist: every block counts as done unless he unticks it.
 const planDoneId = x => x.a + '|' + x.n;
+// Planning names shown without the details he does not need (the nap is just "Sieste").
+const plName = n => String(n || '').replace(/^Sieste\b.*$/i, 'Sieste');
 function notePlan(k) {
-  if (draft.planK !== k) { draft.planK = k; draft.planSkip = [...(M(k, 'planSkip') || [])]; }
-  const L = dayPlan(k).filter(x => !['dep', 'mort', 'quest'].includes(x.c) && !(x.c === 'sommeil' && (x.a === '00:00' || tmin(x.a) >= 22 * 60)));
+  if (draft.planK !== k) { draft.planK = k; const sk = new Set(M(k, 'planSkip') || []);
+    // Muscu and sprint tick themselves: done in Training (or by the watch) = done; "not doing it" = not done.
+    for (const x of dayPlan(k)) { const kd = x.c === 'muscu' ? 'gym' : x.c === 'athle' ? 'track' : null; if (!kd) continue; if (kindDone(k, kd)) sk.delete(planDoneId(x)); else if (kindSkip(k, kd)) sk.add(planDoneId(x)); }
+    draft.planSkip = [...sk]; }
+  const all = dayPlan(k).filter(x => !['dep', 'mort', 'quest'].includes(x.c) && !(x.c === 'sommeil' && (x.a === '00:00' || tmin(x.a) >= 22 * 60)));
+  const meals = all.filter(x => x.c === 'alim'), L = all.filter(x => x.c !== 'alim');
   if (!L.length) return '<p class="note" style="text-align:left;margin-top:0">Rien au planning ce jour-là.</p>';
   const sk = new Set(draft.planSkip || []), n = L.filter(x => !sk.has(planDoneId(x))).length;
   return `<div class="pchk">${L.map(x => { const id = planDoneId(x), on = !sk.has(id), col = PCAT[x.c]?.[1] || 'var(--fg2)';
-    return `<button type="button" class="pck${on ? ' on' : ''}" data-pchk="${esc(id)}" aria-pressed="${on}"><span class="t num">${tfr(x.a)}</span><i style="background:${col}"></i><span class="n">${esc(x.n)}</span><span class="ck" aria-hidden="true"></span></button>`; }).join('')}
+    const kd = x.c === 'muscu' ? 'gym' : x.c === 'athle' ? 'track' : null, auto = kd && kindDone(k, kd) ? 'faite dans l\'appli' : kd && kindSkip(k, kd) ? 'pas faite' : '';
+    return `<button type="button" class="pck${on ? ' on' : ''}" data-pchk="${esc(id)}" aria-pressed="${on}"><span class="t num">${tfr(x.a)}</span><i style="background:${col}"></i><span class="n">${esc(plName(x.n))}${auto ? `<small>${auto}</small>` : ''}</span><span class="ck" aria-hidden="true"></span></button>`; }).join('')}
+    ${meals.length ? `<div class="pck-meals"><span>Repas <small>cochés d'office · décoche un repas sauté</small></span><div>${meals.map(x => { const id = planDoneId(x), on = !sk.has(id); return `<button type="button" class="pckm${on ? ' on' : ''}" data-pchk="${esc(id)}" aria-pressed="${on}"><span class="ck" aria-hidden="true"></span>${esc(x.n)}</button>`; }).join('')}</div></div>` : ''}
     <p class="pck-sum">${n} sur ${L.length} fait${n > 1 ? 's' : ''}</p></div>`;
 }
 document.addEventListener('click', e => { const b = e.target.closest('[data-pchk]'); if (!b || S.sheet?.kind !== 'note') return;
@@ -6256,7 +6291,7 @@ const BUILTIN = [
   {id: 'p-resist', kind: 'track', name: 'Résistance · traîneau et côtes', desc: 'Puissance horizontale', items: [
     {ex: 'warmup', min: 15}, {ex: 'askip', reps: 2, dist: 20}, {ex: 'sled', reps: 6, dist: 20, pct: 95, rest: 150}, {ex: 'hill', reps: 6, dist: 40, pct: 95, rest: 180}]}
 ];
-const myPlans = () => Object.values(S.plans).filter(p => !p.deleted).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+const myPlans = () => Object.values(S.plans).filter(p => !p.deleted).sort((a, b) => (a.name || '').localeCompare(b.name || '', 'fr', {numeric: true}));
 // Oscar's own programme, food plan and protocol, from his "Train de vie performance" file. They are personal,
 // so they live in the private database (tdv/main), loaded after sign-in, never in this public page.
 let TDV_PLANS = [];
@@ -6271,6 +6306,11 @@ function tdvLast() {
   return {n, d};
 }
 const kindDone = (k, kind) => logsOn(k).some(l => l.kind === kind) || !!M(k, kind === 'gym' ? 'gymRpe' : 'trackRpe');
+// "Not doing it today" (injury, anything): kept per day and kind, and always reversible.
+const kindSkip = (k, kind) => !!S.tset?.skip?.[k + '|' + kind] && !kindDone(k, kind);
+async function setSkip(k, kind, on) { const sk = {...(S.tset.skip || {})}; if (on) sk[k + '|' + kind] = true; else delete sk[k + '|' + kind]; S.tset = {...S.tset, skip: sk}; render(); renderMod(true); if (P.stack.length) paneRender();
+  toast(on ? 'Séance pas faite aujourd\'hui · tu peux encore changer d\'avis' : 'Séance remise au programme'); await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()}); }
+document.addEventListener('click', e => { const b = e.target.closest('[data-tskip],[data-tunskip]'); if (!b) return; e.stopPropagation(); const s = !!b.dataset.tskip; setSkip(TODAY, b.dataset.tskip || b.dataset.tunskip, s); });
 // The next session not done yet: today's if it is still to do, else the following one.
 function nextSess(kind) { for (let i = 0; i < 28; i++) { const k = addDays(TODAY, i); for (const kd of kind ? [kind] : ['gym', 'track']) { const p = planForK(k, kd); if (!p || kindDone(k, kd)) continue; return {k, p}; } } return null; }
 // Where the session stands in the day: before its time, under way, past without a note, or done.
@@ -7150,10 +7190,12 @@ function tToday() {
   const doneCard = done.length ? `<article class="card"><span class="chiptag">${TICK.replace('<svg', '<svg width="12" height="12"')} Fait</span>${done.map(l => `<div class="bigname">${esc(l.name)}</div><p class="small muted">${l.min} min · RPE ${l.rpe}/10${l.tonnage ? ' · ' + fx(l.tonnage) + ' kg soulevés' : ''}${l.sprintM ? ' · ' + fx(l.sprintM) + ' m de sprint' : ''}</p>`).join('')}</article>` : '';
   // Today's session of each kind, shown right under that kind's week.
   const today = ['gym', 'track'].filter(kd => planForK(TODAY, kd) && !kindDone(TODAY, kd));
-  const sc = kd => { const q = planForK(TODAY, kd); if (!q || kindDone(TODAY, kd)) return ''; const b = dayPlan(TODAY).find(x => x.c === (kd === 'gym' ? 'muscu' : 'athle'));
-    return `<article class="card"><span class="chiptag">Aujourd'hui · ${kd === 'gym' ? 'Musculation' : 'Sprint'}${b ? ' · ' + tfr(b.a) : ''} · ${estMin(q)} min</span><div class="bigname">${esc(q.name)}</div>${q.title ? `<p style="margin:2px 0 0;font-weight:600">${esc(q.title)}</p>` : ''}<p class="small muted">${esc(q.desc || '')}</p>
-        <ul class="exl">${q.items.map(it => `<li><span>${esc(exOf(it.ex).n)}</span><span>${itemText(it)}</span></li>`).join('')}</ul>
-        <div style="margin-top:14px"><button class="btn" data-tplanv="${q.id}"${q.n ? ` data-tn="${q.n}"` : ''}>Voir la séance</button></div></article>`; };
+  const sc = kd => { const q = planForK(TODAY, kd); if (!q || kindDone(TODAY, kd)) return ''; const b = dayPlan(TODAY).find(x => x.c === (kd === 'gym' ? 'muscu' : 'athle')), lab = kd === 'gym' ? 'Musculation' : 'Sprint';
+    if (kindSkip(TODAY, kd)) return `<article class="card skipc"><span class="chiptag miss"><svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> ${lab} · pas faite aujourd'hui</span><div class="bigname">${esc(q.name)}</div>${q.title || q.desc ? `<p style="margin:2px 0 0;font-weight:600">${esc(q.title || q.desc)}</p>` : ''}
+        <p class="small muted" style="margin-top:8px">Tu as choisi de ne pas la faire. Tu peux changer d'avis jusqu'à ce soir.</p><div style="margin-top:14px"><button class="btn" data-tunskip="${kd}">Finalement, je la fais</button></div></article>`;
+    return `<article class="card"><span class="chiptag">Aujourd'hui · ${lab}${b ? ' · ' + tfr(b.a) : ''} · ${estMin(q)} min</span><button type="button" class="linkcard" data-tplanv="${q.id}"${q.n ? ` data-tn="${q.n}"` : ''}><div class="bigname">${esc(q.name)}</div>${q.title || q.desc ? `<p style="margin:2px 0 0;font-weight:600">${esc(q.title || q.desc)}</p>` : ''}
+        <ul class="exl">${q.items.map(it => `<li><span>${esc(exOf(it.ex).n)}</span><span>${itemText(it)}</span></li>`).join('')}</ul></button>
+        <div class="btnrow two" style="margin-top:14px"><button class="btn" data-tstart="${q.id}"${q.n ? ` data-tn="${q.n}"` : ''}>Commencer la séance</button><button class="btn ghost" data-tskip="${kd}">Ne pas la faire</button></div></article>`; };
   const main = doneCard + (today.length ? '' : (() => {
       // A session placed on a later day: when and what, nothing to start yet.
       const nx = [...Array(42)].map((_, i) => addDays(TODAY, i + 1)).map(k => ({k, p: planFor(k)})).find(x => x.p); if (!nx) return '';
@@ -7193,13 +7235,15 @@ function progList() {
     ${done.length ? `<h2>Séances faites</h2><div class="list donel">${done.map(n => r(n, ' doneses')).join('')}</div>` : ''}`;
 }
 /* ---------- the session board: 4 weeks, empty until he drops a session on a day ---------- */
-const sbShort = p => p.n ? 'S' + p.n : p.coach ? 'S' + (p.week || '') : p.name;
+const sbShort = p => { if (p.n) return 'S' + p.n; if (p.short) return p.short; if (p.coach && p.seq) return 'S' + p.seq; const m = (p.name || '').match(/^Séance (\d+)/); return m ? 'S' + m[1] : (p.name || '').slice(0, 4); };
+// The next number for a new session of that kind: after his programme (S1…S31 in muscu) and his own "Séance N".
+function nextSeq(kind) { let n = 0; for (const p of [...myPlans(), ...(kind === 'gym' ? TDV_PLANS : [])]) if (p.kind === kind) { const m = (p.name || '').match(/^Séance (\d+)/); n = Math.max(n, p.n || p.seq || (m ? +m[1] : 0)); } return n + 1; }
 function sesBoard(kind) {
   const off = S.sbOff || 0, mon0 = addDays(monday(TODAY), 28 * off), c = kind === 'gym' ? 'muscu' : 'athle';
   const cell = k => {
     const p = planForK(k, kind), dk = p && S.tset.dated?.[dKey(k, kind)] === caleRef(p) ? dKey(k, kind) : k, b = dayPlan(k).find(x => x.c === c), past = k < TODAY, done = logsOn(k).some(l => l.kind === kind) || !!M(k, kind === 'gym' ? 'gymRpe' : 'trackRpe');
     return `<div class="bcell${b ? ' slot' : ''}${past ? ' past' : ''}${k === TODAY ? ' today' : ''}" data-bday="${k}" ${past ? '' : `data-bdk="${k}"`}><span class="bd">${DOW[(dow(k) + 6) % 7]} <b>${+k.slice(8)}</b>${b ? `<small>${tfr(b.a)}</small>` : ''}</span>
-      ${p ? `<div class="bchip${done ? ' done' : ''}" data-bref="${esc(caleRef(p))}" data-bfrom="${dk}" title="${esc(p.name)}${p.title ? ' · ' + esc(p.title) : ''}"><span>${esc(sbShort(p))}</span>${past ? (done ? '<i>✓</i>' : '') : `<button type="button" class="bx" data-bx="${dk}" aria-label="Retirer ${esc(p.name)} du ${esc(fmtShort(k))}"><svg viewBox="0 0 12 12" width="9" height="9" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>`}</div>` : done ? '<div class="bchip done ghost"><span>Faite</span><i>✓</i></div>' : past ? '' : `<span class="bplus">${b ? '+' : ''}</span>`}</div>`;
+      ${p ? `<div class="bchip${done ? ' done' : (past || kindSkip(k, kind)) ? ' miss' : ''}" data-bref="${esc(caleRef(p))}" data-bfrom="${dk}" title="${esc(p.name)}${p.title ? ' · ' + esc(p.title) : ''}"><span>${esc(sbShort(p))}</span>${past ? (done ? '<i>✓</i>' : '') : `<button type="button" class="bx" data-bx="${dk}" aria-label="Retirer ${esc(p.name)} du ${esc(fmtShort(k))}"><svg viewBox="0 0 12 12" width="9" height="9" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>`}</div>` : done ? '<div class="bchip done ghost"><span>Faite</span><i>✓</i></div>' : past ? '' : `<span class="bplus">${b ? '+' : ''}</span>`}</div>`;
   };
   const weeks = [0, 1, 2, 3].map(w => addDays(mon0, 7 * w));
   const src = [...(kind === 'gym' ? tdvTodo(8) : []), ...myPlans().filter(x => x.kind === kind)];
@@ -7207,7 +7251,7 @@ function sesBoard(kind) {
   return `<div class="card sboard"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Mes 4 semaines · ${kind === 'gym' ? 'musculation' : 'sprint'}</span><span class="sbnav"><button type="button" data-sboff="-1" aria-label="4 semaines avant"${off <= 0 ? ' disabled' : ''}>‹</button><small>${esc(fmtShort(weeks[0]).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(weeks[3], 6)).replace(/^\S+ /, ''))}</small><button type="button" data-sboff="1" aria-label="4 semaines après">›</button></span></div>
     <div class="bgrid">${weeks.map(w => `<div class="bweek"><span class="bwk">S${seasonWeek(w)}</span>${[0, 1, 2, 3, 4, 5, 6].map(i => cell(addDays(w, i))).join('')}</div>`).join('')}</div>
     <div class="sec-label" style="margin:14px 2px 6px">À caler <small>${isPC() ? 'glisse une séance sur un jour' : 'garde le doigt sur une séance, puis glisse-la sur un jour'}</small></div>
-    <div class="bsrc">${src.length ? src.map(x => { const r = caleRef(x), on = placed.has(r); return `<div class="bchip src${on ? ' on' : ''}" data-bref="${esc(r)}" title="${esc(x.name)}${x.title ? ' · ' + esc(x.title) : ''}"><span>${esc(x.coach ? sbShort(x) : x.name)}</span><small>${x.title ? esc(x.title) + ' · ' : ''}${estMin(x)} min${on ? ' · calée' : ''}</small></div>`; }).join('') : '<p class="small muted" style="margin:0">Crée une séance ci-dessous : elle apparaîtra ici, prête à être calée.</p>'}</div>
+    <div class="bsrc">${src.length ? src.map(x => { const r = caleRef(x), on = placed.has(r); return `<div class="bchip src${on ? ' on' : ''}" data-bref="${esc(r)}" title="${esc(x.name)}${x.title ? ' · ' + esc(x.title) : ''}"><span>${esc(x.name)}</span><small>${(x.title || x.desc) ? esc(x.title || x.desc) + ' · ' : ''}${estMin(x)} min${on ? ' · calée' : ''}</small></div>`; }).join('') : '<p class="small muted" style="margin:0">Crée une séance ci-dessous : elle apparaîtra ici, prête à être calée.</p>'}</div>
     <p class="small muted" style="margin:10px 2px 0">Touche une séance pour la voir. Une séance déjà calée se déplace en la glissant vers un autre jour ; × la remet ici. Les jours encadrés sont tes créneaux ${kind === 'gym' ? 'de muscu' : 'd\'athlé'}.</p></div>`;
 }
 // Drag and drop: with the mouse it moves at once; with the thumb, after a short hold (so the page still scrolls).
@@ -7544,7 +7588,9 @@ function planView(id, n, from) {
       ${coolText(p.cool).length ? `<div class="card wtxt" style="margin-top:12px"><span class="eyebrow">Retour au calme</span>${coolText(p.cool).map(t => `<p class="small">${esc(t)}</p>`).join('')}</div>` : ''}
       ${p.kind === 'gym' ? capsLine(planCheck(p.items)) : ''}
       ${gymCard(p)}
-      <div class="stack" style="margin-top:16px">${(() => { const on = caledOn(caleRef(p)); return `<button class="btn ghost" data-tcale="${caleRef(p)}">${on.length ? 'Calée le ' + esc(fmtShort(on[0])) + ' · changer' : 'Caler à un jour'}</button>`; })()}<button class="btn" data-tstart="${p.id}"${p.n ? ` data-tn="${p.n}"` : ''}>Commencer</button>
+      <div class="stack" style="margin-top:16px">${(() => { const tk = planForK(TODAY, p.kind)?.id === p.id && !kindDone(TODAY, p.kind) ? p.kind : null;
+        if (tk && kindSkip(TODAY, tk)) return `<div class="banner skipb"><b>Pas faite aujourd'hui</b><span class="small muted">Tu peux changer d'avis jusqu'à ce soir.</span></div><button class="btn" data-tunskip="${tk}">Finalement, je la fais</button>`;
+        return `<div class="btnrow two"><button class="btn" data-tstart="${p.id}"${p.n ? ` data-tn="${p.n}"` : ''}>Commencer la séance</button>${tk ? `<button class="btn ghost" data-tskip="${tk}">Ne pas la faire</button>` : ''}</div>`; })()}
       <div class="btnrow"><button class="btn ghost" data-tedit="${p.id}">${mine ? 'Modifier' : 'Dupliquer et adapter'}</button>${mine ? `<button class="btn ghost" data-tdup="${p.id}">Dupliquer</button>` : ''}</div>
       ${from ? `<button class="btn ghost" data-bx="${from}">Retirer du ${esc(fmtShort(from.slice(0, 10)))}</button>` : ''}
       ${mine ? `<button class="btn ghost" data-tdel="${p.id}" style="color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent)">Supprimer la séance</button>` : ''}</div>`;
@@ -7742,10 +7788,10 @@ document.addEventListener('touchend', () => {
 });
 function editPlan(id, date, dup = false) {
   const p = id ? planById(id) : null, mine = p && !BUILTIN.includes(p) && !TDV_PLANS.includes(p) && !dup;
-  ED = p ? structuredClone(p) : {kind: S.tkind === 'track' ? 'track' : 'gym', name: '', desc: '', items: []};
+  ED = p ? structuredClone(p) : {kind: S.tkind === 'track' ? 'track' : 'gym', name: '', desc: '', items: [], seqAuto: true};
   if (ED.kind === 'class') ED.kind = 'gym';
   if (dup) { ED.id = uid(); ED.autoName = false; ED.autoDesc = false; ED.name = (p.name || 'Séance') + ' (copie)'; ED.wk = monday(TODAY); }
-  else if (!mine) { ED.id = uid(); ED.autoName = true; ED.autoDesc = true; }
+  else if (!mine) { ED.id = uid(); ED.autoName = !ED.seqAuto; ED.autoDesc = true; }
   else { ED.autoName ??= false; ED.autoDesc ??= false; }
   ED.date = dup ? null : date || Object.entries(S.tset.dated || {}).find(([, v]) => v === ED.id)?.[0] || null;
   ED.wk = ED.date ? monday(ED.date) : monday(TODAY);
@@ -7820,13 +7866,13 @@ function techBox() {
 }
 function editBody() {
   if (!ED) return '';
-  const trk = ED.kind === 'track', A = sessionAuto(ED);
+  const trk = ED.kind === 'track', A = sessionAuto(ED); if (ED.seqAuto) ED.name = 'Séance ' + nextSeq(ED.kind);
   const num = (i, f, v, ph) => `<input class="mini-in big" inputmode="decimal" data-ed="${i}.${f}" value="${v ?? ''}" placeholder="${ph}">`;
   const rest = (i, v, ph) => `<input class="mini-in big" inputmode="decimal" data-edrest="${i}" value="${restIn(v)}" placeholder="${ph}">`;
   return `<div class="stack" style="margin-top:16px">
     <div class="seg" role="group">${[['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button type="button" data-edkind="${v}" aria-pressed="${ED.kind === v}">${l}</button>`).join('')}</div>
     ${whenRow()}
-    <div class="field"><label class="eyebrow" for="ed-name">Nom${ED.autoName ? ' · rempli tout seul' : ''}</label><input id="ed-name" data-ed="name" value="${esc(ED.autoName ? A.name : ED.name)}" placeholder="Ajoute des exercices : le nom se remplit"></div>
+    <div class="field"><label class="eyebrow" for="ed-name">Nom${ED.autoName ? ' · rempli tout seul' : ''}</label><input id="ed-name" data-ed="name" maxlength="24" value="${esc(ED.autoName ? A.name : ED.name)}" placeholder="Ajoute des exercices : le nom se remplit"></div>
     <div class="field"><label class="eyebrow" for="ed-desc">Objectif${ED.autoDesc ? ' · rempli tout seul' : ''}</label><input id="ed-desc" data-ed="desc" value="${esc(ED.autoDesc ? A.desc : ED.desc || '')}" placeholder="Il suit la logique de tes exercices"></div>
     ${plannedBox()}
     <h2 class="sesh">Séance</h2>
@@ -9588,7 +9634,7 @@ document.addEventListener('input', e => {
     if (f === 'kg') for (let n = +j + 1; n < arr.length; n++) if (!arr[n].done && (arr[n].kg === '' || arr[n].kg === old)) { arr[n].kg = v; const el = document.querySelector(`[data-lv="${i}.${n}.kg"]`); if (el) el.value = v; }
     saveLive();
   }
-  else if (d.ed) { const [i, f] = d.ed.split('.'); if (f) { ED.items[i][f] = t.value === '' ? null : +t.value.replace(',', '.') || null; if (ED.items[i].seq) partNorm(ED.items[i]); } else { ED[i] = t.value; if (i === 'name') ED.autoName = false; if (i === 'desc') ED.autoDesc = false; } }
+  else if (d.ed) { const [i, f] = d.ed.split('.'); if (f) { ED.items[i][f] = t.value === '' ? null : +t.value.replace(',', '.') || null; if (ED.items[i].seq) partNorm(ED.items[i]); } else { ED[i] = t.value; if (i === 'name') ED.autoName = ED.seqAuto = false; if (i === 'desc') ED.autoDesc = false; } }
   else if (d.edt && ED) { const [i, j] = d.edt.split('.'); const tp = [...(ED.items[i].tempo || ['', '', '', ''])]; tp[j] = t.value === '' ? '' : +t.value; ED.items[i].tempo = tp.some(x => x !== '') ? tp : undefined; }
   else if (d.finrpe !== undefined) t.nextElementSibling.textContent = t.value;
   else if (d.fprot !== undefined) t.nextElementSibling.textContent = fx(+t.value, 1);
