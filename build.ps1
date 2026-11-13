@@ -51,23 +51,42 @@ img{max-width:100%}
 (function () {
   var el = document.getElementById('splash'), svg = el.querySelector('svg'), sp = el.querySelector('.sp');
   var t0 = Date.now(), st = {}, done = false, ua = navigator.userAgent;
-  var vw = innerWidth, vh = innerHeight, D = Math.min(vw, vh) < 600 ? 240 : 300, sh = 0;
-  // Android draws its launch screen centred on the whole screen, status bar included: line up with it.
-  if (/Android/i.test(ua) && matchMedia('(display-mode: standalone)').matches) { var I = Math.max(0, screen.height - vh), top = Math.min(I, 32); sh = Math.max(0, (top - (I - top)) / 2); }
-  el.style.setProperty('--d', D + 'px'); el.style.setProperty('--sh', sh + 'px');
+  var vw = innerWidth, vh = innerHeight, D = Math.min(vw, vh) < 600 ? 240 : 300, sh = 0, AND = /Android/i.test(ua) && matchMedia('(display-mode: standalone)').matches;
+  // Android draws its own launch screen first: the same logo, a little bigger, centred on the whole screen (status bar
+  // included). Measured on his S26 from a screen recording: same size and place here, so the hand-over can't be seen.
+  if (AND) D = 274;
+  function place() {
+    vw = innerWidth; vh = innerHeight;
+    // The bar at the bottom (gesture line) is about 15 px; the rest of what the page lacks is the status bar at the top.
+    if (AND) { var I = Math.max(0, screen.height - vh), top = Math.max(0, Math.min(48, I - 15.2)); sh = top - I / 2; }
+    el.style.setProperty('--d', D + 'px'); el.style.setProperty('--sh', sh + 'px');
+  }
+  place(); addEventListener('resize', place);
+  // The phone's top bar stays navy, like Android's launch screen, until the app shows.
+  window.TNR_SPLASH_ON = true;
+  try { document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) { m.content = '#0B1733'; }); } catch (e) {}
+  function bars() { window.TNR_SPLASH_ON = false; try { if (typeof syncBars === 'function') syncBars(); else document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) { m.content = '#000000'; }); } catch (e) {} }
   var PX = 504, PY = 474.6, RIN = 19; // a point in the middle of the N's diagonal, and the stroke's half width there
   function sm(a, b, x) { x = Math.max(0, Math.min(1, (x - a) / (b - a))); return x * x * (3 - 2 * x); }
   function zoom() {
     if (!el.isConnected) return;
-    if (document.hidden) { el.remove(); return; }
+    if (document.hidden) { el.remove(); bars(); return; }
+    removeEventListener('resize', place); vw = innerWidth; vh = innerHeight;
     var dpr = Math.min(devicePixelRatio || 1, 3), c = document.createElement('canvas'), r = svg.getBoundingClientRect();
     c.width = Math.round(vw * dpr); c.height = Math.round(vh * dpr);
-    c.style.cssText = 'position:fixed;left:0;top:0;width:' + vw + 'px;height:' + vh + 'px;z-index:301;pointer-events:none';
+    // The canvas always covers the whole page, even if the page grows during the zoom (no black band at the bottom).
+    c.style.cssText = 'position:fixed;left:0;top:0;width:100%;height:100%;z-index:301;pointer-events:none';
     var x = c.getContext('2d'), k = r.width / 1024, px = r.left + PX * k, py = r.top + PY * k;
     var ps = svg.querySelectorAll('path'), PT = new Path2D(ps[0].getAttribute('d')), PN = new Path2D(ps[1].getAttribute('d')), PR = new Path2D(ps[2].getAttribute('d')), PA = new Path2D(ps[3].getAttribute('d'));
     var far = Math.max(Math.hypot(px, py), Math.hypot(vw - px, py), Math.hypot(px, vh - py), Math.hypot(vw - px, vh - py));
     var L = Math.log(far / (RIN * k) * 1.06), T = 1150, ts = null;
+    function fit() {
+      if (innerWidth === vw && innerHeight === vh) return;
+      px += (innerWidth - vw) / 2; py += (innerHeight - vh) / 2; vw = innerWidth; vh = innerHeight;
+      c.width = Math.round(vw * dpr); c.height = Math.round(vh * dpr);
+    }
     function draw(t) {
+      fit();
       var e = t * t * t * (t * (t * 6 - 15) + 10), s = Math.exp(L * e), rev = sm(.03, .34, t), fa = 1 - sm(0, .2, t), m = dpr * s * k;
       x.setTransform(1, 0, 0, 1, 0, 0); x.globalCompositeOperation = 'source-over'; x.globalAlpha = 1; x.fillStyle = '#0B1733'; x.fillRect(0, 0, c.width, c.height);
       x.setTransform(m, 0, 0, m, dpr * px - m * PX, dpr * py - m * PY);
@@ -79,12 +98,12 @@ img{max-width:100%}
       if (fa > 0) { x.globalAlpha = fa; x.fill(PA, 'evenodd'); }
     }
     draw(0); document.body.appendChild(c); el.remove();
-    var kill = setTimeout(function () { c.remove(); }, T + 600);
-    requestAnimationFrame(function f(now) { if (ts == null) ts = now; var t = Math.min(1, (now - ts) / T); draw(t); if (t < 1) requestAnimationFrame(f); else { clearTimeout(kill); c.remove(); } });
+    var kill = setTimeout(function () { c.remove(); bars(); }, T + 600);
+    requestAnimationFrame(function f(now) { if (ts == null) ts = now; var t = Math.min(1, (now - ts) / T); draw(t); if (t < 1) requestAnimationFrame(f); else { clearTimeout(kill); c.remove(); bars(); } });
   }
   function go() {
     if (done) return; done = true; clearInterval(iv);
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches || !window.Path2D) { el.style.transition = 'opacity .3s'; el.style.opacity = '0'; setTimeout(function () { el.remove(); }, 350); return; }
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches || !window.Path2D) { el.style.transition = 'opacity .3s'; el.style.opacity = '0'; setTimeout(function () { el.remove(); bars(); }, 350); return; }
     // The spinner goes first, then the zoom starts on a quiet frame.
     sp.classList.add('out'); setTimeout(function () { requestAnimationFrame(function () { requestAnimationFrame(zoom); }); }, 180);
     setTimeout(function () { if (el.isConnected) zoom(); }, 900);
