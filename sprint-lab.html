@@ -214,6 +214,7 @@ svg.chev{width:14px;height:14px;flex:none;color:var(--fg3)}
 .stats div{background:var(--card2);border-radius:12px;padding:8px 4px}
 .stats b{display:block;font:600 1rem var(--display);font-variant-numeric:tabular-nums}
 .stats span{font-size:.6875rem;color:var(--fg2)}
+.stats.mac>div:first-child{grid-column:1/-1;padding:12px 8px}.stats.mac>div:first-child b{font-size:2rem;line-height:1.1}.stats.mac>div:first-child span{font-size:.8125rem}
 .why{font-size:.9375rem;line-height:1.5}
 .sci{font-size:.8125rem;line-height:1.5;color:var(--fg2)}
 
@@ -949,7 +950,7 @@ ul.bil{margin:4px 0 0;padding-left:18px;font-size:.875rem;line-height:1.45}ul.bi
 .bchip.done{background:var(--good)}.bchip.ghost{opacity:.7;cursor:default}
 .bsrc{display:flex;flex-wrap:wrap;gap:6px}
 .bchip.src{flex-direction:column;align-items:flex-start;gap:1px;padding:8px 10px;border-radius:12px;background:var(--card2);color:var(--fg);box-shadow:inset 3px 0 0 var(--accent);max-width:100%}
-.bchip.src small{font-size:.625rem;font-weight:500;color:var(--fg2)}.bchip.src.on{opacity:.55}
+.bchip.src small{font-size:.625rem;font-weight:500;color:var(--fg2)}
 .bchip.bdrag{opacity:.35}
 .bghost{position:fixed;left:0;top:0;z-index:400;pointer-events:none;opacity:.95;box-shadow:0 12px 30px rgba(0,0,0,.45);cursor:grabbing}
 body.bdragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
@@ -995,12 +996,13 @@ body.bdragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
 .bchip .bx{padding:0;line-height:0}.bchip .bx svg{display:block}
 /* In a day cell the cross sits inside the chip, on its right, centred. A cell with a block is never dimmed. */
 :root:not(.pc) .sboard{padding-left:12px;padding-right:12px}:root:not(.pc) .bweek{grid-template-columns:16px repeat(7,minmax(0,1fr));gap:2px}:root:not(.pc) .bcell{padding:4px 2px}
-:root:not(.pc) .bcell .bchip{padding:3px 2px 3px 4px;gap:1px;font-size:.625rem;letter-spacing:-.01em}.bcell .bchip{gap:3px}.bcell .bchip span{text-overflow:clip}.bcell .bchip .bx{width:11px;height:11px;background:rgba(0,0,0,.3)}.bcell .bchip .bx svg{width:6px;height:6px}.pc .bcell .bchip .bx{width:16px;height:16px}.pc .bcell .bchip .bx svg{width:8px;height:8px}
+:root:not(.pc) .bcell .bchip{padding:3px 2px 3px 3px;gap:2px;font-size:.625rem;letter-spacing:-.01em}.bcell .bchip{gap:3px;flex:1;min-height:30px;border-radius:8px}:root:not(.pc) .bcell .bchip{margin:0 -2px}.bcell .bchip.ghost{flex:none;min-height:0}.bcell .bchip span{text-overflow:clip}.bcell .bchip .bx{width:15px;height:15px;background:rgba(0,0,0,.3)}.bcell .bchip .bx svg{width:8px;height:8px}.pc .bcell .bchip .bx{width:16px;height:16px}.pc .bcell .bchip .bx svg{width:8px;height:8px}
 .bcell:has(.bchip){opacity:1}.rboard .bcell{opacity:1;cursor:pointer}.rboard .bcell.past{opacity:.45;cursor:default}
 .segl button{flex-direction:column;align-items:flex-start;gap:1px;cursor:pointer}.segl button b small{margin-left:4px}
 .plg-chip{display:block;width:max-content;max-width:100%;margin-top:4px;padding:3px 8px;border-radius:7px;background:var(--pc);color:#fff;font-size:.6875rem;font-weight:700;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.25)}
 .rtl{position:relative;margin:12px 0 0 42px;border-left:1px solid var(--line);cursor:pointer}.rtl-h{position:absolute;left:0;right:0;border-top:1px solid var(--line);pointer-events:none}.rtl-h span{position:absolute;left:-42px;top:-7px;font-size:.625rem;color:var(--fg3);font-style:normal}
-.rtl-b{position:absolute;left:6px;right:4px;border-radius:8px;background:color-mix(in srgb,var(--pc) 22%,var(--card2));border-left:3px solid var(--pc);padding:2px 8px;overflow:hidden;pointer-events:none}.rtl-b b{font-size:.6875rem;font-weight:600}
+.rtl-b{position:absolute;left:6px;right:4px;border-radius:8px;background:color-mix(in srgb,var(--pc) 30%,#1c1c1e);color:#fff;border-left:3px solid var(--pc);padding:0 8px;overflow:hidden;pointer-events:none;display:flex;align-items:center}.rtl-b b{font-size:.75rem;font-weight:600;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rtl-b.new b{font-size:.875rem;font-weight:700}
 .rtl-b.new{--pc:var(--accent);background:var(--accent);color:#fff;z-index:2;box-shadow:0 4px 14px rgba(0,0,0,.35);transition:top .2s cubic-bezier(.32,.72,0,1)}
 .rse-act{display:flex;gap:6px;flex:none}
 .segw{display:grid;grid-template-columns:minmax(96px,220px) minmax(0,1fr);gap:12px;align-items:center;margin-top:8px}.segw svg{width:100%;height:auto}
@@ -1467,6 +1469,11 @@ function chart(pts, o = {}) {
     if (colorFn && pts.length <= 40) pts.forEach((p, i) => { if (p.v != null) g += `<circle cx="${X(i)}" cy="${Y(p.v)}" r="3.2" fill="${colorFn(p.v)}" stroke="var(--card)" stroke-width="1.2"/>`; });
   }
   for (const l of o.lines || []) { const P = l.vals.map((x, i) => x == null ? null : [X(i), Y(x)]).filter(Boolean); g += P.length > 1 ? line(P, l.color, 2.2) : P.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3.5" fill="${l.color}"/>`).join(''); }
+  // The trend: the straight line that fits all the values of the period best, faint, behind nothing important.
+  if (!o.noTrend) { const Q = pts.map((p, i) => p.v == null ? null : [i, p.v]).filter(Boolean);
+    if (Q.length >= 3) { const n = Q.length, mx = Q.reduce((a, q) => a + q[0], 0) / n, my = Q.reduce((a, q) => a + q[1], 0) / n, sxx = Q.reduce((a, q) => a + (q[0] - mx) ** 2, 0);
+      if (sxx > 0) { const b = Q.reduce((a, q) => a + (q[0] - mx) * (q[1] - my), 0) / sxx, i0 = Q[0][0], i1 = Q[n - 1][0], y0 = my + b * (i0 - mx), y1 = my + b * (i1 - mx);
+        g += `<line class="trendl" x1="${X(i0)}" y1="${Y(y0)}" x2="${X(i1)}" y2="${Y(y1)}" stroke="var(--fg2)" stroke-width="1.4" stroke-opacity=".38" stroke-dasharray="4 4" stroke-linecap="round"/>`; } } }
   const id = 'c' + (++chId);
   CH[id] = {pts, X, Y, band, dec, unit, fmt, color, avgVals, W0, H, T, B};
   return `<div class="chartbox" data-ch="${id}"><svg class="chart" viewBox="0 0 ${W0} ${H}" role="img" aria-label="Graphique, glisse le doigt pour lire les valeurs">${g}<g class="sc"></g></svg><div class="bubble" hidden></div></div>`;
@@ -3169,7 +3176,7 @@ function plChip(x, k) {
 }
 function mealView(ml, k, name) {
   openPane({title: name + ' · ' + fmtShort(k), render: () => { const its = menuFor(k).filter(y => y.meal === ml), t = menuTot(its), m = menuOfDay(k);
-    return `<div class="card" style="margin-top:14px"><div class="stats"><div><b>${fx(t.kcal)}</b><span>kcal</span></div><div><b>${fx(t.p)} g</b><span>protéines</span></div><div><b>${fx(t.c)} g</b><span>glucides</span></div><div><b>${fx(t.f)} g</b><span>lipides</span></div></div>
+    return `<div class="card" style="margin-top:14px"><div class="stats mac"><div><b>${fx(t.kcal)}</b><span>kcal</span></div><div><b>${fx(t.p)} g</b><span>protéines</span></div><div><b>${fx(t.c)} g</b><span>glucides</span></div><div><b>${fx(t.f)} g</b><span>lipides</span></div></div>
       <p class="small muted" style="margin:8px 0 0">${esc(m ? m.name : 'Menu de base')}</p></div>
       <div class="list">${its.map(x => `<div class="row"><span class="l">${esc(x.n)}</span><b class="num">${fx(x.g)} g</b></div>`).join('') || '<div class="row"><span class="muted">Rien de prévu à ce repas.</span></div>'}</div>`; }});
 }
@@ -3712,7 +3719,7 @@ function recovCard() {
     ${r ? `<div class="rnext"><b>${r.routine.done ? 'Routine faite' : 'Routine prévue à ' + tfr(r.a)}</b><span class="small muted">${r.routine.min} min · ${esc(CHAINS.find(c => c[0] === r.routine.focus)?.[1] || '')}</span></div>${r.routine.done ? '' : routineHtml(r.routine) + '<button class="btn ghost" data-rdone style="margin-top:10px">C\'est fait</button>'}` : ''}
 
     ${(() => { const X = [TODAY, addDays(TODAY, 1)].flatMap(k => (PLN().extra?.[k] || []).map((y, j) => ({...y, k, j})).filter(y => y.c === 'recup' && !y.routine)); return X.length ? `<div class="sec-label" style="margin:10px 0 6px">Prévu dans ton planning</div><div class="list">${X.map(y => `<div class="row"><span class="l">${esc(y.n)}<span class="hint">${y.k === TODAY ? 'Aujourd\'hui' : 'Demain'} · ${tfr(y.a)} – ${tfr(y.b)}</span></span><button type="button" class="chip" data-rxdel="${y.k}|${y.j}" aria-label="Retirer ${esc(y.n)} du planning">×</button></div>`).join('')}</div>` : ''; })()}
-    <div class="rbtns"><button class="chip" data-rsnew>+ Créer une séance de récupération</button><button class="chip" data-radd>Noter une activité faite</button></div></div>
+    </div>
     ${L.length ? `<div class="sec-label">Fait aujourd'hui</div><div class="list">${L.map((a, i) => `<div class="row"><span class="l">${esc(a.t)}${a.min ? ' · ' + a.min + ' min' : ''}<span class="hint">${esc([RACT.find(x => x[0] === a.cat)?.[1] || (a.cat === 'routine' ? 'Routine' : ''), (a.zone || []).map(z => MUSI[z]?.n.toLowerCase()).filter(Boolean).join(', '), a.at || ''].filter(Boolean).join(' · '))}</span></span><button type="button" class="chip" data-rdel="${i}" aria-label="Retirer ${esc(a.t)}">×</button></div>`).join('')}</div>` : ''}`;
 }
 document.addEventListener('click', e => {
@@ -4587,7 +4594,8 @@ function rsRun(s) {
   const steps = s.items.flatMap(id => RX[id] ? exSteps(RX[id]).map(x => [x.n, x.sec, x.how]) : []); if (!steps.length) return;
   recRun('mus', {id: 'rs-' + s.id, n: s.name, steps, min: rsMin(s)});
 }
-function rsShort(s) { if (s.short) return s.short; const n = s.name.replace(/^(Ma )?[Rr]écup( · )?/, ''); return n.length > 8 ? n.slice(0, 7) + '…' : n; }
+// In a day cell, a code like S12 or M1: RM (muscles), RD (pains), R1, R2… for his own sessions.
+function rsShort(s) { if (s.day) return s.day === 'mus' ? 'RM' : 'RD'; const i = RS_OWN().findIndex(x => x.id === s.id); if (i >= 0) return 'R' + (i + 1); if (s.short) return s.short; const n = s.name.replace(/^(Ma )?[Rr]écup( · )?/, ''); return n.length > 8 ? n.slice(0, 7) + '…' : n; }
 function rsBoard() {
   const off = S.rbOff || 0, mon0 = addDays(monday(TODAY), 28 * off), weeks = [0, 1, 2, 3].map(w => addDays(mon0, 7 * w));
   const cell = k => { const s = rsDayOf(k), past = k < TODAY, done = (S.manual[k]?.recov || []).length > 0;
@@ -4602,9 +4610,10 @@ function rsBoard() {
 }
 function rsList() {
   const own = RS_OWN();
-  return `<h2>Mes séances de récupération</h2><div class="list">${own.map(s => `<button class="rowbtn" data-rsview="${esc(s.id)}"><span><b>${esc(s.name)}</b><span class="meta">${rsMin(s)} min · ${s.items.length} exercices</span></span>${ICON.chev}</button>`).join('')}<button class="addbtn" data-rsnew>+ Créer une séance de récupération</button></div>`;
+  return `<div class="btnrow" style="margin-top:4px"><button class="btn ghost" data-rsnew>+ Créer une séance</button></div>
+    <h2>Mes séances de récupération</h2><div class="list">${own.map(s => `<button class="rowbtn" data-rsview="${esc(s.id)}"><span><b>${esc(s.name)}</b><span class="meta">${rsMin(s)} min · ${s.items.length} exercices</span></span>${ICON.chev}</button>`).join('') || '<div class="row"><span class="muted">Aucune séance à toi pour l\'instant.</span></div>'}</div>`;
 }
-function rsView(id) {
+function rsView(id, from) {
   openPane({title: rsById(id)?.name || 'Séance', render: () => { const s = rsById(id); if (!s) return '<p class="small muted" style="margin-top:16px">Séance supprimée.</p>';
     const steps = s.day ? recSteps(s.day).map(x => ({n: x.n, how: x.how, min: Math.round(x.sec / 60)})) : s.items.map(i => RX[i]).filter(Boolean);
     const on = Object.entries(S.app?.rdated || {}).filter(([k, v]) => v === id && k >= TODAY).map(([k]) => cap(fmtShort(k)));
@@ -4612,7 +4621,8 @@ function rsView(id) {
     return `<div class="card" style="margin-top:14px"><span class="eyebrow">Objectif</span><p style="margin:4px 0 0">${s.day ? (rsGoal(s) ? (s.day === 'mus' ? 'Détendre : ' : 'Soulager : ') + esc(rsGoal(s)) : 'Rien à soigner aujourd\'hui') : esc(s.goal || 'Ta séance de récupération')}</p><p class="small muted" style="margin:6px 0 0">${tot ? tot + ' min · ' : ''}${steps.length} exercice${steps.length > 1 ? 's' : ''}${s.day ? ' · refaite chaque jour par l\'appli' : ''}${on.length ? ' · calée ' + esc(on.join(', ')) : ''}</p></div>
       <div class="list">${steps.map(x => `<div class="row"><span class="l">${esc(x.n)}<span class="hint">${x.min ? x.min + ' min · ' : ''}${esc(x.how || '')}</span></span></div>`).join('') || '<div class="row"><span class="muted">Rien à faire aujourd\'hui pour cette séance.</span></div>'}</div>
       <div class="btnrow" style="margin-top:14px"><button class="btn" data-rsgo2="${esc(id)}"${steps.length ? '' : ' disabled'}>Lancer</button>${s.day ? '' : `<button class="btn ghost" data-rsdup="${esc(id)}">${s.auto ? 'Dupliquer et modifier' : 'Modifier'}</button>`}</div>
-      ${!s.auto && !s.day ? `<button type="button" class="linkbtn" style="color:var(--bad);margin-top:12px" data-rsdel="${esc(id)}">Supprimer cette séance</button>` : ''}`; }});
+      ${from && from >= TODAY ? `<button class="btn ghost" style="margin-top:10px;width:100%" data-rx="${from}">Retirer du ${esc(fmtShort(from))}</button>` : ''}
+      ${!s.auto && !s.day ? `<button class="btn ghost" style="margin-top:10px;width:100%;color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent)" data-rsdel="${esc(id)}">Supprimer cette séance</button>` : ''}`; }});
 }
 // Making a session: a name, then the exercises in the order touched (any of the Exercices tab).
 let RSE = null;
@@ -4650,7 +4660,7 @@ document.addEventListener('click', async e => {
   if ((b = e.target.closest('[data-rsf]'))) { const [k, v] = b.dataset.rsf.split(':'); RSF[k] = v; paneRender(); return; }
   if (RSE && (b = e.target.closest('[data-rseup]'))) { const i = +b.dataset.rseup; [RSE.items[i - 1], RSE.items[i]] = [RSE.items[i], RSE.items[i - 1]]; paneRender(); return; }
   if (RSE && (b = e.target.closest('[data-rsedel]'))) { RSE.items.splice(+b.dataset.rsedel, 1); paneRender(); return; }
-  if ((b = e.target.closest('[data-rx]'))) { e.stopPropagation(); const k = b.dataset.rx, rd = {...(S.app?.rdated || {})}; delete rd[k]; await rsSaveApp({rdated: rd}); await rsUnplan(k); toast('Retirée de ce jour'); return; }
+  if ((b = e.target.closest('[data-rx]'))) { e.stopPropagation(); if (b.closest('#pane')) closePane(); const k = b.dataset.rx, rd = {...(S.app?.rdated || {})}; delete rd[k]; await rsSaveApp({rdated: rd}); await rsUnplan(k); toast('Retirée de ce jour'); return; }
   if ((b = e.target.closest('[data-rboff]')) && !b.disabled) { S.rbOff = Math.max(0, (S.rbOff || 0) + +b.dataset.rboff); render(); return; }
   if (e.target.closest('[data-rsnew]')) { rsEdit(null); return; }
   if ((b = e.target.closest('[data-rsview]'))) { rsView(b.dataset.rsview); return; }
@@ -4683,12 +4693,12 @@ function rsTime(k, id) {
   const s = rsById(id); if (!s) return; const dur = Math.max(5, rsDur(s) || 10), cur = (PLN().extra?.[k] || []).find(x => x.rs), fr = freeSlots(k, dur);
   RTP = {k, id, a: cur?.a || fr[0]?.a || '18:00', dur};
   openPane({title: 'Où la caler ?', onClose: () => { RTP = null; }, render: () => {
-    if (!RTP) return ''; const a = tmin(RTP.a), L = dayPlan(k).filter(x => !x.rs), t0 = 360, t1 = 1440, K = .9;
+    if (!RTP) return ''; const a = tmin(RTP.a), L = dayPlan(k).filter(x => !x.rs), t0 = 360, t1 = 1440, K = 1.25;
     return `<p class="small muted" style="margin:14px 4px 8px">${esc(s.name)} · ${dur} min · ${esc(cap(fmtShort(k)))}. Touche un créneau libre, ou touche ton planning à l'heure voulue.</p>
       ${fr.length ? `<div class="chipsx">${fr.slice(0, 6).map(f => `<button type="button" class="chip" data-rtp="${f.a}" aria-pressed="${f.a === RTP.a}">${tfr(f.a)}</button>`).join('')}</div>` : ''}
       <div class="rtl" data-rtl data-t0="${t0}" data-k="${K}" style="height:${(t1 - t0) * K}px">${[...Array(19)].map((_, i) => `<i class="rtl-h" style="top:${i * 60 * K}px"><span>${String(6 + i).padStart(2, '0')} h</span></i>`).join('')}
-        ${L.map(x => { const xa = Math.max(tmin(x.a), t0), xb = tmin(x.b) <= tmin(x.a) ? t1 : tmin(x.b); return xb <= t0 ? '' : `<div class="rtl-b" style="--pc:${PCAT[x.c]?.[1] || '#888'};top:${(xa - t0) * K}px;height:${Math.max((xb - xa) * K - 1, 6)}px"><b>${esc(x.n)}</b></div>`; }).join('')}
-        <div class="rtl-b new" style="top:${(a - t0) * K}px;height:${Math.max(dur * K, 14)}px"><b>${esc(s.name)} · ${tfr(RTP.a)}</b></div></div>
+        ${L.map(x => { const xa = Math.max(tmin(x.a), t0), xb = tmin(x.b) <= tmin(x.a) ? t1 : tmin(x.b); return xb <= t0 ? '' : `<div class="rtl-b" style="--pc:${PCAT[x.c]?.[1] || '#888'};top:${(xa - t0) * K}px;height:${Math.max((xb - xa) * K - 1, 8)}px"><b>${esc(x.n)}</b></div>`; }).join('')}
+        <div class="rtl-b new" style="top:${(a - t0) * K}px;height:${Math.max(dur * K, 30)}px"><b>${esc(s.name)} · ${tfr(RTP.a)}</b></div></div>
       <div class="btnrow" style="margin-top:14px;position:sticky;bottom:0;padding:8px 0;background:var(--bg)"><button class="btn" data-rtpok>Caler à ${tfr(RTP.a)}</button><button class="btn ghost" data-rtpno>Sans heure</button></div>`; }});
   setTimeout(() => $('.rtl-b.new')?.scrollIntoView({block: 'center', behavior: 'smooth'}), 380);
 }
@@ -4703,7 +4713,7 @@ function rsTime(k, id) {
   document.addEventListener('pointermove', e => { if (!D || e.pointerId !== D.id) return; if (!D.on) { const m = Math.hypot(e.clientX - D.x0, e.clientY - D.y0); if (D.mouse && m > 5) begin(); else if (!D.mouse && m > 8) { stop(); D = null; return; } } if (D?.on) { e.preventDefault(); move(e.clientX, e.clientY); } });
   document.addEventListener('touchmove', e => { if (D?.on) e.preventDefault(); }, {passive: false});
   document.addEventListener('pointerup', async e => { if (!D || e.pointerId !== D.id) return; const d = D; stop(); D = null; window.__rdropT = Date.now();
-    if (!d.on || Math.hypot(e.clientX - d.x0, e.clientY - d.y0) < 12) { if (!e.target.closest('[data-rx]')) { window.__chipT = Date.now(); rsView(d.ref); } return; }
+    if (!d.on || Math.hypot(e.clientX - d.x0, e.clientY - d.y0) < 12) { if (!e.target.closest('[data-rx]')) { window.__chipT = window.__swallowT = Date.now(); rsView(d.ref, d.from); } return; }
     const k = at(e.clientX, e.clientY)?.dataset.rdk, rd = {...(S.app?.rdated || {})};
     if (k) { if (k === d.from) return; rd[k] = d.ref; if (d.from) delete rd[d.from]; await rsSaveApp({rdated: rd}); if (d.from) await rsUnplan(d.from); rsTime(k, d.ref); return; }
     if (d.from) { delete rd[d.from]; await rsSaveApp({rdated: rd}); await rsUnplan(d.from); toast('Retirée de ce jour'); } });
@@ -6947,7 +6957,7 @@ function painCoach() {
     const done = () => {
       if (!A || A.anims !== anims) return; A = null;
       // The real page replaces its copy in the same frame, at the same place: nothing jumps.
-      if (go) { nb.click(); window.scrollTo(0, 0); }
+      if (go) { nb.click(); const top = () => { window.scrollTo(0, 0); document.scrollingElement && (document.scrollingElement.scrollTop = 0); }; top(); requestAnimationFrame(top); setTimeout(top, 120); setTimeout(top, 400); }
       anims.forEach(x => { try { x.cancel(); } catch (e) {} }); clear(w);
     };
     A = {anims, done}; anims[0].onfinish = done; setTimeout(done, ms + 80);
@@ -7114,7 +7124,7 @@ function sesBoard(kind) {
   document.addEventListener('touchmove', e => { if (D?.on) e.preventDefault(); }, {passive: false});
   document.addEventListener('pointerup', async e => {
     if (!D || e.pointerId !== D.id) return; const d = D; stop(); D = null;
-    if (!d.on || Math.hypot(e.clientX - d.x0, e.clientY - d.y0) < 12) { window.__bdropT = window.__chipT = Date.now(); const p = planOf(d.ref); if (p) { if (p.n) planView(p.id, p.n); else planView(p.id); } return; }
+    if (!d.on || Math.hypot(e.clientX - d.x0, e.clientY - d.y0) < 12) { window.__bdropT = window.__chipT = window.__swallowT = Date.now(); const p = planOf(d.ref); if (p) planView(p.id, p.n || null, d.from); return; }
     window.__bdropT = Date.now();
     const t = at(e.clientX, e.clientY), k = t?.dataset.bdk;
     if (k) { if (k === d.from?.slice(0, 10)) return; const ex = planForK(k, planOf(d.ref)?.kind); await caleSave(k, d.ref); toast(`${planOf(d.ref)?.name || 'Séance'} calée le ${fmtShort(k)}${ex && caleRef(ex) !== d.ref ? ' · ' + ex.name + ' revient à caler' : ''}`); return; }
@@ -7124,21 +7134,24 @@ function sesBoard(kind) {
   // A drop must not also count as a tap on what lies under it.
   document.addEventListener('click', e => { if (window.__bdropT && Date.now() - window.__bdropT < 400) { e.stopPropagation(); e.preventDefault(); } }, true);
 })();
+// A sheet opened when the finger lifts: the click the phone sends right after lands on the sheet's dark
+// background, which would close it at once. That one click is swallowed.
+document.addEventListener('click', e => { if (window.__swallowT && Date.now() - window.__swallowT < 600) { window.__swallowT = 0; e.stopPropagation(); e.preventDefault(); } }, true);
 // If the phone cancelled the touch (a tiny slide), the tap on a block still opens its sheet.
 document.addEventListener('click', e => {
   const c = e.target.closest?.('[data-bref],[data-mref],[data-rref]'); if (!c || e.target.closest('.bx') || document.body.classList.contains('bdragging') || (window.__chipT && Date.now() - window.__chipT < 700)) return;
   window.__chipT = Date.now();
-  if (c.dataset.bref) { const p = planOf(c.dataset.bref); if (p) { if (p.n) planView(p.id, p.n); else planView(p.id); } } else if (c.dataset.mref) menuView(c.dataset.mref); else rsView(c.dataset.rref);
+  if (c.dataset.bref) { const p = planOf(c.dataset.bref); if (p) planView(p.id, p.n || null, c.dataset.bfrom); } else if (c.dataset.mref) menuView(c.dataset.mref, c.dataset.mfrom); else rsView(c.dataset.rref, c.dataset.rfrom);
 });
 // Touching a day of the board shows its session (name, goal, exercises), even a past one.
 document.addEventListener('click', e => {
   const c = e.target.closest('[data-bday]'); if (!c || e.target.closest('[data-bref],.bx') || (window.__bdropT && Date.now() - window.__bdropT < 400)) return;
-  const p = planForK(c.dataset.bday, S.tkind === 'track' ? 'track' : 'gym'); if (!p) return; if (p.n) planView(p.id, p.n); else planView(p.id);
+  const kd = S.tkind === 'track' ? 'track' : 'gym', k = c.dataset.bday, p = planForK(k, kd); if (!p) return; const dk = S.tset.dated?.[dKey(k, kd)] ? dKey(k, kd) : S.tset.dated?.[k] ? k : null; planView(p.id, p.n || null, k >= TODAY ? dk : null);
 });
 document.addEventListener('click', async e => {
   const b = e.target.closest('[data-bx]'), o = e.target.closest('[data-sboff]');
   if (o && !o.disabled) { S.sbOff = Math.max(0, (S.sbOff || 0) + +o.dataset.sboff); renderMod(); return; }
-  if (!b) return; e.stopPropagation();
+  if (!b) return; e.stopPropagation(); if (b.closest('#pane')) closePane();
   const k = b.dataset.bx, dated = {...(S.tset.dated || {})}, n = planOf(dated[k])?.name; delete dated[k]; S.tset = {...S.tset, dated}; renderMod();
   await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()}); toast((n || 'Séance') + ' retirée du ' + fmtShort(k.slice(0, 10)));
 });
@@ -7151,7 +7164,8 @@ function tSessions() {
     <button class="banner" data-tseason style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;margin-bottom:8px"><span><b>${k === 'gym' ? 'Ma saison de musculation' : 'Ma saison de sprint'}</b><br><span class="small muted">${(() => { const n = seasonNow(TODAY, k === 'gym' ? 'gym' : 'track'); return n && !n.before && !n.after ? `Bloc ${n.i + 1} · ${esc(n.name)} · semaine ${n.week}/${n.of}` : k === 'gym' ? 'Tes blocs de musculation' : 'Tes blocs : PPG, PPS, pré-compétition, compétition'; })()}</span></span>${ICON.chev}</button>
     <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
     ${sesBoard(k)}
-    <h2>Mes séances</h2><div class="list"><button class="addbtn" data-tnew>+ Créer une séance</button>${mine.map(row).join('')}</div>
+    <div class="btnrow" style="margin-top:16px"><button class="btn ghost" data-tnew>+ Créer une séance</button></div>
+    <h2>Mes séances</h2><div class="list">${mine.map(row).join('') || '<div class="row"><span class="muted">Aucune séance à toi pour l\'instant.</span></div>'}</div>
     ${k === 'gym' && TDV_PLANS.length ? progList() : ''}
     ${base.length ? `<h2>Programmes <small>à dupliquer et adapter</small></h2><div class="list">${base.map(row).join('')}</div>` : ''}`;
 }
@@ -7407,7 +7421,7 @@ document.addEventListener('click', async e => {
   gp[id] === g ? delete gp[id] : gp[id] = g; S.tset = {...(S.tset || {}), gymPlan: gp}; paneRender();
   await dbSet('settings/training', S.tset);
 });
-function planView(id, n) {
+function planView(id, n, from) {
   openPane({title: 'Séance', render: () => {
     const p = (n ? tdvNum(+n) : null) || planById(id); if (!p) return '';
     GYM_CTX = S.tset?.gymPlan?.[p.id] || null;
@@ -7422,7 +7436,8 @@ function planView(id, n) {
       ${gymCard(p)}
       <div class="stack" style="margin-top:16px">${(() => { const on = caledOn(caleRef(p)); return `<button class="btn ghost" data-tcale="${caleRef(p)}">${on.length ? 'Calée le ' + esc(fmtShort(on[0])) + ' · changer' : 'Caler à un jour'}</button>`; })()}<button class="btn" data-tstart="${p.id}"${p.n ? ` data-tn="${p.n}"` : ''}>Commencer</button>
       <div class="btnrow"><button class="btn ghost" data-tedit="${p.id}">${mine ? 'Modifier' : 'Dupliquer et adapter'}</button>${mine ? `<button class="btn ghost" data-tdup="${p.id}">Dupliquer</button>` : ''}</div>
-      ${mine ? `<button class="btn ghost" data-tdel="${p.id}" style="color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent)">Supprimer</button>` : ''}</div>`;
+      ${from ? `<button class="btn ghost" data-bx="${from}">Retirer du ${esc(fmtShort(from.slice(0, 10)))}</button>` : ''}
+      ${mine ? `<button class="btn ghost" data-tdel="${p.id}" style="color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent)">Supprimer la séance</button>` : ''}</div>`;
   }});
 }
 const fmtRest = s => s >= 60 ? `${Math.floor(s / 60)} min${s % 60 ? ' ' + (s % 60) + ' s' : ''}` : s + ' s';
@@ -8257,11 +8272,14 @@ const CIQ = [["Abat, cuit (aliment moyen)",162,25.1,1.4,6.2],["Abondance",393,27
 const foodById = id => S.foods[id] || FOODS.find(f => f.id === id) || (/^c\d+$/.test(id) ? CIQ[+id.slice(1)] : null);
 // Search across words, accents and case ignored; names that start with the words come first, then the shortest.
 const fnorm = s => String(s || '').toLowerCase().normalize('NFD').replace(/\p{M}/gu, '').replace(/[^a-z0-9%]+/g, ' ').trim();
+const FSTOP = new Set(['de', 'du', 'des', 'd', 'la', 'le', 'les', 'l', 'a', 'au', 'aux', 'en', 'et', 'avec', 'sans', 'un', 'une', 'pour', 'sur']);
+// "poulets" finds "poulet": a final s or x is dropped from both sides.
+const fstem = x => x.length > 3 ? x.replace(/[sx]$/, '') : x;
 function foodSeek(list, q, n = 40) {
-  const w = fnorm(q).split(' ').filter(Boolean); if (!w.length) return [];
+  const w = fnorm(q).split(' ').filter(x => x && !FSTOP.has(x)).map(fstem); if (!w.length) return [];
   const out = [];
   for (const f of list) { const s = fnorm(f.n), ws = s.split(' ');
-    if (!w.every(x => ws.some(y => y.startsWith(x)) || (x.length > 3 && s.includes(x)))) continue;
+    if (!w.every(x => ws.some(y => fstem(y).startsWith(x) || y.startsWith(x)) || (x.length > 3 && s.includes(x)))) continue;
     const sc = (s.startsWith(w[0]) ? 0 : ws.some(y => y.startsWith(w[0])) ? 1 : 2) * 1000 + s.length; out.push([sc, f]); }
   return out.sort((a, b) => a[0] - b[0]).slice(0, n).map(x => x[1]);
 }
@@ -8681,15 +8699,17 @@ function menuEditor() {
     ${m ? `<div class="btnrow" style="margin-top:14px">${m.kind === 'day' ? '' : `<button type="button" class="btn ghost" data-mweekme="${m.id}">Caler sur cette semaine</button>`}<button type="button" class="btn ghost" data-mdup="${m.id}">Dupliquer</button></div>
       <button type="button" class="linkbtn" style="color:var(--bad);margin-top:12px" data-mdelm="${m.id}">Supprimer ce bloc</button>` : '<div class="btnrow" style="margin-top:14px"><button type="button" class="btn ghost" data-mdup="">Dupliquer en bloc semaine</button></div>'}`;
 }
-function menuView(id) {
+function menuView(id, from) {
   openPane({title: menuById(id)?.name || 'Menu de base', render: () => {
     const m = id ? menuById(id) : null, L = m ? m.items || [] : planItems(), t = menuTot(L);
     if (id && !m) return '<p class="small muted" style="margin-top:16px">Ce bloc a été supprimé.</p>';
     const wk = m ? Object.keys(S.fset.menuWeek || {}).filter(k => S.fset.menuWeek[k] === id && addDays(k, 6) >= TODAY).map(k => 'S' + seasonWeek(k)) : [], dy = m ? Object.keys(S.fset.menuDated || {}).filter(k => S.fset.menuDated[k] === id && k >= TODAY).map(k => fmtShort(k)) : [];
-    return `<div class="card" style="margin-top:14px"><div class="stats"><div><b>${fx(t.kcal)}</b><span>kcal</span></div><div><b>${fx(t.p)} g</b><span>protéines</span></div><div><b>${fx(t.c)} g</b><span>glucides</span></div><div><b>${fx(t.f)} g</b><span>lipides</span></div></div>
+    return `<div class="card" style="margin-top:14px"><div class="stats mac"><div><b>${fx(t.kcal)}</b><span>kcal</span></div><div><b>${fx(t.p)} g</b><span>protéines</span></div><div><b>${fx(t.c)} g</b><span>glucides</span></div><div><b>${fx(t.f)} g</b><span>lipides</span></div></div>
         <p class="small muted" style="margin:8px 0 0">${m ? (m.kind === 'day' ? 'Bloc jour' : 'Bloc semaine') : 'Les jours sans bloc'}${wk.length ? ' · calé ' + wk.join(', ') : ''}${dy.length ? ' · calé le ' + esc(dy.join(', ')) : ''}</p></div>
       ${MEALS.map(([ml, lab]) => { const its = L.filter(x => x.meal === ml); if (!its.length) return ''; const s = menuTot(its); return `<div class="sec-label">${lab} <small>${fx(s.kcal)} kcal · P ${fx(s.p)} · G ${fx(s.c)}</small></div><div class="list">${its.map(x => `<div class="row"><span class="l">${esc(x.n)}</span><b class="num">${fx(x.g)} g</b></div>`).join('')}</div>`; }).join('')}
-      <div class="btnrow" style="margin-top:14px"><button class="btn ghost" data-medit="${id || ''}">Modifier</button>${m ? `<button class="btn" data-mplace="${id}">Caler</button>` : ''}</div>`; }});
+      <div class="btnrow" style="margin-top:14px"><button class="btn ghost" data-medit="${id || ''}">Modifier</button>${m ? `<button class="btn" data-mplace="${id}">Caler</button>` : ''}</div>
+      ${from && from >= TODAY ? `<button class="btn ghost" style="margin-top:10px;width:100%" data-mx="${from}">Retirer du ${esc(fmtShort(from))}</button>` : ''}
+      ${m ? `<button class="btn ghost" style="margin-top:10px;width:100%;color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent)" data-mdelm="${id}">Supprimer ce bloc</button>` : ''}`; }});
 }
 function menuOpen(id) { MEDIT = id || null; openPane({title: id ? (menuById(id)?.name || 'Menu') : 'Menu de base', onClose: () => { MEDIT = null; renderMod(true); }, render: menuEditor}); }
 // Choosing by touch: a week takes week blocks; a day takes any block, or goes back to its week.
@@ -8712,7 +8732,7 @@ document.addEventListener('click', async e => {
   if ((b = e.target.closest('[data-mview]'))) { menuView(b.dataset.mview); return; }
   if ((b = e.target.closest('[data-medit]'))) { if (P.stack.at(-1)?.title === (menuById(b.dataset.medit)?.name || 'Menu de base')) closePane(); menuOpen(b.dataset.medit); return; }
   if ((b = e.target.closest('[data-mplace]'))) { const m = menuById(b.dataset.mplace); closePane(); if (m?.kind === 'day') menuChoose([TODAY], cap(fmtShort(TODAY))); else menuChoose([], 'Semaine ' + seasonWeek(TODAY), monday(TODAY)); return; }
-  if ((b = e.target.closest('[data-mx]'))) { e.stopPropagation(); await menuPlaceDays([b.dataset.mx], ''); toast('Retiré : ce jour revient au menu de base'); return; }
+  if ((b = e.target.closest('[data-mx]'))) { e.stopPropagation(); if (b.closest('#pane')) closePane(); await menuPlaceDays([b.dataset.mx], ''); toast('Retiré : ce jour revient au menu de base'); return; }
   if ((b = e.target.closest('[data-mnew]'))) { if (P.stack.length) closePane(); const id = await menuNew(null, b.dataset.mnew); menuOpen(id); toast('Bloc créé à partir de ton menu de base'); return; }
   if ((b = e.target.closest('[data-mdup]'))) { const id = await menuNew(b.dataset.mdup || null, b.dataset.mdup ? null : 'week'); closePane(); menuOpen(id); toast('Copie créée'); return; }
   if ((b = e.target.closest('[data-mekind]'))) { const k = b.dataset.mekind; await saveFset({menus: myMenus().map(m => m.id === MEDIT ? {...m, kind: k} : m)}); paneRender(); return; }
@@ -8745,7 +8765,7 @@ document.addEventListener('input', e => { const t = e.target; if (!t.matches?.('
   document.addEventListener('touchmove', e => { if (D?.on) e.preventDefault(); }, {passive: false});
   document.addEventListener('pointerup', async e => { if (!D || e.pointerId !== D.id) return; const d = D; stop(); D = null;
     window.__mdropT = Date.now();
-    if (!d.on || Math.hypot(e.clientX - d.x0, e.clientY - d.y0) < 12) { if (!e.target.closest('[data-mx]')) { window.__chipT = Date.now(); menuView(d.ref); } return; }
+    if (!d.on || Math.hypot(e.clientX - d.x0, e.clientY - d.y0) < 12) { if (!e.target.closest('[data-mx]')) { window.__chipT = window.__swallowT = Date.now(); menuView(d.ref, d.from); } return; }
     const t = at(e.clientX, e.clientY, d.week), name = menuById(d.ref)?.name || 'Menu';
     if (d.week) { const w = t?.dataset.mwrow; if (w) { await menuPlaceWeek(w, d.ref); toast(`${name} : semaine ${seasonWeek(w)}`); } return; }
     const k = t?.dataset.mdk;
@@ -8909,7 +8929,7 @@ function menuHtml() {
     const items = edItems(), own = !MEDIT && !!S.fset.menu?.length;
     const tot = items.reduce((t, x) => ({kcal: t.kcal + x.kcal, p: t.p + x.p, c: t.c + x.c, f: t.f + x.f}), {kcal: 0, p: 0, c: 0, f: 0});
     return `<p class="small muted" style="margin:16px 4px 8px">${MEDIT ? 'Les jours où ce menu est calé, il remplit ton journal le matin.' : 'Ton menu de tous les jours. Il remplit ton journal chaque matin, sauf les jours où un autre menu est calé.'} Remplace un aliment : la quantité est recalculée pour garder les mêmes macros.</p>
-      <div class="card"><div class="stats"><div><b>${fx(tot.kcal)}</b><span>kcal</span></div><div><b>${fx(tot.p)} g</b><span>protéines</span></div><div><b>${fx(tot.c)} g</b><span>glucides</span></div><div><b>${fx(tot.f)} g</b><span>lipides</span></div></div></div>
+      <div class="card"><div class="stats mac"><div><b>${fx(tot.kcal)}</b><span>kcal</span></div><div><b>${fx(tot.p)} g</b><span>protéines</span></div><div><b>${fx(tot.c)} g</b><span>glucides</span></div><div><b>${fx(tot.f)} g</b><span>lipides</span></div></div></div>
       ${MEALS.map(([m, lab]) => { const its = items.map((x, i) => ({...x, i})).filter(x => x.meal === m); return `<div class="sec-label">${lab}</div><div class="list">${its.map(x => `<div class="row"><span class="l">${esc(x.n)}<span class="hint">${fx(x.g)} g · ${fx(x.kcal)} kcal · surtout ${MACRO_N[mainMacro(x)]}</span></span><span style="display:flex;gap:6px"><input class="mini-in" inputmode="numeric" style="width:64px" value="${x.g}" data-mng="${x.i}" aria-label="Grammes"><button class="chip" data-mswap="${x.i}">Remplacer</button><button class="chip" data-mdel="${x.i}" aria-label="Retirer">✕</button></span></div>`).join('')}<button class="addbtn" data-madd="${m}">+ Ajouter au ${lab.toLowerCase()}</button></div>`; }).join('')}
       ${own ? '<div style="margin-top:12px"><button class="btn ghost" data-mreset>Revenir au plan de mon fichier</button></div>' : ''}`;
   }
@@ -9198,8 +9218,7 @@ function fGoals() {
       <div class="row"><span class="l">Protéines<span class="hint">${fx(S.fset.protein || 2, 1)} g par kg de poids${pk ? ` · ton plan : ${fx(pk, 1)} g/kg` : ''}</span></span>${pk ? `<button class="chip" data-fprotplan>Remplir depuis mon plan</button>` : ''}</div>
       <div class="row col"><span class="l">Remplir le journal avec mon menu<span class="hint">Ton journal se remplit chaque matin avec ton menu. Tu corriges seulement ce que tu as mangé en plus ou en moins.</span></span><div class="seg" role="group">${[['on', 'Oui'], ['off', 'Non']].map(([v, l]) => `<button type="button" data-fplanfill="${v}" aria-pressed="${(S.fset.planFill !== false) === (v === 'on')}">${l}</button>`).join('')}</div></div></div>
     <h2>Tes chiffres <small>${g.fromPlan ? 'ton plan, tous les jours' : 'par jour'}</small></h2>
-    <div class="stats"><div><b>${fx(g.kcal)}</b><span>kcal</span></div><div><b>${fx(E.bmr)}</b><span>kcal basales</span></div></div>
-    <div class="stats" style="margin-top:8px"><div><b>${fx(g.p)} g</b><span>protéines</span></div><div><b>${fx(g.c)} g</b><span>glucides</span></div><div><b>${fx(g.f)} g</b><span>lipides</span></div></div>
+    <div class="stats mac"><div><b>${fx(g.kcal)}</b><span>kcal par jour · dont ${fx(E.bmr)} au repos</span></div><div><b>${fx(g.p)} g</b><span>protéines</span></div><div><b>${fx(g.c)} g</b><span>glucides</span></div><div><b>${fx(g.f)} g</b><span>lipides</span></div></div>
     ${detailsBox(`<p><b style="color:var(--fg)">Tes chiffres</b> : ${g.fromPlan ? 'les totaux de ton plan alimentaire, identiques chaque jour comme dans ton fichier.' : `protéines ${fx(S.fset.protein || 2, 1)} g/kg, lipides 1 g/kg (au moins 20 % des calories), les glucides complètent.`}</p>
       <p><b style="color:var(--fg)">Ta dépense</b> : ${E.katch ? `formule de Katch-McArdle sur ta masse maigre (${fx(E.lbm, 1)} kg)` : `formule de Mifflin-St Jeor (${fx(E.w, 1)} kg, ${fx(E.h)} cm, ${fx(E.age)} ans)`}, soit ${fx(E.bmr)} kcal de base et ${fx(E.rest)} kcal au repos ; séances de la montre par la formule de Keytel. Elle sert à vérifier que ton plan couvre ta dépense : ${fx(E.rest + E.aT)} kcal un jour d'entraînement.</p>
       <p><b style="color:var(--fg)">Carences</b> : la dernière valeur de chaque prise de sang, comparée à la norme de son laboratoire et à la précédente, plus ton poids et ton menu.</p>`)}`;
@@ -9256,17 +9275,26 @@ function foodResults(q) {
 }
 const offRows = () => `<div class="sec-label">Produits du commerce</div><div class="list">${OFF.res.map((f, i) => `<button class="rowbtn" data-fpick="o:${i}"><span><b>${esc(f.n)}</b><span class="meta">${esc(f.brand || '')} · pour 100 g</span></span><span class="kc">${fx(f.kcal)} kcal</span></button>`).join('')}</div>`;
 // Open Food Facts (free, open data) for packaged products. The Claude page cannot reach other sites: there it just stays silent.
+const OFFC = new Map(); let OFFT = [];
 function onlineSearch(q) {
   clearTimeout(OFF.t); const s = q.trim().toLowerCase(); if (s.length < 3) return;
   OFF.t = setTimeout(async () => {
     try {
-      const ctl = new AbortController(); setTimeout(() => ctl.abort(), 7000);
-      const r = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(s)}&search_simple=1&action=process&json=1&page_size=40&sort_by=unique_scans_n&lc=fr&fields=product_name,product_name_fr,brands,nutriments`, {signal: ctl.signal});
-      const j = await r.json();
+      const ctl = new AbortController(); setTimeout(() => ctl.abort(), 60000);
+      // The plain search answers in about a second; the sorted one is often refused by their server.
+      const qs = s.split(/\s+/).filter(x => !FSTOP.has(fnorm(x))).join(' ') || s, U = h => `https://${h}.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(qs)}&json=1&page_size=50&lc=fr&fields=product_name,product_name_fr,brands,nutriments`;
+      // Their server takes about 10 searches a minute from one phone: one search once typing stops, the answers kept,
+      // and when it says no, it is asked again a few seconds later.
+      let j = OFFC.get(qs) || null;
+      for (let i = 0; !j && i < 5; i++) { const now = Date.now(); OFFT = OFFT.filter(x => now - x < 60000); if (OFFT.length >= 9) await new Promise(z => setTimeout(z, 60000 - (now - OFFT[0]) + 50));
+        if (($('#ff-q')?.value || '').trim().toLowerCase() !== s) return; OFFT.push(Date.now());
+        try { const r = await fetch(U(i % 2 ? 'fr' : 'world'), {signal: ctl.signal}); if (r.ok) { j = await r.json(); OFFC.set(qs, j); break; } } catch (e) { if (ctl.signal.aborted) break; }
+        await new Promise(z => setTimeout(z, 2500)); }
+      if (!j) return;
       OFF = {q: s, t: null, res: (j.products || []).map(p => ({n: p.product_name_fr || p.product_name, brand: (p.brands || '').split(',')[0], kcal: +p.nutriments?.['energy-kcal_100g'] || 0, p: +p.nutriments?.proteins_100g || 0, c: +p.nutriments?.carbohydrates_100g || 0, f: +p.nutriments?.fat_100g || 0, g: 100})).filter(p => p.n && p.kcal)};
       const el = $('#ff-off'); if (el && ($('#ff-q')?.value || '').trim().toLowerCase() === s) el.innerHTML = OFF.res.length ? offRows() : '';
     } catch (e) {}
-  }, 450);
+  }, 900);
 }
 function pickFood(src, meal) {
   let f;
@@ -9283,9 +9311,9 @@ function qtyPane(f, meal, editIndex) {
     <div class="dhead"><div class="bigname">${esc(f.n)}</div><p class="small muted">Pour 100 g : ${fx(f.kcal)} kcal · P ${fx(f.p, 1)} · G ${fx(f.c, 1)} · L ${fx(f.f, 1)}</p></div>
     <div class="qty"><input inputmode="decimal" id="fq-g" value="${g}" data-fqty aria-label="Quantité en grammes"><span>g</span></div>
     <div class="chipsx" style="justify-content:center">${[...new Set([f.g && f.g !== 100 ? f.g : null, 50, 100, 150, 200].filter(Boolean))].map(v => `<button class="chip" data-fqv="${v}">${v} g${v === f.g && f.unit ? ' · ' + esc(f.unit) : ''}</button>`).join('')}</div>
-    <div class="stats" id="fq-tot"><div><b>${fx(t.kcal)}</b><span>kcal</span></div><div><b>${fx(t.p, 1)} g</b><span>protéines</span></div><div><b>${fx(t.c, 1)} / ${fx(t.f, 1)}</b><span>glucides / lipides</span></div></div>
+    <div class="stats mac" id="fq-tot"><div><b>${fx(t.kcal)}</b><span>kcal</span></div><div><b>${fx(t.p, 1)} g</b><span>protéines</span></div><div><b>${fx(t.c, 1)} g</b><span>glucides</span></div><div><b>${fx(t.f, 1)} g</b><span>lipides</span></div></div>
     <div class="stack" style="margin-top:16px"><button class="btn" data-fqok>${editIndex != null ? 'Enregistrer' : 'Ajouter'}</button>${editIndex != null ? '<button class="btn ghost" data-fqdel style="color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent)">Retirer du journal</button>' : ''}</div>`; },
-  setG: v => { g = Math.max(0, +String(v).replace(',', '.') || 0); const t = tot(); const el = $('#fq-tot'); if (el) el.innerHTML = `<div><b>${fx(t.kcal)}</b><span>kcal</span></div><div><b>${fx(t.p, 1)} g</b><span>protéines</span></div><div><b>${fx(t.c, 1)} / ${fx(t.f, 1)}</b><span>glucides / lipides</span></div>`; },
+  setG: v => { g = Math.max(0, +String(v).replace(',', '.') || 0); const t = tot(); const el = $('#fq-tot'); if (el) el.innerHTML = `<div><b>${fx(t.kcal)}</b><span>kcal</span></div><div><b>${fx(t.p, 1)} g</b><span>protéines</span></div><div><b>${fx(t.c, 1)} g</b><span>glucides</span></div><div><b>${fx(t.f, 1)} g</b><span>lipides</span></div>`; },
   ok: async () => {
     const t = tot(), d = structuredClone(fday(S.fday)); d.items ||= [];
     const it = {n: f.n, g, kcal: Math.round(t.kcal), p: +t.p.toFixed(1), c: +t.c.toFixed(1), f: +t.f.toFixed(1), meal: editIndex != null ? d.items[editIndex].meal : meal, food: f.id || null};
