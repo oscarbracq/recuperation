@@ -712,9 +712,12 @@ svg.body.sil .rg.on{stroke:none;fill:transparent}
 .tbottle{min-width:0}
 .tbottle>span:nth-child(2){min-width:0}
 .tabbar button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;font-size:.6875rem;font-weight:500;color:var(--fg3);transition:color .15s}
-.tabbar button svg{width:26px;height:26px;transition:transform .1s ease-out}
-.tabbar button[aria-selected="true"]{color:var(--accent)}
-.tabbar button:active svg{transform:scale(.9)}
+.tabbar button svg{width:26px;height:26px;transform-origin:50% 70%;transition:transform .32s cubic-bezier(.34,1.56,.64,1)}
+.tabbar button[aria-selected="true"]{color:var(--accent);font-weight:600}
+/* The open page's icon stands a little bigger and higher than the others, with a soft spring. */
+.tabbar button[aria-selected="true"] svg{transform:translateY(-2px) scale(1.18)}
+.tabbar button:active svg{transform:scale(.9);transition-duration:.1s}
+@media (prefers-reduced-motion:reduce){.tabbar button svg{transition:none}}
 /* Top fade, like a chat app: the system bar colour melts into the page instead of a hard band. */
 body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-inset-top,0px) + 24px);z-index:55;pointer-events:none;background:linear-gradient(to bottom,var(--top) env(safe-area-inset-top,0px),color-mix(in srgb,var(--top) 55%,transparent) calc(env(safe-area-inset-top,0px) + 10px),transparent)}
 
@@ -939,7 +942,7 @@ ul.bil{margin:4px 0 0;padding-left:18px;font-size:.875rem;line-height:1.45}ul.bi
 .bd{font-size:.625rem;color:var(--fg2);font-weight:600;line-height:1.1;display:flex;flex-wrap:wrap;gap:0 3px}.bd b{color:var(--fg)}.bd small{width:100%;font-size:.5625rem;font-weight:500}
 .bplus{flex:1;display:grid;place-items:center;color:var(--fg3);font-size:1rem}
 .mboard .bcell{opacity:1;cursor:pointer}.mboard .bcell.past{opacity:.45;cursor:default}.mboard .mbase{flex:1;display:grid;place-items:center;font-size:.625rem;color:var(--fg3)}
-.mwk{background:none;border:0;padding:0;font:inherit;cursor:pointer;border-radius:6px}.mwk:active{color:var(--accent)}.mchip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mwk{background:none;border:0;padding:0;font:inherit;cursor:pointer;border-radius:6px}.mwk.on{color:var(--accent)}.mboard .mbase.wk{color:var(--accent);font-weight:700;font-size:.5625rem;text-align:center;line-height:1.1}.mchip.mday{background:#FF9F0A}.bchip.src.mchip.mday{background:var(--card2);box-shadow:inset 3px 0 0 #FF9F0A}.mboard .bweek.bover{outline:2px solid var(--accent);outline-offset:2px;border-radius:12px}.mwk:active{color:var(--accent)}.mchip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bchip{position:relative;display:flex;align-items:center;gap:2px;padding:4px 5px;border-radius:7px;background:var(--accent);color:#fff;font-size:.6875rem;font-weight:700;line-height:1.1;cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation;min-width:0}
 .bchip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
 .bchip .bx{flex:none;width:16px;height:16px;border-radius:50%;background:rgba(0,0,0,.25);color:#fff;font-size:.75rem;line-height:1;display:grid;place-items:center}
@@ -2621,12 +2624,24 @@ function homePara() {
   else if (!p) { const tg = effortTarget(rec?.score, high), lv = v => (EFFORT.find(([a, b]) => v >= a && v < b) || EFFORT.at(-1))[2].toLowerCase();
     C.push({s: 30, c: ['T', 'R'], t: high ? `Jour intense sans séance prévue : choisis-en une dans Training, vise un effort ${tg.lvl[2].toLowerCase()} (${tg.lvl[0]} à ${tg.lvl[1]} sur 21).` : effY >= 10 ? `Hier, ton effort a été ${lv(effY)} (${fx(effY, 1)} sur 21, ce que ta montre et tes RPE ont mesuré). Aujourd'hui, jour calme : reste sous ${tg.lvl[1]} sur 21, donc mobilité et marche, rien d'intense.` : `Jour calme : reste sous ${tg.lvl[1]} sur 21 d'effort (mobilité, marche), rien d'intense.`}); }
   if (!rec) C.push({s: 40, c: ['R'], t: 'Ta récupération se calibre encore : quelques nuits de mesures.'});
+  // The next 48 hours: a sprint session or a competition tomorrow changes tonight.
+  const tm = addDays(TODAY, 1), tmT = planForK(tm, 'track'), tmG = planForK(tm, 'gym'), comp2 = [1, 2].map(i => addDays(TODAY, i)).find(k => /comp[eè]t/i.test(planForK(k, 'track')?.name || ''));
+  if (comp2) C.push({s: 88, c: ['T', 'N', 'R'], t: `Compétition ${comp2 === tm ? 'demain' : fmtShort(comp2)} : aujourd'hui léger, tout ton plan de glucides, et coucher à ${bed}.`});
+  else if (tmT && !done.some(l => l.kind === 'track')) C.push({s: 54, c: ['T', 'R'], t: `Demain, ${tmT.name.split(' · ').pop().toLowerCase()} : rien de lourd sur les jambes ce soir${tight ? `, et 10 min sur ${MUSI[tight.k].n.toLowerCase()}` : ''}.`});
+  else if (tmG && high && effT >= 12) C.push({s: 45, c: ['T', 'N'], t: `Muscu demain après une grosse journée : protéines au complet ce soir, c'est là que le muscle se reconstruit.`});
+  const wNowL = waterOf(TODAY).L, wGoal = g.waterL || 2;
+  if (h >= 15 && h < 21 && wNowL < wGoal * (h - 8) / 14 - .4) C.push({s: 52, c: ['N', 'T'], t: `Eau : ${fx(wNowL, 1)} L sur ${fx(wGoal, 1)} à ${h} h, tu es en retard d'environ ${fx(wGoal * (h - 8) / 14 - wNowL, 1)} L ; déshydraté, tu perds de la force et de la puissance.`});
+  const scrNow = typeof scrTot === 'function' ? scrTot(TODAY) : null;
+  if (h >= 20 && scrNow != null && scrNow > 360) C.push({s: 48, c: ['R'], t: `Déjà ${durTxt(Math.round(scrNow))} d'écran aujourd'hui : coupe le téléphone 30 min avant ${bed}, la lumière et l'éveil retardent l'endormissement.`});
   try { const top = carences().list[0]; if (top && top.s >= 80) C.push({s: 50, c: ['N'], t: `À corriger dans l'assiette : ${top.n.toLowerCase()}. ${top.fix.split('. ')[0]}.`}); } catch (e) {}
   C.sort((a, b) => b.s - a.s);
   const routine = todayRoutine(), care = routine ? `ta routine de récup à ${routine.a.replace(':', ' h ')}` : planHas(TODAY, 'sauna') ? 'sauna' : null;
   const head = C[0]?.t || 'Rien à signaler : journée normale.', lines = C.slice(1, 4);
-  activeNotes().slice(0, 2).reverse().forEach(n => lines.unshift({c: n.areas?.length ? n.areas : ['T', 'N', 'R'], t: 'Ta note : ' + n.text}));
-  lines.push({c: ['R'], t: `Ce soir : ${care ? care + ', puis ' : ''}coucher à ${bed} pour tes ${need % 1 ? hmH(need) : need + ' h'} de sommeil.`});
+  // Only what changes something today: his own notes already shape the advice (lighter week, no gym…), they are not
+  // read back to him, and the usual bedtime is said only when the last nights ran short.
+  const debt = [0, 1, 2].map(i => VAL.sleepH(addDays(kG || TODAY, -i))).filter(x => x != null), owe = debt.length ? debt.reduce((a, x) => a + Math.max(0, need - x), 0) : 0;
+  if (owe >= 1.5 && h >= 17) lines.push({c: ['R'], t: `Il te manque ${hmH(owe)} de sommeil sur 3 nuits : ${care ? care + ', puis ' : ''}coucher à ${bed}, pas plus tard.`});
+  else if (care && h >= 17) lines.push({c: ['R'], t: `Ce soir : ${care}.`});
   const why = [
     rec ? `Récupération ${rec.score} % : VFC ${hrv ?? '–'} ms contre ta base de ${hb ? fx(hb.m) : '–'} ms (45 %), sommeil ${sl != null ? hmH(sl) : '–'} sur ton besoin de ${hmH(need)} (35 %), FC au repos ${G(kG, 'rhr') ?? '–'} bpm (20 %).` : 'La récupération a besoin de 7 nuits de mesures pour avoir ta base.',
     `Charge : effort moyen ${eff7 != null ? fx(eff7, 1) : '–'} sur 7 jours contre ${eff28 != null ? fx(eff28, 1) : '–'} sur 28 jours, et ta séance du jour dans ${modName('T')}.`,
@@ -2707,12 +2722,41 @@ function bilanHtml() {
   if (sc.length) add(hab < 60 ? 2 : 1, `Score : habitudes ${Math.round(hab)}, physiologie ${Math.round(phy)} sur ${sc.length} journée${sc.length > 1 ? 's' : ''} enregistrée${sc.length > 1 ? 's' : ''}.`, 'R');
   add(care < 30 ? 2 : 1, `Récupération active : ${care} min de soins notés${scr != null ? ` · temps d'écran ${durTxt(Math.round(scr))} par jour` : ''}.`, 'R');
   const worst = Math.max(...pts.map(x => x.lv)), head = worst === 3 ? 'Semaine à surveiller' : worst === 2 ? 'Semaine correcte, quelques points à ajuster' : 'Bonne semaine';
+  // One paragraph for the whole week, the most important first, training, food and recovery read together, then
+  // what it means for next week (its sessions and a competition, if any).
+  const syn = (() => {
+    const S1 = [], next = [...Array(7)].map((_, i) => addDays(e, 1 + i));
+    const nT = next.filter(k => planForK(k, 'track') || planHas(k, 'athle')).length, nG = next.filter(k => planForK(k, 'gym') || planHas(k, 'muscu')).length;
+    const comp = next.find(k => /comp[eè]t/i.test(planForK(k, 'track')?.name || ''));
+    const recDown = rec != null && recP != null && rec < recP - 4, loadUp = acwr != null && acwr > 1.15, sleepLow = sl != null && sl < need - .5;
+    const painTop = pz.find(([, x]) => x.max >= 3), wDown = dW != null && dW < -.6;
+    const fact = [];
+    if (painTop) fact.push([5, `La priorité, c'est ${painWords(painTop[0])} : ${painTop[1].max}/10, notée ${painTop[1].n} jour${painTop[1].n > 1 ? 's' : ''}${loadUp ? ', alors que ta charge montait' : ''}`]);
+    if (rec != null) fact.push([recDown || red >= 2 ? 4 : short >= 3 ? 3 : sleepLow ? 2 : 1, `ta récupération a tourné à ${Math.round(rec)} %${recP != null && Math.abs(rec - recP) >= 1 ? ` (${rec >= recP ? '+' : '−'}${Math.round(Math.abs(rec - recP))} points sur tes 4 semaines d'avant)` : ''}${sleepLow ? `, freinée surtout par le sommeil (${hmH(sl)} pour ${hmH(need)} visées${short ? `, ${short} nuit${short > 1 ? 's' : ''} courte${short > 1 ? 's' : ''}` : ''})` : sl != null ? `, avec un sommeil correct (${hmH(sl)})` : ''}${hrv != null && hrvP != null ? `, et une VFC ${hrv < hrvP * .95 ? 'en baisse' : hrv > hrvP * 1.05 ? 'en hausse' : 'stable'}` : ''}`]);
+    if (acwr != null || done || due) fact.push([acwr > 1.3 ? 4 : due && done < due ? 3 : 1, `côté entraînement, ${done} séance${done > 1 ? 's' : ''} sur ${due || done}${w.m ? `, ${fx(w.m)} m de sprint` : ''}${w.ton ? `, ${fx(w.ton / 1000, 1)} t soulevées` : ''}${acwr != null ? ` et une charge ${acwr > 1.3 ? 'qui a monté trop vite' : acwr < .8 ? 'nettement plus basse que d\'habitude' : 'dans ta zone sûre'} (rapport ${fx(acwr, 2)})` : ''}${recDown && loadUp ? ' : c\'est la charge qui a pris le dessus sur la récupération' : ''}`]);
+    if (nu.length || dW != null) fact.push([wDown && recDown ? 4 : big >= 2 ? 3 : wa != null && wa < wg * .85 ? 2 : 1, `dans l'assiette, ${nu.length ? `${onPlan} jour${onPlan > 1 ? 's' : ''} au plan sur ${nu.length}` : 'alimentation jamais notée le soir'}${big ? ` et ${big} écart${big > 1 ? 's' : ''}` : ''}${wa != null ? `, ${fx(wa, 1)} L d'eau par jour pour ${fx(wg, 1)}` : ''}${dW != null ? `, poids ${dW >= 0 ? '+' : '−'}${fx(Math.abs(dW), 1)} kg` : ''}${wDown && recDown ? ' : tu manques probablement d\'énergie pour ta charge' : ''}`]);
+    if (wd.length && wl != null) fact.push([wl < 3 ? 3 : 1, `ton ressenti du matin est à ${fx(wl, 1)} sur 5${items.length && items[0][1] < 3 ? `, plombé par ${items[0][0].toLowerCase()}` : ''}`]);
+    fact.sort((a, b) => b[0] - a[0]);
+    const first = fact[0]; if (!first) return '';
+    let txt = cap(first[1]) + '. ' + fact.slice(1).map((f, i) => (i === 0 ? 'Ensuite, ' : i === fact.length - 2 ? 'Enfin, ' : '') + f[1]).join('. ') + '.';
+    // What it means for next week.
+    const todo = [];
+    if (painTop) todo.push(`pas de sprint maximal ni de pliométrie sur ${painWords(painTop[0])} tant qu'elle dépasse 3/10`);
+    if (acwr > 1.3) todo.push('garde le même volume au lieu de l\'augmenter');
+    if (sleepLow) todo.push(`coucher à ${bedGoal().replace(':', ' h ')} les veilles de séance`);
+    if (wDown && recDown) todo.push('ajoute 200 à 300 kcal de glucides autour des séances');
+    if (wa != null && wa < wg * .85) todo.push('finis tes deux gourdes avant 18 h');
+    if (comp) todo.push(`compétition ${fmtShort(comp)} : les deux jours d'avant restent légers, glucides au plan complet la veille, et l'échauffement de 45 min à 1 h compte dans ta journée`);
+    txt += ` Semaine prochaine : ${nT ? nT + ' séance' + (nT > 1 ? 's' : '') + ' de sprint' : 'pas de sprint prévu'}${nG ? ' et ' + nG + ' de muscu' : ''}. ${todo.length ? 'À faire : ' + todo.slice(0, 3).join(' ; ') + '.' : 'Rien ne bloque : continue sur ce rythme.'}`;
+    return txt;
+  })();
   const R = (S.reports || []).find(r => r.date && r.date >= s0 && r.date <= addDays(e, 1)), Lst = (t, L, c) => L?.length ? `<div class="sec-label" style="color:${c}">${t}</div><ul class="bil">${L.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '';
   const col = {1: 'var(--good)', 2: 'var(--warn)', 3: 'var(--bad)'};
   return `<div class="card" style="margin-top:14px;padding:8px 12px"><div class="daynav"><button data-biloff="1" aria-label="Semaine d'avant">‹</button><b>Du ${esc(fmtShort(s0))} au ${esc(fmtShort(e))}</b><button data-biloff="-1" aria-label="Semaine d'après"${BIL ? '' : ' disabled'}>›</button></div></div>
     <div class="stack" style="margin-top:12px">
-    <div class="card"><span class="eyebrow">L'essentiel · ${esc(head)}</span><ul class="bilpts">${pts.sort((a, b) => b.lv - a.lv).map(x => `<li><i style="background:${col[x.lv]}"></i><span class="dots"><b style="background:${MODC[x.c]}"></b></span><span>${esc(x.t)}</span></li>`).join('')}</ul>
-      <p class="small muted" style="margin:8px 0 0">Rouge : à corriger · orange : à surveiller · vert : bien. Chaque chiffre est comparé à tes 4 semaines d'avant.</p></div>
+    <div class="card"><span class="eyebrow">La semaine · ${esc(head)}</span><p style="margin:8px 0 0;line-height:1.55">${esc(syn || 'Pas encore assez de données sur cette semaine.')}</p>
+      <details class="hidebox" style="margin-top:10px"><summary><span class="o">Le détail chiffré</span><span class="c">Masquer</span></summary><ul class="bilpts">${pts.sort((a, b) => b.lv - a.lv).map(x => `<li><i style="background:${col[x.lv]}"></i><span class="dots"><b style="background:${MODC[x.c]}"></b></span><span>${esc(x.t)}</span></li>`).join('')}</ul>
+      <p class="small muted" style="margin:8px 0 0">Rouge : à corriger · orange : à surveiller · vert : bien. Chaque chiffre est comparé à tes 4 semaines d'avant.</p></details></div>
     ${R ? `<div class="card"><span class="eyebrow">L'analyse de Claude · ${esc(R.title || '')}</span>${R.headline ? `<h3 style="margin:8px 0 4px">${esc(R.headline)}</h3>` : ''}${R.summary ? `<p class="small">${esc(R.summary)}</p>` : ''}
       ${Lst('Analyses', R.insights, 'var(--fg)')}${Lst('Décisions pour la semaine prochaine', R.decisions || R.actions, 'var(--accent)')}${Lst('Ce qui avance', R.wins, 'var(--good)')}${Lst('Points d\'attention', R.alerts, 'var(--warn)')}${Lst('Nutrition', R.nutrition, '#30D158')}
       ${R.injury ? `<div class="sec-label" style="color:var(--bad)">Douleur et reprise</div><p class="small">${esc(R.injury)}</p>` : ''}${R.followup ? `<div class="sec-label">Suivi de la semaine d'avant</div><p class="small">${esc(R.followup)}</p>` : ''}</div>`
@@ -4473,11 +4517,118 @@ function zoneCare() {
   return `<div class="card"><span class="eyebrow">Soins par zone · ${RB.n === 1 ? 'aujourd\'hui' : RB.n + ' derniers jours'}</span>${L.length ? `<div class="list" style="margin-top:8px">${L.map(([z, x]) => `<div class="row"><span class="l">${esc(MUSI[z]?.n || z)}</span><b class="num">${x.n} fois${x.min ? ' · ' + x.min + ' min' : ''}</b></div>`).join('')}</div>` : '<p class="small muted" style="margin:6px 0 0">Aucun soin noté sur une zone pour l\'instant. Les séances et activités de récup se notent dans Séances.</p>'}</div>`;
 }
 // Recovery · Séances: today's routine and care, the sessions the app proposes, and what was done.
+/* Recovery sessions as blocks, like Training: sessions made from the recovery exercises, placed on days.
+   - proposed ones, built by the app from each muscu session (the muscles it loads most get their care, then slow breathing);
+   - his own ones, made from any exercise of the Exercices tab;
+   - the day's two sessions above (muscu, pains) stay as they are and can be placed too.
+   Stored in settings/app: rsess (his sessions) and rdated (day → session id). */
+const RS_OWN = () => S.app?.rsess || [];
+const rsMin = s => Math.round((s.items || []).reduce((a, id) => a + (RX[id]?.min || 0), 0));
+// The muscles a muscu session loads, from the same coefficients as the body chart (sets × reps × share of work).
+function planMuscles(p) {
+  const m = {}; for (const it of p.items || []) { const c = musCoef(it.ex), n = (+it.sets || 1) * (+it.reps || 8); for (const k in c) m[k] = (m[k] || 0) + n * c[k]; }
+  return Object.entries(m).sort((a, b) => b[1] - a[1]).map(([k]) => k);
+}
+function rsFor(p) {
+  const mus = planMuscles(p).slice(0, 5), used = new Set(), items = [];
+  for (const k of mus) { const x = RLIB.map(r => RX[r[0]]).find(x => x && !used.has(x.id) && (x.mus || []).includes(k) && x.chain !== 'pre' && !/avant la séance/i.test(x.n) && x.kind !== 'chaud' && x.kind !== 'froid'); if (x) { used.add(x.id); items.push(x.id); } if (items.length >= 4) break; }
+  const br = RLIB.map(r => RX[r[0]]).find(x => x && /respiration/i.test(x.n)); if (br) items.push(br.id);
+  return items;
+}
+function rsAuto() {
+  const src = [...tdvTodo(4), ...myPlans().filter(p => p.kind === 'gym')].slice(0, 8);
+  return src.map(p => ({id: 'auto:' + caleRef(p), name: 'Récup · ' + (p.n ? 'S' + p.n + (p.title ? ' ' + p.title : '') : p.name), items: rsFor(p), auto: true})).filter(s => s.items.length > 1);
+}
+const RS_DAY = [{id: 'day:mus', name: 'Récup musculation du jour', day: 'mus'}, {id: 'day:pain', name: 'Récup douleurs du jour', day: 'pain'}];
+const rsAll = () => [...RS_OWN(), ...rsAuto(), ...RS_DAY];
+const rsById = id => rsAll().find(s => s.id === id) || null;
+const rsDayOf = k => rsById(S.app?.rdated?.[k]);
+async function rsSaveApp(patch) { S.app = {...(S.app || {}), ...patch}; render(); if (P.stack.length) paneRender(); await dbSet('settings/app', {...S.app, updatedAt: new Date().toISOString()}); }
+function rsRun(s) {
+  if (s.day) { recRun(s.day); return; }
+  const steps = s.items.flatMap(id => RX[id] ? exSteps(RX[id]).map(x => [x.n, x.sec, x.how]) : []); if (!steps.length) return;
+  recRun('mus', {id: 'rs-' + s.id, n: s.name, steps, min: rsMin(s)});
+}
+function rsShort(s) { const n = s.name.replace(/^Récup( · )?/, ''); return n.length > 9 ? n.slice(0, 8) + '…' : n; }
+function rsBoard() {
+  const off = S.rbOff || 0, mon0 = addDays(monday(TODAY), 28 * off), weeks = [0, 1, 2, 3].map(w => addDays(mon0, 7 * w));
+  const cell = k => { const s = rsDayOf(k), past = k < TODAY, done = (S.manual[k]?.recov || []).length > 0;
+    return `<div class="bcell${past ? ' past' : ''}${k === TODAY ? ' today' : ''}" ${past ? '' : `data-rdk="${k}"`}><span class="bd">${DOW[(dow(k) + 6) % 7]} <b>${+k.slice(8)}</b></span>
+      ${s ? `<div class="bchip rchip${done ? ' done' : ''}" data-rref="${esc(s.id)}" data-rfrom="${k}" title="${esc(s.name)}"><span>${esc(rsShort(s))}</span></div>` : done ? '<div class="bchip rchip done ghost"><span>Faite</span><i>✓</i></div>' : '<span class="bplus"></span>'}</div>`; };
+  const chip = s => `<div class="bchip src rchip" data-rref="${esc(s.id)}" title="${esc(s.name)}"><span>${esc(s.name)}</span><small>${s.day ? 'faite pour ta journée' : rsMin(s) + ' min · ' + s.items.length + ' exercices'}</small></div>`;
+  return `<div class="card sboard rboard"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Mes 4 semaines · récupération</span><span class="sbnav"><button type="button" data-rboff="-1" aria-label="4 semaines avant"${off <= 0 ? ' disabled' : ''}>‹</button><small>${esc(fmtShort(weeks[0]).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(weeks[3], 6)).replace(/^\S+ /, ''))}</small><button type="button" data-rboff="1" aria-label="4 semaines après">›</button></span></div>
+    <div class="bgrid">${weeks.map(w => `<div class="bweek"><span class="bwk">S${seasonWeek(w)}</span>${[0, 1, 2, 3, 4, 5, 6].map(i => cell(addDays(w, i))).join('')}</div>`).join('')}</div>
+    <div class="sec-label" style="margin:14px 2px 6px">À caler <small>garde le doigt sur une séance, puis glisse-la sur un jour</small></div>
+    <div class="bsrc">${[...RS_OWN(), ...rsAuto(), ...RS_DAY].map(chip).join('')}</div>
+    <p class="small muted" style="margin:10px 2px 0">« Récup · S… » : proposées d'après tes séances de muscu, pour les muscles qu'elles chargent le plus. Touche une séance pour la voir, un jour pour choisir.</p></div>`;
+}
+function rsList() {
+  const own = RS_OWN();
+  return `<h2>Mes séances de récupération</h2><div class="list">${own.map(s => `<button class="rowbtn" data-rsview="${esc(s.id)}"><span><b>${esc(s.name)}</b><span class="meta">${rsMin(s)} min · ${s.items.length} exercices</span></span>${ICON.chev}</button>`).join('')}<button class="addbtn" data-rsnew>+ Créer une séance</button></div>`;
+}
+function rsView(id) {
+  openPane({title: rsById(id)?.name || 'Séance', render: () => { const s = rsById(id); if (!s) return '<p class="small muted" style="margin-top:16px">Séance supprimée.</p>';
+    const steps = s.day ? recSteps(s.day).map(x => ({n: x.n, how: x.how, min: Math.round(x.sec / 60)})) : s.items.map(i => RX[i]).filter(Boolean);
+    const on = Object.entries(S.app?.rdated || {}).filter(([k, v]) => v === id && k >= TODAY).map(([k]) => cap(fmtShort(k)));
+    return `<p class="small muted" style="margin:16px 4px 8px">${s.day ? 'Construite chaque jour par l\'appli d\'après ta journée.' : s.auto ? 'Proposée par l\'appli. Duplique-la pour la changer.' : 'Ta séance.'}${on.length ? ' Calée : ' + esc(on.join(', ')) + '.' : ''}</p>
+      <div class="list">${steps.map(x => `<div class="row"><span class="l">${esc(x.n)}<span class="hint">${x.min ? x.min + ' min · ' : ''}${esc(x.how || '')}</span></span></div>`).join('') || '<div class="row"><span class="muted">Rien à faire aujourd\'hui pour cette séance.</span></div>'}</div>
+      <div class="btnrow" style="margin-top:14px"><button class="btn" data-rsgo2="${esc(id)}"${steps.length ? '' : ' disabled'}>Lancer</button>${s.day ? '' : `<button class="btn ghost" data-rsdup="${esc(id)}">${s.auto ? 'Dupliquer et modifier' : 'Modifier'}</button>`}</div>
+      ${!s.auto && !s.day ? `<button type="button" class="linkbtn" style="color:var(--bad);margin-top:12px" data-rsdel="${esc(id)}">Supprimer cette séance</button>` : ''}`; }});
+}
+// Making a session: a name, then the exercises in the order touched (any of the Exercices tab).
+let RSE = null;
+function rsEdit(src) {
+  RSE = src ? {id: src.auto ? 'r' + Date.now().toString(36) : src.id, name: src.auto ? src.name.replace(/^Récup · /, 'Ma récup · ') : src.name, items: [...src.items]} : {id: 'r' + Date.now().toString(36), name: 'Ma séance de récup', items: []};
+  openPane({title: 'Séance de récupération', onClose: () => { RSE = null; }, render: () => {
+    const by = {}; for (const r of RLIB) if (RX[r[0]]) (by[r[2]] ||= []).push(RX[r[0]]);
+    return `<div class="list" style="margin-top:16px"><div class="row"><label for="rse-n">Nom</label><input id="rse-n" class="mini-in" style="width:190px;text-align:left" value="${esc(RSE.name)}" data-rsename></div></div>
+      <div class="card" style="margin-top:12px"><div class="chead"><span class="eyebrow">Dans la séance</span><b class="num">${Math.round(RSE.items.reduce((a, i) => a + (RX[i]?.min || 0), 0))} min</b></div>
+        ${RSE.items.length ? `<ol class="small" style="margin:8px 0 0;padding-left:18px">${RSE.items.map(i => `<li>${esc(RX[i]?.n || i)}</li>`).join('')}</ol>` : '<p class="small muted" style="margin:6px 0 0">Touche les exercices ci-dessous, dans l\'ordre où tu veux les faire. Un échauffement n\'est utile que pour une séance de mobilité active : commence alors par un exercice doux.</p>'}</div>
+      ${RKINDS.filter(([k]) => by[k]).map(([k, n]) => `<div class="sec-label">${esc(n)}</div><div class="list">${by[k].map(x => { const i = RSE.items.indexOf(x.id); return `<button type="button" class="rowbtn${i >= 0 ? ' on' : ''}" data-rsetog="${x.id}"><span><b>${esc(x.n)}</b><span class="meta">${x.min} min${x.tool ? ' · ' + esc(x.tool) : ''}</span></span><span class="kc">${i >= 0 ? i + 1 : '+'}</span></button>`; }).join('')}</div>`).join('')}
+      <div style="margin-top:14px"><button class="btn" data-rsesave>Enregistrer</button></div>`; }});
+}
+document.addEventListener('input', e => { if (RSE && e.target.matches?.('[data-rsename]')) RSE.name = e.target.value; });
+document.addEventListener('click', async e => {
+  let b;
+  if ((b = e.target.closest('[data-rboff]')) && !b.disabled) { S.rbOff = Math.max(0, (S.rbOff || 0) + +b.dataset.rboff); render(); return; }
+  if (e.target.closest('[data-rsnew]')) { rsEdit(null); return; }
+  if ((b = e.target.closest('[data-rsview]'))) { rsView(b.dataset.rsview); return; }
+  if ((b = e.target.closest('[data-rsgo2]'))) { const s = rsById(b.dataset.rsgo2); closePane(); if (s) rsRun(s); return; }
+  if ((b = e.target.closest('[data-rsdup]'))) { const s = rsById(b.dataset.rsdup); closePane(); rsEdit(s); return; }
+  if ((b = e.target.closest('[data-rsdel]'))) { const id = b.dataset.rsdel, rd = {...(S.app?.rdated || {})}; for (const k in rd) if (rd[k] === id) delete rd[k]; closePane(); await rsSaveApp({rsess: RS_OWN().filter(s => s.id !== id), rdated: rd}); toast('Séance supprimée'); return; }
+  if (RSE && (b = e.target.closest('[data-rsetog]'))) { const id = b.dataset.rsetog, i = RSE.items.indexOf(id); if (i >= 0) RSE.items.splice(i, 1); else RSE.items.push(id); paneRender(); return; }
+  if (RSE && e.target.closest('[data-rsesave]')) { if (!RSE.items.length) { toast('Ajoute au moins un exercice'); return; } const s = {id: RSE.id, name: (RSE.name || '').trim() || 'Ma séance de récup', items: RSE.items}; closePane(); await rsSaveApp({rsess: [...RS_OWN().filter(x => x.id !== s.id), s]}); toast('Séance enregistrée : glisse-la sur un jour'); return; }
+  if ((b = e.target.closest('[data-rschoose]'))) { P.stack.at(-1)?.pickRs?.(b.dataset.rschoose); return; }
+  if (window.__rdropT && Date.now() - window.__rdropT < 400) return;
+  if ((b = e.target.closest('[data-rdk]')) && !e.target.closest('[data-rref]')) { const k = b.dataset.rdk; rsChoose(k); }
+});
+function rsChoose(k) {
+  openPane({title: cap(fmtShort(k)), render: () => { const cur = S.app?.rdated?.[k] || '';
+    return `<p class="small muted" style="margin:16px 4px 8px">La séance de récupération de ce jour-là.</p><div class="list"><button class="rowbtn" data-rschoose=""><span><b>Aucune</b></span><span class="kc">${cur ? '' : '✓'}</span></button>${rsAll().map(s => `<button class="rowbtn" data-rschoose="${esc(s.id)}"><span><b>${esc(s.name)}</b><span class="meta">${s.day ? 'faite pour ta journée' : rsMin(s) + ' min'}</span></span><span class="kc">${cur === s.id ? '✓' : ''}</span></button>`).join('')}</div>`; },
+    pickRs: id => { closePane(); const rd = {...(S.app?.rdated || {})}; if (id) rd[k] = id; else delete rd[k]; rsSaveApp({rdated: rd}).then(() => toast(id ? 'Calée le ' + fmtShort(k) : 'Retirée')); }});
+}
+// Drag a recovery session onto a day: after a short hold with the thumb, at once with the mouse.
+(() => {
+  let D = null;
+  const at = (x, y) => { const g = D?.g; if (g) g.style.visibility = 'hidden'; const e = document.elementFromPoint(x, y); if (g) g.style.visibility = ''; return e?.closest?.('[data-rdk]'); };
+  const begin = () => { D.on = true; if (PREFS.haptic) navigator.vibrate?.(12); const r = D.el.getBoundingClientRect(), g = D.el.cloneNode(true); g.classList.add('bghost'); g.style.width = Math.min(r.width, 200) + 'px'; document.body.appendChild(g); D.g = g; D.el.classList.add('bdrag'); document.body.classList.add('bdragging'); move(D.x, D.y); };
+  const move = (x, y) => { D.x = x; D.y = y; if (!D.on) return; D.g.style.transform = `translate(${x - 40}px,${y - 22}px)`; const t = at(x, y); if (t !== D.t) { D.t?.classList.remove('bover'); t?.classList.add('bover'); D.t = t; } };
+  const stop = () => { clearTimeout(D?.timer); if (!D) return; D.g?.remove(); D.el.classList.remove('bdrag'); D.t?.classList.remove('bover'); document.body.classList.remove('bdragging'); };
+  document.addEventListener('pointerdown', e => { const el = e.target.closest?.('[data-rref]'); if (!el || e.button > 0) return; D = {el, ref: el.dataset.rref, from: el.dataset.rfrom || null, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, on: false, mouse: e.pointerType === 'mouse', id: e.pointerId}; if (!D.mouse) D.timer = setTimeout(() => { if (D && !D.on) begin(); }, 280); });
+  document.addEventListener('pointermove', e => { if (!D || e.pointerId !== D.id) return; if (!D.on) { const m = Math.hypot(e.clientX - D.x0, e.clientY - D.y0); if (D.mouse && m > 5) begin(); else if (!D.mouse && m > 8) { stop(); D = null; return; } } if (D?.on) { e.preventDefault(); move(e.clientX, e.clientY); } });
+  document.addEventListener('touchmove', e => { if (D?.on) e.preventDefault(); }, {passive: false});
+  document.addEventListener('pointerup', async e => { if (!D || e.pointerId !== D.id) return; const d = D; stop(); D = null; window.__rdropT = Date.now();
+    if (!d.on) { rsView(d.ref); return; }
+    const k = at(e.clientX, e.clientY)?.dataset.rdk, rd = {...(S.app?.rdated || {})};
+    if (k) { if (k === d.from) return; rd[k] = d.ref; if (d.from) delete rd[d.from]; await rsSaveApp({rdated: rd}); toast(`${rsById(d.ref)?.name || 'Séance'} calée le ${fmtShort(k)}`); return; }
+    if (d.from) { delete rd[d.from]; await rsSaveApp({rdated: rd}); toast('Retirée de ce jour'); } });
+  document.addEventListener('pointercancel', () => { if (D) { stop(); D = null; } });
+})();
 function vRSess() {
   const days = [...Array(14)].map((_, i) => addDays(TODAY, -i)), H = days.flatMap(k => (S.manual[k]?.recov || []).map(a => ({...a, k})));
   const w7 = H.filter(a => a.k > addDays(TODAY, -7)).reduce((t, a) => t + (+a.min || 0), 0);
   return `<header class="top" style="margin-bottom:6px"><div class="sub">Routines, soins et séances de récupération</div><h1>Séances</h1></header>
-    <div class="stack">${recovCard()}${recBlock('mus')}${recBlock('pain')}${careCard()}
+    <div class="stack">${(() => { const s = rsDayOf(TODAY); return s ? `<div class="card"><span class="eyebrow">Calée aujourd'hui</span><div class="bigname">${esc(s.name)}</div><p class="small muted">${s.day ? 'faite pour ta journée' : rsMin(s) + ' min'}</p><button class="btn" style="margin-top:10px" data-rsgo2="${esc(s.id)}">Lancer</button></div>` : ''; })()}${rsBoard()}${recovCard()}${recBlock('mus')}${recBlock('pain')}${rsList()}${careCard()}
     <div class="card"><div class="chead"><span class="eyebrow">Fait ces 14 derniers jours</span><b class="num">${w7} min sur 7 j</b></div>${H.length ? `<div class="list" style="margin-top:8px">${H.map(a => `<div class="row"><span class="l">${esc(a.t)}<span class="hint">${esc(cap(fmtShort(a.k)))}${a.at ? ' · ' + esc(tfr(a.at)) : ''}${a.min ? ' · ' + a.min + ' min' : ''}</span></span></div>`).join('')}</div>` : '<p class="small muted" style="margin:6px 0 0">Rien de noté pour l\'instant : touche « + Activité de récup ».</p>'}</div></div>`;
 }
 // Recovery · Exercices: every kind of recovery, the best proven first; one tap guides the exercise with a timer.
@@ -5359,13 +5510,14 @@ function mmFollow() {
   if (MM.d || Math.hypot(MM.tx - MM.x, MM.ty - MM.y) > .5) MM.raf = requestAnimationFrame(mmFollow); else MM.raf = 0;
 }
 const mmOk = e => MM_NAME[S.mod] && !S.sheet && !P.stack.length && !$('.drawer.on') && !HP.busy
-  && !e.target.closest('.chartbox, input, textarea, select, .tabbar, .sheet, .pane, .sboard');
+  && !e.target.closest('input, textarea, select, .tabbar, .sheet, .pane, [data-jq]');
 document.addEventListener('touchstart', e => {
   if (e.touches.length !== 1 || !mmOk(e) || scrollY > 2) { MM.d = null; return; }
   const t = e.touches[0]; MM.d = {x0: t.clientX, y0: t.clientY, on: false, dy: 0, v: 0, ly: t.clientY, lt: performance.now()};
 }, {passive: true});
 document.addEventListener('touchmove', e => {
   const d = MM.d; if (!d) return;
+  if (document.body.classList.contains('bdragging')) { MM.d = null; return; }
   const t = e.touches[0], dx = t.clientX - d.x0, dy = t.clientY - d.y0;
   if (!d.on) {
     if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
@@ -5771,6 +5923,13 @@ function logMuscle(l) {
         const inten = +st.kg > 0 && rm && e.u === 'kg' ? Math.min(1.05, +st.kg / rm) : r != null && !secs ? pctFor(reps, r) : .6;
         for (const k in c) { add(k, reps * inten * proxF(r) * c[k]); fo[k] = (fo[k] || 0) + reps * inten * proxF(r) * c[k] * fatF(it.ex) * cf; }
       }
+    } else if (it.ex === 'warmup' && +it.min > 0) {
+      // The warm-up is never written in the coach's sheet but takes 45 min to 1 h of a 2 h session: easy running and
+      // drills. Per metre, a sprint loads the muscles far more than jogging (hamstring force rises steeply with speed,
+      // Schache et al. 2012), so a minute of warm-up counts like ~12 m of fast running at 45 %: 50 min ≈ half a sprint session.
+      // Session-RPE (Foster et al. 2001) also counts the whole session, warm-up included.
+      const d = +it.min * 12, inten = .45, cw = musCoef('strides');
+      for (const k in cw) { add(k, d / 10 * inten * cw[k]); fo[k] = (fo[k] || 0) + d / 10 * inten * cw[k] * fatF('strides'); }
     } else if (it.reps) {
       const [fs, di] = RUN_FS[e.cat] || [1, .8], inten = (+it.pct || 0) / 100 || di;
       for (const r of it.reps) { const d = +r.dist || 0; for (const k in c) { add(k, d / 10 * inten * fs * c[k]); fo[k] = (fo[k] || 0) + d / 10 * inten * fs * c[k] * fatF(it.ex); } }
@@ -5904,7 +6063,7 @@ function tdvLast() {
 }
 const kindDone = (k, kind) => logsOn(k).some(l => l.kind === kind) || !!M(k, kind === 'gym' ? 'gymRpe' : 'trackRpe');
 // The next session not done yet: today's if it is still to do, else the following one.
-function nextSess(kind) { for (let i = 0; i < 28; i++) { const k = addDays(TODAY, i), p = planFor(k); if (!p || (kind && p.kind !== kind) || kindDone(k, p.kind)) continue; return {k, p}; } return null; }
+function nextSess(kind) { for (let i = 0; i < 28; i++) { const k = addDays(TODAY, i); for (const kd of kind ? [kind] : ['gym', 'track']) { const p = planForK(k, kd); if (!p || kindDone(k, kd)) continue; return {k, p}; } } return null; }
 // Where the session stands in the day: before its time, under way, past without a note, or done.
 function sessWhen(k, kind) {
   const b = typeof dayPlan === 'function' ? dayPlan(k).find(x => x.c === (kind === 'gym' ? 'muscu' : 'athle')) : null, now = new Date().getHours() * 60 + new Date().getMinutes();
@@ -5926,9 +6085,17 @@ function tdvNum(n) { const id = tdvId(n), p = id ? planById('tdv-' + id) : null;
 function tdvPlanFor(k) { const n = tdvNumFor(k); return n ? tdvNum(n) : null; }
 // A day has a session only when he placed it there (settings/training.dated): an id of a session, or 'n:32' for session 32 of his programme.
 const planOf = v => !v ? null : String(v).startsWith('n:') ? tdvNum(+String(v).slice(2)) : planById(v);
-const planFor = k => planOf(S.tset.dated?.[k]);
+// A muscu session and a sprint session can share a day (muscu at 10 h, athlé in the evening): the sprint one is
+// kept under "day|t". Older sprint sessions placed under the plain day still count.
+const dKey = (k, kind) => kind === 'track' ? k + '|t' : k;
+const planFor = k => planOf(S.tset.dated?.[k]) || planOf(S.tset.dated?.[k + '|t']);
+function planForK(k, kind) {
+  const a = planOf(S.tset.dated?.[k]);
+  if (kind === 'track') return planOf(S.tset.dated?.[k + '|t']) || (a?.kind === 'track' ? a : null);
+  return a && a.kind !== 'track' ? a : null;
+}
 const caleRef = p => p?.n ? 'n:' + p.n : p?.id;
-const caledOn = ref => Object.entries(S.tset?.dated || {}).filter(([k, v]) => v === ref && k >= TODAY).map(([k]) => k).sort();
+const caledOn = ref => [...new Set(Object.entries(S.tset?.dated || {}).filter(([k, v]) => v === ref && k.slice(0, 10) >= TODAY).map(([k]) => k.slice(0, 10)))].sort();
 // The next sessions of his programme still to do, in order: they wait in the list until he places them.
 const tdvTodo = (c = 6) => { if (!TDV_PLANS.length) return []; const n0 = tdvLast().n + 1, out = []; for (let n = n0; n <= 36 && out.length < c; n++) { const p = tdvNum(n); if (p) out.push(p); } return out; };
 let CAL_REF = null;
@@ -5937,7 +6104,7 @@ function calePane(ref) {
   openPane({title: 'Caler la séance', onClose: () => { CAL_REF = null; }, render: () => {
     const p = planOf(CAL_REF); if (!p) return '';
     const on = caledOn(CAL_REF), days = [...Array(21)].map((_, i) => addDays(TODAY, i));
-    const row = k => { const x = planFor(k), b = dayPlan(k).find(y => y.c === (p.kind === 'track' ? 'athle' : 'muscu')), mine = S.tset.dated?.[k] === CAL_REF;
+    const row = k => { const x = planForK(k, p.kind), b = dayPlan(k).find(y => y.c === (p.kind === 'track' ? 'athle' : 'muscu')), mine = S.tset.dated?.[dKey(k, p.kind)] === CAL_REF || (p.kind === 'track' && S.tset.dated?.[k] === CAL_REF);
       return `<button type="button" class="rowbtn calday${mine ? ' on' : ''}" data-calk="${k}"><span><b>${esc(cap(fmtShort(k)))}</b><span class="meta">${b ? (p.kind === 'track' ? 'Athlé' : 'Muscu') + ' ' + tfr(b.a) + ' – ' + tfr(b.b) : 'pas de créneau ' + (p.kind === 'track' ? 'd\'athlé' : 'de muscu')}${x && !mine ? ' · déjà : ' + esc(x.name) : ''}</span></span><span class="kc">${mine ? 'Calée ✓' : x ? 'Remplacer' : 'Caler'}</span></button>`; };
     return `<div class="dhead" style="margin-top:12px"><div class="bigname">${esc(p.name)}</div><p class="small muted">${esc(p.title || p.desc || '')}</p></div>
       ${on.length ? `<div class="card"><span class="eyebrow">Calée le</span><p style="margin:6px 0 0">${on.map(k => esc(cap(fmtShort(k)))).join(', ')}</p><button class="btn ghost" style="margin-top:10px" data-caloff>Retirer de son jour</button></div>` : ''}
@@ -5946,8 +6113,9 @@ function calePane(ref) {
   }});
 }
 async function caleSave(k, ref) {
-  const dated = Object.fromEntries(Object.entries(S.tset.dated || {}).filter(([d, v]) => !(v === ref && d >= TODAY)));
-  if (k) dated[k] = ref;
+  const kind = planOf(ref)?.kind;
+  const dated = Object.fromEntries(Object.entries(S.tset.dated || {}).filter(([d, v]) => !(v === ref && d.slice(0, 10) >= TODAY)));
+  if (k) { k = k.slice(0, 10); if (kind === 'track' && planOf(dated[k])?.kind === 'track') delete dated[k]; dated[dKey(k, kind)] = ref; }
   S.tset = {...S.tset, dated}; renderMod(); render(); paneRender();
   await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()});
 }
@@ -6622,9 +6790,11 @@ function painCoach() {
   document.addEventListener('touchstart', e => {
     finish(); W = null;
     if (!ok(e)) return;
-    const big = e.target.closest?.('svg'); if (big && big.getBoundingClientRect().width > 120) return;
-    if (e.target.closest?.('.chartbox, input, textarea, select, .tabbar, [data-jq], .xdate, .xsel, .bottles4, .rbtl, .sboard, .mp-noswipe') || sideScroll(e.target)) return;
-    const t = e.touches[0]; W = {x: t.clientX, y: t.clientY, lx: t.clientX, lt: performance.now(), v: 0, on: false};
+    // Anywhere on the page, boards, body figures and pictures included; on a chart (which scrubs sideways) and in
+    // strips that scroll sideways, from the screen's edges only.
+    const t = e.touches[0], edge = t.clientX < 28 || t.clientX > innerWidth - 28;
+    if (e.target.closest?.('input, textarea, select, .tabbar, [data-jq], .xdate, .xsel, .bottles4, .rbtl, .mp-noswipe')) return;
+    if (!edge && (e.target.closest?.('.chartbox') || sideScroll(e.target))) return; W = {x: t.clientX, y: t.clientY, lx: t.clientX, lt: performance.now(), v: 0, on: false};
     const tg = e.target, off = () => { tg.removeEventListener('touchmove', onMove); tg.removeEventListener('touchend', onEnd); tg.removeEventListener('touchcancel', onCancel); };
     const onEnd = () => { off(); end(); }, onCancel = () => { off(); cancel(); };
     tg.addEventListener('touchmove', onMove, {passive: false}); tg.addEventListener('touchend', onEnd, {passive: true}); tg.addEventListener('touchcancel', onCancel, {passive: true});
@@ -6637,6 +6807,7 @@ function painCoach() {
   };
   const onMove = e => {
     if (!W) return; const t = e.touches[0], dx = t.clientX - W.x, dy = t.clientY - W.y;
+    if (document.body.classList.contains('bdragging')) { cancel(); return; }   // a block being carried onto a day
     if (!W.on) {
       if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
       if (Math.abs(dx) < Math.abs(dy) * 1.2) { W = null; return; }   // vertical: ordinary scrolling
@@ -6697,7 +6868,7 @@ function coachCard() {
   const left = [...gw.days, ...tw.days].filter(x => x.planned && !x.done && x.k >= TODAY).length;
   const e7 = avgN('effort', 7), e28 = avgN('effort', 28), r = e7 != null && e28 ? e7 / e28 : null;
   const nf = noteFx('T'), free = nf.light || nf.noGym || nf.swap || nf.travel || nf.sick;
-  if (nf.L.length) L.push([nf.sick ? 'bad' : 'mid', nf.sick ? `Tu as noté ${nf.q}. Priorité à la guérison : aucune séance réclamée, on reprend quand ça va, avec une séance plus légère.` : nf.light || nf.noGym ? `Tu as noté ${nf.q}. Je m'aligne : je ne compte aucune séance comme manquée, et si tu en fais une, toutes les charges proposées sont baissées de 10 %. Garde un rappel de vitesse court pour ne pas perdre le nerveux.` : nf.swap ? `Tu as noté ${nf.q}. Je suis ton nouvel ordre : je ne compte rien comme manqué. Laisse au moins 48 h entre la muscu lourde et le sprint à pleine vitesse.` : nf.travel ? `Tu as noté ${nf.q}. Je ne réclame pas de séance pendant ce temps : si tu peux, 20 min de gainage et de pliométrie légère suffisent à garder le fil.` : `J'ai ta note ${nf.q} : je la prends en compte dans mes conseils.`]);
+  if (nf.L.length) L.push([nf.sick ? 'bad' : 'mid', nf.sick ? `Priorité à la guérison : aucune séance réclamée, on reprend quand ça va, avec une séance plus légère.` : nf.light || nf.noGym ? `Je m'aligne : je ne compte aucune séance comme manquée, et si tu en fais une, toutes les charges proposées sont baissées de 10 %. Garde un rappel de vitesse court pour ne pas perdre le nerveux.` : nf.swap ? `Je suis ton nouvel ordre : je ne compte rien comme manqué. Laisse au moins 48 h entre la muscu lourde et le sprint à pleine vitesse.` : nf.travel ? `Je ne réclame pas de séance pendant ce temps : si tu peux, 20 min de gainage et de pliométrie légère suffisent à garder le fil.` : `J'ai ta note ${nf.q} : je la prends en compte dans mes conseils.`]);
   if (S.app?.light && S.app.light >= TODAY) L.push(['mid', `Semaine allégée jusqu'au ${fmtShort(S.app.light)} : toutes les charges proposées sont baissées de 10 %.`, '<button type="button" class="chip" data-light="off">Revenir au plan normal</button>']);
   else if (hrvLowDays() >= 10) L.push(['bad', 'Ton coach Recovery voit ta VFC sous ta normale depuis deux semaines. Je te propose une semaine allégée : −10 % sur toutes les charges pendant 7 jours. C\'est toi qui décides.', '<button type="button" class="chip" data-light="on">Prendre la semaine allégée</button>']);
   const pc = painCoach(); if (pc) L.push(pc);
@@ -6712,7 +6883,7 @@ function coachCard() {
 }
 function coachRecovery(rec, tgt, kG) {
   const L = [], sl = kG ? VAL.sleepH(kG) : null, need = sleepGoal(), hb = kG ? base('hrv', kG, 60) : null, nf = noteFx('R');
-  if (nf.L.length) L.push([nf.sick ? 'bad' : 'mid', nf.sick ? `Tu as noté ${nf.q}. Le corps répare d'abord : nuits longues, beaucoup d'eau, pas d'effort intense tant que la fréquence au repos n'est pas revenue à ta normale.` : nf.light || nf.noGym ? `Avec ta note ${nf.q}, c'est le moment de recharger : vise tes ${hmH(need)} de sommeil chaque nuit et une mobilité douce, ta VFC devrait remonter dans la semaine.` : nf.travel ? `Tu as noté ${nf.q}. En déplacement, garde ton heure de coucher et bois plus que d'habitude : c'est ce qui protège le mieux ta récupération.` : `J'ai ta note ${nf.q} : je surveille ta récupération en conséquence.`]);
+  if (nf.L.length) L.push([nf.sick ? 'bad' : 'mid', nf.sick ? `Le corps répare d'abord : nuits longues, beaucoup d'eau, pas d'effort intense tant que la fréquence au repos n'est pas revenue à ta normale.` : nf.light || nf.noGym ? `Avec ta note ${nf.q}, c'est le moment de recharger : vise tes ${hmH(need)} de sommeil chaque nuit et une mobilité douce, ta VFC devrait remonter dans la semaine.` : nf.travel ? `En déplacement, garde ton heure de coucher et bois plus que d'habitude : c'est ce qui protège le mieux ta récupération.` : `J'ai ta note ${nf.q} : je surveille ta récupération en conséquence.`]);
   if (rec?.ill) L.push(['bad', 'Ta respiration ou ta température de cette nuit sortent de ta normale. Ton corps se défend peut-être contre quelque chose : journée douce, bois bien, couche-toi tôt.']);
   if (rec) L.push([zoneOf(rec.score) === 'bad' ? 'bad' : zoneOf(rec.score) === 'mid' ? 'mid' : 'good', zoneOf(rec.score) === 'bad' ? `Récupération à ${rec.score} % : ton corps te demande du repos. Marche, mobilité douce, rien de plus.` : zoneOf(rec.score) === 'mid' ? `Récupération à ${rec.score} % : tu peux t'entraîner, mais écoute tes sensations et garde de la marge.` : `Récupération à ${rec.score} % : tu es frais. Profites-en, tu as bien dormi pour ça.`]);
   if (hb && hrvLowDays() >= 10) L.push(['bad', lightOn() ? 'Ta VFC est sous ta normale depuis deux semaines. Ta semaine allégée est en cours : garde aussi des nuits longues, c\'est ce qui la fera remonter.' : 'Ta VFC est sous ta normale depuis deux semaines : la fatigue s\'accumule. Ton coach Training est prévenu et te propose une semaine plus légère.']);
@@ -6724,7 +6895,7 @@ function coachRecovery(rec, tgt, kG) {
 }
 function coachNutrition(k) {
   const g = fuelGoal(k), t = dayTotals(k), h = new Date().getHours(), today = k === TODAY, w = waterOf(k), L = [], nf = noteFx('N');
-  if (nf.L.length) L.push(['mid', nf.diet ? `Tu as noté ${nf.q}. Je garde tes protéines au même niveau pour protéger le muscle, et on joue sur les glucides des jours sans séance.` : nf.light || nf.noGym ? `Semaine plus légère d'après ta note ${nf.q} : garde tes protéines, enlève un féculent les jours sans séance, et ton poids restera stable.` : nf.travel ? `Tu as noté ${nf.q}. Prévois des collations faciles : skyr, fruits, une poignée de noix, et une gourde toujours pleine.` : nf.sick ? `Tu as noté ${nf.q}. Mange à ta faim, des plats simples et chauds, et bois souvent.` : `J'ai ta note ${nf.q} : je l'intègre à tes repas.`]);
+  if (nf.L.length) L.push(['mid', nf.diet ? `Je garde tes protéines au même niveau pour protéger le muscle, et on joue sur les glucides des jours sans séance.` : nf.light || nf.noGym ? `Semaine plus légère d'après ta note ${nf.q} : garde tes protéines, enlève un féculent les jours sans séance, et ton poids restera stable.` : nf.travel ? `Prévois des collations faciles : skyr, fruits, une poignée de noix, et une gourde toujours pleine.` : nf.sick ? `Mange à ta faim, des plats simples et chauds, et bois souvent.` : `J'ai ta note ${nf.q} : je l'intègre à tes repas.`]);
   const wNow = avgN('weight', 7), w3 = avgN('weight', 7, addDays(TODAY, -21));
   if (wNow && w3 && w3 - wNow > .8) L.push(['bad', `Tu as perdu ${fx(w3 - wNow, 1)} kg en 3 semaines sans le vouloir. On remet 200 à 300 kcal par jour, surtout des glucides autour des séances : du riz, des pâtes, des patates, tu as le choix.`]);
   if (M(k, 'nutrition') > 0) L.push(['mid', 'Un petit écart aujourd\'hui ? Aucun souci, on n\'en fait pas un drame : ton menu reprend au prochain repas.']);
@@ -6736,7 +6907,8 @@ function coachNutrition(k) {
 }
 function tToday() {
   const kG = lastKey('hrv'), rec = kG ? recovery(kG) : null;
-  const p = planFor(TODAY), done = logsOn(TODAY);
+  // Muscu and sprint the same day: the one still to do comes first, the one done shows as done.
+  const pg = planForK(TODAY, 'gym'), ptk = planForK(TODAY, 'track'), p = pg && !kindDone(TODAY, 'gym') ? pg : ptk && !kindDone(TODAY, 'track') ? ptk : pg || ptk, done = logsOn(TODAY);
   const tgt = effortTarget(rec?.score, !!p || highDay(TODAY));
   const wA = !done.length && !S.live ? watchSession(TODAY, p) : null;
   const ask = wA ? `<article class="card"><span class="chiptag">Reçue de ta montre</span><div class="bigname">${esc(wA.name || (ACT[wA.type] || [wA.type])[0])}</div>
@@ -6744,14 +6916,14 @@ function tToday() {
       <p class="small" style="margin-top:8px">${p ? `Séance validée. Dis-moi ce que tu as fait par rapport à « ${esc(p.name)} » : tout est déjà rempli comme prévu, corrige seulement ce qui a changé.` : 'Séance validée. Note ce que tu as fait pour la garder dans ton historique.'}</p>
       <div style="margin-top:14px"><button class="btn" data-tgfill="${esc(wA.start || '')}">Remplir ma séance</button></div></article>` : '';
   const live = S.live ? `<button class="banner" data-tlive style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Séance en cours</b><br><span class="small muted">${esc(S.live.name)}</span></span><span class="chiptag">Reprendre</span></button>` : '';
-  const main = done.length ? `<article class="card"><span class="chiptag">${TICK.replace('<svg', '<svg width="12" height="12"')} Fait</span>${done.map(l => `<div class="bigname">${esc(l.name)}</div><p class="small muted">${l.min} min · RPE ${l.rpe}/10${l.tonnage ? ' · ' + fx(l.tonnage) + ' kg soulevés' : ''}${l.sprintM ? ' · ' + fx(l.sprintM) + ' m de sprint' : ''}</p>`).join('')}</article>`
-    : p ? `<article class="card"><span class="chiptag">Aujourd'hui · ${p.kind === 'gym' ? 'Musculation' : 'Sprint'} · ${estMin(p)} min</span><div class="bigname">${esc(p.name)}</div><p class="small muted">${esc(p.desc || '')}</p>
+  const doneCard = done.length ? `<article class="card"><span class="chiptag">${TICK.replace('<svg', '<svg width="12" height="12"')} Fait</span>${done.map(l => `<div class="bigname">${esc(l.name)}</div><p class="small muted">${l.min} min · RPE ${l.rpe}/10${l.tonnage ? ' · ' + fx(l.tonnage) + ' kg soulevés' : ''}${l.sprintM ? ' · ' + fx(l.sprintM) + ' m de sprint' : ''}</p>`).join('')}</article>` : '';
+  const main = doneCard + (p && !kindDone(TODAY, p.kind) ? `<article class="card"><span class="chiptag">Aujourd'hui · ${p.kind === 'gym' ? 'Musculation' : 'Sprint'} · ${estMin(p)} min</span><div class="bigname">${esc(p.name)}</div><p class="small muted">${esc(p.desc || '')}</p>
         <ul class="exl">${p.items.map(it => `<li><span>${esc(exOf(it.ex).n)}</span><span>${itemText(it)}</span></li>`).join('')}</ul>
         <div style="margin-top:14px"><button class="btn" data-tplanv="${p.id}"${p.n ? ` data-tn="${p.n}"` : ''}>Voir la séance</button></div></article>` : (() => {
       // A session placed on a later day: when and what, nothing to start yet.
       const nx = [...Array(42)].map((_, i) => addDays(TODAY, i + 1)).map(k => ({k, p: planFor(k)})).find(x => x.p); if (!nx) return '';
       const b = dayPlan(nx.k).find(x => x.c === (nx.p.kind === 'track' ? 'athle' : 'muscu'));
-      return `<article class="card nextc pc6"><span class="chiptag">Prochaine séance · ${esc(cap(fmtShort(nx.k)))}${b ? ' · ' + tfr(b.a) : ''}</span><div class="bigname">${esc(nx.p.name)}</div><p class="small muted">${esc(nx.p.title || nx.p.desc || '')} · ${estMin(nx.p)} min</p><div style="margin-top:12px"><button class="btn ghost" data-tplanv="${nx.p.id}"${nx.p.n ? ` data-tn="${nx.p.n}"` : ''}>Voir la séance</button></div></article>`; })();
+      return `<article class="card nextc pc6"><span class="chiptag">Prochaine séance · ${esc(cap(fmtShort(nx.k)))}${b ? ' · ' + tfr(b.a) : ''}</span><div class="bigname">${esc(nx.p.name)}</div><p class="small muted">${esc(nx.p.title || nx.p.desc || '')} · ${estMin(nx.p)} min</p><div style="margin-top:12px"><button class="btn ghost" data-tplanv="${nx.p.id}"${nx.p.n ? ` data-tn="${nx.p.n}"` : ''}>Voir la séance</button></div></article>`; })());
   return `
     <header class="top"><div class="sub">${fmtDay(TODAY)} · semaine ${seasonWeek(TODAY)}</div>${(() => { const nx = S.live ? null : nextSess(); if (!nx) return `<p class="pmsg">${esc(trainMsg(p, done))}</p>`; const t = nx.k === TODAY; return `${done.length || kindDone(TODAY, 'gym') ? `<p class="pmsg" style="margin-bottom:10px">${esc(trainMsg(p, done.length ? done : [{}]))}</p>` : ''}<button class="pnext" data-tplanv="${nx.p.id}"${nx.p.n ? ` data-tn="${nx.p.n}"` : ''}><span><small>${t ? 'Au programme' : 'Prochaine séance · ' + esc(fmtShort(nx.k))}</small><b>${esc(nx.p.name)}</b></span>${ICON.chev}</button>`; })()}${seasonLine()}</header>
     <div class="stack">${live}${ask}
@@ -6784,13 +6956,13 @@ function progList() {
     ${done.length ? `<h2>Séances faites</h2><div class="list donel">${done.map(n => r(n, ' doneses')).join('')}</div>` : ''}`;
 }
 /* ---------- the session board: 4 weeks, empty until he drops a session on a day ---------- */
-const sbShort = p => p.n ? 'S' + p.n : p.name;
+const sbShort = p => p.n ? 'S' + p.n : p.coach ? p.name.split(' · ').pop() : p.name;
 function sesBoard(kind) {
   const off = S.sbOff || 0, mon0 = addDays(monday(TODAY), 28 * off), c = kind === 'gym' ? 'muscu' : 'athle';
   const cell = k => {
-    const p0 = planFor(k), p = p0 && p0.kind === kind ? p0 : null, b = dayPlan(k).find(x => x.c === c), past = k < TODAY, done = logsOn(k).some(l => l.kind === kind) || !!M(k, kind === 'gym' ? 'gymRpe' : 'trackRpe');
+    const p = planForK(k, kind), dk = p && S.tset.dated?.[dKey(k, kind)] === caleRef(p) ? dKey(k, kind) : k, b = dayPlan(k).find(x => x.c === c), past = k < TODAY, done = logsOn(k).some(l => l.kind === kind) || !!M(k, kind === 'gym' ? 'gymRpe' : 'trackRpe');
     return `<div class="bcell${b ? ' slot' : ''}${past ? ' past' : ''}${k === TODAY ? ' today' : ''}" ${past ? '' : `data-bdk="${k}"`}><span class="bd">${DOW[(dow(k) + 6) % 7]} <b>${+k.slice(8)}</b>${b ? `<small>${tfr(b.a)}</small>` : ''}</span>
-      ${p ? `<div class="bchip${done ? ' done' : ''}" data-bref="${esc(caleRef(p))}" data-bfrom="${k}" title="${esc(p.name)}${p.title ? ' · ' + esc(p.title) : ''}"><span>${esc(sbShort(p))}</span>${past ? (done ? '<i>✓</i>' : '') : `<button type="button" class="bx" data-bx="${k}" aria-label="Retirer ${esc(p.name)} du ${esc(fmtShort(k))}"><svg viewBox="0 0 12 12" width="9" height="9" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>`}</div>` : done ? '<div class="bchip done ghost"><span>Faite</span><i>✓</i></div>' : past ? '' : `<span class="bplus">${b ? '+' : ''}</span>`}</div>`;
+      ${p ? `<div class="bchip${done ? ' done' : ''}" data-bref="${esc(caleRef(p))}" data-bfrom="${dk}" title="${esc(p.name)}${p.title ? ' · ' + esc(p.title) : ''}"><span>${esc(sbShort(p))}</span>${past ? (done ? '<i>✓</i>' : '') : `<button type="button" class="bx" data-bx="${dk}" aria-label="Retirer ${esc(p.name)} du ${esc(fmtShort(k))}"><svg viewBox="0 0 12 12" width="9" height="9" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>`}</div>` : done ? '<div class="bchip done ghost"><span>Faite</span><i>✓</i></div>' : past ? '' : `<span class="bplus">${b ? '+' : ''}</span>`}</div>`;
   };
   const weeks = [0, 1, 2, 3].map(w => addDays(mon0, 7 * w));
   const src = [...(kind === 'gym' ? tdvTodo(8) : []), ...myPlans().filter(x => x.kind === kind)];
@@ -6828,7 +7000,7 @@ function sesBoard(kind) {
     if (!d.on) { const p = planOf(d.ref); if (p) { if (p.n) planView(p.id, p.n); else planView(p.id); } return; }
     window.__bdropT = Date.now();
     const t = at(e.clientX, e.clientY), k = t?.dataset.bdk;
-    if (k) { if (k === d.from) return; const ex = planFor(k); await caleSave(k, d.ref); toast(`${planOf(d.ref)?.name || 'Séance'} calée le ${fmtShort(k)}${ex && caleRef(ex) !== d.ref ? ' · ' + ex.name + ' revient à caler' : ''}`); return; }
+    if (k) { if (k === d.from?.slice(0, 10)) return; const ex = planForK(k, planOf(d.ref)?.kind); await caleSave(k, d.ref); toast(`${planOf(d.ref)?.name || 'Séance'} calée le ${fmtShort(k)}${ex && caleRef(ex) !== d.ref ? ' · ' + ex.name + ' revient à caler' : ''}`); return; }
     if (d.from) { const dated = {...(S.tset.dated || {})}; delete dated[d.from]; S.tset = {...S.tset, dated}; renderMod(); await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()}); toast('Retirée : elle t\'attend dans « À caler »'); }
   });
   document.addEventListener('pointercancel', () => { if (D) { stop(); D = null; } });
@@ -6839,8 +7011,8 @@ document.addEventListener('click', async e => {
   const b = e.target.closest('[data-bx]'), o = e.target.closest('[data-sboff]');
   if (o && !o.disabled) { S.sbOff = Math.max(0, (S.sbOff || 0) + +o.dataset.sboff); renderMod(); return; }
   if (!b) return; e.stopPropagation();
-  const k = b.dataset.bx, dated = {...(S.tset.dated || {})}, n = planFor(k)?.name; delete dated[k]; S.tset = {...S.tset, dated}; renderMod();
-  await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()}); toast((n || 'Séance') + ' retirée du ' + fmtShort(k));
+  const k = b.dataset.bx, dated = {...(S.tset.dated || {})}, n = planOf(dated[k])?.name; delete dated[k]; S.tset = {...S.tset, dated}; renderMod();
+  await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()}); toast((n || 'Séance') + ' retirée du ' + fmtShort(k.slice(0, 10)));
 });
 function tSessions() {
   if (S.tkind === 'class') S.tkind = 'gym';
@@ -6894,6 +7066,13 @@ function logSplit(l) {
         r.ton += (+st.kg || 0) * (+st.reps || 0); if (rm && +st.kg > 0 && !ACCESSORY(e)) { r.gW += inten * reps; r.gR += reps; }
         for (const k in c) { add(k, reps * inten * c[k], reps * c[k]); r.gL += reps * inten * c[k]; }
       }
+    } else if (it.ex === 'warmup' && +it.min > 0) {
+      // The warm-up is never written in the coach's sheet but takes 45 min to 1 h of a 2 h session: easy running and
+      // drills. Per metre, a sprint loads the muscles far more than jogging (hamstring force rises steeply with speed,
+      // Schache et al. 2012), so a minute of warm-up counts like ~12 m of fast running at 45 %: 50 min ≈ half a sprint session.
+      // Session-RPE (Foster et al. 2001) also counts the whole session, warm-up included.
+      const d = +it.min * 12, inten = .45, cw = musCoef('strides');
+      for (const k in cw) { add(k, d / 10 * inten * cw[k], d / 10 * cw[k]); r.sL += d / 10 * inten * cw[k]; }
     } else if (it.reps) {
       const [fs, di] = RUN_FS[e.cat] || [1, .8], inten = (+it.pct || 0) / 100 || di, sprint = e.cat !== 'Échauffement et gammes' && it.ex !== 'warmup';
       for (const x of it.reps) { const d = +x.dist || 0; if (sprint) { r.m += d; r.mW += inten * d; r.mD += d; } for (const k in c) { add(k, d / 10 * inten * fs * c[k], d / 10 * fs * c[k]); r.sL += d / 10 * inten * fs * c[k]; } }
@@ -7517,7 +7696,7 @@ async function savePlan() {
   S.plans[doc.id] = doc;
   await dbSet('plans/' + doc.id, doc);
   const dated = Object.fromEntries(Object.entries(S.tset.dated || {}).filter(([, v]) => v !== doc.id));
-  if (date) dated[date] = doc.id;
+  if (date) dated[dKey(date, doc.kind)] = doc.id;
   S.tset = {...S.tset, dated}; await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()});
   closePane(); if (P.stack.length) closePane();
   toast('Séance enregistrée'); planView(doc.id);
@@ -7597,6 +7776,8 @@ function liveBody() {
     <div class="stack" style="margin-top:14px"><button class="btn ghost" data-tladd>+ Ajouter un exercice</button><button class="btn" data-tfinish>Terminer la séance</button>
     <button class="small muted" data-tcancel style="padding:10px">Abandonner sans enregistrer</button></div>`;
 }
+const restTxt = s => !s ? '' : s % 60 ? s + ' s' : s / 60 + '\'';
+const restParse = v => { const t = String(v || '').trim().replace(',', '.'); if (!t) return null; const m = t.match(/^(\d+(?:\.\d+)?)\s*(s|sec)?/i); if (!m) return null; return Math.round(m[2] ? +m[1] : +m[1] * 60); };
 function liveBox(it, i) {
   const e = exOf(it.ex), tg = it.tg || {}, last = lastText(it.ex), sg = it.sets ? suggest(tg) : null;
   if (it.test) return `<div class="exbox"><h3>${esc(e.n)}<small>${tg.reps || 3} essais</small></h3><div class="tools" style="border:0;padding-top:4px"><button class="btn" data-ltest="${e.test}">Lancer le test</button><button class="rm" data-tlrm="${i}">Retirer</button></div></div>`;
@@ -7606,7 +7787,7 @@ function liveBox(it, i) {
     const timed = e.u === 'm';
     rows = (e.u === 'min' ? '' : `<div class="setrow hd"><span>#</span><span>Distance</span><span>${timed ? 'Temps' : ''}</span><span>${timed ? 'Vitesse' : ''}</span><span></span></div>`) + it.reps.map((r, j) => {
       const v = +r.t > 0 && +r.dist > 0 ? fx(r.dist / r.t * 3.6, 1) + ' km/h' : '';
-      return e.u === 'min' ? `<div class="setrow ${r.done ? 'done' : ''}"><span class="n">${j + 1}</span><span class="small" style="grid-column:span 3">${tg.min || ''} min</span>${ok(i + '.' + j, r.done)}</div>`
+      return e.u === 'min' ? `<div class="setrow ${r.done ? 'done' : ''}"><span class="n">${j + 1}</span><span style="grid-column:span 3;display:flex;align-items:center;gap:8px"><input class="mini-in" inputmode="numeric" data-lv="${i}.${j}.min" value="${r.min ?? tg.min ?? ''}" placeholder="min" aria-label="Durée en minutes" style="width:64px"><span class="small muted">min${it.ex === 'warmup' ? ' · comptées dans la charge' : ''}</span></span>${ok(i + '.' + j, r.done)}</div>`
         : `<div class="setrow ${r.done ? 'done' : ''}"><span class="n">${j + 1}</span><input class="mini-in" inputmode="numeric" data-lv="${i}.${j}.dist" value="${r.dist}" placeholder="m" aria-label="Distance">${timed ? `<input class="mini-in" inputmode="decimal" data-lv="${i}.${j}.t" value="${r.t}" placeholder="s" aria-label="Temps en secondes">` : '<span></span>'}<span class="spd">${v}</span>${ok(i + '.' + j, r.done)}</div>`;
     }).join('');
   } else {
@@ -7620,6 +7801,7 @@ function liveBox(it, i) {
     ${ramp ? `<div class="ramp"><b>Montée en charge</b><span>${ramp}</span></div>` : ''}
     ${painBox(it, i)}${(() => { const g = S.tset?.gymPlan?.[S.live?.plan]; if (!g || !it.sets || gymHas(g, it.ex)) return ''; const x = gymSub(it.ex, g); return `<div class="adapt"><span>Pas de matériel pour cet exercice à ${esc(gymName(g))}.</span>${x ? `<button type="button" class="btn" data-tlsub="${i}|${x.id}">Remplacer par ${esc(x.n)}</button>` : ''}</div>`; })()}
     ${it.sets ? `<div class="ctline"><span>Contraction</span><button type="button" class="hdtog" data-tlct="${i}">${cap(ctName(it.ct))} ⇄</button></div>` : ''}
+    ${it.reps && e.u === 'm' ? `<div class="ctline"><span>Récup entre les répétitions</span><input class="mini-in" data-lrest="${i}" inputmode="text" style="width:76px" value="${esc(restTxt(it.rest ?? tg.rest))}" placeholder="4'" aria-label="Récupération"></div>` : ''}
     <div class="sets">${rows}</div>
     ${it.cn != null ? `<textarea class="cnote" rows="2" data-lcn="${i}" placeholder="Note du coach pour cet exercice…">${esc(it.cn)}</textarea>` : ''}
     <div class="tools"><button data-tlset="${i}">+ Série</button><button data-tex="${it.ex}">Consignes</button>${it.cn == null ? `<button data-tlnote="${i}">+ Note</button>` : ''}<button class="rm" data-tlrm="${i}">Retirer</button></div></div>`;
@@ -7714,7 +7896,7 @@ document.addEventListener('click', e => { const b = e.target.closest('[data-fing
 async function saveLive2() {
   const L = S.live; if (!L) return;
   const rpe = +($('#fin-rpe')?.value || 7), min = parseDur($('#fin-min')?.value) || 1, note = ($('#fin-note')?.value || '').trim();
-  const items = L.items.filter(it => !it.test).map(it => it.reps ? {ex: it.ex, pct: it.tg?.pct || null, reps: it.reps.filter(r => r.done).map(r => ({dist: +r.dist || 0, t: +r.t || null}))}
+  const items = L.items.filter(it => !it.test).map(it => it.reps ? {ex: it.ex, pct: it.tg?.pct || null, ...(exOf(it.ex).u === 'min' ? {min: it.reps.filter(r => r.done).reduce((a, r) => a + (+r.min || +it.tg?.min || 0), 0)} : {}), ...((it.rest ?? it.tg?.rest) ? {rest: it.rest ?? it.tg.rest} : {}), reps: it.reps.filter(r => r.done).map(r => ({dist: +r.dist || 0, t: +r.t || null}))}
     : {ex: it.ex, ...(it.u === 's' ? {u: 's'} : {}), ...(it.ct ? {ct: it.ct} : {}), ...(it.cn ? {cn: it.cn} : {}), sets: it.sets.filter(s => s.done).map(s => ({kg: +s.kg || 0, reps: +s.reps || 0, ...(s.rpe !== undefined && s.rpe !== '' ? {rpe: +s.rpe} : s.rir !== undefined && s.rir !== '' ? {rpe: 10 - +s.rir, rir: +s.rir} : {})}))}).filter(it => (it.reps || it.sets).length);
   if (!items.length) { toast('Valide au moins une série avec ✓'); return; }
   const tonnage = items.reduce((s, it) => s + (it.u === 's' ? 0 : (it.sets || []).reduce((a, x) => a + x.kg * x.reps, 0)), 0);
@@ -8232,14 +8414,14 @@ function fFoods() {
     <div class="list">${FOODS.map(f => `<div class="rowbtn"><span><b>${esc(f.n)}</b><span class="meta">pour 100 g · P ${fx(f.p, 1)} · G ${fx(f.c, 1)} · L ${fx(f.f, 1)}</span></span><span class="kc">${fx(f.kcal)}</span></div>`).join('')}</div>`;
 }
 // ---------- Courses: the week of his menu plus what he adds, with prices and the budget ----------
-/* Several menus, placed on days like the Training sessions: his base menu (the one of every day) plus menus he
-   creates (training day, rest day, weekend…). A 4-week board shows which menu feeds each day; a menu is dropped on a
-   day (hold, then slide) or chosen by touching the day, or the week label for the whole week. The journal of a day
-   fills from its menu; the shopping list adds up the next 7 days. */
+/* Menus as blocks, like the Training sessions. Two kinds:
+   - week blocks: dropped on a week, they feed its 7 days;
+   - day blocks: dropped on one day, they replace the week's menu that day only (a special day).
+   A day follows: its own day block, else its week's block, else the base menu (the file's menu). */
 let MEDIT = null;   // the menu open in the editor: null = base menu
 const myMenus = () => S.fset?.menus || [];
 const menuById = id => myMenus().find(m => m.id === id) || null;
-const menuOfDay = k => { const id = S.fset?.menuDated?.[k]; return id && menuById(id) ? menuById(id) : null; };
+const menuOfDay = k => { const d = S.fset?.menuDated?.[k], w = S.fset?.menuWeek?.[monday(k)]; return (d && menuById(d)) || (w && menuById(w)) || null; };
 const menuFor = k => menuOfDay(k)?.items || planItems();
 const edItems = () => MEDIT ? (menuById(MEDIT)?.items || []) : planItems();
 async function edSave(items) {
@@ -8247,92 +8429,132 @@ async function edSave(items) {
   await saveFset({menus: myMenus().map(m => m.id === MEDIT ? {...m, items: items.map(x => ({...x}))} : m)});
 }
 const menuTot = L => L.reduce((t, x) => ({kcal: t.kcal + x.kcal, p: t.p + x.p, c: t.c + x.c, f: t.f + x.f}), {kcal: 0, p: 0, c: 0, f: 0});
-const menuShort = m => m ? (m.name.length > 9 ? m.name.slice(0, 8) + '…' : m.name) : 'Base';
-async function menuPlace(days, id) {
-  const md = {...(S.fset.menuDated || {})}; for (const k of days) { if (id) md[k] = id; else delete md[k]; }
-  await saveFset({menuDated: md}); renderMod(true);
+const menuShort = m => m ? (m.short || (m.name.length > 8 ? m.name.slice(0, 7) + '…' : m.name)) : 'base';
+// His usual menu turned into ready-made blocks, to raise or lower carbs quickly: rice 300 / 250 / 200 g, bread 0 to
+// 3 slices (one slice of his rye bread ≈ 62 g), and pasta at the same carbs as 300 g of rice. Made once, on his phone.
+const SLICE = 62.5;
+function menuVariant(base, rice, slices, pasta) {
+  const riz = FOODS.find(f => f.n === 'Riz blanc cuit'), pat = FOODS.find(f => f.n === 'Pâtes cuites'), out = [];
+  for (const it of base) {
+    if (/^Riz/.test(it.n)) { if (pasta) out.push(itemOf(pat, Math.round(rice * riz.c / pat.c / 5) * 5, it.meal)); else out.push(itemOf(riz, rice, it.meal)); continue; }
+    if (/^Pain de seigle/.test(it.n)) { if (slices > 0) out.push(itemOf(foodAny(it.food || it.n) || FOODS.find(f => f.n === 'Pain de seigle'), Math.round(SLICE * slices), it.meal)); continue; }
+    out.push({...it});
+  }
+  return out;
 }
+let MSEED = false;
+async function menuSeed() {
+  if (MSEED || S.fset?.menuSeed || !planItems().length || !planItems().some(x => /^Riz/.test(x.n))) return;
+  MSEED = true;
+  const B = planItems(), mk = (id, name, short, rice, sl, pasta) => ({id, kind: 'week', name, short, items: menuVariant(B, rice, sl, pasta)});
+  const add = [mk('wR300', 'Riz 300 g · 2 tranches (ton menu)', 'R300', 300, 2), mk('wR250', 'Riz 250 g · 2 tranches', 'R250', 250, 2), mk('wR200', 'Riz 200 g · 2 tranches', 'R200', 200, 2),
+    mk('wP3', 'Riz 300 g · 3 tranches', '3 pains', 300, 3), mk('wP1', 'Riz 300 g · 1 tranche', '1 pain', 300, 1), mk('wP0', 'Riz 300 g · sans pain', '0 pain', 300, 0),
+    mk('wPat', 'Pâtes · mêmes glucides que riz 300 g', 'Pâtes', 300, 2, true)].filter(m => !menuById(m.id));
+  // Prices per kg, raw weight, from his shops (Lidl, Super U): estimates to adjust when he sees the shelf price.
+  const P = {'Skyr': 4.4, 'Pain de seigle': 4.6, 'Cerneaux de noix': 15, 'Chocolat noir 85 %': 12, 'Compote sans sucre ajouté': 3, 'Escalope de dinde cuite': 8.5, 'Riz blanc cuit': 2.3,
+    'Ratatouille': 3.5, 'Huile d\'olive': 8.5, 'Sauce soja salée': 8, 'Pâtes cuites': 1.4};
+  const prices = {...(S.fset.prices || {})};
+  for (const [n, v] of Object.entries(P)) { const f = FOODS.find(x => x.n === n); if (f && prices[f.id] == null) prices[f.id] = v; }
+  const SC = [[/skyr/i, 4.4], [/tartines.*seigle|seigle/i, 4.6], [/noix/i, 15], [/85/, 12], [/compote|pomme vanille/i, 3], [/riz/i, 2.3], [/soy|soja/i, 8], [/olive/i, 8.5]];
+  for (const f of myFoods()) { const m = SC.find(([re]) => re.test(f.n)); if (m && prices[f.id] == null) prices[f.id] = m[1]; }
+  await saveFset({menus: [...myMenus(), ...add], prices, menuSeed: 1});
+}
+async function menuPlaceDays(days, id) { const md = {...(S.fset.menuDated || {})}; for (const k of days) { if (id) md[k] = id; else delete md[k]; } await saveFset({menuDated: md}); renderMod(true); }
+async function menuPlaceWeek(mon, id) { const mw = {...(S.fset.menuWeek || {})}; if (id) mw[mon] = id; else delete mw[mon]; await saveFset({menuWeek: mw}); renderMod(true); }
+const mchip = (m, src) => { const t = menuTot(m.items || []); return `<div class="bchip src mchip${m.kind === 'day' ? ' mday' : ''}" data-mref="${m.id}" title="${esc(m.name)}"><span>${esc(m.name)}</span><small>${fx(t.c)} g glucides · ${fx(t.kcal)} kcal</small></div>`; };
 function menuBoard() {
   const off = S.mbOff || 0, mon0 = addDays(monday(TODAY), 28 * off), weeks = [0, 1, 2, 3].map(w => addDays(mon0, 7 * w));
-  const cell = k => { const m = menuOfDay(k), past = k < TODAY;
+  const cell = k => { const d = S.fset.menuDated?.[k], dm = d && menuById(d), wm = menuById(S.fset.menuWeek?.[monday(k)]), past = k < TODAY;
     return `<div class="bcell${past ? ' past' : ''}${k === TODAY ? ' today' : ''}" ${past ? '' : `data-mdk="${k}"`}><span class="bd">${DOW[(dow(k) + 6) % 7]} <b>${+k.slice(8)}</b></span>
-      ${m ? `<div class="bchip mchip" data-mref="${m.id}" data-mfrom="${k}" title="${esc(m.name)}"><span>${esc(menuShort(m))}</span></div>` : `<span class="mbase">base</span>`}</div>`; };
+      ${dm ? `<div class="bchip mchip mday" data-mref="${dm.id}" data-mfrom="${k}" title="${esc(dm.name)}"><span>${esc(menuShort(dm))}</span></div>` : `<span class="mbase${wm ? ' wk' : ''}">${esc(menuShort(wm))}</span>`}</div>`; };
+  const wks = myMenus().filter(m => m.kind !== 'day'), dys = myMenus().filter(m => m.kind === 'day');
   return `<div class="card sboard mboard"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Mes 4 semaines · menus</span><span class="sbnav"><button type="button" data-mboff="-1" aria-label="4 semaines avant"${off <= 0 ? ' disabled' : ''}>‹</button><small>${esc(fmtShort(weeks[0]).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(weeks[3], 6)).replace(/^\S+ /, ''))}</small><button type="button" data-mboff="1" aria-label="4 semaines après">›</button></span></div>
-    <div class="bgrid">${weeks.map(w => `<div class="bweek"><button type="button" class="bwk mwk" data-mweek="${w}" aria-label="Choisir le menu de la semaine ${seasonWeek(w)}">S${seasonWeek(w)}</button>${[0, 1, 2, 3, 4, 5, 6].map(i => cell(addDays(w, i))).join('')}</div>`).join('')}</div>
-    <div class="sec-label" style="margin:14px 2px 6px">À caler <small>garde le doigt sur un menu, puis glisse-le sur un jour</small></div>
-    <div class="bsrc">${myMenus().length ? myMenus().map(m => { const t = menuTot(m.items || []); return `<div class="bchip src mchip" data-mref="${m.id}" title="${esc(m.name)}"><span>${esc(m.name)}</span><small>${fx(t.kcal)} kcal · ${fx(t.p)} g P</small></div>`; }).join('') : '<p class="small muted" style="margin:0">Crée un menu ci-dessous (jour d\'entraînement, jour de repos, week-end…) : il apparaîtra ici, prêt à être calé.</p>'}</div>
-    <p class="small muted" style="margin:10px 2px 0">Touche un jour pour choisir son menu, ou le numéro de semaine (S${seasonWeek(weeks[0])}…) pour toute la semaine. Un jour sans menu calé suit ton menu de base.</p></div>`;
+    <div class="bgrid">${weeks.map(w => { const wm = menuById(S.fset.menuWeek?.[w]); return `<div class="bweek" data-mwrow="${w}"><button type="button" class="bwk mwk${wm ? ' on' : ''}" data-mweek="${w}" aria-label="Menu de la semaine ${seasonWeek(w)}">S${seasonWeek(w)}</button>${[0, 1, 2, 3, 4, 5, 6].map(i => cell(addDays(w, i))).join('')}</div>`; }).join('')}</div>
+    <div class="sec-label" style="margin:14px 2px 6px">Blocs semaine <small>glisse-les sur une semaine</small></div>
+    <div class="bsrc">${wks.length ? wks.map(m => mchip(m)).join('') : '<p class="small muted" style="margin:0">Aucun bloc semaine.</p>'}</div>
+    <div class="sec-label" style="margin:14px 2px 6px">Blocs jour <small>glisse-les sur un jour spécial</small></div>
+    <div class="bsrc">${dys.length ? dys.map(m => mchip(m)).join('') : '<p class="small muted" style="margin:0">Crée un bloc jour ci-dessous pour un jour différent (compétition, repas de famille…).</p>'}</div>
+    <p class="small muted" style="margin:10px 2px 0">Garde le doigt sur un bloc, puis glisse-le. Tu peux aussi toucher une semaine (S${seasonWeek(weeks[0])}…) ou un jour pour choisir. Sans bloc, c'est ton menu de base.</p></div>`;
 }
 function fMenu() {
-  const base = menuTot(planItems());
-  const row = (id, name, L, sub) => { const t = menuTot(L); return `<button class="rowbtn" data-medit="${id}"><span><b>${esc(name)}</b><span class="meta">${sub ? sub + ' · ' : ''}${fx(t.kcal)} kcal · ${fx(t.p)} g P · ${fx(t.c)} g G · ${fx(t.f)} g L</span></span>${ICON.chev}</button>`; };
-  const used = id => Object.entries(S.fset.menuDated || {}).filter(([k, v]) => v === id && k >= TODAY).length;
-  return `<header class="top tophead"><div><div class="sub">Tes menus, calés jour par jour ou à la semaine</div><h1>Menu</h1></div></header>
+  menuSeed();
+  const row = m => { const t = menuTot(m.items || []), wk = Object.entries(S.fset.menuWeek || {}).filter(([k, v]) => v === m.id && addDays(k, 6) >= TODAY).length, dy = Object.entries(S.fset.menuDated || {}).filter(([k, v]) => v === m.id && k >= TODAY).length;
+    return `<button class="rowbtn" data-medit="${m.id}"><span><b>${esc(m.name)}</b><span class="meta">${m.kind === 'day' ? 'bloc jour' : 'bloc semaine'}${wk ? ` · ${wk} semaine${wk > 1 ? 's' : ''}` : ''}${dy ? ` · ${dy} jour${dy > 1 ? 's' : ''}` : ''} · ${fx(t.kcal)} kcal · P ${fx(t.p)} · G ${fx(t.c)} · L ${fx(t.f)}</span></span>${ICON.chev}</button>`; };
+  const bt = menuTot(planItems());
+  return `<header class="top tophead"><div><div class="sub">Tes menus en blocs, calés à la semaine ou au jour</div><h1>Menu</h1></div></header>
     ${menuBoard()}
-    <h2>Mes menus</h2><div class="list">${row('', 'Menu de base', planItems(), 'tous les jours sans autre menu')}${myMenus().map(m => row(m.id, m.name, m.items || [], used(m.id) ? `calé ${used(m.id)} jour${used(m.id) > 1 ? 's' : ''}` : 'pas encore calé')).join('')}<button class="addbtn" data-mnew>+ Créer un menu</button></div>
+    <h2>Blocs semaine</h2><div class="list">${myMenus().filter(m => m.kind !== 'day').map(row).join('')}<button class="addbtn" data-mnew="week">+ Créer un bloc semaine</button></div>
+    <h2>Blocs jour</h2><div class="list">${myMenus().filter(m => m.kind === 'day').map(row).join('')}<button class="addbtn" data-mnew="day">+ Créer un bloc jour</button></div>
+    <div class="list" style="margin-top:12px"><button class="rowbtn" data-medit=""><span><b>Menu de base</b><span class="meta">les jours sans bloc · ${fx(bt.kcal)} kcal · G ${fx(bt.c)}</span></span>${ICON.chev}</button></div>
     <h2>Courses <small>pour les 7 prochains jours de tes menus</small></h2>
     ${shopHtml()}`;
 }
 function menuEditor() {
   const m = MEDIT ? menuById(MEDIT) : null;
   if (MEDIT && !m) return '<p class="small muted" style="margin-top:16px">Ce menu a été supprimé.</p>';
-  return `${m ? `<div class="list" style="margin-top:16px"><div class="row"><label for="me-n">Nom</label><input id="me-n" class="mini-in" style="width:180px;text-align:left" value="${esc(m.name)}" data-mename></div></div>` : ''}
+  return `${m ? `<div class="list" style="margin-top:16px"><div class="row"><label for="me-n">Nom</label><input id="me-n" class="mini-in" style="width:190px;text-align:left" value="${esc(m.name)}" data-mename></div>
+      <div class="row col"><span class="l">Type de bloc</span><div class="seg" role="group" aria-label="Type de bloc">${[['week', 'Semaine'], ['day', 'Jour']].map(([v, l]) => `<button type="button" data-mekind="${v}" aria-pressed="${(m.kind || 'week') === v}">${l}</button>`).join('')}</div></div></div>` : ''}
     ${menuHtml()}
-    ${m ? `<div class="btnrow" style="margin-top:14px"><button type="button" class="btn ghost" data-mweekme="${m.id}">Caler sur cette semaine</button><button type="button" class="btn ghost" data-mdup="${m.id}">Dupliquer</button></div>
-      <button type="button" class="linkbtn" style="color:var(--bad);margin-top:12px" data-mdelm="${m.id}">Supprimer ce menu</button>` : '<div class="btnrow" style="margin-top:14px"><button type="button" class="btn ghost" data-mdup="">Dupliquer en nouveau menu</button></div>'}`;
+    ${m ? `<div class="btnrow" style="margin-top:14px">${m.kind === 'day' ? '' : `<button type="button" class="btn ghost" data-mweekme="${m.id}">Caler sur cette semaine</button>`}<button type="button" class="btn ghost" data-mdup="${m.id}">Dupliquer</button></div>
+      <button type="button" class="linkbtn" style="color:var(--bad);margin-top:12px" data-mdelm="${m.id}">Supprimer ce bloc</button>` : '<div class="btnrow" style="margin-top:14px"><button type="button" class="btn ghost" data-mdup="">Dupliquer en bloc semaine</button></div>'}`;
 }
 function menuOpen(id) { MEDIT = id || null; openPane({title: id ? (menuById(id)?.name || 'Menu') : 'Menu de base', onClose: () => { MEDIT = null; renderMod(true); }, render: menuEditor}); }
-// Choosing the menu of one day, or of a whole week, by touch.
-function menuChoose(days, title) {
-  openPane({title, render: () => { const cur = days.length === 1 ? S.fset.menuDated?.[days[0]] || '' : null;
-    const opt = (id, name, L) => { const t = menuTot(L); return `<button class="rowbtn" data-mchoose="${id}"><span><b>${esc(name)}</b><span class="meta">${fx(t.kcal)} kcal · ${fx(t.p)} g P</span></span><span class="kc">${cur === id ? '✓' : ''}</span></button>`; };
-    return `<p class="small muted" style="margin:16px 4px 8px">${days.length > 1 ? 'Le menu choisi remplace celui de chaque jour de la semaine (les jours passés ne changent pas).' : 'Ce jour-là, ton journal se remplira avec ce menu.'}</p>
-      <div class="list">${opt('', 'Menu de base', planItems())}${myMenus().map(m => opt(m.id, m.name, m.items || [])).join('')}</div>
-      <button class="addbtn" style="margin-top:10px" data-mnew>+ Créer un menu</button>`; },
-    pickMenu: id => { closePane(); menuPlace(days.filter(k => k >= TODAY), id).then(() => toast(days.length > 1 ? 'Menu calé sur la semaine' : 'Menu calé le ' + fmtShort(days[0]))); }});
+// Choosing by touch: a week takes week blocks; a day takes any block, or goes back to its week.
+function menuChoose(days, title, week) {
+  openPane({title, render: () => { const cur = week ? S.fset.menuWeek?.[week] || '' : S.fset.menuDated?.[days[0]] || '';
+    const opt = (id, name, L, sub) => { const t = menuTot(L); return `<button class="rowbtn" data-mchoose="${id}"><span><b>${esc(name)}</b><span class="meta">${sub ? sub + ' · ' : ''}${fx(t.c)} g glucides · ${fx(t.kcal)} kcal</span></span><span class="kc">${cur === id ? '✓' : ''}</span></button>`; };
+    const L = week ? myMenus().filter(m => m.kind !== 'day') : myMenus();
+    return `<p class="small muted" style="margin:16px 4px 8px">${week ? 'Ce bloc nourrit les 7 jours de la semaine, sauf les jours où tu as posé un bloc jour.' : 'Ce jour-là seulement, ton journal se remplira avec ce bloc.'}</p>
+      <div class="list">${week ? opt('', 'Menu de base', planItems()) : opt('', 'Suivre la semaine', menuFor(days[0]), 'enlève le bloc de ce jour')}${L.map(m => opt(m.id, m.name, m.items || [], m.kind === 'day' ? 'bloc jour' : 'bloc semaine')).join('')}</div>`; },
+    pickMenu: id => { closePane(); (week ? menuPlaceWeek(week, id) : menuPlaceDays(days, id)).then(() => toast(week ? 'Semaine calée' : 'Jour calé le ' + fmtShort(days[0]))); }});
 }
-async function menuNew(from) {
-  const src = from ? menuById(from) : null, n = myMenus().length + 1;
-  const m = {id: 'm' + Date.now().toString(36), name: src ? src.name + ' (copie)' : 'Menu ' + n, items: structuredClone(src ? src.items : planItems())};
+async function menuNew(from, kind) {
+  const src = from ? menuById(from) : null;
+  const m = {id: 'm' + Date.now().toString(36), kind: kind || src?.kind || 'week', name: src ? src.name + ' (copie)' : (kind === 'day' ? 'Jour spécial ' : 'Semaine ') + (myMenus().length + 1), items: structuredClone(src ? src.items : planItems())};
   await saveFset({menus: [...myMenus(), m]}); renderMod(true); return m.id;
 }
 document.addEventListener('click', async e => {
   let b;
   if ((b = e.target.closest('[data-mboff]')) && !b.disabled) { S.mbOff = Math.max(0, (S.mbOff || 0) + +b.dataset.mboff); renderMod(true); return; }
   if ((b = e.target.closest('[data-medit]'))) { menuOpen(b.dataset.medit); return; }
-  if (e.target.closest('[data-mnew]')) { if (P.stack.length) closePane(); const id = await menuNew(); menuOpen(id); toast('Menu créé à partir de ton menu de base'); return; }
-  if ((b = e.target.closest('[data-mdup]'))) { const id = await menuNew(b.dataset.mdup); closePane(); menuOpen(id); toast('Copie créée'); return; }
-  if ((b = e.target.closest('[data-mweekme]'))) { const mon = monday(TODAY), days = [0, 1, 2, 3, 4, 5, 6].map(i => addDays(mon, i)).filter(k => k >= TODAY); await menuPlace(days, b.dataset.mweekme); toast('Calé jusqu\'à dimanche'); return; }
-  if ((b = e.target.closest('[data-mdelm]'))) { const id = b.dataset.mdelm, md = {...(S.fset.menuDated || {})}; for (const k in md) if (md[k] === id && k >= TODAY) delete md[k];
-    await saveFset({menus: myMenus().filter(m => m.id !== id), menuDated: md}); closePane(); toast('Menu supprimé'); return; }
+  if ((b = e.target.closest('[data-mnew]'))) { if (P.stack.length) closePane(); const id = await menuNew(null, b.dataset.mnew); menuOpen(id); toast('Bloc créé à partir de ton menu de base'); return; }
+  if ((b = e.target.closest('[data-mdup]'))) { const id = await menuNew(b.dataset.mdup || null, b.dataset.mdup ? null : 'week'); closePane(); menuOpen(id); toast('Copie créée'); return; }
+  if ((b = e.target.closest('[data-mekind]'))) { const k = b.dataset.mekind; await saveFset({menus: myMenus().map(m => m.id === MEDIT ? {...m, kind: k} : m)}); paneRender(); return; }
+  if ((b = e.target.closest('[data-mweekme]'))) { await menuPlaceWeek(monday(TODAY), b.dataset.mweekme); toast('Calé sur cette semaine'); return; }
+  if ((b = e.target.closest('[data-mdelm]'))) { const id = b.dataset.mdelm, md = {...(S.fset.menuDated || {})}, mw = {...(S.fset.menuWeek || {})}; for (const k in md) if (md[k] === id && k >= TODAY) delete md[k]; for (const k in mw) if (mw[k] === id && addDays(k, 6) >= TODAY) delete mw[k];
+    await saveFset({menus: myMenus().filter(m => m.id !== id), menuDated: md, menuWeek: mw}); closePane(); toast('Bloc supprimé'); return; }
   if ((b = e.target.closest('[data-mchoose]'))) { P.stack.at(-1)?.pickMenu?.(b.dataset.mchoose); return; }
-  if ((b = e.target.closest('[data-mweek]'))) { const w = b.dataset.mweek; menuChoose([0, 1, 2, 3, 4, 5, 6].map(i => addDays(w, i)), 'Menu de la semaine ' + seasonWeek(w)); return; }
   if (window.__mdropT && Date.now() - window.__mdropT < 400) return;
+  if ((b = e.target.closest('[data-mweek]'))) { const w = b.dataset.mweek; menuChoose([], 'Semaine ' + seasonWeek(w), w); return; }
   if ((b = e.target.closest('[data-mdk]')) && !e.target.closest('[data-mref]')) { const k = b.dataset.mdk; menuChoose([k], cap(fmtShort(k))); }
 });
-document.addEventListener('input', e => { const t = e.target; if (!t.matches?.('[data-mename]') || !MEDIT) return; clearTimeout(t._t); t._t = setTimeout(() => saveFset({menus: myMenus().map(m => m.id === MEDIT ? {...m, name: t.value.trim() || m.name} : m)}), 500); });
-// Drag a menu onto a day: after a short hold with the thumb (so the page still scrolls), at once with the mouse.
+document.addEventListener('input', e => { const t = e.target; if (!t.matches?.('[data-mename]') || !MEDIT) return; clearTimeout(t._t); t._t = setTimeout(() => saveFset({menus: myMenus().map(m => m.id === MEDIT ? {...m, name: t.value.trim() || m.name, short: null} : m)}), 500); });
+// Drag a block: after a short hold with the thumb (so the page still scrolls or swipes), at once with the mouse.
+// A week block lands on the week under the finger (the whole row lights up), a day block on the day.
 (() => {
   let D = null;
-  const at = (x, y) => { const g = D?.g; if (g) g.style.visibility = 'hidden'; const e = document.elementFromPoint(x, y); if (g) g.style.visibility = ''; return e?.closest?.('[data-mdk]'); };
+  const at = (x, y) => { const g = D?.g; if (g) g.style.visibility = 'hidden'; const e = document.elementFromPoint(x, y); if (g) g.style.visibility = ''; return D?.week ? e?.closest?.('[data-mwrow]') : e?.closest?.('[data-mdk]'); };
   const begin = () => { D.on = true; if (PREFS.haptic) navigator.vibrate?.(12);
     const r = D.el.getBoundingClientRect(), g = D.el.cloneNode(true); g.classList.add('bghost'); g.style.width = Math.min(r.width, 200) + 'px';
     document.body.appendChild(g); D.g = g; D.el.classList.add('bdrag'); document.body.classList.add('bdragging'); move(D.x, D.y); };
   const move = (x, y) => { D.x = x; D.y = y; if (!D.on) return; D.g.style.transform = `translate(${x - 40}px,${y - 22}px)`; const t = at(x, y); if (t !== D.t) { D.t?.classList.remove('bover'); t?.classList.add('bover'); D.t = t; } };
   const stop = () => { clearTimeout(D?.timer); if (!D) return; D.g?.remove(); D.el.classList.remove('bdrag'); D.t?.classList.remove('bover'); document.body.classList.remove('bdragging'); };
   document.addEventListener('pointerdown', e => { const el = e.target.closest?.('[data-mref]'); if (!el || e.button > 0) return;
-    D = {el, ref: el.dataset.mref, from: el.dataset.mfrom || null, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, on: false, mouse: e.pointerType === 'mouse', id: e.pointerId};
+    const m = menuById(el.dataset.mref);
+    D = {el, ref: el.dataset.mref, week: !el.dataset.mfrom && m?.kind !== 'day', from: el.dataset.mfrom || null, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, on: false, mouse: e.pointerType === 'mouse', id: e.pointerId};
     if (!D.mouse) D.timer = setTimeout(() => { if (D && !D.on) begin(); }, 280); });
   document.addEventListener('pointermove', e => { if (!D || e.pointerId !== D.id) return;
     if (!D.on) { const m = Math.hypot(e.clientX - D.x0, e.clientY - D.y0); if (D.mouse && m > 5) begin(); else if (!D.mouse && m > 8) { stop(); D = null; return; } }
     if (D?.on) { e.preventDefault(); move(e.clientX, e.clientY); } });
   document.addEventListener('touchmove', e => { if (D?.on) e.preventDefault(); }, {passive: false});
   document.addEventListener('pointerup', async e => { if (!D || e.pointerId !== D.id) return; const d = D; stop(); D = null;
-    if (!d.on) { if (!d.from) menuOpen(d.ref); else menuChoose([d.from], cap(fmtShort(d.from))); window.__mdropT = Date.now(); return; }
     window.__mdropT = Date.now();
-    const t = at(e.clientX, e.clientY), k = t?.dataset.mdk;
-    if (k) { if (k === d.from) return; const days = [k]; if (d.from) days.push(d.from); const md = {...(S.fset.menuDated || {})}; md[k] = d.ref; if (d.from) delete md[d.from]; await saveFset({menuDated: md}); renderMod(true); toast(`${menuById(d.ref)?.name || 'Menu'} calé le ${fmtShort(k)}`); return; }
-    if (d.from) { await menuPlace([d.from], ''); toast('Ce jour revient au menu de base'); } });
+    if (!d.on) { if (!d.from) menuOpen(d.ref); else menuChoose([d.from], cap(fmtShort(d.from))); return; }
+    const t = at(e.clientX, e.clientY), name = menuById(d.ref)?.name || 'Menu';
+    if (d.week) { const w = t?.dataset.mwrow; if (w) { await menuPlaceWeek(w, d.ref); toast(`${name} : semaine ${seasonWeek(w)}`); } return; }
+    const k = t?.dataset.mdk;
+    if (k) { if (k === d.from) return; const md = {...(S.fset.menuDated || {})}; md[k] = d.ref; if (d.from) delete md[d.from]; await saveFset({menuDated: md}); renderMod(true); toast(`${name} le ${fmtShort(k)}`); return; }
+    if (d.from) { await menuPlaceDays([d.from], ''); toast('Ce jour suit de nouveau sa semaine'); } });
   document.addEventListener('pointercancel', () => { if (D) { stop(); D = null; } });
 })();
 function fShop() { return fMenu(); }
@@ -9024,6 +9246,7 @@ document.addEventListener('input', e => {
   else if (d.ffq !== undefined) P.stack.at(-1).setQ(t.value);
   else if (d.fqty !== undefined) P.stack.at(-1).setG(t.value);
   else if (d.lcn !== undefined) { S.live.items[+d.lcn].cn = t.value; saveLive(); }
+  else if (d.lrest !== undefined) { const s = restParse(t.value); S.live.items[+d.lrest].rest = s; saveLive(); }
   else if (d.lv) {
     const [i, j, f] = d.lv.split('.'), arr = S.live.items[i].sets || S.live.items[i].reps, old = arr[j][f], v = t.value.replace(',', '.');
     arr[j][f] = v; if (f === 'rpe') delete arr[j].rir; if (f === 'rir') delete arr[j].rpe;
