@@ -947,7 +947,7 @@ ul.bil{margin:4px 0 0;padding-left:18px;font-size:.875rem;line-height:1.45}ul.bi
 .bd{font-size:.625rem;color:var(--fg2);font-weight:600;line-height:1.1;display:flex;flex-wrap:wrap;gap:0 3px}.bd b{color:var(--fg)}.bd small{width:100%;font-size:.5625rem;font-weight:500}
 .bplus{flex:1;display:grid;place-items:center;color:var(--fg3);font-size:1rem}
 .mboard .bcell{opacity:1;cursor:pointer}.mboard .bcell.past{opacity:.45;cursor:default}.mboard .mbase{flex:1;display:grid;place-items:center;font-size:.625rem;color:var(--fg3)}
-.mwk{background:none;border:0;padding:0;font:inherit;cursor:pointer;border-radius:6px}.mwk.on{color:var(--accent)}.mboard .mbase.wk{color:var(--accent);font-weight:700;font-size:.5625rem;text-align:center;line-height:1.1}.mchip.mday{background:#FF9F0A}.bchip.src.mchip.mday{background:var(--card2);box-shadow:inset 3px 0 0 #FF9F0A}.mboard .bweek.bover{outline:2px solid var(--accent);outline-offset:2px;border-radius:12px}.mwk:active{color:var(--accent)}.mchip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mwk{background:none;border:0;padding:0;font:inherit;cursor:pointer;border-radius:6px}.mwk.on{color:var(--accent)}.mboard .mbase.wk{color:var(--accent);font-weight:700;font-size:.5625rem;text-align:center;line-height:1.1}.mchip.mday{background:var(--accent)}.bchip.src.mchip.mday{background:var(--card2);box-shadow:inset 3px 0 0 var(--accent)}.mboard .bweek.bover{outline:2px solid var(--accent);outline-offset:2px;border-radius:12px}.mwk:active{color:var(--accent)}.mchip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bchip{position:relative;display:flex;align-items:center;gap:2px;padding:4px 5px;border-radius:7px;background:var(--accent);color:#fff;font-size:.6875rem;font-weight:700;line-height:1.1;cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation;min-width:0}
 .bchip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
 .bchip .bx{flex:none;width:16px;height:16px;border-radius:50%;background:rgba(0,0,0,.25);color:#fff;font-size:.75rem;line-height:1;display:grid;place-items:center}
@@ -1012,6 +1012,12 @@ body.bdragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
 .bcell .bchip.ghost{height:28px;opacity:1;cursor:default}.pc .bcell .bchip.ghost{height:34px}
 .bic{flex:none;width:13px;height:13px;border-radius:50%;background:rgba(0,0,0,.3);color:#fff;display:grid;place-items:center;font-style:normal}.bic svg{width:8px;height:8px;display:block}
 .pc .bic{width:16px;height:16px}.pc .bic svg{width:10px;height:10px}
+/* v102 · piled blocks: the ones under show as a thin edge above the top one. Exercises are a bit lighter. */
+.bcell .bchip.stk{overflow:visible;isolation:isolate}.bcell .bchip.stk::before{content:'';position:absolute;left:5px;right:5px;top:-4px;height:5px;border-radius:5px 5px 0 0;background:inherit;filter:brightness(.55);z-index:-1}.bcell .bchip.stk span{overflow:hidden}
+:root:not(.pc) .btnrow.two .btn{font-size:.875rem;padding-left:6px;padding-right:6px;white-space:nowrap}
+.bcell .bchip.xchip{background:color-mix(in srgb,var(--accent) 72%,#000)}.bcell .bchip.xchip.done{background:var(--good)}.bcell .bchip.xchip.miss{background:#7A1F2B}
+.bchip.src.xchip{box-shadow:inset 3px 0 0 color-mix(in srgb,var(--accent) 60%,#fff)}
+.dprow{display:flex;align-items:center;gap:8px}.dprow .rowbtn{flex:1;min-width:0}.dprow .chip{flex:none;margin-right:10px}
 .segl button{flex-direction:column;align-items:flex-start;gap:1px;cursor:pointer}.segl button b small{margin-left:4px}
 .plg-chip{display:block;width:max-content;max-width:100%;margin-top:4px;padding:3px 8px;border-radius:7px;background:var(--pc);color:#fff;font-size:.6875rem;font-weight:700;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.25)}
 .rtl{position:relative;margin:12px 0 0 42px;border-left:1px solid var(--line);cursor:pointer}.rtl-h{position:absolute;left:0;right:0;border-top:1px solid var(--line);pointer-events:none}.rtl-h span{position:absolute;left:-42px;top:-7px;font-size:.625rem;color:var(--fg3);font-style:normal}
@@ -1278,7 +1284,7 @@ input[type=date].mini-in,input[type=date]{min-width:165px;flex:none}
 <div class="tabbar" id="tb-N"><nav role="tablist" aria-label="Sections">
   <button role="tab" data-mtab="journal" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/></svg>Aujourd'hui</button>
   <button role="tab" data-mtab="progress" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 4-7 5 5"/><path d="M3 21h18"/></svg>Tendances</button>
-  <button role="tab" data-mtab="menu" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="12" r="6.5"/><circle cx="14" cy="12" r="3"/><path d="M4 4v5.5a1.5 1.5 0 0 0 3 0V4M5.5 11v9"/></svg>Menu</button>
+  <button role="tab" data-mtab="menu" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v6.5a2 2 0 0 0 2 2 2 2 0 0 0 2-2V3M8 3v18"/><path d="M17.5 21V3c-2 1-3 3.5-3 6.5V13h3"/></svg>Menu</button>
   <button role="tab" data-mtab="foods" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.5c-2-2-7-1.5-7 4 0 4 3 8.5 5 8.5 1 0 1.5-.5 2-.5s1 .5 2 .5c2 0 5-4.5 5-8.5 0-5.5-5-6-7-4z"/><path d="M12 7.5c0-2 1-3.5 3-4.5"/></svg>Aliments</button>
   <button role="tab" data-mtab="nbody" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.5" r="2"/><path d="M5 9l7 1.5L19 9M12 10.5V15l-3 6M12 15l3 6"/></svg>Mon corps</button>
   <button role="tab" data-mtab="goals" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Profil</button>
@@ -1325,7 +1331,7 @@ const mean = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
 const TODAY = key(new Date());
 const SLEEP_NEED = 8.5;
 
-const S = { db: null, g: {}, w: {}, manual: {}, analysis: null, reports: [], profile: null, hrMax: 195, tab: 'today', gran: 'week', off: 0, status: 'loading', sheet: null };
+const S = { db: null, g: {}, w: {}, manual: {}, analysis: null, reports: [], profile: null, hrMax: 195, tab: 'today', gran: 'month', off: 0, status: 'loading', sheet: null };
 // Season weeks run Monday to Sunday; week 1 is the week of 31 August 2026 unless the profile says otherwise.
 function seasonWeek(k) { const s = S.profile?.seasonStart || '2026-08-31'; return Math.floor((new Date(k + 'T12:00:00') - new Date(s + 'T12:00:00')) / 6048e5) + 1; }
 const GYM_RE = /strength|fitness_equipment|hiit|cardio_training|training/;
@@ -4626,22 +4632,55 @@ function rsRun(s) {
 }
 // In a day cell, a code like S12 or M1: RM (muscles), RD (pains), R1, R2… for his own sessions.
 function rsShort(s) { if (s.day) return s.day === 'mus' ? 'RM' : 'RD'; const i = RS_OWN().findIndex(x => x.id === s.id); if (i >= 0) return 'R' + (i + 1); if (s.short) return s.short; const n = s.name.replace(/^(Ma )?[Rr]écup( · )?/, ''); return n.length > 8 ? n.slice(0, 7) + '…' : n; }
+// Recovery: the same piles (settings/app.rmore, day → refs, 'x:<exercise>'), his exercises and two a day to feel better.
+const rmoreOf = k => S.app?.rmore?.[k] || [];
+const rxDone = (k, id) => (S.manual[k]?.recov || []).some(a => a.t === RX[id]?.n);
+// Two recovery exercises a day: for the muscles the most tired (fatigue of the last 3 weeks), changing every day.
+function rxDay() {
+  const st = musState().sort((a, b) => b.fatPct - a.fatPct).map(x => x.k), seed = Math.floor(Date.parse(TODAY) / 864e5), out = [];
+  for (const m of [...st, 'hams', 'psoas', 'erect', 'calves']) { if (out.length >= 2) break;
+    const c = RLIB.map(r => RX[r[0]]).filter(x => x && (x.mus || []).includes(m) && !out.some(o => o.id === x.id)); if (c.length) out.push({id: c[seed % c.length].id, m}); }
+  return out;
+}
+async function rsPlace(k, ref, from) {
+  const rd = {...(S.app?.rdated || {})}, rm = {...(S.app?.rmore || {})}; let unplan = null, time = false;
+  if (from?.startsWith('m|')) { const [, fk, fi] = from.split('|'), L = [...(rm[fk] || [])]; L.splice(+fi, 1); if (L.length) rm[fk] = L; else delete rm[fk]; }
+  else if (from) { delete rd[from]; unplan = from; }
+  if (k && !isExRef(ref) && !rd[k]) { rd[k] = ref; time = true; } else if (k) rm[k] = [...(rm[k] || []), ref];
+  await rsSaveApp({rdated: rd, rmore: rm}); if (unplan) await rsUnplan(unplan);
+  if (time) rsTime(k, ref); else if (k) toast((isExRef(ref) ? RX[ref.slice(2)]?.n : rsById(ref)?.name || 'Bloc') + ' calé le ' + fmtShort(k)); else toast('Retiré de ce jour');
+}
+function rdayPane(k) {
+  openPane({title: cap(fmtShort(k)), render: () => {
+    const s = rsDayOf(k), L = [...(s ? [{ref: s.id, from: k}] : []), ...rmoreOf(k).map((r, i) => ({ref: r, from: `m|${k}|${i}`}))];
+    const row = ({ref, from}) => { const x = isExRef(ref), e = x ? RX[ref.slice(2)] : rsById(ref); if (!e) return '';
+      return `<div class="dprow"><button type="button" class="rowbtn" data-rdopen="${esc(ref)}"><span><b>${esc(e.n || e.name)}</b><span class="meta">${x ? 'Exercice · ' + e.min + ' min' + (rxDone(k, e.id) ? ' · fait' : '') : rsDur(e) + ' min'}</span></span>${ICON.chev}</button>${k >= TODAY ? `<button type="button" class="chip" data-rx="${esc(from)}" data-bxstay="1">Retirer</button>` : ''}</div>`; };
+    return `<p class="small muted" style="margin:16px 4px 8px">Récupération · ${L.length ? L.length + ' bloc' + (L.length > 1 ? 's' : '') + ' calé' + (L.length > 1 ? 's' : '') + ' ce jour-là. Touche un bloc pour le voir.' : 'rien de calé ce jour-là.'}</p>
+      ${L.length ? `<div class="list dplist">${L.map(row).join('')}</div>` : ''}${k >= TODAY ? `<button class="btn ghost" style="margin-top:12px;width:100%" data-rdchoose="${k}">${s ? 'Changer la séance du jour' : 'Choisir une séance pour ce jour'}</button>` : ''}`; }});
+}
 function rsBoard() {
   const off = S.rbOff || 0, mon0 = addDays(monday(TODAY), 28 * off), weeks = [0, 1, 2, 3].map(w => addDays(mon0, 7 * w));
-  const cell = k => { const s = rsDayOf(k), past = k < TODAY, done = (S.manual[k]?.recov || []).length > 0, rt = (PLN().extra?.[k] || []).find(x => x.rs && s && x.rs === s.id);
-    return `<div class="bcell${rt ? ' slot' : ''}${past ? ' past' : ''}${k === TODAY ? ' today' : ''}" ${past ? '' : `data-rdk="${k}"`}><span class="bd">${DOW[(dow(k) + 6) % 7]} <b>${+k.slice(8)}</b>${rt ? `<small>${tfr(rt.a)}</small>` : ''}</span>
+  const cell = k => { const s = rsDayOf(k), past = k < TODAY, done = (S.manual[k]?.recov || []).length > 0, rt = (PLN().extra?.[k] || []).find(x => x.rs && s && x.rs === s.id), mo = rmoreOf(k), top = mo.at(-1);
+    if (top) { const x = isExRef(top), e = x ? RX[top.slice(2)] : rsById(top), dn = x ? rxDone(k, top.slice(2)) : done, fr = `m|${k}|${mo.length - 1}`;
+      return `<div class="bcell${rt ? ' slot' : ''}${past ? ' past' : ''}${k === TODAY ? ' today' : ''}" data-rday="${k}" ${past ? '' : `data-rdk="${k}"`}><span class="bd">${DOW[(dow(k) + 6) % 7]} <b>${+k.slice(8)}</b>${rt ? `<small>${tfr(rt.a)}</small>` : ''}</span>
+      <div class="bchip rchip stk${dn ? ' done' : past ? ' miss' : ''}" data-rref="${esc(top)}" data-rfrom="${fr}" title="${esc(e?.n || e?.name || '')}"><span>${esc(x ? exInit(e?.n) : e ? rsShort(e) : '?')}</span>${dn ? BIC_OK : past ? BIC_NO : `<button type="button" class="bx" data-rx="${fr}" aria-label="Retirer du ${esc(fmtShort(k))}">${BX_SVG}</button>`}</div></div>`; }
+    return `<div class="bcell${rt ? ' slot' : ''}${past ? ' past' : ''}${k === TODAY ? ' today' : ''}" data-rday="${k}" ${past ? '' : `data-rdk="${k}"`}><span class="bd">${DOW[(dow(k) + 6) % 7]} <b>${+k.slice(8)}</b>${rt ? `<small>${tfr(rt.a)}</small>` : ''}</span>
       ${s ? `<div class="bchip rchip${done ? ' done' : past ? ' miss' : ''}" data-rref="${esc(s.id)}" data-rfrom="${k}" title="${esc(s.name)}"><span>${esc(rsShort(s))}</span>${done ? BIC_OK : past ? BIC_NO : `<button type="button" class="bx" data-rx="${k}" aria-label="Retirer ${esc(s.name)} du ${esc(fmtShort(k))}"><svg viewBox="0 0 12 12" width="9" height="9" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>`}</div>` : done ? `<div class="bchip rchip done ghost"><span>Faite</span>${BIC_OK}</div>` : '<span class="bplus"></span>'}</div>`; };
   const chip = s => { const used = Object.entries(S.app?.rdated || {}).some(([k, v]) => v === s.id && k >= TODAY); return `<div class="bchip src rchip${used ? ' on' : ''}" data-rref="${esc(s.id)}" title="${esc(s.name)}"><span>${esc(s.name)}</span><small>${esc(rsGoal(s) || (s.day ? 'faite pour ta journée' : s.items.length + ' exercice' + (s.items.length > 1 ? 's' : '')))} · ${rsDur(s)} min${used ? ' · calée' : ''}</small></div>`; };
   return `<div class="card sboard rboard"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Mes 4 semaines · récup</span><span class="sbnav"><button type="button" data-rboff="-1" aria-label="4 semaines avant"${off <= 0 ? ' disabled' : ''}>‹</button><small>${esc(fmtShort(weeks[0]).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(weeks[3], 6)).replace(/^\S+ /, ''))}</small><button type="button" data-rboff="1" aria-label="4 semaines après">›</button></span></div>
     <div class="bgrid">${weeks.map(w => `<div class="bweek"><span class="bwk">S${seasonWeek(w)}</span>${[0, 1, 2, 3, 4, 5, 6].map(i => cell(addDays(w, i))).join('')}</div>`).join('')}</div>
-    <div class="sec-label" style="margin:14px 2px 6px">À caler <small>garde le doigt sur une séance, puis glisse-la sur un jour</small></div>
+    <div class="sec-label" style="margin:14px 2px 6px">Séances <small>garde le doigt sur une séance, puis glisse-la sur un jour</small></div>
     <div class="bsrc">${rsAll().map(chip).join('')}</div>
-    <p class="small muted" style="margin:10px 2px 0">Récup musculation et Récup douleurs sont refaites chaque jour d'après tes séances et tes douleurs. Touche une séance pour la voir, un jour pour choisir.</p></div>`;
+    ${(() => { const xc = (id, sm) => { const x = RX[id]; return x ? `<div class="bchip src rchip xchip" data-rref="x:${esc(id)}" title="${esc(x.n)}"><span>${esc(x.n)}</span><small>${esc(sm)} · ${x.min} min</small></div>` : ''; };
+      const mine = (S.app?.rmyEx || []).filter(id => RX[id]), day = rxDay();
+      return `<div class="sec-label" style="margin:14px 2px 6px">Exercices <small>ceux que tu as ajoutés</small></div>
+        <div class="bsrc">${mine.length ? mine.map(id => xc(id, RX[id].tool || 'Sans matériel')).join('') : '<p class="small muted" style="margin:0">Touche « + Ajouter un exercice » : il apparaîtra ici, prêt à être calé sur un jour.</p>'}</div>
+        ${day.length ? `<div class="sec-label" style="margin:14px 2px 6px">Exercices du jour <small>pour aller mieux</small></div><div class="bsrc">${day.map(x => xc(x.id, 'pour : ' + (MUSI[x.m]?.n || '').toLowerCase())).join('')}</div>` : ''}`; })()}
+    <p class="small muted" style="margin:10px 2px 0">Récup musculation et Récup douleurs sont refaites chaque jour d'après tes séances et tes douleurs. Touche un bloc pour le voir, un jour pour voir tout ce qui y est calé. Plusieurs blocs s'empilent sur un jour, le dernier posé dessus.</p></div>`;
 }
 function rsList() {
   const own = RS_OWN();
-  return `<div class="btnrow" style="margin-top:4px"><button class="btn ghost" data-rsnew>+ Créer une séance</button></div>
-    <h2>Mes séances de récupération</h2><div class="list">${own.map(s => `<button class="rowbtn" data-rsview="${esc(s.id)}"><span><b>${esc(s.name)}</b><span class="meta">${rsMin(s)} min · ${s.items.length} exercices</span></span>${ICON.chev}</button>`).join('') || '<div class="row"><span class="muted">Aucune séance à toi pour l\'instant.</span></div>'}</div>`;
+  return `<h2>Mes séances de récupération</h2><div class="list">${own.map(s => `<button class="rowbtn" data-rsview="${esc(s.id)}"><span><b>${esc(s.name)}</b><span class="meta">${rsMin(s)} min · ${s.items.length} exercices</span></span>${ICON.chev}</button>`).join('') || '<div class="row"><span class="muted">Aucune séance à toi pour l\'instant.</span></div>'}</div>`;
 }
 function rsView(id, from) {
   openPane({title: rsById(id)?.name || 'Séance', render: () => { const s = rsById(id); if (!s) return '<p class="small muted" style="margin-top:16px">Séance supprimée.</p>';
@@ -4674,11 +4713,12 @@ function rsPickRows() {
   const T = RTOOLS.find(x => x[0] === RSF.tool)?.[2] || (() => true), Z = RZONES.find(x => x[0] === RSF.zone)?.[2], q = fnorm(RSF.q);
   const L = RLIB.map(r => RX[r[0]]).filter(x => x && T(x) && (!Z || (x.mus || []).some(m => Z.includes(m))) && (RSF.kind === 'all' || x.kind === RSF.kind) && (!q || fnorm(x.n + ' ' + (x.tool || '') + ' ' + (x.mus || []).map(m => MUSI[m]?.n || '').join(' ')).includes(q)));
   const by = {}; for (const x of L) (by[x.kind] ||= []).push(x);
-  return RKINDS.filter(([k]) => by[k]).map(([k, n]) => `<div class="sec-label">${esc(n)} · ${by[k].length}</div><div class="list">${by[k].map(x => { const i = RSE?.items.indexOf(x.id) ?? -1; return `<button type="button" class="rowbtn${i >= 0 ? ' on' : ''}" data-rsetog="${x.id}"><span class="m">${x.min} min</span><span style="flex:1;min-width:0"><b>${esc(x.n)}</b><span class="meta">${esc(x.tool ? x.tool + ' · ' : '')}${esc(x.how.length > 80 ? x.how.slice(0, 78) + '…' : x.how)}</span></span><span class="kc">${i >= 0 ? '✓' : '+'}</span></button>`; }).join('')}</div>`).join('') || '<p class="small muted" style="margin-top:14px">Aucun exercice avec ces filtres.</p>';
+  return RKINDS.filter(([k]) => by[k]).map(([k, n]) => `<div class="sec-label">${esc(n)} · ${by[k].length}</div><div class="list">${by[k].map(x => { const i = (RSE ? RSE.items : RPK ? (S.app?.rmyEx || []) : []).indexOf(x.id); return `<button type="button" class="rowbtn${i >= 0 ? ' on' : ''}" data-rsetog="${x.id}"><span class="m">${x.min} min</span><span style="flex:1;min-width:0"><b>${esc(x.n)}</b><span class="meta">${esc(x.tool ? x.tool + ' · ' : '')}${esc(x.how.length > 80 ? x.how.slice(0, 78) + '…' : x.how)}</span></span><span class="kc">${i >= 0 ? '✓' : '+'}</span></button>`; }).join('')}</div>`).join('') || '<p class="small muted" style="margin-top:14px">Aucun exercice avec ces filtres.</p>';
 }
+let RPK = false;
 function rsPick() {
   const chips = (lab, key, opts) => `<div class="sec-label" style="margin:12px 2px 6px">${lab}</div><div class="chipsx">${opts.map(([v, l]) => `<button type="button" class="chip" data-rsf="${key}:${v}" aria-pressed="${RSF[key] === v}">${esc(l)}</button>`).join('')}</div>`;
-  openPane({title: 'Ajouter un exercice', render: () => `<div style="margin-top:14px"><input class="search" id="rsp-q" type="search" placeholder="Chercher : pistolet, ischios, bain…" value="${esc(RSF.q)}" data-rsfq aria-label="Chercher un exercice"></div>
+  openPane({title: 'Ajouter un exercice', onClose: () => { RPK = false; }, render: () => `<div style="margin-top:14px"><input class="search" id="rsp-q" type="search" placeholder="Chercher : pistolet, ischios, bain…" value="${esc(RSF.q)}" data-rsfq aria-label="Chercher un exercice"></div>
       ${chips('Matériel', 'tool', RTOOLS)}${chips('Zone', 'zone', RZONES)}${chips('Méthode', 'kind', [['all', 'Toutes'], ...RKINDS.map(([k, n]) => [k, n])])}
       <div id="rsp-res">${rsPickRows()}</div>`});
 }
@@ -4698,22 +4738,26 @@ document.addEventListener('click', async e => {
   if (RTP && (b = e.target.closest('[data-rtl]'))) { const r = b.getBoundingClientRect(), m = +b.dataset.t0 + (e.clientY - r.top) / +b.dataset.k; RTP.a = tstr(clamp(Math.round(m / 15) * 15, 360, 1440 - RTP.dur)); rtpMove(); return; }
   if (RTP && e.target.closest('[data-rtpok]')) { const {k, id, a, dur} = RTP, s = rsById(id), ex = {...(PLN().extra || {})}; ex[k] = [...(ex[k] || []).filter(x => !x.rs), {a, b: tstr(tmin(a) + dur), n: s?.name || 'Récupération', c: 'recup', rs: id}]; closePane(); await savePlanning({extra: ex}); toast(`${s?.name || 'Séance'} calée à ${tfr(a)} dans ton planning`); return; }
   if (RTP && e.target.closest('[data-rtpno]')) { closePane(); return; }
-  if (e.target.closest('[data-rseadd]')) { rsPick(); return; }
+  if (e.target.closest('[data-rseadd]')) { RPK = false; rsPick(); return; }
   if ((b = e.target.closest('[data-rsf]'))) { const [k, v] = b.dataset.rsf.split(':'); RSF[k] = v; paneRender(); return; }
   if (RSE && (b = e.target.closest('[data-rseup]'))) { const i = +b.dataset.rseup; [RSE.items[i - 1], RSE.items[i]] = [RSE.items[i], RSE.items[i - 1]]; paneRender(); return; }
   if (RSE && (b = e.target.closest('[data-rsedel]'))) { RSE.items.splice(+b.dataset.rsedel, 1); paneRender(); return; }
-  if ((b = e.target.closest('[data-rx]'))) { e.stopPropagation(); if (b.closest('#pane')) closePane(); const k = b.dataset.rx, rd = {...(S.app?.rdated || {})}; delete rd[k]; await rsSaveApp({rdated: rd}); await rsUnplan(k); toast('Retirée de ce jour'); return; }
+  if ((b = e.target.closest('[data-rx]'))) { e.stopPropagation(); if (b.closest('#pane') && !b.dataset.bxstay) closePane(); await rsPlace(null, null, b.dataset.rx); return; }
+  if ((b = e.target.closest('[data-rdopen]'))) { const r = b.dataset.rdopen; if (isExRef(r)) { const x = RX[r.slice(2)]; if (x) recRun('ex', x); } else rsView(r); return; }
+  if ((b = e.target.closest('[data-rdchoose]'))) { closePane(); rsChoose(b.dataset.rdchoose); return; }
+  if (e.target.closest('[data-rexadd]')) { RPK = true; rsPick(); return; }
   if ((b = e.target.closest('[data-rboff]')) && !b.disabled) { S.rbOff = Math.max(0, (S.rbOff || 0) + +b.dataset.rboff); render(); return; }
   if (e.target.closest('[data-rsnew]')) { rsEdit(null); return; }
   if ((b = e.target.closest('[data-rsview]'))) { rsView(b.dataset.rsview); return; }
   if ((b = e.target.closest('[data-rsgo2]'))) { const s = rsById(b.dataset.rsgo2); closePane(); if (s) rsRun(s); return; }
   if ((b = e.target.closest('[data-rsdup]'))) { const s = rsById(b.dataset.rsdup); closePane(); rsEdit(s); return; }
   if ((b = e.target.closest('[data-rsdel]'))) { const id = b.dataset.rsdel, rd = {...(S.app?.rdated || {})}; for (const k in rd) if (rd[k] === id) delete rd[k]; closePane(); await rsSaveApp({rsess: RS_OWN().filter(s => s.id !== id), rdated: rd}); toast('Séance supprimée'); return; }
+  if (!RSE && RPK && (b = e.target.closest('[data-rsetog]'))) { const id = b.dataset.rsetog, L = S.app?.rmyEx || []; if (L.includes(id)) await rsSaveApp({rmyEx: L.filter(x => x !== id)}); else { await rsSaveApp({rmyEx: [...L, id]}); toast((RX[id]?.n || 'Exercice') + ' ajouté : glisse-le sur un jour'); } const r = $('#rsp-res'); if (r) r.innerHTML = rsPickRows(); return; }
   if (RSE && (b = e.target.closest('[data-rsetog]'))) { const id = b.dataset.rsetog, i = RSE.items.indexOf(id); if (i >= 0) RSE.items.splice(i, 1); else { RSE.items.push(id); toast((RX[id]?.n || 'Exercice') + ' ajouté'); } const r = $('#rsp-res'); if (r) r.innerHTML = rsPickRows(); else paneRender(); return; }
   if (RSE && e.target.closest('[data-rsesave]')) { if (!RSE.items.length) { toast('Ajoute au moins un exercice'); return; } const s = {id: RSE.id, name: (RSE.name || '').trim() || 'Ma séance de récup', items: RSE.items}; closePane(); await rsSaveApp({rsess: [...RS_OWN().filter(x => x.id !== s.id), s]}); toast('Séance enregistrée : glisse-la sur un jour'); return; }
   if ((b = e.target.closest('[data-rschoose]'))) { P.stack.at(-1)?.pickRs?.(b.dataset.rschoose); return; }
   if (window.__rdropT && Date.now() - window.__rdropT < 400) return;
-  if ((b = e.target.closest('[data-rdk]')) && !e.target.closest('[data-rref]')) { const k = b.dataset.rdk; rsChoose(k); }
+  if ((b = e.target.closest('[data-rday]')) && !e.target.closest('[data-rref]')) rdayPane(b.dataset.rday);
 });
 function rsChoose(k) {
   openPane({title: cap(fmtShort(k)), render: () => { const cur = S.app?.rdated?.[k] || '';
@@ -4755,17 +4799,17 @@ function rsTime(k, id) {
   document.addEventListener('pointermove', e => { if (!D || e.pointerId !== D.id) return; if (!D.on) { const m = Math.hypot(e.clientX - D.x0, e.clientY - D.y0); if (D.mouse && m > 5) begin(); else if (!D.mouse && m > 8) { stop(); D = null; return; } } if (D?.on) { e.preventDefault(); move(e.clientX, e.clientY); } });
   document.addEventListener('touchmove', e => { if (D?.on) e.preventDefault(); }, {passive: false});
   document.addEventListener('pointerup', async e => { if (!D || e.pointerId !== D.id) return; const d = D; stop(); D = null; window.__rdropT = Date.now();
-    if (!d.on || Math.hypot(e.clientX - d.x0, e.clientY - d.y0) < 12) { if (!e.target.closest('[data-rx]')) { window.__chipT = window.__swallowT = Date.now(); rsView(d.ref, d.from); } return; }
-    const k = at(e.clientX, e.clientY)?.dataset.rdk, rd = {...(S.app?.rdated || {})};
-    if (k) { if (k === d.from) return; rd[k] = d.ref; if (d.from) delete rd[d.from]; await rsSaveApp({rdated: rd}); if (d.from) await rsUnplan(d.from); rsTime(k, d.ref); return; }
-    if (d.from) { delete rd[d.from]; await rsSaveApp({rdated: rd}); await rsUnplan(d.from); toast('Retirée de ce jour'); } });
+    if (!d.on || Math.hypot(e.clientX - d.x0, e.clientY - d.y0) < 12) { if (!e.target.closest('[data-rx]')) { window.__chipT = window.__swallowT = Date.now(); if (isExRef(d.ref)) { const x = RX[d.ref.slice(2)]; if (x) recRun('ex', x); } else rsView(d.ref, d.from?.startsWith('m|') ? null : d.from); } return; }
+    const k = at(e.clientX, e.clientY)?.dataset.rdk, fk = d.from?.startsWith('m|') ? d.from.split('|')[1] : d.from;
+    if (k) { if (k === fk) return; await rsPlace(k, d.ref, d.from); return; }
+    if (d.from) await rsPlace(null, d.ref, d.from); });
   document.addEventListener('pointercancel', () => { if (D) { stop(); D = null; } });
 })();
 function vRSess() {
   const days = [...Array(14)].map((_, i) => addDays(TODAY, -i)), H = days.flatMap(k => (S.manual[k]?.recov || []).map(a => ({...a, k})));
   const w7 = H.filter(a => a.k > addDays(TODAY, -7)).reduce((t, a) => t + (+a.min || 0), 0);
   return `<header class="top" style="margin-bottom:6px"><div class="sub">Routines, soins et séances de récupération</div><h1>Séances</h1></header>
-    <div class="stack">${(() => { const s = rsDayOf(TODAY); return s ? `<div class="card"><span class="eyebrow">Calée aujourd'hui</span><div class="bigname">${esc(s.name)}</div><p class="small muted">${(() => { const x = (PLN().extra?.[TODAY] || []).find(y => y.rs); return x ? tfr(x.a) + ' · ' : ''; })()}${rsDur(s)} min${rsGoal(s) ? ' · ' + esc(rsGoal(s)) : ''}</p><button class="btn" style="margin-top:10px" data-rsgo2="${esc(s.id)}">Lancer</button></div>` : ''; })()}${rsBoard()}${recovCard()}${recBlock('mus')}${recBlock('pain')}${rsList()}${careCard()}
+    <div class="stack">${(() => { const s = rsDayOf(TODAY); return s ? `<div class="card"><span class="eyebrow">Calée aujourd'hui</span><div class="bigname">${esc(s.name)}</div><p class="small muted">${(() => { const x = (PLN().extra?.[TODAY] || []).find(y => y.rs); return x ? tfr(x.a) + ' · ' : ''; })()}${rsDur(s)} min${rsGoal(s) ? ' · ' + esc(rsGoal(s)) : ''}</p><button class="btn" style="margin-top:10px" data-rsgo2="${esc(s.id)}">Lancer</button></div>` : ''; })()}${rsBoard()}<div class="btnrow two"><button class="btn ghost" data-rsnew>+ Créer une séance</button><button class="btn ghost" data-rexadd>+ Ajouter un exercice</button></div>${recBlock('mus')}${recBlock('pain')}${rsList()}${careCard()}
     <div class="card"><div class="chead"><span class="eyebrow">Fait ces 14 derniers jours</span><b class="num">${w7} min sur 7 j</b></div>${H.length ? `<div class="list" style="margin-top:8px">${H.map(a => `<div class="row"><span class="l">${esc(a.t)}<span class="hint">${esc(cap(fmtShort(a.k)))}${a.at ? ' · ' + esc(tfr(a.at)) : ''}${a.min ? ' · ' + a.min + ' min' : ''}</span></span></div>`).join('')}</div>` : '<p class="small muted" style="margin:6px 0 0">Rien de noté pour l\'instant : touche « + Activité de récup ».</p>'}</div></div>`;
 }
 // Recovery · Exercices: every kind of recovery, the best proven first; one tap guides the exercise with a timer.
@@ -7113,13 +7157,12 @@ function tToday() {
       // The day's sessions are shown under their week, not up here.
       if (S.live || today.length) return ''; return `<p class="pmsg">${esc(trainMsg(p, done))}</p>`; })()}${seasonLine()}</header>
     <div class="stack">${live}${ask}
-      <div class="wk2 pc3"><div class="stack">${weekCard('gym')}${sc('gym')}</div><div class="stack">${weekCard('track')}${sc('track')}</div></div>
+      <div class="wk2 pc3"><div class="stack">${weekCard('gym')}${sc('gym')}${tMore('gym')}</div><div class="stack">${weekCard('track')}${sc('track')}${tMore('track')}</div></div>
       ${coachCard()}
       ${main}
     </div>
     <h2>Charge <small>7 derniers jours</small>${editBtn('load')}</h2>${secHtml('load')}
     ${recentLogs()}
-    ${bonusBlock()}
     ${recentSessions().replace('Séances récentes', 'Activités de la semaine')}
     ${footer()}`;
 }
@@ -7145,6 +7188,67 @@ function progList() {
 // Inside a block of a board: done = a check, not done = a cross, both round and centred like the remove button.
 const BIC_OK = '<i class="bic" aria-label="faite"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.6 6.3l2.3 2.3 4.6-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></i>';
 const BIC_NO = '<i class="bic" aria-label="pas faite"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></i>';
+// Several blocks on a day: the first session stays the day's session (settings/training.dated); the next sessions
+// and the exercises pile on it (settings/training.more, "day|kind" → refs, 'x:<exercise>' for an exercise).
+// The cell shows the last one put, on top; touching the day shows them all.
+const BX_SVG = '<svg viewBox="0 0 12 12" width="9" height="9" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+const isExRef = r => String(r || '').startsWith('x:');
+const mKey = (k, kind) => k + '|' + kind;
+const moreOf = (k, kind) => S.tset?.more?.[mKey(k, kind)] || [];
+// An exercise in a cell: its initials (Pont fessier → PF, Nordic hamstring curl → NHC).
+const exInit = n => String(n || '').split(/[\s\-·',()]+/).filter(w => w && !/^(de|du|des|la|le|les|à|au|aux|en|et|sur|d|l|a|avec|sans)$/i.test(w)).map(w => w[0]).join('').toUpperCase().slice(0, 3) || 'EX';
+const refName = r => isExRef(r) ? exOf(r.slice(2)).n : planOf(r)?.name || '';
+const exDone = (k, id) => logsOn(k).some(l => l.kind === 'extra' && l.items?.[0]?.ex === id);
+async function saveTset(patch) { S.tset = {...S.tset, ...patch}; renderMod(); render(); if (P.stack.length) paneRender(); await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()}); }
+// Put a session or an exercise on a day (from the list, or moved from another day). A session goes on an empty day as
+// the day's session; on a day that already has one, it piles on top, like an exercise.
+async function boardPlace(k, kind, ref, from) {
+  const dated = {...(S.tset.dated || {})}, more = {...(S.tset.more || {})};
+  if (from?.startsWith('m|')) { const [, fk, fkind, fi] = from.split('|'), L = [...(more[mKey(fk, fkind)] || [])]; L.splice(+fi, 1); if (L.length) more[mKey(fk, fkind)] = L; else delete more[mKey(fk, fkind)]; }
+  else if (from) delete dated[from];
+  const a = planOf(dated[k]), main = kind === 'track' ? planOf(dated[k + '|t']) || (a?.kind === 'track' ? a : null) : (a && a.kind !== 'track' ? a : null);
+  if (k && !isExRef(ref) && !main) {
+    if (!from) for (const [d, v] of Object.entries(dated)) if (v === ref && d.slice(0, 10) >= TODAY) delete dated[d];
+    if (kind === 'track' && planOf(dated[k])?.kind === 'track') delete dated[k];
+    dated[dKey(k, kind)] = ref;
+  } else if (k) more[mKey(k, kind)] = [...(more[mKey(k, kind)] || []), ref];
+  await saveTset({dated, more});
+}
+async function boardRemove(from) {
+  const dated = {...(S.tset.dated || {})}, more = {...(S.tset.more || {})};
+  if (from.startsWith('m|')) { const [, fk, fkind, fi] = from.split('|'), L = [...(more[mKey(fk, fkind)] || [])]; L.splice(+fi, 1); if (L.length) more[mKey(fk, fkind)] = L; else delete more[mKey(fk, fkind)]; }
+  else delete dated[from];
+  await saveTset({dated, more});
+}
+// The day: every block placed on it, in the order put; a touch on one shows it.
+function dayPane(k, kind) {
+  openPane({title: cap(fmtShort(k)), render: () => {
+    const p = planForK(k, kind), dk = p && S.tset.dated?.[dKey(k, kind)] === caleRef(p) ? dKey(k, kind) : k;
+    const L = [...(p ? [{ref: caleRef(p), from: dk}] : []), ...moreOf(k, kind).map((r, i) => ({ref: r, from: `m|${k}|${kind}|${i}`}))];
+    const row = ({ref, from}) => { const x = isExRef(ref), e = x ? exOf(ref.slice(2)) : null, q = x ? null : planOf(ref), dn = x ? exDone(k, e.id) : logsOn(k).some(l => l.kind === kind);
+      return `<div class="dprow"><button type="button" class="rowbtn" data-dpopen="${esc(ref)}"><span><b>${esc(x ? e.n : q?.name || '')}</b><span class="meta">${x ? 'Exercice' + (e.cat ? ' · ' + esc(e.cat) : '') : esc((q?.title || q?.desc || '') + (q ? ' · ' + estMin(q) + ' min' : ''))}${dn ? ' · faite' : ''}</span></span>${ICON.chev}</button>${k >= TODAY ? `<button type="button" class="chip" data-bx="${esc(from)}" data-bxstay="1" aria-label="Retirer ${esc(refName(ref))}">Retirer</button>` : ''}</div>`; };
+    return `<p class="small muted" style="margin:16px 4px 8px">${kind === 'gym' ? 'Musculation' : 'Sprint'} · ${L.length ? L.length + ' bloc' + (L.length > 1 ? 's' : '') + ' calé' + (L.length > 1 ? 's' : '') + ' ce jour-là. Touche un bloc pour le voir.' : 'rien de calé ce jour-là. Garde le doigt sur une séance ou un exercice, puis glisse-le sur ce jour.'}</p>
+      ${L.length ? `<div class="list dplist">${L.map(row).join('')}</div>` : ''}`; }});
+}
+// Two exercises a day to balance his chains: the lagging side of each pair of opposite muscles (7 days), then the
+// stabilisers a sprinter tends to forget, the least worked first. The choice changes every day.
+function balEx() {
+  const st = musState(), v = Object.fromEntries(st.map(x => [x.k, x.week])), sum = ks => ks.reduce((a, k) => a + (v[k] || 0), 0), need = [];
+  for (const [, a, b, lo, hi] of MPAIRS) { const sa = sum(a), sb = sum(b); if (sa + sb <= 20) continue; const r = sb ? sa / sb : 9; if (r < lo) need.push(a[0]); else if (r > hi) need.push(b[0]); }
+  need.push(...['hams', 'gmed', 'tib', 'adduct', 'rhomb', 'transv', 'foot', 'rotat', 'serr', 'obl'].sort((x, y) => (v[x] || 0) / musLimit(x) - (v[y] || 0) / musLimit(y)));
+  const seed = Math.floor(Date.parse(TODAY) / 864e5), out = [];
+  for (const m of [...new Set(need)]) { if (out.length >= 2) break;
+    // Targeted strength or prevention work for that muscle (no Olympic lifts, jumps or stretches), the most targeted first.
+    const nm = id => Object.keys(musCoef(id)).length, c = EX.filter(e => e.t === 'gym' && !e.hide && e.id !== 'warmup' && ['Prévention', 'Chaîne postérieure', 'Bas du corps', 'Tronc', 'Haut du corps'].includes(e.cat) && (musCoef(e.id)[m] || 0) >= .75 && nm(e.id) <= 6 && !out.some(o => o.id === e.id))
+      .sort((a, b) => (a.cat === 'Prévention' ? 0 : 1) - (b.cat === 'Prévention' ? 0 : 1) || nm(a.id) - nm(b.id) || a.id.localeCompare(b.id)).slice(0, 6);
+    if (c.length) out.push({id: c[seed % c.length].id, m}); }
+  return out;
+}
+// Under the day's session in Aujourd'hui: the other blocks placed today.
+function tMore(kind) {
+  const L = moreOf(TODAY, kind); if (!L.length) return '';
+  return `<div class="list">${L.map(r => { const x = isExRef(r), e = x ? exOf(r.slice(2)) : null, q = x ? null : planOf(r); return `<button type="button" class="rowbtn" data-dpopen="${esc(r)}"><span><b>${esc(x ? e.n : q?.name || '')}</b><span class="meta">${x ? 'Exercice calé aujourd\'hui' + (exDone(TODAY, e.id) ? ' · fait' : '') : esc(q?.title || q?.desc || '') + ' · aussi calée aujourd\'hui'}</span></span>${ICON.chev}</button>`; }).join('')}</div>`;
+}
 const sbShort = p => { if (p.n) return 'S' + p.n; if (p.short) return p.short; if (p.coach && p.seq) return 'S' + p.seq; const m = (p.name || '').match(/^Séance (\d+)/); return m ? 'S' + m[1] : (p.name || '').slice(0, 4); };
 // The next number for a new session of that kind: after his programme (S1…S31 in muscu) and his own "Séance N".
 function nextSeq(kind) { let n = 0; for (const p of [...myPlans(), ...(kind === 'gym' ? TDV_PLANS : [])]) if (p.kind === kind) { const m = (p.name || '').match(/^Séance (\d+)/); n = Math.max(n, p.n || p.seq || (m ? +m[1] : 0)); } return n + 1; }
@@ -7155,16 +7259,24 @@ function sesBoard(kind) {
     // Done without a block placed: the code of the session he did (S31), from its log.
     const lg = (() => { const l = logsOn(k).find(x => x.kind === kind), m = (l?.name || '').match(/^Séance (\d+)/); return m ? 'S' + m[1] : ''; })();
     return `<div class="bcell${b ? ' slot' : ''}${past ? ' past' : ''}${k === TODAY ? ' today' : ''}" data-bday="${k}" ${past ? '' : `data-bdk="${k}"`}><span class="bd">${DOW[(dow(k) + 6) % 7]} <b>${+k.slice(8)}</b>${b ? `<small>${tfr(b.a)}</small>` : ''}</span>
-      ${p ? `<div class="bchip${done ? ' done' : miss ? ' miss' : ''}" data-bref="${esc(caleRef(p))}" data-bfrom="${dk}" title="${esc(p.name)}${p.title ? ' · ' + esc(p.title) : ''}"><span>${esc(sbShort(p))}</span>${done ? BIC_OK : miss ? BIC_NO : `<button type="button" class="bx" data-bx="${dk}" aria-label="Retirer ${esc(p.name)} du ${esc(fmtShort(k))}"><svg viewBox="0 0 12 12" width="9" height="9" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>`}</div>` : done ? `<div class="bchip done ghost"><span>${esc(lg || 'Faite')}</span>${BIC_OK}</div>` : past ? '' : `<span class="bplus">${b ? '+' : ''}</span>`}</div>`;
+      ${(() => { const mo = moreOf(k, kind), top = mo.at(-1);
+        const chipOf = (ref, from, dn, ms, stk) => `<div class="bchip${dn ? ' done' : ms ? ' miss' : ''}${isExRef(ref) ? ' xchip' : ''}${stk ? ' stk' : ''}" data-bref="${esc(ref)}" data-bfrom="${esc(from)}" title="${esc(refName(ref))}"><span>${esc(isExRef(ref) ? exInit(exOf(ref.slice(2)).n) : sbShort(planOf(ref) || {}))}</span>${dn ? BIC_OK : ms ? BIC_NO : `<button type="button" class="bx" data-bx="${esc(from)}" aria-label="Retirer ${esc(refName(ref))} du ${esc(fmtShort(k))}">${BX_SVG}</button>`}</div>`;
+        if (top) { const x = isExRef(top), dn = x ? exDone(k, top.slice(2)) : done; return chipOf(top, `m|${k}|${kind}|${mo.length - 1}`, dn, !dn && (past || (!x && kindSkip(k, kind))), !!p || mo.length > 1); }
+        return p ? chipOf(caleRef(p), dk, done, miss, false) : done ? `<div class="bchip done ghost"><span>${esc(lg || 'Faite')}</span>${BIC_OK}</div>` : past ? '' : `<span class="bplus">${b ? '+' : ''}</span>`; })()}</div>`;
   };
   const weeks = [0, 1, 2, 3].map(w => addDays(mon0, 7 * w));
   const src = [...(kind === 'gym' ? tdvTodo(8) : []), ...myPlans().filter(x => x.kind === kind)];
   const placed = new Set(Object.entries(S.tset?.dated || {}).filter(([d]) => d >= TODAY).map(([, v]) => v));
   return `<div class="card sboard"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Mes 4 semaines · ${kind === 'gym' ? 'muscu' : 'sprint'}</span><span class="sbnav"><button type="button" data-sboff="-1" aria-label="4 semaines avant"${off <= 0 ? ' disabled' : ''}>‹</button><small>${esc(fmtShort(weeks[0]).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(weeks[3], 6)).replace(/^\S+ /, ''))}</small><button type="button" data-sboff="1" aria-label="4 semaines après">›</button></span></div>
     <div class="bgrid">${weeks.map(w => `<div class="bweek"><span class="bwk">S${seasonWeek(w)}</span>${[0, 1, 2, 3, 4, 5, 6].map(i => cell(addDays(w, i))).join('')}</div>`).join('')}</div>
-    <div class="sec-label" style="margin:14px 2px 6px">À caler <small>${isPC() ? 'glisse une séance sur un jour' : 'garde le doigt sur une séance, puis glisse-la sur un jour'}</small></div>
+    <div class="sec-label" style="margin:14px 2px 6px">Séances <small>${isPC() ? 'glisse une séance sur un jour' : 'garde le doigt sur une séance, puis glisse-la sur un jour'}</small></div>
     <div class="bsrc">${src.length ? src.map(x => { const r = caleRef(x), on = placed.has(r); return `<div class="bchip src${on ? ' on' : ''}" data-bref="${esc(r)}" title="${esc(x.name)}${x.title ? ' · ' + esc(x.title) : ''}"><span>${esc(x.name)}</span><small>${(x.title || x.desc) ? esc(x.title || x.desc) + ' · ' : ''}${estMin(x)} min${on ? ' · calée' : ''}</small></div>`; }).join('') : '<p class="small muted" style="margin:0">Crée une séance ci-dessous : elle apparaîtra ici, prête à être calée.</p>'}</div>
-    <p class="small muted" style="margin:10px 2px 0">Touche une séance pour la voir. Une séance déjà calée se déplace en la glissant vers un autre jour ; × la remet ici. Les jours encadrés sont tes créneaux ${kind === 'gym' ? 'de muscu' : 'd\'athlé'}.</p></div>`;
+    ${(() => { const xc = (id, sm) => { const e = exOf(id); return `<div class="bchip src xchip" data-bref="x:${esc(id)}" title="${esc(e.n)}"><span>${esc(e.n)}</span><small>${esc(sm)}</small></div>`; };
+      const mine = (S.tset?.myEx || []).filter(id => exOf(id).t === kind), bal = balEx();
+      return `<div class="sec-label" style="margin:14px 2px 6px">Exercices <small>ceux que tu as ajoutés</small></div>
+        <div class="bsrc">${mine.length ? mine.map(id => xc(id, exOf(id).cat || 'Exercice')).join('') : '<p class="small muted" style="margin:0">Touche « + Ajouter un exercice » : il apparaîtra ici, prêt à être calé sur un jour.</p>'}</div>
+        ${bal.length ? `<div class="sec-label" style="margin:14px 2px 6px">Exercices du jour <small>pour équilibrer tes chaînes</small></div><div class="bsrc">${bal.map(x => xc(x.id, 'pour : ' + (MUSI[x.m]?.n || '').toLowerCase())).join('')}</div>` : ''}`; })()}
+    <p class="small muted" style="margin:10px 2px 0">Touche un bloc pour le voir, un jour pour voir tout ce qui y est calé. Plusieurs blocs peuvent aller sur un même jour : ils s'empilent, le dernier posé dessus. Les jours encadrés sont tes créneaux ${kind === 'gym' ? 'de muscu' : 'd\'athlé'}.</p></div>`;
 }
 // Drag and drop: with the mouse it moves at once; with the thumb, after a short hold (so the page still scrolls).
 (() => {
@@ -7190,11 +7302,12 @@ function sesBoard(kind) {
   document.addEventListener('touchmove', e => { if (D?.on) e.preventDefault(); }, {passive: false});
   document.addEventListener('pointerup', async e => {
     if (!D || e.pointerId !== D.id) return; const d = D; stop(); D = null;
-    if (!d.on || Math.hypot(e.clientX - d.x0, e.clientY - d.y0) < 12) { window.__bdropT = window.__chipT = window.__swallowT = Date.now(); const p = planOf(d.ref); if (p) planView(p.id, p.n || null, d.from); return; }
+    if (!d.on || Math.hypot(e.clientX - d.x0, e.clientY - d.y0) < 12) { window.__bdropT = window.__chipT = window.__swallowT = Date.now(); if (isExRef(d.ref)) { exView(d.ref.slice(2)); return; } const p = planOf(d.ref); if (p) planView(p.id, p.n || null, d.from?.startsWith('m|') ? null : d.from); return; }
     window.__bdropT = Date.now();
     const t = at(e.clientX, e.clientY), k = t?.dataset.bdk;
-    if (k) { if (k === d.from?.slice(0, 10)) return; const ex = planForK(k, planOf(d.ref)?.kind); await caleSave(k, d.ref); toast(`${planOf(d.ref)?.name || 'Séance'} calée le ${fmtShort(k)}${ex && caleRef(ex) !== d.ref ? ' · ' + ex.name + ' revient à caler' : ''}`); return; }
-    if (d.from) { const dated = {...(S.tset.dated || {})}; delete dated[d.from]; S.tset = {...S.tset, dated}; renderMod(); await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()}); toast('Retirée : elle t\'attend dans « À caler »'); }
+    const kind = isExRef(d.ref) ? (S.tkind === 'track' ? 'track' : 'gym') : planOf(d.ref)?.kind || 'gym', fk = d.from?.startsWith('m|') ? d.from.split('|')[1] : d.from?.slice(0, 10);
+    if (k) { if (k === fk) return; await boardPlace(k, kind, d.ref, d.from); toast(`${refName(d.ref) || 'Bloc'} calé le ${fmtShort(k)}`); return; }
+    if (d.from) { await boardRemove(d.from); toast('Retiré de ce jour'); }
   });
   document.addEventListener('pointercancel', () => { if (D) { stop(); D = null; } });
   // A drop must not also count as a tap on what lies under it.
@@ -7207,19 +7320,25 @@ document.addEventListener('click', e => { if (window.__swallowT && Date.now() - 
 document.addEventListener('click', e => {
   const c = e.target.closest?.('[data-bref],[data-mref],[data-rref]'); if (!c || e.target.closest('.bx') || document.body.classList.contains('bdragging') || (window.__chipT && Date.now() - window.__chipT < 700)) return;
   window.__chipT = Date.now();
-  if (c.dataset.bref) { const p = planOf(c.dataset.bref); if (p) planView(p.id, p.n || null, c.dataset.bfrom); } else if (c.dataset.mref) menuView(c.dataset.mref, c.dataset.mfrom); else rsView(c.dataset.rref, c.dataset.rfrom);
+  if (c.dataset.bref) { if (isExRef(c.dataset.bref)) { exView(c.dataset.bref.slice(2)); return; } const p = planOf(c.dataset.bref); if (p) planView(p.id, p.n || null, c.dataset.bfrom?.startsWith('m|') ? null : c.dataset.bfrom); } else if (c.dataset.rref && isExRef(c.dataset.rref)) { const x = RX[c.dataset.rref.slice(2)]; if (x) recRun('ex', x); } else if (c.dataset.mref) menuView(c.dataset.mref, c.dataset.mfrom); else rsView(c.dataset.rref, c.dataset.rfrom);
 });
 // Touching a day of the board shows its session (name, goal, exercises), even a past one.
 document.addEventListener('click', e => {
   const c = e.target.closest('[data-bday]'); if (!c || e.target.closest('[data-bref],.bx') || (window.__bdropT && Date.now() - window.__bdropT < 400)) return;
-  const kd = S.tkind === 'track' ? 'track' : 'gym', k = c.dataset.bday, p = planForK(k, kd); if (!p) return; const dk = S.tset.dated?.[dKey(k, kd)] ? dKey(k, kd) : S.tset.dated?.[k] ? k : null; planView(p.id, p.n || null, k >= TODAY ? dk : null);
+  const kd = S.tkind === 'track' ? 'track' : 'gym'; dayPane(c.dataset.bday, kd);
 });
 document.addEventListener('click', async e => {
   const b = e.target.closest('[data-bx]'), o = e.target.closest('[data-sboff]');
   if (o && !o.disabled) { S.sbOff = Math.max(0, (S.sbOff || 0) + +o.dataset.sboff); renderMod(); return; }
-  if (!b) return; e.stopPropagation(); if (b.closest('#pane')) closePane();
-  const k = b.dataset.bx, dated = {...(S.tset.dated || {})}, n = planOf(dated[k])?.name; delete dated[k]; S.tset = {...S.tset, dated}; renderMod();
-  await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()}); toast((n || 'Séance') + ' retirée du ' + fmtShort(k.slice(0, 10)));
+  if (!b) return; e.stopPropagation(); if (b.closest('#pane') && !b.dataset.bxstay) closePane();
+  const k = b.dataset.bx, mk = k.startsWith('m|') ? k.split('|') : null, n = mk ? refName((S.tset.more?.[mKey(mk[1], mk[2])] || [])[+mk[3]]) : planOf(S.tset.dated?.[k])?.name;
+  await boardRemove(k); toast((n || 'Bloc') + ' retiré du ' + fmtShort(mk ? mk[1] : k.slice(0, 10)));
+});
+document.addEventListener('click', e => {
+  const at = q => e.target.closest(q); let b;
+  if ((b = at('[data-dpopen]'))) { const r = b.dataset.dpopen; if (isExRef(r)) exView(r.slice(2)); else { const q = planOf(r); if (q) planView(q.id, q.n || null); } return; }
+  if (at('[data-texadd]')) { const kind = S.tkind === 'track' ? 'track' : 'gym'; pickExercise(kind, id => { const L = S.tset.myEx || []; if (L.includes(id)) { toast('Déjà dans tes exercices'); return; } saveTset({myEx: [...L, id]}); toast(exOf(id).n + ' ajouté : glisse-le sur un jour'); }); return; }
+  if ((b = at('[data-myexdel]'))) { const id = b.dataset.myexdel; closePane(); saveTset({myEx: (S.tset.myEx || []).filter(x => x !== id)}); toast('Retiré de tes exercices'); }
 });
 function tSessions() {
   if (S.tkind === 'class') S.tkind = 'gym';
@@ -7230,7 +7349,7 @@ function tSessions() {
     <button class="banner" data-tseason style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;margin-bottom:8px"><span><b>${k === 'gym' ? 'Ma saison de musculation' : 'Ma saison de sprint'}</b><br><span class="small muted">${(() => { const n = seasonNow(TODAY, k === 'gym' ? 'gym' : 'track'); return n && !n.before && !n.after ? `Bloc ${n.i + 1} · ${esc(n.name)} · semaine ${n.week}/${n.of}` : k === 'gym' ? 'Tes blocs de musculation' : 'Tes blocs : PPG, PPS, pré-compétition, compétition'; })()}</span></span>${ICON.chev}</button>
     <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
     ${sesBoard(k)}
-    <div class="btnrow" style="margin-top:16px"><button class="btn ghost" data-tnew>+ Créer une séance</button></div>
+    <div class="btnrow two" style="margin-top:16px"><button class="btn ghost" data-tnew>+ Créer une séance</button><button class="btn ghost" data-texadd>+ Ajouter un exercice</button></div>
     <h2>Mes séances</h2><div class="list">${mine.map(row).join('') || '<div class="row"><span class="muted">Aucune séance à toi pour l\'instant.</span></div>'}</div>
     ${k === 'gym' && TDV_PLANS.length ? progList() : ''}
     ${base.length ? `<h2>Programmes <small>à dupliquer et adapter</small></h2><div class="list">${base.map(row).join('')}</div>` : ''}`;
@@ -8213,7 +8332,7 @@ function exView(id) {
     return `<div class="dhead"><div class="eyebrow" style="color:var(--accent)">${esc(e.cat)}</div><div class="bigname" style="font-size:1.75rem">${esc(e.n)}</div><p class="small muted">${esc([e.en && e.en !== e.n ? e.en : '', e.eq, e.m].filter(Boolean).join(' · '))}</p></div>
       ${e.img ? `<div class="demo" data-demo><img src="${IMG}${e.img}/0.jpg" alt="" loading="lazy"><img class="b" src="${IMG}${e.img}/1.jpg" alt="" loading="lazy"><button class="play" aria-label="Lancer ou arrêter la démonstration"><svg class="ip" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg><svg class="is" viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/></svg></button></div>` : ''}
       <div class="card why">${esc(e.c)}</div>
-      ${e.t === 'gym' ? `<button class="btn" style="margin:12px 0" data-bonus="${id}">+ Ajouter un exercice à la journée</button>` : ''}
+      ${e.t === 'gym' ? `<button class="btn" style="margin:12px 0" data-bonus="${id}">Je l'ai fait : le noter</button>` : ''}${(S.tset?.myEx || []).includes(id) ? `<button class="btn ghost" style="margin:0 0 12px" data-myexdel="${esc(id)}">Retirer de mes exercices</button>` : ''}
       ${musTiers(id)}
       ${e.t === 'gym' && e.u === 'kg' ? rmBlock(id) : ''}
       ${b ? `<div class="stats" style="margin-top:12px"><div><b>${fx(b)} kg</b><span>max estimé</span></div><div><b>${h.length}</b><span>séances</span></div><div><b>${esc(short(h[0].date))}</b><span>dernière fois</span></div></div>` : ''}
@@ -8575,7 +8694,6 @@ function fJournal() {
         <div class="macros">${macro('Protéines', t.p, g.p, '#E0352B')}${macro('Glucides', t.c, g.c, '#2F7BF5')}${macro('Lipides', t.f, g.f, '#E8900A')}</div>
       </article>
       ${k === TODAY ? coachNutrition(k) : ''}
-      <div class="card"><span class="eyebrow">Carences possibles <small style="text-transform:none;letter-spacing:0;font-weight:500">de la plus à la moins importante</small></span>${carenceHtml()}</div>
       ${d.fromPlan ? '<p class="small muted" style="margin:0 4px">' + (d.hist ? `Rempli avec ton plan de la semaine ${seasonWeek(k)}.` : 'Rempli avec ton plan alimentaire.') + ' Change seulement ce qui diffère : touche un aliment pour modifier la quantité ou le retirer.</p>' : ''}
       ${MEALS.map(([m]) => { const lab = mealLab(m, k), its = (d.items || []).map((it, i) => ({...it, i})).filter(it => it.meal === m), kc = its.reduce((s, it) => s + it.kcal, 0);
         const hasY = y.some(it => it.meal === m), hasP = k >= FUEL_PLAN_FROM && menuFor(k).some(it => it.meal === m);
@@ -8583,6 +8701,7 @@ function fJournal() {
         return `<div class="list meal"><h3>${lab}${tm ? ` <span class="mt">${tfr(tm)}</span>` : ''}<small>${kc ? fx(kc) + ' kcal' : ''}</small></h3>
           ${its.map(it => `<button class="rowbtn" data-fitem="${it.i}"><span><b>${esc(it.n)}</b><span class="meta">${fx(it.g)} g · P ${fx(it.p)} · G ${fx(it.c)} · L ${fx(it.f)}</span></span><span class="kc">${fx(it.kcal)}</span></button>`).join('')}
           <button class="addbtn" data-fadd="${m}">+ Ajouter un aliment</button>${!its.length && hasP ? `<button class="addbtn" data-fplanmeal="${m}" style="color:var(--fg2);font-weight:500">Remettre le ${lab.toLowerCase()} du plan</button>` : ''}${!its.length && hasY ? `<button class="addbtn" data-fcopy="${m}" style="color:var(--fg2);font-weight:500">Reprendre le ${lab.toLowerCase()} de la veille</button>` : ''}</div>`; }).join('')}
+      <div class="card"><span class="eyebrow">Carences possibles <small style="text-transform:none;letter-spacing:0;font-weight:500">de la plus à la moins importante</small></span>${carenceHtml()}</div>
       <div class="card wfood"><div><span class="eyebrow">Aliment de la semaine</span><p style="margin:6px 0 0"><b>${esc(weekFood()[0])}</b></p><p class="small muted" style="margin:4px 0 0">${esc(weekFood()[1])}.</p></div><button type="button" class="chip on" data-fweek>+ Ajouter</button></div>
     </div>
     ${detailsBox(g.fromPlan ? 'Objectifs = les totaux de ton plan alimentaire, identiques chaque jour. Le calcul de ta dépense est dans Objectifs.' : `Objectifs de la semaine calculés sur ton poids Withings (${fx(g.w, 1)} kg) et ta dépense. Détail dans Objectifs.`)}${footer()}`;
@@ -8613,7 +8732,6 @@ function fProgress() {
     ${granSeg()}
     <div class="card" style="margin-top:10px;padding:8px 12px">${periodNav(P)}</div>
     <div class="stack" style="margin-top:12px">
-      ${lastCard}
       ${big(B.m)}${big(B.f)}${big(B.w)}${big(B.l)}
       ${extra}
       <div class="card pc6"><span class="eyebrow">Macros mangées</span><div class="mleg"><span style="--c:#E0352B">Protéines</span><span style="--c:#F2C200">Lipides</span><span style="--c:#F07A1A">Glucides</span></div>${macroChart(days.length > 1 ? days : [...Array(7)].map((_, i) => { const k = addDays(TODAY, i - 6); return {k, lab: DOW[(dow(k) + 6) % 7], tip: cap(fmtShort(k)), ...dayTotals(k)}; }))}</div>
@@ -8741,9 +8859,9 @@ function menuBoard() {
   const wks = myMenus().filter(m => m.kind !== 'day'), dys = myMenus().filter(m => m.kind === 'day');
   return `<div class="card sboard mboard"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Mes 4 semaines · menus</span><span class="sbnav"><button type="button" data-mboff="-1" aria-label="4 semaines avant"${off <= 0 ? ' disabled' : ''}>‹</button><small>${esc(fmtShort(weeks[0]).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(weeks[3], 6)).replace(/^\S+ /, ''))}</small><button type="button" data-mboff="1" aria-label="4 semaines après">›</button></span></div>
     <div class="bgrid">${weeks.map(w => { const wm = menuById(S.fset.menuWeek?.[w]); return `<div class="bweek" data-mwrow="${w}"><button type="button" class="bwk mwk${wm ? ' on' : ''}" data-mweek="${w}" aria-label="Menu de la semaine ${seasonWeek(w)}">S${seasonWeek(w)}</button>${[0, 1, 2, 3, 4, 5, 6].map(i => cell(addDays(w, i))).join('')}</div>`; }).join('')}</div>
-    <div class="sec-label" style="margin:14px 2px 6px">Blocs semaine <small>glisse-les sur une semaine</small></div>
+    <div class="sec-label" style="margin:14px 2px 6px">Menus semaine <small>glisse-les sur une semaine</small></div>
     <div class="bsrc">${wks.length ? wks.map(m => mchip(m)).join('') : '<p class="small muted" style="margin:0">Aucun bloc semaine.</p>'}</div>
-    <div class="sec-label" style="margin:14px 2px 6px">Blocs jour <small>glisse-les sur un jour spécial</small></div>
+    <div class="sec-label" style="margin:14px 2px 6px">Menus jour <small>glisse-les sur un jour spécial</small></div>
     <div class="bsrc">${dys.length ? dys.map(m => mchip(m)).join('') : '<p class="small muted" style="margin:0">Crée un bloc jour ci-dessous pour un jour différent (compétition, repas de famille…).</p>'}</div>
     <p class="small muted" style="margin:10px 2px 0">Garde le doigt sur un bloc, puis glisse-le. Tu peux aussi toucher une semaine (S${seasonWeek(weeks[0])}…) ou un jour pour choisir. Un jour vide, c'est ton menu de base.</p></div>`;
 }
@@ -8754,7 +8872,7 @@ function fMenu() {
   const bt = menuTot(planItems());
   return `<header class="top tophead"><div><div class="sub">Tes menus en blocs, calés à la semaine ou au jour</div><h1>Menu</h1></div></header>
     ${menuBoard()}
-    <div class="btnrow" style="margin-top:16px"><button class="btn ghost" data-mnew="week">+ Bloc semaine</button><button class="btn ghost" data-mnew="day">+ Bloc jour</button></div>
+    <div class="btnrow" style="margin-top:16px"><button class="btn ghost" data-mnew="week">+ Menu semaine</button><button class="btn ghost" data-mnew="day">+ Menu jour</button></div>
     <h2>Blocs semaine</h2><div class="list">${myMenus().filter(m => m.kind !== 'day').map(row).join('') || '<div class="row"><span class="muted">Aucun bloc semaine.</span></div>'}</div>
     <h2>Blocs jour</h2><div class="list">${myMenus().filter(m => m.kind === 'day').map(row).join('') || '<div class="row"><span class="muted">Aucun bloc jour.</span></div>'}</div>
     <div class="list" style="margin-top:12px"><button class="rowbtn" data-medit=""><span><b>Menu de base</b><span class="meta">les jours sans bloc · ${fx(bt.kcal)} kcal · G ${fx(bt.c)}</span></span>${ICON.chev}</button></div>
@@ -9589,7 +9707,7 @@ function bootTNR(db) {
 // The page ends just above the tab bar, whatever its real height on the phone, so the sources line shows with some air.
 const fitTabbar = () => { const t = document.querySelector('.mod:not([hidden]) .tabbar'); if (t) document.documentElement.style.setProperty('--tbh', t.offsetHeight + 'px'); };
 fitTabbar(); addEventListener('resize', fitTabbar);
-try { const t = localStorage.getItem('sl-tab');  const g = localStorage.getItem('sl-gran'); if (GRAN.some(([x]) => x === g)) S.gran = g; } catch (e) {}
+try { const t = localStorage.getItem('sl-tab');   } catch (e) {}
 setTab(S.tab);
 go('home', false);
 (async () => {
