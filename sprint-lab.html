@@ -388,6 +388,9 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .pckm{display:inline-flex;align-items:center;gap:6px;padding:6px 10px 6px 6px;border-radius:10px;background:var(--card2);border:0;color:var(--fg);font:inherit;font-size:.8125rem}.pckm .ck{width:18px;height:18px;border-radius:5px;box-shadow:inset 0 0 0 1.5px var(--fg2);display:grid;place-items:center}.pckm:not(.on){color:var(--fg2);text-decoration:line-through}
 .pck.on .ck,.pckm.on .ck{background:#30D158;box-shadow:none}.pck.on .ck::after,.pckm.on .ck::after{content:'';width:9px;height:5px;border:2px solid #000;border-top:0;border-right:0;transform:translateY(-1px) rotate(-45deg)}
 .pck:not(.on) .n{color:var(--fg2);text-decoration:line-through;opacity:.7}.pck:not(.on) i{opacity:.3}
+.trc .chead{display:flex;justify-content:space-between;align-items:center;gap:10px}.trc .seg{margin:0;flex:none;min-width:150px}
+.donec .chiptag.okt{color:#30D158;background:rgba(48,209,88,.14)}.donec .linkcard,.nextc .linkcard{margin-top:2px}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent);font:inherit;text-decoration:underline;cursor:pointer}
 .pck-sum{margin:2px 14px 6px;font-size:.75rem;color:var(--fg2)}
 .rbtl .rq{touch-action:none;-webkit-user-select:none;user-select:none;cursor:ns-resize}.rbtl .rq small{font-size:.6875rem}.rbtl .rq.on{box-shadow:inset 0 0 0 1.5px #40C8E0}
 .btl2.q{touch-action:none;user-select:none}
@@ -3085,7 +3088,58 @@ const wdOf = k => new Date(k + 'T12:00:00').getDay();
 // Two plannings: winter (the default) and summer (more time); summer starts as a copy of winter until he changes it.
 const weekKey = () => PLN().saison === 'ete' ? 'weekEte' : 'week';
 const weekPlan = wd => (PLN()[weekKey()]?.[wd] || PLN().week?.[wd] || PLAN_BASE[wd]).map(x => ({...x}));
-const dayPlan = k => planCut(weekPlan(wdOf(k)), (PLN().extra?.[k] || []).map(x => ({...x, date: k})));
+const dayPlan = k => tripFix(k, planCut(weekPlan(wdOf(k)), (PLN().extra?.[k] || []).map(x => ({...x, date: k}))));
+// Trips as he really does them. Bike: he rides about 1,6 times faster than Google's estimate (31 min → 19 min).
+// Car: Google's time without traffic, times Lille's traffic at that hour (TomTom Traffic Index: peaks around 8 h and
+// 17-18 h on weekdays). Then a margin so he always arrives a little early. Minutes are his, in settings/app.trips.
+const TRIP_DEF = {athle: {n: 'Athlétisme', bike: 31, car: 16}, dmarcq: {n: 'Decathlon Marcq-en-Barœul', bike: 12, car: 8}, dlille: {n: 'Domyos · Decathlon Lille', bike: 25, car: 14}, cmarcq: {n: 'Club de Marcq', bike: 12, car: 8}};
+const TRIP_BIKE = 1.6, TRIP_MARGIN = {bike: 5, car: 10};
+const tripOf = id => ({mode: 'bike', ...(TRIP_DEF[id] || {}), ...(S.app?.trips?.[id] || {})});
+function carFactor(wd, h) {
+  if (wd === 0) return h >= 10 && h < 19 ? 1.1 : 1;
+  if (wd === 6) return h >= 10 && h < 19 ? 1.25 : 1.05;
+  return h >= 7.5 && h < 9.5 ? 1.6 : h >= 16.5 && h < 19 ? 1.65 : (h >= 7 && h < 7.5) || (h >= 9.5 && h < 10) || (h >= 16 && h < 16.5) || (h >= 19 && h < 19.5) ? 1.35 : h >= 10 && h < 16 ? 1.2 : 1;
+}
+function tripMin(id, wd, at) {
+  const t = tripOf(id), car = t.mode === 'car'; if (!t.bike && !t.car) return null;
+  const ride = car ? Math.round((t.car || t.bike / 2) * carFactor(wd, at / 60)) : Math.round((t.bike || t.car * 2) / TRIP_BIKE), m = TRIP_MARGIN[car ? 'car' : 'bike'];
+  return {ride, m, tot: Math.ceil((ride + m) / 5) * 5, mode: car ? 'car' : 'bike'};
+}
+const tripLab = x => `${x.mode === 'car' ? 'voiture' : 'vélo'} ${x.ride} min + ${x.m} de marge`;
+// The gym of a muscu day: the one chosen for that session, else the last one he went to.
+const gymOfDay = k => { const p = planForK(k, 'gym'); return (p && S.tset?.gymPlan?.[p.id]) || logs().find(l => l.kind === 'gym' && l.gym)?.gym || 'dmarcq'; };
+// The trips around muscu and sprint follow: the way there ends when the session starts, the way back starts when it ends.
+function tripFix(k, L) {
+  const wd = wdOf(k), out = L.map(x => ({...x}));
+  for (const T of out) {
+    if (T.c !== 'muscu' && T.c !== 'athle') continue;
+    const dest = T.c === 'athle' ? 'athle' : gymOfDay(k), A = tmin(T.a), B = tmin(T.b);
+    const go = out.find(x => x.c === 'dep' && tmin(x.b) === A), back = out.find(x => x.c === 'dep' && tmin(x.a) === B);
+    if (dest === 'maison') { for (const x of [go, back]) if (x) x.drop = true; continue; }
+    const tg = tripMin(dest, wd, A - 20), tb = tripMin(dest, wd, B); if (!tg) continue;
+    const name = TRIP_DEF[dest]?.n || gymName(dest);
+    if (go) Object.assign(go, {oa: go.oa || go.a, a: tstr(Math.max(0, A - tg.tot)), trip: tripLab(tg), dest: name});
+    if (back) Object.assign(back, {oa: back.oa || back.a, b: tstr(Math.min(1440, B + tb.tot)), trip: tripLab(tb), dest: name});
+  }
+  return out.filter(x => !x.drop).sort((p, q) => p.a.localeCompare(q.a));
+}
+function tripsPane() {
+  openPane({title: 'Mes trajets', render: () => `<p class="small muted" style="margin:16px 4px 10px">Écris le temps que Google Maps annonce. L'appli le corrige : à vélo, tu vas 1,6 fois plus vite ; en voiture, elle ajoute les bouchons de Lille selon l'heure. Puis une marge de ${TRIP_MARGIN.bike} min à vélo et ${TRIP_MARGIN.car} min en voiture (garer la voiture), pour arriver toujours un peu en avance.</p>
+    ${Object.keys(TRIP_DEF).map(id => { const t = tripOf(id), at = id === 'athle' ? 18 * 60 : 10 * 60, x = tripMin(id, 1, at - 20);
+      return `<div class="card trc"><div class="chead" style="margin-bottom:10px"><b>${esc(t.n)}</b><div class="seg segsm" role="group" aria-label="Moyen de transport">${[['bike', 'Vélo'], ['car', 'Voiture']].map(([m, l]) => `<button type="button" data-trmode="${id}|${m}" aria-pressed="${(t.mode || 'bike') === m}">${l}</button>`).join('')}</div></div>
+        <div class="list"><div class="row"><label for="tr-${id}-b">Google Maps à vélo<span class="hint">minutes</span></label><input id="tr-${id}-b" class="mini-in" inputmode="numeric" style="width:70px" data-trv="${id}|bike" value="${t.bike || ''}"></div>
+        <div class="row"><label for="tr-${id}-c">Google Maps en voiture<span class="hint">minutes, sans bouchons</span></label><input id="tr-${id}-c" class="mini-in" inputmode="numeric" style="width:70px" data-trv="${id}|car" value="${t.car || ''}"></div></div>
+        <p class="small" style="margin:10px 2px 0">Dans ton planning : <b>${x ? x.tot + ' min' : '–'}</b>${x ? ` · ${tripLab(x)}${x.mode === 'car' ? (id === 'athle' ? ' (un lundi vers 18 h)' : ' (un lundi vers 10 h)') : ''}` : ''}</p></div>`; }).join('')}
+    <p class="small muted" style="margin:10px 4px 0">Avant et après la muscu, c'est le trajet de la salle choisie pour la séance (sinon la dernière où tu es allé). Maison : pas de trajet.</p>`});
+}
+async function tripSave(id, patch) {
+  S.app = {...(S.app || {}), trips: {...(S.app?.trips || {}), [id]: {...(S.app?.trips?.[id] || {}), ...patch}}};
+  paneRender(); render(); renderMod(); plfsRender();
+  await dbSet('settings/app', {...S.app, updatedAt: new Date().toISOString()});
+}
+document.addEventListener('click', e => { const b = e.target.closest('[data-trips]'); if (b) { e.preventDefault(); tripsPane(); return; }
+  const m = e.target.closest('[data-trmode]'); if (!m) return; const [id, v] = m.dataset.trmode.split('|'); tripSave(id, {mode: v}); });
+document.addEventListener('change', e => { const i = e.target.closest?.('[data-trv]'); if (!i) return; const [id, f] = i.dataset.trv.split('|'), v = Math.round(parseFloat(String(i.value).replace(',', '.'))); tripSave(id, {[f]: v > 0 ? v : 0}); });
 // A block added on a given day goes inside a "temps calme" (or dead time): that block is cut around it instead of being covered.
 function planCut(base, ex) {
   const out = [];
@@ -3116,6 +3170,7 @@ const todayRoutine = () => (PLN().extra?.[TODAY] || []).find(x => x.routine);
 async function savePlanning(patch) {
   S.planning = {...PLN(), ...patch};
   paneRender(); render(); renderMod(); plfsRender();
+  if (S.sheet?.kind === 'note') { const box = $('#e-plan'); if (box) box.innerHTML = notePlan($('#e-date')?.value || TODAY); }
   await dbSet('settings/planning', {...S.planning, updatedAt: new Date().toISOString()});
 }
 // Free time for a routine: gaps between blocks, or the calm / dead-time blocks, after now and before bed.
@@ -3178,7 +3233,7 @@ function plfsRender() {
   const col = ({wd, k, L}) => `<div class="plg-col${k === TODAY ? ' pltoday' : ''}" data-plcol="${wd}">${hours.map(t => `<i class="plg-h" style="top:${(t - t0) * K}px"></i>`).join('')}
       ${L.map(x => { const a = tmin(x.a), b = tmin(x.b), h = (b - a) * K, short = h < 30, i = plIdx(x, wd, k), on = !week && PLD.sel === String(i), sp = (x.c === 'muscu' || x.c === 'athle') && planFor(k)?.kind === (x.c === 'muscu' ? 'gym' : 'track') ? planFor(k) : null;
         const chp = short || week ? '' : plChip(x, k), mid = !!chp && h < 76;
-        return `<button class="plg-b${short ? ' short' : ''}${mid ? ' mid' : ''}${on ? ' sel' : ''}" data-plsel="${i}" data-plwd="${wd}" style="--pc:${PCAT[x.c]?.[1] || '#888'};top:${(a - t0) * K}px;height:${Math.max(h - 1, 8)}px"><b>${esc(x.n)}</b>${short ? '' : `<small>${x.a} – ${x.b}${x.date && !x.rs ? ' · ce jour' : ''}</small>${chp}`}${on ? '<span class="plg-hd t" data-plhv="a"></span><span class="plg-hd b" data-plhv="b"></span>' : ''}</button>`; }).join('')}
+        return `<button class="plg-b${short ? ' short' : ''}${mid ? ' mid' : ''}${on ? ' sel' : ''}" data-plsel="${i}" data-plwd="${wd}" style="--pc:${PCAT[x.c]?.[1] || '#888'};top:${(a - t0) * K}px;height:${Math.max(h - 1, 8)}px"><b>${esc(x.n)}</b>${short ? '' : `<small>${x.a} – ${x.b}${x.date && !x.rs ? ' · ce jour' : ''}${x.trip ? ' · ' + esc(x.trip) : ''}</small>${chp}`}${on ? '<span class="plg-hd t" data-plhv="a"></span><span class="plg-hd b" data-plhv="b"></span>' : ''}</button>`; }).join('')}
       ${k === TODAY && nowM >= t0 ? `<i class="plg-now" style="top:${(nowM - t0) * K}px"></i>` : ''}</div>`;
   const own = !!PLN().week?.[PLAN_UI.wd];
   el.className = 'plfs on ' + (week ? 'plw' : 'pld1') + (plRot() ? ' rot' : '');
@@ -3187,11 +3242,11 @@ function plfsRender() {
       <div class="plfs-t"><b>${esc(PLFS.title || 'Mon planning')}</b><small>${esc(cap(fmtShort(plDay(PLAN_UI.wd))))} · semaine ${seasonWeek(plDay(PLAN_UI.wd))}</small></div>
       <button class="plfs-ic" data-plturn aria-label="${week ? 'Revenir à la journée' : 'Voir toute la semaine, téléphone tourné'}" aria-pressed="${week}">${ICON_TURN}</button></header>
     ${week ? '' : plSeasonSeg() + `<div class="plnav"><button type="button" class="plarr" data-plwk="-1" aria-label="Semaine précédente">‹</button><div class="pldays">${PL_ORDER.map(d => `<button data-pld="${d}" aria-pressed="${d === PLAN_UI.wd}"><span>${DAYS_FR[d].slice(0, 3)}</span><b>${+plDay(d).slice(8)}</b></button>`).join('')}</div><button type="button" class="plarr" data-plwk="1" aria-label="Semaine suivante">›</button></div>
-    <div class="plw-info pld-info">${(() => { const x = PLD.sel != null ? plBlockOf(PLD.sel, PLAN_UI.wd) : null; if (!x) return '<span>Touche un bloc pour le voir · garde le doigt pour le déplacer</span>'; const sp = (x.c === 'muscu' || x.c === 'athle') && planFor(plDay(PLAN_UI.wd))?.kind === (x.c === 'muscu' ? 'gym' : 'track') ? planFor(plDay(PLAN_UI.wd)) : null;
-      return `<i style="background:${PCAT[x.c]?.[1] || '#888'}"></i><b>${esc(x.n)}${sp ? ' · ' + esc(sp.name) : ''}</b><span>${tfr(x.a)} – ${tfr(x.b)}</span>${sp ? `<button class="chip" data-tplanv="${sp.id}"${sp.n ? ` data-tn="${sp.n}"` : ''}>Voir la séance</button>` : ''}<button class="chip" data-plb="${PLD.sel}">Modifier</button>`; })()}</div>`}
+    <div class="plw-info pld-info">${(() => { const x0 = PLD.sel != null ? plBlockOf(PLD.sel, PLAN_UI.wd) : null, x = x0 && (dayPlan(plDay(PLAN_UI.wd)).find(y => (y.oa || y.a) === x0.a && y.n === x0.n) || x0); if (!x) return '<span>Touche un bloc pour le voir · garde le doigt pour le déplacer</span>'; const sp = (x.c === 'muscu' || x.c === 'athle') && planFor(plDay(PLAN_UI.wd))?.kind === (x.c === 'muscu' ? 'gym' : 'track') ? planFor(plDay(PLAN_UI.wd)) : null;
+      return `<i style="background:${PCAT[x.c]?.[1] || '#888'}"></i><b>${esc(x.n)}${sp ? ' · ' + esc(sp.name) : ''}</b><span>${tfr(x.a)} – ${tfr(x.b)}${x.trip ? ' · ' + esc(x.trip) : ''}</span>${x.c === 'dep' ? '<button class="chip" data-trips>Mes trajets</button>' : ''}${sp ? `<button class="chip" data-tplanv="${sp.id}"${sp.n ? ` data-tn="${sp.n}"` : ''}>Voir la séance</button>` : ''}<button class="chip" data-plb="${PLD.sel}">Modifier</button>`; })()}</div>`}
     ${week ? `<div class="plg-head"><span></span>${lists.map(d => `<span class="${d.k === TODAY ? 'pltoday' : ''}">${DAYS_FR[d.wd].slice(0, 3)} <b>${+d.k.slice(8)}</b></span>`).join('')}</div>` : ''}
     <div class="plg-scroll"><div class="plg" style="height:${H + 8}px"><div class="plg-axis">${hours.map(t => `<span style="top:${(t - t0) * K}px">${String(t / 60 % 24).padStart(2, '0')} h</span>`).join('')}</div>${lists.map(col).join('')}</div>
-      ${week ? '' : `<div class="stack" style="margin:14px 0 24px"><button class="btn ghost" data-pladd>+ Ajouter un bloc</button>${own ? '<button class="btn ghost" data-plreset>Revenir au planning de mon fichier</button>' : ''}</div>`}</div>
+      ${week ? '' : `<div class="stack" style="margin:14px 0 24px"><button class="btn ghost" data-pladd>+ Ajouter un bloc</button><button class="btn ghost" data-trips>Mes trajets</button>${own ? '<button class="btn ghost" data-plreset>Revenir au planning de mon fichier</button>' : ''}</div>`}</div>
     <div class="plg-leg">${used.map(c => `<span><i style="background:${PCAT[c][1]}"></i>${esc(PCAT[c][0])}</span>`).join('')}</div>
   </div>`;
   el.dataset.t0 = t0; el.dataset.k = K;
@@ -3201,7 +3256,7 @@ function plfsRender() {
     // Full planning: today opens on the red line, another day on its first block. Training, Nutrition or Recovery: the first activity of the day.
     const L0 = lists[0]?.L || [], f0 = L0.find(x => tmin(x.a) >= 4 * 60) || L0[0], first = f0 ? tmin(f0.a) - 20 : 7 * 60;
     const isToday = lists[0]?.k === TODAY, tg = PLFS.only ? first : isToday || week ? nowM - 100 : first;
-    sc.scrollTop = Math.max(0, (tg - t0) * K); PLFS.scrolled = true;
+    sc.scrollTop = Math.max(0, (tg - t0) * K); PLFS.scrolled = true; PLFS.autoTop = isToday && !PLFS.only ? sc.scrollTop : null;
   }
 }
 // The small block inside a planning block, the same as on the boards: the session (muscu, sprint, recovery) or the
@@ -3314,12 +3369,12 @@ function plwRender(el) {
   el.className = 'plfs on plw' + (plRot() ? ' rot' : '');
   const row = ({wd, k, L}) => `<div class="plw-r${k === TODAY ? ' pltoday' : ''}">${hours.map(t => `<i class="plw-l" style="left:calc(${t - t0}px * var(--k))"></i>`).join('')}
     ${L.map(x => { const a = tmin(x.a), b = tmin(x.b), i = plIdx(x, wd, k), on = sx && sel.wd === wd && String(sel.i) === String(i), c = PCAT[x.c]?.[1] || '#888';
-      return `<button class="plw-b${on ? ' sel' : ''}" data-plrb="${i}" data-plwd="${wd}" aria-label="${esc(x.n)}, ${x.a} – ${x.b}" style="--pc:${c};color:${plInk(c)};left:calc(${a - t0}px * var(--k));width:calc(${b - a}px * var(--k) - 1px)" title="${esc(x.n)} · ${tfr(x.a)} – ${tfr(x.b)}"><b>${esc(x.n)}</b><small class="plw-t">${tfr(x.a)} – ${tfr(x.b)}</small>${on ? '<span class="plw-hd a" data-plh="a"></span><span class="plw-hd b" data-plh="b"></span>' : ''}</button>`; }).join('')}
+      return `<button class="plw-b${on ? ' sel' : ''}" data-plrb="${i}" data-plwd="${wd}" aria-label="${esc(x.n)}, ${x.a} – ${x.b}" style="--pc:${c};color:${plInk(c)};left:calc(${a - t0}px * var(--k));width:calc(${b - a}px * var(--k) - 1px)" title="${esc(x.n)}${x.dest ? ' · ' + esc(x.dest) : ''} · ${tfr(x.a)} – ${tfr(x.b)}${x.trip ? ' · ' + esc(x.trip) : ''}"><b>${esc(x.n)}</b><small class="plw-t">${tfr(x.a)} – ${tfr(x.b)}</small>${on ? '<span class="plw-hd a" data-plh="a"></span><span class="plw-hd b" data-plh="b"></span>' : ''}</button>`; }).join('')}
     ${k === TODAY && nowM >= t0 ? `<i class="plw-now" style="left:calc(${nowM - t0}px * var(--k))"></i>` : ''}</div>`;
   el.innerHTML = `<div class="plfs-in">
     <header class="plfs-top"><button class="plfs-ic" data-plx aria-label="Fermer le planning"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       <div class="plfs-t"><b>${esc(PLFS.title || 'Mon planning')}</b><small class="plwkn"><button type="button" class="plarr" data-plwk="-1" aria-label="Semaine précédente">‹</button>Semaine ${seasonWeek(plMonday())} · ${esc(fmtShort(plMonday()).replace(/^\S+ /, ''))}<button type="button" class="plarr" data-plwk="1" aria-label="Semaine suivante">›</button></small></div>
-      <button class="plfs-ic pcno" data-plturn aria-label="Revenir à la journée" aria-pressed="true">${ICON_TURN}</button><button class="btn plw-add pconly" data-plwadd>+ Ajouter un bloc</button></header>
+      <button class="plfs-ic pcno" data-plturn aria-label="Revenir à la journée" aria-pressed="true">${ICON_TURN}</button><button class="btn ghost plw-add pconly" data-trips>Mes trajets</button><button class="btn plw-add pconly" data-plwadd>+ Ajouter un bloc</button></header>
     ${plSeasonSeg()}<div class="plw-info">${sx ? plwInfoHtml(sx, sel.wd, tmin(sx.a), tmin(sx.b)) : plwInfoHtml(null)}</div>
     <div class="plw-g"><div class="plw-days"><span></span>${lists.map(d => `<span class="${d.k === TODAY ? 'pltoday' : ''}">${DAYS_FR[d.wd].slice(0, 3)}<b>${+d.k.slice(8)}</b></span>`).join('')}</div>
       <div class="plw-vp"><div class="plw-c"><div class="plw-hours">${hours.map(t => `<span style="left:calc(${t - t0}px * var(--k))">${t / 60} h</span>`).join('')}</div>${lists.map(row).join('')}</div></div></div>
@@ -3332,9 +3387,19 @@ function plwRender(el) {
   // A name is written only when it fits whole in its box.
   // Every name is written: the text shrinks to fit its box, on one line.
   el.querySelectorAll('.plw-b > b').forEach(n => { const w = n.parentElement.clientWidth - 4; let f = 11; n.style.fontSize = f + 'px'; while (n.scrollWidth > w && f > 5) { f -= .5; n.style.fontSize = f + 'px'; } });
-  if (PLW.px == null) PLW.px = ((isPC() ? 6.75 * 60 : Math.max(Math.min(nowM - 90, 21 * 60), 7 * 60)) - t0) * K;
+  if (PLW.px == null) { PLW.px = ((PLFS.wk ? 6.75 * 60 : isPC() ? Math.max(nowM - 180, 0) : Math.max(Math.min(nowM - 90, 21 * 60), 7 * 60)) - t0) * K; PLW.auto = 'init'; }
   plwSetPx(el, PLW.px);
+  if (PLW.auto === 'init') PLW.auto = PLFS.wk ? null : PLW.px;
 }
+// While the planning stays open, the red line moves with the time, and the view follows it unless he moved it himself.
+setInterval(() => {
+  if (!PLFS.on) return; const el = $('#plfs'); if (!el) return;
+  const nowM = new Date().getHours() * 60 + new Date().getMinutes(), K = +el.dataset.k || 1;
+  const n = el.querySelector('.plw-now'); if (n) { n.style.left = `calc(${nowM}px * var(--k))`;
+    if (PLW.auto != null && Math.abs(PLW.px - PLW.auto) < 1) { plwSetPx(el, (isPC() ? Math.max(nowM - 180, 0) : Math.max(Math.min(nowM - 90, 21 * 60), 7 * 60)) * K); PLW.auto = PLW.px; } }
+  const g = el.querySelector('.plg-now'); if (g) { g.style.top = nowM * K + 'px'; const sc = el.querySelector('.plg-scroll');
+    if (sc && PLFS.autoTop != null && Math.abs(sc.scrollTop - PLFS.autoTop) < 2) { sc.scrollTop = Math.max(0, (nowM - 100) * K); PLFS.autoTop = sc.scrollTop; } }
+}, 30000);
 function plSeasonSeg() { const v = PLN().saison === 'ete' ? 'ete' : 'hiver'; return `<div class="seg plfilt" role="group" aria-label="Afficher">${[['', 'Tout'], ['T', 'Training'], ['N', 'Nutrition'], ['R', 'Recovery']].map(([k, l]) => `<button type="button" data-plf="${k}" aria-pressed="${(PLFS.pf || '') === k}">${l}</button>`).join('')}</div><div hidden class="seg plsaison" role="group" aria-label="Saison">${[['hiver', 'Saison hivernale'], ['ete', 'Saison estivale']].map(([k, l]) => `<button type="button" data-plsaison="${k}" aria-pressed="${v === k}">${l}</button>`).join('')}</div>`; }
 document.addEventListener('click', e => { const b = e.target.closest('[data-plf]'); if (!b) return; PLFS.pf = b.dataset.plf; PLFS.only = PFILT[PLFS.pf] || null; PLD.sel = null; PLW.sel = null; PLFS.scrolled = false; plfsRender(); });
 document.addEventListener('click', e => { const b = e.target.closest('[data-plsaison]'); if (!b) return; PLD.sel = null; PLW.sel = null; savePlanning({saison: b.dataset.plsaison}); toast(b.dataset.plsaison === 'ete' ? 'Planning d\'été : il part de ton planning d\'hiver' : 'Planning d\'hiver'); });
@@ -4504,9 +4569,9 @@ function painWindow(n) { const out = {}; for (let i = 0; i < n; i++) { const k =
 function painMap(view, W, sel) {
   let z = '', hits = '';
   for (const [l, L] of Object.entries(W)) { const pr = painRegion(l); if (!pr || pr.view !== view) continue; const {r, side} = pr, sx = side === ' D' ? -1 : side === ' G' ? 1 : 0, cx = 100 + (view === 'front' ? sx : -sx) * r[2], mx = Math.max(...L.map(x => x.v));
-    z += `<ellipse cx="${cx}" cy="${r[3]}" rx="${r[4] + 3}" ry="${r[5] + 3}" fill="#FF453A" opacity="${(.35 + mx / 10 * .6).toFixed(2)}" filter="url(#soft)"/>`;
+    z += `<ellipse cx="${cx}" cy="${r[3]}" rx="${r[4] + 3}" ry="${r[5] + 3}" fill="#FF453A" opacity="${(.35 + mx / 10 * .6).toFixed(2)}" filter="url(#softp${view})"/>`;
     hits += `<ellipse data-rbz="${esc(l)}" cx="${cx}" cy="${r[3]}" rx="${r[4] + 4}" ry="${r[5] + 4}" fill="transparent" stroke="${sel === l ? '#fff' : 'transparent'}" stroke-width="1.5" role="button" aria-label="${esc(l)}"/>`; }
-  return `<svg viewBox="0 0 200 392" role="img" aria-label="Douleurs, vue ${view === 'front' ? 'de face' : 'de dos'}">${silBase(view)}<g clip-path="url(#silc)" pointer-events="none">${z}</g>${hits}</svg>`;
+  return `<svg viewBox="0 0 200 392" role="img" aria-label="Douleurs, vue ${view === 'front' ? 'de face' : 'de dos'}">${silBase(view, 'p' + view)}<g clip-path="url(#silcp${view})" pointer-events="none">${z}</g>${hits}</svg>`;
 }
 let RB = {n: 7, sel: null};
 function recSteps(kind) {
@@ -5038,24 +5103,24 @@ function silPath() {
   return d + 'Z';
 }
 const SIL = silPath();
-function silBase(view) {
-  return `<defs><linearGradient id="silg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1b1b20"/><stop offset=".5" stop-color="#34343b"/><stop offset="1" stop-color="#1b1b20"/></linearGradient><filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4"/></filter><clipPath id="silc"><path d="${SIL}"/></clipPath></defs>
-    <path class="silp" d="${SIL}" fill="url(#silg)" stroke="#000" stroke-opacity=".35"/>
+function silBase(view, u = '') {
+  return `<defs><linearGradient id="silg${u}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1b1b20"/><stop offset=".5" stop-color="#34343b"/><stop offset="1" stop-color="#1b1b20"/></linearGradient><filter id="soft${u}" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4"/></filter><clipPath id="silc${u}"><path d="${SIL}"/></clipPath></defs>
+    <path class="silp" d="${SIL}" fill="url(#silg${u})" stroke="#000" stroke-opacity=".35"/>
     <g fill="none" stroke="#000" stroke-opacity=".28" stroke-width="1">${view === 'back' ? '<path d="M100 64V206"/><path d="M84 82q16 9 32 0"/><path d="M78 108q8 10 22 12q14-2 22-12"/><path d="M86 200q14 12 28 0"/><path d="M80 290q8 4 14 0M106 290q8 4 14 0"/>' : '<path d="M86 88q14 8 28 0"/><path d="M100 98v58"/><path d="M84 150q16 8 32 0"/><path d="M90 214q10 8 20 0"/><path d="M82 282q6 4 12 0M106 282q6 4 12 0"/>'}</g>`;
 }
 function bodySvg(view) {
-  let s = silBase(view), z = '';
+  let s = silBase(view, 'b'), z = '';
   const painIn = (r, side) => Object.keys(draft.pains).some(l => l === r[1] + side || [...r[6], ...r[7]].some(st => l === st + side));
   for (const r of BODY[view]) {
     const [id, title, dx, cy, rx, ry] = r;
     for (const [sx, side] of dx === 0 ? [[0, '']] : [[-1, ' D'], [1, ' G']]) {
       const cx = 100 + (view === 'front' ? sx : -sx) * dx, key2 = id + side, on = draft._region === key2, hurt = painIn(r, side);
-      if (hurt) z += `<ellipse cx="${cx}" cy="${cy}" rx="${rx + 3}" ry="${ry + 3}" fill="#FF453A" opacity=".85" filter="url(#soft)"/>`;
+      if (hurt) z += `<ellipse cx="${cx}" cy="${cy}" rx="${rx + 3}" ry="${ry + 3}" fill="#FF453A" opacity=".85" filter="url(#softb)"/>`;
       s += `<ellipse class="rg${on ? ' on' : ''}${hurt ? ' hurt' : ''}" data-region="${key2}" cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" role="button" tabindex="0" aria-label="${esc(title + side)}"/>`;
     }
   }
-  const sel = draft._region ? (() => { const [id, side = ''] = draft._region.split(/(?= [DG]$)/), r = regionAt(view, id); if (!r) return ''; const sx = side === ' D' ? -1 : side === ' G' ? 1 : 0, cx = 100 + (view === 'front' ? sx : -sx) * r[2]; return `<ellipse cx="${cx}" cy="${r[3]}" rx="${r[4] + 4}" ry="${r[5] + 4}" fill="#FF453A" opacity=".85" filter="url(#soft)"/>`; })() : '';
-  return `<svg class="body sil" data-bodyhit="${view}" viewBox="0 0 200 392" role="group" aria-label="Silhouette ${view === 'front' ? 'de face' : 'de dos'} : touche l'endroit qui fait mal">${s}<g clip-path="url(#silc)" pointer-events="none">${z}${sel}</g></svg>`;
+  const sel = draft._region ? (() => { const [id, side = ''] = draft._region.split(/(?= [DG]$)/), r = regionAt(view, id); if (!r) return ''; const sx = side === ' D' ? -1 : side === ' G' ? 1 : 0, cx = 100 + (view === 'front' ? sx : -sx) * r[2]; return `<ellipse cx="${cx}" cy="${r[3]}" rx="${r[4] + 4}" ry="${r[5] + 4}" fill="#FF453A" opacity=".85" filter="url(#softb)"/>`; })() : '';
+  return `<svg class="body sil" data-bodyhit="${view}" viewBox="0 0 200 392" role="group" aria-label="Silhouette ${view === 'front' ? 'de face' : 'de dos'} : touche l'endroit qui fait mal">${s}<g clip-path="url(#silcb)" pointer-events="none">${z}${sel}</g></svg>`;
 }
 function painSection() {
   const view = draft._view || 'back';
@@ -5275,13 +5340,12 @@ function notePlan(k) {
     for (const x of dayPlan(k)) { const kd = x.c === 'muscu' ? 'gym' : x.c === 'athle' ? 'track' : null; if (!kd) continue; if (kindDone(k, kd)) sk.delete(planDoneId(x)); else if (kindSkip(k, kd)) sk.add(planDoneId(x)); }
     draft.planSkip = [...sk]; }
   const all = dayPlan(k).filter(x => !['dep', 'mort', 'quest'].includes(x.c) && !(x.c === 'sommeil' && (x.a === '00:00' || tmin(x.a) >= 22 * 60)));
-  const meals = all.filter(x => x.c === 'alim'), L = all.filter(x => x.c !== 'alim');
+  const L = all.slice().sort((p, q) => p.a.localeCompare(q.a));
   if (!L.length) return '<p class="note" style="text-align:left;margin-top:0">Rien au planning ce jour-là.</p>';
   const sk = new Set(draft.planSkip || []), n = L.filter(x => !sk.has(planDoneId(x))).length;
   return `<div class="pchk">${L.map(x => { const id = planDoneId(x), on = !sk.has(id), col = PCAT[x.c]?.[1] || 'var(--fg2)';
     const kd = x.c === 'muscu' ? 'gym' : x.c === 'athle' ? 'track' : null, auto = kd && kindDone(k, kd) ? 'faite dans l\'appli' : kd && kindSkip(k, kd) ? 'pas faite' : '';
     return `<button type="button" class="pck${on ? ' on' : ''}" data-pchk="${esc(id)}" aria-pressed="${on}"><span class="t num">${tfr(x.a)}</span><i style="background:${col}"></i><span class="n">${esc(plName(x.n))}${auto ? `<small>${auto}</small>` : ''}</span><span class="ck" aria-hidden="true"></span></button>`; }).join('')}
-    ${meals.length ? `<div class="pck-meals"><span>Repas <small>cochés d'office · décoche un repas sauté</small></span><div>${meals.map(x => { const id = planDoneId(x), on = !sk.has(id); return `<button type="button" class="pckm${on ? ' on' : ''}" data-pchk="${esc(id)}" aria-pressed="${on}"><span class="ck" aria-hidden="true"></span>${esc(x.n)}</button>`; }).join('')}</div></div>` : ''}
     <p class="pck-sum">${n} sur ${L.length} fait${n > 1 ? 's' : ''}</p></div>`;
 }
 document.addEventListener('click', e => { const b = e.target.closest('[data-pchk]'); if (!b || S.sheet?.kind !== 'note') return;
@@ -7177,17 +7241,21 @@ function tToday() {
   const doneCard = done.length ? `<article class="card"><span class="chiptag">${TICK.replace('<svg', '<svg width="12" height="12"')} Fait</span>${done.map(l => `<div class="bigname">${esc(l.name)}</div><p class="small muted">${l.min} min · RPE ${l.rpe}/10${l.tonnage ? ' · ' + fx(l.tonnage) + ' kg soulevés' : ''}${l.sprintM ? ' · ' + fx(l.sprintM) + ' m de sprint' : ''}</p>`).join('')}</article>` : '';
   // Today's session of each kind, shown right under that kind's week.
   const today = ['gym', 'track'].filter(kd => planForK(TODAY, kd) && !kindDone(TODAY, kd));
-  const sc = kd => { const q = planForK(TODAY, kd); if (!q || kindDone(TODAY, kd)) return ''; const b = dayPlan(TODAY).find(x => x.c === (kd === 'gym' ? 'muscu' : 'athle')), lab = kd === 'gym' ? 'Musculation' : 'Sprint';
+  // Under each week, one session only: today's (or "Séance faite" once done, until midnight), else the next one placed.
+  const sc = kd => { const q = planForK(TODAY, kd), lab = kd === 'gym' ? 'Musculation' : 'Sprint', b = dayPlan(TODAY).find(x => x.c === (kd === 'gym' ? 'muscu' : 'athle'));
+    if (kindDone(TODAY, kd)) { const dn = logsOn(TODAY).filter(l => l.kind === kd), r = M(TODAY, kd === 'gym' ? 'gymRpe' : 'trackRpe');
+      return `<article class="card donec"><span class="chiptag okt">${TICK.replace('<svg', '<svg width="12" height="12"')} Séance faite · aujourd'hui</span>${dn.length ? dn.map(l => `<button type="button" class="linkcard" data-tlog="${l.id}"><div class="bigname">${esc(l.name)}</div><p class="small muted">${l.min} min · RPE ${l.rpe}/10${l.tonnage ? ' · ' + fx(l.tonnage) + ' kg soulevés' : ''}${l.sprintM ? ' · ' + fx(l.sprintM) + ' m de sprint' : ''}</p></button>`).join('') : `<div class="bigname">${esc(q?.name || lab)}</div><p class="small muted">Notée dans ton journal${r ? ' · RPE ' + r + '/10' : ''}</p>`}</article>`; }
+    if (!q) { const nx = [...Array(60)].map((_, i) => addDays(TODAY, i + 1)).map(k => ({k, p: planForK(k, kd)})).find(x => x.p); if (!nx) return '';
+      const nb = dayPlan(nx.k).find(x => x.c === (kd === 'gym' ? 'muscu' : 'athle'));
+      return `<article class="card nextc"><span class="chiptag">Prochaine séance · ${esc(cap(fmtShort(nx.k)))}${nb ? ' · ' + tfr(nb.a) : ''}</span><button type="button" class="linkcard" data-tplanv="${nx.p.id}"${nx.p.n ? ` data-tn="${nx.p.n}"` : ''}><div class="bigname">${esc(nx.p.name)}</div><p class="small muted">${nx.p.title || nx.p.desc ? esc(nx.p.title || nx.p.desc) + ' · ' : ''}${estMin(nx.p)} min</p></button></article>`; }
     if (kindSkip(TODAY, kd)) return `<article class="card skipc"><span class="chiptag miss"><svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> ${lab} · pas faite aujourd'hui</span><div class="bigname">${esc(q.name)}</div>${q.title || q.desc ? `<p style="margin:2px 0 0;font-weight:600">${esc(q.title || q.desc)}</p>` : ''}
         <p class="small muted" style="margin-top:8px">Tu as choisi de ne pas la faire. Tu peux changer d'avis jusqu'à ce soir.</p><div style="margin-top:14px"><button class="btn" data-tunskip="${kd}">Finalement, je la fais</button></div></article>`;
     return `<article class="card"><span class="chiptag">Aujourd'hui · ${lab}${b ? ' · ' + tfr(b.a) : ''} · ${estMin(q)} min</span><button type="button" class="linkcard" data-tplanv="${q.id}"${q.n ? ` data-tn="${q.n}"` : ''}><div class="bigname">${esc(q.name)}</div>${q.title || q.desc ? `<p style="margin:2px 0 0;font-weight:600">${esc(q.title || q.desc)}</p>` : ''}
         <ul class="exl">${q.items.map(it => `<li><span>${esc(exOf(it.ex).n)}</span><span>${itemText(it)}</span></li>`).join('')}</ul></button>
         <div class="btnrow two" style="margin-top:14px"><button class="btn" data-tstart="${q.id}"${q.n ? ` data-tn="${q.n}"` : ''}>Commencer la séance</button><button class="btn ghost" data-tskip="${kd}">Ne pas la faire</button></div></article>`; };
-  const main = doneCard + (today.length ? '' : (() => {
-      // A session placed on a later day: when and what, nothing to start yet.
-      const nx = [...Array(42)].map((_, i) => addDays(TODAY, i + 1)).map(k => ({k, p: planFor(k)})).find(x => x.p); if (!nx) return '';
-      const b = dayPlan(nx.k).find(x => x.c === (nx.p.kind === 'track' ? 'athle' : 'muscu'));
-      return `<article class="card nextc pc6"><span class="chiptag">Prochaine séance · ${esc(cap(fmtShort(nx.k)))}${b ? ' · ' + tfr(b.a) : ''}</span><div class="bigname">${esc(nx.p.name)}</div><p class="small muted">${esc(nx.p.title || nx.p.desc || '')} · ${estMin(nx.p)} min</p><div style="margin-top:12px"><button class="btn ghost" data-tplanv="${nx.p.id}"${nx.p.n ? ` data-tn="${nx.p.n}"` : ''}>Voir la séance</button></div></article>`; })());
+  // Muscu and sprint done show under their week; only the other sessions of the day are listed here.
+  const oth = done.filter(l => l.kind !== 'gym' && l.kind !== 'track' && l.kind !== 'extra');
+  const main = oth.length ? `<article class="card"><span class="chiptag">${TICK.replace('<svg', '<svg width="12" height="12"')} Fait</span>${oth.map(l => `<div class="bigname">${esc(l.name)}</div><p class="small muted">${l.min} min · RPE ${l.rpe}/10</p>`).join('')}</article>` : '';
   return `
     <header class="top"><div class="sub">${fmtDay(TODAY)} · semaine ${seasonWeek(TODAY)}</div>${(() => {
       // The day's sessions are shown under their week, not up here.
@@ -7634,8 +7702,8 @@ function gymCard(p) {
   if (p.kind !== 'gym') return '';
   const F = gymFit(p.items), sel = S.tset?.gymPlan?.[p.id] || '', dist = S.app?.gymDist || {};
   const full = F.filter(f => !f.miss.length), show = full.length ? full : F;
-  return `<div class="card gymc" style="margin-top:12px"><span class="eyebrow">Où faire cette séance</span>${full.length ? '' : '<p class="small" style="margin:6px 2px">Aucune salle n\'a tout : il faudra remplacer un exercice.</p>'}${show.map(f => `<button class="gymrow${sel === f.g ? ' on' : ''}" data-gympick="${esc(p.id)}|${f.g}" aria-pressed="${sel === f.g}"><span><b>${esc(f.name)}</b><span class="meta">${dist[f.g] ? esc(dist[f.g]) + ' · ' : f.g === 'maison' ? 'chez toi, barre jusqu\'à 130 kg · ' : ''}${f.miss.length ? 'il manque : ' + missTxt(f, p.items) : 'tout est faisable'}</span></span><i>${sel === f.g ? '✓' : ''}</i></button>`).join('')}
-    <p class="small muted" style="margin:6px 2px 0">${full.length ? `Seulement les salles où tout est faisable sans rien remplacer${full.length < F.length ? ' (pas ' + F.filter(f => f.miss.length).map(f => esc(f.name) + ' : ' + missTxt(f, p.items).toLowerCase()).join(' ; ') + ')' : ''}. Tes max sur machine sont ceux de la salle choisie.` : 'Pendant la séance, un exercice que la salle n\'a pas te propose un remplaçant.'}</p></div>`;
+  return `<div class="card gymc" style="margin-top:12px"><span class="eyebrow">Où faire cette séance</span>${full.length ? '' : '<p class="small" style="margin:6px 2px">Aucune salle n\'a tout : il faudra remplacer un exercice.</p>'}${show.map(f => `<button class="gymrow${sel === f.g ? ' on' : ''}" data-gympick="${esc(p.id)}|${f.g}" aria-pressed="${sel === f.g}"><span><b>${esc(f.name)}</b><span class="meta">${TRIP_DEF[f.g] ? (() => { const x = tripMin(f.g, 1, 9 * 60 + 40); return x ? esc(x.mode === 'car' ? 'voiture' : 'vélo') + ' ' + x.ride + ' min · ' : ''; })() : dist[f.g] ? esc(dist[f.g]) + ' · ' : f.g === 'maison' ? 'chez toi, barre jusqu\'à 130 kg · ' : ''}${f.miss.length ? 'il manque : ' + missTxt(f, p.items) : 'tout est faisable'}</span></span><i>${sel === f.g ? '✓' : ''}</i></button>`).join('')}
+    <p class="small muted" style="margin:6px 2px 0">${full.length ? `Seulement les salles où tout est faisable sans rien remplacer${full.length < F.length ? ' (pas ' + F.filter(f => f.miss.length).map(f => esc(f.name) + ' : ' + missTxt(f, p.items).toLowerCase()).join(' ; ') + ')' : ''}. Tes max sur machine sont ceux de la salle choisie.` : 'Pendant la séance, un exercice que la salle n\'a pas te propose un remplaçant.'} Le trajet de la salle choisie se met dans ton planning. <button type="button" class="linkbtn" data-trips>Mes trajets</button></p></div>`;
 }
 document.addEventListener('click', async e => {
   const b = e.target.closest('[data-gympick]'); if (!b) return;
@@ -8678,7 +8746,7 @@ function fBody() {
   const val = id => { if (day) return last.sg[id] ?? null; const v = days.map(d => d.sg[id]).filter(x => x != null); return v.length ? mean(v) : null; };
   const V = Object.fromEntries(SEGS.map(([id]) => [id, val(id)])), tot = Object.values(V).reduce((a, x) => a + (x || 0), 0);
   const dens = id => V[id] == null || !tot ? null : V[id] / tot / SEG_REF[id];
-  const ell = SEGS.map(([id, n, cx, cy, rx, ry]) => { const d = dens(id); if (d == null) return ''; return `<ellipse cx="${cx}" cy="${cy}" rx="${rx + 4}" ry="${ry}" fill="${col}" opacity="${(.18 + clamp((d - .8) / .4, 0, 1) * .77).toFixed(2)}" filter="url(#soft)"/>`; }).join('');
+  const ell = SEGS.map(([id, n, cx, cy, rx, ry]) => { const d = dens(id); if (d == null) return ''; return `<ellipse cx="${cx}" cy="${cy}" rx="${rx + 4}" ry="${ry}" fill="${col}" opacity="${(.18 + clamp((d - .8) / .4, 0, 1) * .77).toFixed(2)}" filter="url(#softsg)"/>`; }).join('');
   const delta = id => { const a = first.sg[id], b = last.sg[id]; return a != null && b != null && days.length > 1 ? b - a : null; };
   const dTxt = d => d == null ? '' : `<small class="${(m === 'mm' ? d >= 0 : d <= 0) ? 'up' : 'down'}">${d >= 0 ? '+' : '−'}${fx(Math.abs(d), 2)} kg</small>`;
   const sym = (a, b) => a && b ? Math.abs(a - b) / ((a + b) / 2) * 100 : null, sA = sym(V.ra, V.la), sL = sym(V.rl, V.ll);
@@ -8687,7 +8755,7 @@ function fBody() {
       ${day ? `<p class="small muted" style="margin:6px 0 0">Pesée du ${esc(fmtShort(last.k))}. Choisis Semaine, Mois ou Année pour voir sa courbe.</p>` : pts.length > 1 ? chart(pts, {color: col, dec: 2, unit: 'kg', w: id === 'tr' && isPC() ? 1160 : undefined}) : '<p class="small muted" style="margin:0">Une seule pesée sur cette période.</p>'}</div>`; };
   return head + `<div class="stack" style="margin-top:12px">
       <div class="card segbody pc6"><div class="chead" style="margin:0"><span class="eyebrow">${lab} · ${day ? esc(cap(fmtShort(last.k))) : `moyenne de ${days.length} pesée${days.length > 1 ? 's' : ''}`}</span><b class="num nowrap">${fx(tot, 1)} kg</b></div>
-      <div class="segw"><svg viewBox="0 0 200 392" role="img" aria-label="${lab} par segment">${silBase('front')}<g clip-path="url(#silc)" pointer-events="none">${ell}</g></svg>
+      <div class="segw"><svg viewBox="0 0 200 392" role="img" aria-label="${lab} par segment">${silBase('front', 'sg')}<g clip-path="url(#silcsg)" pointer-events="none">${ell}</g></svg>
       <div class="segl">${SEGS.map(([id, n]) => V[id] != null ? `<button type="button" data-segjump="${id}"><span>${n}</span><b>${fx(V[id], 2)} kg${delta(id) != null ? dTxt(delta(id)) : ''}</b></button>` : '').join('')}</div></div>
       <div class="segleg"><span>moins dense</span><i style="background:linear-gradient(90deg,${col}2e,${col})"></i><span>plus dense</span></div>
       <p class="small muted" style="margin:8px 0 0">Couleur : densité du segment, sa part de ton total comparée à la part habituelle de ce segment. Touche un segment pour voir sa tendance. Écart gauche / droite : bras ${sA != null ? fx(sA, 1) + ' %' : '–'}, jambes ${sL != null ? fx(sL, 1) + ' %' : '–'} ; au-delà de 10 % sur les jambes, un déséquilibre de force est probable.</p></div>
