@@ -2058,7 +2058,7 @@ function parseJumpCsv(txt) {
 }
 async function importJumps(txt) {
   const got = parseJumpCsv(txt);
-  if (!got.length) { toast('Aucun saut reconnu dans ce fichier : envoie-le à Claude pour l\'adapter', 5000); return 0; }
+  if (!got.length) { toast(aiOn() ? 'Aucun saut reconnu dans ce fichier : envoie-le à Claude pour l\'adapter' : 'Aucun saut reconnu dans ce fichier : ce format n\'est pas encore lu par l\'appli', 5000); return 0; }
   const key = j => [j.type, j.date, j.side || '', jVal(j)].join('|'), have = new Set(jumps().map(key));
   const fresh = got.filter(j => !have.has(key(j)));
   if (fresh.length) await saveJumps([...jumps(), ...fresh]);
@@ -2836,7 +2836,7 @@ function homeSyn() {
   const P = homePara(), ai = AN()?.homeText, why = !!HP.why;
   return `<div class="hm-syn2"><div class="hm-card">${homeGauge()}${typeof ai === 'string' && ai ? `<p class="hm-lead">${esc(ai)}</p>` : `<p class="hm-lead">${esc(P.head)}</p>${P.lines.length ? `<ul class="hm-pts">${P.lines.map(l => `<li><span class="dots">${l.c.map(c => `<i style="background:${MODC[c]}"></i>`).join('')}</span><span>${esc(l.t)}</span></li>`).join('')}</ul>` : ''}`}</div></div>
     <div class="hm-whyrow"><button class="hm-why" data-hwhy aria-expanded="${why}">${why ? 'Masquer' : 'Pourquoi'}</button><button class="hm-say" data-hsay aria-label="Écouter l'analyse">${SPEAK}</button></div>
-    <div class="hm-whyw"${why ? '' : ' hidden'}><ul class="hm-whyl">${P.why.map(w => `<li>${esc(w)}</li>`).join('')}</ul><button class="hm-ask" data-hask>Interagir</button></div>`;
+    <div class="hm-whyw"${why ? '' : ' hidden'}><ul class="hm-whyl">${P.why.map(w => `<li>${esc(w)}</li>`).join('')}</ul>${aiOn() ? '<button class="hm-ask" data-hask>Interagir</button>' : ''}</div>`;
 }
 // Everything at a glance: the card text shrinks until it fits; only if it still does not, the least important lines go.
 function homeFit() {
@@ -2927,7 +2927,7 @@ function bilanHtml() {
     <div class="card"><span class="eyebrow">La semaine · ${esc(head)}</span><p style="margin:8px 0 0;line-height:1.55">${esc(syn || 'Pas encore assez de données sur cette semaine.')}</p>
       <details class="hidebox" style="margin-top:10px"><summary><span class="o">Le détail chiffré</span><span class="c">Masquer</span></summary><ul class="bilpts">${pts.sort((a, b) => b.lv - a.lv).map(x => `<li><i style="background:${col[x.lv]}"></i><span class="dots"><b style="background:${MODC[x.c]}"></b></span><span>${esc(x.t)}</span></li>`).join('')}</ul>
       <p class="small muted" style="margin:8px 0 0">Rouge : à corriger · orange : à surveiller · vert : bien. Chaque chiffre est comparé à tes 4 semaines d'avant.</p></details></div>
-    ${R ? `<div class="card"><span class="eyebrow">L'analyse de Claude · ${esc(R.title || '')}</span>${R.headline ? `<h3 style="margin:8px 0 4px">${esc(R.headline)}</h3>` : ''}${R.summary ? `<p class="small">${esc(R.summary)}</p>` : ''}
+    ${!aiOn() ? '' : R ? `<div class="card"><span class="eyebrow">L'analyse de Claude · ${esc(R.title || '')}</span>${R.headline ? `<h3 style="margin:8px 0 4px">${esc(R.headline)}</h3>` : ''}${R.summary ? `<p class="small">${esc(R.summary)}</p>` : ''}
       ${Lst('Analyses', R.insights, 'var(--fg)')}${Lst('Décisions pour la semaine prochaine', R.decisions || R.actions, 'var(--accent)')}${Lst('Ce qui avance', R.wins, 'var(--good)')}${Lst('Points d\'attention', R.alerts, 'var(--warn)')}${Lst('Nutrition', R.nutrition, '#30D158')}
       ${R.injury ? `<div class="sec-label" style="color:var(--bad)">Douleur et reprise</div><p class="small">${esc(R.injury)}</p>` : ''}${R.followup ? `<div class="sec-label">Suivi de la semaine d'avant</div><p class="small">${esc(R.followup)}</p>` : ''}</div>`
       : `<div class="card empty"><b>L'analyse de Claude arrive le vendredi à 20 h</b>Elle croise toute ta semaine (séances, charge, récupération, douleurs, questionnaires, repas) et propose des décisions précises pour la semaine suivante.</div>`}
@@ -4396,7 +4396,12 @@ function detailBody(id) {
   const inZone = zone && vals.length ? Math.round(vals.filter(x => x >= zone[0] && x <= zone[1]).length / vals.length * 100) : null;
   const stat = (val, lab) => `<div><b>${val}</b><span>${lab}</span></div>`;
   const stats = day ? '' : `<div class="stats" style="margin-top:12px">${stat(f(tot), m.weekly ? 'total' : 'moyenne')}${stat(sgn(pct(tot, prev)) || '–', 'vs période d\'avant')}${zone ? stat(inZone != null ? inZone + ' %' : '–', 'en zone') : stat(f(vals.length ? Math.max(...vals) : null), 'maximum')}</div>`;
-  const note = AN()?.notes?.[id === 'sleepH' ? 'sleep' : id];
+  const note = AN()?.notes?.[id === 'sleepH' ? 'sleep' : id] || (() => {
+    if (day || tot == null) return '';
+    const d = pct(tot, prev), per = {week: 'à la semaine d\'avant', month: 'au mois d\'avant', year: 'à l\'année d\'avant'}[S.gran] || 'à la période d\'avant';
+    const t1 = d == null ? 'Pas encore de période d\'avant pour comparer.' : Math.abs(d) < 3 ? `${m.weekly ? 'Total' : 'Moyenne'} stable par rapport ${per}.` : `${m.weekly ? 'Total' : 'Moyenne'} en ${d > 0 ? 'hausse' : 'baisse'} de ${fx(Math.abs(d))} % par rapport ${per}.`;
+    const t2 = inZone == null ? '' : inZone >= 80 ? ` Tu es resté dans ta zone ${inZone} % du temps : c'est solide.` : inZone >= 50 ? ` Dans ta zone ${inZone} % du temps : il y a de la marge pour être plus régulier.` : ` Dans ta zone seulement ${inZone} % du temps : c'est le point à travailler.`;
+    return t1 + t2; })();
   return `
     <div class="dhead"><div class="eyebrow" style="color:${m.c}">${m.lab}${day ? '' : ' · ' + (m.weekly ? 'total' : 'moyenne') + ' · ' + esc(P.title.toLowerCase())}</div><div class="big num">${day ? (VAL[m.id](P.from) == null ? '–' : f(VAL[m.id](P.from))) : f(tot)}<small>${m.fmt ? '' : m.unit}</small></div>${m.extra && day && !S.off ? `<div class="small muted">${m.extra()}</div>` : ''}</div>
     <div style="margin:12px 0 10px">${granSeg()}</div>
@@ -5801,7 +5806,7 @@ function footer() {
   const late = src.filter(([, w]) => !w || w.late);
   return `<div class="foot">
     <div class="srcs">${src.map(([n, w]) => `<span><i class="${!w ? 'off' : w.late ? 'late' : 'ok'}"></i>${n} ${w ? w.txt : '–'}</span>`).join('')}</div>
-    ${late.length ? `<p class="small muted" style="text-align:center;margin:6px 0 0">${late.map(([n]) => n).join(' et ')} : pas de contact depuis plus de 12 h. ${late.map(([n, , u]) => `<a href="${u}" target="_blank" rel="noopener">Ouvrir ${n}</a>`).join(' · ')}, ou demande à Claude de reconnecter.</p>` : ''}
+    ${late.length ? `<p class="small muted" style="text-align:center;margin:6px 0 0">${late.map(([n]) => n).join(' et ')} : pas de contact depuis plus de 12 h. ${late.map(([n, , u]) => `<a href="${u}" target="_blank" rel="noopener">Ouvrir ${n}</a>`).join(' · ')}${aiOn() ? ', ou demande à Claude de reconnecter' : ''}.</p>` : ''}
     ${S.req && !window.RECUP_SYNC && (!last('garmin') || S.req > last('garmin')) ? `<p class="small muted" style="text-align:center;margin:6px 0 0">Mise à jour demandée à ${new Date(S.req).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}, en cours dans l'heure.</p>` : ''}
     <button class="ptr${ptr.busy && !ptr.silent ? ' busy' : ''}" data-ptr aria-label="Actualiser les données"><span class="spin"></span></button></div>`;
 }
@@ -6877,7 +6882,7 @@ function drawerHtml() {
     <button class="ditem" data-dlook><span>Apparence et réglages<span class="hint">Thème, actualisation, vibration, fond animé</span></span><span aria-hidden="true">›</span></button>
     ${TDV_PROTO.length ? '<button class="ditem" data-dproto><span>Mon protocole</span><span aria-hidden="true">›</span></button>' : ''}
     <div class="ditem"><label for="dr-coach">Coachs<span class="hint">${S.app?.coach === false ? 'Désactivés : les conseils des coachs training, nutrition et recovery sont masqués.' : 'Activés : conseils des coachs training, nutrition et recovery.'}</span></label><span class="switch"><input type="checkbox" id="dr-coach" data-hcoach${S.app?.coach === false ? '' : ' checked'}><span></span></span></div>
-    <div class="ditem"><label for="dr-ai">IA<span class="hint">${aiOn() ? 'Activée : conseils et bilans écrits par Claude.' : 'Désactivée : tes données et les explications de base, sans texte écrit par l\'IA.'}</span></label><span class="switch"><input type="checkbox" id="dr-ai" data-hai${aiOn() ? ' checked' : ''}><span></span></span></div>
+    <div class="ditem"><label for="dr-ai">IA<span class="hint">${aiOn() ? 'Activée : Claude écrit l\'analyse du matin, le bilan du vendredi et le bouton Interagir est là.' : 'Désactivée : aucun texte écrit par l\'IA, Claude n\'écrit plus d\'analyse. L\'appli fait ses propres analyses à partir de tes données. Tes données continuent d\'arriver.'}</span></label><span class="switch"><input type="checkbox" id="dr-ai" data-hai${aiOn() ? ' checked' : ''}><span></span></span></div>
     <div class="dconn"><span class="eyebrow">Connexions</span>${connectors()}</div>`;
 }
 function openDrawer() {
