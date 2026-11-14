@@ -4484,11 +4484,12 @@ function impactCard() {
   const PP = periodOf(S.gran, S.off), last = PP.to < TODAY ? PP.to : addDays(TODAY, -1), N = Math.max(0, daysBetween(PP.from, last) + 1), END = addDays(last, 1);
   const items = new Set(); for (let i = 1; i <= N; i++) Object.keys(routineDone(addDays(END, -i))).forEach(x => items.add(x));
   for (const x of items) B.push([x, k => S.manual[k] ? !!routineDone(k)[x] : null]);
-  const out = [];
+  const out = [], DAYS = [];
+  for (let i = 1; i <= N; i++) { const k = addDays(END, -i), k1 = addDays(k, 1), r = recovery(k1)?.score; if (r != null) DAYS.push({k, r, h: G(k1, 'hrv'), sh: VAL.sleepH(k1)}); }
   for (const [n, f] of B) {
     const yes = [], no = [], hy = [], hn = [], sy = [], sn = [];
-    for (let i = 1; i <= N; i++) { const k = addDays(END, -i), k1 = addDays(k, 1), r = recovery(k1)?.score; if (r == null) continue; const v = f(k); if (v == null) continue;
-      (v ? yes : no).push(r); const h = G(k1, 'hrv'), sh = VAL.sleepH(k1); if (h != null) (v ? hy : hn).push(h); if (sh != null) (v ? sy : sn).push(sh); }
+    for (const {k, r, h, sh} of DAYS) { const v = f(k); if (v == null) continue;
+      (v ? yes : no).push(r); if (h != null) (v ? hy : hn).push(h); if (sh != null) (v ? sy : sn).push(sh); }
     if (yes.length >= 3 && no.length >= 3) out.push([n, (mean(yes) / mean(no) - 1) * 100, yes.length, {ry: mean(yes), rn: mean(no), ny: yes.length, nn: no.length, hy: mean(hy), hn: mean(hn), sy: mean(sy), sn: mean(sn)}]);
   }
   const seg = '';
@@ -5448,6 +5449,15 @@ $('#sheet-body').addEventListener('input', () => { if (S.sheet?.kind === 'note')
 $('#sheet-body').addEventListener('change', () => { if (S.sheet?.kind === 'note') noteAutosave(); });
 $('#sheet-body').addEventListener('click', e => { if (S.sheet?.kind === 'note' && e.target.closest('button,input')) setTimeout(noteAutosave, 0); });
 document.addEventListener('visibilitychange', () => { if (document.hidden && NOTE_T) noteFlush(); });
+function dayCheck() {
+  if (key(new Date()) === TODAY) return;
+  const typing = document.activeElement?.matches?.('input, textarea, select');
+  if (typing || S.sheet || (P.stack.length && !P.live)) return;
+  try { if (NOTE_T) noteFlush(); } catch (e) {}
+  location.reload();
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) dayCheck(); });
+setInterval(() => { if (!document.hidden) dayCheck(); }, 60e3);
 document.addEventListener('click', e => {
   if (S.sheet?.kind !== 'note') return;
   const at = q => e.target.closest(q); let b;
@@ -7934,7 +7944,7 @@ function editPlan(id, date, dup = false) {
   if (dup) { ED.id = uid(); ED.autoName = false; ED.autoDesc = false; ED.name = (p.name || 'Séance') + ' (copie)'; ED.wk = monday(TODAY); }
   else if (!mine) { ED.id = uid(); ED.autoName = !ED.seqAuto; ED.autoDesc = true; }
   else { ED.autoName ??= false; ED.autoDesc ??= false; }
-  ED.date = dup ? null : date || Object.entries(S.tset.dated || {}).find(([, v]) => v === ED.id)?.[0] || null;
+  ED.date = dup ? null : date || Object.entries(S.tset.dated || {}).find(([, v]) => v === ED.id)?.[0]?.slice(0, 10) || null; ED.date0 = ED.date;
   ED.wk = ED.date ? monday(ED.date) : monday(TODAY);
   openPane({title: dup ? 'Copie de la séance' : mine ? 'Modifier la séance' : 'Nouvelle séance', fixed: true, left: {label: 'Enregistrer', fn: savePlan}, render: editBody, onClose: () => { ED = null; }});
 }
@@ -8132,11 +8142,12 @@ async function savePlan() {
   const A = sessionAuto(ED);
   if (ED.autoName) ED.name = A.name; if (ED.autoDesc) ED.desc = A.desc;
   ED.name = (ED.name || '').trim() || 'Ma séance';
-  const {date, wk, ...doc0} = ED, doc = {...doc0, updatedAt: new Date().toISOString()};
+  const {date, date0, wk, ...doc0} = ED, doc = {...doc0, updatedAt: new Date().toISOString()};
   S.plans[doc.id] = doc;
   await dbSet('plans/' + doc.id, doc);
-  const dated = Object.fromEntries(Object.entries(S.tset.dated || {}).filter(([, v]) => v !== doc.id));
-  if (date) dated[dKey(date, doc.kind)] = doc.id;
+  const dated = {...(S.tset.dated || {})};
+  if (date0 && date0 !== date) for (const k of [date0, date0 + '|t']) if (dated[k] === doc.id) delete dated[k];
+  if (date) { for (const k of [date, date + '|t']) if (dated[k] === doc.id) delete dated[k]; dated[dKey(date, doc.kind)] = doc.id; }
   S.tset = {...S.tset, dated}; await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()});
   closePane(); if (P.stack.length) closePane();
   toast('Séance enregistrée'); planView(doc.id);
@@ -8193,7 +8204,7 @@ function watchSession(k, p) {
 function fillFromWatch(start) {
   const p = planFor(TODAY), a = watchSession(TODAY, p); if (!a) return;
   const items = (p ? p.items : []).map(liveItem);
-  for (const it of items) for (const x of it.sets || it.reps) x.done = true;
+  for (const it of items) for (const x of it.sets || it.reps || []) x.done = true;
   S.live = {id: uid(), plan: p?.id || null, name: p?.name || a.name || (ACT[a.type] || ['Séance'])[0], kind: p?.kind || (a.type === 'strength_training' ? 'gym' : 'track'),
     date: TODAY, start: new Date().toISOString(), items, fill: !!p, garmin: {min: a.min, start: a.start, avgHr: a.avgHr || null}};
   saveLive(); openLive();
@@ -8202,7 +8213,7 @@ function openLive() { if (!S.live) return; openPane({title: S.live.name, live: t
 function liveBody() {
   const L = S.live; if (!L) return '<div class="empty">Séance terminée.</div>';
   const gA = L.garmin;
-  const doneSets = L.items.reduce((s, it) => s + (it.sets || it.reps).filter(x => x.done).length, 0), all = L.items.reduce((s, it) => s + (it.sets || it.reps).length, 0);
+  const doneSets = L.items.reduce((s, it) => s + (it.sets || it.reps || []).filter(x => x.done).length, 0), all = L.items.reduce((s, it) => s + (it.sets || it.reps || []).length, 0);
   const back = (L.removed || []).map((r, n) => `<button data-tlback="${n}" aria-label="Remettre ${esc(exOf(r.item.ex).n)} dans la séance"><b>${esc(exOf(r.item.ex).n)}</b> · retiré · toucher pour remettre</button>`).join('');
   const wt = warmText(L.warm), ct = coolText(L.cool);
   return `${wt.length ? `<details class="card wtxt" style="margin-top:12px"><summary class="eyebrow">Échauffement · ${warmMin(L.warm)} min</summary>${wt.map(t => `<p class="small">${esc(t)}</p>`).join('')}</details>` : ''}
@@ -8340,7 +8351,7 @@ async function saveLive2() {
     : {ex: it.ex, ...(it.u === 's' ? {u: 's'} : {}), ...(it.ct ? {ct: it.ct} : {}), ...(it.cn ? {cn: it.cn} : {}), sets: it.sets.filter(s => s.done).map(s => ({kg: +s.kg || 0, reps: +s.reps || 0, ...(s.rpe !== undefined && s.rpe !== '' ? {rpe: +s.rpe} : s.rir !== undefined && s.rir !== '' ? {rpe: 10 - +s.rir, rir: +s.rir} : {})}))}).filter(it => (it.reps || it.sets).length);
   if (!items.length) { toast('Valide au moins une série avec ✓'); return; }
   const tonnage = items.reduce((s, it) => s + (it.u === 's' ? 0 : (it.sets || []).reduce((a, x) => a + x.kg * x.reps, 0)), 0);
-  const sprintM = items.reduce((s, it) => s + (it.reps && SPRINT_CATS.includes(exOf(it.ex).cat) && (it.pct ?? 100) >= 90 ? it.reps.reduce((a, r) => a + r.dist, 0) : 0), 0);
+  const sprintM = items.reduce((s, it) => s + (it.reps && SPRINT_CATS.includes(exOf(it.ex).cat) && (it.pct ?? 100) >= 90 ? it.reps.reduce((a, r) => a + (+r.dist || 0), 0) : 0), 0);
   const doc = {id: L.id, plan: L.plan, name: L.name, kind: L.kind, gym: L.gym || null, date: L.date, start: L.start, min, rpe, note, items, shoes: L.shoes || null, cond: L.cond || null, tonnage: Math.round(tonnage), sprintM, updatedAt: new Date().toISOString()};
   S.logs[doc.id] = doc;
   if (!await dbSet('training/' + doc.id, doc)) return;
@@ -9692,12 +9703,12 @@ document.addEventListener('click', e => {
   if (at('[data-panegap]')) { closePane(); return; }
   // Live session
   if ((b = at('[data-tok]'))) {
-    const [i, j] = b.dataset.tok.split('.').map(Number), it = S.live.items[i], x = (it.sets || it.reps)[j];
+    const [i, j] = b.dataset.tok.split('.').map(Number), it = S.live.items[i], x = (it?.sets || it?.reps || [])[j]; if (!x) return;
     x.done = !x.done; if (x.done) { S.live.t0 ||= Date.now(); S.live.t1 = Date.now(); } saveLive(); paneRender();
     if (x.done && PREFS.haptic) navigator.vibrate?.(10);
     return;
   }
-  if ((b = at('[data-tlset]'))) { const it = S.live.items[+b.dataset.tlset], arr = it.sets || it.reps, l = arr.at(-1) || {}; arr.push({...l, done: false, t: ''}); saveLive(); paneRender(); return; }
+  if ((b = at('[data-tlset]'))) { const it = S.live.items[+b.dataset.tlset], arr = it?.sets || it?.reps; if (!arr) return; const l = arr.at(-1) || {}; arr.push({...l, done: false, t: ''}); saveLive(); paneRender(); return; }
   if ((b = at('[data-tlrm]'))) { const i = +b.dataset.tlrm, [item] = S.live.items.splice(i, 1); (S.live.removed ||= []).push({at: i, item}); saveLive(); paneRender(); return; }
   if ((b = at('[data-tlback]'))) { const [r] = S.live.removed.splice(+b.dataset.tlback, 1); S.live.items.splice(Math.min(r.at, S.live.items.length), 0, r.item); saveLive(); paneRender(); return; }
   if ((b = at('[data-tlsub]'))) { const [i, x] = b.dataset.tlsub.split('|'); S.live.items[+i].ex = x; saveLive(); paneRender(); return; }
