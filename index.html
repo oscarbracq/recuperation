@@ -2853,7 +2853,7 @@ document.fonts?.ready.then(() => { if (S.mod === 'home') homeFit(); });
 // then the key point of each block (recovery, training, pain, how he felt, food, habits), against the 4 weeks before.
 let BIL = 0;
 function bilanEnd(off) { let d = TODAY; while (dow(d) !== 5 || (d === TODAY && new Date().getHours() < 20)) d = addDays(d, -1); return addDays(d, -7 * off); }
-function bilanPane() { BIL = 0; openPane({title: 'Bilan de la semaine', side: true, render: bilanHtml}); }
+function bilanPane() { BIL = 0; openPane({title: 'Bilan de la semaine', side: true, render: () => { try { return bilanHtml(); } catch (e) { console.error(e); return `<div class="card empty" style="margin-top:14px"><b>Le bilan n'a pas pu s'afficher</b>${esc(String(e.message || e))}</div>`; } }}); }
 document.addEventListener('click', e => { const b = e.target.closest('[data-biloff]'); if (!b || b.disabled) return; BIL = Math.max(0, BIL + +b.dataset.biloff); paneRender(); });
 function bilanHtml() {
   const e = bilanEnd(BIL), s0 = addDays(e, -6), ks = [...Array(7)].map((_, i) => addDays(s0, i)), pk = [...Array(28)].map((_, i) => addDays(s0, -28 + i));
@@ -2920,7 +2920,7 @@ function bilanHtml() {
     txt += ` Semaine prochaine : ${nT ? nT + ' séance' + (nT > 1 ? 's' : '') + ' de sprint' : 'pas de sprint prévu'}${nG ? ' et ' + nG + ' de muscu' : ''}. ${todo.length ? 'À faire : ' + todo.slice(0, 3).join(' ; ') + '.' : 'Rien ne bloque : continue sur ce rythme.'}`;
     return txt;
   })();
-  const R = (S.reports || []).find(r => r.date && r.date >= s0 && r.date <= addDays(e, 1)), Lst = (t, L, c) => L?.length ? `<div class="sec-label" style="color:${c}">${t}</div><ul class="bil">${L.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '';
+  const R = (S.reports || []).find(r => r.date && r.date >= s0 && r.date <= addDays(e, 1)), Lst = (t, L, c) => { L = Array.isArray(L) ? L.filter(Boolean) : L ? [String(L)] : []; return L.length ? `<div class="sec-label" style="color:${c}">${t}</div><ul class="bil">${L.map(x => `<li>${esc(typeof x === 'string' ? x : x.text || x.t || JSON.stringify(x))}</li>`).join('')}</ul>` : ''; };
   const col = {1: 'var(--good)', 2: 'var(--warn)', 3: 'var(--bad)'};
   return `<div class="card" style="margin-top:14px;padding:8px 12px"><div class="daynav"><button data-biloff="1" aria-label="Semaine d'avant">‹</button><b>Du ${esc(fmtShort(s0))} au ${esc(fmtShort(e))}</b><button data-biloff="-1" aria-label="Semaine d'après"${BIL ? '' : ' disabled'}>›</button></div></div>
     <div class="stack" style="margin-top:12px">

@@ -1,7 +1,7 @@
 // TNR Athletics â€” offline fallback only. Every same-origin file is network-first, so the phone
 // always runs one consistent version when online; the cache only serves when there is no network.
 // Supabase data is never cached here: the app reads it live.
-const CACHE = 'recup-v105';
+const CACHE = 'recup-v106';
 const SHELL = ['./', './index.html', './supabase-db.js', './manifest.webmanifest', './icon-192.png', './icon-256.png', './splash-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL))); self.skipWaiting(); });
