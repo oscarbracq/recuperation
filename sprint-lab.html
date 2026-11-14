@@ -7662,7 +7662,7 @@ function paneShow() {
   $('#scrim').classList.add('on'); $('#pane').classList.add('on'); document.body.style.overflow = 'hidden';
   if (v.focus) setTimeout(() => $(v.focus)?.focus(), 350);
 }
-function paneRender() { const v = P.stack.at(-1); if (!v) { if (S.mod === 'N') renderMod(true); return; } if (v.keep && v.shown) { v.refresh?.(); return; } $('#pane-body').innerHTML = v.render(); initCharts($('#pane-body')); if (v.keep) { v.shown = true; v.mount?.(); } }
+function paneRender() { const v = P.stack.at(-1); if (!v) { if (S.mod === 'N') renderMod(true); return; } if (v.keep && v.shown) { v.refresh?.(); return; } let h; try { h = v.render(); } catch (e) { console.error(e); h = `<div class="card empty" style="margin-top:14px"><b>Cette page n'a pas pu s'afficher</b>${esc(String(e?.message || e))}</div>`; } $('#pane-body').innerHTML = h; try { initCharts($('#pane-body')); if (v.keep) { v.shown = true; v.mount?.(); } } catch (e) { console.error(e); } }
 function closePane() {
   const v = P.stack.pop(); v?.onClose?.();
   if (P.stack.length) { paneShow(); return; }
