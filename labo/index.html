@@ -100,7 +100,71 @@ img{max-width:100%}
 })();
 </script>
 <div id="login" hidden><form><img class="logo" src="../icon-192.png?v=tnr" alt="TNR Athletics"><h1 style="margin:0">TNR Athletics</h1><input name="email" type="email" required autocomplete="email" placeholder="ton e-mail"><input name="password" type="password" required autocomplete="current-password" placeholder="ton mot de passe"><button class="btn" type="submit">Se connecter</button><p class="msg"></p><button class="link" type="button" style="background:none;border:0;color:var(--fg2);font:inherit;font-size:.8125rem;text-decoration:underline">Pas encore de mot de passe ? Recevoir un lien par mail</button></form></div>
-<div id="setpw" hidden><form><img class="logo" src="../icon-192.png?v=tnr" alt="TNR Athletics"><h1 style="margin:0;font-size:1.375rem">Choisis ton mot de passe</h1><p class="small muted" style="margin:0">Pour ouvrir l'appli sur n'importe quel navigateur avec <b class="who"></b>.</p><input name="password" type="password" autocomplete="new-password" placeholder="nouveau mot de passe"><button class="btn" type="submit">Enregistrer</button><p class="msg"></p><button class="later" type="button" style="background:none;border:0;color:var(--fg2);font:inherit;font-size:.8125rem">Plus tard</button></form></div><title>TNR Athletics</title>
+<div id="setpw" hidden><form><img class="logo" src="../icon-192.png?v=tnr" alt="TNR Athletics"><h1 style="margin:0;font-size:1.375rem">Choisis ton mot de passe</h1><p class="small muted" style="margin:0">Pour ouvrir l'appli sur n'importe quel navigateur avec <b class="who"></b>.</p><input name="password" type="password" autocomplete="new-password" placeholder="nouveau mot de passe"><button class="btn" type="submit">Enregistrer</button><p class="msg"></p><button class="later" type="button" style="background:none;border:0;color:var(--fg2);font:inherit;font-size:.8125rem">Plus tard</button></form></div><script>
+/* ================= TNR · LABO : the sandbox =================
+   Runs before anything else on the page.
+   1. The labo has its own corner of the phone's storage: a live session, a draft or a choice made here never
+      shows up in the real app (same web address, so without this they would share it). Only the sign-in is shared.
+   2. labSandbox(db): reads the real account, but every write stays on this phone ("overlay"), merged on top of
+      the real data. Nothing reaches the account. "Réinitialiser le labo" wipes the overlay. */
+(() => {
+  const PRE = 'labo:', shared = k => /^sb-|^supabase|^trf-mock-db$/.test(String(k));
+  const sp = Storage.prototype, get = sp.getItem, set = sp.setItem, del = sp.removeItem;
+  const own = (st, k) => st === window.localStorage && !shared(k) ? PRE + k : k;
+  sp.getItem = function (k) { return get.call(this, own(this, k)); };
+  sp.setItem = function (k, v) { return set.call(this, own(this, k), v); };
+  sp.removeItem = function (k) { return del.call(this, own(this, k)); };
+  window.LAB_RAW = {get: k => get.call(localStorage, k), set: (k, v) => set.call(localStorage, k, v), del: k => del.call(localStorage, k),
+    wipe() { const ks = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith(PRE)) ks.push(k); } ks.forEach(k => del.call(localStorage, k)); }};
+})();
+
+function labSandbox(db) {
+  if (!db) return db;
+  const KEY = 'labo:overlay';
+  let O = {}; try { O = JSON.parse(LAB_RAW.get(KEY) || '{}') || {}; } catch (e) { O = {}; }
+  const save = () => { try { LAB_RAW.set(KEY, JSON.stringify(O)); } catch (e) { console.warn('labo: stockage plein', e); } };
+  const subs = new Set(), meta = {fromCache: false, hasPendingWrites: false};
+  const snapDoc = (id, d) => ({id, exists: d !== undefined && d !== null, data: () => d === null ? undefined : d, metadata: meta});
+  const over = (col, id) => O[col + '/' + id];
+  const mergeDoc = (col, id, real) => { const w = over(col, id); return w ? snapDoc(id, w.d) : real; };
+  const mergeCol = (col, real) => {
+    const m = new Map(); (real?.docs || []).forEach(d => m.set(d.id, d.data()));
+    for (const [p, w] of Object.entries(O)) { const i = p.lastIndexOf('/'); if (p.slice(0, i) !== col) continue; const id = p.slice(i + 1); if (w.d == null) m.delete(id); else m.set(id, w.d); }
+    const docs = [...m.keys()].sort().map(id => snapDoc(id, m.get(id)));
+    return {docs, size: docs.length, empty: !docs.length, metadata: real?.metadata || meta, docChanges: () => []};
+  };
+  const fire = (col, id) => subs.forEach(l => { if (l.col !== col || !l.real) return; if (!l.id) l.fn(mergeCol(col, l.real)); else if (l.id === id) l.fn(mergeDoc(col, id, l.real)); });
+  const write = (col, id, d) => { O[col + '/' + id] = {d: d == null ? null : JSON.parse(JSON.stringify(d)), t: Date.now()}; save(); setTimeout(() => fire(col, id)); };
+  const listen = (col, id, src, fn, err) => {
+    const l = {col, id, fn, real: null}; subs.add(l);
+    const un = src.onSnapshot(s => { l.real = s; fn(id ? mergeDoc(col, id, s) : mergeCol(col, s)); }, err);
+    return () => { subs.delete(l); if (typeof un === 'function') un(); };
+  };
+  const docRef = (col, id) => {
+    const real = db.collection(col).doc(id);
+    return {id, path: col + '/' + id,
+      onSnapshot: (fn, err) => listen(col, id, real, fn, err),
+      async get() { return mergeDoc(col, id, await real.get()); },
+      async one() { const w = over(col, id); if (w) return w.d ?? null; return real.one ? real.one() : (await real.get()).data() ?? null; },
+      async set(d) { write(col, id, d); },
+      async update(d) { const w = over(col, id); let base = w ? w.d : null; if (!w) try { base = (await real.get()).data() || null; } catch (e) {} write(col, id, {...(base || {}), ...d}); },
+      async delete() { write(col, id, null); }};
+  };
+  const api = {
+    collection: col => ({path: col, onSnapshot: (fn, err) => listen(col, null, db.collection(col), fn, err), async get() { return mergeCol(col, await db.collection(col).get()); }, doc: id => docRef(col, id)}),
+    doc: p => { const i = p.lastIndexOf('/'); return docRef(p.slice(0, i), p.slice(i + 1)); }
+  };
+  window.LAB_DB = {count: () => Object.keys(O).length, list: () => Object.keys(O), reset() { O = {}; save(); }};
+  // No cloud call from the labo: no sync request, no key saved, no notification switched on or off.
+  const off = () => Promise.resolve('Labo : sans effet sur ton vrai compte');
+  window.RECUP_SYNC = async () => 'Labo : tes données sont celles de ton compte, la synchro reste dans ta vraie appli';
+  if (window.RECUP_KEYS) window.RECUP_KEYS = {...window.RECUP_KEYS, save: off, linkWithings: off};
+  if (window.RECUP_PUSH) window.RECUP_PUSH = {...window.RECUP_PUSH, on: off, off: off, test: off};
+  return api;
+}
+
+</script>
+<title>TNR Athletics</title>
 
 <style>
 /* Layout: iOS-style grouped list — centered header, recovery gauge hero, 2-column metric tiles that open a detail sheet with a scrubbable chart, translucent tab bar */
@@ -1361,73 +1425,526 @@ input[type=date].mini-in,input[type=date]{min-width:165px;flex:none}
 .qty{display:flex;align-items:center;gap:10px;margin-top:12px}
 .qty input{flex:1;font:700 1.75rem var(--display);text-align:center;color:var(--fg);background:var(--card2);border:0;border-radius:14px;padding:10px;font-variant-numeric:tabular-nums}
 .qty span{font-weight:600;color:var(--fg2)}
-/* ================= LABO: the new home ================= */
-.hm-head{text-align:left}
-.hm-head .sub,.hm-head .hello{text-align:center}
-.lab{display:grid;gap:12px;margin:14px auto 8px;max-width:520px;text-align:left}
-.lab-tag{justify-self:center;font-size:.6875rem;letter-spacing:.08em;font-weight:700;color:#FFD60A;background:rgba(255,214,10,.12);padding:4px 10px;border-radius:99px}
-.lab-c{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:16px;backdrop-filter:blur(24px) saturate(140%);-webkit-backdrop-filter:blur(24px) saturate(140%);animation:labin .55s cubic-bezier(.22,.8,.3,1) both}
-.lab-c:nth-child(2){animation-delay:.04s}.lab-c:nth-child(3){animation-delay:.1s}.lab-c:nth-child(4){animation-delay:.16s}.lab-c:nth-child(5){animation-delay:.22s}.lab-c:nth-child(6){animation-delay:.28s}.lab-c:nth-child(7){animation-delay:.34s}.lab-c:nth-child(8){animation-delay:.4s}
-@keyframes labin{from{opacity:0;transform:translateY(14px) scale(.985)}}
-.lab-c h3{margin:0 0 10px;font-size:1rem;display:flex;align-items:baseline;gap:8px}.lab-c h3 small{font-weight:400;font-size:.75rem;color:var(--fg2)}
-.lab-ready{display:grid;grid-template-columns:auto 1fr;gap:14px 16px;align-items:center}
-.lab-ring{position:relative;width:132px;height:132px}
-.lab-arc{animation:labarc 1.2s cubic-bezier(.22,.8,.3,1) both .15s}@keyframes labarc{from{stroke-dashoffset:var(--c0)}}
-.lab-rv{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-.lab-rv b{font-size:2.25rem;line-height:1;font-variant-numeric:tabular-nums}.lab-rv b small{font-size:1rem;color:var(--fg2);margin-left:1px}.lab-rv span{font-size:.625rem;color:var(--fg2);max-width:96px;margin-top:4px;line-height:1.2}
-.lab-vs{display:grid;grid-template-columns:1fr 1fr;gap:8px}.lab-vs.three{grid-template-columns:repeat(3,1fr)}
-.lab-v{background:rgba(255,255,255,.04);border-radius:14px;padding:8px 10px;display:flex;flex-direction:column;gap:1px;border-left:3px solid transparent}
-.lab-v span{font-size:.6875rem;color:var(--fg2)}.lab-v b{font-size:1.0625rem;font-variant-numeric:tabular-nums}.lab-v small{font-size:.625rem;color:var(--fg2);line-height:1.25}
-.lab-v.ok{border-left-color:#30D158}.lab-v.mid{border-left-color:#FFD60A}.lab-v.bad{border-left-color:#FF453A}
-.lab-say{grid-column:1/-1;margin:0;font-size:.875rem;line-height:1.45}
-.lab-blk{display:grid;grid-template-columns:74px 3px 1fr auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid rgba(255,255,255,.06)}
-.lab-blk:first-of-type{border-top:0}
-.lab-blk .t{display:flex;flex-direction:column;font-size:.6875rem;color:var(--fg2)}.lab-blk .t b{font-size:.9375rem;color:var(--fg)}
-.lab-blk>i{align-self:stretch;border-radius:2px;background:var(--c)}
-.lab-blk .n{display:flex;flex-direction:column;gap:2px;min-width:0}.lab-blk .n small{font-size:.6875rem;color:var(--fg2)}
-.lab-blk.now{background:linear-gradient(90deg,color-mix(in srgb,var(--c) 18%,transparent),transparent);border-radius:12px;padding:8px;margin:0 -8px}
-.lab-blk.now .t{color:var(--c);font-weight:700}
-.lab-chip .plg-chip{position:static;display:inline-block;margin-top:2px;font-size:.6875rem;padding:2px 8px;border-radius:8px;background:rgba(255,255,255,.08);color:var(--fg)}
-.lab-go{background:#fff;color:#000;border:0;border-radius:99px;padding:8px 14px;font:inherit;font-size:.8125rem;font-weight:700}
-.lab-ok{font-size:.75rem;color:#30D158;font-weight:700}
-.lab-link{background:none;border:0;color:var(--fg2);font:inherit;font-size:.8125rem;padding:8px 0 0;cursor:pointer}
-.lab-empty{margin:0;font-size:.875rem;color:var(--fg2)}
-.lab-tip{display:grid;grid-template-columns:22px 1fr;gap:10px;padding:8px 0;border-top:1px solid rgba(255,255,255,.06)}.lab-tip:first-of-type{border-top:0}
-.lab-tip>i{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:.6875rem;color:#000}
-.lab-tip p{margin:0;font-size:.875rem;line-height:1.45}.lab-tip.bad p{color:#FF8A80}.lab-tip.mid p,.lab-tip.warn p{color:#FFE27A}
-.lab-tip .cact{display:block;margin-top:6px}
-.lab-bars{display:grid;gap:10px}.lab-bar>span{display:flex;justify-content:space-between;font-size:.75rem;color:var(--fg2)}.lab-bar>span b{color:var(--fg);font-weight:600;font-variant-numeric:tabular-nums}
-.lab-bar>div{height:7px;border-radius:4px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:5px}.lab-bar i{display:block;height:100%;border-radius:4px;transform-origin:left;animation:labbar .9s cubic-bezier(.22,.8,.3,1) both .25s}@keyframes labbar{from{transform:scaleX(0)}}
-.lab-ds{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;height:118px;align-items:end}
-.lab-d{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px}
-.lab-d i{width:100%;max-width:26px;border-radius:7px 7px 3px 3px;background:linear-gradient(#0A84FF,#5E5CE6);transform-origin:bottom;animation:labgrow .8s cubic-bezier(.22,.8,.3,1) both .3s}@keyframes labgrow{from{transform:scaleY(0)}}
-.lab-d.td i{background:linear-gradient(#FF9F0A,#FF453A)}.lab-d span{font-size:.625rem;color:var(--fg2)}.lab-d em{font-style:normal;font-size:.5625rem;color:var(--fg2);min-height:.8em}
-.lab-acts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px}
-.lab-acts button{background:rgba(255,255,255,.06);border:0;border-radius:16px;color:var(--fg);font:inherit;font-size:.6875rem;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
-.lab-acts b{font-size:1.125rem}
-/* Phone: the letters take less room, the day gets more */
-@media (max-width:899px){
-  #mod-home .hm-info{min-height:40px;margin-top:6px}
-  #mod-home .hm-dock{margin-top:4px;padding-bottom:6px}
-  #mod-home .hm-k .l{height:64px;font-size:3.25rem}
-  #mod-home .hm-head{max-height:none}
+/* ================= TNR · LABO « NX » ================= */
+@property --zc{syntax:'<color>';inherits:true;initial-value:#30D158}
+html.nx-on .mod,html.nx-on .aura,html.nx-on #pcnav,html.nx-on .pcnav,html.nx-on .backhome,html.nx-on .modmark,html.nx-on .drawer,html.nx-on .drawer-scrim{display:none!important}
+html.nx-on body::before{display:none}
+html.nx-on,html.nx-on body{background:#000;overflow:hidden;height:100%}
+.toast{z-index:140!important}
+html.nx-on .toast{bottom:calc(104px + env(safe-area-inset-bottom,0px))}
+#nx[hidden]{display:none!important}
+/* Computer: the engine windows open to the right of the labo sidebar, narrower, over a dimmed page. */
+html.nx-on.pc{--pcw:236px!important}
+html.nx-on.pc #pane .sheet-card{max-width:760px}
+html.nx-on.pc #pane .sheet-scroll,html.nx-on.pc #sheet .sheet-scroll{background:rgba(0,0,0,.8)}
+.nx{--bg:#000;--card:rgba(255,255,255,.058);--card2:rgba(255,255,255,.09);--line:rgba(255,255,255,.085);--fg:#F5F5F7;--fg2:#A1A1AA;--fg3:#6B6B73;--zc:#30D158;
+  --r:26px;--ease:cubic-bezier(.22,.9,.3,1);--spring:cubic-bezier(.34,1.45,.55,1);
+  position:fixed;inset:0;z-index:30;background:var(--bg);color:var(--fg);font:16px/1.4 var(--font);-webkit-font-smoothing:antialiased;transition:--zc 1.2s ease}
+.nx button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.nx button:disabled{opacity:.35;cursor:default}
+.nx svg.i,#nx-shs svg.i,#nx-live svg.i,#nx-cele svg.i,.nx-backnew svg.i{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+/* The aura: three slow lights in the colour of the day's form. */
+.nx-aura{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.nx-aura i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.34;will-change:transform}
+.nx-aura i:nth-child(1){width:70vmax;height:70vmax;left:-25vmax;top:-38vmax;background:radial-gradient(circle,var(--zc),transparent 62%);animation:nxa1 22s ease-in-out infinite alternate}
+.nx-aura i:nth-child(2){width:55vmax;height:55vmax;right:-30vmax;top:-10vmax;background:radial-gradient(circle,#0A84FF,transparent 62%);opacity:.2;animation:nxa2 28s ease-in-out infinite alternate}
+.nx-aura i:nth-child(3){width:60vmax;height:60vmax;left:10vmax;bottom:-48vmax;background:radial-gradient(circle,#BF5AF2,transparent 62%);opacity:.12;animation:nxa1 34s ease-in-out infinite alternate-reverse}
+@keyframes nxa1{to{transform:translate(8vmax,6vmax) scale(1.12)}}@keyframes nxa2{to{transform:translate(-10vmax,8vmax) scale(.9)}}
+/* Top bar (phone): appears with a blur once the page scrolls. */
+.nx-top{position:absolute;left:0;right:0;top:0;z-index:5;height:calc(54px + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) 12px 0 18px;display:flex;align-items:center;gap:10px;transition:background .3s,border-color .3s;border-bottom:1px solid transparent}
+.nx.sc .nx-top{background:rgba(10,10,12,.72);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border-bottom-color:var(--line)}
+.nx-top-t{flex:1;text-align:center;font-weight:700;font-size:.9375rem;opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s}
+.nx.sc .nx-top-t{opacity:1;transform:none}
+.nx-top-r{display:flex;gap:4px;align-items:center}
+.nx-logo{display:flex;align-items:baseline;gap:6px}.nx-logo b{font:900 1.125rem/1 var(--display);letter-spacing:.04em}
+.nx-logo span{font-size:.625rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#000;background:#FFD60A;padding:3px 6px 2px;border-radius:6px;transform:translateY(-2px)}
+.nx-ib{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:var(--fg2)!important;transition:background .2s,transform .2s var(--spring)}
+.nx-ib:active{transform:scale(.88);background:var(--card2)}
+.nx-aib{height:34px;padding:0 12px 0 10px!important;border-radius:99px;display:flex;align-items:center;gap:6px;font-size:.8125rem!important;font-weight:700;color:var(--fg2)!important;border:1px solid var(--line)!important;transition:all .3s}
+.nx-aib.on{color:#fff!important;border-color:transparent!important;background:linear-gradient(120deg,#7C5CFF,#BF5AF2 55%,#FF6FB1)!important;box-shadow:0 4px 18px rgba(191,90,242,.45)}
+/* The page */
+.nx-main{position:absolute;inset:0;z-index:1;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:calc(56px + env(safe-area-inset-top,0px)) 0 calc(118px + env(safe-area-inset-bottom,0px));scrollbar-width:none}
+.nx-main::-webkit-scrollbar{display:none}
+.nx-page{max-width:640px;margin:0 auto;padding:0 16px}
+.nx-h{padding:6px 4px 16px;position:relative}
+.nx-h h1{font:800 2.25rem/1.05 var(--display);letter-spacing:-.035em;margin:2px 0 0}
+.nx-eye{margin:0;font-size:.8125rem;font-weight:600;color:var(--fg2);letter-spacing:.01em}
+.nx-h-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.nx-cols{display:flex;flex-direction:column;gap:12px}
+.nx-col{display:contents}
+.nx-cols>.nx-col>*{order:var(--o,10)}
+/* Cards */
+.nx-card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;overflow:hidden}
+.nx-card.in{background:rgba(255,255,255,.045);margin-top:12px}
+.nx-ct{margin:0 0 12px;font:700 1.0625rem/1.2 var(--display);letter-spacing:-.01em;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.nx-ct small,.nx-h4 small,.nx-sec small{font:500 .75rem var(--font);color:var(--fg3);letter-spacing:0}
+.nx-h4{margin:18px 0 8px;font-size:.9375rem;font-weight:700;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.nx-sec{margin:26px 4px 12px;font:800 1.25rem/1.1 var(--display);letter-spacing:-.02em;display:flex;align-items:baseline;gap:8px}
+.nx-sub{margin:4px 0 0;font-size:.875rem;line-height:1.45;color:var(--fg2)}
+.nx-empty{margin:4px 0;font-size:.875rem;color:var(--fg3)}
+.nx-hint{text-align:center;font-size:.75rem;color:var(--fg3);margin:14px 0 0}
+.nx-err{border-color:rgba(255,69,58,.4)}.nx-err b{display:block}.nx-err small{color:var(--fg2)}
+.nx-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.nx-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px!important;border-radius:16px;background:#fff!important;color:#000!important;font-weight:750!important;font-size:.9375rem!important;transition:transform .25s var(--spring),box-shadow .3s,filter .2s}
+.nx-btn:active{transform:scale(.96)}
+.nx-btn.nx-go{background:linear-gradient(135deg,color-mix(in srgb,var(--k,#30D158) 92%,#fff),var(--k,#30D158))!important;color:#000!important;box-shadow:0 8px 26px color-mix(in srgb,var(--k,#30D158) 40%,transparent);flex:1}
+.nx-btn.sm{min-height:38px;padding:0 14px!important;font-size:.8125rem!important;border-radius:12px;flex:none}
+.nx-btn.wide{width:100%}
+.nx-btn2{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 18px!important;border-radius:16px;background:var(--card2)!important;font-weight:650!important;font-size:.9375rem!important;transition:transform .25s var(--spring),background .2s}
+.nx-btn2:active{transform:scale(.96);background:rgba(255,255,255,.14)!important}
+.nx-link{display:block;margin-top:12px;font-size:.8125rem!important;font-weight:600;color:var(--fg2)!important;padding:4px 0!important;text-align:left}
+.nx-link:active{opacity:.6}
+.nx-chips{display:flex;gap:6px;flex-wrap:wrap}
+.nx-chip{height:34px;padding:0 13px!important;border-radius:99px;background:var(--card2)!important;font-size:.8125rem!important;font-weight:600;display:inline-flex;align-items:center;gap:6px;transition:all .25s var(--spring);white-space:nowrap}
+.nx-chip.on{background:color-mix(in srgb,var(--c,#fff) 22%,transparent)!important;color:color-mix(in srgb,var(--c,#fff) 80%,#fff)!important;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--c,#fff) 70%,transparent)}
+.nx-chip b{font-weight:800}
+.nx-chip:active{transform:scale(.92)}
+.nx-seg{display:flex;padding:4px;border-radius:16px;background:var(--card);border:1px solid var(--line);gap:2px;margin:0 0 14px}
+.nx-seg button{flex:1;height:38px;border-radius:12px;font-size:.875rem!important;font-weight:650;color:var(--fg2)!important;transition:all .3s var(--ease)}
+.nx-seg button.on{background:rgba(255,255,255,.13)!important;color:#fff!important;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.nx-in{width:100%;height:48px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--fg);font:inherit;font-size:1rem;padding:0 14px;outline:none;transition:border-color .2s,background .2s}
+.nx-in:focus{border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.09)}
+.nx-in::placeholder{color:var(--fg3)}
+.nx-kind{display:inline-flex;align-items:center;gap:6px;font-size:.6875rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--k,var(--fg2))}
+.nx-tag{display:inline-block;font-size:.75rem;font-weight:750;color:var(--c);background:color-mix(in srgb,var(--c) 16%,transparent);padding:4px 10px;border-radius:99px}
+.nx-bar{height:8px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:12px}
+.nx-bar i{display:block;height:100%;border-radius:5px;background:var(--c,var(--k,#fff));transition:width .6s var(--ease)}
+.nx-adapt{margin:12px 0 0;padding:10px 12px;border-radius:14px;background:rgba(255,214,10,.1);color:#FFE27A;font-size:.8125rem;line-height:1.45}
+.nx-acts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+.nx-acts button{min-height:74px;border-radius:18px;background:var(--card2)!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:.6875rem!important;font-weight:600;text-align:center;padding:8px 4px!important;line-height:1.2;transition:transform .25s var(--spring)}
+.nx-acts button:active{transform:scale(.93)}
+.nx-acts button.bad{color:#FF8A80!important}
+/* Tab bar (phone): a floating glass capsule; the pill slides with a spring. */
+.nx-tabs{position:absolute;z-index:6;left:max(14px,env(safe-area-inset-left,0px));right:max(14px,env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));height:68px;border-radius:26px;display:flex;padding:6px;
+  background:rgba(28,28,32,.72);backdrop-filter:blur(26px) saturate(170%);-webkit-backdrop-filter:blur(26px) saturate(170%);border:1px solid rgba(255,255,255,.1);box-shadow:0 18px 40px rgba(0,0,0,.55);max-width:520px;margin:0 auto}
+.nx-tabs button{flex:1;position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:.6875rem!important;font-weight:650;color:var(--fg3)!important;transition:color .3s}
+.nx-tabs button.on{color:#fff!important}
+.nx-tabs button svg{transition:transform .4s var(--spring)}.nx-tabs button.on svg{transform:translateY(-1px) scale(1.08)}
+.nx-tabs button:active svg{transform:scale(.85)}
+.nx-pill{position:absolute;left:0;top:6px;bottom:6px;border-radius:20px;background:rgba(255,255,255,.12);transition:transform .5s var(--spring),width .4s var(--ease);z-index:0}
+.nx-side{display:none}
+/* Page arrival: cards rise one after the other; a tab change slides in the direction of travel. */
+.nx-page.enter .nx-h{animation:nxin .6s var(--ease) both}
+.nx-page.enter .nx-card,.nx-page.enter .nx-strip,.nx-page.enter .nx-cal,.nx-page.enter .nx-seg,.nx-page.enter .nx-pc,.nx-page.enter .nx-libbar,.nx-page.enter .nx-hr,.nx-page.enter .nx-acts{animation:nxin .62s var(--ease) both;animation-delay:calc(var(--o,1) * 55ms + 40ms)}
+.nx-page.enter.l .nx-h{animation-name:nxinl}.nx-page.enter.r .nx-h{animation-name:nxinr}
+.nx-page.enter .nx-pc{animation-delay:calc(var(--i,0) * 40ms + 120ms)}
+@keyframes nxin{from{opacity:0;transform:translateY(18px) scale(.985)}}
+@keyframes nxinl{from{opacity:0;transform:translateX(-26px)}}@keyframes nxinr{from{opacity:0;transform:translateX(26px)}}
+.nx-page.enter .nx-arc{animation:nxarc 1.3s var(--ease) both .2s}
+@keyframes nxarc{from{stroke-dashoffset:var(--c0)}}
+.nx-page.enter .nx-ln{animation:nxln 1.4s var(--ease) both .25s;stroke-dasharray:1}
+@keyframes nxln{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+.nx-page.enter .nx-area{animation:nxfade 1s ease both .6s}@keyframes nxfade{from{opacity:0}}
+.nx-page.enter .nx-bars i{animation:nxgrow .8s var(--spring) both;animation-delay:calc(var(--d) + 200ms)}@keyframes nxgrow{from{transform:scaleY(0)}}
+.nx-page.enter .nx-dot{animation:nxpop .5s var(--spring) both 1.3s}@keyframes nxpop{from{transform:translate(-50%,-50%) scale(0)}}
+/* Week strip on the first page */
+.nx-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:0 0 14px}
+.nx-sd{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 7px!important;border-radius:16px;transition:background .2s,transform .2s var(--spring)}
+.nx-sd span{font-size:.6875rem;color:var(--fg3);font-weight:700}.nx-sd b{font-size:1.0625rem;font-weight:750;font-variant-numeric:tabular-nums}
+.nx-sd i,.nx-wd-h i{display:flex;gap:3px;height:6px;margin-top:2px}
+.nx-sd em,.nx-wd-h em{width:6px;height:6px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--c)}
+.nx-sd em.dn,.nx-wd-h em.dn{background:var(--c)}
+.nx-sd.past{opacity:.5}
+.nx-sd.on{background:#fff!important;color:#000!important;opacity:1}.nx-sd.on span{color:#000}
+.nx-sd:active{transform:scale(.9)}
+/* Form */
+.nx-hero{padding:20px 18px 16px;background:linear-gradient(160deg,color-mix(in srgb,var(--zc) 16%,rgba(255,255,255,.04)),rgba(255,255,255,.035) 55%);border-color:color-mix(in srgb,var(--zc) 22%,var(--line))}
+.nx-hero-in{display:grid!important;grid-template-columns:auto 1fr;gap:18px;align-items:center;width:100%;text-align:left}
+.nx-ring{position:relative;display:grid;place-items:center;flex:none}
+.nx-ring svg{display:block;max-width:100%;height:auto;filter:drop-shadow(0 0 18px color-mix(in srgb,var(--zc) 30%,transparent))}
+.nx-ring-v{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.nx-ring-v b{font:800 3rem/1 var(--display);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.nx-ring-v b small{font-size:1.125rem;color:var(--fg2);font-weight:700;margin-left:1px}
+.nx-ring-v>span{font-size:.6875rem;color:var(--fg2);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-top:4px;text-align:center;max-width:110px;line-height:1.2}
+.nx-hero-t{display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0}
+.nx-say{margin:0;font-size:.9375rem;line-height:1.4;font-weight:550}
+.nx-more{font-size:.75rem;color:var(--fg3);font-weight:600}
+.nx-vits{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.nx-vit{background:rgba(0,0,0,.25);border-radius:16px;padding:10px 10px 9px;display:grid;grid-template-columns:auto 1fr;column-gap:6px;align-items:center;position:relative;overflow:hidden}
+.nx-vit svg{color:var(--c)}.nx-vit span{font-size:.6875rem;color:var(--fg2);font-weight:650}
+.nx-vit b{grid-column:1/-1;font-size:1.0625rem;font-weight:750;font-variant-numeric:tabular-nums;margin-top:4px;white-space:nowrap}
+.nx-vit small{grid-column:1/-1;font-size:.625rem;color:var(--fg3);line-height:1.25}
+.nx-vit::after{content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:0 3px 3px 0;background:transparent}
+.nx-vit.ok::after{background:#30D158}.nx-vit.mid::after{background:#FFD60A}.nx-vit.bad::after{background:#FF453A}
+/* Morning check */
+.nx-q{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.nx-q:first-of-type{border-top:0}
+.nx-q>span{font-size:.875rem;font-weight:650;display:flex;flex-direction:column;min-width:0}.nx-q>span small{font-size:.6875rem;color:var(--fg3);font-weight:500}
+.nx-dots{display:flex;gap:5px;flex:none}
+.nx-dots button{width:36px;height:36px;border-radius:12px;background:var(--card2)!important;font-weight:750;font-size:.875rem!important;color:var(--fg2)!important;transition:all .3s var(--spring)}
+.nx-dots button.on{background:var(--c)!important;color:#000!important;transform:scale(1.08);box-shadow:0 4px 14px color-mix(in srgb,var(--c) 45%,transparent)}
+.nx-dots button:active{transform:scale(.88)}
+.nx-qp{flex-direction:column;align-items:stretch}.nx-qp .nx-chips{margin-top:2px}
+.nx-check.done{display:flex;align-items:center;gap:12px;padding:14px 16px}
+.nx-check.done>div:nth-child(2){flex:1;min-width:0;display:flex;flex-direction:column}.nx-check.done b{font-size:.9375rem}.nx-check.done small{font-size:.75rem;color:var(--fg2);line-height:1.35}
+.nx-check.done .nx-link{margin:0;flex:none}
+.nx-chk-ok{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#30D158;color:#000;flex:none}
+/* Sessions */
+.nx-sess{--k:#FF453A;padding:18px;background:linear-gradient(165deg,color-mix(in srgb,var(--k) 20%,rgba(255,255,255,.04)),rgba(255,255,255,.04) 60%);border-color:color-mix(in srgb,var(--k) 28%,var(--line))}
+.nx-sess::before{content:"";position:absolute;right:-60px;top:-60px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--k) 35%,transparent),transparent 70%);pointer-events:none}
+.nx-sess-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.nx-sess-min{display:inline-flex;align-items:center;gap:5px;font-size:.8125rem;font-weight:700;color:var(--fg2)}
+.nx-sess h2,.nx-pd h2{margin:8px 0 0;font:800 1.625rem/1.1 var(--display);letter-spacing:-.025em}
+.nx-sess-f{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
+.nx-sess-f span{display:flex;flex-direction:column;font-size:.6875rem;color:var(--fg2);font-weight:600}.nx-sess-f b{font-size:1.25rem;font-weight:800;color:var(--fg);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.nx-exl{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:2px}
+.nx-exl li{display:flex;justify-content:space-between;gap:10px;padding:8px 0 8px 12px;position:relative;font-size:.875rem;border-top:1px solid var(--line)}
+.nx-exl li:first-child{border-top:0}
+.nx-exl li::before{content:"";position:absolute;left:0;top:11px;bottom:11px;width:3px;border-radius:2px;background:var(--c,#888)}
+.nx-exl li b{font-weight:650;min-width:0}.nx-exl li span{color:var(--fg2);text-align:right;font-size:.8125rem;flex:none;max-width:55%}
+.nx-exl li.nx-mli{color:var(--fg3);font-size:.8125rem}.nx-exl li.nx-mli::before{display:none}
+.nx-sess.done{--k:#30D158}.nx-done-ic{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--k);color:#000}
+.nx-sess.live{animation:nxbreath 3s ease-in-out infinite}
+@keyframes nxbreath{50%{border-color:color-mix(in srgb,var(--k) 60%,var(--line))}}
+.nx-live-dot{width:8px;height:8px;border-radius:50%;background:var(--k);box-shadow:0 0 0 0 var(--k);animation:nxping 1.6s ease-out infinite}
+@keyframes nxping{70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.nx-sess.nxrest{--k:#8E7CF0}.nx-sess.skip{--k:#8E8E93;opacity:.8}
+.nx-next{display:grid!important;grid-template-columns:1fr auto;align-items:center;column-gap:8px;width:100%;margin-top:14px;padding:12px 14px!important;border-radius:16px;background:rgba(0,0,0,.25)!important;text-align:left}
+.nx-next span{font-size:.625rem;color:var(--fg3);font-weight:800;text-transform:uppercase;letter-spacing:.08em;grid-column:1}.nx-next b{grid-column:1;font-size:.9375rem;min-width:0}.nx-next svg{grid-column:2;grid-row:1/3;color:var(--fg3)}
+/* Timeline */
+.nx-tls{display:grid}
+.nx-meals,.nx-tls,.nx-exs,.nx-list,.nx-hist,.nx-eds,.nx-sets,.nx-pgrid,.nx-exl,.nx-qs,.nx-pdl{grid-template-columns:minmax(0,1fr)}
+.nx-card>*{min-width:0}
+.nx-tl{display:grid;grid-template-columns:64px 3px 1fr;gap:12px;align-items:center;padding:9px 0;position:relative}
+.nx-tl .t{display:flex;flex-direction:column;font-variant-numeric:tabular-nums}.nx-tl .t b{font-size:.875rem;font-weight:700}.nx-tl .t small{font-size:.6875rem;color:var(--fg3)}
+.nx-tl>i{align-self:stretch;border-radius:3px;background:var(--c);min-height:30px}
+.nx-tl .n{display:flex;flex-direction:column;min-width:0}.nx-tl .n b{font-size:.9375rem;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nx-tl .n small{font-size:.75rem;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nx-tl.past{opacity:.38}
+.nx-tl.now{background:linear-gradient(90deg,color-mix(in srgb,var(--c) 20%,transparent),transparent 85%);border-radius:14px;margin:2px -10px;padding:9px 10px}
+.nx-tl.now .t small{color:var(--c);font-weight:800}
+.nx-tl.now::after{content:"";position:absolute;left:10px;right:10px;bottom:3px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--c) var(--p),rgba(255,255,255,.08) var(--p))}
+.nx-tls.sm .nx-tl{padding:6px 0}.nx-tls.sm .nx-tl>i{min-height:22px}
+/* Fuel */
+.nx-minis{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center}
+.nx-mini{display:flex;flex-direction:column;align-items:center;gap:2px}
+.nx-mini-r{position:relative;width:58px;height:58px;display:grid;place-items:center}
+.nx-mini-r svg{position:absolute;inset:0}
+.nx-mini-r b{font-size:.875rem;font-weight:800;font-variant-numeric:tabular-nums}.nx-mini-r b small{font-size:.5625rem;color:var(--fg2)}
+.nx-mini>span{font-size:.75rem;font-weight:700;margin-top:4px}.nx-mini>small{font-size:.625rem;color:var(--fg3);font-variant-numeric:tabular-nums}
+.nx-meals{display:grid;gap:6px;margin-top:16px}
+.nx-meal{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.22);border-radius:16px;padding:4px 4px 4px 0}
+.nx-meal-in{flex:1;min-width:0;display:flex!important;align-items:center;gap:10px;padding:8px 6px 8px 10px!important;text-align:left}
+.nx-meal-ic{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:rgba(245,165,36,.15);color:#F5A524;flex:none}
+.nx-meal-t{flex:1;min-width:0;display:flex;flex-direction:column}.nx-meal-t b{font-size:.875rem}.nx-meal-t small{font-size:.6875rem;color:var(--fg3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nx-meal em{font-style:normal;font-size:.75rem;color:var(--fg2);font-weight:650;flex:none;font-variant-numeric:tabular-nums}
+.nx-plus{background:var(--card2)!important;width:38px;height:38px;border-radius:12px;color:#fff!important}
+.nx-water{display:grid;grid-template-columns:1fr 1fr 1.6fr;gap:6px;margin-top:10px}
+.nx-btl{display:flex!important;align-items:center;gap:8px;padding:10px!important;border-radius:16px;background:rgba(0,0,0,.22)!important;color:var(--fg3)!important;text-align:left;transition:all .3s var(--spring);min-width:0}
+.nx-btl span{display:flex;flex-direction:column;font-size:.75rem;font-weight:650;color:var(--fg2);min-width:0}.nx-btl span small{font-size:.625rem;color:var(--fg3);font-weight:500}
+.nx-btl.on{color:#40C8E0!important;background:rgba(64,200,224,.13)!important}.nx-btl.on span{color:#fff}
+.nx-btl.on svg{animation:nxfill .5s var(--spring)}@keyframes nxfill{40%{transform:scale(1.25) rotate(-8deg)}}
+.nx-btl:active{transform:scale(.94)}
+.nx-btl.tr span:first-of-type{flex:1}
+.nx-step{display:flex;gap:4px;flex-direction:row!important}.nx-step button{width:30px;height:30px;border-radius:10px;background:var(--card2)!important;font-weight:800;color:#fff!important}
+/* Coach */
+.nx-tip{display:grid;grid-template-columns:24px 1fr;gap:10px;padding:10px 0;border-top:1px solid var(--line);align-items:start}
+.nx-tip:first-of-type{border-top:0}
+.nx-tip>i{width:24px;height:24px;border-radius:8px;display:grid;place-items:center;font-style:normal;font-weight:900;font-size:.6875rem;color:#000;background:var(--c)}
+.nx-tip p{margin:0;font-size:.875rem;line-height:1.45}.nx-tip.bad p{color:#FF9A90}.nx-tip.mid p,.nx-tip.warn p{color:#FFE27A}
+.nx-tip .cact{display:block;margin-top:6px}
+.nx-tip .cact button,.nx-tip .cact .chip{font-size:.75rem!important}
+.nx-spk{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:9px;background:linear-gradient(120deg,#7C5CFF,#BF5AF2,#FF6FB1);color:#fff}
+.nx-spk.big{width:58px;height:58px;border-radius:20px;box-shadow:0 10px 30px rgba(191,90,242,.45)}
+.nx-aic{border-color:rgba(191,90,242,.35);background:linear-gradient(160deg,rgba(124,92,255,.16),rgba(255,255,255,.04) 60%)}
+.nx-aic p{margin:0;font-size:.9375rem;line-height:1.5}
+/* Week */
+.nx-wnav{position:absolute;right:0;bottom:16px;display:flex;align-items:center;gap:4px}
+.nx-cal{display:none;grid-template-columns:repeat(7,1fr);gap:6px;margin:0 0 14px}
+.nx-wd{border-radius:18px;transition:background .25s,box-shadow .25s;min-width:0}
+.nx-wd-h{width:100%;display:flex!important;flex-direction:column;align-items:center;gap:2px;padding:9px 0 8px!important;border-radius:18px;position:relative;transition:transform .2s var(--spring)}
+.nx-wd-h span{font-size:.6875rem;color:var(--fg3);font-weight:700}.nx-wd-h b{font-size:1.125rem;font-weight:750;font-variant-numeric:tabular-nums}
+.nx-wd-h u{position:absolute;left:22%;right:22%;bottom:2px;height:3px;border-radius:2px;background:rgba(255,255,255,.08);text-decoration:none;overflow:hidden}
+.nx-wd-h u::after{content:"";position:absolute;inset:0;width:var(--w);background:var(--c);border-radius:2px}
+.nx-wd.past .nx-wd-h{opacity:.6}
+.nx-wd.today .nx-wd-h b{color:var(--zc)}
+.nx-wd.sel{background:#fff}.nx-wd.sel .nx-wd-h{opacity:1}.nx-wd.sel .nx-wd-h span{color:#555}.nx-wd.sel .nx-wd-h b{color:#000}
+.nx-wd-h:active{transform:scale(.9)}
+.nx-wd-s{display:none}
+.nx-wd.over{box-shadow:inset 0 0 0 2px #fff}
+.nx-dd{scroll-margin-top:calc(70px + env(safe-area-inset-top,0px))}
+.nx-dd-d{display:flex;gap:8px;margin:0 0 12px}.nx-dd-d span{flex:1;display:flex;flex-direction:column;padding:10px;border-radius:14px;background:rgba(0,0,0,.22);font-size:.6875rem;color:var(--fg2)}.nx-dd-d b{font-size:1.0625rem;color:var(--c);font-variant-numeric:tabular-nums}
+.nx-ses{border-radius:18px;background:linear-gradient(135deg,color-mix(in srgb,var(--k) 16%,transparent),rgba(0,0,0,.2));padding:4px;margin-bottom:8px}
+.nx-ses-in{display:flex!important;flex-direction:column;align-items:flex-start;width:100%;padding:10px 12px!important;text-align:left;gap:2px}
+.nx-ses-in b{font-size:1.0625rem;font-weight:750}.nx-ses-in small{font-size:.75rem;color:var(--fg2)}
+.nx-ses-a{display:flex;gap:6px;padding:0 8px 8px;flex-wrap:wrap;align-items:center}
+.nx-dd-m{display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;border-radius:14px;background:rgba(245,165,36,.09);font-size:.8125rem;color:var(--fg2)}.nx-dd-m svg{color:#F5A524}.nx-dd-m b{color:var(--fg)}
+.nx-wss{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.nx-ws{padding:12px;border-radius:16px;background:rgba(0,0,0,.22);display:flex;flex-direction:column;gap:2px}.nx-ws b{font-size:1.375rem;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}.nx-ws span{font-size:.6875rem;color:var(--fg2);line-height:1.3}
+.nx-add{width:100%;min-height:56px;margin-top:12px;border-radius:18px;border:1.5px dashed rgba(255,255,255,.2)!important;display:flex!important;align-items:center;justify-content:center;gap:8px;font-weight:700;color:var(--fg2)!important;transition:all .25s var(--spring)}
+.nx-add:active{transform:scale(.97);background:var(--card)!important}
+.nx-add.sm{min-height:46px;margin-top:4px}
+.pc-only{display:none}
+.nx-wl{display:grid;gap:4px}
+.nx-wlr{display:grid!important;grid-template-columns:44px minmax(0,1fr);gap:10px;align-items:center;padding:8px 10px 8px 6px!important;border-radius:14px;text-align:left;transition:background .2s}
+.nx-wlr.sel{background:rgba(255,255,255,.08)!important}.nx-wlr.past{opacity:.55}
+.nx-wlr>span{display:flex;flex-direction:column;align-items:center;font-size:.625rem;font-weight:800;color:var(--fg3);text-transform:uppercase}.nx-wlr>span b{font-size:1.0625rem;color:var(--fg);font-weight:750}
+.nx-wlr.today>span b{color:var(--zc)}
+.nx-wlr>div{display:flex;flex-wrap:wrap;gap:4px;min-width:0}
+.nx-wlr em{font-style:normal;font-size:.75rem;font-weight:700;padding:5px 9px;border-radius:9px;background:color-mix(in srgb,var(--c) 18%,transparent);color:color-mix(in srgb,var(--c) 70%,#fff);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.nx-wlr em.dn::after{content:" \2713"}
+.nx-wlr i{font-style:normal;font-size:.75rem;color:var(--fg3)}
+/* Studio */
+.nx-create{min-height:44px;padding:0 16px!important;border-radius:14px;flex:none;margin-bottom:4px}
+.nx-libbar{display:flex;flex-direction:column;gap:10px;margin-bottom:6px}
+.nx-pcs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.nx-pcs.nx-hscroll{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:0 16px 4px;scrollbar-width:none}.nx-pcs.nx-hscroll::-webkit-scrollbar{display:none}
+.nx-pcs.nx-hscroll .nx-pc{flex:0 0 62%;scroll-snap-align:start}
+.nx-pc{--k:#FF453A;position:relative;display:flex!important;flex-direction:column;align-items:flex-start;gap:4px;min-height:148px;padding:14px!important;border-radius:22px;text-align:left;overflow:hidden;
+  background:linear-gradient(160deg,color-mix(in srgb,var(--k) 22%,rgba(255,255,255,.05)),rgba(255,255,255,.04) 70%)!important;border:1px solid color-mix(in srgb,var(--k) 22%,var(--line))!important;transition:transform .3s var(--spring)}
+.nx-pc:active{transform:scale(.96)}
+.nx-pc b{font-size:1rem;font-weight:750;line-height:1.2;letter-spacing:-.01em}
+.nx-pc small{font-size:.75rem;color:var(--fg2);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.nx-pc-f{margin-top:auto;padding-top:8px;display:flex;flex-wrap:wrap;gap:4px}
+.nx-pc-f em{font-style:normal;font-size:.6875rem;font-weight:700;padding:3px 7px;border-radius:8px;background:rgba(0,0,0,.28);color:var(--fg2);display:inline-flex;align-items:center;gap:3px}
+.nx-pc-f em.cal{color:#000;background:var(--k)}
+.nx-pc.new{--k:#fff;align-items:center;justify-content:center;text-align:center;background:transparent!important;border:1.5px dashed rgba(255,255,255,.2)!important;color:var(--fg2)}
+.nx-pc.new b{color:var(--fg)}
+.nx-hist{display:grid;gap:6px}
+.nx-hr{display:flex!important;align-items:center;gap:12px;padding:10px 12px!important;border-radius:18px;background:var(--card)!important;border:1px solid var(--line)!important;text-align:left;color:var(--fg2)!important}
+.nx-hr .d{width:44px;height:44px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:color-mix(in srgb,var(--k) 18%,transparent);font-size:.625rem;color:var(--k);font-weight:700;text-transform:uppercase;flex:none}
+.nx-hr .d b{font-size:1.0625rem;color:var(--fg);line-height:1}
+.nx-hr .n{flex:1;min-width:0;display:flex;flex-direction:column}.nx-hr .n b{font-size:.9375rem;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nx-hr .n small{font-size:.75rem}
+.nx-pad{padding:0 4px 12px}
+/* Session detail */
+.nx-pd{--k:#FF453A;padding:4px 2px 0}
+.nx-pd-a{margin-top:16px}
+.nx-pdl{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:6px}
+.nx-pdl li{display:flex;gap:12px;padding:12px;border-radius:16px;background:var(--card);border-left:3px solid var(--c)}
+.nx-pdl .l{width:26px;font-size:.75rem;font-weight:800;color:var(--c);flex:none;padding-top:2px}
+.nx-pdl .t{flex:1;min-width:0;display:flex;flex-direction:column}.nx-pdl .t b{font-size:.9375rem}.nx-pdl .t small{font-size:.8125rem;color:var(--fg2)}
+.nx-pdl details,.nx-cue{margin-top:6px}.nx-pdl summary,.nx-cue summary{font-size:.75rem;color:var(--fg3);cursor:pointer;font-weight:600}.nx-pdl details p,.nx-cue p{margin:6px 0 0;font-size:.8125rem;color:var(--fg2);line-height:1.45}
+.nx-days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.nx-dc{position:relative;height:56px;border-radius:14px;background:var(--card)!important;border:1px solid var(--line)!important;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:1px;transition:all .3s var(--spring)}
+.nx-dc span{font-size:.625rem;color:var(--fg3);font-weight:700}.nx-dc b{font-size:1rem;font-weight:750;font-variant-numeric:tabular-nums}
+.nx-dc i{position:absolute;top:6px;right:6px;width:6px;height:6px;border-radius:50%;background:var(--fg3)}
+.nx-dc.on{background:#fff!important;color:#000!important;border-color:#fff!important;transform:scale(1.04)}.nx-dc.on span{color:#555}
+.nx-dc:active{transform:scale(.9)}
+/* Builder */
+.nx-segk button.on{background:var(--k)!important;color:#000!important;box-shadow:0 4px 16px color-mix(in srgb,var(--k) 45%,transparent)}
+.nx-ed-name{font-size:1.25rem;font-weight:750;height:56px;margin-bottom:12px}
+.nx-edstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.nx-edstats span{padding:10px 12px;border-radius:16px;background:color-mix(in srgb,var(--k) 12%,rgba(255,255,255,.04));display:flex;flex-direction:column;font-size:.6875rem;color:var(--fg2);font-weight:600}
+.nx-edstats b{font-size:1.5rem;font-weight:800;color:var(--fg);letter-spacing:-.03em;font-variant-numeric:tabular-nums;transition:all .3s}
+.nx-eds{display:grid;gap:10px}
+.nx-edi{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:10px 10px 12px;position:relative;border-left:3px solid var(--c);touch-action:pan-y;animation:nxin .4s var(--ease) both}
+.nx-edi.lift{z-index:5;box-shadow:0 20px 44px rgba(0,0,0,.6);background:#1C1C20;transition:none!important}
+.nx-edi-h{display:flex;align-items:center;gap:4px}
+.nx-grip{width:30px;height:38px;display:grid;place-items:center;color:var(--fg3);cursor:grab;touch-action:none;flex:none}
+.nx-edi-n{flex:1;min-width:0;display:flex;flex-direction:column}.nx-edi-n b{font-size:.9375rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nx-edi-n small{font-size:.6875rem;color:var(--fg3)}
+.nx-edi-h .nx-ib{width:36px;height:36px}
+.nx-ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:6px;margin-top:6px}
+.nx-st{background:rgba(0,0,0,.25);border-radius:14px;padding:6px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.nx-st>span{font-size:.6875rem;color:var(--fg3);font-weight:650;padding-left:4px}
+.nx-st>div{display:flex;align-items:center;justify-content:space-between;gap:2px}
+.nx-st b{flex:1;min-width:0;text-align:center;font-size:.875rem;font-weight:750;font-variant-numeric:tabular-nums;white-space:nowrap}
+.nx-st button{width:32px;height:32px;border-radius:10px;background:var(--card2)!important;font-size:1.125rem!important;font-weight:700;color:#fff!important;transition:transform .2s var(--spring)}
+.nx-st button:active{transform:scale(.85);background:rgba(255,255,255,.2)!important}
+.nx-tpl{padding:4px 0}.nx-tplg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.nx-tplg button{display:flex!important;flex-direction:column;align-items:flex-start;gap:3px;padding:12px!important;border-radius:16px;text-align:left;background:color-mix(in srgb,var(--k) 12%,rgba(255,255,255,.04))!important;border:1px solid var(--line)!important;transition:transform .25s var(--spring)}
+.nx-tplg button:active{transform:scale(.95)}.nx-tplg b{font-size:.875rem}.nx-tplg small{font-size:.6875rem;color:var(--fg2);line-height:1.3}
+/* Exercise picker */
+.nx-search{margin-bottom:10px}
+.nx-cats{flex-wrap:nowrap;overflow-x:auto;margin:0 -18px 10px;padding:0 18px 2px;scrollbar-width:none}.nx-cats::-webkit-scrollbar{display:none}
+.nx-exs{display:grid;gap:4px}
+.nx-ex{display:flex!important;align-items:center;gap:10px;padding:11px 12px 11px 14px!important;border-radius:16px;background:var(--card)!important;text-align:left;position:relative;overflow:hidden;transition:background .3s,transform .2s var(--spring)}
+.nx-ex::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:0 3px 3px 0;background:var(--c)}
+.nx-ex span{flex:1;min-width:0;display:flex;flex-direction:column}.nx-ex b{font-size:.9375rem}.nx-ex small{font-size:.6875rem;color:var(--fg3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nx-ex i{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:var(--card2);font-style:normal;font-weight:800;font-size:.8125rem;flex:none}
+.nx-ex.in i{background:var(--c);color:#000}
+.nx-ex:active{transform:scale(.97)}
+.nx-ex.flash{animation:nxflash .5s ease}@keyframes nxflash{30%{background:color-mix(in srgb,var(--c) 30%,transparent)}}
+/* Progress */
+.nx-segp{position:absolute;right:0;bottom:16px;margin:0;width:200px}
+.nx-pgrid{display:grid;gap:12px}
+.nx-pc2-h{display:flex!important;justify-content:space-between;align-items:flex-start;width:100%;gap:10px;text-align:left;margin-bottom:10px}
+.nx-pc2-l{display:flex;align-items:center;gap:6px;font-size:.8125rem;font-weight:700;color:var(--c)}
+.nx-pc2-v{display:flex;flex-direction:column;align-items:flex-end;gap:2px}.nx-pc2-v b{font:800 1.625rem/1 var(--display);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.nx-dl{font-style:normal;font-size:.6875rem;font-weight:700;color:var(--fg3)}.nx-dl.up{color:#30D158}.nx-dl.down{color:#FF6961}.nx-dl.mid{color:#FFD60A}
+.nx-chart{position:relative;height:120px}
+.nx-chart svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.nx-dot{position:absolute;width:11px;height:11px;border-radius:50%;background:var(--c);transform:translate(-50%,-50%);box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 30%,transparent),0 0 16px var(--c)}
+.nx-ref{position:absolute;left:0;transform:translateY(-120%);font-style:normal;font-size:.5625rem;color:var(--fg3);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.nx-nodata{height:90px;display:grid;place-items:center;font-size:.8125rem;color:var(--fg3);border-radius:14px;background:rgba(0,0,0,.18)}
+.nx-bars{position:relative;height:110px;display:grid;grid-template-columns:repeat(var(--n),1fr);gap:clamp(1px,.6vw,4px);align-items:end}
+.nx-bars i{height:var(--h);min-height:2px;border-radius:4px 4px 2px 2px;background:var(--bc,var(--c));opacity:.55;transform-origin:bottom}
+.nx-bars i.hl{opacity:1;box-shadow:0 0 14px var(--bc,var(--c))}.nx-bars i.na{opacity:.12}
+.nx-bref{position:absolute;left:0;right:0;border-top:1.5px dashed rgba(255,255,255,.35);pointer-events:none}
+.nx-bref span{position:absolute;right:0;top:-16px;font-size:.5625rem;color:var(--fg2);font-weight:700;text-transform:uppercase;letter-spacing:.05em;background:rgba(0,0,0,.4);padding:1px 5px;border-radius:5px}
+.nx-cap{margin:10px 0 0;font-size:.75rem;color:var(--fg3);line-height:1.4}
+.nx-recs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px}
+.nx-recs div{padding:10px;border-radius:14px;background:rgba(0,0,0,.22);display:flex;flex-direction:column}.nx-recs span{font-size:.6875rem;color:var(--fg2)}.nx-recs b{font-size:1.25rem;font-weight:800;color:#FF9F0A;font-variant-numeric:tabular-nums}.nx-recs small{font-size:.625rem;color:var(--fg3)}
+.nx-more-acts{margin-top:22px}
+/* Why sheet, meals, AI */
+.nx-why-top{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;margin-bottom:12px}
+.nx-why-top .nx-ring-v b{font-size:2.25rem}
+.nx-part{padding:12px 0;border-top:1px solid var(--line)}
+.nx-part>div:first-child{display:flex;align-items:baseline;gap:8px}.nx-part b{font-size:.9375rem}.nx-part span{font-size:.75rem;color:var(--fg3);flex:1}.nx-part em{font-style:normal;font-weight:800;color:var(--c);font-variant-numeric:tabular-nums}
+.nx-part .nx-bar{margin-top:8px}.nx-part small{display:block;margin-top:6px;font-size:.75rem;color:var(--fg2)}
+.nx-mt{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 12px}.nx-mt span{padding:10px;border-radius:14px;background:var(--card);display:flex;flex-direction:column;font-size:.6875rem;color:var(--fg2)}.nx-mt b{font-size:1.125rem;color:var(--fg);font-variant-numeric:tabular-nums}
+.nx-list{display:grid;gap:6px}
+.nx-li{display:flex;align-items:center;gap:4px;padding:2px 4px 2px 0;border-radius:16px;background:var(--card)}
+.nx-li-in{flex:1;min-width:0;display:flex!important;flex-direction:column;align-items:flex-start;padding:10px 12px!important;text-align:left}.nx-li-in b{font-size:.9375rem}.nx-li-in small{font-size:.75rem;color:var(--fg2)}
+.nx-ai-hero{text-align:center;padding:8px 6px 4px}.nx-ai-hero h2{margin:14px 0 4px;font:800 1.5rem/1.15 var(--display);letter-spacing:-.02em}
+.nx-switch{display:flex;align-items:center;gap:12px;margin-top:16px;padding:14px 16px;border-radius:18px;background:var(--card);border:1px solid var(--line);cursor:pointer}
+.nx-switch span{flex:1;display:flex;flex-direction:column}.nx-switch b{font-size:1rem}.nx-switch small{font-size:.75rem;color:var(--fg2)}
+.nx-switch input{position:absolute;opacity:0;pointer-events:none}
+.nx-switch i{width:52px;height:32px;border-radius:99px;background:rgba(255,255,255,.16);position:relative;transition:background .3s;flex:none}
+.nx-switch i::after{content:"";position:absolute;left:3px;top:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.3);transition:transform .35s var(--spring)}
+.nx-switch input:checked+i{background:linear-gradient(120deg,#7C5CFF,#BF5AF2)}.nx-switch input:checked+i::after{transform:translateX(20px)}
+.nx-qs{display:grid;gap:6px;margin:12px 0}
+.nx-qs button{display:flex!important;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px!important;border-radius:14px;background:rgba(191,90,242,.1)!important;text-align:left;font-size:.875rem!important;font-weight:600}
+.nx-qs svg{color:#BF8CFF}
+.nx-ul{margin:6px 0 0;padding-left:18px;color:var(--fg2);font-size:.875rem;line-height:1.6}
+.nx-pkr{--k:#FF453A;display:flex!important;flex-direction:column;align-items:flex-start;gap:2px;width:100%;padding:12px 14px!important;margin-bottom:6px;border-radius:16px;text-align:left;background:linear-gradient(120deg,color-mix(in srgb,var(--k) 14%,transparent),var(--card))!important;border:1px solid var(--line)!important;transition:transform .2s var(--spring)}
+.nx-pkr:active{transform:scale(.97)}.nx-pkr b{font-size:.9375rem}.nx-pkr small{font-size:.75rem;color:var(--fg2)}
+/* ---------- sheets ---------- */
+#nx-shs{position:fixed;inset:0;z-index:36;pointer-events:none}
+.nx-sh{position:absolute;inset:0;pointer-events:auto}
+.nx-sh-bg{position:absolute;inset:0;background:rgba(0,0,0,.55);opacity:0;transition:opacity .4s ease}
+.nx-sh.on .nx-sh-bg{opacity:1}
+.nx-sh-card{position:absolute;left:0;right:0;bottom:0;max-height:calc(100% - 40px - env(safe-area-inset-top,0px));display:flex;flex-direction:column;background:#141416;color:#F5F5F7;border-radius:28px 28px 0 0;border:1px solid rgba(255,255,255,.08);border-bottom:0;
+  transform:translateY(105%);transition:transform .52s cubic-bezier(.32,.72,0,1);box-shadow:0 -20px 60px rgba(0,0,0,.5);font:16px/1.4 var(--font);--card:rgba(255,255,255,.058);--card2:rgba(255,255,255,.09);--line:rgba(255,255,255,.085);--fg:#F5F5F7;--fg2:#A1A1AA;--fg3:#6B6B73;--ease:cubic-bezier(.22,.9,.3,1);--spring:cubic-bezier(.34,1.45,.55,1)}
+.nx-sh.on .nx-sh-card{transform:none}
+.nx-sh.off{pointer-events:none}.nx-sh.off .nx-sh-card{transform:translateY(105%)}.nx-sh.off .nx-sh-bg{opacity:0}
+.nx-sh.full .nx-sh-card{height:calc(100% - 28px - env(safe-area-inset-top,0px))}
+.nx-sh-card button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.nx-sh-card button:disabled{opacity:.35}
+.nx-sh-hd{position:relative;display:flex;align-items:center;justify-content:center;min-height:56px;padding:12px 56px 6px;flex:none;touch-action:none;cursor:grab}
+.nx-sh-hd b{font-size:1rem;font-weight:750}
+.nx-grab{position:absolute;top:7px;left:50%;width:38px;height:5px;margin-left:-19px;border-radius:3px;background:rgba(255,255,255,.22)}
+.nx-sh-x{position:absolute!important;right:10px;top:10px;background:var(--card2)!important;width:36px!important;height:36px!important}
+.nx-sh-body{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:6px 18px calc(24px + env(safe-area-inset-bottom,0px));-webkit-overflow-scrolling:touch}
+.nx-sh-ft{flex:none;padding:12px 18px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:rgba(20,20,22,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.nx-sh-ft[hidden]{display:none}
+.nx-pick .nx-sh-card{height:calc(100% - 60px - env(safe-area-inset-top,0px))}
+/* ---------- live focus mode ---------- */
+.nx-live{position:fixed;inset:0;z-index:65;background:#000;color:#F5F5F7;transform:translateY(100%);transition:transform .55s cubic-bezier(.32,.72,0,1);font:16px/1.4 var(--font);
+  --card:rgba(255,255,255,.058);--card2:rgba(255,255,255,.1);--line:rgba(255,255,255,.085);--fg:#F5F5F7;--fg2:#A1A1AA;--fg3:#6B6B73;--ease:cubic-bezier(.22,.9,.3,1);--spring:cubic-bezier(.34,1.45,.55,1)}
+.nx-live.on{transform:none}
+.nx-live button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.nx-live button:disabled{opacity:.3}
+.nx-lv{height:100%;display:flex;flex-direction:column;max-width:620px;margin:0 auto;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);position:relative;background:radial-gradient(120% 60% at 50% -10%,color-mix(in srgb,var(--k) 26%,transparent),transparent 60%)}
+.nx-lv-hd{display:flex;align-items:center;gap:6px;padding:8px 8px 4px}
+.nx-lv-ttl{flex:1;text-align:center;display:flex;flex-direction:column;min-width:0}.nx-lv-ttl b{font-size:.9375rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nx-lv-ttl small{font-size:.75rem;color:var(--fg2);font-variant-numeric:tabular-nums}
+.nx-lv-prog{height:4px;margin:6px 16px 0;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden}.nx-lv-prog i{display:block;height:100%;background:var(--k);border-radius:3px;transition:width .6s var(--ease);box-shadow:0 0 12px var(--k)}
+.nx-lv-chips{display:flex;gap:6px;overflow-x:auto;padding:12px 16px 4px;scrollbar-width:none;flex:none}.nx-lv-chips::-webkit-scrollbar{display:none}
+.nx-lv-chips button{flex:none;height:34px;padding:0 12px!important;border-radius:99px;background:var(--card)!important;font-size:.75rem!important;font-weight:650;color:var(--fg2)!important;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all .3s var(--spring)}
+.nx-lv-chips em{font-style:normal;font-weight:800;color:var(--c)}
+.nx-lv-chips button.on{background:#fff!important;color:#000!important}.nx-lv-chips button.dn{color:var(--fg3)!important;text-decoration:line-through}.nx-lv-chips button.dn.on{text-decoration:none}
+.nx-lv-card{flex:1;overflow-y:auto;padding:14px 16px 10px;animation:nxin .45s var(--ease) both}
+.nx-lv-card.swap{animation:nxinr .4s var(--ease) both}
+.nx-lv-cat{font-size:.6875rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--c)}
+.nx-lv-card h2{margin:6px 0 2px;font:800 2.125rem/1.05 var(--display);letter-spacing:-.035em}
+.nx-lv-tg{margin:0;font-size:1rem;color:var(--fg2);font-weight:600}
+.nx-sets{display:grid;gap:8px;margin-top:16px}
+.nx-set{display:flex;align-items:center;gap:8px;padding:8px 8px 8px 12px;border-radius:20px;background:var(--card);border:1px solid var(--line);transition:background .3s,border-color .3s,opacity .3s}
+.nx-set .n{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:.75rem;font-weight:800;background:var(--card2);flex:none}
+.nx-set .d{flex:1;display:flex;flex-direction:column;font-size:1.125rem;font-weight:750;font-variant-numeric:tabular-nums}.nx-set .d small{font-size:.6875rem;color:var(--fg3);font-weight:600}
+.nx-set label{flex:1;display:flex;align-items:baseline;gap:4px;background:rgba(0,0,0,.35);border-radius:14px;padding:0 10px;min-width:0}
+.nx-set input{width:100%;min-width:0;height:46px;border:0;background:none;color:#fff;font:750 1.375rem var(--font);font-variant-numeric:tabular-nums;outline:none;text-align:right}
+.nx-set input::placeholder{color:var(--fg3)}
+.nx-set label small{font-size:.75rem;color:var(--fg3);font-weight:600;width:26px}
+.nx-tick{width:54px;height:54px;border-radius:18px;background:var(--card2)!important;display:grid;place-items:center;color:var(--fg3)!important;flex:none;transition:all .35s var(--spring)}
+.nx-tick:active{transform:scale(.85)}
+.nx-set.dn{background:color-mix(in srgb,var(--k) 12%,transparent);border-color:color-mix(in srgb,var(--k) 30%,transparent)}
+.nx-set.dn .nx-tick{background:var(--k)!important;color:#000!important;animation:nxtick .45s var(--spring)}
+@keyframes nxtick{0%{transform:scale(.6)}60%{transform:scale(1.15)}}
+.nx-set.dn .n{background:var(--k);color:#000}
+.nx-set.nx1{border-color:rgba(255,255,255,.3)}
+.nx-lv-ft{flex:none;padding:10px 16px 14px;display:flex;flex-direction:column;gap:8px;background:linear-gradient(transparent,#000 30%)}
+.nx-lv-ft .nx-btn{min-height:58px;font-size:1.0625rem!important;border-radius:20px}
+.nx-lv-nav{display:flex;align-items:center;justify-content:space-between}
+.nx-lv-end{font-size:.875rem!important;font-weight:700;color:var(--fg2)!important;padding:10px 16px!important}
+.nx-rest{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:rgba(0,0,0,.86);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);animation:nxfade .3s ease}
+.nx-rest-r{position:relative;width:min(64vw,250px);aspect-ratio:1;display:grid;place-items:center}
+.nx-rest-r svg{position:absolute;inset:0;width:100%;height:100%}
+.nx-rest-arc{animation:nxrest linear forwards;filter:drop-shadow(0 0 10px var(--k))}
+@keyframes nxrest{from{stroke-dashoffset:0}to{stroke-dashoffset:553}}
+.nx-rest-r b{font:800 3.75rem/1 var(--display);letter-spacing:-.04em;font-variant-numeric:tabular-nums;position:relative}
+.nx-rest-r small{position:absolute;bottom:28%;font-size:.75rem;color:var(--fg2);font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.nx-rest-n{margin:0;font-size:.9375rem;color:var(--fg2);text-align:center;padding:0 24px}
+.nx-rest.end .nx-rest-r b{color:var(--k);animation:nxpulse .6s ease 2}
+@keyframes nxpulse{50%{transform:scale(1.12)}}
+/* Celebration */
+.nx-cele{position:fixed;inset:0;z-index:150;display:grid;place-items:center;pointer-events:none;opacity:0;transition:opacity .4s}
+.nx-cele.on{opacity:1}
+.nx-cele-in{display:flex;flex-direction:column;align-items:center;gap:8px;padding:28px 30px;border-radius:30px;background:rgba(20,20,22,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);text-align:center;max-width:300px;transform:scale(.8);transition:transform .6s cubic-bezier(.34,1.56,.64,1);color:#fff}
+.nx-cele.on .nx-cele-in{transform:none}
+.nx-cele-in b{font-size:1.25rem}.nx-cele-in small{font-size:.8125rem;color:#A1A1AA}
+.nx-cele-ring{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;background:#30D158;color:#000;box-shadow:0 0 0 0 rgba(48,209,88,.6);animation:nxring 1.2s ease-out .2s}
+@keyframes nxring{to{box-shadow:0 0 0 40px rgba(48,209,88,0)}}
+.nx-cele>i{position:absolute;left:50%;top:50%;width:8px;height:14px;border-radius:3px;background:hsl(calc(var(--a) * 1.1),90%,62%);opacity:0;transform:rotate(var(--a)) translateY(0)}
+.nx-cele.on>i{animation:nxconf 1.3s cubic-bezier(.2,.7,.3,1) var(--d) forwards}
+@keyframes nxconf{0%{opacity:1;transform:rotate(var(--a)) translateY(-40px) scale(.6)}100%{opacity:0;transform:rotate(var(--a)) translateY(-210px) rotate(220deg)}}
+.nx-backnew{position:fixed;z-index:120;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);height:38px;padding:0 16px;border-radius:99px;border:0;display:flex;align-items:center;gap:6px;font:700 .8125rem var(--font);color:#000;background:#FFD60A;box-shadow:0 8px 24px rgba(0,0,0,.4);cursor:pointer}
+.nx-backnew[hidden]{display:none}
+/* ---------- phones ---------- */
+@media (max-width:440px){.nx-hero .nx-ring{width:146px}.nx-hero .nx-ring-v b{font-size:2.5rem}.nx-hero-in{gap:14px}}
+/* ---------- small phones ---------- */
+@media (max-width:380px){
+  .nx-vits{grid-template-columns:1fr 1fr 1fr;gap:6px}.nx-vit{padding:8px}
+  .nx-dots button{width:32px;height:32px}
+  .nx-water{grid-template-columns:1fr 1fr}.nx-btl.tr{grid-column:1/-1}
+  .nx-acts{grid-template-columns:repeat(2,1fr)}
+  .nx-segp{position:static;width:auto;margin-top:12px}
 }
-@media (max-width:380px){.lab-ready{grid-template-columns:1fr;justify-items:center}.lab-vs.three{grid-template-columns:1fr 1fr}}
-/* Computer: a real dashboard, three columns */
+/* ---------- computer: a sidebar and real columns ---------- */
 @media (min-width:900px){
-  .lab{max-width:none;grid-template-columns:1.05fr 1fr 1fr;align-items:start}
-  .lab-tag{grid-column:1/-1}
-  .lab-ready{grid-column:1;grid-row:2 / span 2}
-  .lab-now{grid-column:2;grid-row:2 / span 2}
-  .lab-coach{grid-column:3;grid-row:2}
-  .lab-speed{grid-column:3;grid-row:3}
-  .lab-fuel{grid-column:1;grid-row:4}
-  .lab-week{grid-column:2;grid-row:4}
-  .lab-acts{grid-column:3;grid-row:4;grid-template-columns:1fr 1fr}
-  .lab-ready{grid-template-columns:1fr;justify-items:center}
-  .lab-ring{width:170px;height:170px}.lab-ring svg{width:170px;height:170px}
+  .nx-tabs,.nx-top{display:none}
+  .nx-side{display:flex;flex-direction:column;position:absolute;left:0;top:0;bottom:0;width:236px;z-index:6;padding:26px 14px 18px;gap:6px;background:rgba(14,14,16,.6);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border-right:1px solid var(--line)}
+  .nx-side .nx-logo{padding:0 10px 22px}.nx-side .nx-logo b{font-size:1.375rem}
+  .nx-side nav{display:flex;flex-direction:column;gap:4px}
+  .nx-side nav button,.nx-side-ai,.nx-side-set{display:flex!important;align-items:center;gap:12px;height:46px;padding:0 12px!important;border-radius:14px;font-size:.9375rem!important;font-weight:650;color:var(--fg2)!important;transition:background .2s,color .2s}
+  .nx-side nav button:hover,.nx-side-ai:hover,.nx-side-set:hover{background:rgba(255,255,255,.06)!important;color:#fff!important}
+  .nx-side nav button.on{background:rgba(255,255,255,.12)!important;color:#fff!important}
+  .nx-side-ai{margin-top:auto}.nx-side-ai em{margin-left:auto;font-style:normal;font-size:.6875rem;color:var(--fg3)}
+  .nx-side-ai svg{color:#BF8CFF}
+  .nx-side-note{font-size:.6875rem;color:var(--fg3);line-height:1.4;margin:10px 12px 0}
+  .nx-main{left:236px;padding:34px 0 60px}
+  .nx-page{max-width:1320px;padding:0 36px}
+  .nx-h h1{font-size:2.75rem}
+  .nx-cols{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr) minmax(0,.95fr);gap:16px;align-items:start}
+  .nx-col{display:flex;flex-direction:column;gap:16px;min-width:0}
+  .nx-strip{max-width:560px}
+  .nx-wcols{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}
+  .nx-cal{display:grid;gap:8px;margin-bottom:16px}
+  .nx-wd{background:var(--card);border:1px solid var(--line);min-height:190px;display:flex;flex-direction:column}
+  .nx-wd.sel{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.4)}.nx-wd.sel .nx-wd-h b{color:#fff}.nx-wd.sel .nx-wd-h span{color:var(--fg2)}
+  .nx-wd-h{flex-direction:row!important;justify-content:flex-start;gap:8px;padding:12px 12px 8px!important}
+  .nx-wd-h i{margin-left:auto}
+  .nx-wd-s{display:flex;flex-direction:column;gap:6px;padding:0 8px 8px;flex:1}
+  .nx-wchip{display:flex!important;flex-direction:column;align-items:flex-start;padding:9px 10px!important;border-radius:12px;background:color-mix(in srgb,var(--c) 20%,rgba(0,0,0,.2))!important;border-left:3px solid var(--c)!important;text-align:left;cursor:grab}
+  .nx-wchip b{font-size:.8125rem;line-height:1.2;overflow-wrap:anywhere;hyphens:auto}.nx-wchip{min-width:0;max-width:100%}.nx-wchip small{font-size:.6875rem;color:var(--fg2)}
+  .nx-wchip.dn{opacity:.6;cursor:pointer}.nx-wchip.ghost{opacity:.3}
+  .nx-wadd{margin-top:auto;height:32px;border-radius:10px;display:grid!important;place-items:center;color:var(--fg3)!important;opacity:0;transition:opacity .2s,background .2s}
+  .nx-wd:hover .nx-wadd{opacity:1}.nx-wadd:hover{background:rgba(255,255,255,.08)!important}
+  .pc-only{display:block}
+  .phone-only{display:none!important}
+  .nx-pcs{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+  .nx-pcs.nx-hscroll{display:grid;overflow:visible;margin:0;padding:0}.nx-pcs.nx-hscroll .nx-pc{flex:none}
+  .nx-pc{min-height:170px;padding:18px!important}
+  .nx-pc:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(0,0,0,.4)}
+  .nx-libbar{flex-direction:row;align-items:center}.nx-libbar .nx-search{max-width:380px;margin:0}
+  .nx-seg{max-width:460px}
+  .nx-hist{grid-template-columns:repeat(2,1fr);gap:8px}.nx-hist .nx-sec{grid-column:1/-1}
+  .nx-pgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+  .nx-chart{height:160px}.nx-bars{height:150px}
+  .nx-segp{width:240px}
+  .nx-acts{grid-template-columns:repeat(4,minmax(0,160px))}
+  .nx-sh-card{left:50%;right:auto;bottom:auto;top:50%;width:min(640px,calc(100% - 80px));max-height:min(860px,calc(100% - 80px));border-radius:28px;border-bottom:1px solid rgba(255,255,255,.08);transform:translate(-50%,-46%) scale(.96);opacity:0;transition:transform .4s cubic-bezier(.32,.72,0,1),opacity .3s}
+  .nx-sh.on .nx-sh-card{transform:translate(-50%,-50%);opacity:1}
+  .nx-sh.off .nx-sh-card{transform:translate(-50%,-46%) scale(.96);opacity:0}
+  .nx-sh.full .nx-sh-card{height:min(900px,calc(100% - 60px));width:min(760px,calc(100% - 80px))}
+  .nx-pick .nx-sh-card{height:min(820px,calc(100% - 80px))}
+  .nx-grab{display:none}.nx-sh-hd{cursor:default}
+  .nx-live{left:236px}
+  .nx-lv{max-width:760px}
+  html.nx-on .toast{bottom:28px;left:calc(50% + 118px)}
+  .nx-backnew{left:auto;right:24px;transform:none}
+  ::-webkit-scrollbar{width:10px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:10px}
 }
-@media (prefers-reduced-motion:reduce){.lab-c,.lab-arc,.lab-bar i,.lab-d i{animation:none}}
+@media (min-width:900px) and (max-width:1180px){.nx-cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.nx-cols>.nx-col.c3{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;align-items:start}}
+@media (prefers-reduced-motion:reduce){.nx *,.nx-sh *,.nx-live *{animation:none!important;transition-duration:.01s!important}.nx-aura i{animation:none}}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -10039,120 +10556,901 @@ go('home', false);
   else window.TNR_SPLASH?.ready('sync');
 })();
 
-/* ================= TNR Athletics · LABO =================
-   The test version: same data, same pages, but a new home that answers "what do I do now?" on one screen,
-   one coach instead of three, a speed block made for a sprinter, a real computer layout.
-   Sandbox: nothing written here reaches the real account (see labSandbox). */
-function labSandbox(db) {
-  if (!db) return db;
-  const W = window.LAB_WRITES = {};
-  const wrapDoc = (path, ref) => new Proxy(ref, {get(t, k) {
-    if (k === 'set') return async d => { W[path] = d; };
-    if (k === 'update') return async d => { W[path] = {...(W[path] || {}), ...d}; };
-    if (k === 'delete') return async () => { W[path] = null; };
-    const v = t[k]; return typeof v === 'function' ? v.bind(t) : v; }});
-  return new Proxy(db, {get(t, k) {
-    if (k === 'doc') return p => wrapDoc(p, t.doc(p));
-    if (k === 'collection') return c => { const col = t.collection(c); return new Proxy(col, {get(ct, ck) { if (ck === 'doc') return id => wrapDoc(c + '/' + id, ct.doc(id)); const v = ct[ck]; return typeof v === 'function' ? v.bind(ct) : v; }}); };
-    const v = t[k]; return typeof v === 'function' ? v.bind(t) : v; }});
-}
-(() => {
-  const no = () => { toast('Labo : rien n\'est changé sur ton vrai compte'); return Promise.resolve('off'); };
-  if (window.RECUP_KEYS) { RECUP_KEYS.save = async () => { no(); }; RECUP_KEYS.linkWithings = () => no(); }
-  if (window.RECUP_PUSH) { RECUP_PUSH.on = no; RECUP_PUSH.off = no; }
-  if (window.RECUP_SYNC) window.RECUP_SYNC = async () => 'Labo : synchro désactivée';
-})();
+/* ================= TNR · LABO « NX » : a new app on the same engine =================
+   Four places instead of three parts × six tabs: Aujourd'hui, Semaine, Séances, Progrès.
+   No AI by default: every number and every advice comes from rules and his own data.
+   The ✦ button brings Claude in, only when he asks for it. */
 
-// ---------- one coach: the three coaches' advice, sorted, the three that matter now ----------
-const LAB_CAP = {};
-const coachBox0 = coachBox;
-coachBox = (who, L) => { LAB_CAP[who] = L.filter(Boolean); return coachBox0(who, L); };
-function labCoach(rec, tgt, kG) {
-  for (const k in LAB_CAP) delete LAB_CAP[k];
+const NX = {tab: 'today', day: TODAY, wk: 0, lib: {seg: 'mine', f: 'all', q: ''}, pn: 30, classic: false, sh: [], html: {}, ai: false,
+  open: {}, lv: {open: false, i: 0}, rest: null, t: null, dir: 1, ready: false, drag: null, pend: false};
+try { const t = localStorage.getItem('nx.tab'); if (['today', 'week', 'lib', 'prog'].includes(t)) NX.tab = t; NX.ai = localStorage.getItem('nx.ai') === '1'; NX.pn = +localStorage.getItem('nx.pn') || 30; } catch (e) {}
+const NX_TABS = [['today', 'Aujourd\'hui'], ['week', 'Semaine'], ['lib', 'Séances'], ['prog', 'Progrès']];
+const NXC = {track: '#FF9F0A', gym: '#FF453A', good: '#30D158', warn: '#FFD60A', bad: '#FF453A', none: '#8E8E93', T: '#FF453A', N: '#30D158', R: '#0A84FF', ai: '#BF8CFF',
+  water: '#40C8E0', kcal: '#F5A524', p: '#FF6B6B', c: '#4CC38A', sleep: '#8E7CF0', hrv: '#30D158', rhr: '#FF6482', load: '#FF9F0A', weight: '#64D2FF'};
+const NX_CATC = {'Accélération': '#FF9F0A', 'Vitesse max': '#FF453A', 'Endurance de vitesse': '#FF375F', 'Résistance': '#BF5AF2', 'Tempo': '#64D2FF', 'Échauffement et gammes': '#8E8E93',
+  'Bas du corps': '#FF453A', 'Chaîne postérieure': '#FF9F0A', 'Pliométrie': '#FFD60A', 'Haltérophilie': '#BF5AF2', 'Prévention': '#30D158', 'Tronc': '#64D2FF', 'Haut du corps': '#0A84FF'};
+const nxCat = id => NX_CATC[exOf(id).cat] || '#8E8E93';
+const nxHap = (ms = 8) => { if (PREFS.haptic !== false) try { navigator.vibrate?.(ms); } catch (e) {} };
+
+/* ---------- icons ---------- */
+const NXP = {
+  today: '<circle cx="12" cy="12" r="8.5" opacity=".35"/><path d="M12 3.5a8.5 8.5 0 0 1 8.2 10.7"/><circle cx="12" cy="12" r="2.2"/>',
+  week: '<rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M3.5 10h17M8.5 3v4M15.5 3v4"/><path d="M8 14.5h2M14 14.5h2M8 17.5h2"/>',
+  lib: '<path d="M13 2.5 5.5 13.2h5.6L10.5 21.5 18.5 10.4h-5.7z"/>',
+  prog: '<path d="M3.5 19.5h17"/><path d="M5.5 15.5l4.2-4.6 3.6 2.8 5.7-6.7"/><path d="M15.5 7h3.5v3.5"/>',
+  spark: '<path d="M12 3.2c.5 4.6 2.4 6.6 7 7.2-4.6.6-6.5 2.6-7 7.2-.5-4.6-2.4-6.6-7-7.2 4.6-.6 6.5-2.6 7-7.2z"/><path d="M19 3.5v3M17.5 5h3"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>', x: '<path d="M6 6l12 12M18 6 6 18"/>', check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  play: '<path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/>', up: '<path d="M6 14l6-6 6 6"/>', down: '<path d="M6 10l6 6 6-6"/>',
+  left: '<path d="M15 5l-7 7 7 7"/>', right: '<path d="M9 5l7 7-7 7"/>', copy: '<rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 5.5V5a1.5 1.5 0 0 0-1.5-1.5H6A1.5 1.5 0 0 0 4.5 5v8A1.5 1.5 0 0 0 6 14.5h.5"/>',
+  edit: '<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/>', trash: '<path d="M4.5 7h15M10 11v6M14 11v6M6 7l1 12.5h10L18 7M9 7V4.5h6V7"/>',
+  grip: '<circle cx="9" cy="7" r="1"/><circle cx="15" cy="7" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="17" r="1"/><circle cx="15" cy="17" r="1"/>',
+  list: '<path d="M9 6.5h11M9 12h11M9 17.5h11M4.5 6.5h.01M4.5 12h.01M4.5 17.5h.01"/>', moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
+  heart: '<path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.4a4.3 4.3 0 0 1 7.5 2.4C19.5 15.4 12 20 12 20z"/>', wave: '<path d="M3 12h3.5l2.5-6 4 12 3-9 1.5 3H21"/>',
+  drop: '<path d="M12 3.5s6 6.4 6 10.5a6 6 0 0 1-12 0c0-4.1 6-10.5 6-10.5z"/>', bolt: '<path d="M13 2.5 5.5 13.2h5.6L10.5 21.5 18.5 10.4h-5.7z"/>', clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  cal: '<rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M3.5 10h17M8.5 3v4M15.5 3v4M12 13v5M9.5 15.5h5"/>', flag: '<path d="M5 21V4.5M5 4.5h11l-2 4 2 4H5"/>',
+  bottle: '<path d="M10 2.5h4v3l1.5 2v12a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2v-12l1.5-2z"/><path d="M8.5 12h7"/>', fork: '<path d="M7 3v8a2.5 2.5 0 0 0 5 0V3M9.5 3v18M17 3c-1.7 1.3-2.5 3.6-2.5 6.5V13h2.5v8"/>',
+  out: '<path d="M14 4.5h5.5V10M19.5 4.5 11 13M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"/>'
+};
+const ic = (n, s = 22) => `<svg class="i" viewBox="0 0 24 24" width="${s}" height="${s}" aria-hidden="true">${NXP[n] || ''}</svg>`;
+
+/* ---------- small helpers ---------- */
+const nxRest = s => !s ? '–' : s >= 60 ? `${Math.floor(s / 60)} min${s % 60 ? ' ' + String(s % 60).padStart(2, '0') : ''}` : s + ' s';
+const nxSpan = m => m >= 60 ? Math.floor(m / 60) + ' h' + (m % 60 ? ' ' + String(m % 60).padStart(2, '0') : '') : Math.max(1, m) + ' min';
+const nxCnt = (v, d = 0) => v == null || isNaN(v) ? '–' : `<span class="nx-cnt" data-v="${v}" data-d="${d}">${fx(v, d)}</span>`;
+const nxNow = () => new Date().getHours() * 60 + new Date().getMinutes();
+const nxKind = p => p?.kind === 'track' ? 'track' : 'gym';
+const nxKindName = k => k === 'track' ? 'Piste' : 'Muscu';
+const nxNorm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+function nxItemTxt(it) {
+  const e = exOf(it.ex), u = unitOf(it);
+  if (it.ex === 'warmup' || e.u === 'min') return (it.min || 15) + ' min';
+  if (it.seq) return `${(it.blocks || 1) > 1 ? it.blocks + ' × ' : ''}${it.seq.join(' – ')} m${it.pct ? ' · ' + it.pct + ' %' : ''}`;
+  if (e.t === 'test') return (it.reps || 3) + ' essais';
+  if (e.t === 'track') return [`${it.reps || 1} × ${it.dist ? it.dist + ' m' : ''}`.trim(), it.pct ? it.pct + ' %' : '', it.rest ? 'récup ' + nxRest(it.rest) : ''].filter(Boolean).join(' · ');
+  return [`${it.sets || 1} × ${it.reps || '?'}${u === 's' ? ' s' : ''}`, it.pct ? it.pct + ' %' : it.kg ? it.kg + ' kg' : '', it.rest ? 'récup ' + nxRest(it.rest) : ''].filter(Boolean).join(' · ');
+}
+// Sprint metres that count (as the engine counts them): sprint categories at 90 % or more.
+function nxSprintM(p) {
+  if (!p || p.kind !== 'track') return 0;
+  return (p.items || []).reduce((s, it) => s + (SPRINT_CATS.includes(exOf(it.ex).cat) && (it.pct ?? 100) >= 90 ? (it.seq ? it.seq.reduce((a, b) => a + (+b || 0), 0) * (it.blocks || 1) : (+it.reps || 1) * (+it.dist || 0)) : 0), 0);
+}
+const nxSets = p => (p?.items || []).reduce((s, it) => s + (it.min ? 0 : +(it.sets || it.reps || 0)), 0);
+function nxRing(v, col, size = 160, w = 14, cls = 'nx-arc') {
+  const r = (size - w) / 2, c = 2 * Math.PI * r, o = v == null ? c : c * (1 - clamp(v, 0, 100) / 100), m = size / 2;
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" aria-hidden="true"><circle cx="${m}" cy="${m}" r="${r}" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="${w}"/><circle class="${cls}" cx="${m}" cy="${m}" r="${r}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${o.toFixed(1)}" style="--c0:${c.toFixed(1)}" transform="rotate(-90 ${m} ${m})"/></svg>`;
+}
+
+/* ---------- the shell ---------- */
+function nxMount() {
+  document.documentElement.classList.add('nx-on');
+  const tabs = NX_TABS.map(([t, n]) => `<button data-nx="tab" data-a="${t}" aria-label="${n}">${ic(t, 24)}<span>${n}</span></button>`).join('');
+  document.body.insertAdjacentHTML('beforeend', `
+  <div id="nx" class="nx">
+    <div class="nx-aura" aria-hidden="true"><i></i><i></i><i></i></div>
+    <aside class="nx-side"><div class="nx-logo"><b>TNR</b><span>Labo</span></div><nav>${tabs}</nav>
+      <button class="nx-side-ai" data-nx="ai">${ic('spark', 20)}<span>Coach IA</span><em id="nx-side-ai"></em></button>
+      <button class="nx-side-set" data-nx="set">${ic('gear', 20)}<span>Réglages du labo</span></button>
+      <p class="nx-side-note">Labo : rien de ce que tu fais ici ne change ton vrai compte.</p></aside>
+    <header class="nx-top"><div class="nx-logo"><b>TNR</b><span>Labo</span></div><span class="nx-top-t" id="nx-top-t"></span>
+      <div class="nx-top-r"><button class="nx-aib" data-nx="ai" aria-label="Coach IA">${ic('spark', 18)}<span>IA</span></button><button class="nx-ib" data-nx="set" aria-label="Réglages du labo">${ic('gear', 22)}</button></div></header>
+    <main class="nx-main" id="nx-main"><div id="nx-page" class="nx-page"></div></main>
+    <nav class="nx-tabs" id="nx-tabs"><span class="nx-pill" id="nx-pill"></span>${tabs}</nav>
+  </div>
+  <div id="nx-shs"></div>
+  <div id="nx-live" class="nx-live" hidden></div>
+  <div id="nx-cele" class="nx-cele" hidden></div>
+  <button id="nx-new" class="nx-backnew" data-nx="new" hidden>${ic('spark', 16)} Revenir au labo</button>`);
+  const main = $('#nx-main');
+  main.addEventListener('scroll', () => $('#nx').classList.toggle('sc', main.scrollTop > 28), {passive: true});
+  addEventListener('resize', () => nxPillMove(true));
+}
+const NX_PAGES = {today: () => nxToday(), week: () => nxWeek(), lib: () => nxLib(), prog: () => nxProg()};
+function nxSoon(ms = 90) { if (NX.classic) return; clearTimeout(NX.t); NX.t = setTimeout(() => nxDraw(false), ms); }
+function nxDraw(enter, force) {
+  if (NX.classic) return;
+  // The labo has its own AI switch (off unless he turns it on here); the engine reads it from S.app.
+  if (S.app && (S.app.ai !== false) !== NX.ai) S.app = {...S.app, ai: NX.ai};
+  const pg = $('#nx-page'); if (!pg) return;
+  if (!NX.ready) return;
+  const ae = document.activeElement;
+  if (!enter && !force && (NX.drag || (ae && pg.contains(ae) && /INPUT|TEXTAREA|SELECT/.test(ae.tagName)))) { NX.pend = true; return; }
+  NX.pend = false;
+  let html; try { html = NX_PAGES[NX.tab](); } catch (e) { console.error(e); html = `<div class="nx-pg"><div class="nx-card nx-err"><b>Cette page n'a pas pu s'afficher</b><small>${esc(String(e?.message || e))}</small></div></div>`; }
+  if (enter || NX.html[NX.tab] !== html || pg.dataset.tab !== NX.tab) {
+    const main = $('#nx-main'), y = main.scrollTop;
+    pg.innerHTML = html; pg.dataset.tab = NX.tab; NX.html[NX.tab] = html;
+    if (enter) { pg.classList.remove('enter', 'l', 'r'); void pg.offsetWidth; pg.classList.add('enter', NX.dir < 0 ? 'l' : 'r'); nxCount(pg); clearTimeout(NX.et); NX.et = setTimeout(() => pg.classList.remove('enter'), 1400); }
+    else if (!pg.classList.contains('enter')) main.scrollTop = y;
+  }
+  for (const v of NX.sh) if (v.auto && !(ae && v.el.contains(ae) && /INPUT|TEXTAREA/.test(ae.tagName))) nxShDraw(v);
+  nxChrome();
+  if (NX.lv.open) { if (!S.live) nxLiveDone(); else if (!NX.lvInput) nxLiveDraw(); }
+}
+function nxChrome() {
+  const kG = lastKey('hrv'), sc = kG ? recovery(kG)?.score : null, zc = NXC[zoneOf(sc)] || NXC.none;
+  $('#nx')?.style.setProperty('--zc', zc);
+  document.querySelectorAll('#nx [data-nx="tab"]').forEach(b => b.classList.toggle('on', b.dataset.a === NX.tab));
+  const t = $('#nx-top-t'); if (t) t.textContent = (NX_TABS.find(x => x[0] === NX.tab) || [])[1] || '';
+  const sa = $('#nx-side-ai'); if (sa) sa.textContent = NX.ai ? 'activé' : 'désactivé';
+  document.querySelectorAll('.nx-aib').forEach(b => b.classList.toggle('on', NX.ai));
+  nxPillMove();
+}
+function nxPillMove(now) {
+  const b = $(`#nx-tabs [data-a="${NX.tab}"]`), p = $('#nx-pill'); if (!b || !p) return;
+  if (now) p.style.transition = 'none';
+  p.style.width = b.offsetWidth + 'px'; p.style.transform = `translateX(${b.offsetLeft}px)`;
+  if (now) requestAnimationFrame(() => p.style.transition = '');
+}
+function nxTab(t, push = true) {
+  if (!NX_PAGES[t]) return;
+  const main = $('#nx-main');
+  if (t === NX.tab) { main.scrollTo({top: 0, behavior: 'smooth'}); return; }
+  const from = NX_TABS.findIndex(x => x[0] === NX.tab), to = NX_TABS.findIndex(x => x[0] === t);
+  NX.dir = to >= from ? 1 : -1; NX.tab = t; nxHap(6);
+  try { localStorage.setItem('nx.tab', t); } catch (e) {}
+  try { if (push && t !== 'today' && !history.state?.nxt) history.pushState({mod: S.mod, nxt: t}, ''); else if (history.state?.nxt) history.replaceState({mod: S.mod, nxt: t}, ''); } catch (e) {}
+  main.scrollTop = 0; nxDraw(true);
+}
+// Numbers count up when a page arrives.
+function nxCount(root) {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const els = [...root.querySelectorAll('.nx-cnt')]; if (!els.length) return;
+  const t0 = performance.now(), D = 900;
+  const step = t => { const k = Math.min(1, (t - t0) / D), e = 1 - Math.pow(1 - k, 3);
+    for (const el of els) { if (!el.isConnected) continue; const v = +el.dataset.v, d = +el.dataset.d || 0; el.textContent = fx(v * e, d); }
+    if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+
+/* ---------- sheets (the labo's own) ---------- */
+function nxOpen(v) {
+  const same = NX.sh.find(s => s.id === v.id); if (same) { Object.assign(same, v); nxShDraw(same); return; }
+  const el = document.createElement('div'); el.className = 'nx-sh' + (v.full ? ' full' : '') + (v.cls ? ' ' + v.cls : '');
+  el.innerHTML = `<div class="nx-sh-bg" data-nx="sh-x"></div><div class="nx-sh-card" role="dialog" aria-modal="true" aria-label="${esc(v.title || '')}"><div class="nx-sh-hd"><span class="nx-grab"></span><b>${esc(v.title || '')}</b><button class="nx-ib nx-sh-x" data-nx="sh-x" aria-label="Fermer">${ic('x', 20)}</button></div><div class="nx-sh-body"></div><div class="nx-sh-ft" hidden></div></div>`;
+  $('#nx-shs').appendChild(el); v.el = el; NX.sh.push(v); nxShDraw(v);
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('on')));
+  try { history.pushState({mod: S.mod, nxs: NX.sh.length}, ''); } catch (e) {}
+  nxHap(6);
+}
+function nxShDraw(v = NX.sh.at(-1)) {
+  if (!v) return;
+  const b = v.el.querySelector('.nx-sh-body'), y = b.scrollTop;
+  let h; try { h = v.render(); } catch (e) { console.error(e); h = `<div class="nx-card nx-err"><b>Cette fenêtre n'a pas pu s'afficher</b><small>${esc(String(e?.message || e))}</small></div>`; }
+  if (b._h !== h) { b.innerHTML = h; b._h = h; b.scrollTop = y; }
+  const f = v.el.querySelector('.nx-sh-ft'), fh = v.foot ? v.foot() : '';
+  if (f._h !== fh) { f.innerHTML = fh; f._h = fh; } f.hidden = !fh;
+  v.mount?.(v.el);
+}
+// Closing goes through the history, so the phone's back gesture and the buttons do the same thing.
+function nxClose() { if (!NX.sh.length) return; const v = NX.sh.at(-1); if (v.guard && !v.guard()) return; v.guard = null; if (history.state?.nxs) history.back(); else nxPop(); }
+function nxPop() {
+  const v = NX.sh.pop(); if (!v) return;
+  if (v.guard && !v.guard()) { NX.sh.push(v); try { history.pushState({mod: S.mod, nxs: NX.sh.length}, ''); } catch (e) {} return; }
+  v.onClose?.(); v.el.classList.remove('on'); v.el.classList.add('off'); setTimeout(() => v.el.remove(), 450); nxSoon(20);
+}
+// Closes every labo sheet at once (no animation wait), and drops their history steps in one go.
+function nxCloseAll() {
+  const n = NX.sh.length; if (!n) return;
+  while (NX.sh.length) { const v = NX.sh.pop(); v.onClose?.(); v.el.classList.remove('on'); v.el.classList.add('off'); const el = v.el; setTimeout(() => el.remove(), 450); }
+  if (history.state?.nxs) { NX.skipPop = true; try { history.go(-Math.min(n, history.state.nxs)); } catch (e) { NX.skipPop = false; } }
+}
+addEventListener('popstate', () => {
+  if (NX.skipPop) { NX.skipPop = false; return; }
+  if (NX.classic) return;
+  if (P.stack.length || S.sheet || PLFS.on) return;   // the engine closes its own windows
+  if (NX.sh.length) { nxPop(); return; }
+  if (NX.lv.open) { nxLiveHide(true); return; }
+  if (NX.tab !== 'today') nxTab('today', false);
+}, true);
+// Pull the sheet down by its top to close it.
+document.addEventListener('pointerdown', e => {
+  const hd = e.target.closest('.nx-sh-hd'); if (!hd || e.target.closest('button')) return;
+  const card = hd.closest('.nx-sh-card'); NX.shd = {card, y0: e.clientY, dy: 0, id: e.pointerId}; card.style.transition = 'none'; hd.setPointerCapture?.(e.pointerId);
+});
+document.addEventListener('pointermove', e => { const d = NX.shd; if (!d || e.pointerId !== d.id) return; d.dy = Math.max(0, e.clientY - d.y0); d.card.style.transform = `translateY(${d.dy}px)`; });
+const nxShUp = e => { const d = NX.shd; if (!d || e.pointerId !== d.id) return; NX.shd = null; d.card.style.transition = ''; d.card.style.transform = ''; if (d.dy > 110) nxClose(); };
+document.addEventListener('pointerup', nxShUp); document.addEventListener('pointercancel', nxShUp);
+
+/* ================= PAGE 1 · AUJOURD'HUI ================= */
+function nxToday() {
+  const kG = lastKey('hrv'), rec = kG ? recovery(kG) : null, sc = rec?.score ?? null, z = zoneOf(sc), zc = NXC[z] || NXC.none;
+  const hi = highDay(TODAY), tgt = effortTarget(sc, hi);
+  const card = (cls, order, col, html, extra = '') => `<section class="nx-card ${cls}" style="--o:${order};${extra}">${html}</section>`;
+  // Forme
+  const sl = kG ? VAL.sleepH(kG) : null, need = sleepGoal(), hrv = kG ? G(kG, 'hrv') : null, hb = kG ? base('hrv', kG, 60) : null, rhr = kG ? G(kG, 'rhr') : null, rb = kG ? base('rhr', kG, 60) : null;
+  const vit = (icn, col, lab, val, sub, st) => `<div class="nx-vit ${st || ''}" style="--c:${col}">${ic(icn, 16)}<span>${lab}</span><b>${val}</b><small>${sub}</small></div>`;
+  const hero = `<button class="nx-hero-in" data-nx="why" aria-label="Pourquoi ce score">
+      <div class="nx-ring">${nxRing(sc, zc, 176, 15)}<div class="nx-ring-v"><b>${sc == null ? '–' : nxCnt(sc)}${sc == null ? '' : '<small>%</small>'}</b><span>Forme</span></div></div>
+      <div class="nx-hero-t"><span class="nx-tag" style="--c:${zc}">${esc(ZONE[z])}</span><p class="nx-say">${esc(tgt.text)}</p><span class="nx-more">${kG && kG !== TODAY ? 'Dernière mesure : ' + esc(fmtShort(kG)) + ' · ' : ''}Pourquoi ce score ›</span></div></button>
+    <div class="nx-vits">${vit('moon', NXC.sleep, 'Sommeil', hmH(sl), 'besoin ' + hmH(need), sl == null ? '' : sl >= need - .3 ? 'ok' : sl >= need - 1 ? 'mid' : 'bad')}
+      ${vit('wave', NXC.hrv, 'VFC', hrv != null ? hrv + ' ms' : '–', hb && hrv != null ? (hrv >= hb.m ? '+' : '−') + Math.abs(Math.round((hrv / hb.m - 1) * 100)) + ' % / ta base' : 'base en calcul', hb && hrv != null ? (hrv >= hb.m * .95 ? 'ok' : hrv >= hb.m * .85 ? 'mid' : 'bad') : '')}
+      ${vit('heart', NXC.rhr, 'FC repos', rhr != null ? rhr + ' bpm' : '–', rb ? 'base ' + fx(rb.m) + ' bpm' : '', rb && rhr != null ? (rhr <= rb.m + 2 ? 'ok' : rhr <= rb.m + 5 ? 'mid' : 'bad') : '')}</div>`;
+  const C = nxCoach(rec, tgt, kG), nC = NX.open.coach ? C.length : 3;
+  const WHO = {T: NXC.T, N: NXC.N, R: NXC.R};
+  const coach = `<h3 class="nx-ct">À retenir aujourd'hui<small>sans IA · tes règles et tes données</small></h3>
+    ${C.slice(0, nC).map(x => `<div class="nx-tip ${x.z}"><i style="--c:${WHO[x.who] || NXC.none}">${x.who}</i><p>${esc(x.t)}${x.h ? `<span class="cact">${x.h}</span>` : ''}</p></div>`).join('') || '<p class="nx-empty">Rien à corriger : continue exactement comme ça.</p>'}
+    ${C.length > 3 ? `<button class="nx-link" data-nx="open" data-a="coach">${NX.open.coach ? 'Moins' : 'Voir les ' + C.length + ' conseils'}</button>` : ''}`;
+  const AI = NX.ai ? AN()?.homeText : null;
+  const cards = [
+    `<div class="nx-col c1">`,
+    card('nx-hero', 1, zc, hero, `--zc:${zc}`),
+    nxCheckCard(2),
+    card('nx-coach', 6, '', coach),
+    `</div><div class="nx-col c2">`,
+    nxSessCards(3, sc, hi, tgt),
+    card('nx-dayc', 4, '', `<h3 class="nx-ct">Ta journée<small>${NX.open.day ? 'toute la journée' : 'à partir de maintenant'}</small></h3><div class="nx-tls">${nxDayLine(TODAY, !!NX.open.day) || '<p class="nx-empty">Plus rien de prévu : place au calme et au sommeil.</p>'}</div><button class="nx-link" data-nx="open" data-a="day">${NX.open.day ? 'Seulement la suite' : 'Toute la journée'}</button>`),
+    `</div><div class="nx-col c3">`,
+    nxFuelCard(5),
+    AI ? card('nx-aic', 7, '', `<h3 class="nx-ct"><span class="nx-spk">${ic('spark', 16)}</span>Analyse de Claude<small>coach IA activé</small></h3><p>${esc(AI)}</p><button class="nx-link" data-nx="ai">Poser une question ›</button>`) : '',
+    `</div>`
+  ].join('');
+  const h = new Date().getHours(), hello = (h < 5 ? 'Bonne nuit' : h < 18 ? 'Bonjour' : 'Bonsoir') + ' ' + (S.profile?.name || 'Oscar');
+  return `<div class="nx-pg nx-today"><div class="nx-h"><p class="nx-eye">${esc(cap(fmtDay(TODAY)))}</p><h1>${esc(hello)}</h1></div>${nxStrip()}<div class="nx-cols">${cards}</div></div>`;
+}
+function nxStrip() {
+  const mon = monday(TODAY);
+  return `<div class="nx-strip">${[...Array(7)].map((_, i) => { const k = addDays(mon, i), t = planForK(k, 'track'), g = planForK(k, 'gym');
+    const dots = [t ? `<em class="${kindDone(k, 'track') ? 'dn' : ''}" style="--c:${NXC.track}"></em>` : '', g ? `<em class="${kindDone(k, 'gym') ? 'dn' : ''}" style="--c:${NXC.gym}"></em>` : ''].join('');
+    return `<button class="nx-sd${k === TODAY ? ' on' : ''}${k < TODAY ? ' past' : ''}" data-nx="goday" data-a="${k}" aria-label="${esc(fmtDay(k))}"><span>${DOW[i]}</span><b>${+k.slice(8)}</b><i>${dots}</i></button>`; }).join('')}</div>`;
+}
+function nxCheckCard(order) {
+  const W0 = M(TODAY, 'well') || {}, PN = pains(TODAY), n = WELL.filter(([id]) => W0[id]).length, done = n === WELL.length;
+  if (done && !NX.open.check) {
+    const lab = {slq: 'Sommeil', fat: 'Fraîcheur', sor: 'Courbatures', str: 'Stress', mood: 'Humeur'};
+    const pn = Object.entries(PN).filter(([, v]) => v > 0);
+    return `<section class="nx-card nx-check done" style="--o:${order}"><div class="nx-chk-ok">${ic('check', 18)}</div><div><b>Check du matin fait</b><small>${WELL.map(([id]) => `${lab[id]} ${W0[id]}`).join(' · ')}${pn.length ? ' · douleur : ' + pn.map(([l, v]) => esc(l) + ' ' + v).join(', ') : ''}</small></div><button class="nx-link" data-nx="open" data-a="check">Modifier</button></section>`;
+  }
+  return `<section class="nx-card nx-check" style="--o:${order}"><h3 class="nx-ct">Check du matin<small>${n}/${WELL.length} · 1 = mal, 5 = au top</small></h3>
+    ${WELL.map(([id, nm, lo, hi]) => `<div class="nx-q"><span>${esc(nm)}<small>${esc(lo)} → ${esc(hi)}</small></span><div class="nx-dots">${[1, 2, 3, 4, 5].map(v => `<button class="${W0[id] === v ? 'on' : ''}" data-nx="well" data-a="${id}" data-b="${v}" aria-label="${esc(nm)} ${v}" style="--c:${['', '#FF453A', '#FF9F0A', '#FFD60A', '#9BE15D', '#30D158'][v]}">${v}</button>`).join('')}</div></div>`).join('')}
+    <div class="nx-q nx-qp"><span>Une douleur ?<small>touche pour monter : 2, 4, 6, 8, puis retirer</small></span><div class="nx-chips">${COMMON_PAINS.concat(Object.keys(PN).filter(l => !COMMON_PAINS.includes(l))).map(p => { const v = PN[p] || 0; return `<button class="nx-chip${v ? ' on' : ''}" data-nx="pain" data-a="${esc(p)}" style="--c:${v >= 6 ? NXC.bad : v >= 3 ? NXC.warn : NXC.good}">${esc(p)}${v ? ` <b>${v}</b>` : ''}</button>`; }).join('')}</div></div>
+    ${done ? '<button class="nx-btn" data-nx="open" data-a="check">C\'est noté</button>' : ''}
+    <button class="nx-link" data-nx="note">Questionnaire complet (journée, activités, notes) ›</button></section>`;
+}
+async function nxManual(fn) {
+  const doc = structuredClone(S.manual[TODAY] || {}); fn(doc); doc.date = TODAY; doc.updatedAt = new Date().toISOString();
+  S.manual[TODAY] = doc; nxSoon(10);
+  try { await S.db?.collection('manual').doc(TODAY).set(doc); } catch (e) { toast('Échec de l\'enregistrement'); }
+}
+function nxSessCards(order, sc, hi, tgt) {
+  const out = [], L = S.live;
+  if (L) {
+    const c = nxLiveCount(L), min = Math.max(0, Math.floor((Date.now() - new Date(L.start)) / 60000)), kc = NXC[nxKind(L)];
+    out.push(`<section class="nx-card nx-sess live" style="--o:${order};--k:${kc}"><div class="nx-sess-top"><span class="nx-kind"><i class="nx-live-dot"></i>En cours · ${min} min</span><span class="nx-sess-min">${c.d}/${c.n}</span></div><h2>${esc(L.name)}</h2><div class="nx-bar"><i style="width:${c.n ? c.d / c.n * 100 : 0}%"></i></div><div class="nx-row"><button class="nx-btn nx-go" data-nx="live">${ic('play', 18)} Reprendre</button></div></section>`);
+  }
+  for (const kind of ['track', 'gym']) {
+    if (L && nxKind(L) === kind && L.date === TODAY) continue;
+    const p = planForK(TODAY, kind), done = kindDone(TODAY, kind), lg = logsOn(TODAY).find(l => l.kind === kind);
+    if (done) out.push(nxDoneCard(order, kind, p, lg));
+    else if (p) out.push(nxPlanCard(order, kind, p, sc, hi, tgt));
+  }
+  if (!out.length) {
+    const n = nextSess();
+    out.push(`<section class="nx-card nx-sess nxrest" style="--o:${order}"><div class="nx-sess-top"><span class="nx-kind">Ta séance</span></div><h2>${hi ? 'Aucune séance calée' : 'Repos aujourd\'hui'}</h2>
+      <p class="nx-sub">${hi ? 'Ton planning a un créneau d\'entraînement aujourd\'hui, mais aucune séance n\'y est calée.' : 'Pas de séance prévue : c\'est pendant le repos que tu progresses.'}</p>
+      ${n ? `<button class="nx-next" data-nx="plan" data-a="${esc(caleRef(n.p))}"><span>Prochaine séance · ${esc(n.k === addDays(TODAY, 1) ? 'demain' : fmtShort(n.k))}</span><b>${esc(n.p.name)}</b>${ic('right', 18)}</button>` : ''}
+      ${hi ? `<div class="nx-row"><button class="nx-btn2" data-nx="cale" data-a="${TODAY}">${ic('cal', 18)} Caler une séance aujourd'hui</button></div>` : `<button class="nx-link" data-nx="cale" data-a="${TODAY}">Caler quand même une séance aujourd'hui ›</button>`}</section>`);
+  }
+  return out.join('');
+}
+function nxPlanCard(order, kind, p, sc, hi, tgt) {
+  const b = dayPlan(TODAY).find(x => x.c === (kind === 'track' ? 'athle' : 'muscu')), ref = caleRef(p), skip = kindSkip(TODAY, kind), its = p.items.filter(it => it.ex !== 'warmup'), sm = nxSprintM(p);
+  if (skip) return `<section class="nx-card nx-sess skip" style="--o:${order};--k:${NXC[kind]}"><div class="nx-sess-top"><span class="nx-kind">${nxKindName(kind)} · pas aujourd'hui</span></div><h2>${esc(p.name)}</h2><p class="nx-sub">Tu as choisi de ne pas la faire aujourd'hui.</p><div class="nx-row"><button class="nx-btn2" data-nx="skip" data-a="${kind}" data-b="0">La remettre</button></div></section>`;
+  const sp = nxSpeed(), warn = kind === 'track' && sp.tips.find(t => /veille du sprint/.test(t[1]));
+  const adapt = sc != null && hi && sc < 67 ? tgt.text : warn ? warn[1] : '';
+  return `<section class="nx-card nx-sess" style="--o:${order};--k:${NXC[kind]}">
+    <div class="nx-sess-top"><span class="nx-kind">${nxKindName(kind)}${b ? ' · ' + tfr(b.a) : ''}${b?.dest ? ' · ' + esc(b.dest) : ''}</span><span class="nx-sess-min">${ic('clock', 15)} ${estMin(p)} min</span></div>
+    <h2>${esc(p.name)}</h2>${p.title || p.desc ? `<p class="nx-sub">${esc(p.title || p.desc)}</p>` : ''}
+    <div class="nx-sess-f">${sm ? `<span><b>${fx(sm)}</b> m de sprint</span>` : ''}<span><b>${its.length}</b> exercices</span><span><b>${nxSets(p)}</b> ${kind === 'track' ? 'répétitions' : 'séries'}</span></div>
+    <ol class="nx-exl">${its.slice(0, 5).map(it => `<li style="--c:${nxCat(it.ex)}"><b>${esc(exOf(it.ex).n)}</b><span>${esc(nxItemTxt(it))}</span></li>`).join('')}${its.length > 5 ? `<li class="nx-mli">+ ${its.length - 5} autre${its.length - 5 > 1 ? 's' : ''}</li>` : ''}</ol>
+    ${adapt ? `<p class="nx-adapt">${esc(adapt)}</p>` : ''}
+    <div class="nx-row"><button class="nx-btn nx-go" data-nx="start" data-a="${esc(p.id)}" data-b="${p.n || ''}">${ic('play', 18)} Commencer</button><button class="nx-btn2" data-nx="plan" data-a="${esc(ref)}">Détail</button></div>
+    <button class="nx-link" data-nx="skip" data-a="${kind}" data-b="1">Pas aujourd'hui</button></section>`;
+}
+function nxDoneCard(order, kind, p, l) {
+  const st = (v, s) => `<span><b>${v}</b>${s}</span>`, rpe = M(TODAY, kind === 'gym' ? 'gymRpe' : 'trackRpe');
+  return `<section class="nx-card nx-sess done" style="--o:${order};--k:${NXC[kind]}"><div class="nx-sess-top"><span class="nx-kind">${nxKindName(kind)} · faite</span><span class="nx-done-ic">${ic('check', 18)}</span></div>
+    <h2>${esc(l?.name || p?.name || 'Séance')}</h2>
+    <div class="nx-sess-f">${l ? st(l.min + ' min', 'durée') + st(l.rpe + '/10', 'RPE') + (kind === 'track' ? st(fx(l.sprintM) + ' m', 'sprint') : st(fx((l.tonnage || 0) / 1000, 1) + ' t', 'soulevées')) : st('RPE ' + (rpe ?? '–'), 'noté au questionnaire')}</div>
+    <p class="nx-sub">Bien joué. Elle compte déjà dans ta charge et dans tes besoins du jour.</p>
+    ${l ? `<div class="nx-row"><button class="nx-btn2" data-nx="log" data-a="${esc(l.id)}">Revoir la séance</button></div>` : ''}</section>`;
+}
+function nxDayLine(k, all) {
+  const now = nxNow(), L = dayPlan(k).filter(x => x.c !== 'quest' && !(x.c === 'sommeil' && x.a === '00:00'));
+  let rows = L; if (!all && k === TODAY) { const i = L.findIndex(x => tmin(x.b) > now); rows = i < 0 ? [] : L.slice(i, i + 5); }
+  return rows.map(x => {
+    const a = tmin(x.a), b = tmin(x.b), on = k === TODAY && a <= now && b > now, past = k === TODAY && b <= now, col = PCAT[x.c]?.[1] || '#888';
+    const kd = x.c === 'muscu' ? 'gym' : x.c === 'athle' ? 'track' : null, q = kd && planForK(k, kd), cat = PCAT[x.c]?.[0] || '';
+    const when = k !== TODAY || past ? '' : on ? 'maintenant' : 'dans ' + nxSpan(a - now);
+    const sub = [q ? cat : cat !== plName(x.n) ? cat : '', x.dest, x.trip].filter(Boolean).join(' · ');
+    return `<div class="nx-tl${on ? ' now' : ''}${past ? ' past' : ''}" style="--c:${col}${on ? ';--p:' + Math.round((now - a) / Math.max(1, b - a) * 100) + '%' : ''}"><span class="t"><b>${tfr(x.a)}</b>${when ? `<small>${when}</small>` : ''}</span><i></i><span class="n"><b>${esc(q ? q.name : plName(x.n))}</b>${sub ? `<small>${esc(sub)}</small>` : ''}</span></div>`;
+  }).join('');
+}
+function nxFuelCard(order) {
+  const g = fuelGoal(TODAY), t = dayTotals(TODAY), w = waterOf(TODAY), d = fday(TODAY), wb = w.wb || {b1: 0, b2: 0, t: 0};
+  const mini = (lab, v, goal, u, col, dec = 0) => { const p = goal ? Math.min(100, v / goal * 100) : 0; return `<div class="nx-mini"><div class="nx-mini-r">${nxRing(p, col, 58, 6, 'nx-arc sm')}<b>${goal ? Math.round(p) : '–'}<small>%</small></b></div><span>${lab}</span><small>${fx(v, dec)} / ${fx(goal, dec)} ${u}</small></div>`; };
+  const meals = MEALS.map(([m]) => { const its = (d.items || []).filter(it => it.meal === m), kc = its.reduce((s, it) => s + (it.kcal || 0), 0);
+    return `<div class="nx-meal"><button class="nx-meal-in" data-nx="meal" data-a="${m}"><span class="nx-meal-ic">${ic('fork', 16)}</span><span class="nx-meal-t"><b>${esc(mealLab(m))}</b><small>${its.length ? esc(its.map(it => it.n).slice(0, 3).join(', ')) + (its.length > 3 ? '…' : '') : 'rien noté'}</small></span><em>${its.length ? fx(kc) + ' kcal' : ''}</em></button><button class="nx-ib nx-plus" data-nx="food" data-a="${m}" aria-label="Ajouter à ${esc(mealLab(m))}">${ic('plus', 18)}</button></div>`; }).join('');
+  return `<section class="nx-card nx-fuel" style="--o:${order}"><h3 class="nx-ct">Carburant<small>${d.fromPlan ? 'rempli d\'après ton plan · change ce qui diffère' : g.train ? 'jour d\'entraînement' : 'jour de repos'}</small></h3>
+    <div class="nx-minis">${mini('Énergie', t.kcal, g.kcal, 'kcal', NXC.kcal)}${mini('Protéines', t.p, g.p, 'g', NXC.p)}${mini('Glucides', t.c, g.c, 'g', NXC.c)}${mini('Eau', w.L, g.waterL, 'L', NXC.water, 1)}</div>
+    <div class="nx-meals">${meals}</div>
+    <div class="nx-water"><button class="nx-btl${wnum(wb.b1) ? ' on' : ''}" data-nx="wb" data-a="b1">${ic('bottle', 22)}<span>Gourde 1<small>1 L</small></span></button><button class="nx-btl${wnum(wb.b2) ? ' on' : ''}" data-nx="wb" data-a="b2">${ic('bottle', 22)}<span>Gourde 2<small>1 L</small></span></button>
+      <div class="nx-btl tr${wb.t ? ' on' : ''}">${ic('bottle', 22)}<span>Entraînement<small>${fx(wb.t || 0, 1)} × 0,8 L</small></span><span class="nx-step"><button data-nx="wt" data-a="-0.5" aria-label="Moins">−</button><button data-nx="wt" data-a="0.5" aria-label="Plus">+</button></span></div></div></section>`;
+}
+
+/* ---------- one coach: the engine's three coaches + sprint rules, sorted ---------- */
+const NX_CAP = {}; let NX_CAPON = false;
+const nxCoachBox0 = coachBox;
+coachBox = (who, L) => { if (NX_CAPON) NX_CAP[who] = (L || []).filter(Boolean); return nxCoachBox0(who, L); };
+function nxCoach(rec, tgt, kG) {
+  for (const k in NX_CAP) delete NX_CAP[k];
+  NX_CAPON = true;
   try { coachCard(); } catch (e) {} try { coachRecovery(rec, tgt, kG); } catch (e) {} try { coachNutrition(TODAY); } catch (e) {}
-  const all = []; for (const [who, L] of Object.entries(LAB_CAP)) for (const x of L) all.push({who, z: x[0], t: x[1], h: x[2]});
-  // Sprint first: a speed rule for a sprinter weighs more than a generic tip.
-  for (const s of labSpeed().tips) all.push({who: 'T', z: s[0], t: s[1]});
-  const rank = {bad: 0, mid: 1, warn: 1, good: 2, ok: 2};
-  const seen = new Set();
-  return all.filter(x => { const k = x.t.slice(0, 40); if (seen.has(k)) return false; seen.add(k); return true; }).sort((a, b) => rank[a.z] - rank[b.z]).slice(0, 4);
+  NX_CAPON = false;
+  const all = []; for (const [who, L] of Object.entries(NX_CAP)) for (const x of L) if (x && x[1]) all.push({who, z: x[0], t: x[1], h: x[2]});
+  for (const s of nxSpeed().tips) all.unshift({who: 'T', z: s[0], t: s[1]});
+  const rank = {bad: 0, mid: 1, warn: 1, good: 2, ok: 2}, seen = new Set();
+  return all.filter(x => { const k = String(x.t).slice(0, 40); if (seen.has(k)) return false; seen.add(k); return true; }).sort((a, b) => (rank[a.z] ?? 2) - (rank[b.z] ?? 2));
 }
-
-// ---------- speed: what a sprinter needs to see ----------
-function labSpeed() {
+// What a sprinter must not miss: days without top speed, heavy gym the day before the track, sudden jumps in sprint volume.
+function nxSpeed() {
   const tr = k => !!(M(k, 'trackRpe') || logsOn(k).some(l => l.kind === 'track'));
   const gymHeavy = k => logsOn(k).some(l => l.kind === 'gym' && (l.rpe || 0) >= 7) || (M(k, 'gymRpe') || 0) >= 7;
   let last = null; for (let i = 0; i < 60; i++) { const k = addDays(TODAY, -i); if (tr(k)) { last = k; break; } }
   const since = last ? daysBetween(last, TODAY) : null;
-  // The usual week: only the past weeks where he really sprinted (a restart two weeks ago must not look like +300 %).
   const m7 = sumN('sprint', 7), past = [1, 2, 3, 4].map(i => sumN('sprint', 7, addDays(TODAY, -7 * i))).filter(v => v > 0), m28 = past.length >= 2 ? mean(past) : 0;
-  const nx = nextSess('track'), ng = nextSess('gym');
-  const tips = [];
-  if (since != null && since >= 7) tips.push(['mid', `${since} jours sans vitesse maximale. Au-delà de 7 à 10 jours, le nerveux redescend : même 3 sprints courts à 95 % suffisent à le garder.`]);
-  if (nx) { const before = addDays(nx.k, -1); if (gymHeavy(before) || (planForK(before, 'gym') && !kindDone(before, 'gym'))) tips.push(['mid', `Muscu lourde la veille du sprint du ${fmtShort(nx.k)} : laisse si possible 48 h entre les deux pour arriver frais sur la piste.`]); }
-  if (m28 > 0 && m7 > m28 * 1.4) tips.push(['bad', `${fx(m7)} m de sprint cette semaine, contre ${fx(m28)} m en moyenne : +${Math.round((m7 / m28 - 1) * 100)} %. Les ischios encaissent mal les hausses brusques de vitesse maximale.`]);
-  return {since, last, m7, m28, nx, ng, tips};
+  const nx = nextSess('track'), tips = [];
+  if (since != null && since >= 7) tips.push(['mid', `${since} jours sans vitesse maximale. Au-delà de 7 à 10 jours, le système nerveux perd sa vivacité : même 3 sprints courts à 95 % suffisent à la garder.`]);
+  if (nx) { const before = addDays(nx.k, -1); if (gymHeavy(before) || (planForK(before, 'gym') && !kindDone(before, 'gym'))) tips.push(['mid', `Muscu la veille du sprint du ${fmtShort(nx.k)} : laisse si possible 48 h entre une muscu lourde et la piste pour arriver frais.`]); }
+  if (m28 > 0 && m7 > m28 * 1.4) tips.push(['bad', `${fx(m7)} m de sprint sur 7 jours, contre ${fx(m28)} m d'habitude (+${Math.round((m7 / m28 - 1) * 100)} %). Les ischios encaissent mal les hausses brusques de vitesse maximale.`]);
+  return {since, last, m7, m28, nx, tips};
 }
 
-// ---------- the day, from now ----------
-function labDay() {
-  const now = new Date().getHours() * 60 + new Date().getMinutes();
-  const L = dayPlan(TODAY).filter(x => !['quest'].includes(x.c) && !(x.c === 'sommeil' && x.a === '00:00'));
-  const cur = L.find(x => tmin(x.a) <= now && tmin(x.b) > now), next = L.filter(x => tmin(x.a) > now).slice(0, cur ? 3 : 4);
-  const span = m => m >= 60 ? Math.floor(m / 60) + ' h' + (m % 60 ? ' ' + String(m % 60).padStart(2, '0') : '') : m + ' min';
-  const row = (x, on) => { const a = tmin(x.a), col = PCAT[x.c]?.[1] || '#888', chip = plChip(x, TODAY);
-    const kd = x.c === 'muscu' ? 'gym' : x.c === 'athle' ? 'track' : null, q = kd && planForK(TODAY, kd), dn = kd && kindDone(TODAY, kd);
-    const act = q && !dn ? `<button class="lab-go" data-tstart="${q.id}"${q.n ? ` data-tn="${q.n}"` : ''}>Commencer</button>` : dn ? '<span class="lab-ok">Faite ✓</span>' : '';
-    return `<div class="lab-blk${on ? ' now' : ''}" style="--c:${col}"><span class="t">${on ? 'maintenant' : 'dans ' + span(a - now)}<b>${tfr(x.a)}</b></span><i></i><span class="n"><b>${esc(plName(x.n))}${x.dest ? ' · ' + esc(x.dest) : ''}</b>${x.trip ? `<small>${esc(x.trip)}</small>` : ''}${chip ? `<span class="lab-chip">${chip}</span>` : ''}</span>${act}</div>`; };
-  return (cur ? row(cur, true) : '') + next.map(x => row(x, false)).join('') || '<p class="lab-empty">Plus rien de prévu aujourd\'hui : place au calme et au sommeil.</p>';
+/* ================= PAGE 2 · SEMAINE ================= */
+function nxWeek() {
+  const mon = addDays(monday(TODAY), 7 * NX.wk), days = [...Array(7)].map((_, i) => addDays(mon, i));
+  if (!days.includes(NX.day)) NX.day = days.includes(TODAY) ? TODAY : mon;
+  const cell = (k, i) => {
+    const ss = ['track', 'gym'].map(kd => ({kd, p: planForK(k, kd), dn: kindDone(k, kd)})).filter(x => x.p || x.dn);
+    const r = k <= TODAY ? recovery(k)?.score : null;
+    return `<div class="nx-wd${k === NX.day ? ' sel' : ''}${k === TODAY ? ' today' : ''}${k < TODAY ? ' past' : ''}" data-drop="${k}">
+      <button class="nx-wd-h" data-nx="day" data-a="${k}"><span>${DOW[i]}</span><b>${+k.slice(8)}</b><i>${ss.map(x => `<em class="${x.dn ? 'dn' : ''}" style="--c:${NXC[x.kd]}"></em>`).join('')}</i>${r != null ? `<u style="--c:${NXC[zoneOf(r)]};--w:${r}%"></u>` : ''}</button>
+      <div class="nx-wd-s">${ss.map(x => { const ref = x.p ? caleRef(x.p) : ''; return `<button class="nx-wchip${x.dn ? ' dn' : ''}" style="--c:${NXC[x.kd]}" data-nx="${x.p ? 'plan' : 'day'}" data-a="${esc(x.p ? ref : k)}"${x.p && !x.dn ? ` draggable="true" data-drag="${esc(ref)}" data-from="${k}"` : ''}><b>${esc(x.p?.name || (x.kd === 'track' ? 'Piste' : 'Muscu'))}</b><small>${x.dn ? 'faite' : x.p ? estMin(x.p) + ' min' : ''}</small></button>`; }).join('')}
+        <button class="nx-wadd" data-nx="cale" data-a="${k}" aria-label="Caler une séance">${ic('plus', 16)}</button></div></div>`;
+  };
+  // The week in numbers
+  const past = days.filter(k => k <= TODAY), planned = days.flatMap(k => ['track', 'gym'].map(kd => planForK(k, kd) ? {k, kd} : null)).filter(Boolean);
+  const doneN = days.reduce((s, k) => s + ['track', 'gym'].filter(kd => kindDone(k, kd)).length, 0);
+  const smPlan = days.reduce((s, k) => s + nxSprintM(planForK(k, 'track')), 0), smDone = days.reduce((s, k) => s + (VAL.sprint(k) || 0), 0);
+  const effs = past.map(k => effortDay(k)).filter(v => v != null), recs = past.map(k => recovery(k)?.score).filter(v => v != null);
+  const stat = (v, l, col) => `<div class="nx-ws"><b style="color:${col || 'inherit'}">${v}</b><span>${l}</span></div>`;
+  const summary = `<h3 class="nx-ct">La semaine en chiffres</h3><div class="nx-wss">${stat(doneN + ' / ' + planned.length, 'séances faites')}${stat(fx(smDone) + ' m', 'sprint fait · ' + fx(smPlan) + ' prévus', NXC.track)}${stat(effs.length ? fx(mean(effs), 1) : '–', 'effort moyen / 21', NXC.load)}${stat(recs.length ? Math.round(mean(recs)) + ' %' : '–', 'forme moyenne', recs.length ? NXC[zoneOf(mean(recs))] : '')}</div>
+    <div class="nx-acts"><button data-nx="bilan">${ic('flag', 18)}<span>Bilan de la semaine</span></button><button data-nx="eng" data-a="shop">${ic('list', 18)}<span>Liste de courses</span></button><button data-nx="eng" data-a="menu">${ic('fork', 18)}<span>Mon menu</span></button><button data-nx="eng" data-a="planning">${ic('clock', 18)}<span>Mes horaires</span></button></div>`;
+  return `<div class="nx-pg nx-weekp"><div class="nx-h"><p class="nx-eye">${esc(cap(fmtShort(mon)))} – ${esc(fmtShort(addDays(mon, 6)))}</p><h1>Semaine ${seasonWeek(mon)}</h1>
+    <div class="nx-wnav"><button class="nx-ib" data-nx="wk" data-a="-1" aria-label="Semaine d'avant">${ic('left', 20)}</button>${NX.wk ? '<button class="nx-chip" data-nx="wk" data-a="0">Cette semaine</button>' : ''}<button class="nx-ib" data-nx="wk" data-a="1" aria-label="Semaine d'après">${ic('right', 20)}</button></div></div>
+    <div class="nx-cal">${days.map(cell).join('')}</div>
+    <div class="nx-cols nx-wcols"><div class="nx-col c1"><section class="nx-card phone-only" style="--o:1"><h3 class="nx-ct">Les séances de la semaine<small>touche un jour pour le détail</small></h3><div class="nx-wl">${days.map((k, i) => { const ss = ['track', 'gym'].map(kd => ({kd, p: planForK(k, kd), dn: kindDone(k, kd)})).filter(x => x.p || x.dn);
+      return `<button class="nx-wlr${k === NX.day ? ' sel' : ''}${k === TODAY ? ' today' : ''}${k < TODAY ? ' past' : ''}" data-nx="day" data-a="${k}"><span>${esc(fmtShort(k).split(' ')[0].replace('.', ''))}<b>${+k.slice(8)}</b></span><div>${ss.map(x => `<em class="${x.dn ? 'dn' : ''}" style="--c:${NXC[x.kd]}">${esc(x.p?.name || nxKindName(x.kd))}</em>`).join('') || `<i>${highDay(k) ? 'créneau libre' : 'repos'}</i>`}</div></button>`; }).join('')}</div></section>
+      <section class="nx-card nx-dd" style="--o:2">${nxDayDetail(NX.day)}</section></div><div class="nx-col c2"><section class="nx-card" style="--o:3">${summary}</section></div></div>
+    <p class="nx-hint pc-only">Glisse une séance d'un jour à l'autre pour la déplacer.</p></div>`;
+}
+function nxDayDetail(k) {
+  const ses = ['track', 'gym'].map(kd => {
+    const p = planForK(k, kd), dn = kindDone(k, kd), lg = logsOn(k).find(l => l.kind === kd); if (!p && !dn) return '';
+    const ref = p ? caleRef(p) : null;
+    return `<div class="nx-ses" style="--k:${NXC[kd]}"><button class="nx-ses-in" data-nx="${p ? 'plan' : 'log'}" data-a="${esc(p ? ref : lg?.id || '')}"><span class="nx-kind">${nxKindName(kd)}${dn ? ' · faite ✓' : ''}</span><b>${esc(lg?.name || p?.name || '')}</b><small>${lg ? lg.min + ' min · RPE ' + lg.rpe : p ? estMin(p) + ' min · ' + p.items.length + ' exercices' : ''}</small></button>
+      ${p && !dn ? `<div class="nx-ses-a">${k === TODAY ? `<button class="nx-btn nx-go sm" data-nx="start" data-a="${esc(p.id)}" data-b="${p.n || ''}">${ic('play', 16)} Commencer</button>` : ''}<button class="nx-chip" data-nx="move" data-a="${esc(ref)}" data-b="${k}">Déplacer</button><button class="nx-chip" data-nx="unplace" data-a="${esc(ref)}" data-b="${k}">Retirer</button></div>` : ''}</div>`;
+  }).join('');
+  const rec = k <= TODAY ? recovery(k)?.score : null, eff = k <= TODAY ? effortDay(k) : null, sl = k <= TODAY ? VAL.sleepH(k) : null;
+  const mp = k >= TODAY ? (() => { const L = menuFor(k) || []; if (!L.length) return ''; const t = L.reduce((a, x) => ({kcal: a.kcal + (x.kcal || 0), p: a.p + (x.p || 0)}), {kcal: 0, p: 0}); return `<div class="nx-dd-m">${ic('fork', 16)}<span>Menu prévu : <b>${fx(t.kcal)} kcal</b> · ${fx(t.p)} g de protéines</span></div>`; })() : (() => { const t = dayTotals(k); return t.kcal ? `<div class="nx-dd-m">${ic('fork', 16)}<span>Mangé : <b>${fx(t.kcal)} kcal</b> · ${fx(t.p)} g de protéines</span></div>` : ''; })();
+  return `<h3 class="nx-ct">${esc(cap(fmtDay(k)))}${k === TODAY ? '<small>aujourd\'hui</small>' : ''}</h3>
+    ${k <= TODAY && (rec != null || eff) ? `<div class="nx-dd-d">${rec != null ? `<span style="--c:${NXC[zoneOf(rec)]}"><b>${rec} %</b>forme</span>` : ''}${eff != null ? `<span style="--c:${NXC.load}"><b>${fx(eff, 1)}</b>effort</span>` : ''}${sl != null ? `<span style="--c:${NXC.sleep}"><b>${hmH(sl)}</b>sommeil</span>` : ''}</div>` : ''}
+    ${ses || `<p class="nx-empty">${highDay(k) ? 'Créneau d\'entraînement, aucune séance calée.' : 'Pas de séance : jour léger.'}</p>`}
+    ${k >= TODAY ? `<button class="nx-add sm" data-nx="cale" data-a="${k}">${ic('plus', 18)} Caler une séance</button>` : ''}
+    ${mp}
+    <h4 class="nx-h4">Planning</h4><div class="nx-tls sm">${nxDayLine(k, true) || '<p class="nx-empty">Rien de prévu.</p>'}</div>
+    <button class="nx-link" data-nx="eng" data-a="planning">Modifier mes horaires ›</button>`;
+}
+async function nxPlace(ref, k, on) {
+  const p = planOf(ref); if (!p) return;
+  const dated = {...(S.tset.dated || {})};
+  for (const x of [k, k + '|t']) if (dated[x] === ref) delete dated[x];
+  if (on) { if (p.kind === 'track' && planOf(dated[k])?.kind === 'track') delete dated[k]; dated[dKey(k, p.kind)] = ref; }
+  S.tset = {...S.tset, dated}; nxSoon(10);
+  await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()});
+}
+function nxPickSess(k, moveRef) {
+  nxOpen({id: 'pks', title: moveRef ? 'Déplacer la séance' : 'Caler · ' + cap(fmtShort(k)), render: () => {
+    if (moveRef) {
+      const p = planOf(moveRef);
+      return `<p class="nx-sub">Choisis le nouveau jour de « ${esc(p?.name || '')} ».</p><div class="nx-days">${[...Array(21)].map((_, i) => { const d = addDays(TODAY, i), x = planForK(d, nxKind(p)); return `<button class="nx-dc${d === k ? ' on' : ''}" data-nx="moveto" data-a="${esc(moveRef)}" data-b="${k}" data-c="${d}"><span>${DOW[(dow(d) + 6) % 7]}</span><b>${+d.slice(8)}</b>${x && d !== k ? '<i></i>' : ''}</button>`; }).join('')}</div>`;
+    }
+    const row = (p, sub) => `<button class="nx-pkr" data-nx="pks" data-a="${esc(caleRef(p))}" data-b="${k}" style="--k:${NXC[nxKind(p)]}"><span class="nx-kind">${nxKindName(nxKind(p))}</span><b>${esc(p.name)}</b><small>${esc(sub || p.title || p.desc || '')} · ${estMin(p)} min</small></button>`;
+    const todo = tdvTodo(4), mine = myPlans();
+    return `${todo.length ? `<h4 class="nx-h4">Ton programme · dans l'ordre</h4>${todo.map(p => row(p, p.title)).join('')}` : ''}
+      <h4 class="nx-h4">Mes séances</h4>${mine.map(p => row(p)).join('') || '<p class="nx-empty">Tu n\'as pas encore créé de séance.</p>'}
+      <button class="nx-add" data-nx="new" data-a="${k}">${ic('plus', 18)} Créer une nouvelle séance pour ce jour</button>
+      <h4 class="nx-h4">Modèles</h4>${BUILTIN.map(p => row(p)).join('')}`;
+  }});
 }
 
-// ---------- the ring ----------
-function labRing(v, col, size = 132, w = 11) {
-  const r = (size - w) / 2, c = 2 * Math.PI * r, o = v == null ? c : c * (1 - v / 100);
-  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" aria-hidden="true"><circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="${w}"/><circle class="lab-arc" cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${o.toFixed(1)}" style="--c0:${c.toFixed(1)}" transform="rotate(-90 ${size / 2} ${size / 2})"/></svg>`;
+/* ================= PAGE 3 · SÉANCES (the coach's studio) ================= */
+function nxLib() {
+  const s = NX.lib, seg = (v, n) => `<button class="${s.seg === v ? 'on' : ''}" data-nx="libseg" data-a="${v}">${n}</button>`;
+  let body = '';
+  if (s.seg === 'mine') {
+    const q = nxNorm(s.q), ok = p => (s.f === 'all' || nxKind(p) === s.f) && (!q || nxNorm(p.name + ' ' + (p.desc || '') + ' ' + (p.title || '')).includes(q));
+    const todo = tdvTodo(6).filter(ok), mine = myPlans().filter(ok);
+    body = `<div class="nx-libbar"><input class="nx-in nx-search" type="search" data-nxin="libq" placeholder="Rechercher une séance" value="${esc(s.q)}"><div class="nx-chips">${[['all', 'Tout'], ['track', 'Piste'], ['gym', 'Muscu']].map(([v, n]) => `<button class="nx-chip${s.f === v ? ' on' : ''}" data-nx="libf" data-a="${v}">${n}</button>`).join('')}</div></div>
+      ${todo.length ? `<h3 class="nx-sec">Ton programme<small>les prochaines, dans l'ordre</small></h3><div class="nx-pcs nx-hscroll">${todo.map((p, i) => nxPlanTile(p, i)).join('')}</div>` : ''}
+      <h3 class="nx-sec">Mes séances<small>${mine.length}</small></h3>
+      <div class="nx-pcs">${mine.map((p, i) => nxPlanTile(p, i)).join('')}<button class="nx-pc new" data-nx="new">${ic('plus', 28)}<b>Créer une séance</b><small>piste ou muscu, en 1 minute</small></button></div>`;
+  } else if (s.seg === 'models') {
+    body = `<p class="nx-sub nx-pad">Des bases prêtes : ouvre-en une, puis « Utiliser comme base » pour la copier dans tes séances et l'adapter.</p><div class="nx-pcs">${BUILTIN.filter(p => s.f === 'all' || nxKind(p) === s.f).map((p, i) => nxPlanTile(p, i)).join('')}</div>`;
+  } else {
+    const L = logs().slice(0, 60); let last = '';
+    body = `<div class="nx-hist">${L.map((l, i) => { const m = l.date.slice(0, 7), h = m !== last ? `<h3 class="nx-sec">${esc(cap(new Date(l.date + 'T12:00:00').toLocaleDateString('fr-FR', {month: 'long', year: 'numeric'})))}</h3>` : ''; last = m;
+      return h + `<button class="nx-hr" data-nx="log" data-a="${esc(l.id)}" style="--k:${NXC[l.kind === 'track' ? 'track' : 'gym']}"><span class="d"><b>${+l.date.slice(8)}</b>${esc(DOW[(dow(l.date) + 6) % 7])}</span><span class="n"><b>${esc(l.name)}</b><small>${l.min} min · RPE ${l.rpe}${l.kind === 'track' ? ' · ' + fx(l.sprintM) + ' m' : l.tonnage ? ' · ' + fx(l.tonnage / 1000, 1) + ' t' : ''}</small></span>${ic('right', 18)}</button>`; }).join('') || '<p class="nx-empty">Aucune séance enregistrée.</p>'}</div>`;
+  }
+  return `<div class="nx-pg nx-libp"><div class="nx-h nx-h-row"><div><p class="nx-eye">Ton atelier de coach</p><h1>Séances</h1></div><button class="nx-btn nx-create" data-nx="new">${ic('plus', 20)} Créer</button></div>
+    <div class="nx-seg">${seg('mine', 'Mes séances')}${seg('models', 'Modèles')}${seg('done', 'Historique')}</div>${body}</div>`;
+}
+function nxPlanTile(p, i) {
+  const ref = caleRef(p), on = caledOn(ref), sm = nxSprintM(p), kd = nxKind(p);
+  return `<button class="nx-pc" data-nx="plan" data-a="${esc(ref)}" style="--k:${NXC[kd]};--i:${i}"><span class="nx-kind">${nxKindName(kd)}</span><b>${esc(p.name)}</b><small>${esc(p.title || p.desc || '')}</small>
+    <span class="nx-pc-f"><em>${estMin(p)} min</em><em>${p.items.length} exos</em>${sm ? `<em>${fx(sm)} m</em>` : ''}${on.length ? `<em class="cal">${ic('cal', 13)} ${esc(fmtShort(on[0]))}</em>` : ''}</span></button>`;
+}
+function nxPlanSheet(ref) { nxOpen({id: 'plan', title: 'Séance', auto: true, render: () => nxPlanBody(ref)}); }
+function nxPlanBody(ref) {
+  const p = planOf(ref); if (!p) return '<p class="nx-empty">Séance introuvable.</p>';
+  const own = !!S.plans[p.id] && !p.n, kd = nxKind(p), on = caledOn(ref), sm = nxSprintM(p), lab = itemLabels(p.items);
+  const wt = (() => { try { return warmText(p.warm); } catch (e) { return []; } })();
+  return `<div class="nx-pd" style="--k:${NXC[kd]}"><span class="nx-kind">${nxKindName(kd)}${p.n ? ' · ton programme' : !own ? ' · modèle' : ''}</span><h2>${esc(p.name)}</h2>${p.title || p.desc ? `<p class="nx-sub">${esc(p.title || p.desc)}</p>` : ''}
+    <div class="nx-sess-f"><span><b>${estMin(p)}</b> min</span><span><b>${p.items.length}</b> exercices</span>${sm ? `<span><b>${fx(sm)}</b> m de sprint</span>` : `<span><b>${nxSets(p)}</b> séries</span>`}</div></div>
+    <div class="nx-row nx-pd-a" style="--k:${NXC[kd]}"><button class="nx-btn nx-go" data-nx="start" data-a="${esc(p.id)}" data-b="${p.n || ''}">${ic('play', 18)} Commencer maintenant</button></div>
+    ${wt.length ? `<div class="nx-card in"><h4 class="nx-h4">Échauffement · ${warmMin(p.warm)} min</h4>${wt.map(t => `<p class="nx-sub">${esc(t)}</p>`).join('')}</div>` : ''}
+    ${p.tech ? `<div class="nx-card in"><h4 class="nx-h4">Technique</h4><p class="nx-sub">${esc(p.tech)}</p></div>` : ''}
+    <ol class="nx-pdl">${p.items.map((it, i) => { const e = exOf(it.ex); return `<li style="--c:${nxCat(it.ex)}"><span class="l">${lab[i] || '•'}</span><span class="t"><b>${esc(e.n)}</b><small>${esc(nxItemTxt(it))}</small>${e.c ? `<details><summary>Consignes</summary><p>${esc(e.c)}</p></details>` : ''}</span></li>`; }).join('')}</ol>
+    <h4 class="nx-h4">Caler à un jour<small>touche un jour pour l'ajouter ou l'enlever</small></h4>
+    <div class="nx-days">${[...Array(21)].map((_, i) => { const k = addDays(TODAY, i), x = planForK(k, kd), mine = on.includes(k); return `<button class="nx-dc${mine ? ' on' : ''}" data-nx="toggleday" data-a="${esc(ref)}" data-b="${k}"><span>${DOW[(dow(k) + 6) % 7]}</span><b>${+k.slice(8)}</b>${x && !mine ? '<i title="déjà une séance ce jour-là"></i>' : ''}</button>`; }).join('')}</div>
+    <div class="nx-acts">${own ? `<button data-nx="edit" data-a="${esc(p.id)}">${ic('edit', 18)}<span>Modifier</span></button>` : `<button data-nx="copy" data-a="${esc(ref)}">${ic('edit', 18)}<span>Utiliser comme base</span></button>`}
+      ${own ? `<button data-nx="copy" data-a="${esc(ref)}">${ic('copy', 18)}<span>Dupliquer</span></button><button data-nx="del" data-a="${esc(p.id)}" class="bad">${ic('trash', 18)}<span>Supprimer</span></button>` : ''}</div>`;
 }
 
-function labDash() {
-  const kG = lastKey('hrv'), rec = kG ? recovery(kG) : null, z = zoneOf(rec?.score), zc = {good: '#30D158', warn: '#FFD60A', bad: '#FF453A'}[z] || '#8E8E93';
-  const tgt = effortTarget(rec?.score, highDay(TODAY)), eff = effortDay(TODAY);
-  const sl = kG ? VAL.sleepH(kG) : null, need = sleepGoal(), hrv = kG ? G(kG, 'hrv') : null, hb = kG ? base('hrv', kG, 60) : null;
+/* ---------- the session builder ---------- */
+const NX_STEPS = {dist: [10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 100, 120, 150, 200, 250, 300, 400], rest: [0, 15, 30, 45, 60, 75, 90, 120, 150, 180, 240, 300, 360, 420, 480, 600],
+  pct: [0, 50, 60, 70, 75, 80, 85, 90, 95, 100]};
+const NX_TPL_GYM = [{name: 'Pliométrie · réactivité', desc: 'Contacts courts, raideur, élasticité', kind: 'gym', items: [{ex: 'pogo', sets: 3, reps: 20, rest: 60}, {ex: 'hurdlehop', sets: 4, reps: 5, rest: 90}, {ex: 'bounds', sets: 4, reps: 6, rest: 120}, {ex: 'dropjump', sets: 3, reps: 5, rest: 120}, {ex: 'medball', sets: 3, reps: 5, rest: 90}]}];
+function nxSmartItem(id, kind) {
+  const it = defaultItem(id), e = exOf(id); delete it.tempo;
+  const D = {'Vitesse max': {reps: 4, dist: 30, pct: 100, rest: 300}, 'Accélération': {reps: 5, dist: 20, pct: 95, rest: 150}, 'Endurance de vitesse': {reps: 3, dist: 120, pct: 95, rest: 480},
+    'Résistance': {reps: 6, dist: 20, pct: 95, rest: 150}, 'Tempo': {reps: 8, dist: 100, pct: 70, rest: 45},
+    'Pliométrie': {sets: 3, reps: 6, rest: 90}, 'Haltérophilie': {sets: 4, reps: 3, pct: 75, rest: 150}, 'Prévention': {sets: 3, reps: 8, rest: 60}, 'Tronc': {sets: 3, rest: 45}};
+  if (e.t === 'track' && e.u !== 'g' && D[e.cat]) Object.assign(it, D[e.cat]);
+  if (e.t === 'gym' && D[e.cat]) Object.assign(it, D[e.cat]);
+  if (e.t === 'gym' && ['squat', 'fsquat', 'hbdl', 'deadlift', 'bench', 'halfsquat'].includes(id)) Object.assign(it, {sets: 4, reps: 5, pct: 80, rest: 180});
+  return it;
+}
+function nxEdOpen(src, copy, day) {
+  const p = src ? planOf(src) : null, own = !!(p && S.plans[p.id] && !p.n && !copy);
+  NX.ed = {id: own ? p.id : uid(), base: own ? structuredClone(p) : null, own, kind: p ? nxKind(p) : NX.lib.f === 'gym' ? 'gym' : 'track',
+    name: own ? (p.autoName ? '' : p.name || '') : p ? (p.name || '') + (copy && S.plans[p.id] ? ' (copie)' : '') : '', items: p ? structuredClone(p.items) : [],
+    days: new Set(own ? caledOn(p.id) : day ? [day] : []), descAuto: own ? !!p.autoDesc : !p, desc: p ? p.desc || '' : '', dirty: false};
+  if (p && !own) { NX.ed.base = {warm: p.warm, cool: p.cool, tech: p.tech}; for (const k of ['warm', 'cool', 'tech']) if (NX.ed.base[k] == null) delete NX.ed.base[k]; }
+  nxOpen({id: 'ed', full: true, cls: 'nx-ed', title: own ? 'Modifier la séance' : 'Nouvelle séance', render: nxEdBody, foot: nxEdFoot,
+    guard: () => !NX.ed?.dirty || confirm('Quitter sans enregistrer cette séance ?'), onClose: () => { NX.ed = null; }});
+}
+function nxEdBody() {
+  const E = NX.ed; if (!E) return '';
+  const pl = {kind: E.kind, items: E.items}, A = sessionAuto(pl), sm = nxSprintM(pl);
+  return `<div class="nx-seg nx-segk">${['track', 'gym'].map(k => `<button class="${E.kind === k ? 'on' : ''}" style="--k:${NXC[k]}" data-nx="ed-kind" data-a="${k}">${k === 'track' ? 'Piste · vitesse' : 'Muscu · force'}</button>`).join('')}</div>
+    <input class="nx-in nx-ed-name" data-nxin="ed-name" placeholder="${esc(A.name || 'Nom de la séance (automatique si vide)')}" value="${esc(E.name)}" aria-label="Nom de la séance">
+    <div class="nx-edstats" style="--k:${NXC[E.kind]}"><span><b>${E.items.length ? estMin(pl) : 0}</b>min</span><span><b>${E.items.filter(it => it.ex !== 'warmup').length}</b>exercices</span>${E.kind === 'track' ? `<span><b>${fx(sm)}</b>m de sprint</span>` : `<span><b>${nxSets(pl)}</b>séries</span>`}</div>
+    ${E.items.length ? `<div class="nx-eds" id="nx-eds">${E.items.map(nxEdItem).join('')}</div>` : nxEdTpl()}
+    <button class="nx-add" data-nx="ed-add">${ic('plus', 20)} Ajouter un exercice</button>
+    <h4 class="nx-h4">Caler la séance<small>touche un ou plusieurs jours</small></h4>
+    <div class="nx-days">${[...Array(21)].map((_, i) => { const k = addDays(TODAY, i), x = planForK(k, E.kind), on = E.days.has(k); return `<button class="nx-dc${on ? ' on' : ''}" data-nx="ed-day" data-a="${k}"><span>${DOW[(dow(k) + 6) % 7]}</span><b>${+k.slice(8)}</b>${x && x.id !== E.id && !on ? '<i title="déjà une séance"></i>' : ''}</button>`; }).join('')}</div>
+    <button class="nx-link" data-nx="ed-full">Éditeur complet : tempo, superséries, échauffement détaillé ›</button>`;
+}
+const nxEdFoot = () => NX.ed ? `<button class="nx-btn nx-go wide" data-nx="ed-save"${NX.ed.items.length ? '' : ' disabled'}>${ic('check', 18)} Enregistrer la séance</button>` : '';
+function nxEdTpl() {
+  const L = [...BUILTIN.filter(p => p.kind === NX.ed.kind), ...NX_TPL_GYM.filter(p => p.kind === NX.ed.kind)];
+  return `<div class="nx-tpl"><p class="nx-sub">Pars d'un modèle et adapte-le, ou ajoute tes exercices un par un.</p><div class="nx-tplg">${L.map((p, i) => `<button data-nx="ed-tpl" data-a="${i}" style="--k:${NXC[NX.ed.kind]}"><b>${esc(p.name)}</b><small>${esc(p.desc || '')}</small></button>`).join('')}</div></div>`;
+}
+function nxEdItem(it, i) {
+  const e = exOf(it.ex), u = unitOf(it);
+  const st = (f, lab, v, show) => `<div class="nx-st"><span>${lab}</span><div><button data-nx="ed-st" data-a="${i}" data-b="${f}" data-c="-1" aria-label="${lab} moins">−</button><b>${show}</b><button data-nx="ed-st" data-a="${i}" data-b="${f}" data-c="1" aria-label="${lab} plus">+</button></div></div>`;
+  let ctl = '';
+  if (it.ex === 'warmup' || e.u === 'min') ctl = st('min', 'Durée', it.min, (it.min || 15) + ' min');
+  else if (it.seq) ctl = `<p class="nx-sub">Séquence ${esc(nxItemTxt(it))} · à modifier dans l'éditeur complet.</p>`;
+  else if (e.t === 'track' || e.t === 'test') ctl = st('reps', 'Répétitions', it.reps, it.reps || 1) + (e.t === 'test' ? '' : st('dist', 'Distance', it.dist, (it.dist || 0) + ' m') + (e.u === 'g' ? '' : st('pct', 'Intensité', it.pct, it.pct ? it.pct + ' %' : 'libre') + st('rest', 'Récup', it.rest, nxRest(it.rest))));
+  else ctl = st('sets', 'Séries', it.sets, it.sets || 1) + st('reps', u === 's' ? 'Secondes' : 'Reps', it.reps, it.reps || 1) + st('pct', '% du max', it.pct, it.pct ? it.pct + ' %' : 'libre') + st('rest', 'Récup', it.rest, nxRest(it.rest));
+  const adv = [it.tempo ? 'tempo ' + it.tempo.join('') : '', it.link ? 'supersérie' : '', it.ct ? (CT.find(c => c[0] === it.ct) || [, ''])[1] : ''].filter(Boolean).join(' · ');
+  return `<div class="nx-edi" style="--c:${nxCat(it.ex)}" data-i="${i}"><div class="nx-edi-h"><span class="nx-grip" data-nxdrag="${i}" aria-label="Glisser pour déplacer">${ic('grip', 18)}</span><span class="nx-edi-n"><b>${esc(e.n)}</b><small>${esc(e.cat || '')}${adv ? ' · ' + esc(adv) : ''}</small></span>
+    <button class="nx-ib" data-nx="ed-mv" data-a="${i}" data-b="-1" aria-label="Monter"${i ? '' : ' disabled'}>${ic('up', 18)}</button><button class="nx-ib" data-nx="ed-dup" data-a="${i}" aria-label="Dupliquer">${ic('copy', 18)}</button><button class="nx-ib" data-nx="ed-rm" data-a="${i}" aria-label="Retirer">${ic('x', 18)}</button></div><div class="nx-ctl">${ctl}</div></div>`;
+}
+function nxEdStep(i, f, d) {
+  const it = NX.ed.items[i]; if (!it) return; const e = exOf(it.ex), u = unitOf(it);
+  // Next or previous value of the list; a value typed elsewhere (between two steps) goes to the nearest step that way.
+  const list = (L, v) => { v = v || 0; if (v > L.at(-1)) return d > 0 ? v : L.at(-1); let j = L.findIndex(x => x >= v); if (L[j] !== v && d > 0) j--; return L[clamp(j + d, 0, L.length - 1)]; };
+  if (f === 'dist' || f === 'rest') it[f] = list(NX_STEPS[f], it[f]);
+  else if (f === 'pct') { const v = list(NX_STEPS.pct, it.pct); if (v) it.pct = v; else delete it.pct; }
+  else if (f === 'min') it.min = clamp((it.min || 15) + 5 * d, 5, 90);
+  else if (f === 'sets') it.sets = clamp((it.sets || 1) + d, 1, 12);
+  else if (f === 'reps') it.reps = clamp((it.reps || 1) + d * (u === 's' && e.t !== 'track' ? 5 : 1), 1, u === 's' ? 300 : 60);
+  if (f === 'rest' && !it.rest) delete it.rest;
+  NX.ed.dirty = true; nxHap(5); nxShDraw();
+}
+async function nxEdSave() {
+  const E = NX.ed; if (!E || !E.items.length) { toast('Ajoute au moins un exercice'); return; }
+  const A = sessionAuto({kind: E.kind, items: E.items}), name = (E.name || '').trim();
+  const doc = {...(E.base || {}), id: E.id, kind: E.kind, name: name || A.name || 'Ma séance', desc: E.descAuto ? A.desc : E.desc || A.desc, items: E.items, autoName: !name, autoDesc: E.descAuto, updatedAt: new Date().toISOString()};
+  for (const k of ['date', 'date0', 'wk', 'n', 'title', 'deleted']) delete doc[k];
+  S.plans[doc.id] = doc;
+  await dbSet('plans/' + doc.id, doc);
+  const dated = {...(S.tset.dated || {})};
+  for (const [k, v] of Object.entries(dated)) if (v === doc.id && k.slice(0, 10) >= TODAY) delete dated[k];
+  for (const k of E.days) { if (k < TODAY) continue; if (doc.kind === 'track' && planOf(dated[k])?.kind === 'track') delete dated[k]; dated[dKey(k, doc.kind)] = doc.id; }
+  S.tset = {...S.tset, dated}; await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()});
+  E.dirty = false; nxClose(); toast(E.days.size ? `Séance enregistrée et calée ${E.days.size > 1 ? 'sur ' + E.days.size + ' jours' : 'le ' + fmtShort([...E.days][0])}` : 'Séance enregistrée dans tes séances');
+  NX.lib.seg = 'mine'; nxSoon(10);
+}
+// Exercise picker: search, families, stays open to add several.
+function nxPick() {
+  NX.pk = {q: '', cat: '', n: 0};
+  nxOpen({id: 'pick', title: 'Ajouter un exercice', cls: 'nx-pick', render: nxPickBody, foot: () => `<button class="nx-btn wide" data-nx="pk-done">${NX.pk?.n ? `Terminé · ${NX.pk.n} ajouté${NX.pk.n > 1 ? 's' : ''}` : 'Terminé'}</button>`});
+}
+function nxPickPool() { const k = NX.ed?.kind || 'track'; return EX.filter(e => k === 'track' ? e.t === 'track' || e.t === 'test' : e.t === 'gym'); }
+function nxPickBody() {
+  const pool = nxPickPool(), cats = [...new Set(pool.map(e => e.t === 'test' ? 'Tests' : e.cat).filter(Boolean))];
+  return `<input class="nx-in nx-search" type="search" data-nxin="pk-q" placeholder="Rechercher : lancé, squat, nordic…" value="${esc(NX.pk.q)}" aria-label="Rechercher un exercice">
+    <div class="nx-chips nx-cats">${['', ...cats].map(c => `<button class="nx-chip${NX.pk.cat === c ? ' on' : ''}" data-nx="pk-cat" data-a="${esc(c)}"${c ? ` style="--c:${NX_CATC[c] || '#8E8E93'}"` : ''}>${esc(c || 'Tout')}</button>`).join('')}</div>
+    <div class="nx-exs" id="nx-exs">${nxPickRows()}</div>`;
+}
+function nxPickRows() {
+  const q = nxNorm(NX.pk.q), c = NX.pk.cat, pool = nxPickPool();
+  let L = pool.filter(e => (!c || (c === 'Tests' ? e.t === 'test' : e.cat === c)) && (!q || nxNorm(e.n + ' ' + (e.en || '') + ' ' + (e.m || '') + ' ' + (e.cat || '')).includes(q)));
+  if (!q && !c) { const used = {}; for (const p of myPlans()) for (const it of p.items) used[it.ex] = (used[it.ex] || 0) + 1; for (const l of logs().slice(0, 40)) for (const it of l.items || []) used[it.ex] = (used[it.ex] || 0) + 2; L = L.slice().sort((a, b) => (used[b.id] || 0) - (used[a.id] || 0)); }
+  const n = (NX.ed?.items || []).reduce((o, it) => (o[it.ex] = (o[it.ex] || 0) + 1, o), {});
+  return L.slice(0, 120).map(e => `<button class="nx-ex${n[e.id] ? ' in' : ''}" data-nx="pk" data-a="${e.id}" style="--c:${NX_CATC[e.cat] || '#8E8E93'}"><span><b>${esc(e.n)}</b><small>${esc([e.t === 'test' ? 'Test' : e.cat, e.m].filter(Boolean).join(' · '))}</small></span><i>${n[e.id] ? '×' + n[e.id] : ic('plus', 18)}</i></button>`).join('') || '<p class="nx-empty">Aucun exercice ne correspond.</p>';
+}
+// Reorder by dragging the grip (finger or mouse).
+document.addEventListener('pointerdown', e => {
+  const g = e.target.closest('[data-nxdrag]'); if (!g || !NX.ed) return;
+  e.preventDefault(); const el = g.closest('.nx-edi'), list = [...document.querySelectorAll('#nx-eds .nx-edi')], i = list.indexOf(el); if (i < 0) return;
+  const R = list.map(x => x.getBoundingClientRect());
+  NX.drag = {el, list, i, to: i, y0: e.clientY, R, h: R[i].height + 10, id: e.pointerId};
+  el.classList.add('lift'); list.forEach(x => x !== el && (x.style.transition = 'transform .22s cubic-bezier(.2,.8,.2,1)')); try { g.setPointerCapture(e.pointerId); } catch (err) {} nxHap(10);
+});
+document.addEventListener('pointermove', e => {
+  const d = NX.drag; if (!d || e.pointerId !== d.id) return;
+  const dy = e.clientY - d.y0, c = d.R[d.i].top + d.R[d.i].height / 2 + dy; d.el.style.transform = `translateY(${dy}px) scale(1.02)`;
+  let to = d.i; for (let j = 0; j < d.list.length; j++) { if (j === d.i) continue; const m = d.R[j].top + d.R[j].height / 2; if (j > d.i && c > m) to = j; if (j < d.i && c < m && to === d.i) to = j; }
+  for (let j = 0; j < d.list.length; j++) if (j < d.i && c < d.R[j].top + d.R[j].height / 2) { to = Math.min(to, j); break; }
+  d.to = to; d.list.forEach((x, j) => { if (j === d.i) return; x.style.transform = j > d.i && j <= to ? `translateY(${-d.h}px)` : j < d.i && j >= to ? `translateY(${d.h}px)` : ''; });
+});
+const nxDragEnd = e => { const d = NX.drag; if (!d || e.pointerId !== d.id) return; NX.drag = null; if (d.to !== d.i) { const [it] = NX.ed.items.splice(d.i, 1); NX.ed.items.splice(d.to, 0, it); NX.ed.dirty = true; nxHap(8); } nxShDraw(); if (NX.pend) nxSoon(); };
+document.addEventListener('pointerup', nxDragEnd); document.addEventListener('pointercancel', nxDragEnd);
+
+/* ================= PAGE 4 · PROGRÈS ================= */
+function nxSeries(f, n) { const s = series(f, n); if (n <= 120) return s; const out = []; for (let i = 0; i < s.length; i += 7) { const w = s.slice(i, i + 7), v = w.map(p => p.v).filter(x => x != null); out.push({k: w[0].k, v: v.length ? mean(v) : null}); } return out; }
+function nxLine(pts, o = {}) {
+  const W = 320, H = o.h || 120, vals = pts.map(p => p.v).filter(v => v != null);
+  if (vals.length < 2) return '<div class="nx-nodata">Pas encore assez de données sur cette période</div>';
+  let lo = Math.min(...vals), hi = Math.max(...vals); if (o.band) { lo = Math.min(lo, o.band[0]); hi = Math.max(hi, o.band[1]); } for (const r of o.refs || []) { lo = Math.min(lo, r[0]); hi = Math.max(hi, r[0]); }
+  if (o.lo != null) lo = Math.min(lo, o.lo); if (o.hi != null) hi = Math.max(hi, o.hi);
+  const pad = (hi - lo) * .12 || 1; lo -= pad; hi += pad;
+  const X = i => i / Math.max(1, pts.length - 1) * W, Y = v => H - 4 - (v - lo) / (hi - lo) * (H - 8);
+  const segs = []; let cur = []; pts.forEach((p, i) => { if (p.v == null) { if (cur.length) segs.push(cur); cur = []; } else cur.push([X(i), Y(p.v)]); }); if (cur.length) segs.push(cur);
+  const id = 'g' + Math.random().toString(36).slice(2, 7), col = o.c || '#fff';
+  const lines = segs.map(s => s.length === 1 ? '' : smoothD(s)).filter(Boolean);
+  const areas = segs.filter(s => s.length > 1).map(s => smoothD(s) + ` L${s.at(-1)[0].toFixed(1)} ${H} L${s[0][0].toFixed(1)} ${H} Z`);
+  const lastI = pts.map(p => p.v).lastIndexOf(pts.filter(p => p.v != null).at(-1).v), lv = pts[lastI].v;
+  return `<div class="nx-chart" style="--c:${col}"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".32"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>
+    ${o.band ? `<rect x="0" y="${Y(o.band[1]).toFixed(1)}" width="${W}" height="${Math.max(1, Y(o.band[0]) - Y(o.band[1])).toFixed(1)}" fill="${col}" opacity=".09"/>` : ''}
+    ${(o.refs || []).map(r => `<line x1="0" x2="${W}" y1="${Y(r[0]).toFixed(1)}" y2="${Y(r[0]).toFixed(1)}" stroke="rgba(255,255,255,.22)" stroke-dasharray="3 4" vector-effect="non-scaling-stroke"/>`).join('')}
+    ${areas.map(d => `<path class="nx-area" d="${d}" fill="url(#${id})"/>`).join('')}${lines.map(d => `<path class="nx-ln" d="${d}" pathLength="1" fill="none" stroke="${col}" stroke-width="2.4" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`).join('')}</svg>
+    <i class="nx-dot" style="left:${(X(lastI) / W * 100).toFixed(2)}%;top:${(Y(lv) / H * 100).toFixed(2)}%"></i>
+    ${(o.refs || []).map(r => `<em class="nx-ref" style="top:${(Y(r[0]) / H * 100).toFixed(2)}%">${esc(r[1])}</em>`).join('')}</div>`;
+}
+function nxBars(vals, o = {}) {
+  const mx = Math.max(o.max || 0, ...vals.map(x => x.v || 0)) || 1;
+  return `<div class="nx-bars" style="--n:${vals.length};--c:${o.c || '#fff'}">${vals.map((x, i) => `<i class="${x.hl ? 'hl' : ''}${x.v == null ? ' na' : ''}" style="--h:${((x.v || 0) / mx * 100).toFixed(1)}%;--d:${Math.min(600, i * 14)}ms${x.c ? ';--bc:' + x.c : ''}"></i>`).join('')}${o.ref ? `<b class="nx-bref" style="bottom:${(o.ref / mx * 100).toFixed(1)}%"><span>${esc(o.refLab || '')}</span></b>` : ''}</div>`;
+}
+function nxProg() {
+  const n = NX.pn, per = {30: '30 jours', 90: '3 mois', 365: '1 an'}[n];
+  const kG = lastKey('hrv') || TODAY, delta = (s, inv) => { const v = s.map(p => p.v).filter(x => x != null); if (v.length < 4) return ''; const h = Math.floor(v.length / 2), a = mean(v.slice(0, h)), b = mean(v.slice(h)); if (!a) return ''; const p = (b / a - 1) * 100; if (Math.abs(p) < 1.5) return '<em class="nx-dl">stable</em>'; const good = inv ? p < 0 : p > 0; return `<em class="nx-dl ${good ? 'up' : 'down'}">${p > 0 ? '▲' : '▼'} ${fx(Math.abs(p))} %</em>`; };
+  const card = (o, id, col, icn, lab, val, sub, chart, extra = '') => `<section class="nx-card nx-pc2" style="--o:${o};--c:${col}"><button class="nx-pc2-h" ${id ? `data-nx="metric" data-a="${id}"` : 'tabindex="-1"'}><span class="nx-pc2-l">${ic(icn, 16)}${lab}</span><span class="nx-pc2-v"><b>${val}</b>${sub}</span></button>${chart}${extra}</section>`;
+  const rec = nxSeries('recovery', n), hrv = nxSeries('hrv', n), rhr = nxSeries('rhr', n), wt = nxSeries('weight', n);
+  const hb = base('hrv', TODAY, 60), r0 = recovery(kG)?.score;
+  const slp = series('sleepH', Math.min(n, 30)), need = sleepGoal();
+  // Load: daily effort (or weekly sums over a year), and the 7 / 28 days ratio.
+  const effD = n <= 90 ? series('effort', n).map(p => ({v: p.v, hl: p.k === TODAY})) : [...Array(52)].map((_, i) => { const end = addDays(TODAY, -7 * (51 - i)); return {v: series('effort', 7, end).reduce((s, p) => s + (p.v || 0), 0)}; });
   const e7 = avgN('effort', 7), e28 = avgN('effort', 28), acwr = e7 != null && e28 ? e7 / e28 : null;
-  const sp = labSpeed(), C = labCoach(rec, tgt, kG);
-  const g = fuelGoal(TODAY), t = dayTotals(TODAY), w = waterOf(TODAY);
-  const vit = (lab, val, sub, state) => `<div class="lab-v ${state || ''}"><span>${lab}</span><b>${val}</b><small>${sub}</small></div>`;
-  const pct = (a, b) => b ? Math.round(a / b * 100) : 0;
-  const days = [...Array(7)].map((_, i) => addDays(TODAY, i - 6)), effs = days.map(k => effortDay(k) || 0), mx = Math.max(21, ...effs);
-  const bar = (v, k) => `<div class="lab-d${k === TODAY ? ' td' : ''}"><i style="height:${Math.max(3, v / mx * 100).toFixed(0)}%"></i><span>${DOW[(dow(k) + 6) % 7]}</span><em>${[kindDone(k, 'gym') ? 'M' : '', kindDone(k, 'track') ? 'S' : ''].filter(Boolean).join('·')}</em></div>`;
-  const WHO = {T: ['Training', '#FF453A'], N: ['Nutrition', '#30D158'], R: ['Recovery', '#0A84FF']};
-  return `<div class="lab">
-    <div class="lab-tag">LABO · version test · rien n'est enregistré</div>
-    <section class="lab-c lab-ready">
-      <div class="lab-ring">${labRing(rec?.score, zc)}<div class="lab-rv"><b>${rec?.score ?? '–'}<small>%</small></b><span>${esc(ZONE[z])}</span></div></div>
-      <div class="lab-vs">${vit('Sommeil', hmH(sl), 'sur ' + hmH(need), sl == null ? '' : sl >= need - .3 ? 'ok' : sl >= need - 1 ? 'mid' : 'bad')}
-        ${vit('VFC', hrv != null ? hrv + ' ms' : '–', hb ? (hrv >= hb.m ? '+' : '−') + Math.abs(Math.round((hrv / hb.m - 1) * 100)) + ' % vs ta base' : 'base en calcul', hb && hrv != null ? (hrv >= hb.m * .95 ? 'ok' : hrv >= hb.m * .85 ? 'mid' : 'bad') : '')}
-        ${vit('Charge', acwr != null ? fx(acwr, 2) : '–', '7 j / 28 j · zone 0,8 – 1,3', acwr == null ? '' : acwr > 1.3 ? 'bad' : acwr < .8 ? 'mid' : 'ok')}
-        ${vit('Effort du jour', eff != null ? fx(eff, 1) : '0', `visé ${tgt.lvl[0]} à ${tgt.lvl[1]} sur 21`, '')}</div>
-      <p class="lab-say">${esc(tgt.text)}</p>
-    </section>
-    <section class="lab-c lab-now"><h3>Ta journée <small>à partir de maintenant</small></h3>${labDay()}<button class="lab-link" data-hplan>Tout le planning ›</button></section>
-    <section class="lab-c lab-coach"><h3>Ton coach <small>les ${C.length} points qui comptent aujourd'hui</small></h3>
-      ${C.map(x => `<div class="lab-tip ${x.z}"><i style="background:${WHO[x.who][1]}">${x.who}</i><p>${esc(x.t)}${x.h ? `<span class="cact">${x.h}</span>` : ''}</p></div>`).join('') || '<p class="lab-empty">Rien à corriger : continue exactement comme ça.</p>'}</section>
-    <section class="lab-c lab-speed"><h3>Vitesse <small>ce qui fait un sprinteur</small></h3>
-      <div class="lab-vs three">${vit('Dernière vitesse max', sp.since == null ? '–' : sp.since === 0 ? 'aujourd\'hui' : sp.since === 1 ? 'hier' : 'il y a ' + sp.since + ' j', sp.last ? fmtShort(sp.last) : 'aucune sur 60 jours', sp.since == null ? '' : sp.since <= 5 ? 'ok' : sp.since <= 9 ? 'mid' : 'bad')}
-        ${vit('Sprint 7 jours', fx(sp.m7) + ' m', sp.m28 ? 'semaine habituelle ' + fx(sp.m28) + ' m' : 'pas encore de semaine de référence', sp.m28 && sp.m7 > sp.m28 * 1.4 ? 'bad' : sp.m28 ? 'ok' : '')}
-        ${vit('Prochaine piste', sp.nx ? cap(fmtShort(sp.nx.k)) : '–', sp.nx ? esc(sp.nx.p.name) : 'rien de calé', '')}</div></section>
-    <section class="lab-c lab-fuel"><h3>Carburant <small>aujourd'hui</small></h3>
-      <div class="lab-bars">${[['Énergie', t.kcal, g.kcal, 'kcal', '#F5A524'], ['Protéines', t.p, g.p, 'g', '#FF6B6B'], ['Glucides', t.c, g.c, 'g', '#4CC38A'], ['Eau', w.L, g.waterL, 'L', '#40C8E0']].map(([n, v, goal, u, c]) => `<div class="lab-bar"><span>${n}<b>${fx(v || 0, u === 'L' ? 1 : 0)} / ${fx(goal || 0, u === 'L' ? 1 : 0)} ${u}</b></span><div><i style="width:${Math.min(100, pct(v || 0, goal || 0))}%;background:${c}"></i></div></div>`).join('')}</div></section>
-    <section class="lab-c lab-week"><h3>Ta semaine <small>effort par jour · M muscu · S sprint</small></h3><div class="lab-ds">${days.map((k, i) => bar(effs[i], k)).join('')}</div></section>
-    <section class="lab-c lab-acts"><button data-hday><b>+</b>Questionnaire du jour</button><button data-hlog><b>✎</b>Journal de bord</button><button data-hbilan><b>≡</b>Bilan de la semaine</button><button data-hplan><b>◷</b>Planning</button></section>
-  </div>`;
+  // Speed: sprint metres per week over 12 weeks, and best times.
+  const mon = monday(TODAY), wk = [...Array(12)].map((_, i) => { const s = addDays(mon, -7 * (11 - i)), e = addDays(s, 6); let m = 0; for (let k = s; k <= e && k <= TODAY; k = addDays(k, 1)) m += VAL.sprint(k) || 0; return {v: m, hl: i === 11}; });
+  const best = {}; for (const l of logs()) if (l.kind === 'track') for (const it of l.items || []) for (const r of it.reps || []) { const t = +r.t, d = +r.dist; if (!t || !d || t > d / 4) continue; const key = exOf(it.ex).n + '|' + d; if (!best[key] || t < best[key].t) best[key] = {t, d, n: exOf(it.ex).n, date: l.date}; }
+  const recs = Object.values(best).sort((a, b) => a.d - b.d).slice(0, 8);
+  const sp = nxSpeed();
+  const fuelN = Math.min(n, 30), fuel = [...Array(fuelN)].map((_, i) => { const k = addDays(TODAY, i - fuelN + 1), t = dayTotals(k), g = fuelGoal(k); return {v: g.p ? t.p / g.p * 100 : null, hl: k === TODAY, c: t.p >= g.p * .9 ? NXC.good : t.p >= g.p * .7 ? NXC.warn : NXC.bad}; });
+  const lastV = s => { const v = s.map(p => p.v).filter(x => x != null); return v.length ? v.at(-1) : null; };
+  const sec = (t, s) => `<h3 class="nx-sec">${t}<small>${s || ''}</small></h3>`;
+  return `<div class="nx-pg nx-progp"><div class="nx-h"><p class="nx-eye">Tes tendances · ${per}</p><h1>Progrès</h1>
+    <div class="nx-seg nx-segp">${[[30, '30 j'], [90, '3 mois'], [365, '1 an']].map(([v, l]) => `<button class="${n === v ? 'on' : ''}" data-nx="pn" data-a="${v}">${l}</button>`).join('')}</div></div>
+    ${sec('Ton corps', 'récupération')}
+    <div class="nx-pgrid">
+      ${card(1, 'recovery', NXC[zoneOf(r0)] || NXC.good, 'today', 'Forme', r0 != null ? r0 + ' %' : '–', delta(rec), nxLine(rec, {c: NXC[zoneOf(r0)] || NXC.good, lo: 0, hi: 100, refs: [[67, 'élevée'], [34, 'faible']]}))}
+      ${card(2, 'hrv', NXC.hrv, 'wave', 'VFC nocturne', lastV(hrv) != null ? fx(lastV(hrv)) + ' ms' : '–', delta(hrv), nxLine(hrv, {c: NXC.hrv, band: hb ? [hb.m - hb.sd, hb.m + hb.sd] : null}), hb ? `<p class="nx-cap">Bande : ta zone normale (base ${fx(hb.m)} ms ± ${fx(hb.sd)})</p>` : '')}
+      ${card(3, 'sleepH', NXC.sleep, 'moon', 'Sommeil', hmH(lastV(slp)), `<em class="nx-dl">moy. ${hmH(mean(slp.map(p => p.v).filter(v => v != null)))}</em>`, nxBars(slp.map(p => ({v: p.v, hl: p.k === TODAY, c: p.v == null ? '' : p.v >= need - .3 ? NXC.sleep : p.v >= need - 1 ? '#6E5FC2' : '#4A3F86'})), {c: NXC.sleep, ref: need, refLab: 'besoin ' + hmH(need), max: 10}), Math.min(n, 30) < n ? '<p class="nx-cap">Les 30 dernières nuits</p>' : '')}
+      ${card(4, 'rhr', NXC.rhr, 'heart', 'FC au repos', lastV(rhr) != null ? fx(lastV(rhr)) + ' bpm' : '–', delta(rhr, true), nxLine(rhr, {c: NXC.rhr}))}
+    </div>
+    ${sec('Ton entraînement', 'charge et vitesse')}
+    <div class="nx-pgrid">
+      ${card(5, 'effort', NXC.load, 'bolt', 'Charge', acwr != null ? fx(acwr, 2) : '–', `<em class="nx-dl ${acwr == null ? '' : acwr > 1.3 ? 'down' : acwr < .8 ? 'mid' : 'up'}">${acwr == null ? '' : acwr > 1.3 ? 'trop haute' : acwr < .8 ? 'basse' : 'dans la zone'}</em>`, nxBars(effD, {c: NXC.load}), `<p class="nx-cap">Ratio 7 jours / 28 jours : zone idéale 0,8 à 1,3. ${n > 90 ? 'Effort total par semaine.' : 'Effort par jour, sur 21.'}</p>`)}
+      ${card(6, 'sprint', NXC.track, 'flag', 'Vitesse', fx(sp.m7) + ' m', `<em class="nx-dl">7 derniers jours</em>`, nxBars(wk, {c: NXC.track}), `<p class="nx-cap">Mètres de sprint (90 % et plus) par semaine, 12 semaines.${sp.since != null ? ' Dernière vitesse max : ' + (sp.since === 0 ? 'aujourd\'hui' : sp.since === 1 ? 'hier' : 'il y a ' + sp.since + ' jours') + '.' : ''}</p>
+        ${recs.length ? `<div class="nx-recs">${recs.map(r => `<div><span>${esc(r.n)} · ${r.d} m</span><b>${fx(r.t, 2)} s</b><small>${esc(fmtShort(r.date))}</small></div>`).join('')}</div>` : '<p class="nx-cap">Note tes temps pendant la séance : tes records apparaîtront ici.</p>'}`)}
+    </div>
+    ${sec('Ta composition', 'Withings')}
+    <div class="nx-pgrid">
+      ${card(7, 'weight', NXC.weight, 'drop', 'Poids', lastV(wt) != null ? fx(lastV(wt), 1) + ' kg' : '–', delta(wt), nxLine(wt, {c: NXC.weight}), W(lastKey('weight') || TODAY, 'fatPct') != null ? `<p class="nx-cap">Masse grasse ${fx(W(lastKey('weight') || TODAY, 'fatPct'), 1)} % · masse musculaire ${fx(W(lastKey('weight') || TODAY, 'muscleKg'), 1)} kg</p>` : '')}
+      ${card(8, '', NXC.p, 'fork', 'Protéines', fuel.at(-1)?.v != null ? Math.round(fuel.at(-1).v) + ' %' : '–', '<em class="nx-dl">de ton objectif</em>', nxBars(fuel, {c: NXC.p, ref: 100, refLab: 'objectif', max: 130}), `<p class="nx-cap">Les ${fuelN} derniers jours.</p>`)}
+    </div>
+    <div class="nx-acts nx-more-acts"><button data-nx="eng" data-a="tests">${ic('bolt', 18)}<span>Faire un test</span></button><button data-nx="eng" data-a="jumps">${ic('up', 18)}<span>Mes sauts</span></button><button data-nx="eng" data-a="blood">${ic('drop', 18)}<span>Prises de sang</span></button><button data-nx="bilan">${ic('flag', 18)}<span>Bilan de la semaine</span></button></div></div>`;
 }
-homeSyn = () => labDash();
-homeActs = () => '';
-homeFit = () => { const h = $('#hm-head'); if (h) h.style.setProperty('--hmz', 1); };
-// The day moves: the home page redraws every minute while it is shown.
-setInterval(() => { if (S.mod === 'home' && !document.hidden && !HP.sel && !HP.busy) { const h = $('#hm-head'); if (h) { const y = h.scrollTop; renderMod(true); const h2 = $('#hm-head'); if (h2) h2.scrollTop = y; } } }, 60e3);
+
+/* ---------- the "why" of the score ---------- */
+function nxWhy() {
+  nxOpen({id: 'why', title: 'Ta forme', auto: true, render: () => {
+    const kG = lastKey('hrv'); if (!kG) return '<p class="nx-sub">Il faut quelques nuits de mesures de ta montre pour calculer ta forme.</p>';
+    const r = recovery(kG), bH = base('hrv', kG, 60), bR = base('rhr', kG, 60), hrv = G(kG, 'hrv'), h7 = avgN('hrv', 7, kG), rhr = G(kG, 'rhr');
+    if (!r || !bH) return '<p class="nx-sub">Ta base de VFC se calcule encore : il faut au moins une semaine de nuits.</p>';
+    const zH = .5 * zOf(hrv, bH) + .5 * zOf(h7, bH), zR = rhr != null && bR ? zOf(rhr, bR) : 0, sp = VAL.sleepPerf(kG) ?? 85;
+    const parts = [['VFC', 45, sig(zH) * 100, NXC.hrv, `${hrv} ms cette nuit, ${fx(h7)} ms sur 7 jours. Ta base : ${fx(bH.m)} ms.`], ['Sommeil', 35, sp, NXC.sleep, `${hmH(VAL.sleepH(kG))} pour un besoin de ${hmH(sleepGoal())}.`], ['FC au repos', 20, sig(-zR) * 100, NXC.rhr, `${rhr ?? '–'} bpm. Ta base : ${bR ? fx(bR.m) : '–'} bpm.`]];
+    const d14 = [...Array(14)].map((_, i) => { const k = addDays(kG, i - 13), s = recovery(k)?.score; return {v: s, hl: k === kG, c: s == null ? '' : NXC[zoneOf(s)]}; });
+    return `<div class="nx-why-top"><div class="nx-ring">${nxRing(r.score, NXC[zoneOf(r.score)], 132, 12)}<div class="nx-ring-v"><b>${r.score}<small>%</small></b><span>${esc(ZONE[zoneOf(r.score)])}</span></div></div>
+      <p class="nx-sub">Ton score mélange trois mesures de ta nuit, comparées à <b>tes propres</b> habitudes des 60 derniers jours, pas à une norme.</p></div>
+      ${parts.map(([n, w, v, c, t]) => `<div class="nx-part" style="--c:${c}"><div><b>${n}</b><span>compte pour ${w} %</span><em>${Math.round(v)} / 100</em></div><div class="nx-bar"><i style="width:${clamp(v, 2, 100)}%"></i></div><small>${esc(t)}</small></div>`).join('')}
+      ${r.ill ? '<p class="nx-adapt">Respiration ou température de nuit plus hautes que d\'habitude : −15 points. Possible début de maladie, écoute-toi.</p>' : ''}
+      ${(maxPain(kG) ?? 0) >= 3 ? '<p class="nx-adapt">Douleur notée à 3 ou plus : ta forme est plafonnée à 33 % tant qu\'elle dure.</p>' : ''}
+      <h4 class="nx-h4">Les 14 derniers jours</h4>${nxBars(d14, {c: NXC.good, max: 100})}
+      <div class="nx-row" style="margin-top:14px"><button class="nx-btn2" data-nx="goprog">Voir toutes mes courbes</button></div>`;
+  }});
+}
+
+/* ---------- meals ---------- */
+function nxMeal(m) {
+  nxOpen({id: 'meal', title: mealLab(m), auto: true, render: () => {
+    const d = fday(TODAY), its = (d.items || []).map((it, i) => ({it, i})).filter(x => x.it.meal === m), t = its.reduce((a, {it}) => ({kcal: a.kcal + (it.kcal || 0), p: a.p + (it.p || 0), c: a.c + (it.c || 0)}), {kcal: 0, p: 0, c: 0});
+    return `${d.fromPlan ? '<p class="nx-sub">Rempli d\'après ton plan alimentaire. Retire ou change ce que tu n\'as pas mangé.</p>' : ''}
+      <div class="nx-mt"><span><b>${fx(t.kcal)}</b>kcal</span><span><b>${fx(t.p)} g</b>protéines</span><span><b>${fx(t.c)} g</b>glucides</span></div>
+      <div class="nx-list">${its.map(({it, i}) => `<div class="nx-li"><button class="nx-li-in" data-nx="fedit" data-a="${i}"><b>${esc(it.n)}</b><small>${fx(it.g)} g · ${fx(it.kcal)} kcal · ${fx(it.p, 1)} g prot.</small></button><button class="nx-ib" data-nx="fdel" data-a="${i}" aria-label="Retirer">${ic('x', 18)}</button></div>`).join('') || '<p class="nx-empty">Rien pour ce repas.</p>'}</div>
+      <div class="nx-row"><button class="nx-btn" data-nx="food" data-a="${m}">${ic('plus', 18)} Ajouter un aliment</button>${d.fromPlan ? '' : `<button class="nx-btn2" data-nx="mplan" data-a="${m}">Remettre le plan</button>`}</div>`;
+  }});
+}
+
+/* ---------- coach IA (optional) ---------- */
+const NX_Q = ['Comment adapter ma séance de demain ?', 'Pourquoi ma VFC baisse ?', 'Est-ce que je récupère assez ?', 'Mon alimentation suit-elle ma charge ?'];
+function nxAsk(q) {
+  let t = claudeContext(); if (t.length > 4600) t = t.slice(0, 4600);
+  window.open('https://claude.ai/new?q=' + encodeURIComponent(t + (q || '')), '_blank');
+}
+function nxAiSheet() {
+  nxOpen({id: 'ai', title: 'Coach IA', cls: 'nx-aish', auto: true, render: () => {
+    const A = AN(), R = (S.reports || []).slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))[0];
+    return `<div class="nx-ai-hero"><span class="nx-spk big">${ic('spark', 30)}</span><h2>Ton appli marche sans IA</h2><p class="nx-sub">La forme, les séances, les repas et les conseils du jour viennent de règles claires et de tes propres données. L'IA est un plus, quand tu veux aller plus loin : Claude lit tout ton historique et te répond comme un préparateur.</p></div>
+      <label class="nx-switch"><span><b>Coach IA</b><small>${NX.ai ? 'Activé : les analyses de Claude apparaissent dans l\'appli' : 'Désactivé : aucune analyse IA n\'est affichée'}</small></span><input type="checkbox" data-nxin="ai"${NX.ai ? ' checked' : ''}><i></i></label>
+      ${NX.ai ? `<div class="nx-card in"><h4 class="nx-h4">Analyse du jour</h4>${A?.homeText ? `<p>${esc(A.homeText)}</p>` : '<p class="nx-sub">Pas encore d\'analyse aujourd\'hui : Claude écrit la sienne à chaque synchronisation.</p>'}</div>
+        ${R ? `<div class="nx-card in"><h4 class="nx-h4">Bilan de Claude · ${esc(R.date ? fmtShort(String(R.date).slice(0, 10)) : '')}</h4>${R.headline || R.title ? `<p><b>${esc(R.headline || R.title)}</b></p>` : ''}${R.summary ? `<p class="nx-sub">${esc(String(R.summary))}</p>` : ''}<button class="nx-link" data-nx="bilan">Lire le bilan complet ›</button></div>` : ''}
+        <div class="nx-card in"><h4 class="nx-h4">Poser une question à Claude</h4><p class="nx-sub">Claude s'ouvre avec ton état du jour, tes 7 derniers jours, tes séances et ta charge déjà écrits. Tu n'as qu'à ajouter ta question.</p>
+          <div class="nx-qs">${NX_Q.map(q => `<button data-nx="ask" data-a="${esc(q)}">${esc(q)}${ic('out', 15)}</button>`).join('')}</div><button class="nx-btn wide" data-nx="ask" data-a="">${ic('spark', 18)} Ouvrir Claude avec mes données</button></div>`
+      : `<div class="nx-card in"><h4 class="nx-h4">Ce que l'IA ajoute si tu l'actives</h4><ul class="nx-ul"><li>Une analyse écrite de ta journée et de tes tendances</li><li>Le bilan de Claude chaque vendredi</li><li>Tes questions, avec toutes tes données déjà fournies</li></ul></div>`}`;
+  }});
+}
+function nxSetSheet() {
+  nxOpen({id: 'set', title: 'Réglages du labo', render: () => `
+    <div class="nx-card in"><h4 class="nx-h4">Le labo</h4><p class="nx-sub">Une version test de ton appli : elle lit tes vraies données, mais tout ce que tu fais ici (séances créées, repas, check du matin, séances faites) reste sur cet appareil. Ton vrai compte et ta vraie appli ne changent jamais.</p>
+      <p class="nx-sub"><b>${window.LAB_DB?.count?.() || 0}</b> changement${(window.LAB_DB?.count?.() || 0) > 1 ? 's' : ''} gardé${(window.LAB_DB?.count?.() || 0) > 1 ? 's' : ''} sur cet appareil.</p><button class="nx-btn2" data-nx="reset">Tout effacer et repartir de mes vraies données</button></div>
+    <div class="nx-card in"><h4 class="nx-h4">Version complète</h4><p class="nx-sub">Toutes les pages de ton appli actuelle (T, N, R), pour retrouver un détail que le labo ne montre pas.</p><button class="nx-btn2" data-nx="classic">Ouvrir la version complète</button></div>
+    <div class="nx-card in"><h4 class="nx-h4">Outils</h4><div class="nx-acts">${[['tests', 'bolt', 'Tests'], ['jumps', 'up', 'Sauts'], ['blood', 'drop', 'Prises de sang'], ['menu', 'fork', 'Mon menu'], ['shop', 'list', 'Courses'], ['planning', 'clock', 'Mes horaires'], ['trips', 'right', 'Mes trajets'], ['journal', 'edit', 'Journal de bord']].map(([a, i, n]) => `<button data-nx="eng" data-a="${a}">${ic(i, 18)}<span>${n}</span></button>`).join('')}</div></div>`});
+}
+
+/* ================= LIVE · focus mode, one exercise at a time ================= */
+function nxLiveCount(L) { let n = 0, d = 0; for (const it of L.items || []) { if (it.test) { n++; if (it.done) d++; continue; } for (const x of it.sets || it.reps || []) { n++; if (x.done) d++; } } return {n, d}; }
+const nxItDone = it => it.test ? !!it.done : (it.sets || it.reps || []).length > 0 && (it.sets || it.reps).every(x => x.done);
+function nxStart(id, n) {
+  if (S.live) { nxLiveOpen(); return; }
+  const p = (n ? tdvNum(+n) : null) || planById(id); if (!p) { toast('Séance introuvable'); return; }
+  const gym = S.tset?.gymPlan?.[p.id] || null; GYM_CTX = gym;
+  S.live = {id: uid(), plan: p.id, name: p.name, kind: p.kind, date: TODAY, start: new Date().toISOString(), gym, items: p.items.map(liveItem), warm: p.warm || null, cool: p.cool || null};
+  saveLive(); nxCloseAll();
+  NX.lv.i = 0; setTimeout(nxLiveOpen, NX.skipPop ? 120 : 0); nxSoon(10);
+}
+function nxLiveOpen() {
+  if (!S.live || NX.lv.open) return; NX.lv.open = true; NX.lvId = S.live.id;
+  if (NX.lv.i == null || NX.lv.i >= S.live.items.length || nxItDone(S.live.items[NX.lv.i])) { const j = S.live.items.findIndex(it => !nxItDone(it)); NX.lv.i = j < 0 ? 0 : j; }
+  const el = $('#nx-live'); el.hidden = false; nxLiveDraw(); requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('on')));
+  try { history.pushState({mod: S.mod, nxl: 1}, ''); } catch (e) {}
+  clearInterval(NX.lvT); NX.lvT = setInterval(nxLiveTick, 500);
+}
+function nxLiveHide(fromBack) {
+  if (!NX.lv.open) return; NX.lv.open = false; const el = $('#nx-live'); el.classList.remove('on'); setTimeout(() => { if (!NX.lv.open) el.hidden = true; }, 420);
+  clearInterval(NX.lvT); NX.rest = null;
+  if (!fromBack && history.state?.nxl) { NX.skipPop = true; history.back(); }
+  nxSoon(10);
+}
+// Saved: a small celebration. Abandoned (from the list view): just close.
+function nxLiveDone() { const id = NX.lvId; nxLiveHide(); if (id && S.logs?.[id]) nxCele(); }
+function nxLiveDraw() {
+  const L = S.live, el = $('#nx-live'); if (!L || !el) return;
+  const i = clamp(NX.lv.i, 0, L.items.length - 1), it = L.items[i], e = exOf(it.ex), arr = it.sets || it.reps || [], c = nxLiveCount(L), kc = NXC[nxKind(L)];
+  const nxt = arr.findIndex(x => !x.done), min = Math.max(0, Math.floor((Date.now() - new Date(L.start)) / 60000)), lab = itemLabels(L.items);
+  const row = (x, j) => it.sets
+    ? `<div class="nx-set${x.done ? ' dn' : ''}${j === nxt ? ' nx1' : ''}"><span class="n">${j + 1}</span><label><input inputmode="decimal" data-nxlv="${i}.${j}.kg" value="${esc(x.kg ?? '')}" placeholder="–"><small>kg</small></label><label><input inputmode="numeric" data-nxlv="${i}.${j}.reps" value="${esc(x.reps ?? '')}" placeholder="–"><small>${it.u === 's' ? 's' : 'reps'}</small></label><button class="nx-tick" data-nx="lv-tick" data-a="${i}.${j}" aria-label="Valider la série ${j + 1}">${ic('check', 22)}</button></div>`
+    : `<div class="nx-set${x.done ? ' dn' : ''}${j === nxt ? ' nx1' : ''}"><span class="n">${j + 1}</span><span class="d">${x.dist ? x.dist + ' m' : x.min ? x.min + ' min' : '–'}${x.blk ? `<small>bloc ${x.blk}</small>` : ''}</span><label><input inputmode="decimal" data-nxlv="${i}.${j}.t" value="${esc(x.t ?? '')}" placeholder="–"><small>s</small></label><button class="nx-tick" data-nx="lv-tick" data-a="${i}.${j}" aria-label="Valider la répétition ${j + 1}">${ic('check', 22)}</button></div>`;
+  const last = i >= L.items.length - 1;
+  const cta = it.test ? `<button class="nx-btn nx-go wide" data-nx="lv-list">Faire le test dans la vue liste</button>`
+    : nxt >= 0 ? `<button class="nx-btn nx-go wide" data-nx="lv-tick" data-a="${i}.${nxt}">${ic('check', 20)} Valider ${it.sets ? 'la série' : 'la répétition'} ${nxt + 1}</button>`
+    : last ? `<button class="nx-btn nx-go wide" data-nx="lv-end">${ic('flag', 18)} Terminer la séance</button>` : `<button class="nx-btn nx-go wide" data-nx="lv-go" data-a="${i + 1}">Exercice suivant ${ic('right', 18)}</button>`;
+  const R = NX.rest, rl = R ? Math.max(0, Math.ceil((R.end - Date.now()) / 1000)) : 0;
+  el.innerHTML = `<div class="nx-lv" style="--k:${kc}">
+    <div class="nx-lv-hd"><button class="nx-ib" data-nx="lv-min" aria-label="Réduire">${ic('down', 24)}</button><div class="nx-lv-ttl"><b>${esc(L.name)}</b><small id="nx-lv-time">${min} min · ${c.d}/${c.n}</small></div><button class="nx-ib" data-nx="lv-list" aria-label="Vue liste">${ic('list', 22)}</button></div>
+    <div class="nx-lv-prog"><i style="width:${c.n ? c.d / c.n * 100 : 0}%"></i></div>
+    <div class="nx-lv-chips" id="nx-lv-chips">${L.items.map((x, j) => `<button class="${j === i ? 'on' : ''}${nxItDone(x) ? ' dn' : ''}" data-nx="lv-go" data-a="${j}" style="--c:${nxCat(x.ex)}">${lab[j] ? `<em>${lab[j]}</em>` : ''}${esc(exOf(x.ex).n)}</button>`).join('')}</div>
+    <div class="nx-lv-card" data-i="${i}"><span class="nx-lv-cat" style="--c:${nxCat(it.ex)}">${esc(it.test ? 'Test' : e.cat || '')} · ${i + 1} / ${L.items.length}</span><h2>${esc(e.n)}</h2><p class="nx-lv-tg">${esc(nxItemTxt(it.tg || {}))}</p>
+      ${it.adapted ? `<p class="nx-adapt">${esc(it.adapted)}</p>` : ''}${e.c ? `<details class="nx-cue"><summary>Consignes</summary><p>${esc(e.c)}</p></details>` : ''}
+      ${it.test ? '<p class="nx-sub">Un test se fait avec ses outils (vidéo, chrono, sauts) : ouvre la vue liste.</p>' : `<div class="nx-sets">${arr.map(row).join('')}</div><button class="nx-link" data-nx="lv-addset" data-a="${i}">+ ${it.sets ? 'Une série' : 'Une répétition'} de plus</button>`}</div>
+    <div class="nx-lv-ft">${cta}<div class="nx-lv-nav"><button class="nx-ib" data-nx="lv-go" data-a="${i - 1}"${i ? '' : ' disabled'} aria-label="Exercice précédent">${ic('left', 22)}</button><button class="nx-lv-end" data-nx="lv-end">Terminer</button><button class="nx-ib" data-nx="lv-go" data-a="${i + 1}"${last ? ' disabled' : ''} aria-label="Exercice suivant">${ic('right', 22)}</button></div></div>
+    ${R ? `<div class="nx-rest${rl ? '' : ' end'}"><div class="nx-rest-r"><svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="88" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="10"/><circle cx="100" cy="100" r="88" fill="none" stroke="${kc}" stroke-width="10" stroke-linecap="round" stroke-dasharray="553" style="animation-duration:${R.total}s;animation-delay:-${((Date.now() - R.t0) / 1000).toFixed(2)}s" class="nx-rest-arc" transform="rotate(-90 100 100)"/></svg><b id="nx-rest-t">${Math.floor(rl / 60)}:${String(rl % 60).padStart(2, '0')}</b><small>récupération</small></div>
+      <p class="nx-rest-n">${R.next ? 'Ensuite : ' + esc(R.next) : 'Belle série.'}</p><div class="nx-row"><button class="nx-btn2" data-nx="rest-add">+ 30 s</button><button class="nx-btn" data-nx="rest-skip">Passer</button></div></div>` : ''}</div>`;
+  const ch = $('#nx-lv-chips .on'); if (ch) ch.scrollIntoView({block: 'nearest', inline: 'center', behavior: NX.lvMoved ? 'smooth' : 'auto'}); NX.lvMoved = false;
+}
+function nxLiveTick() {
+  if (!S.live) { if (NX.lv.open) nxLiveDone(); return; }
+  const L = S.live, c = nxLiveCount(L), t = $('#nx-lv-time'); if (t) t.textContent = `${Math.max(0, Math.floor((Date.now() - new Date(L.start)) / 60000))} min · ${c.d}/${c.n}`;
+  const R = NX.rest; if (!R) return;
+  const rl = Math.max(0, Math.ceil((R.end - Date.now()) / 1000)), b = $('#nx-rest-t'); if (b) b.textContent = `${Math.floor(rl / 60)}:${String(rl % 60).padStart(2, '0')}`;
+  if (rl <= 0 && !R.rang) { R.rang = true; try { navigator.vibrate?.([180, 90, 180]); } catch (e) {} $('.nx-rest')?.classList.add('end'); setTimeout(() => { if (NX.rest === R) { NX.rest = null; nxLiveDraw(); } }, 1600); }
+}
+function nxTick(i, j) {
+  const L = S.live, it = L?.items[i], x = (it?.sets || it?.reps || [])[j]; if (!x) return;
+  x.done = !x.done;
+  if (x.done) {
+    L.t0 ||= Date.now(); L.t1 = Date.now(); nxHap(14);
+    const arr = it.sets || it.reps, rest = +(it.rest ?? it.tg?.rest ?? 0), more = arr.some(y => !y.done);
+    const nI = more ? i : L.items.findIndex((y, k) => k > i && !nxItDone(y));
+    if (rest > 0 && (more || nI >= 0)) NX.rest = {t0: Date.now(), end: Date.now() + rest * 1000, total: rest, next: more ? `${exOf(it.ex).n}, ${it.sets ? 'série' : 'répétition'} ${arr.findIndex(y => !y.done) + 1}` : exOf(L.items[nI].ex).n};
+    if (!more && nI >= 0) { NX.lv.i = nI; NX.lvMoved = true; }
+  }
+  saveLive(); nxLiveDraw();
+}
+function nxCele() {
+  const el = $('#nx-cele'); if (!el) return;
+  el.innerHTML = `<div class="nx-cele-in"><div class="nx-cele-ring">${ic('check', 54)}</div><b>Séance enregistrée</b><small>Elle compte dans ta charge, ta forme et tes besoins du jour.</small></div>${[...Array(18)].map((_, i) => `<i style="--a:${i * 20}deg;--d:${(i % 3) * 60}ms"></i>`).join('')}`;
+  el.hidden = false; requestAnimationFrame(() => el.classList.add('on')); nxHap(30);
+  setTimeout(() => { el.classList.remove('on'); setTimeout(() => { el.hidden = true; }, 500); }, 2200);
+}
+
+/* ================= events ================= */
+const NXA = {
+  tab: b => nxTab(b.dataset.a),
+  'sh-x': () => nxClose(),
+  why: () => nxWhy(), goprog: () => { nxCloseAll(); setTimeout(() => nxTab('prog'), 80); },
+  ai: () => nxAiSheet(), set: () => nxSetSheet(),
+  open: b => { const k = b.dataset.a; NX.open[k] = !NX.open[k]; nxDraw(false); },
+  note: () => openSheet('note', TODAY),
+  well: b => { nxHap(6); nxManual(d => { d.well = {...(d.well || {}), [b.dataset.a]: +b.dataset.b}; }); },
+  pain: b => { const l = b.dataset.a, L = [0, 2, 4, 6, 8]; nxHap(6); nxManual(d => { const p = {...pains(TODAY)}, v = p[l] || 0, nv = L[(L.indexOf(L.find(x => x >= v) ?? 0) + 1) % L.length]; if (nv) p[l] = nv; else delete p[l]; d.pains = p; delete d.pain; }); },
+  start: b => nxStart(b.dataset.a, b.dataset.b), live: () => nxLiveOpen(),
+  plan: b => nxPlanSheet(b.dataset.a), log: b => b.dataset.a && logView(b.dataset.a),
+  skip: (b) => setSkip(TODAY, b.dataset.a, b.dataset.b === '1'),
+  cale: b => nxPickSess(b.dataset.a),
+  pks: async b => { await nxPlace(b.dataset.a, b.dataset.b, true); nxClose(); toast('Séance calée ' + (b.dataset.b === TODAY ? 'aujourd\'hui' : 'le ' + fmtShort(b.dataset.b))); },
+  move: b => nxPickSess(b.dataset.b, b.dataset.a),
+  moveto: async b => { const [ref, from, to] = [b.dataset.a, b.dataset.b, b.dataset.c]; if (from !== to) { await nxPlace(ref, from, false); await nxPlace(ref, to, true); toast('Déplacée au ' + fmtShort(to)); } nxClose(); },
+  unplace: async b => { await nxPlace(b.dataset.a, b.dataset.b, false); toast('Retirée de ce jour · elle reste dans tes séances'); },
+  toggleday: async b => { const ref = b.dataset.a, k = b.dataset.b, on = caledOn(ref).includes(k); nxHap(6); await nxPlace(ref, k, !on); },
+  goday: b => { NX.day = b.dataset.a; NX.wk = 0; nxTab('week'); },
+  day: b => { NX.day = b.dataset.a; nxHap(5); nxDraw(false); if (b.classList.contains('nx-wlr')) setTimeout(() => $('.nx-dd')?.scrollIntoView({behavior: 'smooth', block: 'start'}), 30); },
+  wk: b => { const d = +b.dataset.a; NX.wk = d ? NX.wk + d : 0; NX.day = null; NX.dir = d < 0 ? -1 : 1; nxDraw(true); },
+  bilan: () => bilanPane(),
+  eng: b => ({shop: () => shopPane(), menu: () => menuPane(), planning: () => planningPane(), tests: () => testsPane(), jumps: () => jumpsPane(), blood: () => bloodPane(), trips: () => tripsPane(), journal: () => journalLog()}[b.dataset.a] || (() => {}))(),
+  metric: b => openSheet('detail', b.dataset.a),
+  pn: b => { NX.pn = +b.dataset.a; try { localStorage.setItem('nx.pn', NX.pn); } catch (e) {} nxDraw(true); },
+  libseg: b => { NX.lib.seg = b.dataset.a; nxDraw(false); }, libf: b => { NX.lib.f = b.dataset.a; nxDraw(false); },
+  new: b => { if (NX.classic) { nxClassic(false); return; } nxEdOpen(null, false, b.dataset.a || null); },
+  edit: b => nxEdOpen(b.dataset.a), copy: b => nxEdOpen(b.dataset.a, true),
+  del: async b => { const p = S.plans[b.dataset.a]; if (!p || !confirm(`Supprimer « ${p.name} » ?`)) return; const doc = {...p, deleted: true, updatedAt: new Date().toISOString()}; S.plans[p.id] = doc; await dbSet('plans/' + p.id, doc);
+    const dated = Object.fromEntries(Object.entries(S.tset.dated || {}).filter(([k, v]) => !(v === p.id && k.slice(0, 10) >= TODAY))); S.tset = {...S.tset, dated}; await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()}); nxClose(); toast('Séance supprimée'); },
+  'ed-kind': b => { const E = NX.ed; if (E.kind === b.dataset.a) return; if (E.items.some(it => it.ex !== 'warmup') && !confirm('Changer de type vide la liste d\'exercices. Continuer ?')) return; E.kind = b.dataset.a; E.items = E.items.filter(it => it.ex === 'warmup'); E.dirty = true; nxShDraw(); },
+  'ed-tpl': b => { const L = [...BUILTIN.filter(p => p.kind === NX.ed.kind), ...NX_TPL_GYM.filter(p => p.kind === NX.ed.kind)], p = L[+b.dataset.a]; if (!p) return; NX.ed.items = structuredClone(p.items); if (!NX.ed.name) NX.ed.name = ''; NX.ed.dirty = true; nxHap(10); nxShDraw(); },
+  'ed-add': () => nxPick(),
+  'ed-st': b => nxEdStep(+b.dataset.a, b.dataset.b, +b.dataset.c),
+  'ed-mv': b => { const i = +b.dataset.a, j = i + +b.dataset.b, L = NX.ed.items; if (j < 0 || j >= L.length) return; [L[i], L[j]] = [L[j], L[i]]; NX.ed.dirty = true; nxShDraw(); },
+  'ed-dup': b => { const i = +b.dataset.a; NX.ed.items.splice(i + 1, 0, structuredClone(NX.ed.items[i])); NX.ed.dirty = true; nxShDraw(); },
+  'ed-rm': b => { NX.ed.items.splice(+b.dataset.a, 1); NX.ed.dirty = true; nxShDraw(); },
+  'ed-day': b => { const k = b.dataset.a, D = NX.ed.days; if (D.has(k)) D.delete(k); else D.add(k); NX.ed.dirty = true; nxHap(5); nxShDraw(); },
+  'ed-save': () => nxEdSave(),
+  'ed-full': () => { const E = NX.ed; if (!E) return; if (!E.items.length) { toast('Ajoute d\'abord un exercice'); return; }
+    // The full editor works on a saved session: keep this one first (unplaced days stay as chosen), then open it there.
+    nxEdSave().then(() => setTimeout(() => editPlan(E.id), 450)); },
+  'pk-cat': b => { NX.pk.cat = b.dataset.a; nxShDraw(); },
+  pk: b => { const id = b.dataset.a; NX.ed.items.push(nxSmartItem(id, NX.ed.kind)); NX.ed.dirty = true; NX.pk.n++; nxHap(10); b.classList.add('flash'); setTimeout(() => { const x = $('#nx-exs'); if (x) x.innerHTML = nxPickRows(); nxShDraw(); }, 260); const ed = NX.sh.find(s => s.id === 'ed'); if (ed) nxShDraw(ed); },
+  'pk-done': () => nxClose(),
+  meal: b => nxMeal(b.dataset.a),
+  food: b => { S.fday = TODAY; addFood(b.dataset.a); },
+  fedit: b => { S.fday = TODAY; const i = +b.dataset.a, it = fday(TODAY).items[i]; if (!it) return; qtyPane({n: it.n, kcal: it.kcal / it.g * 100, p: it.p / it.g * 100, c: it.c / it.g * 100, f: it.f / it.g * 100, g: it.g, id: it.food}, it.meal, i); },
+  fdel: b => { const d = structuredClone(fday(TODAY)); d.items.splice(+b.dataset.a, 1); saveDay(TODAY, d); nxHap(8); },
+  mplan: b => { const m = b.dataset.a, d = structuredClone(fday(TODAY)); d.items = (d.items || []).filter(it => it.meal !== m).concat(structuredClone((menuFor(TODAY) || []).filter(it => it.meal === m))); saveDay(TODAY, d); toast('Repas du plan remis'); },
+  wb: b => { const w = waterOf(TODAY).wb || {}; setWater(TODAY, {[b.dataset.a]: wnum(w[b.dataset.a]) ? 0 : 1}); nxHap(8); },
+  wt: b => { const w = waterOf(TODAY).wb || {}; setWater(TODAY, {t: clamp((w.t || 0) + +b.dataset.a, 0, 4)}); nxHap(6); },
+  ask: b => nxAsk(b.dataset.a || ''),
+  reset: () => { if (!confirm('Effacer tout ce que tu as fait dans le labo et repartir de tes vraies données ?')) return; window.LAB_DB?.reset(); LAB_RAW.wipe(); location.reload(); },
+  classic: () => { nxCloseAll(); setTimeout(() => nxClassic(true), 120); },
+  'lv-min': () => nxLiveHide(), 'lv-list': () => openLive(),
+  'lv-go': b => { const j = +b.dataset.a; if (!S.live || j < 0 || j >= S.live.items.length) return; NX.lv.i = j; NX.lvMoved = true; nxHap(5); nxLiveDraw(); const c = $('.nx-lv-card'); c?.classList.add('swap'); },
+  'lv-tick': b => { const [i, j] = b.dataset.a.split('.').map(Number); nxTick(i, j); },
+  'lv-addset': b => { const it = S.live.items[+b.dataset.a], arr = it?.sets || it?.reps; if (!arr) return; const l = arr.at(-1) || {}; arr.push({...l, done: false, t: ''}); saveLive(); nxLiveDraw(); },
+  'lv-end': () => finishPane(),
+  'rest-add': () => { const R = NX.rest; if (!R) return; R.end += 30e3; R.total += 30; R.rang = false; nxLiveDraw(); },
+  'rest-skip': () => { NX.rest = null; nxLiveDraw(); }
+};
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-nx]'); if (!b || b.disabled) return;
+  const f = NXA[b.dataset.nx]; if (!f) return;
+  e.preventDefault(); try { f(b, e); } catch (err) { console.error(err); toast('Oups : ' + (err?.message || err)); }
+});
+document.addEventListener('input', e => {
+  const t = e.target, d = t.dataset;
+  if (d.nxin === 'libq') { NX.lib.q = t.value; clearTimeout(NX.qt); NX.qt = setTimeout(() => { const pos = t.selectionStart; nxDraw(false, true); const n = $('[data-nxin="libq"]'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (err) {} } }, 220); }
+  else if (d.nxin === 'pk-q') { NX.pk.q = t.value; const x = $('#nx-exs'); if (x) x.innerHTML = nxPickRows(); }
+  else if (d.nxin === 'ed-name') { NX.ed.name = t.value; NX.ed.dirty = true; }
+  else if (d.nxlv) {
+    const [i, j, f] = d.nxlv.split('.'), arr = S.live?.items[i]?.sets || S.live?.items[i]?.reps; if (!arr?.[j]) return;
+    const old = arr[j][f], v = t.value.replace(',', '.'); arr[j][f] = v;
+    if (f === 'kg') for (let n = +j + 1; n < arr.length; n++) if (!arr[n].done && (arr[n].kg === '' || arr[n].kg == null || arr[n].kg === old)) { arr[n].kg = v; const el = document.querySelector(`[data-nxlv="${i}.${n}.kg"]`); if (el) el.value = v; }
+    saveLive();
+  }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.dataset.nxin === 'ai') { NX.ai = t.checked; try { localStorage.setItem('nx.ai', NX.ai ? '1' : '0'); } catch (err) {} toast(NX.ai ? 'Coach IA activé dans le labo' : 'Coach IA désactivé : l\'appli marche sans IA'); nxDraw(false); }
+});
+document.addEventListener('focusin', e => { if (e.target.closest?.('#nx-live')) NX.lvInput = true; });
+document.addEventListener('focusout', e => { if (e.target.closest?.('#nx-live')) { NX.lvInput = false; } if (NX.pend) nxSoon(200); });
+// PC: drag a session from one day to another.
+document.addEventListener('dragstart', e => { const c = e.target.closest?.('[data-drag]'); if (!c) return; e.dataTransfer.setData('text/plain', c.dataset.drag + '|' + c.dataset.from); e.dataTransfer.effectAllowed = 'move'; c.classList.add('ghost'); });
+document.addEventListener('dragend', e => { e.target.closest?.('[data-drag]')?.classList.remove('ghost'); document.querySelectorAll('.nx-wd.over').forEach(x => x.classList.remove('over')); });
+document.addEventListener('dragover', e => { const c = e.target.closest?.('[data-drop]'); if (!c) return; e.preventDefault(); document.querySelectorAll('.nx-wd.over').forEach(x => x !== c && x.classList.remove('over')); c.classList.add('over'); });
+document.addEventListener('drop', async e => { const c = e.target.closest?.('[data-drop]'); if (!c) return; e.preventDefault(); c.classList.remove('over'); const [ref, from] = (e.dataTransfer.getData('text/plain') || '').split('|'), to = c.dataset.drop; if (!ref || !from || from === to) return; await nxPlace(ref, from, false); await nxPlace(ref, to, true); toast('Déplacée au ' + fmtShort(to)); });
+
+/* ================= classic mode, and hooks into the engine ================= */
+const nxRender0 = render, nxRenderMod0 = renderMod, nxGo0 = go;
+render = function () { if (NX.classic) return nxRender0.apply(this, arguments); if (S.sheet?.kind === 'detail' && !scrubBox) { const y = $('#sheet-scroll').scrollTop; $('#sheet-body').innerHTML = detailBody(S.sheet.arg); initCharts($('#sheet-body')); $('#sheet-scroll').scrollTop = y; } nxSoon(); };
+renderMod = function () { if (NX.classic) return nxRenderMod0.apply(this, arguments); if (P.stack.length && P.live) paneRender(); nxSoon(); };
+// An engine button that leads to one of the old parts opens the full version there.
+go = function (m, push) { if (!NX.classic && m !== 'home') nxClassic(true, true); return nxGo0.apply(this, arguments); };
+// The phone's top bar stays black on the labo; the old colours come back in the full version.
+const nxSync0 = syncBars;
+syncBars = function () { if (NX.classic) return nxSync0.apply(this, arguments); document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', '#000000')); };
+// The labo is dark, windows of the engine included.
+PREFS.theme = 'dark'; try { applyPrefs(); } catch (e) {}
+function nxClassic(on, quiet) {
+  NX.classic = on; document.documentElement.classList.toggle('nx-on', !on);
+  $('#nx').hidden = on; $('#nx-new').hidden = !on;
+  if (on) { if (NX.lv.open) nxLiveHide(); if (!quiet) { nxGo0('home', false); } nxRender0(); nxRenderMod0(true); pcSync(); toast('Version complète · le bouton en haut te ramène au labo'); }
+  else { closeAllPanes(); if (S.sheet) closeSheet(); nxGo0('home', false); pcSync(); nxDraw(true); }
+}
+// The day moves: the timeline and the "in 1 h 20" refresh every minute.
+setInterval(() => { if (!document.hidden && !NX.classic && (NX.tab === 'today' || NX.tab === 'week')) nxSoon(); }, 60e3);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) nxSoon(); });
+
+// Start: the shell is drawn at once; the arrival animation waits for the splash screen to go.
+nxMount();
+nxChrome();
+(function nxWaitSplash(n = 0) {
+  if (window.TNR_SPLASH_ON && n < 200) { setTimeout(() => nxWaitSplash(n + 1), 100); return; }
+  setTimeout(() => { NX.ready = true; nxDraw(true); if (S.live && S.live.date === TODAY) toast('Séance en cours : touche « Reprendre »'); }, n ? 60 : 350);
+})();
 
 </script>
 
