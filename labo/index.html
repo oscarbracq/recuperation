@@ -3158,7 +3158,12 @@ async function aiSave() {
 }
 // Le projet TNR dans l'appli Claude (le connecteur y est activé).
 const AI_URL = 'https://claude.ai/projects';
-function aiOpenClaude() { aiSave(); window.open(AI_URL, '_blank', 'noopener'); }
+// Sur Android : l'appli Claude s'ouvre directement sur le projet (sinon le navigateur, déjà connecté, prend le relais). Sur PC : un nouvel onglet.
+function aiOpenClaude() {
+  aiSave();
+  if (/Android/i.test(navigator.userAgent)) location.href = 'intent://' + AI_URL.replace(/^https:\/\//, '') + '#Intent;scheme=https;package=com.anthropic.claude;S.browser_fallback_url=' + encodeURIComponent(AI_URL) + ';end';
+  else window.open(AI_URL, '_blank', 'noopener');
+}
 setTimeout(aiSave, 15000); setInterval(aiSave, 5 * 60000);
 document.addEventListener('visibilitychange', () => { if (document.hidden) aiSave(); });
 function homeGreeting() {
