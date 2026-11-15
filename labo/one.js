@@ -13,7 +13,8 @@ const oneHap = (ms = 6) => { try { if (PREFS.haptic !== false) navigator.vibrate
 const oneCalm = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 // L'accueil n'existe plus : tout ce qui y menait ramène au module en cours.
 const oneGo0 = go;
-go = function (mod, push = true) { if (mod === 'home') { mod = ONE.mods.includes(S.mod) ? S.mod : oneSaved().m; push = false; } oneGo0(mod, push); oneSync(); };
+// L'accueil existe à nouveau (page TNR) : y aller, c'est vraiment y aller (avant, ça renvoyait vers Recovery et ça faisait clignoter la barre).
+go = function (mod, push = true) { if (mod === 'home') push = false; oneGo0(mod, push); oneSync(); };
 // À l'ouverture : toujours Recovery · Aujourd'hui (la récupération d'abord).
 const oneSaved = () => ({m: 'R', i: 0});
 // Change de module en gardant la même position d'onglet. La page apparaît sur place (pas de glissement : ça, c'est pour les onglets).
@@ -237,7 +238,7 @@ window.ONE_SPLASH = function (el, svg, bars) {
   // L'appli s'ouvre sur l'Accueil : on mesure la barre dans sa forme finale (T N R serrés), sans attendre ses transitions.
   const de = document.documentElement; de.classList.add('one-home', 'one-notr'); void de.offsetWidth;
   const ink = tg.map(oneInk); de.classList.remove('one-notr');
-  const NS = 'http://www.w3.org/2000/svg', D = 1050, fl = [];
+  const NS = 'http://www.w3.org/2000/svg', D = 1050, fl = [], land = [];
   for (let i = 0; i < 3; i++) {
     const bb = ps[i].getBBox(), m = ps[i].getScreenCTM(); if (!m) return false;
     const x = m.e + bb.x * m.a, y = m.f + bb.y * m.d, w = bb.width * m.a, h = bb.height * m.d;
@@ -246,14 +247,16 @@ window.ONE_SPLASH = function (el, svg, bars) {
     const p = ps[i].cloneNode(); p.setAttribute('fill', '#fff'); s.appendChild(p); document.body.appendChild(s); fl.push(s);
     const r = ink[i], sc = r.h / h, tx = r.x + r.w / 2 - (x + w / 2), ty = r.y + r.h / 2 - (y + h / 2), dl = i * 70;
     tg[i].style.transition = 'none'; tg[i].style.opacity = '0';
-    s.animate([{transform: 'none'}, {transform: `translate(${tx}px,${ty}px) scale(${sc})`}], {duration: D, delay: dl, easing: 'cubic-bezier(.7,0,.2,1)', fill: 'forwards'});
-    // Posé : la lettre dessinée laisse la place à la vraie lettre de la barre, au même endroit, en fondu court.
-    setTimeout(() => { tg[i].style.opacity = ''; tg[i].animate([{opacity: 0}, {opacity: 1}], {duration: 160, easing: 'ease-out'}); s.animate([{opacity: 1}, {opacity: 0}], {duration: 160, fill: 'forwards'}); }, D + dl);
+    const a = s.animate([{transform: 'none'}, {transform: `translate(${tx}px,${ty}px) scale(${sc})`}], {duration: D, delay: dl, easing: 'cubic-bezier(.7,0,.2,1)', fill: 'forwards'});
+    // Posée (vraiment, même si le téléphone a démarré l'animation en retard) : la vraie lettre est déjà là, pleine, juste dessous,
+    // et la lettre dessinée s'efface par-dessus. Jamais les deux à moitié transparentes en même temps : pas de flash.
+    land.push(a.finished.then(() => { tg[i].style.opacity = ''; return s.animate([{opacity: 1}, {opacity: 0}], {duration: 120, fill: 'forwards'}).finished; }).catch(() => {}));
   }
   for (let i = 0; i < 3; i++) ps[i].style.opacity = 0;
   el.querySelector('.sp')?.remove();
   el.animate([{opacity: 1}, {opacity: 0}], {duration: 700, delay: 220, easing: 'ease', fill: 'forwards'});
-  setTimeout(() => { fl.forEach(s => s.remove()); el.remove(); bars(); tg.forEach(b => { b.style.opacity = ''; b.style.transition = ''; }); }, D + 140 + 200);
+  let end = false; const fin = () => { if (end) return; end = true; fl.forEach(s => s.remove()); el.remove(); bars(); tg.forEach(b => { b.style.opacity = ''; }); void document.body.offsetWidth; tg.forEach(b => { b.style.transition = ''; }); };
+  Promise.all(land).then(fin); setTimeout(fin, 4000);
   return true;
 };
 // Le contour réel de la lettre affichée (pas sa boîte) : position et hauteur de l'encre, pour que la lettre volante s'y pose pile.
