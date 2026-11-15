@@ -1081,6 +1081,9 @@ body.bdragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
 .drawer-scrim.on{opacity:1;pointer-events:auto}
 .drawer h2{margin:0 0 6px;font-size:1.25rem}
 .drawer .ditem{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:14px;border-radius:14px;background:var(--card2);color:var(--fg);font:inherit;text-align:left;border:0}
+.drawer .dclaude{justify-content:flex-start}.drawer .dgrow{flex:1;min-width:0}
+.drawer .dsq{flex:none;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;align-content:center;color:#fff;font-size:1.15rem;font-weight:800;line-height:1;background:linear-gradient(135deg,#7c5cff,#e0529c);box-shadow:0 6px 18px rgba(124,92,255,.35)}
+.drawer .dsq b{font-size:.62rem;letter-spacing:.06em}
 .drawer .ditem .hint{display:block;font-size:.8125rem;color:var(--fg2);margin-top:2px}
 @media (prefers-reduced-motion:reduce){.drawer{transition:none}}
 .hm-info{margin-top:auto;min-height:96px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;text-align:center;transition:opacity .25s}
@@ -2933,6 +2936,9 @@ async function aiSave() {
   if (body === AI_LAST) return;
   try { await window.RECUP_AI_SAVE(text); AI_LAST = body; } catch (e) {}
 }
+// Le projet TNR dans l'appli Claude (le connecteur y est activé).
+const AI_URL = 'https://claude.ai/projects';
+function aiOpenClaude() { aiSave(); window.open(AI_URL, '_blank', 'noopener'); }
 setTimeout(aiSave, 15000); setInterval(aiSave, 5 * 60000);
 document.addEventListener('visibilitychange', () => { if (document.hidden) aiSave(); });
 function homeGreeting() {
@@ -6812,6 +6818,7 @@ function drawerHtml() {
     ${TDV_PROTO.length ? '<button class="ditem" data-dproto><span>Mon protocole</span><span aria-hidden="true">›</span></button>' : ''}
     <div class="ditem"><label for="dr-coach">Coachs<span class="hint">${S.app?.coach === false ? 'Désactivés : les conseils des coachs training, nutrition et recovery sont masqués.' : 'Activés : conseils des coachs training, nutrition et recovery.'}</span></label><span class="switch"><input type="checkbox" id="dr-coach" data-hcoach${S.app?.coach === false ? '' : ' checked'}><span></span></span></div>
     <div class="ditem"><label for="dr-ai">IA<span class="hint">${aiOn() ? 'Activée : Claude écrit l\'analyse du matin, le bilan du vendredi et le bouton Interagir est là.' : 'Désactivée : aucun texte écrit par l\'IA, Claude n\'écrit plus d\'analyse. L\'appli fait ses propres analyses à partir de tes données. Tes données continuent d\'arriver.'}</span></label><span class="switch"><input type="checkbox" id="dr-ai" data-hai${aiOn() ? ' checked' : ''}><span></span></span></div>
+    <button class="ditem dclaude" data-dclaude><span class="dsq" aria-hidden="true">+<b>IA</b></span><span class="dgrow">Claude · projet TNR<span class="hint">Pose tes questions à Claude : il lit toutes tes données TNR à jour grâce au connecteur.</span></span><span aria-hidden="true">›</span></button>
     <div class="dconn"><span class="eyebrow">Connexions</span>${connectors()}</div>`;
 }
 function openDrawer() {
@@ -9710,6 +9717,7 @@ document.addEventListener('click', e => {
   if (at('[data-hmenu]')) { if (Date.now() - (window.__hmT || 0) > 600) openDrawer(); return; }
   if (at('[data-dclose]')) { closeDrawer(); return; }
   if (at('[data-hset]')) { homeSettings(); return; }
+  if (at('[data-dclaude]')) { aiOpenClaude(); return; }
   if (at('[data-dplan]')) { closeDrawer(); planningPane(); return; }
   if (at('[data-dlook]')) { openPane({title: 'Apparence et réglages', side: true, render: () => '<div style="margin-top:16px"></div>' + settings()}); return; }
   if (at('[data-dproto]')) { openPane({title: 'Mon protocole', side: true, render: () => `<div class="list proto" style="margin-top:16px">${TDV_PROTO.map(([t, l]) => `<details class="row col"><summary class="l"><b>${esc(t)}</b></summary><ul>${l.map(x => `<li>${esc(x)}</li>`).join('')}</ul></details>`).join('')}</div>`}); return; }

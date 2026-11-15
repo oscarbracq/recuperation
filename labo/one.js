@@ -108,8 +108,7 @@ function oneCount(els) {
 }
 
 /* ---------- IA : l'appli Claude, projet TNR (elle lit tes données à jour grâce au connecteur TNR) ---------- */
-const ONE_AI_URL = 'https://claude.ai/projects';
-function oneAiGo() { aiSave(); oneHap(6); window.open(ONE_AI_URL, '_blank'); }
+function oneAiGo() { oneHap(6); aiOpenClaude(); }
 
 /* ---------- les plannings : même format en T, N et R ---------- */
 // Les cases « + » vides de Nutrition et Recovery reçoivent le même « + » que Training (le style fait le reste).
