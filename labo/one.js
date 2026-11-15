@@ -28,6 +28,7 @@ function oneSwitch(m, i = oneIdx()) {
   const v = oneView(); if (v && !oneCalm()) v.animate([{opacity: 0, filter: 'blur(8px)'}, {opacity: 1, filter: 'blur(0)'}], {duration: 420, easing: 'cubic-bezier(.2,.8,.2,1)'});
 }
 function oneTab(i) {
+  if (S.mod === 'home') { oneSwitch(ONE.lm || 'R', i); return; }
   const k = ONE.keys[S.mod]?.[i]; if (!k) return;
   if (k === oneCur()) { window.scrollTo({top: 0, behavior: 'smooth'}); return; }
   // Le retour du téléphone depuis un onglet ramène à Aujourd'hui (une seule étape dans l'historique).
@@ -42,10 +43,11 @@ function oneMount() {
   document.body.insertAdjacentHTML('beforeend', `<div id="one-top" class="one-top"><button class="one-sq" data-hday aria-label="Questionnaire du jour" title="Questionnaire du jour">${oneIc('plus')}</button>
     <div class="one-mods" role="tablist" aria-label="Module"><span class="one-mp"></span>${ONE.mods.map(m => `<button role="tab" data-one-m="${m}" style="--c:${ONE.col[m]}"><b>${m}</b><span>${ONE.name[m]}</span></button>`).join('')}</div>
     <button class="one-sq one-aib" data-one-ai aria-label="Ouvrir Claude (projet TNR)" title="Ouvrir Claude (projet TNR)">${oneIc('ai')}<span>IA</span></button></div>
-    <nav id="one-tabs" class="one-tabs" aria-label="Sections"><span class="one-pill"></span>${[0, 1, 2, 3, 4, 5].map(i => `<button data-one-t="${i}"></button>`).join('')}</nav>`);
+    <nav id="one-tabs" class="one-tabs" aria-label="Sections"><span class="one-pill"></span><button data-one-h aria-label="Accueil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-6.5 8 6.5"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>Accueil</button>${[0, 1, 2, 3, 4, 5].map(i => `<button data-one-t="${i}"></button>`).join('')}</nav>`);
   document.addEventListener('click', e => {
     const m = e.target.closest('[data-one-m]'); if (m) { if (m.dataset.oneM !== S.mod) oneSwitch(m.dataset.oneM); else window.scrollTo({top: 0, behavior: 'smooth'}); return; }
     const t = e.target.closest('[data-one-t]'); if (t) { oneTab(+t.dataset.oneT); return; }
+    if (e.target.closest('[data-one-h]')) { oneHome(); return; }
     if (e.target.closest('[data-one-ai]')) { oneAiGo(); return; }
   });
   for (const ev of ['pointerdown', 'keydown', 'touchstart']) addEventListener(ev, () => { ONE.act = performance.now(); }, {capture: true, passive: true});
@@ -73,13 +75,23 @@ function oneMag(box, p, ms) {
 }
 // Met la barre et le sélecteur à jour (noms, icônes, pastilles) ; appelée après chaque changement de page.
 function oneSync() {
-  const tabs = $('#one-tabs'), top = $('#one-top'); if (!tabs || !ONE.mods.includes(S.mod)) return;
-  document.documentElement.style.setProperty('--one-c', ONE.col[S.mod]);
-  const src = [...(pcBar(S.mod)?.querySelectorAll('[role=tab]') || [])], i = oneIdx();
+  const tabs = $('#one-tabs'), top = $('#one-top'), home = S.mod === 'home'; if (!tabs || (!home && !ONE.mods.includes(S.mod))) return;
+  if (!home) ONE.lm = S.mod; const m = home ? ONE.lm || 'R' : S.mod;
+  document.documentElement.classList.toggle('one-home', home);
+  document.documentElement.style.setProperty('--one-c', home ? '#8E9BB5' : ONE.col[m]);
+  const src = [...(pcBar(m)?.querySelectorAll('[role=tab]') || [])], i = home ? -1 : oneIdx();
   tabs.querySelectorAll('[data-one-t]').forEach((b, j) => { const s = src[j]; if (!s) return; const h = s.innerHTML; if (b._h !== h) { b.innerHTML = h; b._h = h; } b.setAttribute('aria-label', s.textContent.trim()); b.classList.toggle('on', j === i); });
-  top.querySelectorAll('[data-one-m]').forEach(b => b.classList.toggle('on', b.dataset.oneM === S.mod));
-  onePill(tabs, tabs.querySelector('.one-pill'), tabs.querySelector('[data-one-t].on')); onePill(top.querySelector('.one-mods'), top.querySelector('.one-mp'), top.querySelector('.one-mods .on'));
-  try { localStorage.setItem('one.pos', JSON.stringify({m: S.mod, i})); } catch (e) {}
+  tabs.querySelector('[data-one-h]').classList.toggle('on', home);
+  top.querySelectorAll('[data-one-m]').forEach(b => b.classList.toggle('on', !home && b.dataset.oneM === S.mod));
+  onePill(tabs, tabs.querySelector('.one-pill'), tabs.querySelector('button.on'));
+  if (!home) onePill(top.querySelector('.one-mods'), top.querySelector('.one-mp'), top.querySelector('.one-mods .on'));
+}
+// Accueil : la page d'accueil de l'appli ; en haut, les noms s'effacent et le T, le N et le R se rapprochent pour écrire TNR.
+function oneHome() {
+  if (S.mod === 'home') { window.scrollTo({top: 0, behavior: 'smooth'}); return; }
+  ONE.lm = S.mod; if (S.sheet) closeSheet(); while (P.stack.length) closePane();
+  ONE.act = performance.now(); oneGo0('home', false); window.scrollTo(0, 0); oneSync(); oneHap(6);
+  const v = $('#mod-home'); if (v && !oneCalm()) v.animate([{opacity: 0, filter: 'blur(8px)'}, {opacity: 1, filter: 'blur(0)'}], {duration: 420, easing: 'cubic-bezier(.2,.8,.2,1)'});
 }
 
 /* ---------- animations : courbes qui se dessinent, blocs qui montent, anneaux et chiffres qui partent de zéro ---------- */
@@ -144,13 +156,14 @@ addEventListener('popstate', () => {
 try { history.scrollRestoration = 'manual'; } catch (e) {}
 (function oneStart(n = 0) {
   if (!S.mod && n < 200) { setTimeout(() => oneStart(n + 1), 50); return; }
-  oneSwitch('R', 0); window.scrollTo(0, 0); ONE.ready = true; oneSync();
+  ONE.lm = 'R'; oneGo0('home', false); window.scrollTo(0, 0); ONE.ready = true; oneSync();
 })();
 
 /* ---------- même période partout : Jour · Semaine · Mois · Année · Tout, et les flèches pour remonter le temps ---------- */
 // Ce qui compte « jusqu'à aujourd'hui » compte jusqu'à la fin de la période choisie quand une page la demande.
 const oneTo = () => ONE.per && ONE.per.to < TODAY ? ONE.per.to : TODAY;
 const oneShift = f => (0, eval)('(' + f.toString().replace(/\bTODAY\b/g, 'oneTo()') + ')');
+painSection = (0, eval)('(' + painSection.toString().replace("draft._view || 'back'", "draft._view || 'front'") + ')');
 musPeriod = oneShift(musPeriod); tBuckets = oneShift(tBuckets); painWindow = oneShift(painWindow); zoneCare = oneShift(zoneCare);
 const ONE_DAYS = {day: 1, week: 7, month: 30, year: 365, all: 3650};
 const onePerBar = P => granSeg() + `<div class="card" style="margin-top:10px;padding:8px 12px">${periodNav(P)}</div>`;

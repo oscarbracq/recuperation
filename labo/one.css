@@ -1,7 +1,7 @@
 /* ================= TNR LABO : une seule entrée, barre flottante en verre, + · T N R · IA ================= */
 /* L'ancienne barre reste dans la page (le glissement du pouce s'en sert pour connaître les onglets), mais invisible. */
 html.one .tabbar{visibility:hidden!important;pointer-events:none!important;transform:translateY(200%)!important}
-html.one .modmark,html.one .backhome,html.one #pcnav,html.one #mod-home{display:none!important}
+html.one .modmark,html.one .backhome,html.one #pcnav,html.one:not(.one-home) #mod-home{display:none!important}
 html.one{--tbh:98px!important;--pcw:0px!important}
 html.one.pc body{padding-left:0!important}
 
@@ -81,8 +81,25 @@ html.one .seg.msrc{box-sizing:border-box;min-height:37px}html.one #t-view .seg.m
 html.one #f-view .segbody>.chead{height:20px;align-items:center}html.one #f-view .segbody>.chead .num{font-size:1rem}
 /* La lentille : du verre liquide, clair et bombé, bords qui accrochent la lumière ; la barre a un peu de marge pour l'élan. */
 html.one .one-tabs{padding:6px 14px!important}html.one .one-mods{padding:4px 10px!important}
-html.one :is(.one-pill,.one-mp){border-radius:999px!important;background:rgba(255,255,255,.07)!important;border:0!important;
+html.one .one-pill{border-radius:20px!important}html.one .one-mp{border-radius:14px!important}
+html.one :is(.one-pill,.one-mp){background:rgba(255,255,255,.07)!important;border:0!important;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.22),inset 1.5px 1.5px 1px -.5px rgba(255,255,255,.55),inset -1.5px -1.5px 1px -.5px rgba(255,255,255,.28),inset 0 0 14px color-mix(in srgb,var(--one-c) 35%,transparent),0 6px 20px rgba(0,0,0,.28),0 0 22px color-mix(in srgb,var(--one-c) 22%,transparent)!important;
   backdrop-filter:blur(1.5px) saturate(1.9) brightness(1.15);-webkit-backdrop-filter:blur(1.5px) saturate(1.9) brightness(1.15)}
-html.one :is(.one-tabs,.one-mods) button>*{transform:scale(var(--mag,1))!important;transition:transform .1s linear,opacity .3s}
+html.one :is(.one-tabs,.one-mods) button{transform:scale(var(--mag,1));transition:transform .1s linear,color .3s,flex-grow .55s cubic-bezier(.3,.7,.25,1)}
+html.one .one-tabs button.on svg,html.one .one-mods button.on b{transform:none!important}
 html.one .one-tabs button.on svg{filter:drop-shadow(0 0 6px color-mix(in srgb,var(--one-c) 70%,transparent))}
+/* Accueil : la barre du haut se resserre, les noms s'effacent, T N R se rapprochent ; + et IA suivent. */
+html.one .one-top{justify-content:center}
+html.one .one-mods{transition:flex-grow .6s cubic-bezier(.3,.7,.25,1),flex-basis .6s cubic-bezier(.3,.7,.25,1)}
+html.one .one-mods button span{max-width:90px;transition:max-width .6s cubic-bezier(.3,.7,.25,1),opacity .35s}
+html.one .one-mods button b{transition:background-color .5s,opacity .5s,font-size .6s cubic-bezier(.3,.7,.25,1),width .6s cubic-bezier(.3,.7,.25,1)}
+html.one .one-mp{transition:opacity .35s,background .3s,box-shadow .3s}
+html.one.one-home .one-mods{flex:0 0 92px}
+html.one.one-home .one-mods button{gap:0;padding:0}
+html.one.one-home .one-mods button span{max-width:0;opacity:0}
+html.one.one-home .one-mods button b{background-color:transparent;opacity:1;font-size:1.2rem;width:22px;letter-spacing:0}
+html.one.one-home .one-mp{opacity:0}
+html.one #mod-home .hm-dock,html.one #mod-home .hm-pcmods{display:none!important}
+html.one #one-tabs button[data-one-h]{position:relative;z-index:1;flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;background:none;color:var(--fg3);font:inherit;font-size:.625rem;font-weight:600;cursor:pointer;padding:0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.one #one-tabs button[data-one-h] svg{width:22px;height:22px;flex:none}html.one #one-tabs button[data-one-h].on{color:var(--fg)}
+html.one #mod-home #hm-head{margin-top:56px}
