@@ -79,3 +79,7 @@ html.one #f-view .one-segw{grid-template-columns:1fr}
 html.one :is(#t-view,#f-view,#v-today,#v-trends,#v-rsess,#v-rlib,#v-reports,#v-profile)>header.top+*{margin-top:0!important}
 html.one .seg.msrc{box-sizing:border-box;min-height:37px}html.one #t-view .seg.msrc+*{margin-top:12px!important}html.one .one-segsp{margin-bottom:12px}
 html.one #f-view .segbody>.chead{height:20px;align-items:center}html.one #f-view .segbody>.chead .num{font-size:1rem}
+/* La lentille derrière l'onglet et le module choisis : verre clair et brillant, teinté de la couleur du module. */
+html.one :is(.one-pill,.one-mp){background:linear-gradient(180deg,rgba(255,255,255,.26),rgba(255,255,255,.07) 55%,rgba(255,255,255,.12)),color-mix(in srgb,var(--one-c) 16%,transparent)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(255,255,255,.1),inset 0 0 0 1px rgba(255,255,255,.16),0 4px 16px rgba(0,0,0,.25),0 0 20px color-mix(in srgb,var(--one-c) 30%,transparent)!important;
+  backdrop-filter:blur(6px) saturate(1.6) brightness(1.12);-webkit-backdrop-filter:blur(6px) saturate(1.6) brightness(1.12)}

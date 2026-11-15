@@ -14,7 +14,8 @@ const oneCalm = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 // L'accueil n'existe plus : tout ce qui y menait ramène au module en cours.
 const oneGo0 = go;
 go = function (mod, push = true) { if (mod === 'home') { mod = ONE.mods.includes(S.mod) ? S.mod : oneSaved().m; push = false; } oneGo0(mod, push); oneSync(); };
-const oneSaved = () => { try { const o = JSON.parse(localStorage.getItem('one.pos') || '{}'); return {m: ONE.mods.includes(o.m) ? o.m : 'T', i: +o.i || 0}; } catch (e) { return {m: 'T', i: 0}; } };
+// À l'ouverture : toujours Recovery · Aujourd'hui (la récupération d'abord).
+const oneSaved = () => ({m: 'R', i: 0});
 // Change de module en gardant la même position d'onglet. La page apparaît sur place (pas de glissement : ça, c'est pour les onglets).
 function oneSwitch(m, i = oneIdx()) {
   if (!ONE.mods.includes(m)) return;
@@ -57,9 +58,11 @@ function onePill(box, p, on) {
   const x0 = p._x, w0 = p._w; p._x = x; p._w = w;
   p.style.width = w + 'px'; p.style.transform = `translateX(${x}px)`;
   if (x0 == null || (x0 === x && w0 === w) || oneCalm()) return;
-  const dir = Math.sign(x - x0), over = Math.max(pad, Math.min(max, x + dir * Math.min(9, Math.abs(x - x0) * .06)));
+  const dir = Math.sign(x - x0), want = Math.min(9, Math.abs(x - x0) * .06), over = Math.max(pad, Math.min(max, x + dir * want)), sq = want - Math.abs(over - x);
+  // Contre un bord, l'élan qui ne peut pas passer devient un petit écrasement : la pastille reste dans le cadre.
+  const mid = sq > 1 ? {transform: `translateX(${dir > 0 ? x + sq * 1.1 : x}px)`, width: (w - sq * 1.1) + 'px', offset: .72} : {transform: `translateX(${over}px)`, width: w + 'px', offset: .72};
   p.getAnimations().forEach(a => a.cancel());
-  p.animate([{transform: `translateX(${x0}px)`, width: w0 + 'px'}, {transform: `translateX(${over}px)`, width: w + 'px', offset: .72}, {transform: `translateX(${x}px)`, width: w + 'px'}], {duration: 460, easing: 'cubic-bezier(.3,.7,.25,1)'});
+  p.animate([{transform: `translateX(${x0}px)`, width: w0 + 'px'}, mid, {transform: `translateX(${x}px)`, width: w + 'px'}], {duration: 460, easing: 'cubic-bezier(.3,.7,.25,1)'});
 }
 // Met la barre et le sélecteur à jour (noms, icônes, pastilles) ; appelée après chaque changement de page.
 function oneSync() {
@@ -74,7 +77,7 @@ function oneSync() {
 
 /* ---------- animations : courbes qui se dessinent, blocs qui montent, anneaux et chiffres qui partent de zéro ---------- */
 // Seulement juste après un geste (arrivée sur une page, changement de période, d'unité…), pas à chaque mise à jour silencieuse des données.
-const oneRecent = () => performance.now() - ONE.act < 1600 || performance.now() < 7000;
+const oneRecent = () => (ONE.reveal || (!document.getElementById('splash') && !window.TNR_SPLASH_ON)) && performance.now() - ONE.act < 1600 && ONE.done !== ONE.act;
 function oneAnim(root) {
   if (!root || oneCalm() || !oneRecent()) return;
   const fresh = el => { if (ONE.seen.has(el)) return false; ONE.seen.add(el); return true; };
@@ -92,7 +95,8 @@ function oneAnim(root) {
     c.animate([{strokeDashoffset: C}, {strokeDashoffset: o}], {duration: 1150, easing: 'cubic-bezier(.3,.8,.25,1)'}); });
   root.querySelectorAll('.imb i').forEach((b, i) => { if (!fresh(b)) return; b.style.transformOrigin = b.classList.contains('neg') ? 'right' : 'left';
     b.animate([{transform: 'scaleX(0)'}, {transform: 'scaleX(1)'}], {duration: 750, delay: 150 + i * 60, easing: 'cubic-bezier(.3,1.25,.5,1)', fill: 'backwards'}); });
-  oneCount([...root.querySelectorAll('.num, .imh b, .segl b')].filter(fresh));
+  const nums = [...root.querySelectorAll('.num, .imh b, .segl b')].filter(fresh); oneCount(nums);
+  if (nums.length || root.querySelector('svg')) ONE.done = ONE.act;
 }
 // Le chiffre monte de 0 jusqu'à sa valeur (le premier nombre de chaque élément, le reste du texte ne bouge pas).
 function oneCount(els) {
@@ -131,8 +135,8 @@ addEventListener('popstate', () => {
 }, true);
 // Au démarrage : directement dans le dernier module et le dernier onglet utilisés (Training · Aujourd'hui la première fois).
 (function oneStart(n = 0) {
-  if ((window.TNR_SPLASH_ON || !S.mod) && n < 200) { setTimeout(() => oneStart(n + 1), 100); return; }
-  const s = oneSaved(); if (!ONE.mods.includes(S.mod)) oneSwitch(s.m, s.i); ONE.ready = true; oneSync(); oneAfter();
+  if (!S.mod && n < 200) { setTimeout(() => oneStart(n + 1), 50); return; }
+  oneSwitch('R', 0); ONE.ready = true; oneSync();
 })();
 
 /* ---------- même période partout : Jour · Semaine · Mois · Année · Tout, et les flèches pour remonter le temps ---------- */
@@ -209,6 +213,7 @@ window.ONE_SPLASH = function (el, svg, bars) {
   el.animate([{opacity: 1}, {opacity: 0}], {duration: 700, delay: 220, easing: 'ease', fill: 'forwards'});
   setTimeout(() => fl.forEach(s => s.animate([{opacity: 1}, {opacity: 0}], {duration: 180, fill: 'forwards'})), D + 150);
   setTimeout(() => { fl.forEach(s => s.remove()); el.remove(); bars(); }, D + 380);
+  setTimeout(() => { ONE.reveal = true; ONE.act = performance.now(); ONE.seen = new WeakSet(); oneAfter(); }, 260);
   return true;
 };
 
