@@ -2937,7 +2937,7 @@ async function aiSave() {
   try { await window.RECUP_AI_SAVE(text); AI_LAST = body; } catch (e) {}
 }
 // Le projet TNR dans l'appli Claude (le connecteur y est activé).
-const AI_URL = 'https://claude.ai/projects';
+const AI_URL = 'https://claude.ai/project/01a1e00d-19f9-7639-b74f-52770ce8fac5';
 // Sur Android : l'appli Claude s'ouvre directement sur le projet (sinon le navigateur, déjà connecté, prend le relais). Sur PC : un nouvel onglet.
 function aiOpenClaude() {
   aiSave();
