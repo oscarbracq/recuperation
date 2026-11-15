@@ -28,6 +28,9 @@ must('href="apple-touch-icon.png', 'href="../apple-touch-icon.png')
 must('<script src="supabase-db.js', '<script src="../supabase-db.js')
 h = re.sub(r"<script>if \('serviceWorker' in navigator\) \{.*?\}</script>", '', h, count=1, flags=re.S)
 assert "navigator.serviceWorker.register('sw.js')" not in h
+# Ouverture du labo : les lettres T, N, R vont se poser dans leurs carrés (labo/one.js, ONE_SPLASH) au lieu du zoom dans le N.
+HID = "    if (document.hidden) { el.remove(); bars(); return; }" + chr(10)
+must(HID, HID + "    if (window.ONE_SPLASH && window.ONE_SPLASH(el, svg, bars)) return;" + chr(10), 1)
 must('const db = await recupGetDb();', 'const db = labSandbox(await recupGetDb());', 1)
 must('<meta name="apple-mobile-web-app-title" content="TNR Athletics">', '<meta name="apple-mobile-web-app-title" content="TNR Labo"><title>TNR Labo</title>')
 # The sandbox must run before every other script of the page.

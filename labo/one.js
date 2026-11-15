@@ -24,7 +24,7 @@ function oneSwitch(m, i = oneIdx()) {
   saveUi(); ONE.act = performance.now();
   oneGo0(m, false); try { history.replaceState({...(history.state || {}), mod: m}, ''); if (i > 0 && !history.state?.one) history.pushState({mod: m, one: 1}, ''); } catch (e) {}
   oneSync(); oneHap(8);
-  const v = oneView(); if (v && !oneCalm()) v.animate([{opacity: 0, transform: 'scale(.985)', filter: 'blur(8px)'}, {opacity: 1, transform: 'none', filter: 'blur(0)'}], {duration: 420, easing: 'cubic-bezier(.2,.8,.2,1)'});
+  const v = oneView(); if (v && !oneCalm()) v.animate([{opacity: 0, filter: 'blur(8px)'}, {opacity: 1, filter: 'blur(0)'}], {duration: 420, easing: 'cubic-bezier(.2,.8,.2,1)'});
 }
 function oneTab(i) {
   const k = ONE.keys[S.mod]?.[i]; if (!k) return;
@@ -68,7 +68,7 @@ function oneSync() {
   const src = [...(pcBar(S.mod)?.querySelectorAll('[role=tab]') || [])], i = oneIdx();
   tabs.querySelectorAll('[data-one-t]').forEach((b, j) => { const s = src[j]; if (!s) return; const h = s.innerHTML; if (b._h !== h) { b.innerHTML = h; b._h = h; } b.setAttribute('aria-label', s.textContent.trim()); b.classList.toggle('on', j === i); });
   top.querySelectorAll('[data-one-m]').forEach(b => b.classList.toggle('on', b.dataset.oneM === S.mod));
-  onePill(tabs, tabs.querySelector('.on'), tabs.querySelector('.one-pill')); onePill(top.querySelector('.one-mods'), top.querySelector('.one-mods .on'), top.querySelector('.one-mp'));
+  onePill(tabs, tabs.querySelector('.one-pill'), tabs.querySelector('[data-one-t].on')); onePill(top.querySelector('.one-mods'), top.querySelector('.one-mp'), top.querySelector('.one-mods .on'));
   try { localStorage.setItem('one.pos', JSON.stringify({m: S.mod, i})); } catch (e) {}
 }
 
@@ -86,6 +86,8 @@ function oneAnim(root) {
     svg.querySelectorAll(':scope > circle').forEach((c, i) => { c.style.transformBox = 'fill-box'; c.style.transformOrigin = 'center'; c.animate([{transform: 'scale(0)', opacity: 0}, {transform: 'scale(1)', opacity: 1}], {duration: 320, delay: 650 + Math.min(450, i * 10), fill: 'backwards'}); });
     svg.querySelectorAll('.trendl, .sc').forEach(l => l.animate([{opacity: 0}, {opacity: 1}], {duration: 450, delay: 1000, fill: 'backwards'}));
   });
+  // Intensité et volume (Training · Tendance) : les barres poussent comme celles du tonnage.
+  root.querySelectorAll('svg.dual').forEach(svg => { if (!fresh(svg)) return; svg.querySelectorAll('rect').forEach((r, i) => { r.style.transformBox = 'fill-box'; r.style.transformOrigin = '50% 100%'; r.animate([{transform: 'scaleY(0)'}, {transform: 'scaleY(1)'}], {duration: 560, delay: Math.min(520, i * 22), easing: 'cubic-bezier(.34,1.35,.5,1)', fill: 'backwards'}); }); });
   root.querySelectorAll('svg.ring').forEach(s => { if (!fresh(s)) return; const c = s.querySelectorAll('circle')[1]; if (!c) return; const C = +c.getAttribute('stroke-dasharray'), o = +c.getAttribute('stroke-dashoffset'); if (!C) return;
     c.animate([{strokeDashoffset: C}, {strokeDashoffset: o}], {duration: 1150, easing: 'cubic-bezier(.3,.8,.25,1)'}); });
   root.querySelectorAll('.imb i').forEach((b, i) => { if (!fresh(b)) return; b.style.transformOrigin = b.classList.contains('neg') ? 'right' : 'left';
@@ -132,3 +134,90 @@ addEventListener('popstate', () => {
   if ((window.TNR_SPLASH_ON || !S.mod) && n < 200) { setTimeout(() => oneStart(n + 1), 100); return; }
   const s = oneSaved(); if (!ONE.mods.includes(S.mod)) oneSwitch(s.m, s.i); ONE.ready = true; oneSync(); oneAfter();
 })();
+
+/* ---------- même période partout : Jour · Semaine · Mois · Année · Tout, et les flèches pour remonter le temps ---------- */
+// Ce qui compte « jusqu'à aujourd'hui » compte jusqu'à la fin de la période choisie quand une page la demande.
+const oneTo = () => ONE.per && ONE.per.to < TODAY ? ONE.per.to : TODAY;
+const oneShift = f => (0, eval)('(' + f.toString().replace(/\bTODAY\b/g, 'oneTo()') + ')');
+musPeriod = oneShift(musPeriod); tBuckets = oneShift(tBuckets); painWindow = oneShift(painWindow); zoneCare = oneShift(zoneCare);
+const ONE_DAYS = {day: 1, week: 7, month: 30, year: 365, all: 3650};
+const onePerBar = P => granSeg() + `<div class="card" style="margin-top:10px;padding:8px 12px">${periodNav(P)}</div>`;
+const oneAfterHead = (h, add) => h.replace('</header>', '</header>' + add);
+function oneWithPer(fn) { ONE.per = periodOf(S.gran, S.off); try { return fn(ONE.per); } finally { ONE.per = null; } }
+// Training · Tendance
+const oneTProg0 = tProgress;
+tProgress = () => oneWithPer(P => {
+  const sv = S.tgran; S.tgran = S.gran === 'all' ? 'year' : S.gran; let h; try { h = oneTProg0(); } finally { S.tgran = sv; }
+  h = h.replace(/<div class="seg" role="group" aria-label="Période">(?:(?!<\/div>)[\s\S])*?data-tgran[\s\S]*?<\/div>/, '');
+  return oneAfterHead(h, onePerBar(P));
+});
+// Training · Mon corps : la période en haut, puis muscu / sprint / les deux / tout, puis le corps
+const oneBodyCard0 = bodyCard;
+bodyCard = () => { let h = oneBodyCard0(); if (!ONE.per) return h; return h.replace(msrcSeg(), '').replace(/<div class="seg" role="group" aria-label="Période" style="margin-top:8px">[\s\S]*?<\/div>/, ''); };
+const oneTBody0 = tBody;
+tBody = () => oneWithPer(P => { const sv = S.mgran; S.mgran = S.gran; let h; try { h = oneTBody0(); } finally { S.mgran = sv; } return oneAfterHead(h, onePerBar(P) + msrcSeg()); });
+// Recovery · Mon corps
+const oneRBody0 = vReports;
+vReports = () => oneWithPer(P => {
+  const sv = RB.n; RB.n = Math.max(1, Math.min(ONE_DAYS[S.gran] || 7, daysBetween(P.from, oneTo()) + 1)); let h; try { h = oneRBody0(); } finally { RB.n = sv; }
+  h = h.replace(/<div class="seg" role="group" aria-label="Période">[\s\S]*?<\/div>/, '').replace(/Douleurs (du jour|des 7 derniers jours|des 30 derniers jours)/, 'Douleurs · ' + esc(P.title.toLowerCase()));
+  return oneAfterHead(h, onePerBar(P) + '<div class="one-segsp" aria-hidden="true"></div>');
+});
+document.addEventListener('click', e => { if (S.mod === 'T' && e.target.closest('[data-gran],[data-off]')) { ONE.act = performance.now(); setTimeout(() => renderMod(true)); } });
+
+/* ---------- Séances : le planning en premier (même hauteur en T, N et R), la saison en dessous des boutons ---------- */
+const oneTSes0 = tSessions;
+tSessions = () => {
+  let h = oneTSes0();
+  const ban = h.match(/<button class="banner" data-tseason[\s\S]*?<\/button>/)?.[0], seg = h.match(/<div class="seg" role="group" aria-label="Type">[\s\S]*?<\/div>/)?.[0], row = h.match(/<div class="btnrow two"[\s\S]*?<\/div>/)?.[0];
+  if (!ban || !seg || !row) return h;
+  h = h.replace(ban, '').replace(seg, '');
+  const board = sesBoard(S.tkind); h = h.includes(board) ? h.replace(board, board + seg) : h;
+  return h.replace(row, row + '<div style="margin-top:12px">' + ban + '</div>');
+};
+/* ---------- Les compléments (créatine…) passent dans Menu, sous « + Menu semaine · + Menu jour » ---------- */
+const oneFoods0 = fFoods; fFoods = () => oneFoods0().replace(suppSection(), '');
+const oneMenu0 = fMenu; fMenu = () => oneMenu0().replace(/(<div class="btnrow" style="margin-top:16px"><button class="btn ghost" data-mnew="week">[\s\S]*?<\/div>)/, '$1<div style="margin-top:16px">' + suppSection() + '</div>');
+/* ---------- Training · Aujourd'hui : la phrase du jour toujours là, comme en Nutrition et Recovery ---------- */
+const oneTToday0 = tToday;
+tToday = () => {
+  let h = oneTToday0(); const sl = seasonLine(); if (sl) h = h.replace(sl + '</header>', '</header>' + sl);
+  if (!/<p class="pmsg">/.test(h.slice(0, h.indexOf('</header>')))) {
+    const pg = planForK(TODAY, 'gym'), ptk = planForK(TODAY, 'track'), p = pg && !kindDone(TODAY, 'gym') ? pg : ptk && !kindDone(TODAY, 'track') ? ptk : pg || ptk;
+    h = h.replace(/(<header class="top"><div class="sub">[^<]*<\/div>)/, `$1<p class="pmsg">${esc(trainMsg(p, logsOn(TODAY)))}</p>`);
+  }
+  return h;
+};
+
+/* ---------- Ouverture : le T, le N et le R du logo se séparent et vont se poser dans leurs carrés, en haut ---------- */
+window.ONE_SPLASH = function (el, svg, bars) {
+  const tg = [...document.querySelectorAll('#one-top .one-mods button b')], ps = svg.querySelectorAll('path');
+  if (tg.length !== 3 || ps.length < 4 || oneCalm()) return false;
+  const NS = 'http://www.w3.org/2000/svg', D = 1050, fl = [];
+  for (let i = 0; i < 3; i++) {
+    const bb = ps[i].getBBox(), m = ps[i].getScreenCTM(); if (!m) return false;
+    const x = m.e + bb.x * m.a, y = m.f + bb.y * m.d, w = bb.width * m.a, h = bb.height * m.d;
+    const s = document.createElementNS(NS, 'svg'); s.setAttribute('viewBox', `${bb.x} ${bb.y} ${bb.width} ${bb.height}`);
+    s.style.cssText = `position:fixed;left:${x}px;top:${y}px;width:${w}px;height:${h}px;z-index:302;pointer-events:none;overflow:visible`;
+    const p = ps[i].cloneNode(); p.setAttribute('fill', '#fff'); s.appendChild(p); document.body.appendChild(s); fl.push(s);
+    const r = tg[i].getBoundingClientRect(), sc = r.height * .56 / h, tx = r.left + r.width / 2 - (x + w / 2), ty = r.top + r.height / 2 - (y + h / 2);
+    s.animate([{transform: 'none'}, {transform: `translate(${tx}px,${ty}px) scale(${sc})`}], {duration: D, delay: i * 70, easing: 'cubic-bezier(.7,0,.2,1)', fill: 'forwards'});
+    tg[i].animate([{transform: 'scale(.3)', opacity: 0}, {transform: 'scale(1)', opacity: getComputedStyle(tg[i]).opacity}], {duration: 420, delay: D * .78 + i * 70, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'backwards'});
+  }
+  for (let i = 0; i < 3; i++) ps[i].style.opacity = 0;
+  el.querySelector('.sp')?.remove();
+  el.animate([{opacity: 1}, {opacity: 0}], {duration: 700, delay: 220, easing: 'ease', fill: 'forwards'});
+  setTimeout(() => fl.forEach(s => s.animate([{opacity: 1}, {opacity: 0}], {duration: 180, fill: 'forwards'})), D + 150);
+  setTimeout(() => { fl.forEach(s => s.remove()); el.remove(); bars(); }, D + 380);
+  return true;
+};
+
+/* ---------- Mon corps : le même bonhomme, à la même taille et au même endroit en Training, Nutrition et Recovery ---------- */
+// Nutrition : deux silhouettes, comme Training et Recovery (face et dos) ; les bras sur l'une, le tronc et les jambes sur l'autre.
+const oneFBody0 = fBody;
+fBody = () => {
+  const h = oneFBody0(), m = h.match(/<div class="segw"><svg viewBox="0 0 200 392"[^>]*>([\s\S]*?)<\/svg>/); if (!m) return h;
+  const ells = m[1].match(/<ellipse [^>]*\/>/g) || [], arm = e => /cx="(53|147)"/.test(e);
+  const fig = (suf, lab, L) => `<div><div class="lab">${lab}</div><svg viewBox="0 0 200 392" role="img" aria-label="${lab}">${silBase('front', suf)}<g clip-path="url(#silc${suf})" pointer-events="none">${L.join('').replace(/url\(#softsg\)/g, `url(#soft${suf})`)}</g></svg></div>`;
+  return h.replace(m[0], `<div class="one-2body">${fig('sgA', 'BRAS', ells.filter(arm))}${fig('sgB', 'TRONC ET JAMBES', ells.filter(e => !arm(e)))}</div><div class="segw one-segw">`);
+};

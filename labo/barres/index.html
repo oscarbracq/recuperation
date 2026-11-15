@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>TNR Barres</title>
+<style>
+/* Petite appli de test : plusieurs rendus de la barre Training · Nutrition · Recovery, à essayer au doigt. */
+:root{--bg:#000;--fg:#f5f5f7;--fg2:#a1a1a6;--fg3:#6e6e73;--card:#1c1c1e;--T:#FF3B30;--N:#30D158;--R:#0A84FF;--c:var(--T)}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+.aura{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.aura span{position:absolute;border-radius:50%;filter:blur(80px);opacity:.45;background:var(--c);transition:background .8s}
+.aura span:nth-child(1){width:70vmax;height:70vmax;left:-35vmax;top:-20vmax;animation:w1 31s ease-in-out infinite}
+.aura span:nth-child(2){width:60vmax;height:60vmax;right:-32vmax;top:30vh;animation:w2 37s ease-in-out infinite;opacity:.3}
+@keyframes w1{0%,100%{transform:none}25%{transform:translate(16vmax,9vmax) scale(1.14)}50%{transform:translate(7vmax,24vmax) scale(.94)}75%{transform:translate(-9vmax,11vmax) scale(1.08)}}
+@keyframes w2{0%,100%{transform:none}25%{transform:translate(-14vmax,-10vmax) scale(.9)}50%{transform:translate(-22vmax,6vmax) scale(1.12)}75%{transform:translate(-6vmax,14vmax) scale(.97)}}
+main{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:calc(20px + env(safe-area-inset-top,0px)) 16px 40px}
+h1{font-size:1.6rem;margin:0 0 4px}
+.intro{color:var(--fg2);margin:0 0 22px;font-size:.95rem}
+section{margin:0 0 26px}
+section h2{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--fg3);margin:0 0 8px;font-weight:700}
+section p{color:var(--fg2);font-size:.85rem;margin:8px 0 0}
+/* la barre, comme dans le labo : + · modules · IA */
+.top{display:flex;gap:6px}
+.sq{flex:none;width:46px;height:46px;border-radius:17px;display:grid;place-items:center;color:var(--fg);font-weight:800;font-size:.6rem;background:color-mix(in srgb,var(--c) 20%,rgba(28,28,30,.7));border:1px solid color-mix(in srgb,var(--c) 38%,transparent);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);transition:background .3s,border-color .3s}
+.sq svg{width:18px;height:18px}
+.mods{flex:1;min-width:0;position:relative;display:flex;padding:4px;border-radius:18px;background:rgba(28,28,30,.55);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);border:1px solid rgba(127,127,127,.18);box-shadow:0 8px 28px rgba(0,0,0,.28)}
+.pill{position:absolute;left:0;top:4px;bottom:4px;border-radius:14px;background:color-mix(in srgb,var(--pc,var(--c)) 22%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pc,var(--c)) 42%,transparent),0 0 18px color-mix(in srgb,var(--pc,var(--c)) 30%,transparent);transition:background .3s,box-shadow .3s}
+.mods button{position:relative;z-index:1;flex:1 1 0;min-width:0;height:36px;border:0;background:none;color:var(--fg2);font:inherit;font-size:.78rem;font-weight:600;display:flex;align-items:center;justify-content:center;gap:4px;padding:0 4px;border-radius:14px;cursor:pointer;white-space:nowrap;transition:color .3s,flex-grow .45s cubic-bezier(.3,.7,.25,1)}
+.mods button.on{color:var(--fg)}
+.L{flex:none;display:grid;place-items:center;width:19px;height:19px;border-radius:6px;font-size:.72rem;font-weight:800;color:#fff;background:var(--m);opacity:.55;transition:opacity .3s,transform .45s cubic-bezier(.34,1.56,.64,1),width .45s,height .45s,font-size .45s,border-radius .45s}
+.on .L{opacity:1}
+.w{overflow:hidden;text-overflow:ellipsis;transition:max-width .45s cubic-bezier(.3,.7,.25,1),opacity .3s,font-size .4s}
+/* Actuel : carré + mot entier */
+.v0 button{font-size:.72rem}.v0 .on .L{transform:scale(1.08)}
+/* V1 : le carré remplace la première lettre du mot : [T]raining */
+.v1 button{gap:1px}.v1 .w{letter-spacing:-.01em}.v1 .on .L{transform:scale(1.08)}
+/* V2 : le module choisi en entier, les autres en carré seul */
+.v2 button{flex-grow:.42}.v2 button.on{flex-grow:2.2}
+.v2 button:not(.on) .w{max-width:0;opacity:0}.v2 button.on .w{max-width:120px;opacity:1}
+.v2 button{gap:1px}
+/* V3 : les autres en entier et en petit, le module choisi devient une grosse lettre */
+.v3 button{gap:3px}.v3 button:not(.on) .w{font-size:.68rem}
+.v3 button.on .L{width:28px;height:28px;font-size:1rem;border-radius:9px;transform:none}
+.v3 button.on .w{max-width:0;opacity:0}.v3 button:not(.on) .w{max-width:110px;opacity:1}
+.v3 button.on{flex-grow:.7}
+.hint{display:inline-block;margin-top:8px;font-size:.78rem;color:var(--fg3)}
+</style>
+</head>
+<body>
+<div class="aura" aria-hidden="true"><span></span><span></span></div>
+<main>
+  <h1>Barres T · N · R</h1>
+  <p class="intro">Touche Training, Nutrition ou Recovery dans chaque barre pour comparer. Le fond prend la couleur du module choisi.</p>
+  <section><h2>Actuelle</h2><div class="top" data-v="v0"></div><p>Le carré de la lettre, puis le mot entier.</p></section>
+  <section><h2>Version 1</h2><div class="top" data-v="v1"></div><p>Le carré remplace la première lettre : <b>[T]raining</b>, <b>[N]utrition</b>, <b>[R]ecovery</b>.</p></section>
+  <section><h2>Version 2</h2><div class="top" data-v="v2"></div><p>Le module choisi s'écrit en entier ; les deux autres se réduisent à leur carré.</p></section>
+  <section><h2>Version 3</h2><div class="top" data-v="v3"></div><p>Le module choisi devient une grosse lettre ; les deux autres restent écrits en entier, en petit.</p></section>
+</main>
+<script>
+const M = [['T', 'Training', 'raining', '#FF3B30'], ['N', 'Nutrition', 'utrition', '#30D158'], ['R', 'Recovery', 'ecovery', '#0A84FF']];
+const PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+const AI = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>';
+const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+// La pastille glisse avec un petit élan, sans sortir du cadre (même mouvement que dans le labo).
+function pill(box) {
+  const p = box.querySelector('.pill'), on = box.querySelector('.on'); if (!p || !on) return;
+  const pad = 4, x = on.offsetLeft, w = on.offsetWidth, max = box.clientWidth - pad - w, x0 = p._x, w0 = p._w; p._x = x; p._w = w;
+  p.style.width = w + 'px'; p.style.transform = `translateX(${x}px)`; p.style.setProperty('--pc', on.style.getPropertyValue('--m'));
+  if (x0 == null || calm || (x0 === x && w0 === w)) return;
+  const dir = Math.sign(x - x0), over = Math.max(pad, Math.min(max, x + dir * Math.min(9, Math.abs(x - x0) * .06)));
+  p.getAnimations().forEach(a => a.cancel());
+  p.animate([{transform: `translateX(${x0}px)`, width: w0 + 'px'}, {transform: `translateX(${over}px)`, width: w + 'px', offset: .72}, {transform: `translateX(${x}px)`, width: w + 'px'}], {duration: 460, easing: 'cubic-bezier(.3,.7,.25,1)'});
+}
+document.querySelectorAll('.top').forEach(t => {
+  const v = t.dataset.v;
+  t.innerHTML = `<span class="sq" aria-label="Questionnaire du jour">${PLUS}</span><div class="mods ${v}" role="tablist"><span class="pill"></span>${M.map(([l, n, rest, c], i) =>
+    `<button role="tab" data-m="${l}" class="${i ? '' : 'on'}" style="--m:${c}" aria-label="${n}"><span class="L">${l}</span><span class="w">${v === 'v1' || v === 'v2' ? rest : n}</span></button>`).join('')}</div><span class="sq">${AI}</span>`;
+  const box = t.querySelector('.mods');
+  box.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b || b.classList.contains('on')) return;
+    box.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+    document.documentElement.style.setProperty('--c', b.style.getPropertyValue('--m'));
+    try { navigator.vibrate?.(8); } catch (e) {}
+    // Les largeurs changent en douceur (versions 2 et 3) : la pastille suit pendant toute la transition.
+    if (v === 'v2' || v === 'v3') { const p = box.querySelector('.pill'), t0 = performance.now(); (function f() { const on = box.querySelector('.on'); p.style.width = on.offsetWidth + 'px'; p.style.transform = `translateX(${on.offsetLeft}px)`; p._x = on.offsetLeft; p._w = on.offsetWidth; p.style.setProperty('--pc', on.style.getPropertyValue('--m')); if (performance.now() - t0 < 560) requestAnimationFrame(f); })(); }
+    else pill(box);
+  });
+  // À la fin du changement de largeur, la pastille se recale exactement sur le module choisi.
+  box.addEventListener('transitionend', e => { if (e.propertyName !== 'flex-grow') return; const p = box.querySelector('.pill'), on = box.querySelector('.on'); p.style.width = on.offsetWidth + 'px'; p.style.transform = `translateX(${on.offsetLeft}px)`; p._x = on.offsetLeft; p._w = on.offsetWidth; });
+  requestAnimationFrame(() => pill(box));
+});
+addEventListener('resize', () => document.querySelectorAll('.mods').forEach(pill));
+</script>
+</body>
+</html>

@@ -57,6 +57,7 @@ img{max-width:100%}
   function zoom() {
     if (!el.isConnected) return;
     if (document.hidden) { el.remove(); bars(); return; }
+    if (window.ONE_SPLASH && window.ONE_SPLASH(el, svg, bars)) return;
     removeEventListener('resize', place); vw = innerWidth; vh = innerHeight;
     var dpr = Math.min(devicePixelRatio || 1, 3), c = document.createElement('canvas'), r = svg.getBoundingClientRect();
     c.width = Math.round(vw * dpr); c.height = Math.round(vh * dpr);
@@ -1448,7 +1449,25 @@ html.one.pc body{padding-left:0!important}
 .one-mp{position:absolute;left:0;top:4px;bottom:4px;border-radius:14px;background:color-mix(in srgb,var(--one-c) 20%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--one-c) 40%,transparent),0 0 18px color-mix(in srgb,var(--one-c) 28%,transparent);transition:background .3s,box-shadow .3s}
 @media(max-width:345px){.one-mods button span{display:none}}
 html.one .mm-space{height:48px!important}
-html.one #v-today>header.top:first-child,html.one #v-trends>header.top:first-child,html.one #v-rsess>header.top:first-child,html.one #v-rlib>header.top:first-child,html.one #v-reports>header.top:first-child,html.one #v-profile>header.top:first-child{margin-top:48px}
+html.one #v-today>header.top:first-child,html.one #v-trends>header.top:first-child,html.one #v-rsess>header.top:first-child,html.one #v-rlib>header.top:first-child,html.one #v-reports>header.top:first-child,html.one #v-profile>header.top:first-child{margin-top:12px!important}
+/* Chaque onglet commence au même endroit en Training, Nutrition et Recovery : même en-tête, même hauteur. */
+html.one :is(#t-view,#f-view,#v-today,#v-trends,#v-rsess,#v-rlib,#v-reports,#v-profile)>header.top{box-sizing:border-box;height:62px;margin-bottom:12px!important;padding-bottom:0!important;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
+html.one :is(#t-view,#f-view,#v-today,#v-trends,#v-rsess,#v-rlib,#v-reports,#v-profile)>header.top:has(>.pmsg){height:86px;justify-content:flex-start}
+html.one :is(#t-view,#f-view,#v-today,#v-trends,#v-rsess,#v-rlib,#v-reports,#v-profile)>header.top .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.one :is(#t-view,#f-view,#v-today,#v-trends,#v-rsess,#v-rlib,#v-reports,#v-profile)>header.top .pmsg{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+html.one :is(#t-view,#f-view,#v-today,#v-trends,#v-rsess,#v-rlib,#v-reports,#v-profile)>header.tophead{flex-direction:row;align-items:flex-end;justify-content:space-between;gap:10px}
+html.one header.tophead>div:first-child{min-width:0}html.one header.tophead .unitseg{flex:none;width:auto;margin:0 0 4px}
+html.one .one-segsp{height:var(--one-segh,40px)}
+/* Le fond de couleur bouge tout doucement, dans tous les sens, comme un écran au repos. */
+html.one .aura span{animation-play-state:running!important}
+html.one .aura span:nth-child(1){animation:onew1 31s ease-in-out infinite!important}
+html.one .aura span:nth-child(2){animation:onew2 37s ease-in-out infinite!important}
+html.one .aura span:nth-child(3){animation:onew3 43s ease-in-out infinite!important}
+html.one .aura span:nth-child(4){animation:onew2 53s ease-in-out infinite reverse!important}
+@keyframes onew1{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(16vmax,9vmax) scale(1.14)}50%{transform:translate(7vmax,24vmax) scale(.94)}75%{transform:translate(-9vmax,11vmax) scale(1.08)}}
+@keyframes onew2{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(-14vmax,-10vmax) scale(.9)}50%{transform:translate(-22vmax,6vmax) scale(1.12)}75%{transform:translate(-6vmax,14vmax) scale(.97)}}
+@keyframes onew3{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(12vmax,-14vmax) scale(1.1)}50%{transform:translate(22vmax,-4vmax) scale(.92)}75%{transform:translate(8vmax,8vmax) scale(1.05)}}
+@media(prefers-reduced-motion:reduce){html.one .aura span{animation:none!important}}
 
 /* barre d'onglets flottante en verre */
 .one-tabs{position:fixed;z-index:30;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom,0px));width:calc(100% - 24px);max-width:560px;height:68px;display:flex;padding:6px;border-radius:26px;background:color-mix(in srgb,var(--card,#1c1c1e) 50%,transparent);backdrop-filter:blur(26px) saturate(1.8);-webkit-backdrop-filter:blur(26px) saturate(1.8);border:1px solid rgba(127,127,127,.2);box-shadow:0 14px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.06)}
@@ -1479,6 +1498,16 @@ html.one #sheet.one-qs .pck{border-radius:16px;transition:transform .25s cubic-b
 html.one #sheet.one-qs .pck:active{transform:scale(.96)}
 html.one #sheet.one-qs .list{border-radius:18px;overflow:hidden}
 html.one #sheet.one-qs .row{transition:background .2s}
+/* Mon corps : même rangée de réglages, puis deux silhouettes de 145 px, au pixel près, dans les trois modules */
+html.one .seg.msrc{margin-top:12px}html.one .seg.msrc button{white-space:nowrap;font-size:.75rem;padding-left:4px;padding-right:4px}
+html.one .one-segsp{height:37px;margin-top:12px}
+html.one :is(#t-view .mbody,#v-reports .rbody2,#f-view .one-2body){display:grid!important;grid-template-columns:145px 145px!important;justify-content:center;gap:16px!important;margin-top:10px!important}
+html.one :is(#t-view .mbody,#v-reports .rbody2,#f-view .one-2body) svg{width:145px!important;height:auto!important;display:block}
+html.one #t-view .mbody figure{display:flex;flex-direction:column;margin:0}html.one #t-view .mbody figcaption{order:-1}
+html.one :is(#t-view .mbody figcaption,#v-reports .rbody2 .lab,#f-view .one-2body .lab){display:block;height:16px;margin:0 0 4px;text-align:center;font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--fg3);font-weight:600}
+html.one #t-view .card:has(>.mbody)>.chead,html.one #f-view .segbody>.chead,html.one #v-reports .card:has(>.rbody2)>.eyebrow{display:flex;min-height:20px;margin:0!important}
+html.one #f-view .one-segw{grid-template-columns:1fr}
+html.one :is(#t-view,#f-view,#v-today,#v-trends,#v-rsess,#v-rlib,#v-reports,#v-profile)>header.top+*{margin-top:0!important}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -10166,7 +10195,7 @@ function oneSwitch(m, i = oneIdx()) {
   saveUi(); ONE.act = performance.now();
   oneGo0(m, false); try { history.replaceState({...(history.state || {}), mod: m}, ''); if (i > 0 && !history.state?.one) history.pushState({mod: m, one: 1}, ''); } catch (e) {}
   oneSync(); oneHap(8);
-  const v = oneView(); if (v && !oneCalm()) v.animate([{opacity: 0, transform: 'scale(.985)', filter: 'blur(8px)'}, {opacity: 1, transform: 'none', filter: 'blur(0)'}], {duration: 420, easing: 'cubic-bezier(.2,.8,.2,1)'});
+  const v = oneView(); if (v && !oneCalm()) v.animate([{opacity: 0, filter: 'blur(8px)'}, {opacity: 1, filter: 'blur(0)'}], {duration: 420, easing: 'cubic-bezier(.2,.8,.2,1)'});
 }
 function oneTab(i) {
   const k = ONE.keys[S.mod]?.[i]; if (!k) return;
@@ -10210,7 +10239,7 @@ function oneSync() {
   const src = [...(pcBar(S.mod)?.querySelectorAll('[role=tab]') || [])], i = oneIdx();
   tabs.querySelectorAll('[data-one-t]').forEach((b, j) => { const s = src[j]; if (!s) return; const h = s.innerHTML; if (b._h !== h) { b.innerHTML = h; b._h = h; } b.setAttribute('aria-label', s.textContent.trim()); b.classList.toggle('on', j === i); });
   top.querySelectorAll('[data-one-m]').forEach(b => b.classList.toggle('on', b.dataset.oneM === S.mod));
-  onePill(tabs, tabs.querySelector('.on'), tabs.querySelector('.one-pill')); onePill(top.querySelector('.one-mods'), top.querySelector('.one-mods .on'), top.querySelector('.one-mp'));
+  onePill(tabs, tabs.querySelector('.one-pill'), tabs.querySelector('[data-one-t].on')); onePill(top.querySelector('.one-mods'), top.querySelector('.one-mp'), top.querySelector('.one-mods .on'));
   try { localStorage.setItem('one.pos', JSON.stringify({m: S.mod, i})); } catch (e) {}
 }
 
@@ -10228,6 +10257,8 @@ function oneAnim(root) {
     svg.querySelectorAll(':scope > circle').forEach((c, i) => { c.style.transformBox = 'fill-box'; c.style.transformOrigin = 'center'; c.animate([{transform: 'scale(0)', opacity: 0}, {transform: 'scale(1)', opacity: 1}], {duration: 320, delay: 650 + Math.min(450, i * 10), fill: 'backwards'}); });
     svg.querySelectorAll('.trendl, .sc').forEach(l => l.animate([{opacity: 0}, {opacity: 1}], {duration: 450, delay: 1000, fill: 'backwards'}));
   });
+  // Intensité et volume (Training · Tendance) : les barres poussent comme celles du tonnage.
+  root.querySelectorAll('svg.dual').forEach(svg => { if (!fresh(svg)) return; svg.querySelectorAll('rect').forEach((r, i) => { r.style.transformBox = 'fill-box'; r.style.transformOrigin = '50% 100%'; r.animate([{transform: 'scaleY(0)'}, {transform: 'scaleY(1)'}], {duration: 560, delay: Math.min(520, i * 22), easing: 'cubic-bezier(.34,1.35,.5,1)', fill: 'backwards'}); }); });
   root.querySelectorAll('svg.ring').forEach(s => { if (!fresh(s)) return; const c = s.querySelectorAll('circle')[1]; if (!c) return; const C = +c.getAttribute('stroke-dasharray'), o = +c.getAttribute('stroke-dashoffset'); if (!C) return;
     c.animate([{strokeDashoffset: C}, {strokeDashoffset: o}], {duration: 1150, easing: 'cubic-bezier(.3,.8,.25,1)'}); });
   root.querySelectorAll('.imb i').forEach((b, i) => { if (!fresh(b)) return; b.style.transformOrigin = b.classList.contains('neg') ? 'right' : 'left';
@@ -10274,6 +10305,93 @@ addEventListener('popstate', () => {
   if ((window.TNR_SPLASH_ON || !S.mod) && n < 200) { setTimeout(() => oneStart(n + 1), 100); return; }
   const s = oneSaved(); if (!ONE.mods.includes(S.mod)) oneSwitch(s.m, s.i); ONE.ready = true; oneSync(); oneAfter();
 })();
+
+/* ---------- même période partout : Jour · Semaine · Mois · Année · Tout, et les flèches pour remonter le temps ---------- */
+// Ce qui compte « jusqu'à aujourd'hui » compte jusqu'à la fin de la période choisie quand une page la demande.
+const oneTo = () => ONE.per && ONE.per.to < TODAY ? ONE.per.to : TODAY;
+const oneShift = f => (0, eval)('(' + f.toString().replace(/\bTODAY\b/g, 'oneTo()') + ')');
+musPeriod = oneShift(musPeriod); tBuckets = oneShift(tBuckets); painWindow = oneShift(painWindow); zoneCare = oneShift(zoneCare);
+const ONE_DAYS = {day: 1, week: 7, month: 30, year: 365, all: 3650};
+const onePerBar = P => granSeg() + `<div class="card" style="margin-top:10px;padding:8px 12px">${periodNav(P)}</div>`;
+const oneAfterHead = (h, add) => h.replace('</header>', '</header>' + add);
+function oneWithPer(fn) { ONE.per = periodOf(S.gran, S.off); try { return fn(ONE.per); } finally { ONE.per = null; } }
+// Training · Tendance
+const oneTProg0 = tProgress;
+tProgress = () => oneWithPer(P => {
+  const sv = S.tgran; S.tgran = S.gran === 'all' ? 'year' : S.gran; let h; try { h = oneTProg0(); } finally { S.tgran = sv; }
+  h = h.replace(/<div class="seg" role="group" aria-label="Période">(?:(?!<\/div>)[\s\S])*?data-tgran[\s\S]*?<\/div>/, '');
+  return oneAfterHead(h, onePerBar(P));
+});
+// Training · Mon corps : la période en haut, puis muscu / sprint / les deux / tout, puis le corps
+const oneBodyCard0 = bodyCard;
+bodyCard = () => { let h = oneBodyCard0(); if (!ONE.per) return h; return h.replace(msrcSeg(), '').replace(/<div class="seg" role="group" aria-label="Période" style="margin-top:8px">[\s\S]*?<\/div>/, ''); };
+const oneTBody0 = tBody;
+tBody = () => oneWithPer(P => { const sv = S.mgran; S.mgran = S.gran; let h; try { h = oneTBody0(); } finally { S.mgran = sv; } return oneAfterHead(h, onePerBar(P) + msrcSeg()); });
+// Recovery · Mon corps
+const oneRBody0 = vReports;
+vReports = () => oneWithPer(P => {
+  const sv = RB.n; RB.n = Math.max(1, Math.min(ONE_DAYS[S.gran] || 7, daysBetween(P.from, oneTo()) + 1)); let h; try { h = oneRBody0(); } finally { RB.n = sv; }
+  h = h.replace(/<div class="seg" role="group" aria-label="Période">[\s\S]*?<\/div>/, '').replace(/Douleurs (du jour|des 7 derniers jours|des 30 derniers jours)/, 'Douleurs · ' + esc(P.title.toLowerCase()));
+  return oneAfterHead(h, onePerBar(P) + '<div class="one-segsp" aria-hidden="true"></div>');
+});
+document.addEventListener('click', e => { if (S.mod === 'T' && e.target.closest('[data-gran],[data-off]')) { ONE.act = performance.now(); setTimeout(() => renderMod(true)); } });
+
+/* ---------- Séances : le planning en premier (même hauteur en T, N et R), la saison en dessous des boutons ---------- */
+const oneTSes0 = tSessions;
+tSessions = () => {
+  let h = oneTSes0();
+  const ban = h.match(/<button class="banner" data-tseason[\s\S]*?<\/button>/)?.[0], seg = h.match(/<div class="seg" role="group" aria-label="Type">[\s\S]*?<\/div>/)?.[0], row = h.match(/<div class="btnrow two"[\s\S]*?<\/div>/)?.[0];
+  if (!ban || !seg || !row) return h;
+  h = h.replace(ban, '').replace(seg, '');
+  const board = sesBoard(S.tkind); h = h.includes(board) ? h.replace(board, board + seg) : h;
+  return h.replace(row, row + '<div style="margin-top:12px">' + ban + '</div>');
+};
+/* ---------- Les compléments (créatine…) passent dans Menu, sous « + Menu semaine · + Menu jour » ---------- */
+const oneFoods0 = fFoods; fFoods = () => oneFoods0().replace(suppSection(), '');
+const oneMenu0 = fMenu; fMenu = () => oneMenu0().replace(/(<div class="btnrow" style="margin-top:16px"><button class="btn ghost" data-mnew="week">[\s\S]*?<\/div>)/, '$1<div style="margin-top:16px">' + suppSection() + '</div>');
+/* ---------- Training · Aujourd'hui : la phrase du jour toujours là, comme en Nutrition et Recovery ---------- */
+const oneTToday0 = tToday;
+tToday = () => {
+  let h = oneTToday0(); const sl = seasonLine(); if (sl) h = h.replace(sl + '</header>', '</header>' + sl);
+  if (!/<p class="pmsg">/.test(h.slice(0, h.indexOf('</header>')))) {
+    const pg = planForK(TODAY, 'gym'), ptk = planForK(TODAY, 'track'), p = pg && !kindDone(TODAY, 'gym') ? pg : ptk && !kindDone(TODAY, 'track') ? ptk : pg || ptk;
+    h = h.replace(/(<header class="top"><div class="sub">[^<]*<\/div>)/, `$1<p class="pmsg">${esc(trainMsg(p, logsOn(TODAY)))}</p>`);
+  }
+  return h;
+};
+
+/* ---------- Ouverture : le T, le N et le R du logo se séparent et vont se poser dans leurs carrés, en haut ---------- */
+window.ONE_SPLASH = function (el, svg, bars) {
+  const tg = [...document.querySelectorAll('#one-top .one-mods button b')], ps = svg.querySelectorAll('path');
+  if (tg.length !== 3 || ps.length < 4 || oneCalm()) return false;
+  const NS = 'http://www.w3.org/2000/svg', D = 1050, fl = [];
+  for (let i = 0; i < 3; i++) {
+    const bb = ps[i].getBBox(), m = ps[i].getScreenCTM(); if (!m) return false;
+    const x = m.e + bb.x * m.a, y = m.f + bb.y * m.d, w = bb.width * m.a, h = bb.height * m.d;
+    const s = document.createElementNS(NS, 'svg'); s.setAttribute('viewBox', `${bb.x} ${bb.y} ${bb.width} ${bb.height}`);
+    s.style.cssText = `position:fixed;left:${x}px;top:${y}px;width:${w}px;height:${h}px;z-index:302;pointer-events:none;overflow:visible`;
+    const p = ps[i].cloneNode(); p.setAttribute('fill', '#fff'); s.appendChild(p); document.body.appendChild(s); fl.push(s);
+    const r = tg[i].getBoundingClientRect(), sc = r.height * .56 / h, tx = r.left + r.width / 2 - (x + w / 2), ty = r.top + r.height / 2 - (y + h / 2);
+    s.animate([{transform: 'none'}, {transform: `translate(${tx}px,${ty}px) scale(${sc})`}], {duration: D, delay: i * 70, easing: 'cubic-bezier(.7,0,.2,1)', fill: 'forwards'});
+    tg[i].animate([{transform: 'scale(.3)', opacity: 0}, {transform: 'scale(1)', opacity: getComputedStyle(tg[i]).opacity}], {duration: 420, delay: D * .78 + i * 70, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'backwards'});
+  }
+  for (let i = 0; i < 3; i++) ps[i].style.opacity = 0;
+  el.querySelector('.sp')?.remove();
+  el.animate([{opacity: 1}, {opacity: 0}], {duration: 700, delay: 220, easing: 'ease', fill: 'forwards'});
+  setTimeout(() => fl.forEach(s => s.animate([{opacity: 1}, {opacity: 0}], {duration: 180, fill: 'forwards'})), D + 150);
+  setTimeout(() => { fl.forEach(s => s.remove()); el.remove(); bars(); }, D + 380);
+  return true;
+};
+
+/* ---------- Mon corps : le même bonhomme, à la même taille et au même endroit en Training, Nutrition et Recovery ---------- */
+// Nutrition : deux silhouettes, comme Training et Recovery (face et dos) ; les bras sur l'une, le tronc et les jambes sur l'autre.
+const oneFBody0 = fBody;
+fBody = () => {
+  const h = oneFBody0(), m = h.match(/<div class="segw"><svg viewBox="0 0 200 392"[^>]*>([\s\S]*?)<\/svg>/); if (!m) return h;
+  const ells = m[1].match(/<ellipse [^>]*\/>/g) || [], arm = e => /cx="(53|147)"/.test(e);
+  const fig = (suf, lab, L) => `<div><div class="lab">${lab}</div><svg viewBox="0 0 200 392" role="img" aria-label="${lab}">${silBase('front', suf)}<g clip-path="url(#silc${suf})" pointer-events="none">${L.join('').replace(/url\(#softsg\)/g, `url(#soft${suf})`)}</g></svg></div>`;
+  return h.replace(m[0], `<div class="one-2body">${fig('sgA', 'BRAS', ells.filter(arm))}${fig('sgB', 'TRONC ET JAMBES', ells.filter(e => !arm(e)))}</div><div class="segw one-segw">`);
+};
 
 </script>
 
