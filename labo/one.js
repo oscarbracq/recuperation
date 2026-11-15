@@ -2,10 +2,10 @@
    Les pages sont exactement celles de l'appli principale. Ce qui change :
    · plus d'accueil ni de lettres : on arrive directement dans un module ;
    · une barre flottante en verre avec les 6 onglets (leurs noms suivent le module), et le pouce glisse d'un onglet à l'autre ;
-   · en haut : « + » (questionnaire du jour) · T · N · R (même onglet, autre module) · « IA » (le coach qui connaît tout) ;
+   · en haut : « + » (questionnaire du jour) · T · N · R (même onglet, autre module) · « IA » (ouvre l'appli Claude, projet TNR) ;
    · les chiffres, courbes, blocs et anneaux s'animent quand une page arrive ou quand on change de période. */
 const ONE = {mods: ['T', 'N', 'R'], keys: {T: ['today', 'progress', 'sessions', 'library', 'body', 'profile'], N: ['journal', 'progress', 'menu', 'foods', 'nbody', 'goals'], R: ['today', 'trends', 'rsess', 'rlib', 'reports', 'profile']},
-  name: {T: 'Training', N: 'Nutrition', R: 'Recovery'}, col: Object.fromEntries(HOME_K), ready: false, act: 0, seen: new WeakSet(), chat: [], busy: false, aiOpen: false};
+  name: {T: 'Training', N: 'Nutrition', R: 'Recovery'}, col: Object.fromEntries(HOME_K), ready: false, act: 0, seen: new WeakSet()};
 const oneCur = () => S.mod === 'R' ? S.tab : S.mod === 'T' ? S.ttab : S.mod === 'N' ? S.ftab : null;
 const oneIdx = () => Math.max(0, (ONE.keys[S.mod] || []).indexOf(oneCur()));
 const oneView = () => S.mod === 'R' ? $('#v-' + S.tab) : S.mod === 'T' ? $('#t-view') : S.mod === 'N' ? $('#f-view') : null;
@@ -40,15 +40,12 @@ function oneMount() {
   document.documentElement.classList.add('one');
   document.body.insertAdjacentHTML('beforeend', `<div id="one-top" class="one-top"><button class="one-sq" data-hday aria-label="Questionnaire du jour" title="Questionnaire du jour">${oneIc('plus')}</button>
     <div class="one-mods" role="tablist" aria-label="Module"><span class="one-mp"></span>${ONE.mods.map(m => `<button role="tab" data-one-m="${m}" style="--c:${ONE.col[m]}"><b>${m}</b><span>${ONE.name[m]}</span></button>`).join('')}</div>
-    <button class="one-sq one-aib" data-one-ai aria-label="Coach IA" title="Coach IA">${oneIc('ai')}<span>IA</span></button></div>
+    <button class="one-sq one-aib" data-one-ai aria-label="Ouvrir Claude (projet TNR)" title="Ouvrir Claude (projet TNR)">${oneIc('ai')}<span>IA</span></button></div>
     <nav id="one-tabs" class="one-tabs" aria-label="Sections"><span class="one-pill"></span>${[0, 1, 2, 3, 4, 5].map(i => `<button data-one-t="${i}"></button>`).join('')}</nav>`);
   document.addEventListener('click', e => {
     const m = e.target.closest('[data-one-m]'); if (m) { if (m.dataset.oneM !== S.mod) oneSwitch(m.dataset.oneM); else window.scrollTo({top: 0, behavior: 'smooth'}); return; }
     const t = e.target.closest('[data-one-t]'); if (t) { oneTab(+t.dataset.oneT); return; }
-    if (e.target.closest('[data-one-ai]')) { oneAiOpen(); return; }
-    if (e.target.closest('[data-one-aix]')) { oneAiClose(); return; }
-    if (e.target.closest('[data-one-new]')) { ONE.chat = []; oneChatSave(); oneAiDraw(); return; }
-    const sg = e.target.closest('[data-one-sug]'); if (sg) oneAsk(sg.textContent);
+    if (e.target.closest('[data-one-ai]')) { oneAiGo(); return; }
   });
   for (const ev of ['pointerdown', 'keydown', 'touchstart']) addEventListener(ev, () => { ONE.act = performance.now(); }, {capture: true, passive: true});
   addEventListener('resize', () => oneSync());
@@ -110,71 +107,9 @@ function oneCount(els) {
   requestAnimationFrame(step);
 }
 
-/* ---------- le coach IA : une vraie discussion, dans l'appli, avec toutes les données ---------- */
-try { ONE.chat = JSON.parse(localStorage.getItem('one.chat') || '[]') || []; } catch (e) { ONE.chat = []; }
-const oneChatSave = () => { try { localStorage.setItem('one.chat', JSON.stringify(ONE.chat.slice(-60))); } catch (e) {} };
-const ONE_SUG = ['Comment je récupère cette semaine par rapport à la précédente ?', 'Que manger avant ma prochaine séance, et à quelle heure ?', 'Pourquoi ma VFC a bougé ces derniers jours ?', 'Organise ma journée de demain heure par heure', 'Est-ce que ma charge monte trop vite ?', 'Mes douleurs : qu\'est-ce que je dois adapter ?'];
-// Tout ce que l'appli sait, en texte : l'état du jour, 90 jours de mesures, les séances, le programme, le menu, le profil.
-function oneContext() {
-  const L = [], t = (f, d = '') => { try { return f() ?? d; } catch (e) { return d; } };
-  L.push('Aujourd\'hui : ' + TODAY + ' (' + t(() => fmtDay(TODAY)) + '), heure ' + new Date().toTimeString().slice(0, 5));
-  L.push(t(() => claudeContext()));
-  L.push('\n## 90 derniers jours\ndate;récupération %;sommeil h;VFC ms;FC repos;effort /21;poids kg;kcal;protéines g;sprint m;douleurs');
-  for (let i = 89; i >= 0; i--) { const k = addDays(TODAY, -i);
-    L.push([k, t(() => recovery(k)?.score), t(() => VAL.sleepH(k) != null ? fx(VAL.sleepH(k), 1) : ''), t(() => G(k, 'hrv')), t(() => G(k, 'rhr')), t(() => effortDay(k) != null ? fx(effortDay(k), 1) : ''),
-      t(() => W(k, 'weight')), t(() => Math.round(dayTotals(k).kcal) || ''), t(() => Math.round(dayTotals(k).p) || ''), t(() => VAL.sprint(k) || ''),
-      t(() => Object.entries(pains(k) || {}).filter(([, v]) => v > 0).map(([a, v]) => a + ' ' + v).join(' '))].join(';')); }
-  L.push('\n## Séances faites (60 jours)'); t(() => logs().filter(l => l.date >= addDays(TODAY, -60)).forEach(l => L.push(`${l.date} · ${l.name} · ${l.min} min · RPE ${l.rpe}${l.sprintM ? ' · ' + l.sprintM + ' m de sprint' : ''}${l.tonnage ? ' · ' + Math.round(l.tonnage) + ' kg soulevés' : ''}`)));
-  L.push('\n## Programme des 14 prochains jours'); for (let i = 0; i < 14; i++) { const k = addDays(TODAY, i); L.push(k + ' : ' + (['track', 'gym'].map(kd => t(() => planForK(k, kd)?.name)).filter(Boolean).join(' + ') || 'pas de séance')); }
-  L.push('\n## Planning du jour'); t(() => dayPlan(TODAY).forEach(x => L.push(`${x.a}–${x.b} ${plName(x.n)}`)));
-  L.push('\n## Menu du jour'); t(() => (menuFor(TODAY) || []).forEach(x => L.push(`${x.meal || ''} · ${x.n}${x.g ? ' ' + Math.round(x.g) + ' g' : ''}${x.kcal ? ' · ' + Math.round(x.kcal) + ' kcal' : ''}`)));
-  L.push('\n## Objectifs du jour'); t(() => L.push(JSON.stringify(fuelGoal(TODAY))));
-  L.push('\n## Profil'); t(() => L.push(JSON.stringify(S.profile || {})));
-  return L.join('\n');
-}
-const oneMd = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/^#+\s*(.+)$/gm, '<b>$1</b>').replace(/^[-•]\s+/gm, '• ').replace(/\n/g, '<br>');
-function oneAiOpen() {
-  let el = $('#one-ai');
-  if (!el) {
-    el = document.createElement('div'); el.id = 'one-ai'; el.className = 'one-ai';
-    el.innerHTML = `<div class="one-ai-bg" data-one-aix></div><div class="one-ai-card" role="dialog" aria-label="Coach IA"><header><span class="one-ai-ic">${oneIc('ai', 22)}</span><div><b>Coach IA</b><small>connaît toutes tes données</small></div><button class="one-ai-new" data-one-new>Nouvelle</button><button class="one-ai-x" data-one-aix aria-label="Fermer">×</button></header>
-      <div class="one-ai-log" id="one-ai-log"></div><form class="one-ai-f" id="one-ai-f"><textarea rows="1" placeholder="Pose ta question…" aria-label="Ta question"></textarea><button type="submit" aria-label="Envoyer">↑</button></form></div>`;
-    document.body.appendChild(el);
-    const f = el.querySelector('form'), ta = f.querySelector('textarea');
-    f.onsubmit = e => { e.preventDefault(); const q = ta.value.trim(); if (q) { ta.value = ''; ta.style.height = ''; oneAsk(q); } };
-    ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); f.requestSubmit(); } });
-    ta.addEventListener('input', () => { ta.style.height = ''; ta.style.height = Math.min(120, ta.scrollHeight) + 'px'; });
-  }
-  if (!ONE.aiOpen) { ONE.aiOpen = true; try { history.pushState({mod: S.mod, one: history.state?.one, oneai: 1}, ''); } catch (e) {} }
-  el.hidden = false; requestAnimationFrame(() => el.classList.add('on')); oneAiDraw(); oneHap(6);
-}
-function oneAiClose(fromBack) {
-  const el = $('#one-ai'); if (!el || !ONE.aiOpen) return; ONE.aiOpen = false;
-  el.classList.remove('on'); setTimeout(() => { if (!ONE.aiOpen) el.hidden = true; }, 350);
-  if (!fromBack && history.state?.oneai) { POP_SKIP = true; history.back(); }
-}
-function oneAiDraw() {
-  const log = $('#one-ai-log'); if (!log) return;
-  const msgs = ONE.chat.map(m => `<div class="one-b ${m.role === 'user' ? 'me' : 'it'}${m.err ? ' err' : ''}">${m.role === 'user' ? esc(m.content).replace(/\n/g, '<br>') : oneMd(m.content)}</div>`).join('');
-  log.innerHTML = (ONE.chat.length ? '' : `<div class="one-ai-hi"><b>Pose-moi n'importe quelle question.</b><p>Je lis ta forme, ton sommeil, ta VFC, tes séances, ta charge, tes repas, ton programme et tes douleurs avant de répondre. Tu peux demander au jour près, ou à l'heure près.</p></div>`)
-    + msgs + (ONE.busy ? '<div class="one-b it typing"><i></i><i></i><i></i></div>' : '')
-    + (ONE.busy ? '' : `<div class="one-sugs">${ONE_SUG.map(s => `<button data-one-sug>${esc(s)}</button>`).join('')}</div>`);
-  log.scrollTop = log.scrollHeight;
-}
-async function oneAsk(q) {
-  if (!q || ONE.busy) return;
-  ONE.chat.push({role: 'user', content: q}); ONE.busy = true; oneChatSave(); oneAiDraw();
-  // On n'envoie pas les messages d'erreur, ni une question restée sans réponse.
-  const send = ONE.chat.filter((m, i, a) => !m.err && !(m.role === 'user' && a[i + 1]?.err)).map(({role, content}) => ({role, content}));
-  try {
-    const tok = await window.RECUP_TOKEN?.(); if (!tok) throw new Error('Connecte-toi à ton compte pour parler au coach.');
-    const r = await fetch(RECUP_SUPABASE.url + '/functions/v1/coach', {method: 'POST', headers: {Authorization: 'Bearer ' + tok, apikey: RECUP_SUPABASE.key, 'Content-Type': 'application/json'}, body: JSON.stringify({context: oneContext(), messages: send})});
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(j.error || (r.status === 404 ? 'Le coach n\'est pas encore installé sur ton serveur (fonction « coach » à ajouter dans Supabase).' : 'Erreur ' + r.status));
-    ONE.chat.push({role: 'assistant', content: j.text || '(pas de réponse)'});
-  } catch (e) { ONE.chat.push({role: 'assistant', content: '⚠ ' + (e?.message || e), err: 1}); }
-  ONE.busy = false; oneChatSave(); oneAiDraw();
-}
+/* ---------- IA : l'appli Claude, projet TNR (elle lit tes données à jour grâce au connecteur TNR) ---------- */
+const ONE_AI_URL = 'https://claude.ai/projects';
+function oneAiGo() { aiSave(); oneHap(6); window.open(ONE_AI_URL, '_blank'); }
 
 /* ---------- les plannings : même format en T, N et R ---------- */
 // Les cases « + » vides de Nutrition et Recovery reçoivent le même « + » que Training (le style fait le reste).
@@ -191,7 +126,6 @@ const oneRender0 = render; render = function (...a) { const r = oneRender0(...a)
 const oneRenderMod0 = renderMod; renderMod = function (f) { oneRenderMod0(f); oneSync(); if (S.mod === 'T' || S.mod === 'N') oneAfter(); };
 oneMount();
 addEventListener('popstate', () => {
-  if (ONE.aiOpen) { oneAiClose(true); return; }
   if (S.sheet || P.stack.length || PLFS.on || POP_SKIP || !ONE.mods.includes(S.mod)) return; if (oneIdx() > 0) oneTab(0);
 }, true);
 // Au démarrage : directement dans le dernier module et le dernier onglet utilisés (Training · Aujourd'hui la première fois).

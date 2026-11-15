@@ -114,8 +114,8 @@ async function recupGetDb() {
   }
   if (!session.user.user_metadata?.hasPassword) askPassword(SB, session.user.email);
   window.RECUP_SIGNOUT = async () => { await SB.auth.signOut(); location.reload(); };
-  // The in-app coach (labo) calls its function with Oscar's session.
-  window.RECUP_TOKEN = async () => (await SB.auth.getSession()).data.session?.access_token || null;
+  // The Claude app connector (function `tnr`) reads this summary, written by the app whenever it changes.
+  window.RECUP_AI_SAVE = async text => { const at = new Date().toISOString(); const {error} = await SB.from('docs').upsert({collection: 'ai', id: 'contexte', data: {text, at}, updated_at: at}); if (error) throw error; };
   // Pull to refresh: the sync function asks Garmin and Withings right away (a few seconds).
   window.RECUP_SYNC = async () => {
     const {data: {session: s}} = await SB.auth.getSession();

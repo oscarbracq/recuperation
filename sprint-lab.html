@@ -2906,6 +2906,35 @@ function askClaude() {
   if (text.length > 5000) text = text.slice(0, 5000);
   window.open('https://claude.ai/new?q=' + encodeURIComponent(text), '_blank');
 }
+// Résumé complet pour le connecteur TNR de l'appli Claude (fonction « tnr » sur Supabase) :
+// l'état du jour, 90 jours de mesures, les séances, le programme, le menu, le profil. Envoyé dès qu'il change.
+function aiContext() {
+  const L = [], t = (f, d = '') => { try { return f() ?? d; } catch (e) { return d; } };
+  L.push('Aujourd\'hui : ' + TODAY + ' (' + t(() => fmtDay(TODAY)) + '), heure ' + new Date().toTimeString().slice(0, 5));
+  L.push(t(() => claudeContext().replace(/\s*Ma question : $/, '')));
+  L.push('\n## 90 derniers jours\ndate;récupération %;sommeil h;VFC ms;FC repos;effort /21;poids kg;kcal;protéines g;sprint m;douleurs');
+  for (let i = 89; i >= 0; i--) { const k = addDays(TODAY, -i);
+    L.push([k, t(() => recovery(k)?.score), t(() => VAL.sleepH(k) != null ? fx(VAL.sleepH(k), 1) : ''), t(() => G(k, 'hrv')), t(() => G(k, 'rhr')), t(() => effortDay(k) != null ? fx(effortDay(k), 1) : ''),
+      t(() => W(k, 'weight')), t(() => Math.round(dayTotals(k).kcal) || ''), t(() => Math.round(dayTotals(k).p) || ''), t(() => VAL.sprint(k) || ''),
+      t(() => Object.entries(pains(k) || {}).filter(([, v]) => v > 0).map(([a, v]) => a + ' ' + v).join(' '))].join(';')); }
+  L.push('\n## Séances faites (60 jours)'); t(() => logs().filter(l => l.date >= addDays(TODAY, -60)).forEach(l => L.push(`${l.date} · ${l.name} · ${l.min} min · RPE ${l.rpe}${l.sprintM ? ' · ' + l.sprintM + ' m de sprint' : ''}${l.tonnage ? ' · ' + Math.round(l.tonnage) + ' kg soulevés' : ''}`)));
+  L.push('\n## Programme des 14 prochains jours'); for (let i = 0; i < 14; i++) { const k = addDays(TODAY, i); L.push(k + ' : ' + (['track', 'gym'].map(kd => t(() => planForK(k, kd)?.name)).filter(Boolean).join(' + ') || 'pas de séance')); }
+  L.push('\n## Planning du jour'); t(() => dayPlan(TODAY).forEach(x => L.push(`${x.a}–${x.b} ${plName(x.n)}`)));
+  L.push('\n## Menu du jour'); t(() => (menuFor(TODAY) || []).forEach(x => L.push(`${x.meal || ''} · ${x.n}${x.g ? ' ' + Math.round(x.g) + ' g' : ''}${x.kcal ? ' · ' + Math.round(x.kcal) + ' kcal' : ''}`)));
+  L.push('\n## Objectifs du jour'); t(() => L.push(JSON.stringify(fuelGoal(TODAY))));
+  L.push('\n## Profil'); t(() => L.push(JSON.stringify(S.profile || {})));
+  return L.join('\n');
+}
+let AI_LAST = '';
+async function aiSave() {
+  if (S.status !== 'ready' || !window.RECUP_AI_SAVE) return;
+  let text; try { text = aiContext(); } catch (e) { return; }
+  const body = text.slice(text.indexOf('\n'));
+  if (body === AI_LAST) return;
+  try { await window.RECUP_AI_SAVE(text); AI_LAST = body; } catch (e) {}
+}
+setTimeout(aiSave, 15000); setInterval(aiSave, 5 * 60000);
+document.addEventListener('visibilitychange', () => { if (document.hidden) aiSave(); });
 function homeGreeting() {
   const n = S.profile?.name || 'Oscar', h = new Date().getHours(), kG = lastKey('hrv'), rec = kG ? recovery(kG) : null, z = rec ? zoneOf(rec.score) : null;
   const sl = kG ? VAL.sleepH(kG) : null, done = logsOn(TODAY).length || (G(TODAY, 'acts') || []).some(a => ['strength_training', 'track_running'].includes(a.type));
