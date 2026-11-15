@@ -1,0 +1,43 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Labo 7 · Épure</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;500;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--fg:#000;--mut:#8a8a8a;--line:#e6e6e6;--sh-bg:#fff;--sh-fg:#000;--sh-ac:#000}
+@media(prefers-color-scheme:dark){:root{--bg:#000;--fg:#fff;--mut:#777;--line:#222;--sh-bg:#111;--sh-fg:#fff;--sh-ac:#fff}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:'Inter Tight',system-ui,sans-serif}
+.w{max-width:760px;margin:auto;padding:20px 20px 60px}.top{display:flex;justify-content:space-between;font-size:13px;color:var(--mut)}.top button{background:none;border:0;color:var(--fg);font:500 13px 'Inter Tight';cursor:pointer;text-decoration:underline}
+.cmd{display:flex;align-items:center;gap:10px;border-bottom:2px solid var(--fg);padding:14px 0;margin:22px 0 6px}.cmd input{flex:1;border:0;background:none;color:var(--fg);font:300 22px 'Inter Tight';outline:none;min-width:0}
+.sug{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px}.sug button{border:1px solid var(--line);background:none;color:var(--fg);border-radius:99px;padding:7px 12px;font:500 13px 'Inter Tight';cursor:pointer;transition:.2s}.sug button:hover{background:var(--fg);color:var(--bg)}
+.hero{display:grid;grid-template-columns:auto 1fr;gap:4px 18px;align-items:end;margin-bottom:24px}.hero .n{font-size:min(38vw,220px);font-weight:800;line-height:.8;letter-spacing:-.06em}.hero p{margin:0;font-size:18px;font-weight:500}
+.lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.nums{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--fg);border-bottom:1px solid var(--line)}.nums div{padding:14px 0}.nums b{display:block;font-size:28px;font-weight:800;letter-spacing:-.03em}
+details{border-bottom:1px solid var(--line)}summary{list-style:none;display:flex;justify-content:space-between;align-items:baseline;padding:20px 0;cursor:pointer;font-size:24px;font-weight:800;letter-spacing:-.02em}summary::-webkit-details-marker{display:none}
+summary span{font-size:14px;font-weight:500;color:var(--mut)}summary:after{content:'+';font-weight:300;font-size:28px;transition:transform .3s}details[open] summary:after{transform:rotate(45deg)}
+details .c{padding:0 0 20px;animation:op .4s ease}@keyframes op{from{opacity:0;transform:translateY(-6px)}}
+.r{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:15px}.r span:last-child{color:var(--mut);text-align:right}
+.b{border:0;background:var(--fg);color:var(--bg);font:800 15px 'Inter Tight';padding:14px 18px;margin-top:12px;cursor:pointer;width:100%}
+.hide{display:none}
+@media(max-width:480px){.nums{grid-template-columns:repeat(2,minmax(0,1fr))}.hero .n{font-size:44vw}}
+</style></head><body><div class="w">
+<div class="top"><span id="d"></span><span><button onclick="D.ai()">IA</button></span></div>
+<div class="cmd">⌕<input id="q" placeholder="Que veux-tu faire ?" autocomplete="off"></div>
+<div class="sug" id="sug"></div>
+<div class="hero"><div class="n" data-n="0" id="fn">0</div><div><div class="lbl">Forme</div><p id="fm"></p></div></div>
+<div class="nums" id="nums"></div><div id="acc"></div></div>
+<script src="../labx/data.js"></script>
+<script>
+document.getElementById('d').textContent=D.jour;document.getElementById('fn').dataset.n=D.forme;document.getElementById('fm').textContent=D.formeMot+'. '+D.conseils[0];
+document.getElementById('nums').innerHTML=[['Sommeil',D.sommeil.h],['VFC',D.vfc+' ms'],['FC repos',D.fcr],['Charge',D.charge]].map(([l,v])=>`<div><span class="lbl">${l}</span><b>${v}</b></div>`).join('');
+const A=[['Séance','seance',D.seance.nom+' · '+D.seance.heure,D.seance.items.map(x=>`<div class="r"><span>${x.n}</span><span>${x.s?x.s+' × '+x.r+(x.kg?' · '+x.kg+' kg':''):x.d}</span></div>`).join('')+'<button class="b" onclick="D.seanceSheet()">Commencer</button>'],
+['Semaine','semaine','5 sur 6 faites',D.semaine.map(d=>`<div class="r"><span>${d.j} ${d.num}${d.auj?' —':''}</span><span>${d.n}${d.fait?' ✓':''}</span></div>`).join('')],
+['Corps','corps','Mollets 44 %',`<div style="display:flex;gap:10px;max-width:260px">${D.body('front',v=>v>=80?'var(--fg)':v>=60?'#999':'#e00')}${D.body('back',v=>v>=80?'var(--fg)':v>=60?'#999':'#e00')}</div>`+D.muscles.map(m=>`<div class="r"><span>${m.n}</span><span>${m.v} %</span></div>`).join('')],
+['Repas','repas',D.macros.kcal[0]+' / '+D.macros.kcal[1]+' kcal',D.repas.map(r=>`<div class="r"><span>${r.h} ${r.n}${r.fait?' ✓':''}</span><span>${r.d}</span></div>`).join('')],
+['Courses','courses',D.eur(D.courses.reduce((a,c)=>a+c.p,0)),D.courses.map(c=>`<div class="r"><span>${c.n}</span><span>${D.eur(c.p)}</span></div>`).join('')],
+['Progrès','progres','30 m lancé 3"02',`<div class="lbl">Forme 90 jours</div>${D.spark(D.hist.forme,300,90,'currentColor',false)}`+D.records.map(r=>`<div class="r"><span>${r.n}</span><span>${r.v} (${r.e})</span></div>`).join('')],
+['Mes séances','biblio',D.biblio.length+' modèles',D.biblio.map(b=>`<div class="r"><span>${b.n}</span><span>${b.d} min</span></div>`).join('')+'<button class="b" onclick="D.builder()">Créer une séance</button>']];
+document.getElementById('acc').innerHTML=A.map(([t,id,s,h])=>`<details id="${id}"><summary>${t}<span>${s}</span></summary><div class="c">${h}</div></details>`).join('');
+const Q=[['Commencer la séance',()=>D.seanceSheet()],['Créer une séance',()=>D.builder()],['Noter un repas',()=>openD('repas')],['Voir les courses',()=>openD('courses')],['Mes records',()=>openD('progres')],['Muscles fatigués',()=>openD('corps')]];
+const openD=id=>{const d=document.getElementById(id);d.open=true;d.scrollIntoView({behavior:'smooth'})};
+const sug=f=>{document.getElementById('sug').innerHTML=Q.filter(([l])=>l.toLowerCase().includes(f.toLowerCase())).map(([l],i)=>`<button data-i="${Q.findIndex(x=>x[0]===l)}">${l}</button>`).join('')||'<span class="lbl">Rien trouvé</span>'};sug('');
+document.getElementById('sug').onclick=e=>{const b=e.target.closest('button');if(b)Q[b.dataset.i][1]()};
+const q=document.getElementById('q');q.oninput=()=>sug(q.value);q.onkeydown=e=>{if(e.key==='Enter'){const b=document.querySelector('#sug button');if(b)b.click()}};D.count();
+</script></body></html>

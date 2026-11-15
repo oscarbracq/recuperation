@@ -9054,7 +9054,18 @@ async function menuSeed2() {
   const md = Object.fromEntries(Object.entries(S.fset.menuDated || {}).map(([k, v]) => [k, map[v] ? 'd' + map[v].slice(1) : v]));
   await saveFset({menus: [...out, ...own], menuWeek: mw, menuDated: md, menuSeed: 2});
 }
+// Shelf prices per kg he photographed (Lidl / Super U, Nov 2026): replace the old estimates once.
+let PSEED = false;
+async function priceShelf() {
+  if (PSEED || !S.fset || (S.fset.priceShelf || 0) >= 1) return; PSEED = true;
+  const SH = [[/skyr/i, 3.96], [/seigle/i, 4.24], [/cerneaux|^noix$/i, 14.75], [/chocolat.*85|85 ?%/i, 15.1], [/compote|pomme vanille/i, 2.5], [/blanc de poulet|filets? de poulet|escalope de dinde/i, 7.99],
+    [/^riz/i, 1.95], [/ratatouille/i, 4.99], [/olive/i, 6.43], [/soja|soy/i, 6.6], [/colza/i, 1.6], [/arrabbiata/i, 10.24]];
+  const prices = {...(S.fset.prices || {})};
+  for (const f of [...FOODS, ...myFoods()]) { const m = SH.find(([re]) => re.test(f.n)); if (m) prices[f.id] = m[1]; }
+  await saveFset({prices, priceShelf: 1});
+}
 async function menuSeed() {
+  priceShelf();
   if ((S.fset?.menuSeed || 0) >= 1) return menuSeed2();
   if (MSEED || S.fset?.menuSeed || !planItems().length || !planItems().some(x => /^Riz/.test(x.n))) return;
   MSEED = true;

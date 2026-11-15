@@ -1,0 +1,44 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Labo 4 · Cockpit</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f0e;--c1:#161a18;--c2:#1e2421;--fg:#e9f0ec;--mut:#7f8b85;--ac:#c6ff3d;--sh-bg:#161a18;--sh-ac:#5c8a00}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:'Space Grotesk',system-ui,sans-serif}
+.app{display:flex;min-height:100vh}aside{width:220px;flex:none;border-right:1px solid var(--c2);padding:22px 14px;position:sticky;top:0;height:100vh}aside h1{font-size:20px;margin:0 8px 24px}aside h1 b{color:var(--ac)}
+aside button{display:flex;width:100%;gap:10px;align-items:center;border:0;background:none;color:var(--mut);font:500 15px 'Space Grotesk';padding:11px 12px;border-radius:12px;cursor:pointer;text-align:left}aside .on{background:var(--c2);color:var(--fg)}aside .on:before{content:'';width:6px;height:6px;border-radius:50%;background:var(--ac)}
+.ia{margin-top:20px;border:1px dashed var(--ac)!important;color:var(--ac)!important}
+main{flex:1;min-width:0;padding:22px}.hd{display:flex;align-items:baseline;gap:12px;margin-bottom:16px}.hd h2{margin:0;font-size:28px}.mut{color:var(--mut);font-size:13px}
+.bento{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(130px,auto);gap:12px}
+.w{background:var(--c1);border:1px solid var(--c2);border-radius:20px;padding:16px;min-width:0;animation:pop .55s cubic-bezier(.2,1,.3,1.15) both;animation-delay:calc(var(--i)*60ms);transition:border-color .2s,transform .2s}.w:hover{border-color:#3a4540;transform:translateY(-2px)}
+@keyframes pop{from{opacity:0;transform:scale(.92)}}.w .t{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin-bottom:8px;display:flex;justify-content:space-between}
+.s2{grid-column:span 2}.r2{grid-row:span 2}.big{font-size:64px;font-weight:700;line-height:1;color:var(--ac)}.mid{font-size:30px;font-weight:700}
+.gauge{height:10px;border-radius:10px;background:linear-gradient(90deg,#2fd4a3,#c6ff3d,#ffc23d,#ff4d6d);position:relative;margin:18px 0 6px}.gauge i{position:absolute;top:-5px;width:4px;height:20px;background:#fff;border-radius:2px;left:var(--x);animation:slide 1s cubic-bezier(.2,.9,.3,1.2) both}@keyframes slide{from{left:0}}
+.wk{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}.wk div{background:var(--c2);border-radius:12px;padding:8px 4px;text-align:center;font-size:11px;min-width:0}.wk .a{outline:2px solid var(--ac)}.wk i{display:block;height:4px;border-radius:4px;margin:6px 4px 0}
+.row{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--c2);font-size:14px}.row:last-child{border:0}.row b{flex:1;font-weight:500;min-width:0}
+.btn{border:0;background:var(--ac);color:#0d0f0e;font:700 14px 'Space Grotesk';border-radius:12px;padding:11px 14px;cursor:pointer;margin-top:10px}
+.lib{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}.lib .w{cursor:pointer}
+.ck{width:22px;height:22px;border-radius:7px;border:2px solid var(--mut);display:grid;place-items:center;cursor:pointer;flex:none}.ck.on{background:var(--ac);border-color:var(--ac);color:#000}
+.tabs{display:none}
+@media(max-width:1100px){.bento{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){aside{display:none}.tabs{display:flex;gap:6px;overflow-x:auto;position:sticky;top:0;background:var(--bg);padding:12px 16px;z-index:3}.tabs button{flex:none;border:1px solid var(--c2);background:var(--c1);color:var(--fg);border-radius:99px;padding:8px 14px;font:500 14px 'Space Grotesk';cursor:pointer}.tabs .on{background:var(--ac);color:#000}main{padding:6px 16px 40px}.big{font-size:52px}.r2{grid-row:auto}}
+</style></head><body>
+<div class="app"><aside id="side"></aside><div style="flex:1;min-width:0"><div class="tabs" id="tabs"></div><main id="m"></main></div></div>
+<script src="../labx/data.js"></script>
+<script>
+let tab='dash';const T=[['dash','Tableau de bord'],['sean','Séances'],['course','Courses']];const ck=new Set();
+const P={dash:()=>{let i=0;const w=(cls,t,h)=>`<div class="w ${cls}" style="--i:${i++}"><div class="t">${t}</div>${h}</div>`;return `<div class="hd"><h2>Bonjour, coach</h2><span class="mut">${D.jour}</span></div><div class="bento">`+
+w('r2','Forme',`<div class="big" data-n="${D.forme}">0</div><div style="margin-top:6px">${D.formeMot}</div><div style="color:var(--ac);margin-top:10px">${D.spark(D.hist.forme.slice(-30),300,90,'#c6ff3d')}</div>`)+
+w('','Sommeil',`<div class="mid">${D.sommeil.h}</div><div class="mut">${D.sommeil.coucher} → ${D.sommeil.lever} · score ${D.sommeil.score}</div>`)+
+w('','VFC · FC repos',`<div class="mid"><span data-n="${D.vfc}">0</span> <span class="mut">ms</span> · ${D.fcr} <span class="mut">bpm</span></div><div class="mut">Zone normale ${D.vfcBase-6}–${D.vfcBase+6}</div>`)+
+w('s2','Charge de la semaine',`<div class="mid">${D.charge} <span class="mut">/ ${D.chargeMax}</span></div><div class="gauge"><i style="--x:${D.charge/D.chargeMax*100}%"></i></div><div class="mut" style="display:flex;justify-content:space-between"><span>Récup</span><span>Optimal</span><span>Trop</span></div>`)+
+w('s2','Semaine 46',`<div class="wk">${D.semaine.map(d=>`<div class="${d.auj?'a':''}">${d.j}<br><b style="font-size:16px">${d.num}</b><i style="background:${D.col(d.t)};opacity:${d.fait?1:.4}"></i></div>`).join('')}</div>`)+
+w('s2 r2','Séance du jour · '+D.seance.heure,`<div class="mid">${D.seance.nom}</div>${D.seance.items.map(x=>`<div class="row"><b>${x.n}</b><span class="mut">${x.s?x.s+'×'+x.r:x.d}</span></div>`).join('')}<button class="btn" onclick="D.seanceSheet()">Lancer ▶</button>`)+
+w('','Muscles',`<div style="display:flex;gap:4px;max-width:180px;margin:auto">${D.body('front')}${D.body('back')}</div>`)+
+w('','Protéines',`<div class="mid">${D.macros.p[0]}<span class="mut"> / ${D.macros.p[1]} g</span></div><div style="height:8px;background:var(--c2);border-radius:8px;margin-top:12px"><div style="width:${D.macros.p[0]/D.macros.p[1]*100}%;height:100%;background:var(--ac);border-radius:8px"></div></div>`)+
+w('s2','Records',D.records.slice(0,4).map(r=>`<div class="row"><b>${r.n}</b><span style="color:var(--ac)">${r.e}</span><span>${r.v}</span></div>`).join(''))+
+w('s2','Conseils du jour',D.conseils.map(c=>`<div class="row"><b>→ ${c}</b></div>`).join(''))+'</div>'},
+sean:()=>`<div class="hd"><h2>Mes séances</h2><button class="btn" style="margin:0 0 0 auto" onclick="D.builder()">+ Créer</button></div><div class="lib">${D.biblio.map((b,i)=>`<div class="w" style="--i:${i}" onclick="D.seanceSheet()"><div class="t"><span style="color:${D.col(b.t)}">● ${b.t}</span><span>${b.d} min</span></div><div class="mid" style="font-size:20px">${b.n}</div></div>`).join('')}</div>`,
+course:()=>{const tot=D.courses.reduce((a,c)=>a+c.p,0),got=D.courses.filter((c,i)=>ck.has(i)).reduce((a,c)=>a+c.p,0);return `<div class="hd"><h2>Courses</h2><span class="mut">${D.eur(got)} dans le panier · total ${D.eur(tot)}</span></div><div class="w" style="--i:0;max-width:640px">${D.courses.map((c,i)=>`<div class="row"><span class="ck ${ck.has(i)?'on':''}" onclick="ck.has(${i})?ck.delete(${i}):ck.add(${i});go()">${ck.has(i)?'✓':''}</span><b style="${ck.has(i)?'text-decoration:line-through;opacity:.5':''}">${c.n}</b><span class="mut">${c.m}</span><span>${D.eur(c.p)}</span></div>`).join('')}</div>`}};
+function go(){const nav=T.map(([k,l])=>`<button class="${k===tab?'on':''}" onclick="tab='${k}';go()">${l}</button>`).join('');document.getElementById('side').innerHTML='<h1>TNR <b>Cockpit</b></h1>'+nav+'<button class="ia" onclick="D.ai()">✦ Activer l\'IA</button>';
+document.getElementById('tabs').innerHTML=nav+'<button onclick="D.ai()">✦ IA</button>';document.getElementById('m').innerHTML=P[tab]();D.count();}
+go();
+</script></body></html>

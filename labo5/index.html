@@ -1,0 +1,32 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Labo 5 · Cartes</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--sh-bg:#111;--sh-ac:#ff3b30}*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#000;color:#fff;font-family:Archivo,system-ui,sans-serif}
+.deck{display:flex;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;gap:0}.deck::-webkit-scrollbar{display:none}
+.cd{flex:none;width:100%;height:100%;scroll-snap-align:center;padding:22px 20px 100px;display:flex;flex-direction:column;position:relative;overflow:hidden;background:var(--g)}
+.cd .k{font-size:13px;font-weight:800;letter-spacing:.14em;opacity:.75}.cd h2{font-size:clamp(44px,13vw,92px);font-weight:900;line-height:.9;margin:10px 0;text-transform:uppercase;letter-spacing:-.02em}
+.cd .bg{position:absolute;right:-30px;bottom:60px;font-size:min(70vw,420px);font-weight:900;opacity:.08;line-height:1;pointer-events:none}
+.cd .in>*{opacity:0;transform:translateY(24px);transition:.6s cubic-bezier(.2,.9,.3,1)}.cd.vis .in>*{opacity:1;transform:none}.cd.vis .in>*:nth-child(2){transition-delay:.08s}.cd.vis .in>*:nth-child(3){transition-delay:.16s}.cd.vis .in>*:nth-child(4){transition-delay:.24s}.cd.vis .in>*:nth-child(5){transition-delay:.32s}
+.in{max-width:560px;width:100%;margin:auto 0;position:relative}.pill{display:inline-flex;gap:6px;flex-wrap:wrap}.pill span{background:rgba(255,255,255,.18);border-radius:99px;padding:7px 12px;font-weight:800;font-size:14px}
+.btn{border:0;background:#fff;color:#000;font:900 17px Archivo;padding:16px 22px;border-radius:99px;margin-top:18px;cursor:pointer;text-transform:uppercase}
+.ln{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.2);font-weight:800;font-size:17px}.ln span{opacity:.7;font-weight:500}
+.dots{position:fixed;bottom:26px;left:0;right:0;display:flex;justify-content:center;gap:8px;z-index:3}.dots button{width:8px;height:8px;border-radius:8px;border:0;background:rgba(255,255,255,.4);padding:0;transition:width .35s;cursor:pointer}.dots .on{width:28px;background:#fff}
+.top{position:fixed;top:16px;right:16px;z-index:3;display:flex;gap:8px}.top button{border:0;background:rgba(0,0,0,.35);backdrop-filter:blur(10px);color:#fff;border-radius:99px;padding:9px 14px;font:800 13px Archivo;cursor:pointer}
+.arr{display:none}@media(min-width:900px){.arr{display:block;position:fixed;top:50%;z-index:3;border:0;background:rgba(0,0,0,.35);color:#fff;width:48px;height:48px;border-radius:50%;font-size:22px;cursor:pointer}.arr.l{left:16px}.arr.r{right:16px}.cd{padding:40px 90px 100px}}
+</style></head><body>
+<div class="top"><button onclick="D.builder()">+ Séance</button><button onclick="D.ai()">✦ IA</button></div>
+<div class="deck" id="deck"></div><div class="dots" id="dots"></div><button class="arr l" onclick="to(cur-1)">‹</button><button class="arr r" onclick="to(cur+1)">›</button>
+<script src="../labx/data.js"></script>
+<script>
+const C=[['linear-gradient(150deg,#ff3b30,#ff9500)','FORME',`<div class="k">${D.jour.toUpperCase()}</div><h2><span data-n="${D.forme}">0</span><br>${D.formeMot}</h2><div class="pill"><span>😴 ${D.sommeil.h}</span><span>❤ ${D.vfc} ms</span><span>⚡ ${D.charge}</span></div><p style="font-size:18px;opacity:.9">${D.conseils[0]}</p>`],
+['linear-gradient(150deg,#111,#3a3a3a)','GO',`<div class="k">SÉANCE · ${D.seance.heure}</div><h2>${D.seance.nom}</h2><div>${D.seance.items.slice(0,5).map(x=>`<div class="ln">${x.n}<span>${x.s?x.s+' × '+x.r:x.d}</span></div>`).join('')}</div><div><button class="btn" onclick="D.seanceSheet()">Commencer ▶</button></div>`],
+['linear-gradient(150deg,#0a84ff,#5e5ce6)','CORPS',`<div class="k">RÉCUPÉRATION</div><h2>Mollets<br>${D.muscles[2].v}%</h2><div style="display:flex;gap:10px;max-width:300px">${D.body('front',v=>v>=80?'#fff':v>=60?'#ffd60a':'#ff375f')}${D.body('back',v=>v>=80?'#fff':v>=60?'#ffd60a':'#ff375f')}</div><p style="font-size:17px">${D.conseils[1]}</p>`],
+['linear-gradient(150deg,#30d158,#0b7a3b)','FUEL',`<div class="k">CARBURANT</div><h2>${D.macros.kcal[0]}<br><span style="font-size:.4em">/ ${D.macros.kcal[1]} KCAL</span></h2>${D.repas.map(r=>`<div class="ln">${r.fait?'✓ ':'○ '}${r.n}<span>${r.k} kcal</span></div>`).join('')}`],
+['linear-gradient(150deg,#bf5af2,#5e1a8c)','SEM',`<div class="k">SEMAINE 46</div><h2>5 / 6<br><span style="font-size:.4em">SÉANCES FAITES</span></h2>${D.semaine.map(d=>`<div class="ln">${d.j} ${d.num}<span>${d.n} ${d.fait?'✓':''}</span></div>`).join('')}`],
+['linear-gradient(150deg,#ffd60a,#ff9f0a)','PR',`<div class="k" style="color:#000">RECORDS</div><h2 style="color:#000">3"02<br><span style="font-size:.4em">30 M LANCÉ</span></h2><div style="color:#000">${D.records.slice(1).map(r=>`<div class="ln" style="border-color:rgba(0,0,0,.2)">${r.n}<span>${r.v} · ${r.e}</span></div>`).join('')}</div><div style="color:#000">${D.spark(D.hist.vitesse,300,80,'#000')}</div>`]];
+const dk=document.getElementById('deck');dk.innerHTML=C.map(([g,bg,h])=>`<section class="cd" style="--g:${g}"><div class="bg">${bg}</div><div class="in">${h}</div></section>`).join('');
+document.getElementById('dots').innerHTML=C.map((_,i)=>`<button onclick="to(${i})" aria-label="Carte ${i+1}"></button>`).join('');
+let cur=-1;const cds=[...dk.children];
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.intersectionRatio>.6){const i=cds.indexOf(e.target);if(i!==cur){cur=i;e.target.classList.add('vis');D.count(e.target);document.querySelectorAll('.dots button').forEach((b,k)=>b.classList.toggle('on',k===i))}}}),{root:dk,threshold:[.6]});cds.forEach(c=>io.observe(c));
+window.to=i=>{i=Math.max(0,Math.min(C.length-1,i));dk.scrollTo({left:i*dk.clientWidth,behavior:'smooth'})};addEventListener('keydown',e=>{if(e.key==='ArrowRight')to(cur+1);if(e.key==='ArrowLeft')to(cur-1)});
+</script></body></html>

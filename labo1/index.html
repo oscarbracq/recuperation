@@ -1,0 +1,50 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Labo 1 · Néon</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#04060f;--c1:#0b1024;--fg:#eef2ff;--mut:#8b95b8;--ac:#2f7bff;--glow:0 0 24px rgba(47,123,255,.55);--sh-bg:#0b1024;--sh-ac:#2f7bff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -10%,#10225a 0,var(--bg) 55%) fixed;color:var(--fg);font-family:Inter,system-ui,sans-serif;min-height:100vh}
+header{display:flex;align-items:center;gap:10px;padding:18px 16px 6px;max-width:1100px;margin:auto}header h1{font-size:22px;margin:0;font-weight:900}header h1 i{color:var(--ac);font-style:normal}
+.ia{margin-left:auto;border:1px solid var(--ac);background:rgba(47,123,255,.12);color:#fff;border-radius:99px;padding:8px 14px;font:600 14px Inter;box-shadow:var(--glow);cursor:pointer}
+main{max-width:1100px;margin:auto;padding:8px 16px 110px}.pg{animation:in .5s cubic-bezier(.2,.9,.3,1) both}@keyframes in{from{opacity:0;transform:translateY(14px)}}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border:1px solid rgba(120,150,255,.18);border-radius:22px;padding:16px;margin-bottom:14px}
+.hero{display:flex;flex-direction:column;align-items:center;padding:22px 16px;border-color:rgba(47,123,255,.6);box-shadow:var(--glow),inset 0 0 40px rgba(47,123,255,.12)}
+.rw{position:relative;color:var(--ac);filter:drop-shadow(0 0 12px rgba(47,123,255,.8))}.rw b{position:absolute;inset:0;display:grid;place-items:center;font-size:56px;font-weight:900;color:#fff}
+.hero h2{margin:10px 0 2px;font-size:26px;font-weight:900;text-transform:uppercase;letter-spacing:.02em}.mut{color:var(--mut);font-size:13px}
+.trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;width:100%;margin-top:18px}.trio div{background:rgba(255,255,255,.04);border-radius:16px;padding:12px;text-align:center}.trio b{display:block;font-size:20px}
+.btn{display:block;width:100%;padding:15px;border:0;border-radius:16px;background:var(--ac);color:#fff;font:800 16px Inter;box-shadow:var(--glow);cursor:pointer;margin-top:12px}
+.row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}.row:last-child{border:0}.row b{flex:1;min-width:0}
+.pct{font-weight:900;font-size:20px}.split{display:grid;grid-template-columns:1fr 1.1fr;gap:14px;align-items:start}.tog{display:flex;gap:6px;justify-content:center;margin-bottom:8px}
+.tog button,.seg button{border:1px solid rgba(120,150,255,.3);background:none;color:var(--fg);border-radius:99px;padding:7px 14px;font:600 13px Inter;cursor:pointer}.tog .on,.seg .on{background:var(--ac);border-color:var(--ac);box-shadow:var(--glow)}
+.mthumb{width:44px;height:44px;border-radius:12px;background:#151b36;display:grid;place-items:center;font-size:12px;font-weight:800}
+nav{position:fixed;left:12px;right:12px;bottom:14px;display:flex;justify-content:space-around;background:rgba(11,16,36,.85);backdrop-filter:blur(16px);border:1px solid rgba(120,150,255,.25);border-radius:24px;padding:8px;max-width:560px;margin:auto;z-index:5}
+nav button{flex:1;border:0;background:none;color:var(--mut);font:600 11px Inter;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;border-radius:16px;cursor:pointer}nav button span{font-size:20px}nav .on{color:#fff;background:rgba(47,123,255,.25);box-shadow:var(--glow)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.mac{text-align:center}.mac .rw{display:inline-block}.mac .rw b{font-size:16px}
+.fab{position:fixed;right:20px;bottom:96px;width:58px;height:58px;border-radius:50%;border:0;background:var(--ac);color:#fff;font-size:28px;box-shadow:var(--glow);cursor:pointer;z-index:5}
+@media(min-width:900px){.wide{display:grid;grid-template-columns:1fr 1fr;gap:14px}.wide>.col{min-width:0}}
+@media(max-width:420px){.split{grid-template-columns:1fr}}
+</style></head><body>
+<header><h1>TNR<i>·</i>Néon</h1><button class="ia" onclick="D.ai()">✦ Coach</button></header>
+<main id="m"></main><button class="fab" onclick="D.builder()" aria-label="Créer une séance">+</button>
+<nav id="n"></nav>
+<script src="../labx/data.js"></script>
+<script>
+let tab='forme',side='front',per=30;
+const T={forme:['◉','Forme'],seance:['⚡','Séance'],corps:['◎','Corps'],prog:['↗','Progrès'],assiette:['◐','Assiette']};
+const P={
+forme:()=>`<div class="wide"><div class="col"><div class="card hero"><div class="rw">${D.ring(D.forme,210,16)}<b data-n="${D.forme}">0</b></div><h2>${D.formeMot}</h2><div class="mut">${D.jour}</div>
+<div class="trio"><div><b>${D.sommeil.h}</b><span class="mut">Sommeil</span></div><div><b data-n="${D.vfc}">0</b><span class="mut">VFC ms</span></div><div><b data-n="${D.charge}" data-dec="1">0</b><span class="mut">Charge</span></div></div></div></div>
+<div class="col"><div class="card"><div class="mut">AUJOURD'HUI · ${D.seance.heure}</div><h2 style="margin:6px 0 2px">${D.seance.nom}</h2><div class="mut">${D.seance.sous} · ${D.seance.duree} min</div><button class="btn" onclick="D.seanceSheet()">Commencer la séance</button></div>
+<div class="card"><div class="mut" style="margin-bottom:6px">À RETENIR</div>${D.conseils.map(c=>`<div class="row"><span style="color:var(--ac)">●</span><b style="font-weight:500">${c}</b></div>`).join('')}</div></div></div>`,
+seance:()=>`<div class="card"><h2 style="margin:0 0 4px">${D.seance.nom}</h2><div class="mut">${D.seance.sous}</div>${D.seance.items.map(x=>`<div class="row"><div class="mthumb" style="color:${D.col(x.t==='Force'?'muscu':'piste')}">${x.t.slice(0,3)}</div><b>${x.n}<br><span class="mut">${x.s?x.s+' × '+x.r+' · récup '+x.rec:x.d}</span></b>${x.kg?`<span class="pct" style="font-size:15px">${x.kg} kg</span>`:''}</div>`).join('')}<button class="btn" onclick="D.seanceSheet()">Commencer</button></div>
+<div class="card"><div class="mut">MES SÉANCES</div>${D.biblio.map(b=>`<div class="row"><span style="width:10px;height:10px;border-radius:50%;background:${D.col(b.t)};box-shadow:0 0 10px ${D.col(b.t)}"></span><b>${b.n}</b><span class="mut">${b.d} min</span></div>`).join('')}<button class="btn" onclick="D.builder()">+ Nouvelle séance</button></div>`,
+corps:()=>`<h2 style="font-size:30px;font-weight:900;margin:6px 0 12px">Travaille ce qui a <span style="color:var(--ac)">récupéré</span></h2><div class="split"><div class="card"><div class="tog"><button class="${side==='front'?'on':''}" onclick="side='front';go()">Face</button><button class="${side==='back'?'on':''}" onclick="side='back';go()">Dos</button></div><div style="max-width:220px;margin:auto">${D.body(side)}</div></div>
+<div class="card">${D.muscles.slice().sort((a,b)=>a.v-b.v).map(m=>`<div class="row"><div class="mthumb" style="box-shadow:inset 0 0 0 2px ${D.zone(m.v)}">${m.v}</div><b>${m.n}</b><span class="pct" style="color:${D.zone(m.v)}">${m.v} %</span></div>`).join('')}</div></div>`,
+prog:()=>`<div class="tog seg">${[30,90,365].map(p=>`<button class="${per===p?'on':''}" onclick="per=${p};go()">${p===30?'30 j':p===90?'3 mois':'1 an'}</button>`).join('')}</div>
+<div class="wide">${[['Forme','forme','#2f7bff'],['VFC','vfc','#2fd4a3'],['Sommeil (h)','sommeil','#a96bff'],['Charge','charge','#ff7a1a']].map(([l,k,c])=>`<div class="card col"><div class="mut">${l.toUpperCase()}</div><b style="font-size:26px">${D.hist[k].at(-1)}</b>${D.spark(D.hist[k].slice(-Math.min(per,90)),300,90,c)}</div>`).join('')}</div>
+<div class="card"><div class="mut">RECORDS</div>${D.records.map(r=>`<div class="row"><b>${r.n}</b><span class="mut">${r.d}</span><span class="pct" style="font-size:17px">${r.v}</span><span style="color:#2fd4a3;font-size:12px">${r.e}</span></div>`).join('')}</div>`,
+assiette:()=>{const M=D.macros;return `<div class="card"><div class="grid2" style="grid-template-columns:repeat(4,minmax(0,1fr))">${[['kcal','Kcal','#2f7bff'],['p','Prot.','#2fd4a3'],['g','Gluc.','#ffc23d'],['l','Lip.','#ff4d6d']].map(([k,l,c])=>`<div class="mac"><div class="rw" style="color:${c}">${D.ring(M[k][0]/M[k][1]*100,74,7)}<b>${Math.round(M[k][0]/M[k][1]*100)}%</b></div><div class="mut">${l}</div></div>`).join('')}</div></div>
+<div class="card">${D.repas.map(r=>`<div class="row"><span style="font-size:20px">${r.fait?'✅':'⭕'}</span><b>${r.n} <span class="mut">${r.h}</span><br><span class="mut">${r.d}</span></b><span class="mut">${r.k}</span></div>`).join('')}</div>
+<div class="card"><div class="mut">COURSES · ${D.eur(D.courses.reduce((a,c)=>a+c.p,0))}</div>${D.courses.map(c=>`<div class="row"><b style="font-weight:500">${c.n}</b><span class="mut">${c.m}</span><b style="flex:none">${D.eur(c.p)}</b></div>`).join('')}</div>`}};
+function go(){document.getElementById('m').innerHTML=`<div class="pg">${P[tab]()}</div>`;document.getElementById('n').innerHTML=Object.entries(T).map(([k,[i,l]])=>`<button class="${k===tab?'on':''}" onclick="tab='${k}';go();scrollTo(0,0)"><span>${i}</span>${l}</button>`).join('');D.count();}
+go();
+</script></body></html>

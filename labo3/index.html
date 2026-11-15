@@ -1,0 +1,43 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Labo 3 · Fil</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f1e9;--fg:#1d1a16;--mut:#857b6e;--ac:#ff5a1f;--line:#e2d8ca;--sh-bg:#fffaf3;--sh-fg:#1d1a16;--sh-ac:#ff5a1f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:'DM Sans',system-ui,sans-serif}
+.wrap{max-width:640px;margin:auto;padding:16px 16px 120px}h1{font:400 34px 'DM Serif Display',serif;margin:6px 0 0}.mut{color:var(--mut);font-size:13px}
+.hd{display:flex;align-items:flex-end;gap:10px}.ia{margin-left:auto;border:1px solid var(--fg);background:none;border-radius:99px;padding:8px 14px;font:700 13px 'DM Sans';cursor:pointer}
+.stories{display:flex;gap:14px;overflow-x:auto;padding:16px 2px 6px;scrollbar-width:none}.st{flex:none;text-align:center;font-size:12px;cursor:pointer;background:none;border:0;font-family:inherit;color:inherit}
+.st i{display:grid;place-items:center;width:66px;height:66px;border-radius:50%;padding:3px;background:conic-gradient(var(--ac),#ffb800,var(--ac));margin-bottom:5px}.st i span{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:var(--bg);border:3px solid var(--bg);font-size:20px;font-weight:700}
+.tl{position:relative;margin-top:14px;padding-left:64px}.tl:before{content:'';position:absolute;left:46px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.ev{position:relative;margin-bottom:14px;animation:in .5s cubic-bezier(.2,.9,.3,1) both;animation-delay:calc(var(--i)*70ms)}@keyframes in{from{opacity:0;transform:translateX(18px)}}
+.ev time{position:absolute;left:-64px;top:14px;width:38px;text-align:right;font-size:12px;font-weight:700;color:var(--mut)}.ev:before{content:'';position:absolute;left:-23px;top:16px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--c,var(--mut))}
+.ev.done:before{background:var(--c)}.box{background:#fffaf3;border:1px solid var(--line);border-radius:18px;padding:14px}.box h3{margin:0 0 4px;font-size:17px}
+.now{position:relative;margin:4px 0 18px;height:2px;background:var(--ac)}.now span{position:absolute;left:-64px;top:-9px;background:var(--ac);color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:99px}
+.big{border:0;background:var(--fg);color:#fff;border-radius:14px;padding:12px 16px;font:700 15px 'DM Sans';margin-top:10px;cursor:pointer}.chk{display:flex;gap:6px;margin-top:8px}.chk button{flex:1;border:1px solid var(--line);background:none;border-radius:10px;padding:8px 0;font:600 13px 'DM Sans';cursor:pointer}.chk .on{background:var(--ac);border-color:var(--ac);color:#fff}
+.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;display:flex;gap:8px;background:var(--fg);padding:8px;border-radius:99px;box-shadow:0 10px 30px rgba(0,0,0,.25);z-index:5}.fab button{border:0;background:none;color:#fff;font:700 14px 'DM Sans';padding:10px 14px;border-radius:99px;cursor:pointer}.fab .p{background:var(--ac)}
+#sv{position:fixed;inset:0;z-index:50;color:#fff;display:none;flex-direction:column;padding:14px 16px 30px}#sv.on{display:flex}
+#sv .bars{display:flex;gap:4px}#sv .bars i{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.35);overflow:hidden}#sv .bars i b{display:block;height:100%;background:#fff;width:0}#sv .bars i.d b{width:100%}#sv .bars i.c b{animation:fill 5s linear forwards}@keyframes fill{to{width:100%}}
+#sv .ct{flex:1;display:flex;flex-direction:column;justify-content:center;max-width:520px;margin:auto;width:100%;animation:in .4s both}#sv h2{font:400 44px 'DM Serif Display',serif;margin:0}#sv .x{position:absolute;right:16px;top:26px;background:none;border:0;color:#fff;font-size:26px;cursor:pointer}
+</style></head><body>
+<div class="wrap"><div class="hd"><div><div class="mut">${'DIMANCHE 15 NOVEMBRE'}</div><h1>Ta journée</h1></div><button class="ia" onclick="D.ai()">✦ IA</button></div>
+<div class="stories" id="stories"></div><div class="tl" id="tl"></div></div>
+<div class="fab"><button onclick="D.toast('Repas noté (maquette)')">🍽 Repas</button><button class="p" onclick="D.builder()">+ Séance</button><button onclick="story(4)">📈</button></div>
+<div id="sv"></div>
+<script src="../labx/data.js"></script>
+<script>
+document.querySelector('.hd .mut').textContent=D.jour.toUpperCase();
+const S=[['Forme','78',`linear-gradient(160deg,#ff5a1f,#ffb800)`,()=>`<div class="mut" style="color:#fff;opacity:.8">FORME DU JOUR</div><h2>${D.forme} / 100</h2><p style="font-size:20px">${D.formeMot}. VFC ${D.vfc} ms, au-dessus de ta zone (${D.vfcBase}).</p><div style="color:#fff">${D.spark(D.hist.forme.slice(-30),300,120,'#fff')}</div>`],
+['Sommeil','7h4',`linear-gradient(160deg,#3a2a8c,#0e1030)`,()=>`<div style="opacity:.7">NUIT</div><h2>${D.sommeil.h}</h2><p style="font-size:20px">Couché ${D.sommeil.coucher}, levé ${D.sommeil.lever}. Profond ${D.sommeil.profond}.</p>${D.bars(D.hist.sommeil.slice(-7),120,'#a99bff',D.J)}`],
+['Séance','⚡',`linear-gradient(160deg,#111,#3b1a0c)`,()=>`<div style="opacity:.7">${D.seance.heure} · ${D.seance.lieu.toUpperCase()}</div><h2>${D.seance.nom}</h2>${D.seance.items.map(x=>`<p style="margin:6px 0;font-size:17px">— ${x.n} <span style="opacity:.6">${x.s?x.s+'×'+x.r:x.d}</span></p>`).join('')}`],
+['Assiette','🍽',`linear-gradient(160deg,#1f6b4a,#0c2b1f)`,()=>`<div style="opacity:.7">CARBURANT</div><h2>${D.macros.kcal[0]} / ${D.macros.kcal[1]}</h2><p style="font-size:20px">Protéines ${D.macros.p[0]} / ${D.macros.p[1]} g. Eau ${D.macros.eau[0]} / ${D.macros.eau[1]} L.</p>`],
+['Progrès','↗',`linear-gradient(160deg,#0f3a6b,#08172b)`,()=>`<div style="opacity:.7">TES RECORDS</div><h2>30 m lancé 3"02</h2>${D.records.slice(1).map(r=>`<p style="font-size:18px;margin:6px 0">${r.n} <b>${r.v}</b> <span style="opacity:.6">${r.e}</span></p>`).join('')}`]];
+document.getElementById('stories').innerHTML=S.map(([n,ic],i)=>`<button class="st" onclick="story(${i})"><i><span>${ic}</span></i>${n}</button>`).join('');
+let si=0,tm;window.story=i=>{si=i;const v=document.getElementById('sv');if(i<0||i>=S.length){v.classList.remove('on');clearTimeout(tm);return}
+v.style.background=S[i][2];v.innerHTML=`<div class="bars">${S.map((_,k)=>`<i class="${k<i?'d':k===i?'c':''}"><b></b></i>`).join('')}</div><button class="x" onclick="event.stopPropagation();story(-1)">×</button><div class="ct">${S[i][3]()}</div>`;v.classList.add('on');clearTimeout(tm);tm=setTimeout(()=>story(si+1),5000)};
+document.getElementById('sv').onclick=e=>story(si+(e.clientX<innerWidth/3?-1:1)<0?0:si+(e.clientX<innerWidth/3?-1:1));
+const E=[['6:47','Réveil',`Nuit de ${D.sommeil.h} · forme <b>${D.forme}</b>`,'#a99bff',1,`<div class="mut" style="margin-top:8px">Comment tu te sens ?</div><div class="chk">${['😴','😐','🙂','💪','🔥'].map((e,i)=>`<button class="${i===3?'on':''}" onclick="this.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('on'));this.classList.add('on')">${e}</button>`).join('')}</div>`],
+['7:30','Petit-déjeuner',D.repas[0].d+' · '+D.repas[0].k+' kcal','#2fa36b',1],['12:30','Déjeuner',D.repas[1].d+' · '+D.repas[1].k+' kcal','#2fa36b',1],
+['NOW'],['16:00','Collation',D.repas[2].d,'#2fa36b',0,`<button class="big" style="background:#2fa36b" onclick="D.toast('Collation notée')">J'ai mangé</button>`],
+['17:30',D.seance.nom,D.seance.sous+' · '+D.seance.duree+' min','#ff5a1f',0,`<button class="big" onclick="D.seanceSheet()">Voir et commencer</button>`],
+['20:00','Dîner',D.repas[3].d,'#2fa36b',0],['22:30','Écrans coupés','Coucher visé 23:00 pour 8 h','#a99bff',0]];
+document.getElementById('tl').innerHTML=E.map((e,i)=>e[0]==='NOW'?`<div class="now"><span>${D.heure.replace('7:42','14:10')}</span></div>`:`<div class="ev ${e[4]?'done':''}" style="--c:${e[3]};--i:${i}"><time>${e[0]}</time><div class="box"><h3>${e[1]}</h3><div class="mut">${e[2]}</div>${e[5]||''}</div></div>`).join('');
+</script></body></html>

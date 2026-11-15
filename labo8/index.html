@@ -1,0 +1,43 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Labo 8 · Piste</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700;800&family=Barlow:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1a0d0a;--t:#c2410c;--t2:#9a3412;--fg:#fff7f2;--mut:#d6b5a6;--ac:#fde047;--sh-bg:#2a1410;--sh-ac:#c2410c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:Barlow,system-ui,sans-serif}
+.lanes{display:flex;position:sticky;top:0;z-index:4;background:var(--t);box-shadow:0 4px 0 #0003}.lanes button{flex:1;border:0;border-right:2px solid rgba(255,255,255,.7);background:none;color:#fff;padding:10px 4px 8px;font:700 13px 'Barlow Condensed';text-transform:uppercase;letter-spacing:.06em;cursor:pointer}
+.lanes button b{display:block;font-size:22px;line-height:1}.lanes .on{background:#fff;color:var(--t)}.lanes button:last-child{border:0}
+main{max-width:980px;margin:auto;padding:16px 16px 50px}.pg{animation:in .45s cubic-bezier(.2,.9,.3,1) both}@keyframes in{from{opacity:0;transform:translateX(30px)}}
+h2{font:800 40px 'Barlow Condensed';text-transform:uppercase;margin:4px 0;letter-spacing:.01em}.mut{color:var(--mut);font-size:14px}
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px;margin-bottom:14px}
+.oval{width:100%;max-width:520px;display:block;margin:auto}.oval .run{offset-path:path('M90 30 H310 A70 70 0 0 1 310 170 H90 A70 70 0 0 1 90 30');animation:lap 6s linear infinite}@keyframes lap{to{offset-distance:100%}}
+.prog{stroke-dasharray:var(--L);stroke-dashoffset:var(--L);animation:pr 1.6s cubic-bezier(.2,.8,.2,1) .2s forwards}@keyframes pr{to{stroke-dashoffset:var(--o)}}
+.chrono{font:800 84px 'Barlow Condensed';line-height:.9;color:var(--ac);letter-spacing:-.01em}.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.g3 div{background:rgba(0,0,0,.25);border-radius:12px;padding:10px;text-align:center}.g3 b{font:800 26px 'Barlow Condensed';display:block}
+.rep{display:grid;grid-template-columns:40px 1fr 70px 60px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px dashed rgba(255,255,255,.15);font-size:15px}.rep b{font:700 20px 'Barlow Condensed'}
+.bar{height:8px;border-radius:8px;background:linear-gradient(90deg,var(--t),var(--ac))}
+.btn{border:0;background:var(--ac);color:#1a0d0a;font:800 18px 'Barlow Condensed';text-transform:uppercase;padding:14px 20px;border-radius:12px;cursor:pointer;width:100%;margin-top:10px;letter-spacing:.04em}
+.timer{display:grid;place-items:center;position:relative;margin:10px auto;color:var(--ac)}.timer b{position:absolute;font:800 48px 'Barlow Condensed';color:#fff}
+.ia{position:fixed;right:14px;bottom:16px;border:0;background:#fff;color:var(--t);font:800 15px 'Barlow Condensed';padding:12px 16px;border-radius:99px;box-shadow:0 6px 20px #0006;cursor:pointer;z-index:5}
+@media(min-width:900px){.two{display:grid;grid-template-columns:1.2fr 1fr;gap:14px}}
+</style></head><body>
+<div class="lanes" id="ln"></div><main id="m"></main><button class="ia" onclick="D.ai()">✦ IA</button>
+<script src="../labx/data.js"></script>
+<script>
+let tab=0,tmr=null,left=0;const reps=[['1','30 m lancé','3"05',9.84],['2','30 m lancé','3"02',9.93],['3','30 m lancé','3"04',9.87],['4','30 m lancé','3"08',9.74]];
+const L=2*220+2*Math.PI*70,done=1240,goal=1600;
+const T=[['Jour',()=>`<div class="two"><div class="card"><div class="mut">MÈTRES DE SPRINT · SEMAINE 46</div><h2>${done} / ${goal} m</h2>
+<svg class="oval" viewBox="0 0 400 200"><path d="M90 30 H310 A70 70 0 0 1 310 170 H90 A70 70 0 0 1 90 30" fill="#9a3412" stroke="#c2410c" stroke-width="34"/>${[0,1,2,3].map(i=>`<path d="M90 ${18+i*8} H310 A${82-i*8} ${82-i*8} 0 0 1 310 ${182-i*8} H90 A${82-i*8} ${82-i*8} 0 0 1 90 ${18+i*8}" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="1"/>`).join('')}
+<path class="prog" d="M90 30 H310 A70 70 0 0 1 310 170 H90 A70 70 0 0 1 90 30" fill="none" stroke="#fde047" stroke-width="6" stroke-linecap="round" style="--L:${L};--o:${L*(1-done/goal)}"/><rect x="120" y="70" width="160" height="60" rx="8" fill="#2f6b2f"/><circle class="run" r="7" fill="#fff"/></svg></div>
+<div><div class="card"><div class="mut">FORME</div><div class="chrono" data-n="${D.forme}">0</div><div>${D.formeMot} · ${D.conseils[0]}</div></div><div class="g3"><div><b>${D.sommeil.h}</b><span class="mut">sommeil</span></div><div><b>${D.vfc}</b><span class="mut">VFC</span></div><div><b>${D.charge}</b><span class="mut">charge</span></div></div></div></div>
+<div class="card"><div class="mut">AUJOURD'HUI ${D.seance.heure} · ${D.seance.lieu.toUpperCase()}</div><h2>${D.seance.nom}</h2><div class="mut">${D.seance.sous}</div><button class="btn" onclick="tab=1;go()">Feuille de piste →</button></div>`],
+['Séance',()=>`<h2>Feuille de piste</h2>${D.seance.items.map((x,i)=>`<div class="card" style="display:flex;gap:12px;align-items:center"><b style="font:800 30px 'Barlow Condensed';color:var(--ac);width:30px">${i+1}</b><div style="flex:1"><b style="font-size:18px">${x.n}</b><div class="mut">${x.s?x.s+' × '+x.r+' · récup '+x.rec+(x.cible?' · cible '+x.cible:''):x.d}${x.kg?' · '+x.kg+' kg':''}</div></div>${x.rec?`<button class="btn" style="width:auto;margin:0;padding:10px 12px;font-size:15px" onclick="rest('${x.rec}')">⏱ Récup</button>`:''}</div>`).join('')}<button class="btn" onclick="D.builder()">+ Créer une autre séance</button>`],
+['Chronos',()=>`<div class="two"><div class="card"><div class="mut">DERNIER 30 M LANCÉ</div><div class="chrono">3"02</div><div class="mut">9,93 m/s · record personnel −0"04</div>
+<div style="margin-top:14px">${reps.map(r=>`<div class="rep"><span class="mut">#${r[0]}</span><span>${r[1]}</span><b>${r[2]}</b><span class="mut">${r[3]}</span></div>`).join('')}</div>
+<div style="display:flex;gap:8px;margin-top:12px"><input id="ch" placeholder='3"01' inputmode="decimal" style="flex:1;padding:12px;border-radius:10px;border:0;font:700 20px 'Barlow Condensed'"><button class="btn" style="width:auto;margin:0" onclick="addRep()">Noter</button></div></div>
+<div class="card"><div class="mut">VITESSE MAX · 12 SEMAINES (m/s)</div><div style="color:var(--ac)">${D.spark(D.hist.vitesse,300,120,'#fde047')}</div>${D.records.map(r=>`<div class="rep" style="grid-template-columns:1fr 70px 60px"><span>${r.n}</span><b>${r.v}</b><span style="color:#86efac">${r.e}</span></div>`).join('')}</div></div>`],
+['Corps',()=>`<h2>Jambes avant tout</h2><div class="two"><div class="card" style="display:flex;gap:10px;max-width:360px">${D.body('front')}${D.body('back')}</div><div class="card">${D.muscles.slice(0,5).map(m=>`<div style="margin:10px 0"><div style="display:flex;justify-content:space-between"><b>${m.n}</b><span>${m.v} %</span></div><div style="height:8px;background:#0004;border-radius:8px"><div class="bar" style="width:${m.v}%;background:${D.zone(m.v)}"></div></div></div>`).join('')}<p class="mut">${D.conseils[1]}</p></div></div>`],
+['Assiette',()=>`<h2>Carburant</h2><div class="g3" style="margin-bottom:14px">${[['kcal','kcal'],['p','prot. g'],['g','gluc. g']].map(([k,l])=>`<div><b>${D.macros[k][0]}</b><span class="mut">/ ${D.macros[k][1]} ${l}</span></div>`).join('')}</div>${D.repas.map(r=>`<div class="card" style="padding:12px 16px"><b>${r.fait?'✓':'○'} ${r.h} · ${r.n}</b><div class="mut">${r.d}</div></div>`).join('')}`]];
+window.rest=t=>{left=parseInt(t)*(t.includes('min')?60:1);const sh=D.sheet(`<h3>Récupération</h3><div class="timer">${D.ring(100,200,12,'#fde047')}<b id="tv"></b></div><button class="go" onclick="D.close()">Passer</button>`);clearInterval(tmr);const tot=left;
+const tick=()=>{const v=sh.querySelector('#tv');if(!v){clearInterval(tmr);return}v.textContent=Math.floor(left/60)+':'+String(left%60).padStart(2,'0');sh.querySelector('.arc').style.strokeDashoffset=sh.querySelector('.arc').style.getPropertyValue('--L')*(1-left/tot);if(left--<=0){clearInterval(tmr);navigator.vibrate&&navigator.vibrate(300);D.close()}};tick();tmr=setInterval(tick,1000)};
+window.addRep=()=>{const v=document.getElementById('ch').value.trim();if(!v)return;reps.push([reps.length+1+'','30 m lancé',v.includes('"')?v:v.replace(/[.,]/,'"'),'—']);go();D.toast('Chrono noté')};
+function go(){document.getElementById('ln').innerHTML=T.map(([l],i)=>`<button class="${i===tab?'on':''}" onclick="tab=${i};go()"><b>${i+1}</b>${l}</button>`).join('');document.getElementById('m').innerHTML=`<div class="pg">${T[tab][1]()}</div>`;D.count();}
+go();
+</script></body></html>

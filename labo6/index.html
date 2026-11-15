@@ -1,0 +1,35 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Labo 6 · Tableau</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fbfbfa;--fg:#37352f;--mut:#9b9a97;--line:#ebebea;--ac:#2383e2;--sh-bg:#fff;--sh-fg:#37352f;--sh-ac:#2383e2}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,sans-serif;font-size:14px}
+header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}header h1{font-size:18px;margin:0}.mut{color:var(--mut);font-size:12px}
+.stat{display:flex;gap:8px;flex-wrap:wrap}.stat span{background:#f1f1ef;border-radius:6px;padding:4px 8px;font-size:12px}.stat b{font-weight:700}
+.bt{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 11px;font:500 13px Inter;cursor:pointer;color:var(--fg)}.bt.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+.lay{display:flex;min-height:calc(100vh - 60px)}.tray{width:250px;flex:none;border-right:1px solid var(--line);padding:14px;overflow:auto}.tray h4{margin:14px 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
+.board{flex:1;display:flex;gap:10px;overflow-x:auto;padding:14px;align-items:flex-start;scroll-snap-type:x proximity}
+.col{flex:none;width:210px;background:#f7f6f3;border-radius:10px;padding:8px;scroll-snap-align:start;transition:background .2s}.col.ov{background:#e7f1fb}.col.a{box-shadow:inset 0 0 0 2px var(--ac)}
+.col h3{font-size:13px;margin:4px 4px 8px;display:flex;justify-content:space-between}
+.k{background:#fff;border:1px solid var(--line);border-radius:8px;padding:9px 10px;margin-bottom:7px;cursor:grab;box-shadow:0 1px 2px rgba(0,0,0,.04);animation:in .35s ease both;position:relative}.k:active{cursor:grabbing}
+@keyframes in{from{opacity:0;transform:translateY(6px)}}.k .tg{display:inline-block;font-size:11px;border-radius:4px;padding:1px 6px;margin-bottom:4px;color:#fff}.k.done{opacity:.55}.k.done b:after{content:' ✓'}
+.k b{display:block;font-weight:500}.add{width:100%;border:0;background:none;color:var(--mut);text-align:left;padding:6px;border-radius:6px;cursor:pointer;font:inherit}.add:hover{background:#ecebe8}
+.ex{padding:6px 8px;border-radius:6px;cursor:grab;display:flex;justify-content:space-between}.ex:hover{background:#efefed}
+.side{width:300px;flex:none;border-left:1px solid var(--line);padding:14px;overflow:auto}.row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line)}
+@media(max-width:1100px){.side{display:none}}@media(max-width:760px){.tray{display:none}.board{padding:12px 16px}.col{width:78vw}}
+</style></head><body>
+<header><h1>📋 Tableau du coach</h1><span class="mut">Semaine 46 · glisse les séances d'un jour à l'autre</span><div class="stat"><span>Forme <b>${0}</b></span></div><span style="margin-left:auto"></span><button class="bt" onclick="D.ai()">✦ IA</button><button class="bt p" onclick="D.builder()">+ Nouvelle séance</button></header>
+<div class="lay"><div class="tray" id="tray"></div><div class="board" id="board"></div><div class="side" id="side"></div></div>
+<script src="../labx/data.js"></script>
+<script>
+document.querySelector('.stat').innerHTML=`<span>Forme <b>${D.forme}</b></span><span>Sommeil <b>${D.sommeil.h}</b></span><span>VFC <b>${D.vfc}</b></span><span>Charge <b>${D.charge}</b></span>`;
+const days=D.semaine.map(d=>({...d,cards:d.t==='repos'?[]:[{n:d.n,t:d.t,fait:d.fait}]}));days[1].cards.push({n:'Gainage + mobilité',t:'recup',fait:1});days[3].cards.push({n:'Haut du corps léger',t:'muscu',fait:1});
+let drag=null;
+function draw(){document.getElementById('board').innerHTML=days.map((d,i)=>`<div class="col ${d.auj?'a':''}" data-d="${i}"><h3><span>${d.j} ${d.num}</span><span class="mut">${d.cards.length}</span></h3>${d.cards.map((c,k)=>`<div class="k ${c.fait?'done':''}" draggable="true" data-d="${i}" data-k="${k}"><span class="tg" style="background:${D.col(c.t)}">${c.t}</span><b>${c.n}</b><span class="mut">${(D.biblio.find(b=>b.n===c.n)||{d:45}).d} min</span></div>`).join('')}<button class="add" onclick="D.builder()">+ Ajouter</button></div>`).join('');}
+document.getElementById('tray').innerHTML='<b>Bibliothèque</b><h4>Modèles</h4>'+D.biblio.map(b=>`<div class="ex" draggable="true" data-new="${b.n}" data-t="${b.t}"><span>${b.n}</span><span class="mut">${b.d}′</span></div>`).join('')+Object.entries(D.exos).slice(0,3).map(([c,l])=>`<h4>${c}</h4>`+l.map(e=>`<div class="ex">${e}</div>`).join('')).join('');
+document.getElementById('side').innerHTML=`<b>Aujourd'hui</b><p class="mut">${D.jour}</p><div style="max-width:200px;margin:auto;display:flex;gap:4px">${D.body('front')}${D.body('back')}</div><p>${D.conseils[1]}</p><b>Charge · 4 semaines</b>${D.bars([280,340,310,365],90,'#2383e2',['S43','S44','S45','S46'])}<b style="display:block;margin-top:14px">Records</b>${D.records.map(r=>`<div class="row"><span>${r.n}</span><b>${r.v}</b></div>`).join('')}`;
+document.addEventListener('dragstart',e=>{const k=e.target.closest('.k,[data-new]');if(!k)return;drag=k.dataset.new?{n:k.dataset.new,t:k.dataset.t}:{d:+k.dataset.d,k:+k.dataset.k};e.dataTransfer.setData('text','x')});
+document.addEventListener('dragover',e=>{const c=e.target.closest('.col');if(c){e.preventDefault();document.querySelectorAll('.col').forEach(x=>x.classList.toggle('ov',x===c))}});
+document.addEventListener('drop',e=>{const c=e.target.closest('.col');document.querySelectorAll('.col').forEach(x=>x.classList.remove('ov'));if(!c||!drag)return;e.preventDefault();const to=+c.dataset.d;
+if(drag.n)days[to].cards.push({n:drag.n,t:drag.t});else{const [card]=days[drag.d].cards.splice(drag.k,1);days[to].cards.push(card)}drag=null;draw();D.toast('Séance placée '+days[to].j)});
+document.addEventListener('click',e=>{const k=e.target.closest('.k');if(k)D.seanceSheet()});draw();
+</script></body></html>
