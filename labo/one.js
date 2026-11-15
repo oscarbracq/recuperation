@@ -51,18 +51,25 @@ function oneMount() {
   for (const ev of ['pointerdown', 'keydown', 'touchstart']) addEventListener(ev, () => { ONE.act = performance.now(); }, {capture: true, passive: true});
   addEventListener('resize', () => oneSync());
 }
-// La pastille glisse avec un petit élan, mais ne dépasse jamais le cadre de la barre.
+// La lentille garde toujours sa taille. Elle glisse avec un petit élan, qui peut aller dans la marge de la barre sans jamais sortir du cadre ;
+// ce qui passe dessous grossit un peu, comme sous une loupe.
 function onePill(box, p, on) {
   if (!box || !on || !p) return;
-  const pad = parseFloat(getComputedStyle(box).paddingLeft) || 0, x = on.offsetLeft, w = on.offsetWidth, max = box.clientWidth - pad - w;
-  const x0 = p._x, w0 = p._w; p._x = x; p._w = w;
+  const x = on.offsetLeft, w = on.offsetWidth, lo = 3, hi = box.clientWidth - 3 - w;
+  const x0 = p._x; p._x = x; p._w = w;
   p.style.width = w + 'px'; p.style.transform = `translateX(${x}px)`;
-  if (x0 == null || (x0 === x && w0 === w) || oneCalm()) return;
-  const dir = Math.sign(x - x0), want = Math.min(9, Math.abs(x - x0) * .06), over = Math.max(pad, Math.min(max, x + dir * want)), sq = want - Math.abs(over - x);
-  // Contre un bord, l'élan qui ne peut pas passer devient un petit écrasement : la pastille reste dans le cadre.
-  const mid = sq > 1 ? {transform: `translateX(${dir > 0 ? x + sq * 1.1 : x}px)`, width: (w - sq * 1.1) + 'px', offset: .72} : {transform: `translateX(${over}px)`, width: w + 'px', offset: .72};
+  if (x0 == null || x0 === x || oneCalm()) { oneMag(box, p, 0); return; }
+  const dir = Math.sign(x - x0), over = Math.max(lo, Math.min(hi, x + dir * Math.min(10, Math.abs(x - x0) * .07)));
   p.getAnimations().forEach(a => a.cancel());
-  p.animate([{transform: `translateX(${x0}px)`, width: w0 + 'px'}, mid, {transform: `translateX(${x}px)`, width: w + 'px'}], {duration: 460, easing: 'cubic-bezier(.3,.7,.25,1)'});
+  p.animate([{transform: `translateX(${x0}px)`}, {transform: `translateX(${over}px)`, offset: .7}, {transform: `translateX(${x}px)`}], {duration: 480, easing: 'cubic-bezier(.3,.7,.25,1)'});
+  oneMag(box, p, 520);
+}
+function oneMag(box, p, ms) {
+  const t0 = performance.now();
+  const f = () => { const pr = p.getBoundingClientRect(), c = pr.left + pr.width / 2;
+    box.querySelectorAll('button').forEach(b => { const r = b.getBoundingClientRect(), d = Math.abs(r.left + r.width / 2 - c) / (r.width || 1); b.style.setProperty('--mag', (1 + .14 * Math.max(0, 1 - d)).toFixed(3)); });
+    if (performance.now() - t0 < ms) requestAnimationFrame(f); };
+  f();
 }
 // Met la barre et le sélecteur à jour (noms, icônes, pastilles) ; appelée après chaque changement de page.
 function oneSync() {
@@ -134,9 +141,10 @@ addEventListener('popstate', () => {
   if (S.sheet || P.stack.length || PLFS.on || POP_SKIP || !ONE.mods.includes(S.mod)) return; if (oneIdx() > 0) oneTab(0);
 }, true);
 // Au démarrage : directement dans le dernier module et le dernier onglet utilisés (Training · Aujourd'hui la première fois).
+try { history.scrollRestoration = 'manual'; } catch (e) {}
 (function oneStart(n = 0) {
   if (!S.mod && n < 200) { setTimeout(() => oneStart(n + 1), 50); return; }
-  oneSwitch('R', 0); ONE.ready = true; oneSync();
+  oneSwitch('R', 0); window.scrollTo(0, 0); ONE.ready = true; oneSync();
 })();
 
 /* ---------- même période partout : Jour · Semaine · Mois · Année · Tout, et les flèches pour remonter le temps ---------- */
