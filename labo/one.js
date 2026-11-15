@@ -59,12 +59,23 @@ function oneMount() {
 function onePill(box, p, on) {
   if (!box || !on || !p) return;
   const x = on.offsetLeft, w = on.offsetWidth, lo = 3, hi = box.clientWidth - 3 - w;
+  // En haut (T N R), la lentille est posée en proportion de la barre : elle reste sur le bon module même quand la barre s'élargit (sortie de l'Accueil).
+  if (p.classList.contains('one-mp')) { oneMp(box, p, on); return; }
   const x0 = p._x; p._x = x; p._w = w;
   p.style.width = w + 'px'; p.style.transform = `translateX(${x}px)`;
   if (x0 == null || x0 === x || oneCalm()) { oneMag(box, p, 0); return; }
   const dir = Math.sign(x - x0), over = Math.max(lo, Math.min(hi, x + dir * Math.min(10, Math.abs(x - x0) * .07)));
   p.getAnimations().forEach(a => a.cancel());
   p.animate([{transform: `translateX(${x0}px)`}, {transform: `translateX(${over}px)`, offset: .7}, {transform: `translateX(${x}px)`}], {duration: 480, easing: 'cubic-bezier(.3,.7,.25,1)'});
+  oneMag(box, p, 520);
+}
+function oneMp(box, p, on) {
+  const bs = [...box.querySelectorAll('button')], i = bs.indexOf(on), n = bs.length, cs = getComputedStyle(box), pl = parseFloat(cs.paddingLeft), pr = parseFloat(cs.paddingRight);
+  const i0 = p._i; p._i = i; p.style.left = pl + 'px'; p.style.width = `calc((100% - ${pl + pr}px) / ${n})`; p.style.transform = `translateX(${i * 100}%)`;
+  if (i0 == null || i0 === i || oneCalm()) { oneMag(box, p, 0); return; }
+  const dir = Math.sign(i - i0), edge = (i === 0 && dir < 0) || (i === n - 1 && dir > 0), ov = Math.min(edge ? Math.max(0, (dir < 0 ? pl : pr) - 3) : 10, Math.abs(i - i0) * on.offsetWidth * .07);
+  p.getAnimations().forEach(a => a.cancel());
+  p.animate([{transform: `translateX(${i0 * 100}%)`}, {transform: `translateX(calc(${i * 100}% + ${dir * ov}px))`, offset: .7}, {transform: `translateX(${i * 100}%)`}], {duration: 480, easing: 'cubic-bezier(.3,.7,.25,1)'});
   oneMag(box, p, 520);
 }
 function oneMag(box, p, ms) {
@@ -85,7 +96,9 @@ function oneSync() {
   tabs.querySelector('[data-one-h]').classList.toggle('on', home);
   top.querySelectorAll('[data-one-m]').forEach(b => b.classList.toggle('on', !home && b.dataset.oneM === S.mod));
   onePill(tabs, tabs.querySelector('.one-pill'), tabs.querySelector('button.on'));
-  if (!home) onePill(top.querySelector('.one-mods'), top.querySelector('.one-mp'), top.querySelector('.one-mods .on'));
+  const box = top.querySelector('.one-mods'), mp = top.querySelector('.one-mp');
+  if (home) box.querySelectorAll('button').forEach(b => b.style.setProperty('--mag', 1));
+  else onePill(box, mp, box.querySelector('.on'));
 }
 // Accueil : la page d'accueil de l'appli ; en haut, les noms s'effacent et le T, le N et le R se rapprochent pour écrire TNR.
 function oneHome() {
@@ -221,25 +234,37 @@ tToday = () => {
 window.ONE_SPLASH = function (el, svg, bars) {
   const tg = [...document.querySelectorAll('#one-top .one-mods button b')], ps = svg.querySelectorAll('path');
   if (tg.length !== 3 || ps.length < 4 || oneCalm()) return false;
+  // L'appli s'ouvre sur l'Accueil : on mesure la barre dans sa forme finale (T N R serrés), sans attendre ses transitions.
+  const de = document.documentElement; de.classList.add('one-home', 'one-notr'); void de.offsetWidth;
+  const ink = tg.map(oneInk); de.classList.remove('one-notr');
   const NS = 'http://www.w3.org/2000/svg', D = 1050, fl = [];
   for (let i = 0; i < 3; i++) {
     const bb = ps[i].getBBox(), m = ps[i].getScreenCTM(); if (!m) return false;
     const x = m.e + bb.x * m.a, y = m.f + bb.y * m.d, w = bb.width * m.a, h = bb.height * m.d;
     const s = document.createElementNS(NS, 'svg'); s.setAttribute('viewBox', `${bb.x} ${bb.y} ${bb.width} ${bb.height}`);
-    s.style.cssText = `position:fixed;left:${x}px;top:${y}px;width:${w}px;height:${h}px;z-index:302;pointer-events:none;overflow:visible`;
+    s.style.cssText = `position:fixed;left:${x}px;top:${y}px;width:${w}px;height:${h}px;z-index:302;pointer-events:none;overflow:visible;transform-origin:50% 50%`;
     const p = ps[i].cloneNode(); p.setAttribute('fill', '#fff'); s.appendChild(p); document.body.appendChild(s); fl.push(s);
-    const r = tg[i].getBoundingClientRect(), sc = r.height * .56 / h, tx = r.left + r.width / 2 - (x + w / 2), ty = r.top + r.height / 2 - (y + h / 2);
-    s.animate([{transform: 'none'}, {transform: `translate(${tx}px,${ty}px) scale(${sc})`}], {duration: D, delay: i * 70, easing: 'cubic-bezier(.7,0,.2,1)', fill: 'forwards'});
-    tg[i].animate([{transform: 'scale(.3)', opacity: 0}, {transform: 'scale(1)', opacity: getComputedStyle(tg[i]).opacity}], {duration: 420, delay: D * .78 + i * 70, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'backwards'});
+    const r = ink[i], sc = r.h / h, tx = r.x + r.w / 2 - (x + w / 2), ty = r.y + r.h / 2 - (y + h / 2), dl = i * 70;
+    tg[i].style.transition = 'none'; tg[i].style.opacity = '0';
+    s.animate([{transform: 'none'}, {transform: `translate(${tx}px,${ty}px) scale(${sc})`}], {duration: D, delay: dl, easing: 'cubic-bezier(.7,0,.2,1)', fill: 'forwards'});
+    // Posé : la lettre dessinée laisse la place à la vraie lettre de la barre, au même endroit, en fondu court.
+    setTimeout(() => { tg[i].style.opacity = ''; tg[i].animate([{opacity: 0}, {opacity: 1}], {duration: 160, easing: 'ease-out'}); s.animate([{opacity: 1}, {opacity: 0}], {duration: 160, fill: 'forwards'}); }, D + dl);
   }
   for (let i = 0; i < 3; i++) ps[i].style.opacity = 0;
   el.querySelector('.sp')?.remove();
   el.animate([{opacity: 1}, {opacity: 0}], {duration: 700, delay: 220, easing: 'ease', fill: 'forwards'});
-  setTimeout(() => fl.forEach(s => s.animate([{opacity: 1}, {opacity: 0}], {duration: 180, fill: 'forwards'})), D + 150);
-  setTimeout(() => { fl.forEach(s => s.remove()); el.remove(); bars(); }, D + 380);
-  setTimeout(() => { ONE.reveal = true; ONE.act = performance.now(); ONE.seen = new WeakSet(); oneAfter(); }, 260);
+  setTimeout(() => { fl.forEach(s => s.remove()); el.remove(); bars(); tg.forEach(b => { b.style.opacity = ''; b.style.transition = ''; }); }, D + 140 + 200);
   return true;
 };
+// Le contour réel de la lettre affichée (pas sa boîte) : position et hauteur de l'encre, pour que la lettre volante s'y pose pile.
+function oneInk(b) {
+  const t = b.firstChild, cs = getComputedStyle(b), rg = document.createRange(); rg.selectNodeContents(b);
+  const rr = rg.getBoundingClientRect(), cx = (oneInk.c ||= document.createElement('canvas').getContext('2d'));
+  cx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`; const m = cx.measureText(t?.nodeValue || 'T');
+  const asc = m.actualBoundingBoxAscent, h = asc + m.actualBoundingBoxDescent, w = m.actualBoundingBoxLeft + m.actualBoundingBoxRight;
+  const lineTop = rr.top + (rr.height - (m.fontBoundingBoxAscent + m.fontBoundingBoxDescent)) / 2;
+  return {x: rr.left - m.actualBoundingBoxLeft, y: lineTop + m.fontBoundingBoxAscent - asc, w, h};
+}
 
 /* ---------- Mon corps : le même bonhomme, à la même taille et au même endroit en Training, Nutrition et Recovery ---------- */
 // Nutrition : deux silhouettes, comme Training et Recovery (face et dos) ; les bras sur l'une, le tronc et les jambes sur l'autre.
