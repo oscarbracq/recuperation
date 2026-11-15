@@ -1,26 +1,75 @@
-/* ================= TNR LABO : une seule entrée, barre flottante en verre, sélecteur T · N · R ================= */
-html.one .tabbar,html.one .modmark,html.one .backhome,html.one #pcnav,html.one #mod-home{display:none!important}
+/* ================= TNR LABO : une seule entrée, barre flottante en verre, + · T N R · IA ================= */
+/* L'ancienne barre reste dans la page (le glissement du pouce s'en sert pour connaître les onglets), mais invisible. */
+html.one .tabbar{visibility:hidden!important;pointer-events:none!important;transform:translateY(200%)!important}
+html.one .modmark,html.one .backhome,html.one #pcnav,html.one #mod-home{display:none!important}
 html.one{--tbh:98px!important;--pcw:0px!important}
 html.one.pc body{padding-left:0!important}
-/* sélecteur de module, en haut */
-.one-top{position:fixed;z-index:30;top:calc(8px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);width:calc(100% - 24px);max-width:470px;display:flex;gap:8px;pointer-events:none}.one-mods{flex:1;min-width:0}
-.one-q{pointer-events:auto;flex:none;width:44px;height:44px;border-radius:16px;display:grid;place-items:center;color:var(--fg);background:color-mix(in srgb,var(--one-c) 22%,var(--card,#1c1c1e));backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid color-mix(in srgb,var(--one-c) 40%,transparent);box-shadow:0 8px 28px rgba(0,0,0,.28);cursor:pointer;transition:transform .3s cubic-bezier(.34,1.56,.64,1)}.one-q:active{transform:scale(.9)}
-.one-mods{position:relative;display:flex;padding:4px;border-radius:18px;background:color-mix(in srgb,var(--card,#1c1c1e) 55%,transparent);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);border:1px solid rgba(127,127,127,.18);box-shadow:0 8px 28px rgba(0,0,0,.28);pointer-events:auto}
-.one-mods button{position:relative;z-index:1;flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:36px;border:0;background:none;border-radius:14px;color:var(--fg2);font:inherit;font-size:.8125rem;font-weight:600;cursor:pointer;transition:color .3s}
-.one-mods button b{display:grid;place-items:center;width:22px;height:22px;border-radius:7px;font-size:.8rem;font-weight:800;color:#fff;background:var(--c);opacity:.55;transition:opacity .3s,transform .4s cubic-bezier(.34,1.56,.64,1)}
+
+/* en haut : + · Training Nutrition Recovery · IA */
+.one-top{position:fixed;z-index:30;top:calc(8px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);width:calc(100% - 16px);max-width:520px;display:flex;gap:6px;pointer-events:none}
+.one-sq{pointer-events:auto;flex:none;width:46px;height:46px;border-radius:17px;display:grid;place-items:center;align-content:center;gap:1px;color:var(--fg);font:inherit;font-size:.56rem;font-weight:800;letter-spacing:.04em;
+  background:color-mix(in srgb,var(--one-c) 20%,color-mix(in srgb,var(--card,#1c1c1e) 70%,transparent));backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);border:1px solid color-mix(in srgb,var(--one-c) 38%,transparent);box-shadow:0 8px 28px rgba(0,0,0,.28);cursor:pointer;transition:transform .3s cubic-bezier(.34,1.56,.64,1),background .3s,border-color .3s}
+.one-sq:active{transform:scale(.9)}.one-aib svg{width:18px;height:18px}
+.one-mods{flex:1;min-width:0;position:relative;display:flex;padding:4px;border-radius:18px;background:color-mix(in srgb,var(--card,#1c1c1e) 55%,transparent);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);border:1px solid rgba(127,127,127,.18);box-shadow:0 8px 28px rgba(0,0,0,.28);pointer-events:auto}
+.one-mods button{position:relative;z-index:1;flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:4px;height:36px;border:0;background:none;border-radius:14px;color:var(--fg2);font:inherit;font-size:.72rem;letter-spacing:-.01em;padding:0 2px;font-weight:600;cursor:pointer;transition:color .3s;white-space:nowrap}
+.one-mods button b{flex:none;display:grid;place-items:center;width:19px;height:19px;border-radius:6px;font-size:.72rem;font-weight:800;color:#fff;background:var(--c);opacity:.55;transition:opacity .3s,transform .4s cubic-bezier(.34,1.56,.64,1)}
+.one-mods button span{overflow:hidden;text-overflow:ellipsis}
 .one-mods button.on{color:var(--fg)}.one-mods button.on b{opacity:1;transform:scale(1.08)}
-.one-mp{position:absolute;left:0;top:4px;bottom:4px;border-radius:14px;background:color-mix(in srgb,var(--one-c) 20%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--one-c) 40%,transparent),0 0 18px color-mix(in srgb,var(--one-c) 30%,transparent);transition:transform .5s cubic-bezier(.34,1.45,.55,1),width .4s,background .3s,box-shadow .3s}
-@media(max-width:360px){.one-mods button span{display:none}}
-/* place pour le sélecteur au-dessus des pages */
-html.one .mm-space{height:46px!important}
-html.one #mod-R>.view,html.one #v-today,html.one #v-trends,html.one #v-rsess,html.one #v-rlib,html.one #v-reports,html.one #v-profile{scroll-margin-top:60px}
+.one-mp{position:absolute;left:0;top:4px;bottom:4px;border-radius:14px;background:color-mix(in srgb,var(--one-c) 20%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--one-c) 40%,transparent),0 0 18px color-mix(in srgb,var(--one-c) 28%,transparent);transition:background .3s,box-shadow .3s}
+@media(max-width:345px){.one-mods button span{display:none}}
+html.one .mm-space{height:48px!important}
+html.one #v-today>header.top:first-child,html.one #v-trends>header.top:first-child,html.one #v-rsess>header.top:first-child,html.one #v-rlib>header.top:first-child,html.one #v-reports>header.top:first-child,html.one #v-profile>header.top:first-child{margin-top:48px}
+
 /* barre d'onglets flottante en verre */
 .one-tabs{position:fixed;z-index:30;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom,0px));width:calc(100% - 24px);max-width:560px;height:68px;display:flex;padding:6px;border-radius:26px;background:color-mix(in srgb,var(--card,#1c1c1e) 50%,transparent);backdrop-filter:blur(26px) saturate(1.8);-webkit-backdrop-filter:blur(26px) saturate(1.8);border:1px solid rgba(127,127,127,.2);box-shadow:0 14px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.06)}
 .one-tabs button{position:relative;z-index:1;flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;background:none;color:var(--fg3);font:inherit;font-size:.625rem;font-weight:600;cursor:pointer;transition:color .3s;padding:0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .one-tabs button svg{width:22px;height:22px;flex:none;transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
 .one-tabs button.on{color:var(--fg)}.one-tabs button.on svg{color:var(--one-c);transform:translateY(-1px) scale(1.1);filter:drop-shadow(0 0 6px color-mix(in srgb,var(--one-c) 70%,transparent))}
 .one-tabs button:active svg{transform:scale(.85)}
-.one-pill{position:absolute;left:0;top:6px;bottom:6px;border-radius:20px;background:color-mix(in srgb,var(--one-c) 20%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--one-c) 38%,transparent),0 0 22px color-mix(in srgb,var(--one-c) 35%,transparent);transition:transform .5s cubic-bezier(.34,1.45,.55,1),width .4s,background .3s,box-shadow .3s}
-/* changement de module : la page glisse du bon côté */
-.one-in{animation:onein .45s cubic-bezier(.2,.9,.3,1) both}.one-in.l{animation-name:oneinl}@keyframes onein{from{opacity:0;transform:translateX(26px)}}@keyframes oneinl{from{opacity:0;transform:translateX(-26px)}}
-@media(prefers-reduced-motion:reduce){.one-in{animation:none}.one-pill,.one-mp{transition:none}}
+.one-pill{position:absolute;left:0;top:6px;bottom:6px;border-radius:20px;background:color-mix(in srgb,var(--one-c) 20%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--one-c) 38%,transparent),0 0 22px color-mix(in srgb,var(--one-c) 32%,transparent);transition:background .3s,box-shadow .3s}
+
+/* coach IA : la discussion */
+.one-ai{position:fixed;inset:0;z-index:95}.one-ai-bg{position:absolute;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;transition:opacity .3s}
+.one-ai-card{position:absolute;left:0;right:0;bottom:0;top:calc(10px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;background:var(--bg);border-radius:26px 26px 0 0;border:1px solid var(--line);transform:translateY(100%);transition:transform .45s cubic-bezier(.2,.9,.25,1);overflow:hidden}
+.one-ai.on .one-ai-bg{opacity:1}.one-ai.on .one-ai-card{transform:none}
+.one-ai-card header{display:flex;align-items:center;gap:10px;padding:14px 14px 12px;border-bottom:1px solid var(--line)}
+.one-ai-ic{width:38px;height:38px;border-radius:13px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#7c5cff,#e0529c)}
+.one-ai-card header div{flex:1;min-width:0}.one-ai-card header b{display:block;font-size:1.05rem}.one-ai-card header small{color:var(--fg2);font-size:.78rem}
+.one-ai-new{border:1px solid var(--line);background:none;color:var(--fg2);border-radius:99px;padding:7px 12px;font:inherit;font-size:.78rem;font-weight:600;cursor:pointer}
+.one-ai-x{width:38px;height:38px;border:0;border-radius:50%;background:var(--card2,rgba(127,127,127,.15));color:var(--fg);font-size:1.4rem;line-height:1;cursor:pointer}
+.one-ai-log{flex:1;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:8px;overscroll-behavior:contain}
+.one-ai-hi{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px}.one-ai-hi p{margin:6px 0 0;color:var(--fg2);font-size:.9rem;line-height:1.45}
+.one-b{max-width:88%;padding:10px 14px;border-radius:19px;font-size:.95rem;line-height:1.45;animation:oneb .3s cubic-bezier(.2,1.2,.4,1) both;overflow-wrap:anywhere}
+.one-b.me{align-self:flex-end;background:linear-gradient(135deg,#7c5cff,#5b6cff);color:#fff;border-bottom-right-radius:6px}
+.one-b.it{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:6px}.one-b.err{color:var(--warn,#ffd60a)}
+@keyframes oneb{from{opacity:0;transform:translateY(8px) scale(.97)}}
+.one-b.typing{display:flex;gap:5px;padding:14px 16px}.one-b.typing i{width:7px;height:7px;border-radius:50%;background:var(--fg3);animation:onedot 1s infinite}.one-b.typing i:nth-child(2){animation-delay:.15s}.one-b.typing i:nth-child(3){animation-delay:.3s}
+@keyframes onedot{50%{opacity:.3;transform:translateY(-3px)}}
+.one-sugs{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.one-sugs button{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:14px;padding:8px 12px;font:inherit;font-size:.82rem;text-align:left;cursor:pointer}
+.one-ai-f{display:flex;gap:8px;align-items:flex-end;padding:10px 12px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+.one-ai-f textarea{flex:1;min-width:0;resize:none;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:20px;padding:11px 15px;font:inherit;font-size:1rem;line-height:1.35;max-height:120px;outline:none}
+.one-ai-f button{flex:none;width:44px;height:44px;border:0;border-radius:50%;background:linear-gradient(135deg,#7c5cff,#5b6cff);color:#fff;font-size:1.2rem;font-weight:800;cursor:pointer}
+@media(min-width:900px){.one-ai-card{left:50%;right:auto;width:640px;top:5vh;bottom:5vh;border-radius:26px;transform:translate(-50%,40px);opacity:0;transition:transform .4s cubic-bezier(.2,.9,.25,1),opacity .3s}.one-ai.on .one-ai-card{transform:translate(-50%,0);opacity:1}}
+
+/* plannings T · N · R : même format ; un jour passé est entièrement grisé, séances faites comprises */
+html.one .sboard .bcell.past{filter:grayscale(1);opacity:.42}
+html.one .sboard .bcell.past *{color:var(--fg3)!important}
+html.one .sboard .bplus{font-weight:600}
+
+/* Nutrition · vue Jour : le grand chiffre centré, sans le doublon en haut à droite */
+html.one .card:has(.dayv) .chead .num{display:none}
+html.one .dayv{display:flex;flex-direction:column;align-items:center;text-align:center}
+
+/* questionnaire du jour, habillé plus moderne */
+html.one #sheet.one-qs .sheet-card{background:linear-gradient(180deg,color-mix(in srgb,var(--one-c) 14%,var(--bg)) 0,var(--bg) 220px)}
+html.one #sheet.one-qs .qh{display:flex;align-items:center;gap:10px;font-size:1.15rem;margin-top:22px}
+html.one #sheet.one-qs .qh:before{content:'';width:4px;height:20px;border-radius:4px;background:var(--one-c)}
+html.one #sheet.one-qs .sec-label{letter-spacing:.1em}
+html.one #sheet.one-qs .seg{border-radius:14px}html.one #sheet.one-qs .seg button{border-radius:11px;transition:background .25s,color .25s,transform .25s cubic-bezier(.34,1.56,.64,1)}
+html.one #sheet.one-qs .seg button:active{transform:scale(.94)}
+html.one #sheet.one-qs .seg button[aria-pressed="true"],html.one #sheet.one-qs .seg button.on{background:var(--one-c)!important;color:#fff!important;box-shadow:0 4px 14px color-mix(in srgb,var(--one-c) 40%,transparent)}
+html.one #sheet.one-qs .pck{border-radius:16px;transition:transform .25s cubic-bezier(.34,1.56,.64,1),background .25s,border-color .25s}
+html.one #sheet.one-qs .pck:active{transform:scale(.96)}
+html.one #sheet.one-qs .list{border-radius:18px;overflow:hidden}
+html.one #sheet.one-qs .row{transition:background .2s}
+@media(prefers-reduced-motion:reduce){.one-b,.one-ai-card,.one-ai-bg{animation:none;transition:none}}
