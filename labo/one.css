@@ -102,4 +102,9 @@ html.one.one-home .one-mp{opacity:0}
 html.one #mod-home .hm-dock,html.one #mod-home .hm-pcmods{display:none!important}
 html.one #one-tabs button[data-one-h]{position:relative;z-index:1;flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;background:none;color:var(--fg3);font:inherit;font-size:.625rem;font-weight:600;cursor:pointer;padding:0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 html.one #one-tabs button[data-one-h] svg{width:22px;height:22px;flex:none}html.one #one-tabs button[data-one-h].on{color:var(--fg)}
-html.one #mod-home #hm-head{margin-top:56px}
+html.one #mod-home #hm-head{margin-top:56px;overflow:visible}
+/* Accueil : T N R bien au milieu de leur bulle ; le bouton IA dans le coin en haut à gauche, à la même hauteur que la barre. */
+html.one.one-home .one-mods button{justify-content:center}
+html.one.one-home .one-mods button b{height:28px;line-height:1;padding-bottom:2px;box-sizing:border-box}
+.one-hai{position:fixed;z-index:31;left:calc(8px + env(safe-area-inset-left,0px));top:calc(8px + env(safe-area-inset-top,0px));opacity:0;pointer-events:none;transform:scale(.6);transition:opacity .35s,transform .45s cubic-bezier(.34,1.56,.64,1)}
+html.one.one-home .one-hai{opacity:1;pointer-events:auto;transform:none}
