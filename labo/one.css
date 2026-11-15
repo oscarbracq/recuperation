@@ -1,0 +1,26 @@
+/* ================= TNR LABO : une seule entrée, barre flottante en verre, sélecteur T · N · R ================= */
+html.one .tabbar,html.one .modmark,html.one .backhome,html.one #pcnav,html.one #mod-home{display:none!important}
+html.one{--tbh:98px!important;--pcw:0px!important}
+html.one.pc body{padding-left:0!important}
+/* sélecteur de module, en haut */
+.one-top{position:fixed;z-index:30;top:calc(8px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);width:calc(100% - 24px);max-width:470px;display:flex;gap:8px;pointer-events:none}.one-mods{flex:1;min-width:0}
+.one-q{pointer-events:auto;flex:none;width:44px;height:44px;border-radius:16px;display:grid;place-items:center;color:var(--fg);background:color-mix(in srgb,var(--one-c) 22%,var(--card,#1c1c1e));backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid color-mix(in srgb,var(--one-c) 40%,transparent);box-shadow:0 8px 28px rgba(0,0,0,.28);cursor:pointer;transition:transform .3s cubic-bezier(.34,1.56,.64,1)}.one-q:active{transform:scale(.9)}
+.one-mods{position:relative;display:flex;padding:4px;border-radius:18px;background:color-mix(in srgb,var(--card,#1c1c1e) 55%,transparent);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);border:1px solid rgba(127,127,127,.18);box-shadow:0 8px 28px rgba(0,0,0,.28);pointer-events:auto}
+.one-mods button{position:relative;z-index:1;flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:36px;border:0;background:none;border-radius:14px;color:var(--fg2);font:inherit;font-size:.8125rem;font-weight:600;cursor:pointer;transition:color .3s}
+.one-mods button b{display:grid;place-items:center;width:22px;height:22px;border-radius:7px;font-size:.8rem;font-weight:800;color:#fff;background:var(--c);opacity:.55;transition:opacity .3s,transform .4s cubic-bezier(.34,1.56,.64,1)}
+.one-mods button.on{color:var(--fg)}.one-mods button.on b{opacity:1;transform:scale(1.08)}
+.one-mp{position:absolute;left:0;top:4px;bottom:4px;border-radius:14px;background:color-mix(in srgb,var(--one-c) 20%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--one-c) 40%,transparent),0 0 18px color-mix(in srgb,var(--one-c) 30%,transparent);transition:transform .5s cubic-bezier(.34,1.45,.55,1),width .4s,background .3s,box-shadow .3s}
+@media(max-width:360px){.one-mods button span{display:none}}
+/* place pour le sélecteur au-dessus des pages */
+html.one .mm-space{height:46px!important}
+html.one #mod-R>.view,html.one #v-today,html.one #v-trends,html.one #v-rsess,html.one #v-rlib,html.one #v-reports,html.one #v-profile{scroll-margin-top:60px}
+/* barre d'onglets flottante en verre */
+.one-tabs{position:fixed;z-index:30;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom,0px));width:calc(100% - 24px);max-width:560px;height:68px;display:flex;padding:6px;border-radius:26px;background:color-mix(in srgb,var(--card,#1c1c1e) 50%,transparent);backdrop-filter:blur(26px) saturate(1.8);-webkit-backdrop-filter:blur(26px) saturate(1.8);border:1px solid rgba(127,127,127,.2);box-shadow:0 14px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.06)}
+.one-tabs button{position:relative;z-index:1;flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;background:none;color:var(--fg3);font:inherit;font-size:.625rem;font-weight:600;cursor:pointer;transition:color .3s;padding:0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.one-tabs button svg{width:22px;height:22px;flex:none;transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
+.one-tabs button.on{color:var(--fg)}.one-tabs button.on svg{color:var(--one-c);transform:translateY(-1px) scale(1.1);filter:drop-shadow(0 0 6px color-mix(in srgb,var(--one-c) 70%,transparent))}
+.one-tabs button:active svg{transform:scale(.85)}
+.one-pill{position:absolute;left:0;top:6px;bottom:6px;border-radius:20px;background:color-mix(in srgb,var(--one-c) 20%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--one-c) 38%,transparent),0 0 22px color-mix(in srgb,var(--one-c) 35%,transparent);transition:transform .5s cubic-bezier(.34,1.45,.55,1),width .4s,background .3s,box-shadow .3s}
+/* changement de module : la page glisse du bon côté */
+.one-in{animation:onein .45s cubic-bezier(.2,.9,.3,1) both}.one-in.l{animation-name:oneinl}@keyframes onein{from{opacity:0;transform:translateX(26px)}}@keyframes oneinl{from{opacity:0;transform:translateX(-26px)}}
+@media(prefers-reduced-motion:reduce){.one-in{animation:none}.one-pill,.one-mp{transition:none}}

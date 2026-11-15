@@ -1,13 +1,13 @@
-# Builds the LABO version (labo/index.html): the same engine (sprint-lab.html) with a new app on top
-# (labo/nx.js + labo/nx.css) and a sandbox (labo/nx-head.js) so nothing reaches the real account.
+# Builds the LABO version (labo/index.html): the main app (sprint-lab.html), entered in one place
+# (labo/one.js + labo/one.css: floating tab bar, T/N/R switch) and a sandbox (labo/nx-head.js) so nothing reaches the real account.
 # Run from the app folder:  python -I labo/build-labo.py
 # The main app is rebuilt afterwards, so index.html at the root stays the real app.
 import os, re, shutil, subprocess
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
 src = open('sprint-lab.html', encoding='utf-8', newline='').read()
-css = open('labo/nx.css', encoding='utf-8').read()
-js = open('labo/nx.js', encoding='utf-8').read()
+css = open('labo/one.css', encoding='utf-8').read()
+js = open('labo/one.js', encoding='utf-8').read()
 head = open('labo/nx-head.js', encoding='utf-8').read()
 i = src.index('</style>'); src = src[:i] + css + src[i:]
 j = src.rindex('</script>'); src = src[:j] + '\n' + js + '\n' + src[j:]
