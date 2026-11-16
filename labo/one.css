@@ -27,19 +27,23 @@ html.one :is(#t-view,#f-view,#v-today,#v-trends,#v-rsess,#v-rlib,#v-reports,#v-p
 html.one :is(#t-view,#f-view,#v-today,#v-trends,#v-rsess,#v-rlib,#v-reports,#v-profile)>header.tophead{flex-direction:row;align-items:flex-end;justify-content:space-between;gap:10px}
 html.one header.tophead>div:first-child{min-width:0}html.one header.tophead .unitseg{flex:none;width:auto;margin:0 0 4px}
 html.one .one-segsp{height:var(--one-segh,40px)}
-/* Le fond de couleur bouge tout doucement, dans tous les sens, comme un écran au repos. */
-/* Les 4 taches partent du centre et se promènent dans tout l'écran (coins, bords, milieu), chacune à son rythme : jamais deux fois
-   le même dessin. Elles sont les mêmes en T, N et R : seule leur couleur change, en fondu. */
-html.one .aura span{animation-play-state:running!important;left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;width:62vmax!important;height:62vmax!important;margin:-31vmax 0 0 -31vmax;transition:background-color 1.2s ease}
-html.one .aura span:nth-child(4){width:48vmax!important;height:48vmax!important;margin:-24vmax 0 0 -24vmax}
-html.one .aura span:nth-child(1){animation:onew1 96s ease-in-out -11s infinite!important}
-html.one .aura span:nth-child(2){animation:onew2 113s ease-in-out -47s infinite!important}
-html.one .aura span:nth-child(3){animation:onew3 127s ease-in-out -83s infinite!important}
-html.one .aura span:nth-child(4){animation:onew4 141s ease-in-out -29s infinite!important}
-@keyframes onew1{0%,100%{transform:translate(-36vw,-36vh) scale(1)}12%{transform:translate(18vw,-40vh) scale(1.12)}25%{transform:translate(40vw,-6vh) scale(.92)}37%{transform:translate(12vw,30vh) scale(1.06)}50%{transform:translate(-30vw,40vh) scale(.95)}62%{transform:translate(-40vw,2vh) scale(1.1)}75%{transform:translate(-2vw,-22vh) scale(.9)}87%{transform:translate(30vw,20vh) scale(1.05)}}
-@keyframes onew2{0%,100%{transform:translate(36vw,32vh) scale(1)}13%{transform:translate(4vw,42vh) scale(.92)}26%{transform:translate(-36vw,26vh) scale(1.1)}40%{transform:translate(-32vw,-22vh) scale(.96)}54%{transform:translate(0,-40vh) scale(1.08)}68%{transform:translate(38vw,-30vh) scale(.9)}82%{transform:translate(20vw,4vh) scale(1.06)}91%{transform:translate(-8vw,16vh) scale(.98)}}
-@keyframes onew3{0%,100%{transform:translate(-32vw,36vh) scale(1.05)}14%{transform:translate(-40vw,-8vh) scale(.92)}29%{transform:translate(-10vw,-38vh) scale(1.1)}44%{transform:translate(32vw,-26vh) scale(.95)}58%{transform:translate(40vw,14vh) scale(1.08)}72%{transform:translate(14vw,40vh) scale(.9)}86%{transform:translate(-16vw,10vh) scale(1.04)}}
-@keyframes onew4{0%,100%{transform:translate(32vw,-36vh) scale(1)}16%{transform:translate(0,-12vh) scale(1.1)}33%{transform:translate(-36vw,-30vh) scale(.92)}50%{transform:translate(-22vw,22vh) scale(1.06)}66%{transform:translate(20vw,40vh) scale(.94)}83%{transform:translate(40vw,2vh) scale(1.08)}}
+/* Fond « Aurore » (choisi dans labo/fonds) : 3 grandes taches de couleur floues qui se promènent dans tout l'écran.
+   Elles sont les mêmes en T, N et R : seules leurs couleurs changent, en fondu lent. */
+@property --o1{syntax:'<color>';inherits:true;initial-value:#0A84FF}
+@property --o2{syntax:'<color>';inherits:true;initial-value:#5E5CE6}
+@property --o3{syntax:'<color>';inherits:true;initial-value:#64D2FF}
+html.one{--o1:#0A84FF;--o2:#FF3B30;--o3:#30D158;transition:--o1 1.6s ease,--o2 1.6s ease,--o3 1.6s ease}
+html.one[data-mod="T"]{--o1:#FF3B30;--o2:#FF9F0A;--o3:#FF375F}
+html.one[data-mod="N"]{--o1:#30D158;--o2:#63E6BE;--o3:#0FB9A6}
+html.one[data-mod="R"]{--o1:#0A84FF;--o2:#5E5CE6;--o3:#64D2FF}
+html.one .aura span{animation-play-state:running!important;left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;width:70vmax!important;height:70vmax!important;margin:-35vmax 0 0 -35vmax;border-radius:50%;filter:blur(70px)!important;opacity:calc(.55 * var(--aura-k,1))!important}
+html.one .aura span:nth-child(1){background:var(--o1)!important;animation:ro1 70s ease-in-out infinite!important}
+html.one .aura span:nth-child(2){background:var(--o2)!important;animation:ro2 83s ease-in-out -30s infinite!important}
+html.one .aura span:nth-child(3){background:var(--o3)!important;animation:ro3 97s ease-in-out -60s infinite!important;opacity:calc(.4 * var(--aura-k,1))!important}
+html.one .aura span:nth-child(4){display:none}
+@keyframes ro1{0%,100%{transform:translate(-35vw,-35vh)}25%{transform:translate(35vw,-25vh)}50%{transform:translate(25vw,35vh)}75%{transform:translate(-30vw,25vh)}}
+@keyframes ro2{0%,100%{transform:translate(35vw,30vh)}25%{transform:translate(-30vw,35vh)}50%{transform:translate(-35vw,-30vh)}75%{transform:translate(30vw,-35vh)}}
+@keyframes ro3{0%,100%{transform:translate(0,-40vh) scale(.8)}33%{transform:translate(-38vw,10vh) scale(1.1)}66%{transform:translate(38vw,20vh) scale(.9)}}
 @media(prefers-reduced-motion:reduce){html.one .aura span{animation:none!important}}
 
 /* barre d'onglets flottante en verre */
