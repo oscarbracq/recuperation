@@ -28,14 +28,18 @@ html.one :is(#t-view,#f-view,#v-today,#v-trends,#v-rsess,#v-rlib,#v-reports,#v-p
 html.one header.tophead>div:first-child{min-width:0}html.one header.tophead .unitseg{flex:none;width:auto;margin:0 0 4px}
 html.one .one-segsp{height:var(--one-segh,40px)}
 /* Le fond de couleur bouge tout doucement, dans tous les sens, comme un écran au repos. */
-html.one .aura span{animation-play-state:running!important}
-html.one .aura span:nth-child(1){animation:onew1 31s ease-in-out infinite!important}
-html.one .aura span:nth-child(2){animation:onew2 37s ease-in-out infinite!important}
-html.one .aura span:nth-child(3){animation:onew3 43s ease-in-out infinite!important}
-html.one .aura span:nth-child(4){animation:onew2 53s ease-in-out infinite reverse!important}
-@keyframes onew1{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(16vmax,9vmax) scale(1.14)}50%{transform:translate(7vmax,24vmax) scale(.94)}75%{transform:translate(-9vmax,11vmax) scale(1.08)}}
-@keyframes onew2{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(-14vmax,-10vmax) scale(.9)}50%{transform:translate(-22vmax,6vmax) scale(1.12)}75%{transform:translate(-6vmax,14vmax) scale(.97)}}
-@keyframes onew3{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(12vmax,-14vmax) scale(1.1)}50%{transform:translate(22vmax,-4vmax) scale(.92)}75%{transform:translate(8vmax,8vmax) scale(1.05)}}
+/* Les 4 taches partent du centre et se promènent dans tout l'écran (coins, bords, milieu), chacune à son rythme : jamais deux fois
+   le même dessin. Elles sont les mêmes en T, N et R : seule leur couleur change, en fondu. */
+html.one .aura span{animation-play-state:running!important;left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;width:62vmax!important;height:62vmax!important;margin:-31vmax 0 0 -31vmax;transition:background-color 1.2s ease}
+html.one .aura span:nth-child(4){width:48vmax!important;height:48vmax!important;margin:-24vmax 0 0 -24vmax}
+html.one .aura span:nth-child(1){animation:onew1 96s ease-in-out -11s infinite!important}
+html.one .aura span:nth-child(2){animation:onew2 113s ease-in-out -47s infinite!important}
+html.one .aura span:nth-child(3){animation:onew3 127s ease-in-out -83s infinite!important}
+html.one .aura span:nth-child(4){animation:onew4 141s ease-in-out -29s infinite!important}
+@keyframes onew1{0%,100%{transform:translate(-36vw,-36vh) scale(1)}12%{transform:translate(18vw,-40vh) scale(1.12)}25%{transform:translate(40vw,-6vh) scale(.92)}37%{transform:translate(12vw,30vh) scale(1.06)}50%{transform:translate(-30vw,40vh) scale(.95)}62%{transform:translate(-40vw,2vh) scale(1.1)}75%{transform:translate(-2vw,-22vh) scale(.9)}87%{transform:translate(30vw,20vh) scale(1.05)}}
+@keyframes onew2{0%,100%{transform:translate(36vw,32vh) scale(1)}13%{transform:translate(4vw,42vh) scale(.92)}26%{transform:translate(-36vw,26vh) scale(1.1)}40%{transform:translate(-32vw,-22vh) scale(.96)}54%{transform:translate(0,-40vh) scale(1.08)}68%{transform:translate(38vw,-30vh) scale(.9)}82%{transform:translate(20vw,4vh) scale(1.06)}91%{transform:translate(-8vw,16vh) scale(.98)}}
+@keyframes onew3{0%,100%{transform:translate(-32vw,36vh) scale(1.05)}14%{transform:translate(-40vw,-8vh) scale(.92)}29%{transform:translate(-10vw,-38vh) scale(1.1)}44%{transform:translate(32vw,-26vh) scale(.95)}58%{transform:translate(40vw,14vh) scale(1.08)}72%{transform:translate(14vw,40vh) scale(.9)}86%{transform:translate(-16vw,10vh) scale(1.04)}}
+@keyframes onew4{0%,100%{transform:translate(32vw,-36vh) scale(1)}16%{transform:translate(0,-12vh) scale(1.1)}33%{transform:translate(-36vw,-30vh) scale(.92)}50%{transform:translate(-22vw,22vh) scale(1.06)}66%{transform:translate(20vw,40vh) scale(.94)}83%{transform:translate(40vw,2vh) scale(1.08)}}
 @media(prefers-reduced-motion:reduce){html.one .aura span{animation:none!important}}
 
 /* barre d'onglets flottante en verre */

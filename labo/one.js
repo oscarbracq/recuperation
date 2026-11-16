@@ -233,8 +233,12 @@ tToday = () => {
 
 /* ---------- Ouverture : le T, le N et le R du logo se séparent et vont se poser dans leurs carrés, en haut ---------- */
 window.ONE_SPLASH = function (el, svg, bars) {
+  // L'écran d'ouverture relance son départ au bout de 0,9 s s'il est encore là (sécurité prévue pour l'ancien zoom) :
+  // une seule envolée, sinon le fond bleu nuit revenait d'un coup (le flash) et les lettres repartaient.
+  if (ONE.spl) return true;
   const tg = [...document.querySelectorAll('#one-top .one-mods button b')], ps = svg.querySelectorAll('path');
   if (tg.length !== 3 || ps.length < 4 || oneCalm()) return false;
+  ONE.spl = true;
   // L'appli s'ouvre sur l'Accueil : on mesure la barre dans sa forme finale (T N R serrés), sans attendre ses transitions.
   const de = document.documentElement; de.classList.add('one-home', 'one-notr'); void de.offsetWidth;
   const ink = tg.map(oneInk); de.classList.remove('one-notr');
