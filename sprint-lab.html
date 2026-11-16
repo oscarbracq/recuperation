@@ -660,7 +660,10 @@ svg.body.sil .rg.on{stroke:none;fill:transparent}
 .plw-r{flex:1;position:relative;border-top:1px solid var(--line)}
 .plw-r:last-child{border-bottom:1px solid var(--line)}
 .plw-r.pltoday{background:color-mix(in srgb,var(--accent) 7%,transparent)}
-.plfs .plw-l{position:absolute;top:0;bottom:0;border-left:1px solid var(--line);opacity:.55}
+.plfs .plw-l{position:absolute;top:0;bottom:0;border-left:1px solid var(--line);opacity:.55}.plfs .plw-l.plq{opacity:.22}.plg-h.plq{opacity:.22}
+/* Le bloc où passe la ligne rouge grandit un peu, vers le haut et le bas (semaine) ou sur les côtés (journée) : jamais sur les blocs voisins. */
+.plw-b{transition:top .4s cubic-bezier(.3,.7,.25,1),bottom .4s cubic-bezier(.3,.7,.25,1),box-shadow .4s}.plw-b.plcur,.pc .plw-b.plcur{top:-3px;bottom:-3px;z-index:3;box-shadow:0 0 0 1.5px rgba(255,255,255,.75),0 6px 16px rgba(0,0,0,.4)}
+.plg-b{transition:left .4s cubic-bezier(.3,.7,.25,1),right .4s cubic-bezier(.3,.7,.25,1),box-shadow .4s}.plg-b.plcur{left:-2px;right:-2px;z-index:3;box-shadow:0 0 0 1.5px rgba(255,255,255,.6),0 6px 16px rgba(0,0,0,.35)}
 .plfs .plw-now{position:absolute;top:0;bottom:0;border-left:2px solid var(--bad);z-index:4;pointer-events:none}
 .plw-b{position:absolute;top:2px;bottom:2px;background:var(--pc);border-radius:3px;padding:0 4px;display:flex;align-items:center;overflow:hidden;font-size:.6875rem;font-weight:600;text-align:left;-webkit-touch-callout:none}
 .plw-b > b{white-space:nowrap;font-weight:600;overflow:hidden;display:block;line-height:1.1}.plw-b{padding:0 2px}
@@ -1075,7 +1078,7 @@ body.bdragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
 .rr-now .rp{height:6px;border-radius:3px;background:var(--card2);overflow:hidden;margin-bottom:14px}.rr-now .rp i{display:block;height:100%;background:var(--accent);transition:width .25s linear}
 .rr-st{width:100%;text-align:left;color:var(--fg);gap:12px;align-items:flex-start}.rr-st .l{flex:1;min-width:0}.rr-st .ck{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--card2);font-size:.8125rem;font-weight:700;color:var(--fg2)}.rr-st .ck svg{width:16px;height:16px}
 .rr-st .d{flex:none;font-size:.8125rem;color:var(--fg2);white-space:nowrap}.rr-st.done{opacity:.55}.rr-st.done .ck{background:var(--good);color:#fff}.rr-st.cur{box-shadow:inset 3px 0 0 var(--accent)}.rr-st.cur .ck{background:var(--accent);color:#fff}
-.ctrow{display:flex;align-items:center;gap:10px;margin:10px 0 2px}.ctrow>span{font-size:.75rem;color:var(--fg2);white-space:nowrap}.ctrow .seg{flex:1;margin:0}.ctrow .seg button{font-size:.75rem;padding:6px 2px}
+.ctrow{display:flex;flex-direction:column;align-items:stretch;gap:6px;margin:10px 0 2px}.ctrow>span{font-size:.75rem;color:var(--fg2);white-space:nowrap}.ctrow .seg{flex:none;width:100%;min-width:0;margin:0;box-sizing:border-box}.ctrow .seg button{min-width:0;font-size:.6875rem;padding:6px 1px;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ctline{display:flex;align-items:center;justify-content:space-between;margin:6px 2px 2px;font-size:.8125rem;color:var(--fg2)}
 .drawer-scrim{position:fixed;inset:0;z-index:59;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .3s}
 .drawer-scrim.on{opacity:1;pointer-events:auto}
@@ -3270,10 +3273,10 @@ function plfsRender() {
   const used = [...new Set(all.map(x => x.c))].filter(c => PCAT[c]);
   const hours = []; for (let t = t0; t <= t1; t += 60) hours.push(t);
   const nowM = new Date().getHours() * 60 + new Date().getMinutes();
-  const col = ({wd, k, L}) => `<div class="plg-col${k === TODAY ? ' pltoday' : ''}" data-plcol="${wd}">${hours.map(t => `<i class="plg-h" style="top:${(t - t0) * K}px"></i>`).join('')}
+  const col = ({wd, k, L}) => `<div class="plg-col${k === TODAY ? ' pltoday' : ''}" data-plcol="${wd}">${hours.map(t => `<i class="plg-h" style="top:${(t - t0) * K}px"></i>`).join('')}${plQuarters(t0, t1).map(t => `<i class="plg-h plq" style="top:${(t - t0) * K}px"></i>`).join('')}
       ${L.map(x => { const a = tmin(x.a), b = tmin(x.b), h = (b - a) * K, short = h < 30, i = plIdx(x, wd, k), on = !week && PLD.sel === String(i), sp = (x.c === 'muscu' || x.c === 'athle') && planFor(k)?.kind === (x.c === 'muscu' ? 'gym' : 'track') ? planFor(k) : null;
         const chp = short || week ? '' : plChip(x, k), mid = !!chp && h < 76;
-        return `<button class="plg-b${short ? ' short' : ''}${mid ? ' mid' : ''}${on ? ' sel' : ''}" data-plsel="${i}" data-plwd="${wd}" style="--pc:${PCAT[x.c]?.[1] || '#888'};top:${(a - t0) * K}px;height:${Math.max(h - 1, 8)}px"><b>${esc(x.n)}</b>${short ? '' : `<small>${x.a} – ${x.b}${x.date && !x.rs ? ' · ce jour' : ''}${x.trip ? ' · ' + esc(x.trip) : ''}</small>${chp}`}${on ? '<span class="plg-hd t" data-plhv="a"></span><span class="plg-hd b" data-plhv="b"></span>' : ''}</button>`; }).join('')}
+        return `<button class="plg-b${short ? ' short' : ''}${mid ? ' mid' : ''}${on ? ' sel' : ''}${k === TODAY && a <= nowM && nowM < b ? ' plcur' : ''}" data-plsel="${i}" data-plwd="${wd}"${k === TODAY ? ` data-pa="${a}" data-pb="${b}"` : ''} style="--pc:${PCAT[x.c]?.[1] || '#888'};top:${(a - t0) * K}px;height:${Math.max(h - 1, 8)}px"><b>${esc(x.n)}</b>${short ? '' : `<small>${x.a} – ${x.b}${x.date && !x.rs ? ' · ce jour' : ''}${x.trip ? ' · ' + esc(x.trip) : ''}</small>${chp}`}${on ? '<span class="plg-hd t" data-plhv="a"></span><span class="plg-hd b" data-plhv="b"></span>' : ''}</button>`; }).join('')}
       ${k === TODAY && nowM >= t0 ? `<i class="plg-now" style="top:${(nowM - t0) * K}px"></i>` : ''}</div>`;
   const own = !!PLN().week?.[PLAN_UI.wd];
   el.className = 'plfs on ' + (week ? 'plw' : 'pld1') + (plRot() ? ' rot' : '');
@@ -3398,6 +3401,8 @@ function plwInfoHtml(x, wd, a, b) {
   return x ? `<i style="background:${PCAT[x.c]?.[1] || '#888'}"></i><b>${esc(x.n)}${sp ? ' · ' + esc(sp.name) : ''}</b><span>${DAYS_FR[wd]} · ${tfr(tstr(a))} – ${tfr(tstr(b))} · ${b - a >= 60 ? Math.floor((b - a) / 60) + ' h' + ((b - a) % 60 ? ' ' + String((b - a) % 60).padStart(2, '0') : '') : (b - a) + ' min'}</span><small>Tire un bord pour changer la durée · garde le doigt pour déplacer</small>`
     : '<span>Touche une case pour voir ce que c\'est · glisse avec le pouce pour parcourir la journée</span>';
 }
+// Une ligne grise tous les quarts d'heure, sous les blocs (les heures pleines restent un peu plus marquées).
+const plQuarters = (t0, t1) => { const q = []; for (let t = t0 + 15; t < t1; t += 15) if (t % 60) q.push(t); return q; };
 function plwRender(el) {
   const lists = PL_ORDER.map(wd => ({wd, k: plDay(wd), L: shownPlan(plDay(wd))}));
   const all = lists.flatMap(d => d.L);
@@ -3407,9 +3412,9 @@ function plwRender(el) {
   const sel = PLW.sel, sx = sel && plBlockOf(sel.i, sel.wd);
   if (sel && !sx) PLW.sel = null;
   el.className = 'plfs on plw' + (plRot() ? ' rot' : '');
-  const row = ({wd, k, L}) => `<div class="plw-r${k === TODAY ? ' pltoday' : ''}">${hours.map(t => `<i class="plw-l" style="left:calc(${t - t0}px * var(--k))"></i>`).join('')}
+  const row = ({wd, k, L}) => `<div class="plw-r${k === TODAY ? ' pltoday' : ''}">${hours.map(t => `<i class="plw-l" style="left:calc(${t - t0}px * var(--k))"></i>`).join('')}${plQuarters(t0, t1).map(t => `<i class="plw-l plq" style="left:calc(${t - t0}px * var(--k))"></i>`).join('')}
     ${L.map(x => { const a = tmin(x.a), b = tmin(x.b), i = plIdx(x, wd, k), on = sx && sel.wd === wd && String(sel.i) === String(i), c = PCAT[x.c]?.[1] || '#888';
-      return `<button class="plw-b${on ? ' sel' : ''}" data-plrb="${i}" data-plwd="${wd}" aria-label="${esc(x.n)}, ${x.a} – ${x.b}" style="--pc:${c};color:${plInk(c)};left:calc(${a - t0}px * var(--k));width:calc(${b - a}px * var(--k) - 1px)" title="${esc(x.n)}${x.dest ? ' · ' + esc(x.dest) : ''} · ${tfr(x.a)} – ${tfr(x.b)}${x.trip ? ' · ' + esc(x.trip) : ''}"><b>${esc(x.n)}</b><small class="plw-t">${tfr(x.a)} – ${tfr(x.b)}</small>${on ? '<span class="plw-hd a" data-plh="a"></span><span class="plw-hd b" data-plh="b"></span>' : ''}</button>`; }).join('')}
+      return `<button class="plw-b${on ? ' sel' : ''}${k === TODAY && a <= nowM && nowM < b ? ' plcur' : ''}" data-plrb="${i}" data-plwd="${wd}"${k === TODAY ? ` data-pa="${a}" data-pb="${b}"` : ''} aria-label="${esc(x.n)}, ${x.a} – ${x.b}" style="--pc:${c};color:${plInk(c)};left:calc(${a - t0}px * var(--k));width:calc(${b - a}px * var(--k) - 1px)" title="${esc(x.n)}${x.dest ? ' · ' + esc(x.dest) : ''} · ${tfr(x.a)} – ${tfr(x.b)}${x.trip ? ' · ' + esc(x.trip) : ''}"><b>${esc(x.n)}</b><small class="plw-t">${tfr(x.a)} – ${tfr(x.b)}</small>${on ? '<span class="plw-hd a" data-plh="a"></span><span class="plw-hd b" data-plh="b"></span>' : ''}</button>`; }).join('')}
     ${k === TODAY && nowM >= t0 ? `<i class="plw-now" style="left:calc(${nowM - t0}px * var(--k))"></i>` : ''}</div>`;
   el.innerHTML = `<div class="plfs-in">
     <header class="plfs-top"><button class="plfs-ic" data-plx aria-label="Fermer le planning"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
@@ -3437,6 +3442,7 @@ setInterval(() => {
   const nowM = new Date().getHours() * 60 + new Date().getMinutes(), K = +el.dataset.k || 1;
   const n = el.querySelector('.plw-now'); if (n) { n.style.left = `calc(${nowM}px * var(--k))`;
     if (PLW.auto != null && Math.abs(PLW.px - PLW.auto) < 1) { plwSetPx(el, (isPC() ? Math.max(nowM - 180, 0) : Math.max(Math.min(nowM - 90, 21 * 60), 7 * 60)) * K); PLW.auto = PLW.px; } }
+  el.querySelectorAll('[data-pa]').forEach(b => b.classList.toggle('plcur', +b.dataset.pa <= nowM && nowM < +b.dataset.pb));
   const g = el.querySelector('.plg-now'); if (g) { g.style.top = nowM * K + 'px'; const sc = el.querySelector('.plg-scroll');
     if (sc && PLFS.autoTop != null && Math.abs(sc.scrollTop - PLFS.autoTop) < 2) { sc.scrollTop = Math.max(0, (nowM - 100) * K); PLFS.autoTop = sc.scrollTop; } }
 }, 30000);
@@ -6353,8 +6359,8 @@ function planCheck(items) {
     const e = exOf(it.ex);
     if (it.ex === 'warmup' || it.min) continue;
     if (e.t === 'track') { const n = +it.reps || 0; sets += 1; reps += n; sec += n * (+it.dist || 0) / 7.5; continue; }
-    const n = (+it.sets || 0), r = +it.reps || 0, secs = unitOf(it) === 's';
-    sets += n; reps += n * (secs ? r / 3 : r); sec += n * (secs ? r : r * 3);
+    const n = (+it.sets || 0), r = +it.reps || 0, secs = unitOf(it) === 's', mt = unitOf(it) === 'm';
+    sets += n; reps += n * (mt ? 1 : secs ? r / 3 : r); sec += n * (mt ? r / 4 : secs ? r : r * 3);
     if (!ACCESSORY(e) && it.pct) { iw += it.pct * n * r; ir += n * r; }
   }
   const avg = ir ? iw / ir : null, min = sec / 60, warn = [];
@@ -6486,6 +6492,11 @@ const logs = () => Object.values(S.logs).filter(l => !l.deleted && ((l.name = (l
 const logsOn = k => logs().filter(l => l.date === k);
 function estMin(p) { return Math.round(((p.warm ? warmMin(p.warm) : 0) + (p.cool?.min || 0) + (p.tech ? 15 : 0) + p.items.reduce((s, it) => s + (it.min || 0) + (it.sets || it.reps || 0) * (((it.rest || 60) + (it.dist ? it.dist / 6 : 40)) / 60) + (it.seq && it.brest ? it.brest * ((it.blocks || 1) - 1) / 60 : 0), 0)) / 5) * 5; }
 const unitOf = it => it.ct === 'iso' ? 's' : it.u || (exOf(it.ex).u === 's' ? 's' : 'reps');
+// Répétitions, secondes (2:00 s'écrit avec deux points) ou mètres (poussée de traîneau : 20 m, 4 fois).
+const U_NEXT = {reps: 's', s: 'm', m: 'reps'}, U_LBL = {reps: 'Répét.', s: 'Secondes', m: 'Mètres'};
+const secIn = v => v == null || v === '' ? '' : +v < 60 ? String(v) : `${Math.floor(v / 60)}:${String(v % 60).padStart(2, '0')}`;
+const uVal = (it, v) => unitOf(it) === 's' ? (+v >= 60 ? secIn(+v) : v + ' s') : unitOf(it) === 'm' ? v + ' m' : String(v);
+function secParse(v) { const t = String(v || '').trim().replace(/[,.;]/g, ':'); let m = t.match(/^(\d+):(\d{0,2})$/); if (m) return +m[1] * 60 + (m[2].length === 1 ? +m[2] * 10 : +(m[2] || 0)); m = t.match(/^(\d+)$/); return m ? +m[1] : null; }
 const CT = [['', 'Classique'], ['conc', 'Concentrique'], ['exc', 'Excentrique'], ['iso', 'Isométrique']];
 const CT_F = {conc: .7, exc: 1.35, iso: .75};
 const ctName = c => (CT.find(x => x[0] === (c || ''))?.[1] || 'Classique').toLowerCase();
@@ -6495,7 +6506,7 @@ function itemText(it) {
   if (it.min) return it.min + ' min';
   if (it.seq) return `${it.seq.length > 1 ? it.seq.join(' + ') + ' m × ' + it.blocks + ' blocs' : it.blocks + ' × ' + it.seq[0] + ' m'}${it.pct ? ' · ' + it.pct + ' %' : ''}${it.brest && it.seq.length > 1 ? ' · ' + fmtRest(it.brest) + ' entre blocs' : ''}`;
   if (e.t === 'track') return `${it.reps} × ${it.dist} m${it.pct ? ' · ' + it.pct + ' %' : ''}`;
-  return `${it.sets} × ${it.reps}${unitOf(it) === 's' ? ' s' : ''}${it.ct && it.ct !== 'iso' ? ' · ' + ctName(it.ct) : it.ct === 'iso' ? ' · isométrique' : ''}${it.pct ? ' · ' + it.pct + ' %' : ''}${it.kg ? ' · ' + fx(it.kg, 1) + ' kg' : ''}${it.rpe ? ' · RPE ' + it.rpe : ''}${it.note ? ' · ' + it.note : ''}`;
+  return `${it.sets} × ${uVal(it, it.reps)}${it.ct && it.ct !== 'iso' ? ' · ' + ctName(it.ct) : it.ct === 'iso' ? ' · isométrique' : ''}${it.pct ? ' · ' + it.pct + ' %' : ''}${it.kg ? ' · ' + fx(it.kg, 1) + ' kg' : ''}${it.rpe ? ' · RPE ' + it.rpe : ''}${it.note ? ' · ' + it.note : ''}`;
 }
 
 /* ---------- history, records and suggested loads ---------- */
@@ -6505,7 +6516,7 @@ function exHistory(id, g = curGym()) { const m = g && machineEx(id), out = []; f
 // otherwise sets up to 12 reps are used.
 function bestE1rm(id, g = curGym()) {
   let lo = 0, hi = 0;
-  for (const {it} of exHistory(id, g)) if (unitOf(it) !== 's') for (const s of it.sets || []) {
+  for (const {it} of exHistory(id, g)) if (unitOf(it) === 'reps') for (const s of it.sets || []) {
     const kg = +s.kg, r = +s.reps; if (!(kg > 0 && r > 0)) continue;
     const rir = s.rpe !== undefined && s.rpe !== '' && s.rpe != null ? Math.max(0, 10 - +s.rpe) : s.rir !== undefined && s.rir !== '' && s.rir != null ? +s.rir : 0, v = e1rm(kg, r + rir);
     if (r <= 5) lo = Math.max(lo, v); else if (r <= 12) hi = Math.max(hi, v);
@@ -6514,7 +6525,7 @@ function bestE1rm(id, g = curGym()) {
 }
 function lastText(id) {
   const h = exHistory(id)[0]; if (!h) return '';
-  if (h.it.sets) { const s = h.it.sets; return `Dernière fois (${short(h.date)}) : ${s.map(x => (x.kg ? fx(x.kg, x.kg % 1 ? 1 : 0) + ' × ' : '') + x.reps + (unitOf(h.it) === 's' ? ' s' : '')).join(', ')}`; }
+  if (h.it.sets) { const s = h.it.sets; return `Dernière fois (${short(h.date)}) : ${s.map(x => (x.kg ? fx(x.kg, x.kg % 1 ? 1 : 0) + ' × ' : '') + uVal(h.it, x.reps)).join(', ')}`; }
   const t = h.it.reps.filter(r => r.t); return t.length ? `Dernière fois (${short(h.date)}) : ${t.map(r => fx(r.t, 2) + ' s').join(', ')}` : '';
 }
 // Progression rule: +2.5 % when every set was completed last time, otherwise the same load until it is.
@@ -7816,7 +7827,7 @@ function sessionAuto(ed) {
   for (const it of its) {
     const g = GRP[exOf(it.ex).cat] || 'bas', n = +it.sets || 1; w[g] = (w[g] || 0) + n;
     if (it.pct) { pw += it.pct * n; pn += n; }
-    if (it.reps && unitOf(it) !== 's') { rw += it.reps * n; rn += n; }
+    if (it.reps && unitOf(it) === 'reps') { rw += it.reps * n; rn += n; }
   }
   const tot = Object.values(w).reduce((a, b) => a + b, 0), L = Object.entries(w).sort((a, b) => b[1] - a[1]), [g1, v1] = L[0], g2 = L[1]?.[0];
   const share = v1 / tot, pct = pn ? pw / pn : null, reps = rn ? rw / rn : null;
@@ -7981,6 +7992,7 @@ document.addEventListener('touchend', () => {
 function editPlan(id, date, dup = false) {
   const p = id ? planById(id) : null, mine = p && !BUILTIN.includes(p) && !TDV_PLANS.includes(p) && !dup;
   ED = p ? structuredClone(p) : {kind: S.tkind === 'track' ? 'track' : 'gym', name: '', desc: '', items: [], seqAuto: true};
+  ED.gym = (p && S.tset?.gymPlan?.[p.id]) || null;
   if (ED.kind === 'class') ED.kind = 'gym';
   if (dup) { ED.id = uid(); ED.autoName = false; ED.autoDesc = false; ED.name = (p.name || 'Séance') + ' (copie)'; ED.wk = monday(TODAY); }
   else if (!mine) { ED.id = uid(); ED.autoName = !ED.seqAuto; ED.autoDesc = true; }
@@ -8059,6 +8071,7 @@ function techBox() {
 function editBody() {
   if (!ED) return '';
   const trk = ED.kind === 'track', A = sessionAuto(ED); if (ED.seqAuto) ED.name = 'Séance ' + nextSeq(ED.kind);
+  GYM_CTX = !trk && ED.gym || null;
   const num = (i, f, v, ph) => `<input class="mini-in big" inputmode="decimal" data-ed="${i}.${f}" value="${v ?? ''}" placeholder="${ph}">`;
   const rest = (i, v, ph) => `<input class="mini-in big" inputmode="decimal" data-edrest="${i}" value="${restIn(v)}" placeholder="${ph}">`;
   return `<div class="stack" style="margin-top:16px">
@@ -8067,6 +8080,7 @@ function editBody() {
     <div class="field"><label class="eyebrow" for="ed-name">Nom${ED.autoName ? ' · rempli tout seul' : ''}</label><input id="ed-name" data-ed="name" maxlength="24" value="${esc(ED.autoName ? A.name : ED.name)}" placeholder="Ajoute des exercices : le nom se remplit"></div>
     <div class="field"><label class="eyebrow" for="ed-desc">Objectif${ED.autoDesc ? ' · rempli tout seul' : ''}</label><input id="ed-desc" data-ed="desc" value="${esc(ED.autoDesc ? A.desc : ED.desc || '')}" placeholder="Il suit la logique de tes exercices"></div>
     ${plannedBox()}
+    ${trk ? '' : `<div class="field"><span class="eyebrow">Salle</span><div class="chipsx edgym">${GYMS.map(([g, n]) => `<button type="button" class="chip" data-edgym="${g}" aria-pressed="${ED.gym === g}">${esc(n)}</button>`).join('')}</div><p class="hint" style="margin:4px 2px 0">${ED.gym ? 'Les exercices proposés sont ceux du matériel de cette salle, et tes max sur machine sont ceux de cette salle.' : 'Choisis la salle : tu ne verras que les exercices faisables avec son matériel.'}</p></div>`}
     <h2 class="sesh">Séance</h2>
     <div class="sesbox">
     ${warmBox()}
@@ -8077,7 +8091,7 @@ function editBody() {
       : it.ex === 'warmup' ? `<div class="edrow" style="grid-template-columns:1fr"><label>Minutes${num(i, 'min', it.min, '15')}</label></div>`
         : it.seq ? partBody(it, i, num, rest)
         : e.t === 'track' ? `<div class="edrow"><label>Répét.${num(i, 'reps', it.reps, '4')}</label><label>Distance m${num(i, 'dist', it.dist, '30')}</label><label>Intensité %${num(i, 'pct', it.pct, '95')}</label><label>Récup${rest(i, it.rest, '3:00')}</label></div>`
-        : `<div class="edrow"><label>Séries${num(i, 'sets', it.sets, '3')}</label><label><button type="button" class="hdtog" data-edu="${i}.${unitOf(it) === 's' ? 'reps' : 's'}">${unitOf(it) === 's' ? 'Secondes' : 'Répét.'} ⇄</button>${num(i, 'reps', it.reps, '10')}</label><label>% du max${num(i, 'pct', it.pct, '–')}</label><label>Récup${rest(i, it.rest, '3:00')}</label></div>
+        : `<div class="edrow"><label>${unitOf(it) === 'm' ? 'Fois' : 'Séries'}${num(i, 'sets', it.sets, '3')}</label><label><button type="button" class="hdtog" data-edu="${i}.${U_NEXT[unitOf(it)]}">${U_LBL[unitOf(it)]} ⇄</button>${unitOf(it) === 's' ? `<input class="mini-in big" inputmode="decimal" data-edsec="${i}" value="${secIn(it.reps)}" placeholder="30">` : num(i, 'reps', it.reps, unitOf(it) === 'm' ? '20' : '10')}</label><label>% du max${num(i, 'pct', it.pct, '–')}</label><label>Récup${rest(i, it.rest, '3:00')}</label></div>
           <div class="ctrow"><span>Contraction</span><div class="seg">${CT.map(([c, l]) => `<button type="button" data-edct="${i}.${c}" aria-pressed="${(it.ct || '') === c}">${l}</button>`).join('')}</div></div>
           <div class="tempo"><span>Tempo</span>${['Excentrique', 'Pause bas', 'Concentrique', 'Pause haut'].map((l, j) => `<label>${l}<input class="mini-in" inputmode="numeric" data-edt="${i}.${j}" value="${(it.tempo || [])[j] ?? ''}" placeholder="–"></label>`).join('')}</div>
           ${kg ? `<p class="sug">≈ ${fx(kg, kg % 1 ? 1 : 0)} kg à ${it.pct} % de ton max (${fx(rm)} kg)${recFactor().why}</p>` : rm ? `<p class="hint">Ton max : ${fx(rm)} kg. Mets un % pour avoir la charge.</p>` : ''}`}
@@ -8088,7 +8102,7 @@ function editBody() {
     ${trk ? `<button class="btn ghost" data-edpart>${ED.items.some(x => x.seq) ? '+ Ajouter une partie à la séance principale' : '+ Séance principale'}</button>` : '<button class="btn ghost" data-edadd>+ Ajouter un exercice</button>'}
     ${coolBox()}
     </div>
-    <p class="small muted">Récup : tape 90 pour 90 s, 2 pour 2 min, 1,30 pour 1 min 30. Le % du max se calcule sur ton max (test ou estimation de tes séances).</p></div>`;
+    </div>`;
 }
 const EQUIPS = ['Barre', 'Haltères', 'Kettlebell', 'Machine', 'Poulie', 'Poids du corps', 'Élastique', 'Médecine-ball', 'Barre hexagonale', 'Landmine', 'Barre EZ', 'Smith', 'Box', 'Banc', 'Barre de traction', 'Barres parallèles', 'Traîneau', 'Ballon', 'Haies'];
 const exGroups = kind => [...new Set(EX.filter(e => kind === 'any' || e.t === kind).map(e => e.cat))];
@@ -8129,8 +8143,9 @@ document.addEventListener('click', e => {
 function pickExercise(kind, onPick) {
   const F = {q: '', cat: '', eq: ''};
   const rows = () => {
-    const rec = !F.q && !F.cat && !F.eq ? recentEx(kind) : [];
-    return (rec.length ? `<div class="sec-label">Récents</div><div class="list">${rec.map(id => { const e = exOf(id); return `<button class="rowbtn" data-pk="${id}"><span><b>${esc(e.n)}</b><span class="meta">${esc(e.eq || e.cat)}${exMax(id) ? ' · ' + exMax(id) : ''}</span></span><span class="kc">+</span></button>`; }).join('')}</div>` : '') + exRows(exSearch(F.q, kind, F), 'data-pk');
+    const G = ED && ED.kind === 'gym' && ED.gym, ok = id => !G || exOf(id).t !== 'gym' || gymHas(G, id);
+    const rec = (!F.q && !F.cat && !F.eq ? recentEx(kind) : []).filter(ok);
+    return (G ? `<p class="hint" style="margin:10px 2px 0">Seulement ce qu'on peut faire à ${esc(gymName(G))}.</p>` : '') + (rec.length ? `<div class="sec-label">Récents</div><div class="list">${rec.map(id => { const e = exOf(id); return `<button class="rowbtn" data-pk="${id}"><span><b>${esc(e.n)}</b><span class="meta">${esc(e.eq || e.cat)}${exMax(id) ? ' · ' + exMax(id) : ''}</span></span><span class="kc">+</span></button>`; }).join('')}</div>` : '') + exRows(exSearch(F.q, kind, F).filter(([e]) => ok(e.id)), 'data-pk');
   };
   openPane({title: 'Ajouter un exercice', render: () => `<div style="margin-top:14px"><input class="search" id="pk-q" type="search" placeholder="Rechercher, en français ou en anglais" data-pkq aria-label="Rechercher" value="${esc(F.q)}"></div>${exFilters(F, kind)}<div id="pk-res">${rows()}</div>`,
     pick: id => { closePane(); onPick(id); }, setQ: v => { F.q = v; $('#pk-res').innerHTML = rows(); }, filt: F});
@@ -8183,13 +8198,14 @@ async function savePlan() {
   const A = sessionAuto(ED);
   if (ED.autoName) ED.name = A.name; if (ED.autoDesc) ED.desc = A.desc;
   ED.name = (ED.name || '').trim() || 'Ma séance';
-  const {date, date0, wk, ...doc0} = ED, doc = {...doc0, updatedAt: new Date().toISOString()};
+  const {date, date0, wk, gym, ...doc0} = ED, doc = {...doc0, updatedAt: new Date().toISOString()};
   S.plans[doc.id] = doc;
   await dbSet('plans/' + doc.id, doc);
   const dated = {...(S.tset.dated || {})};
   if (date0 && date0 !== date) for (const k of [date0, date0 + '|t']) if (dated[k] === doc.id) delete dated[k];
   if (date) { for (const k of [date, date + '|t']) if (dated[k] === doc.id) delete dated[k]; dated[dKey(date, doc.kind)] = doc.id; }
-  S.tset = {...S.tset, dated}; await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()});
+  const gymPlan = {...(S.tset.gymPlan || {})}; if (doc.kind === 'gym' && gym) gymPlan[doc.id] = gym; else delete gymPlan[doc.id];
+  S.tset = {...S.tset, dated, gymPlan}; await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()});
   closePane(); if (P.stack.length) closePane();
   toast('Séance enregistrée'); planView(doc.id);
 }
@@ -8283,11 +8299,11 @@ function liveBox(it, i) {
         : `<div class="setrow ${r.done ? 'done' : ''}"><span class="n">${j + 1}</span><input class="mini-in" inputmode="numeric" data-lv="${i}.${j}.dist" value="${r.dist}" placeholder="m" aria-label="Distance">${timed ? `<input class="mini-in" inputmode="decimal" data-lv="${i}.${j}.t" value="${r.t}" placeholder="s" aria-label="Temps en secondes">` : '<span></span>'}<span class="spd">${v}</span>${ok(i + '.' + j, r.done)}</div>`;
     }).join('');
   } else {
-    const prev = exHistory(it.ex)[0]?.it.sets || [], em = effMode(), nu = unitOf(it) === 's' ? 'reps' : 's';
+    const prev = exHistory(it.ex)[0]?.it.sets || [], em = effMode(), nu = U_NEXT[unitOf(it)];
     const effV = st => st[em] != null && st[em] !== '' ? st[em] : em === 'rpe' && st.rir != null && st.rir !== '' ? 10 - st.rir : em === 'rir' && st.rpe != null && st.rpe !== '' ? 10 - st.rpe : '';
-    rows = `<div class="setrow e6 hd"><span>#</span><span>Avant</span><span>${e.u === 'kg' ? 'kg' : e.u === 's' ? '' : '+ kg'}</span><button type="button" class="hdtog" data-tlu="${i}.${nu}" aria-label="Compter en ${nu === 's' ? 'secondes' : 'répétitions'}">${unitOf(it) === 's' ? 'Sec.' : 'Rép.'} ⇄</button><button type="button" class="hdtog" data-tleff aria-label="Noter en ${em === 'rpe' ? 'RIR' : 'RPE'}">${em.toUpperCase()} ⇄</button><span></span></div>` + it.sets.map((s, j) => `<div class="setrow e6 ${s.done ? 'done' : ''}"><span class="n">${j + 1}</span><span class="prev">${prev[j] ? (prev[j].kg ? fx(prev[j].kg, prev[j].kg % 1 ? 1 : 0) + '×' : '') + prev[j].reps : '–'}</span>${e.u === 's' ? '<span></span>' : `<input class="mini-in" inputmode="decimal" data-lv="${i}.${j}.kg" value="${s.kg}" placeholder="${e.u === 'kg' ? 'kg' : '0'}" aria-label="Charge">`}<input class="mini-in" inputmode="numeric" data-lv="${i}.${j}.reps" value="${s.reps}" placeholder="${tg.reps || ''}" aria-label="${unitOf(it) === 's' ? 'Secondes' : 'Répétitions'}"><input class="mini-in eff" inputmode="decimal" data-lv="${i}.${j}.${em}" value="${effV(s)}" placeholder="${em === 'rpe' ? '8' : '2'}" aria-label="${em.toUpperCase()}">${ok(i + '.' + j, s.done)}</div>`).join('');
+    rows = `<div class="setrow e6 hd"><span>#</span><span>Avant</span><span>${e.u === 'kg' ? 'kg' : e.u === 's' ? '' : '+ kg'}</span><button type="button" class="hdtog" data-tlu="${i}.${nu}" aria-label="Compter en ${nu === 's' ? 'secondes' : nu === 'm' ? 'mètres' : 'répétitions'}">${{s: 'Sec.', m: 'Mèt.', reps: 'Rép.'}[unitOf(it)]} ⇄</button><button type="button" class="hdtog" data-tleff aria-label="Noter en ${em === 'rpe' ? 'RIR' : 'RPE'}">${em.toUpperCase()} ⇄</button><span></span></div>` + it.sets.map((s, j) => `<div class="setrow e6 ${s.done ? 'done' : ''}"><span class="n">${j + 1}</span><span class="prev">${prev[j] ? (prev[j].kg ? fx(prev[j].kg, prev[j].kg % 1 ? 1 : 0) + '×' : '') + prev[j].reps : '–'}</span>${e.u === 's' ? '<span></span>' : `<input class="mini-in" inputmode="decimal" data-lv="${i}.${j}.kg" value="${s.kg}" placeholder="${e.u === 'kg' ? 'kg' : '0'}" aria-label="Charge">`}<input class="mini-in" inputmode="numeric" data-lv="${i}.${j}.reps" value="${s.reps}" placeholder="${tg.reps || ''}" aria-label="${{s: 'Secondes', m: 'Mètres', reps: 'Répétitions'}[unitOf(it)]}"><input class="mini-in eff" inputmode="decimal" data-lv="${i}.${j}.${em}" value="${effV(s)}" placeholder="${em === 'rpe' ? '8' : '2'}" aria-label="${em.toUpperCase()}">${ok(i + '.' + j, s.done)}</div>`).join('');
   }
-  const lastCn = !it.cn ? exHistory(it.ex)[0]?.it.cn : '', ramp = it.sets && unitOf(it) !== 's' ? rampText(it.ex, +(sg?.kg || tg.kg || it.sets[0]?.kg || 0), +(tg.reps || it.sets[0]?.reps || 0)) : '';
+  const lastCn = !it.cn ? exHistory(it.ex)[0]?.it.cn : '', ramp = it.sets && unitOf(it) === 'reps' ? rampText(it.ex, +(sg?.kg || tg.kg || it.sets[0]?.kg || 0), +(tg.reps || it.sets[0]?.reps || 0)) : '';
   return `<div class="exbox"><h3><span class="exn">${esc(e.n)}${famOf(it.ex) ? `<button type="button" class="varbtn" data-tlvar="${i}">Variante ▾</button>` : ''}</span><small>${itemText(tg.ex ? {...tg, ex: it.ex, u: it.u, note: (tg.note || '').replace(/^une jambe(, )?/, '')} : {ex: it.ex, sets: it.sets?.length, reps: '', min: 0})}</small></h3>
     ${last ? `<div class="hint">${esc(last)}</div>` : ''}${lastCn ? `<div class="hint">Note du coach, la dernière fois : ${esc(lastCn)}</div>` : ''}${sg ? `<div class="sug">Proposé : ${fx(sg.kg, sg.kg % 1 ? 1 : 0)} kg · ${esc(sg.why)}</div>` : ''}
     ${ramp ? `<div class="ramp"><b>Montée en charge</b><span>${ramp}</span></div>` : ''}
@@ -8515,7 +8531,7 @@ function bonusBlock() {
   return `<h2>Exercices ajoutés aujourd'hui <small>comptés dans ta charge</small></h2>
     <div class="list">${L.map(row).join('')}<button class="rowbtn" data-bxadd><span><b style="color:var(--accent)">+ Ajouter un exercice à la journée</b><span class="meta">Un exercice fait en dehors d'une séance</span></span><span class="kc">›</span></button></div>`;
 }
-const setsTxt = it => (it.sets || []).map(s => (s.kg ? fx(s.kg, s.kg % 1 ? 1 : 0) + ' kg × ' : '') + s.reps + (unitOf(it) === 's' ? ' s' : '')).join(', ') + (it.ct ? ' · ' + ctName(it.ct) : '');
+const setsTxt = it => (it.sets || []).map(s => (s.kg ? fx(s.kg, s.kg % 1 ? 1 : 0) + ' kg × ' : '') + uVal(it, s.reps)).join(', ') + (it.ct ? ' · ' + ctName(it.ct) : '');
 function bonusPane(ex) {
   const e = exOf(ex), prev = exHistory(ex)[0]?.it, iso = e.u === 's';
   const nowHM = new Date().toTimeString().slice(0, 5);
@@ -9775,7 +9791,8 @@ document.addEventListener('click', e => {
   if ((b = at('[data-tlu]'))) { const [i, u] = b.dataset.tlu.split('.'); S.live.items[+i].u = u; saveLive(); paneRender(); return; }
   if ((b = at('[data-edct]'))) { const [i, c] = b.dataset.edct.split('.'), it = ED.items[+i]; const was = it.ct; if (c) it.ct = c; else delete it.ct; if (c === 'iso') { it.u = 's'; if (!it.reps || it.reps < 15 || it.reps > 90) it.reps = 30; } else if (was === 'iso' && exOf(it.ex).u !== 's') { it.u = 'reps'; it.reps = 8; } paneRender(); return; }
   if ((b = at('[data-tlct]'))) { const it = S.live.items[+b.dataset.tlct], o = CT.map(x => x[0]), c = o[(o.indexOf(it.ct || '') + 1) % o.length]; const was = it.ct; if (c) it.ct = c; else delete it.ct; if (c === 'iso') it.u = 's'; else if (was === 'iso' && exOf(it.ex).u !== 's') it.u = 'reps'; saveLive(); paneRender(); return; }
-  if ((b = at('[data-edu]'))) { const [i, u] = b.dataset.edu.split('.'); ED.items[+i].u = u; if (u === 's' && !ED.items[+i].reps) ED.items[+i].reps = 30; paneRender(); return; }
+  if ((b = at('[data-edu]'))) { const [i, u] = b.dataset.edu.split('.'), it = ED.items[+i]; it.u = u; it.reps = {s: 30, m: 20, reps: 10}[u]; paneRender(); return; }
+  if ((b = at('[data-edgym]'))) { const g = b.dataset.edgym; ED.gym = ED.gym === g ? null : g; paneRender(); return; }
   if ((b = at('[data-tgfill]'))) { fillFromWatch(b.dataset.tgfill); return; }
   if (at('[data-rmlist]')) { rmList(); return; }
   if (at('[data-hask]')) { askClaude(); return; }
@@ -9843,6 +9860,7 @@ document.addEventListener('input', e => {
     saveLive();
   }
   else if (d.ed) { const [i, f] = d.ed.split('.'); if (f) { ED.items[i][f] = t.value === '' ? null : +t.value.replace(',', '.') || null; if (ED.items[i].seq) partNorm(ED.items[i]); } else { ED[i] = t.value; if (i === 'name') ED.autoName = ED.seqAuto = false; if (i === 'desc') ED.autoDesc = false; } }
+  else if (d.edsec !== undefined && ED) { const v = t.value.replace(/[,.;]/g, ':'); if (v !== t.value) { t.value = v; t.setSelectionRange?.(v.length, v.length); } ED.items[+d.edsec].reps = secParse(v); }
   else if (d.edt && ED) { const [i, j] = d.edt.split('.'); const tp = [...(ED.items[i].tempo || ['', '', '', ''])]; tp[j] = t.value === '' ? '' : +t.value; ED.items[i].tempo = tp.some(x => x !== '') ? tp : undefined; }
   else if (d.finrpe !== undefined) t.nextElementSibling.textContent = t.value;
   else if (d.fprot !== undefined) t.nextElementSibling.textContent = fx(+t.value, 1);
