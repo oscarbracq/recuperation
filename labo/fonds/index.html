@@ -84,7 +84,9 @@ main{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:calc(10px
 .mods button.on{color:var(--fg)}.mods button.on b{opacity:1}
 .pill{position:absolute;top:4px;bottom:4px;left:4px;width:calc((100% - 8px)/3);border-radius:13px;background:rgba(255,255,255,.09);box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);transition:transform .5s cubic-bezier(.3,.7,.25,1)}
 h1{font-size:1.9rem;margin:22px 4px 2px}.sub{color:var(--fg2);margin:0 4px 14px;font-size:.9rem}
-.card{background:var(--glass);backdrop-filter:blur(24px) saturate(1.6);-webkit-backdrop-filter:blur(24px) saturate(1.6);border:1px solid var(--line);border-radius:22px;padding:14px 16px;margin-bottom:12px}
+/* Les blocs de contenu sont presque opaques : le fond reste visible autour, mais il ne gêne jamais la lecture des chiffres.
+   (La barre du haut et la barre du bas gardent leur verre transparent.) */
+.card{background:rgba(18,18,20,.86);backdrop-filter:blur(30px) saturate(1.2);-webkit-backdrop-filter:blur(30px) saturate(1.2);box-shadow:0 10px 30px rgba(0,0,0,.25);border:1px solid var(--line);border-radius:22px;padding:14px 16px;margin-bottom:12px}
 .card .ey{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--fg2);font-weight:700}
 .rings{display:flex;justify-content:space-around;text-align:center}
 .ring{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:1.25rem;background:conic-gradient(var(--c1) calc(var(--p)*1%),rgba(255,255,255,.1) 0);-webkit-mask:radial-gradient(circle,transparent 58%,#000 59%);mask:radial-gradient(circle,transparent 58%,#000 59%)}
