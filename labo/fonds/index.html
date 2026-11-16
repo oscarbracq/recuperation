@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>TNR Fonds</title>
+<style>
+/* Labo des fonds d'écran : la même allure que le labo, avec de fausses données, pour essayer des fonds calmes et hypnotiques.
+   Chaque fond prend les couleurs du module choisi (T rouge, N vert, R bleu), en fondu lent. */
+@property --c1{syntax:'<color>';inherits:true;initial-value:#0A84FF}
+@property --c2{syntax:'<color>';inherits:true;initial-value:#5E5CE6}
+@property --c3{syntax:'<color>';inherits:true;initial-value:#64D2FF}
+@property --a{syntax:'<angle>';inherits:false;initial-value:0deg}
+@property --x1{syntax:'<percentage>';inherits:false;initial-value:20%}
+@property --y1{syntax:'<percentage>';inherits:false;initial-value:20%}
+@property --x2{syntax:'<percentage>';inherits:false;initial-value:80%}
+@property --y2{syntax:'<percentage>';inherits:false;initial-value:70%}
+:root{--fg:#f5f5f7;--fg2:#a1a1a6;--glass:rgba(28,28,30,.5);--line:rgba(255,255,255,.12);transition:--c1 1.6s ease,--c2 1.6s ease,--c3 1.6s ease}
+:root[data-m="T"]{--c1:#FF3B30;--c2:#FF9F0A;--c3:#FF375F}
+:root[data-m="N"]{--c1:#30D158;--c2:#63E6BE;--c3:#0FB9A6}
+:root[data-m="R"]{--c1:#0A84FF;--c2:#5E5CE6;--c3:#64D2FF}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#000;color:var(--fg);font:16px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+#bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+#bg *{position:absolute}
+@media(prefers-reduced-motion:reduce){#bg,#bg *{animation:none!important}}
+
+/* 1 · Aurore : 4 taches qui se promènent partout */
+.f-aurore i{width:70vmax;height:70vmax;left:50%;top:50%;margin:-35vmax 0 0 -35vmax;border-radius:50%;filter:blur(70px);opacity:.55}
+.f-aurore i:nth-child(1){background:var(--c1);animation:ro1 70s ease-in-out infinite}
+.f-aurore i:nth-child(2){background:var(--c2);animation:ro2 83s ease-in-out -30s infinite}
+.f-aurore i:nth-child(3){background:var(--c3);animation:ro3 97s ease-in-out -60s infinite;opacity:.4}
+@keyframes ro1{0%,100%{transform:translate(-35vw,-35vh)}25%{transform:translate(35vw,-25vh)}50%{transform:translate(25vw,35vh)}75%{transform:translate(-30vw,25vh)}}
+@keyframes ro2{0%,100%{transform:translate(35vw,30vh)}25%{transform:translate(-30vw,35vh)}50%{transform:translate(-35vw,-30vh)}75%{transform:translate(30vw,-35vh)}}
+@keyframes ro3{0%,100%{transform:translate(0,-40vh) scale(.8)}33%{transform:translate(-38vw,10vh) scale(1.1)}66%{transform:translate(38vw,20vh) scale(.9)}}
+
+/* 2 · Respiration : une seule grande lumière qui inspire et expire (environ 6 respirations par minute) */
+.f-souffle i{width:90vmax;height:90vmax;left:50%;top:58%;margin:-45vmax 0 0 -45vmax;border-radius:50%;background:radial-gradient(circle,var(--c1) 0,color-mix(in srgb,var(--c2) 60%,transparent) 35%,transparent 68%);filter:blur(30px);animation:br 10s ease-in-out infinite}
+@keyframes br{0%,100%{transform:scale(.72);opacity:.45}50%{transform:scale(1.05);opacity:.8}}
+
+/* 3 · Soie : un tourbillon de couleurs qui tourne très lentement, tout flou */
+.f-soie i{width:160vmax;height:160vmax;left:50%;top:50%;margin:-80vmax 0 0 -80vmax;border-radius:50%;background:conic-gradient(from var(--a),var(--c1),#000 22%,var(--c2) 40%,#000 58%,var(--c3) 76%,#000 90%,var(--c1));filter:blur(60px);opacity:.6;animation:sp 90s linear infinite}
+@keyframes sp{to{--a:360deg}}
+
+/* 4 · Marée : de grandes vagues douces qui passent de gauche à droite */
+.f-maree i{left:-50vw;width:200vw;height:70vh;border-radius:50%;filter:blur(50px);opacity:.5}
+.f-maree i:nth-child(1){bottom:-40vh;background:var(--c1);animation:wv 26s ease-in-out infinite alternate}
+.f-maree i:nth-child(2){bottom:-50vh;background:var(--c2);animation:wv 34s ease-in-out -10s infinite alternate-reverse;opacity:.45}
+.f-maree i:nth-child(3){top:-45vh;background:var(--c3);animation:wv 41s ease-in-out -20s infinite alternate;opacity:.3}
+@keyframes wv{0%{transform:translateX(-18vw) translateY(4vh) rotate(-4deg)}100%{transform:translateX(18vw) translateY(-6vh) rotate(5deg)}}
+
+/* 5 · Brume : deux lumières qui glissent l'une vers l'autre sur un fond presque noir (dégradés, pas de formes) */
+.f-brume i{inset:0;background:radial-gradient(60% 50% at var(--x1) var(--y1),color-mix(in srgb,var(--c1) 70%,transparent),transparent 70%),radial-gradient(55% 45% at var(--x2) var(--y2),color-mix(in srgb,var(--c2) 60%,transparent),transparent 70%),#030308;animation:mist 48s ease-in-out infinite alternate}
+@keyframes mist{0%{--x1:15%;--y1:15%;--x2:85%;--y2:80%}33%{--x1:70%;--y1:25%;--x2:25%;--y2:70%}66%{--x1:40%;--y1:75%;--x2:75%;--y2:20%}100%{--x1:85%;--y1:60%;--x2:15%;--y2:35%}}
+
+/* 6 · Dunes : des collines de couleur, en couches, qui ondulent à peine (façon fonds d'écran Apple) */
+.f-dunes{background:linear-gradient(#000 0,color-mix(in srgb,var(--c3) 18%,#000) 100%)}
+.f-dunes i{left:-30vw;width:160vw;height:90vh;border-radius:50% 50% 0 0;filter:blur(18px)}
+.f-dunes i:nth-child(1){bottom:-48vh;background:linear-gradient(color-mix(in srgb,var(--c3) 70%,#000),#000);animation:du 30s ease-in-out infinite alternate}
+.f-dunes i:nth-child(2){bottom:-60vh;background:linear-gradient(color-mix(in srgb,var(--c2) 75%,#000),#000);animation:du 38s ease-in-out -12s infinite alternate-reverse}
+.f-dunes i:nth-child(3){bottom:-70vh;background:linear-gradient(color-mix(in srgb,var(--c1) 85%,#000),#000);animation:du 46s ease-in-out -20s infinite alternate}
+@keyframes du{0%{transform:translateX(-8vw) scaleY(.95)}100%{transform:translateX(8vw) scaleY(1.06)}}
+
+/* 7 · Lave : des bulles de lumière qui montent lentement et se fondent */
+.f-lave i{width:46vmax;height:46vmax;border-radius:50%;filter:blur(45px);opacity:.55;bottom:-50vmax}
+.f-lave i:nth-child(1){left:-10vw;background:var(--c1);animation:up 40s linear infinite}
+.f-lave i:nth-child(2){left:35vw;background:var(--c2);animation:up 52s linear -20s infinite}
+.f-lave i:nth-child(3){left:60vw;background:var(--c3);animation:up 46s linear -34s infinite}
+.f-lave i:nth-child(4){left:10vw;background:var(--c2);animation:up 58s linear -8s infinite;opacity:.4}
+@keyframes up{0%{transform:translate(0,0) scale(.8)}50%{transform:translate(8vw,-80vh) scale(1.15)}100%{transform:translate(-4vw,-170vh) scale(.9)}}
+
+/* 8 · Nuit : presque noir, une seule lueur qui dérive tout doucement */
+.f-nuit i{width:80vmax;height:80vmax;left:50%;top:50%;margin:-40vmax 0 0 -40vmax;border-radius:50%;background:var(--c1);filter:blur(110px);opacity:.22;animation:ro1 120s ease-in-out infinite}
+
+/* l'appli de test, par-dessus */
+main{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top,0px)) 14px calc(120px + env(safe-area-inset-bottom,0px))}
+.top{display:flex;gap:6px;position:sticky;top:calc(8px + env(safe-area-inset-top,0px));z-index:3}
+.sq,.mods{background:var(--glass);backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);border:1px solid var(--line);border-radius:17px}
+.sq{flex:none;width:46px;height:46px;display:grid;place-items:center;font-size:1.3rem;color:var(--fg)}
+.mods{flex:1;display:flex;padding:4px;position:relative}
+.mods button{flex:1;position:relative;z-index:1;height:36px;border:0;background:none;color:var(--fg2);font:inherit;font-size:.78rem;font-weight:600;border-radius:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px}
+.mods button b{display:grid;place-items:center;width:19px;height:19px;border-radius:6px;font-size:.7rem;color:#fff;background:var(--k);opacity:.6}
+.mods button.on{color:var(--fg)}.mods button.on b{opacity:1}
+.pill{position:absolute;top:4px;bottom:4px;left:4px;width:calc((100% - 8px)/3);border-radius:13px;background:rgba(255,255,255,.09);box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);transition:transform .5s cubic-bezier(.3,.7,.25,1)}
+h1{font-size:1.9rem;margin:22px 4px 2px}.sub{color:var(--fg2);margin:0 4px 14px;font-size:.9rem}
+.card{background:var(--glass);backdrop-filter:blur(24px) saturate(1.6);-webkit-backdrop-filter:blur(24px) saturate(1.6);border:1px solid var(--line);border-radius:22px;padding:14px 16px;margin-bottom:12px}
+.card .ey{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--fg2);font-weight:700}
+.rings{display:flex;justify-content:space-around;text-align:center}
+.ring{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:1.25rem;background:conic-gradient(var(--c1) calc(var(--p)*1%),rgba(255,255,255,.1) 0);-webkit-mask:radial-gradient(circle,transparent 58%,#000 59%);mask:radial-gradient(circle,transparent 58%,#000 59%)}
+.rw{position:relative}.rw span{position:absolute;inset:0;display:grid;place-items:center;font-weight:800}.rw small{display:block;color:var(--fg2);font-size:.72rem;margin-top:6px}
+.row{display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid var(--line)}.row:first-of-type{border-top:0}.row b{font-weight:600}
+.pick{position:fixed;z-index:4;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));width:calc(100% - 20px);max-width:520px;background:var(--glass);backdrop-filter:blur(26px) saturate(1.8);-webkit-backdrop-filter:blur(26px) saturate(1.8);border:1px solid var(--line);border-radius:24px;padding:10px 10px 8px}
+.pick p{margin:0 4px 8px;font-size:.78rem;color:var(--fg2)}.pick p b{color:var(--fg)}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--fg);font:inherit;font-size:.82rem;font-weight:600;padding:8px 13px;border-radius:999px;cursor:pointer}
+.chips button.on{background:color-mix(in srgb,var(--c1) 35%,transparent);border-color:color-mix(in srgb,var(--c1) 60%,transparent)}
+.hide main{opacity:0;pointer-events:none}main{transition:opacity .5s}
+</style>
+</head>
+<body>
+<div id="bg" aria-hidden="true"></div>
+<main>
+  <div class="top"><span class="sq">+</span><div class="mods" role="tablist"><span class="pill"></span>
+    <button data-m="T" style="--k:#FF3B30"><b>T</b>Training</button><button data-m="N" style="--k:#30D158"><b>N</b>Nutrition</button><button data-m="R" style="--k:#0A84FF"><b>R</b>Recovery</button></div><span class="sq">✦</span></div>
+  <h1 id="t">Aujourd'hui</h1><p class="sub" id="s">Lundi 16 novembre · fausses données pour tester</p>
+  <div class="card"><div class="rings">
+    <div class="rw"><div class="ring" style="--p:82"></div><span>82</span><small>Sommeil</small></div>
+    <div class="rw"><div class="ring" style="--p:67"></div><span>67</span><small>Récupération</small></div>
+    <div class="rw"><div class="ring" style="--p:40"></div><span>8</span><small>Effort</small></div></div></div>
+  <div class="card"><div class="ey">Ta journée</div><div class="row"><span>Musculation</span><b>10 h</b></div><div class="row"><span>Déjeuner</span><b>12 h 30</b></div><div class="row"><span>Sieste</span><b>13 h 30</b></div><div class="row"><span>Athlétisme</span><b>18 h 30</b></div></div>
+  <div class="card"><div class="ey">Semaine</div><div class="row"><span>Séances</span><b>4 / 5</b></div><div class="row"><span>Sommeil moyen</span><b>8 h 05</b></div><div class="row"><span>Protéines</span><b>148 g</b></div></div>
+  <div class="card"><div class="ey">Note</div><p style="margin:6px 0 0;color:var(--fg2)">Touche Training, Nutrition ou Recovery : le fond garde sa forme, seules ses couleurs changent. Touche deux fois le même fond pour cacher l'appli et ne voir que lui.</p></div>
+</main>
+<div class="pick"><p>Fond : <b id="fn"></b></p><div class="chips" id="chips"></div></div>
+<script>
+const F = [['aurore', 'Aurore', 3], ['souffle', 'Respiration', 1], ['soie', 'Soie', 1], ['maree', 'Marée', 3], ['brume', 'Brume', 1], ['dunes', 'Dunes', 3], ['lave', 'Lave', 4], ['nuit', 'Nuit', 1]];
+const bg = document.getElementById('bg'), chips = document.getElementById('chips'), de = document.documentElement;
+let cur = null;
+try { cur = localStorage.getItem('tnr-fond'); } catch (e) {}
+function setF(k) {
+  if (k === cur && bg.className) { document.body.classList.toggle('hide'); return; }
+  document.body.classList.remove('hide');
+  const f = F.find(x => x[0] === k) || F[0]; cur = f[0];
+  bg.className = 'f-' + f[0]; bg.innerHTML = '<i></i>'.repeat(f[2]);
+  bg.animate([{opacity: 0}, {opacity: 1}], {duration: 900, easing: 'ease'});
+  document.getElementById('fn').textContent = f[1];
+  chips.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.f === f[0]));
+  try { localStorage.setItem('tnr-fond', f[0]); } catch (e) {}
+}
+chips.innerHTML = F.map(([k, n]) => `<button data-f="${k}">${n}</button>`).join('');
+chips.addEventListener('click', e => { const b = e.target.closest('button'); if (b) setF(b.dataset.f); });
+const T = {T: ['Training', 'Séance de force · 10 h'], N: ['Nutrition', '2 580 kcal prévues · 150 g de protéines'], R: ['Recovery', 'Récupération 67 % · bonne nuit']};
+function setM(m) {
+  de.dataset.m = m;
+  document.querySelectorAll('.mods button').forEach((b, i) => { b.classList.toggle('on', b.dataset.m === m); if (b.dataset.m === m) document.querySelector('.pill').style.transform = `translateX(${i * 100}%)`; });
+  document.getElementById('t').textContent = T[m][0]; document.getElementById('s').textContent = T[m][1] + ' · fausses données';
+}
+document.querySelector('.mods').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setM(b.dataset.m); });
+setM('R'); setF(cur || 'aurore');
+</script>
+</body>
+</html>

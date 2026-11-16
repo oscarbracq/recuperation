@@ -131,10 +131,18 @@ function oneAnim(root) {
     c.animate([{strokeDashoffset: C}, {strokeDashoffset: o}], {duration: 1150, easing: 'cubic-bezier(.3,.8,.25,1)'}); });
   root.querySelectorAll('.imb i').forEach((b, i) => { if (!fresh(b)) return; b.style.transformOrigin = b.classList.contains('neg') ? 'right' : 'left';
     b.animate([{transform: 'scaleX(0)'}, {transform: 'scaleX(1)'}], {duration: 750, delay: 150 + i * 60, easing: 'cubic-bezier(.3,1.25,.5,1)', fill: 'backwards'}); });
+  // Nutrition · le chiffre du jour part de « − ce que tu dois manger » et monte jusqu'à ton bilan (ex. −2 580 → +2).
+  root.querySelectorAll('.calring .rw > b').forEach(b => { if (!fresh(b)) return; try { const g = fuelGoal(S.fday)?.kcal, t = dayTotals(S.fday)?.kcal || 0; if (g) oneBal(b, -g, t - g); } catch (e) {} });
   const nums = [...root.querySelectorAll('.num, .imh b, .segl b')].filter(fresh); oneCount(nums);
   if (nums.length || root.querySelector('svg')) ONE.done = ONE.act;
 }
 // Le chiffre monte de 0 jusqu'à sa valeur (le premier nombre de chaque élément, le reste du texte ne bouge pas).
+function oneBal(b, from, to) {
+  const n = b.firstChild; if (!n || n.nodeType !== 3) return; const fin = n.nodeValue, t0 = performance.now(), D = 1300;
+  const txt = v => { const r = Math.round(v); return (r < 0 ? '−' : r > 0 ? '+' : '') + fx(Math.abs(r)); };
+  const step = t => { if (!n.isConnected) return; const k = Math.min(1, (t - t0) / D), e = 1 - Math.pow(1 - k, 3); n.nodeValue = k < 1 ? txt(from + (to - from) * e) : fin; if (k < 1) requestAnimationFrame(step); };
+  n.nodeValue = txt(from); requestAnimationFrame(step);
+}
 function oneCount(els) {
   const items = [];
   for (const el of els) { const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); let n;
@@ -162,7 +170,9 @@ openSheet = function (kind, ...a) { const r = oneOpenSheet0(kind, ...a); $('#she
 
 // Les fonctions du moteur qui changent de page passent par ici : barre juste, plannings alignés, animations.
 const oneAfter = () => { const v = oneView(); onePlan(v); oneAnim(v); };
-const oneSetTab0 = setTab; setTab = function (t) { oneSetTab0(t); oneSync(); };
+// Arriver sur un onglet de Recovery le redessine toujours : chiffres et anneaux repartent de zéro à chaque visite
+// (avant, une page identique n'était pas redessinée, donc rien ne bougeait en revenant).
+const oneSetTab0 = setTab; setTab = function (t) { const v = $('#v-' + t); if (v && performance.now() - ONE.act < 400) v._html = null; oneSetTab0(t); oneSync(); };
 const oneRender0 = render; render = function (...a) { const r = oneRender0(...a); if (S.mod === 'R') oneAfter(); return r; };
 const oneRenderMod0 = renderMod; renderMod = function (f) { oneRenderMod0(f); oneSync(); if (S.mod === 'T' || S.mod === 'N') oneAfter(); };
 oneMount();

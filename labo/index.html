@@ -1382,7 +1382,7 @@ input[type=date].mini-in,input[type=date]{min-width:165px;flex:none}
 .pbtn .pz{grid-column:2/-1}.pbtn .pz .range{margin:8px 0 3px}
 .parts button.prow{width:100%;text-align:left;color:var(--fg)}.parts button.chead{color:var(--fg);text-align:left}
 .impact .impw{margin:8px 0 6px}.imp{cursor:pointer}
-.impl{display:flex;justify-content:space-between;font-size:.6875rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--fg2);margin-bottom:6px}.impact .pos{color:var(--good)}.impact .neg{color:var(--warn)}
+.impl{display:flex;justify-content:space-between;font-size:.6875rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--fg2);margin-bottom:6px}.impact .pos{color:var(--good)}.impact .neg{color:var(--warn)}.impact .impsolo{flex:none;background:none;border:0;padding:0;margin:0;color:var(--fg3,var(--fg2));opacity:.75;cursor:pointer;font-family:inherit}
 .imp{padding:10px 12px;border-radius:12px;background:var(--card2);margin-top:6px}.imh{display:flex;justify-content:space-between;font-size:.8125rem;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
 .imb{position:relative;height:6px;margin-top:8px;border-radius:3px;background:repeating-linear-gradient(-45deg,transparent 0 3px,color-mix(in srgb,var(--fg3) 30%,transparent) 3px 5px)}.imb i{position:absolute;top:0;bottom:0;border-radius:3px}.imb i.pos{background:var(--good)}.imb i.neg{background:var(--warn)}.imb s{position:absolute;left:50%;top:-2px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:var(--fg)}
 .gymrow{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 4px;border-top:1px solid var(--line)}.gymrow:first-of-type{border-top:0}.gymrow .meta{display:block;font-size:.8125rem;color:var(--fg2)}.gymrow i{color:var(--accent);font-style:normal;font-weight:700}.gymrow.on b{color:var(--accent)}
@@ -1621,8 +1621,7 @@ html.one-notr .one-top,html.one-notr .one-top *{transition:none!important}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="../supabase-db.js?v=65"></script>
 
-<script>
-const $ = s => document.querySelector(s);
+<script>const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const key = d => { const z = new Date(d.getTime() - d.getTimezoneOffset()*60000); return z.toISOString().slice(0,10); };
 const addDays = (k, n) => { const d = new Date(k + 'T12:00:00'); d.setDate(d.getDate() + n); return key(d); };
@@ -4806,13 +4805,16 @@ document.addEventListener('click', e => { const b = e.target.closest('[data-metr
 document.addEventListener('click', e => { const b = e.target.closest('[data-part]'); if (!b || !PART[b.dataset.part]) return; e.stopPropagation(); partPane(b.dataset.part); }, true);
 // What his habits do to his recovery, like Whoop's journal insights: over the last 90 days, the average recovery of the
 // morning after a day with the habit, against the mornings after a day without it. It shows a link, not a proof.
+// « Moment solo » reste caché par défaut, sur toutes les périodes ; le petit « Afficher » gris en haut à droite le montre.
+const impSolo = () => { try { return localStorage.getItem('tnr-impsolo') === '1'; } catch (e) { return false; } };
+document.addEventListener('click', e => { if (!e.target.closest('[data-impsolo]')) return; try { localStorage.setItem('tnr-impsolo', impSolo() ? '0' : '1'); } catch (err) {} render(); });
 function impactCard() {
   const B = [['Coucher avant 23 h 30', k => { const b = hm2min(G(addDays(k, 1), 'bed')); return b == null ? null : b <= 23 * 60 + 30; }],
     ['Nuit de 8 h 30 ou plus', k => { const h = VAL.sleepH(addDays(k, 1)); return h == null ? null : h >= 8.5; }],
     ['Eau : objectif atteint', k => S.manual[k] ? waterOf(k).L >= 2 : null], ['Écart alimentaire', k => S.manual[k] ? M(k, 'nutrition') > 0 : null],
     ['Effort de 14 ou plus', k => { const e = effortDay(k); return e == null ? null : e >= 14; }], ['Séance de musculation', k => !!(M(k, 'gymRpe') || logsOn(k).some(l => l.kind === 'gym'))],
     ['Séance de sprint', k => !!(M(k, 'trackRpe') || logsOn(k).some(l => l.kind === 'track'))], ['Douleur notée', k => S.manual[k] ? (maxPain(k) || 0) > 0 : null],
-    ['Moment solo', k => S.manual[k] ? !!M(k, 'mast') : null]];
+    ...(impSolo() ? [['Moment solo', k => S.manual[k] ? !!M(k, 'mast') : null]] : [])];
   const PP = periodOf(S.gran, S.off), last = PP.to < TODAY ? PP.to : addDays(TODAY, -1), N = Math.max(0, daysBetween(PP.from, last) + 1), END = addDays(last, 1);
   const items = new Set(); for (let i = 1; i <= N; i++) Object.keys(routineDone(addDays(END, -i))).forEach(x => items.add(x));
   for (const x of items) B.push([x, k => S.manual[k] ? !!routineDone(k)[x] : null]);
@@ -4824,10 +4826,10 @@ function impactCard() {
       (v ? yes : no).push(r); if (h != null) (v ? hy : hn).push(h); if (sh != null) (v ? sy : sn).push(sh); }
     if (yes.length >= 3 && no.length >= 3) out.push([n, (mean(yes) / mean(no) - 1) * 100, yes.length, {ry: mean(yes), rn: mean(no), ny: yes.length, nn: no.length, hy: mean(hy), hn: mean(hn), sy: mean(sy), sn: mean(sn)}]);
   }
-  const seg = '';
-  if (!out.length) return `<div class="card impact"><span class="eyebrow">Impact de tes habitudes sur ta récupération</span>${seg}<p class="small muted" style="margin:6px 0 0">${S.gran === 'day' ? 'Sur un seul jour, on ne peut pas comparer : choisis Semaine, Mois ou Année.' : 'Pas encore assez de jours sur cette période : il faut au moins 3 jours avec et 3 jours sans chaque habitude. Essaie une période plus longue.'}</p></div>`;
+  const seg = '', head = `<div class="chead"><span class="eyebrow">Impact de tes habitudes sur ta récupération</span><button type="button" class="eyebrow impsolo" data-impsolo aria-pressed="${impSolo()}">${impSolo() ? 'Masquer' : 'Afficher'}</button></div>`;
+  if (!out.length) return `<div class="card impact">${head}${seg}<p class="small muted" style="margin:6px 0 0">${S.gran === 'day' ? 'Sur un seul jour, on ne peut pas comparer : choisis Semaine, Mois ou Année.' : 'Pas encore assez de jours sur cette période : il faut au moins 3 jours avec et 3 jours sans chaque habitude. Essaie une période plus longue.'}</p></div>`;
   out.sort((a, b) => b[1] - a[1]); IMP_LAST = out; const mx = Math.max(10, ...out.map(x => Math.abs(x[1])));
-  return `<div class="card impact"><div class="chead"><span class="eyebrow">Impact de tes habitudes sur ta récupération</span></div><p class="small muted" style="margin:2px 0 8px">${esc(PP.title)} · touche une habitude pour le détail</p>
+  return `<div class="card impact">${head}<p class="small muted" style="margin:2px 0 8px">${esc(PP.title)} · touche une habitude pour le détail</p>
     <div class="impl"><span class="neg">▼ N'aide pas</span><span>% d'impact</span><span class="pos">Aide ▲</span></div>
     ${out.map(([n, v, c], i) => `<div class="imp" data-imp="${i}" role="button" tabindex="0"><div class="imh"><span>${esc(n)}</span><b class="${v >= 0 ? 'pos' : 'neg'}">${v >= 0 ? '+' : '−'}${fx(Math.abs(v))} %</b></div><div class="imb"><i class="${v >= 0 ? 'pos' : 'neg'}" style="${v >= 0 ? 'left:50%' : 'right:50%'};width:${(Math.abs(v) / mx * 50).toFixed(1)}%"></i><s></s></div></div>`).join('')}
     ${detailsBox('Pour chaque habitude : ta récupération moyenne le lendemain des jours où tu l\'as faite, comparée aux lendemains des jours sans. Il faut au moins 3 jours de chaque. C\'est un lien observé sur tes données, pas une preuve : une séance intense et une nuit courte arrivent souvent ensemble.')}</div>`;
@@ -10357,10 +10359,18 @@ function oneAnim(root) {
     c.animate([{strokeDashoffset: C}, {strokeDashoffset: o}], {duration: 1150, easing: 'cubic-bezier(.3,.8,.25,1)'}); });
   root.querySelectorAll('.imb i').forEach((b, i) => { if (!fresh(b)) return; b.style.transformOrigin = b.classList.contains('neg') ? 'right' : 'left';
     b.animate([{transform: 'scaleX(0)'}, {transform: 'scaleX(1)'}], {duration: 750, delay: 150 + i * 60, easing: 'cubic-bezier(.3,1.25,.5,1)', fill: 'backwards'}); });
+  // Nutrition · le chiffre du jour part de « − ce que tu dois manger » et monte jusqu'à ton bilan (ex. −2 580 → +2).
+  root.querySelectorAll('.calring .rw > b').forEach(b => { if (!fresh(b)) return; try { const g = fuelGoal(S.fday)?.kcal, t = dayTotals(S.fday)?.kcal || 0; if (g) oneBal(b, -g, t - g); } catch (e) {} });
   const nums = [...root.querySelectorAll('.num, .imh b, .segl b')].filter(fresh); oneCount(nums);
   if (nums.length || root.querySelector('svg')) ONE.done = ONE.act;
 }
 // Le chiffre monte de 0 jusqu'à sa valeur (le premier nombre de chaque élément, le reste du texte ne bouge pas).
+function oneBal(b, from, to) {
+  const n = b.firstChild; if (!n || n.nodeType !== 3) return; const fin = n.nodeValue, t0 = performance.now(), D = 1300;
+  const txt = v => { const r = Math.round(v); return (r < 0 ? '−' : r > 0 ? '+' : '') + fx(Math.abs(r)); };
+  const step = t => { if (!n.isConnected) return; const k = Math.min(1, (t - t0) / D), e = 1 - Math.pow(1 - k, 3); n.nodeValue = k < 1 ? txt(from + (to - from) * e) : fin; if (k < 1) requestAnimationFrame(step); };
+  n.nodeValue = txt(from); requestAnimationFrame(step);
+}
 function oneCount(els) {
   const items = [];
   for (const el of els) { const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); let n;
@@ -10388,7 +10398,9 @@ openSheet = function (kind, ...a) { const r = oneOpenSheet0(kind, ...a); $('#she
 
 // Les fonctions du moteur qui changent de page passent par ici : barre juste, plannings alignés, animations.
 const oneAfter = () => { const v = oneView(); onePlan(v); oneAnim(v); };
-const oneSetTab0 = setTab; setTab = function (t) { oneSetTab0(t); oneSync(); };
+// Arriver sur un onglet de Recovery le redessine toujours : chiffres et anneaux repartent de zéro à chaque visite
+// (avant, une page identique n'était pas redessinée, donc rien ne bougeait en revenant).
+const oneSetTab0 = setTab; setTab = function (t) { const v = $('#v-' + t); if (v && performance.now() - ONE.act < 400) v._html = null; oneSetTab0(t); oneSync(); };
 const oneRender0 = render; render = function (...a) { const r = oneRender0(...a); if (S.mod === 'R') oneAfter(); return r; };
 const oneRenderMod0 = renderMod; renderMod = function (f) { oneRenderMod0(f); oneSync(); if (S.mod === 'T' || S.mod === 'N') oneAfter(); };
 oneMount();
