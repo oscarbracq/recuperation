@@ -82,7 +82,7 @@ function oneMp(box, p, on) {
 function oneMag(box, p, ms) {
   const t0 = performance.now();
   const f = () => { const pr = p.getBoundingClientRect(), c = pr.left + pr.width / 2;
-    box.querySelectorAll('button').forEach(b => { const r = b.getBoundingClientRect(), d = Math.abs(r.left + r.width / 2 - c) / (r.width || 1); b.style.setProperty('--mag', (1 + .14 * Math.max(0, 1 - d)).toFixed(3)); });
+    box.querySelectorAll('button').forEach(b => { const r = b.getBoundingClientRect(), d = Math.abs(r.left + r.width / 2 - c) / (r.width || 1); b.style.setProperty('--mag', (1 + (box.id === 'one-tabs' ? .07 : .14) * Math.max(0, 1 - d)).toFixed(3)); });
     if (performance.now() - t0 < ms) requestAnimationFrame(f); };
   f();
 }

@@ -2945,7 +2945,10 @@ const AI_URL = 'https://claude.ai/project/01a1e00d-19f9-7639-b74f-52770ce8fac5';
 function aiOpenClaude() {
   aiSave();
   if (/Android/i.test(navigator.userAgent)) location.href = 'intent://' + AI_URL.replace(/^https:\/\//, '') + '#Intent;scheme=https;package=com.anthropic.claude;S.browser_fallback_url=' + encodeURIComponent(AI_URL) + ';end';
-  else window.open(AI_URL, '_blank', 'noopener');
+  else if (/iPhone|iPad/i.test(navigator.userAgent)) window.open(AI_URL, '_blank', 'noopener');
+  // Ordinateur : l'appli Claude installée (déjà connectée) s'ouvre sur le projet ; sans appli, le site s'ouvre à la place.
+  else { let left = false; const off = () => { left = true; }; addEventListener('blur', off, {once: true}); location.href = 'claude://' + AI_URL.replace(/^https:\/\//, '');
+    setTimeout(() => { removeEventListener('blur', off); if (!left && !document.hidden) window.open(AI_URL, '_blank', 'noopener'); }, 1500); }
 }
 setTimeout(aiSave, 15000); setInterval(aiSave, 5 * 60000);
 document.addEventListener('visibilitychange', () => { if (document.hidden) aiSave(); });

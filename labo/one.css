@@ -114,3 +114,9 @@ html.one.one-home .one-mods button b{height:28px;line-height:1;padding-bottom:2p
 html.one.one-home .one-hai{opacity:1;pointer-events:auto;transform:none}
 
 html.one-notr .one-top,html.one-notr .one-top *{transition:none!important}
+
+/* Petits téléphones : 7 onglets en bas. Les noms tiennent entiers dans leur case (rien de coupé ni décalé), l'icône et le nom
+   restent au centre de la bulle, et la loupe grossit moins en bas pour que rien ne dépasse de la bulle. */
+html.one #one-tabs button{text-overflow:clip;letter-spacing:-.02em}
+@media (max-width:430px){html.one .one-tabs{padding:6px 7px!important}html.one #one-tabs button,html.one #one-tabs button[data-one-h]{font-size:.5625rem;padding:0;gap:4px;letter-spacing:-.03em}}
+@media (max-width:350px){html.one #one-tabs button{font-size:.5rem;letter-spacing:-.03em}}

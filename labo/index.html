@@ -1548,6 +1548,12 @@ html.one.one-home .one-mods button b{height:28px;line-height:1;padding-bottom:2p
 html.one.one-home .one-hai{opacity:1;pointer-events:auto;transform:none}
 
 html.one-notr .one-top,html.one-notr .one-top *{transition:none!important}
+
+/* Petits téléphones : 7 onglets en bas. Les noms tiennent entiers dans leur case (rien de coupé ni décalé), l'icône et le nom
+   restent au centre de la bulle, et la loupe grossit moins en bas pour que rien ne dépasse de la bulle. */
+html.one #one-tabs button{text-overflow:clip;letter-spacing:-.02em}
+@media (max-width:430px){html.one .one-tabs{padding:6px 7px!important}html.one #one-tabs button,html.one #one-tabs button[data-one-h]{font-size:.5625rem;padding:0;gap:4px;letter-spacing:-.03em}}
+@media (max-width:350px){html.one #one-tabs button{font-size:.5rem;letter-spacing:-.03em}}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -3230,7 +3236,10 @@ const AI_URL = 'https://claude.ai/project/01a1e00d-19f9-7639-b74f-52770ce8fac5';
 function aiOpenClaude() {
   aiSave();
   if (/Android/i.test(navigator.userAgent)) location.href = 'intent://' + AI_URL.replace(/^https:\/\//, '') + '#Intent;scheme=https;package=com.anthropic.claude;S.browser_fallback_url=' + encodeURIComponent(AI_URL) + ';end';
-  else window.open(AI_URL, '_blank', 'noopener');
+  else if (/iPhone|iPad/i.test(navigator.userAgent)) window.open(AI_URL, '_blank', 'noopener');
+  // Ordinateur : l'appli Claude installée (déjà connectée) s'ouvre sur le projet ; sans appli, le site s'ouvre à la place.
+  else { let left = false; const off = () => { left = true; }; addEventListener('blur', off, {once: true}); location.href = 'claude://' + AI_URL.replace(/^https:\/\//, '');
+    setTimeout(() => { removeEventListener('blur', off); if (!left && !document.hidden) window.open(AI_URL, '_blank', 'noopener'); }, 1500); }
 }
 setTimeout(aiSave, 15000); setInterval(aiSave, 5 * 60000);
 document.addEventListener('visibilitychange', () => { if (document.hidden) aiSave(); });
@@ -10310,7 +10319,7 @@ function oneMp(box, p, on) {
 function oneMag(box, p, ms) {
   const t0 = performance.now();
   const f = () => { const pr = p.getBoundingClientRect(), c = pr.left + pr.width / 2;
-    box.querySelectorAll('button').forEach(b => { const r = b.getBoundingClientRect(), d = Math.abs(r.left + r.width / 2 - c) / (r.width || 1); b.style.setProperty('--mag', (1 + .14 * Math.max(0, 1 - d)).toFixed(3)); });
+    box.querySelectorAll('button').forEach(b => { const r = b.getBoundingClientRect(), d = Math.abs(r.left + r.width / 2 - c) / (r.width || 1); b.style.setProperty('--mag', (1 + (box.id === 'one-tabs' ? .07 : .14) * Math.max(0, 1 - d)).toFixed(3)); });
     if (performance.now() - t0 < ms) requestAnimationFrame(f); };
   f();
 }
