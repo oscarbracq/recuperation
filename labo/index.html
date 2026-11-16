@@ -1789,7 +1789,9 @@ function chart(pts, o = {}) {
   // Bars sit in slots; lines run edge to edge.
   const X = bars ? (i => L + (i + .5) / pts.length * (W0 - L - R)) : (i => L + (pts.length === 1 ? (W0 - L - R) / 2 : i / (pts.length - 1) * (W0 - L - R)));
   const Y = y => T + (1 - (y - lo) / (hi - lo)) * (H - T - B);
-  let g = '';
+  // Sous la courbe, un dégradé de sa couleur qui s'efface vers le bas (et sous le point touché quand on glisse le doigt).
+  const gid = 'cg' + (chId + 1), stop = (o, a) => `<stop offset="${o}" style="stop-color:${color};stop-opacity:${a}"/>`;
+  let g = `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">${stop(0, .42)}${stop(.6, .1)}${stop(1, 0)}</linearGradient><linearGradient id="${gid}s" x1="0" y1="0" x2="0" y2="1">${stop(0, .5)}${stop(1, 0)}</linearGradient></defs>`;
   for (let i = 0; i <= 3; i++) { const t = lo + (hi - lo) * i / 3, y = Y(t); g += `<line class="grid" x1="${L}" x2="${W0 - R}" y1="${y}" y2="${y}"/><text x="${L - 6}" y="${y + 3}" text-anchor="end">${fx(t, hi - lo < .6 ? 2 : hi - lo < 6 ? 1 : 0)}</text>`; }
   if (pts.length <= 12 && pts.every(p => p.lab)) pts.forEach((p, i) => g += `<text x="${X(i)}" y="${H - 6}" text-anchor="middle">${esc(p.lab)}</text>`);
   else g += `<text x="${L}" y="${H - 6}">${esc(pts[0].lab ?? short(pts[0].k))}</text><text x="${W0 - R}" y="${H - 6}" text-anchor="end">${esc(pts[pts.length - 1].lab ?? short(pts[pts.length - 1].k))}</text>`;
@@ -1804,11 +1806,13 @@ function chart(pts, o = {}) {
   } else if (avg) {
     pts.forEach((p, i) => { if (p.v != null) g += `<circle cx="${X(i)}" cy="${Y(p.v)}" r="2.4" fill="${color}" opacity=".35"/>`; });
     avgVals = pts.map((p, i) => { const w = pts.slice(Math.max(0, i - 6), i + 1).map(q => q.v).filter(x => x != null); return w.length >= 3 ? mean(w) : null; });
+    { const A = avgVals.map((a, i) => a == null ? null : [X(i), Y(a)]).filter(Boolean); if (A.length > 1) g += `<path d="M${A[0][0]} ${H - B} L${smoothD(A).slice(1)} L${A[A.length - 1][0]} ${H - B}Z" fill="url(#${gid})"/>`; }
     g += line(avgVals.map((a, i) => a == null ? null : [X(i), Y(a)]).filter(Boolean), color, 2.4);
   } else {
     const P = pts.map((p, i) => p.v == null ? null : [X(i), Y(p.v)]).filter(Boolean);
-    if (P.length > 1) g += `<path d="M${P[0][0]} ${H - B} L${smoothD(P).slice(1)} L${P[P.length - 1][0]} ${H - B}Z" fill="${color}" opacity=".08"/>`;
+    if (P.length > 1) g += `<path d="M${P[0][0]} ${H - B} L${smoothD(P).slice(1)} L${P[P.length - 1][0]} ${H - B}Z" fill="url(#${gid})"/>`;
     g += line(P, color, 2.2);
+    if (!colorFn && P.length <= 45) g += P.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.6" fill="${color}" stroke="var(--card)" stroke-width="1.2"/>`).join('');
     if (colorFn && pts.length <= 40) pts.forEach((p, i) => { if (p.v != null) g += `<circle cx="${X(i)}" cy="${Y(p.v)}" r="3.2" fill="${colorFn(p.v)}" stroke="var(--card)" stroke-width="1.2"/>`; });
   }
   for (const l of o.lines || []) { const P = l.vals.map((x, i) => x == null ? null : [X(i), Y(x)]).filter(Boolean); g += P.length > 1 ? line(P, l.color, 2.2) : P.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3.5" fill="${l.color}"/>`).join(''); }
@@ -1818,7 +1822,7 @@ function chart(pts, o = {}) {
       if (sxx > 0) { const b = Q.reduce((a, q) => a + (q[0] - mx) * (q[1] - my), 0) / sxx, i0 = Q[0][0], i1 = Q[n - 1][0], y0 = my + b * (i0 - mx), y1 = my + b * (i1 - mx);
         g += `<line class="trendl" x1="${X(i0)}" y1="${Y(y0)}" x2="${X(i1)}" y2="${Y(y1)}" stroke="var(--fg2)" stroke-width="1.4" stroke-opacity=".38" stroke-dasharray="4 4" stroke-linecap="round"/>`; } } }
   const id = 'c' + (++chId);
-  CH[id] = {pts, X, Y, band, dec, unit, fmt, color, avgVals, W0, H, T, B};
+  CH[id] = {pts, X, Y, band, dec, unit, fmt, color, avgVals, W0, H, T, B, gid, bars};
   return `<div class="chartbox" data-ch="${id}"><svg class="chart" viewBox="0 0 ${W0} ${H}" role="img" aria-label="Graphique, glisse le doigt pour lire les valeurs">${g}<g class="sc"></g></svg><div class="bubble" hidden></div></div>`;
 }
 function scrubTo(box, i) {
@@ -1827,7 +1831,7 @@ function scrubTo(box, i) {
   let j = i; while (j >= 0 && c.pts[j].v == null && !(c.avgVals?.[j] != null)) j--;
   if (j < 0) return;
   const p = c.pts[j], v = c.avgVals?.[j] ?? p.v, x = c.X(j), y = c.Y(v);
-  box.querySelector('.sc').innerHTML = `<line class="scrub" x1="${x}" x2="${x}" y1="${c.T}" y2="${c.H - c.B}"/><circle cx="${x}" cy="${y}" r="5" fill="${c.color}" stroke="var(--card)" stroke-width="2"/>`;
+  box.querySelector('.sc').innerHTML = (c.bars ? '' : `<rect x="${x - 9}" y="${y}" width="18" height="${Math.max(0, c.H - c.B - y)}" rx="4" fill="url(#${c.gid}s)"/>`) + `<line class="scrub" x1="${x}" x2="${x}" y1="${c.T}" y2="${c.H - c.B}"/><circle cx="${x}" cy="${y}" r="5" fill="${c.color}" stroke="var(--card)" stroke-width="2"/>`;
   let st = '';
   if (c.band && v != null) st = v < c.band[0] ? 'sous ta zone' : v > c.band[1] ? 'au-dessus de ta zone' : 'dans ta zone';
   const b = box.querySelector('.bubble'), shown = c.fmt ? c.fmt(p.v ?? v) : fx(p.v ?? v, c.dec) + (c.unit ? ' ' + c.unit : '');

@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>TNR Corps</title>
+<style>
+/* Trois propositions de corps (fausses données) : chaque muscle se touche. Face et dos, même dessin, trois façons de le colorer. */
+:root{--bg:#000;--card:#161618;--fg:#f5f5f7;--fg2:#a1a1a6;--fg3:#6e6e73;--line:rgba(255,255,255,.1);--base:#3a3a40;--under:#6b7280;--ok:#34C47C;--tired:#F0A830;--over:#E5534B}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+main{max-width:520px;margin:0 auto;padding:calc(16px + env(safe-area-inset-top,0px)) 14px 40px}
+h1{font-size:1.6rem;margin:4px 4px 2px}.intro{color:var(--fg2);font-size:.9rem;margin:0 4px 16px}
+.tabs{display:flex;gap:6px;margin:0 0 14px;position:sticky;top:calc(8px + env(safe-area-inset-top,0px));z-index:5;background:rgba(0,0,0,.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:6px;border-radius:16px;border:1px solid var(--line)}
+.tabs button{flex:1;border:0;background:none;color:var(--fg2);font:inherit;font-size:.85rem;font-weight:600;padding:9px 4px;border-radius:11px;cursor:pointer}
+.tabs button.on{background:rgba(255,255,255,.1);color:var(--fg)}
+.card{background:var(--card);border-radius:22px;padding:16px;border:1px solid var(--line)}
+.ch{display:flex;align-items:center;gap:10px;margin-bottom:6px}.ch i{width:34px;height:34px;border-radius:10px;background:#23324a;display:grid;place-items:center;font-style:normal;color:#7fb0ff}
+.ch b{display:block;font-size:1.05rem}.ch small{color:var(--fg2)}
+.figs{display:flex;justify-content:center;gap:6px;position:relative}
+.fig{flex:1;max-width:210px;text-align:center}.fig span{font-size:.75rem;color:var(--fg3)}
+svg.body{width:100%;height:auto;display:block;overflow:visible}
+svg.body [data-z]{cursor:pointer;stroke:var(--bg);stroke-width:1.6;stroke-linejoin:round;transition:fill .5s,opacity .35s,filter .35s}
+svg.body .skin{fill:var(--base)}
+svg.body.dim [data-z]:not(.sel){opacity:.25}
+svg.body [data-z].sel{filter:brightness(1.25) drop-shadow(0 0 6px rgba(255,255,255,.35))}
+.leg{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 14px;margin:12px 0 4px;font-size:.78rem;color:var(--fg2)}.leg span{display:flex;align-items:center;gap:5px}.leg i{width:10px;height:10px;border-radius:50%}
+.list{margin-top:10px}
+.row{display:grid;grid-template-columns:14px 1fr auto 96px;align-items:center;gap:10px;padding:8px 4px;border-radius:10px;cursor:pointer}
+.row.sel{background:rgba(255,255,255,.07)}.row i{width:12px;height:12px;border-radius:50%}.row em{font-style:normal;color:var(--fg2);font-variant-numeric:tabular-nums;font-size:.85rem}
+.bar{height:7px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden}.bar u{display:block;height:100%;border-radius:4px;transition:width .6s cubic-bezier(.3,.7,.25,1)}
+.det{margin-top:10px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.05);font-size:.88rem;color:var(--fg2);min-height:46px}.det b{color:var(--fg)}
+/* Proposition 2 : face et dos l'un derrière l'autre */
+.p2 .figs{height:auto}.p2 .back{position:absolute;left:50%;top:6px;width:52%;max-width:200px;transform:translateX(-12%);opacity:.95;z-index:0}.p2 .front{position:relative;z-index:1;width:62%;max-width:240px;margin-right:22%}
+/* Proposition 3 : lumière */
+.p3 svg.body [data-z]{stroke:rgba(255,255,255,.08);stroke-width:1}
+.p3 svg.body .skin{fill:#121216}
+</style>
+</head>
+<body>
+<main>
+  <h1>Corps · 3 propositions</h1>
+  <p class="intro">Touche un muscle (sur le dessin ou dans la liste) : il s'allume et son détail s'affiche. Données inventées.</p>
+  <div class="tabs" id="tabs"><button data-p="1" class="on">1 · État</button><button data-p="2">2 · Séries</button><button data-p="3">3 · Lumière</button></div>
+  <div id="view"></div>
+</main>
+<script>
+// Les muscles, dessinés pour la moitié gauche de l'écran (le côté droit du corps), puis reflétés : chaque zone = un groupe.
+const Z = {
+  pecs: ['Pectoraux', 24, 22], delts: ['Épaules', 18, 22], biceps: ['Biceps', 10, 20], triceps: ['Triceps', 12, 20], fore: ['Avant-bras', 6, 16],
+  abs: ['Abdominaux', 14, 20], obl: ['Obliques', 8, 16], traps: ['Trapèzes', 9, 16], lats: ['Dorsaux', 12, 25], lowb: ['Lombaires', 11, 16],
+  glutes: ['Fessiers', 10, 20], quads: ['Quadriceps', 18, 22], add: ['Adducteurs', 7, 14], hams: ['Ischios', 10, 20], calves: ['Mollets', 15, 18], tib: ['Tibial antérieur', 4, 12]};
+const FRONT = [
+  ['traps', 'M90 57C83 61 72 66 63 70L77 72C85 70 91 66 93 62Z'],
+  ['delts', 'M62 70C50 72 43 84 44 101C50 97 56 93 62 92C66 84 70 77 76 72Z'],
+  ['pecs', 'M77 73C70 79 64 88 63 97C67 110 81 115 98 111L98 77C92 73 84 71 77 73Z'],
+  ['biceps', 'M45 103C42 115 42 130 46 141C52 143 58 139 60 131C62 118 60 104 58 96C52 97 48 99 45 103Z'],
+  ['fore', 'M46 145C40 159 36 177 36 195L46 197C52 181 58 163 60 145C56 143 50 143 46 145Z'],
+  ['obl', 'M63 101C61 121 65 150 73 176L85 184L85 117C77 117 69 111 63 101Z'],
+  ['abs', 'M90 116H98V130H90Q86 130 86 126V120Q86 116 90 116Z M89 133H98V147H89Q86 147 86 143V137Q86 133 89 133Z M89 150H98V164H89Q86 164 86 160V154Q86 150 89 150Z M88 167H98V189C93 189 89 186 87 181V170Q87 167 88 167Z'],
+  ['quads', 'M71 191C63 215 61 245 65 277L73 283C75 255 77 223 81 197Z M81 197C77 227 77 257 81 287L90 289C92 259 92 227 88 197Z M89 241C93 259 95 277 93 291L98 292C100 272 98 250 94 236Z'],
+  ['add', 'M89 192L98 196V236C94 226 91 210 89 192Z'],
+  ['tib', 'M71 302C67 326 67 350 71 374L77 374C79 350 79 326 77 304Z'],
+  ['calves', 'M78 303C85 321 87 345 83 369L78 371C80 346 80 323 78 303Z']];
+const BACK = [
+  ['traps', 'M100 50L85 59L64 71C78 76 89 85 97 101L100 132Z'],
+  ['delts', 'M62 70C50 72 43 84 44 101C50 97 56 93 62 92C66 84 70 77 76 72Z'],
+  ['triceps', 'M45 103C42 117 44 132 48 143C54 141 60 131 60 119C60 107 58 98 56 94C51 96 47 99 45 103Z'],
+  ['fore', 'M46 145C40 159 36 177 36 195L46 197C52 181 58 163 60 145C56 143 50 143 46 145Z'],
+  ['lats', 'M66 92C66 110 70 140 82 165L97 158L97 106C88 99 77 94 66 92Z'],
+  ['lowb', 'M85 166L98 160V186L84 182Z'],
+  ['glutes', 'M72 185C66 201 70 223 84 229C92 231 98 227 98 215V191C90 187 80 185 72 185Z'],
+  ['hams', 'M68 233C64 257 66 281 72 297L82 297C84 273 82 251 84 233Z M85 233C89 255 91 277 91 297L97 297C99 273 99 251 97 231Z'],
+  ['calves', 'M69 303C63 319 65 341 73 355L82 355C86 339 86 319 82 303Z M83 303C91 315 93 333 89 351L84 355C87 336 87 318 83 303Z']];
+// La peau autour des muscles : tête, cou, mains, genoux, pieds, bassin.
+const SKIN = '<ellipse cx="100" cy="30" rx="16" ry="20"/><path d="M91 48H109L112 62C104 66 96 66 88 62Z"/>'
+  + '<ellipse cx="41" cy="206" rx="7" ry="11"/><ellipse cx="159" cy="206" rx="7" ry="11"/>'
+  + '<path d="M70 190L98 188V194L71 193Z M102 188L130 190L129 193L102 194Z"/><path d="M66 286L80 290L90 292L98 294L97 300L71 300Z M134 286L120 290L110 292L102 294L103 300L129 300Z"/>'
+  + '<path d="M68 374L84 372L86 386C80 392 70 392 64 388Z M132 374L116 372L114 386C120 392 130 392 136 388Z"/>';
+const half = (L, c) => L.map(([z, d]) => `<path data-z="${z}" d="${d}" fill="${c(z)}"/>`).join('');
+const fig = (L, c) => `<svg class="body" viewBox="30 6 140 392" role="img"><g class="skin">${SKIN}</g>${half(L, c)}<g transform="translate(200 0) scale(-1 1)">${half(L, c)}</g></svg>`;
+// États (proposition 1) : séries de la semaine par rapport à la cible.
+const state = z => { const [, s, t] = Z[z]; return s > t ? 'over' : s >= t * .8 ? 'tired' : s >= t * .45 ? 'ok' : 'under'; };
+const SC = {under: 'var(--under)', ok: 'var(--ok)', tired: 'var(--tired)', over: 'var(--over)'}, SN = {under: 'Sous-entraîné', ok: 'Optimal', tired: 'Fatigué', over: 'Surentraîné'};
+// Séries (proposition 2) : du bleu (peu) au rouge (beaucoup).
+const HEAT = ['#2E5BD8', '#2FA36B', '#C9D63A', '#F08A24', '#E5462F'], heat = z => HEAT[Math.min(4, Math.floor(Z[z][1] / Z[z][2] * 4.2))];
+// Lumière (proposition 3) : la couleur du module, plus vive quand le muscle a beaucoup travaillé.
+const glow = z => `rgba(10,132,255,${(.18 + .8 * Math.min(1, Z[z][1] / Z[z][2])).toFixed(2)})`;
+let P = '1', SEL = null;
+function draw() {
+  const col = P === '1' ? z => SC[state(z)] : P === '2' ? heat : glow;
+  const zs = Object.keys(Z).sort((a, b) => Z[b][1] / Z[b][2] - Z[a][1] / Z[a][2]);
+  const figs = P === '2' ? `<div class="figs"><div class="back">${fig(BACK, col)}</div><div class="front">${fig(FRONT, col)}</div></div>`
+    : `<div class="figs"><div class="fig"><span>Face</span>${fig(FRONT, col)}</div><div class="fig"><span>Dos</span>${fig(BACK, col)}</div></div>`;
+  const leg = P === '1' ? Object.entries(SN).map(([k, n]) => `<span><i style="background:${SC[k]}"></i>${n}</span>`).join('')
+    : P === '2' ? ['Très peu', 'Peu', 'Bien', 'Beaucoup', 'Trop'].map((n, i) => `<span><i style="background:${HEAT[i]}"></i>${n}</span>`).join('')
+    : '<span><i style="background:rgba(10,132,255,.25)"></i>Peu travaillé</span><span><i style="background:#0A84FF;box-shadow:0 0 8px #0A84FF"></i>Très travaillé</span>';
+  document.getElementById('view').innerHTML = `<div class="card p${P}"><div class="ch"><i>∿</i><div><b>${P === '1' ? 'Fatigue musculaire' : P === '2' ? 'Séries de la semaine' : 'Travail musculaire'}</b><small>7 derniers jours</small></div></div>
+    ${figs}<div class="leg">${leg}</div>
+    <div class="det" id="det">Touche un muscle pour voir son détail.</div>
+    <div class="list">${zs.map(z => `<div class="row" data-r="${z}"><i style="background:${col(z)}${P === '3' ? ';box-shadow:0 0 8px ' + col(z) : ''}"></i><span>${Z[z][0]}</span><em>${Z[z][1]}/${Z[z][2]}</em><div class="bar"><u style="width:${Math.min(100, Z[z][1] / Z[z][2] * 100)}%;background:${col(z)}"></u></div></div>`).join('')}</div></div>`;
+  if (P === '3') document.querySelectorAll('svg.body [data-z]').forEach(p => p.style.filter = `drop-shadow(0 0 ${(2 + 6 * Math.min(1, Z[p.dataset.z][1] / Z[p.dataset.z][2])).toFixed(1)}px rgba(10,132,255,.8))`);
+  pick(SEL);
+}
+function pick(z) {
+  SEL = z;
+  document.querySelectorAll('svg.body').forEach(s => s.classList.toggle('dim', !!z));
+  document.querySelectorAll('svg.body [data-z]').forEach(p => p.classList.toggle('sel', p.dataset.z === z));
+  document.querySelectorAll('.row').forEach(r => r.classList.toggle('sel', r.dataset.r === z));
+  const d = document.getElementById('det'); if (!d) return;
+  if (!z) { d.textContent = 'Touche un muscle pour voir son détail.'; return; }
+  const [n, s, t] = Z[z], st = state(z);
+  d.innerHTML = `<b>${n}</b> · ${s} séries sur ${t} conseillées cette semaine · <b style="color:${SC[st]}">${SN[st]}</b>. ${st === 'over' ? 'Allège ce groupe jusqu\'à lundi.' : st === 'tired' ? 'Encore 1 ou 2 séances légères au plus.' : st === 'ok' ? 'Bonne dose : continue comme ça.' : 'Tu peux ajouter des séries ici.'}`;
+}
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-p]'); if (t) { P = t.dataset.p; document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b === t)); draw(); return; }
+  const z = e.target.closest('[data-z],[data-r]'); if (z) { const k = z.dataset.z || z.dataset.r; pick(SEL === k ? null : k); return; }
+  if (!e.target.closest('.card')) pick(null);
+});
+draw();
+</script>
+</body>
+</html>
