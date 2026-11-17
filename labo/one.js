@@ -380,11 +380,13 @@ paneShow = function (...a) { const r = onePaneShow0.apply(this, a); const v = P.
   const SEL = 'p.small.muted, p.hint, p.small.hint, .tools .hint, h2 small, .sec-label small';
   const skip = el => el.closest('.one-st, #one-top, #one-tabs, .toast, .dhead, .chartbox, svg') || el.dataset.tip;
   const run = root => {
-    root.querySelectorAll?.(SEL).forEach(el => {
+    root?.querySelectorAll?.(SEL).forEach(el => {
       if (skip(el)) return; el.dataset.tip = '1';
       const t = el.textContent.trim();
       if (el.matches('h2 small, .sec-label small')) { if (t.length > 22) el.hidden = true; return; }
       if (t.length < 46) return;
+      // Dans les plannings : l'aide est juste cachée, sans « Détail » qui prend de la place.
+      if (el.closest('.sboard')) { el.hidden = true; return; }
       el.hidden = true; el.classList.add('one-tipx');
       const b = document.createElement('button'); b.type = 'button'; b.className = 'one-tipb'; b.textContent = 'Détail';
       b.onclick = e => { e.stopPropagation(); el.hidden = !el.hidden; b.textContent = el.hidden ? 'Détail' : 'Masquer'; };
@@ -422,7 +424,10 @@ function archHide(root = document) {
   root.querySelectorAll?.('.sboard').forEach(b => {
     const m = archMod(b), A = ARCH[m], L = new Set(A.get());
     b.querySelectorAll(`.bsrc [data-${A.attr}]`).forEach(c => { c.style.display = L.has(c.dataset[A.attr]) ? 'none' : ''; });
-    if (!b.querySelector(':scope > .one-archrow')) b.insertAdjacentHTML('beforeend', `<div class="one-archrow"><button type="button" class="one-arch" data-onearch="${m}">Archive</button></div>`);
+    // Un bouton large, comme « + Créer une séance », juste au-dessus de ces boutons (sinon en bas du planning).
+    let row = b.nextElementSibling; for (let i = 0; row && i < 3 && !row.matches('.btnrow'); i++) row = row.nextElementSibling;
+    const at = row?.matches('.btnrow') ? row : null, box = at ? at.parentNode : b;
+    if (!box.querySelector(`:scope > .one-archrow[data-for="${m}"]`)) { const h = `<div class="one-archrow" data-for="${m}"><button type="button" class="btn ghost one-arch" data-onearch="${m}">Archive</button></div>`; if (at) at.insertAdjacentHTML('beforebegin', h); else b.insertAdjacentHTML('beforeend', h); }
   });
 }
 new MutationObserver(ms => { for (const x of ms) for (const n of x.addedNodes) if (n.nodeType === 1 && (n.matches?.('.sboard') || n.querySelector?.('.sboard'))) { archHide(n.parentNode || document); return; } }).observe(document.body, {childList: true, subtree: true});
