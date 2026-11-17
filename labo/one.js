@@ -322,7 +322,8 @@ syncBars = function () {
   const to = window.TNR_SPLASH_ON ? '#0B1733' : c1 ? '#' + c1.map(v => Math.round(v * ONE_BAND).toString(16).padStart(2, '0')).join('') : '#000000';
   const set = c => document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.media = ''; m.content = c; });
   const A = oneRgb(ONE_BAR.cur), B = oneRgb(to); cancelAnimationFrame(ONE_BAR.raf);
-  if (!A || !B || window.TNR_SPLASH_ON || oneCalm() || document.hidden) { ONE_BAR.cur = to; set(to); return; }
+  // Vers l'Accueil (ou le planning), le haut d'écran passe au noir tout de suite, comme la page.
+  if (!A || !B || window.TNR_SPLASH_ON || oneCalm() || document.hidden || !c1) { ONE_BAR.cur = to; set(to); return; }
   const t0 = performance.now(), D = 1600, ease = t => t * t * (3 - 2 * t);
   const f = now => { const k = Math.min(1, (now - t0) / D), e = ease(k), c = `rgb(${A.map((v, j) => Math.round(v + (B[j] - v) * e)).join(',')})`;
     ONE_BAR.cur = c; set(c); if (k < 1) ONE_BAR.raf = requestAnimationFrame(f); };

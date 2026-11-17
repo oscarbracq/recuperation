@@ -139,3 +139,37 @@ html.one.one-sw .mod *,html.one.one-sw .mod{animation:none!important}
 html.one.one-pl body::before,html.one.one-pl .aura,html.one.one-pl #one-top,html.one.one-pl #one-tabs,html.one.one-pl .one-hai{opacity:0!important;pointer-events:none!important;transition:opacity .25s}
 html.one.one-pl .plfs{background:#000!important}
 @media (max-width:430px){html.one .one-tabs{width:calc(100% - 16px)!important}}
+
+/* Accueil : le haut d'écran passe au noir tout de suite, en même temps que la page (pas de rouge qui traîne). */
+html.one[data-mod="home"]{--band:#000!important}
+
+/* ---------- Actus : le carré en haut à droite de l'Accueil, en face de l'IA ---------- */
+.one-act{position:fixed;z-index:31;right:calc(8px + env(safe-area-inset-right,0px));top:calc(26px + env(safe-area-inset-top,0px));opacity:0;pointer-events:none;transform:scale(.6);transition:opacity .35s,transform .45s cubic-bezier(.34,1.56,.64,1);
+  border:0!important;background:linear-gradient(#141416,#141416) padding-box,conic-gradient(from 200deg,#FF3B30,#FF9F0A,#30D158,#0FB9A6,#0A84FF,#5E5CE6,#FF3B30) border-box!important;border:2px solid transparent!important}
+html.one.one-home .one-act{opacity:1;pointer-events:auto;transform:none}
+html.one.one-pl .one-act{opacity:0!important;pointer-events:none!important}
+.one-act.seen{background:linear-gradient(#141416,#141416) padding-box,linear-gradient(rgba(255,255,255,.22),rgba(255,255,255,.22)) border-box!important}
+.one-act svg{width:18px;height:18px}
+
+/* ---------- Actus : les stories plein écran (comme la première version test) ---------- */
+.one-st{position:fixed;inset:0;z-index:160;color:#fff;background:radial-gradient(120% 80% at 80% 0%,color-mix(in srgb,var(--c) 85%,#000) 0%,color-mix(in srgb,var(--c) 35%,#000) 45%,#050506 100%);opacity:0;transform:scale(1.04);transition:opacity .3s,transform .35s cubic-bezier(.2,.8,.2,1),background .5s;overflow:hidden;-webkit-user-select:none;user-select:none;touch-action:none;-webkit-touch-callout:none}
+.one-st.on{opacity:1;transform:none}
+.one-st .bars{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:12px;right:12px;display:flex;gap:4px;z-index:3}
+.one-st .bars i{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.25);overflow:hidden}
+.one-st .bars b{display:block;height:100%;width:0;background:#fff}.one-st .bars .d b{width:100%}
+.one-st .bars .c b{animation:onesf var(--dur,8s) linear forwards}.one-st.paused .bars .c b{animation-play-state:paused}
+@keyframes onesf{to{width:100%}}
+.one-st .ax,.one-st .as{position:absolute;z-index:4;width:44px;height:44px;display:grid;place-items:center;color:#fff;background:none;border:0;padding:0;cursor:pointer}
+.one-st .ax{top:calc(22px + env(safe-area-inset-top,0px));right:8px}
+.one-st .as{top:calc(22px + env(safe-area-inset-top,0px));right:52px;opacity:.45}.one-st .as.on{opacity:.9}
+.one-st .bgw{position:absolute;right:-3%;bottom:3%;font-weight:900;font-size:min(46vw,380px);line-height:.8;letter-spacing:-.05em;opacity:.08;white-space:nowrap;pointer-events:none}
+.one-st .ct{position:relative;z-index:2;max-width:560px;height:100%;margin:0 auto;padding:76px 22px 40px;display:flex;flex-direction:column;justify-content:center;pointer-events:none}
+.one-st .ct>*{animation:onein .6s cubic-bezier(.2,.8,.2,1) both}.one-st .ct>*:nth-child(2){animation-delay:.06s}.one-st .ct>*:nth-child(3){animation-delay:.12s}.one-st .ct>*:nth-child(4){animation-delay:.18s}.one-st .ct>*:nth-child(5){animation-delay:.24s}
+@keyframes onein{from{opacity:0;transform:translateY(14px)}}
+.one-st .k{font-size:.72rem;font-weight:800;letter-spacing:.16em;opacity:.8}
+.one-st .big{font-weight:900;font-size:clamp(64px,22vw,128px);line-height:.9;letter-spacing:-.04em;margin:8px 0 4px;font-variant-numeric:tabular-nums}.one-st .big small{font-size:.3em;letter-spacing:0;opacity:.8}
+.one-st .ttl{font-weight:850;font-size:clamp(22px,6.5vw,34px);text-transform:uppercase;letter-spacing:-.01em;margin-bottom:16px}
+.one-st .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}.one-st .grid div{background:rgba(255,255,255,.12);border-radius:14px;padding:10px}
+.one-st .grid b{display:block;font-size:1.05rem}.one-st .grid span{font-size:.72rem;opacity:.8}
+.one-st .tip{background:rgba(0,0,0,.25);border-radius:14px;padding:12px 14px;margin:4px 0 0;font-size:1rem;line-height:1.45}
+@media(prefers-reduced-motion:reduce){.one-st,.one-st *{animation:none!important;transition:none!important}}
