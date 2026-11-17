@@ -240,3 +240,16 @@ html.one .one-archrow{display:flex;justify-content:flex-end;margin-top:8px}
 html.one .one-arch{border:0;background:none;color:var(--fg3,#8e8e93);font:inherit;font-size:.8rem;font-weight:500;padding:6px 2px;cursor:pointer;transition:transform .2s,background .2s,color .2s}
 html.one .one-arch.drop{background:rgba(255,255,255,.1);color:var(--fg);padding:12px 22px;border-radius:14px;border:1.5px dashed rgba(255,255,255,.4)}
 html.one .one-arch.drop.over{background:var(--one-c,#0A84FF);color:#fff;border-style:solid;transform:scale(1.06)}
+
+/* Le corps anatomique (one-body.js) */
+html.one svg.b3{width:100%;height:auto;display:block}
+html.one svg.b3 .m3{transition:opacity .3s,filter .3s;cursor:pointer}
+html.one svg.b3 .m3.idle{opacity:.85}
+html.one svg.b3.dim .m3.off{opacity:.22}
+html.one svg.b3 .m3.on{filter:brightness(1.12)}
+html.one svg.b3 .m3.soft{opacity:.5}
+html.one svg.b3 .m3.pick{filter:brightness(1.25) drop-shadow(0 0 6px rgba(255,255,255,.35))}
+html.one .b3seg{margin:8px 0 10px}
+html.one .one-2body.b3n{display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center}
+html.one .one-2body.b3n .lab{font-size:.7rem;font-weight:800;letter-spacing:.12em;margin-bottom:6px}
+html.one .segl3 .row{min-height:44px}
