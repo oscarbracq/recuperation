@@ -7203,6 +7203,8 @@ function painCoach() {
     w.el.style.transform = `translate3d(${d}px,0,0)`;
     if (w.gs[0]) w.gs[0].style.transform = `translate3d(${d - s}px,0,0)`;
     if (w.gs[1]) w.gs[1].style.transform = `translate3d(${d + s}px,0,0)`;
+    // The tab bar can follow the thumb (fraction of the way to the next tab, signed).
+    window.TAB_DRAG?.(w.T.i, Math.max(-1, Math.min(1, -d / s)), 0);
   };
   const onMove = e => {
     if (!W) return; const t = e.touches[0], dx = t.clientX - W.x, dy = t.clientY - W.y;
@@ -7231,6 +7233,7 @@ function painCoach() {
     const ease = 'cubic-bezier(.22,.8,.3,1)', anims = [];
     const mv = (el, a, b) => { if (!el) return; anims.push(el.animate([{transform: `translate3d(${a}px,0,0)`}, {transform: `translate3d(${b}px,0,0)`}], {duration: ms, easing: ease, fill: 'forwards'})); };
     mv(w.el, d, to); mv(w.gs[0], d - s, to - s); mv(w.gs[1], d + s, to + s);
+    window.TAB_DRAG?.(w.T.i, go ? dir : 0, ms);
     if (go && PREFS.haptic) navigator.vibrate?.(6);
     const done = () => {
       if (!A || A.anims !== anims) return; A = null;
@@ -7240,7 +7243,7 @@ function painCoach() {
     };
     A = {anims, done}; anims[0].onfinish = done; setTimeout(done, ms + 80);
   };
-  const cancel = () => { if (W?.on) clear(W); W = null; };
+  const cancel = () => { if (W?.on) { clear(W); window.TAB_DRAG?.(W.T.i, 0, 200); } W = null; };
 })();
 function hrvLowDays() {
   const kG = lastKey('hrv'), hb = kG ? base('hrv', kG, 60) : null; if (!hb) return 0;
