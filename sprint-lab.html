@@ -6178,6 +6178,259 @@ EX_X.push(['toewalk', 'Marche sur la pointe des pieds', 'Prévention', 'Poids du
   ['slpogo', 'Pogos sur une jambe', 'Pliométrie', 'Poids du corps', 's', 'Petits rebonds sur une jambe, genou presque tendu, contact bref et raide.', 'Single-leg pogo']);
 Object.assign(MUSC_X, {toewalk: {calves: 1, soleus: .75, foot: .75}, heelwalk: {tib: 1, foot: .5}, donkey: {glutes: 1, hams: .25}, mbback: {glutes: 1, hams: .75, erect: .75, quads: .5, shoul: .5}, slpogo: {calves: 1, soleus: .75, foot: .5}});
 for (const [id, n, cat, eq, u, c, en] of EX_X) EX.push({id, n, t: 'gym', cat, m: Object.entries(MUSC_X[id]).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k]) => MUS_NAME[k] || k).join(', '), c, u, eq, en});
+/* ---------- The big strength library: real movements × the equipment and variants that really exist ----------
+   Each movement lists only the equipment it is done with and the variants coaches use (angle, grip, one arm or one leg,
+   stance, pause…). Names are built in plain French: movement + variant + equipment ("Développé incliné prise serrée aux
+   haltères"). Nothing invented: no odd mixes. Ids are stable (g_ + codes), so a history never loses its exercise. */
+/* ---------- The big strength library: real movements × the equipment and variants that really exist ----------
+   Each movement lists only the equipment it is done with and the variants coaches use (angle, grip, one arm or one leg,
+   stance, pause…). Names are built in plain French: movement + variant + equipment ("Développé incliné prise serrée aux
+   haltères"). Nothing invented: no odd mixes. Ids are stable (g_ + codes), so a history never loses its exercise. */
+/* ---------- The big strength library: real movements × the equipment and variants that really exist ----------
+   Each movement lists only the equipment it is done with and the variants coaches use (angle, grip, one arm or one leg,
+   stance, pause…). Names are built in plain French: movement + variant + equipment ("Développé incliné prise serrée aux
+   haltères"). Nothing invented: no odd mixes. Ids are stable (g_ + codes), so a history never loses its exercise. */
+/* ---------- The big strength library: real movements × the equipment and variants that really exist ----------
+   Each movement lists only the equipment it is done with and the variants coaches use (angle, grip, one arm or one leg,
+   stance, pause…). Names are built in plain French: movement + variant + equipment ("Développé incliné prise serrée aux
+   haltères"). Nothing invented: no odd mixes. Ids are stable (g_ + codes), so a history never loses its exercise. */
+/* ---------- The big strength library: real movements × the equipment and variants that really exist ----------
+   Each movement lists only the equipment it is done with and the variants coaches use (angle, grip, one arm or one leg,
+   stance, pause…). Names are built in plain French: movement + variant + equipment ("Développé incliné prise serrée aux
+   haltères"). Nothing invented: no odd mixes. Ids are stable (g_ + codes), so a history never loses its exercise. */
+const MUSC_GEN = {}, EQ_GEN = {};
+(() => {
+  // Equipment: code → [filter label, words added to the name, unit when not loaded with weights, gym need]
+  const Q = {b: ['Barre', 'à la barre'], h: ['Haltères', 'aux haltères'], h1: ['Haltères', 'à un haltère'], k: ['Kettlebell', 'au kettlebell'], k2: ['Kettlebell', 'à deux kettlebells'],
+    p: ['Poulie', 'à la poulie'], e: ['Élastique', 'à l\'élastique', 'reps'], m: ['Machine', 'à la machine'], s: ['Smith', 'à la Smith'], l: ['Landmine', 'à la landmine'], z: ['Barre EZ', 'à la barre EZ'],
+    x: ['Barre hexagonale', 'à la barre hexagonale'], w: ['Poids du corps', '', 'reps'], v: ['Poids du corps', 'lesté'], t: ['Anneaux', 'aux sangles', 'reps', ['trx', 'rings']], a: ['Anneaux', 'aux anneaux', 'reps', ['rings']],
+    mb: ['Médecine-ball', 'au médecine-ball'], sb: ['Ballon', 'sur swiss ball', 'reps', ['swiss']], sa: ['Autre', 'au sac lesté'], sf: ['Barre', 'à la safety bar', '', ['rack']], c: ['Barre', 'à la barre avec chaînes'],
+    tb: ['Barre', 'à la barre trap'], bp: ['Machine', 'à la machine convergente'], pl: ['Machine', 'à la machine à disques'], cb: ['Autre', 'au câble de traction'], d: ['Autre', 'au disque'], tr: ['Traîneau', '', '', ['sled']], cm: ['Machine', '', '']};
+  // A variant: [words, code, muscles to add, only with these equipment codes, extra cue, unit]
+  const O = (w, c, mu, only, cue, u) => ({w, c, mu, only: only ? only.split(' ') : null, cue, u});
+  const OE = (...a) => ({...O(...a), end: true});
+  const N = O('', '');
+  const ANG = [N, O('incliné', 'i', {shoul: .5}, null, 'Banc à 30-45°.'), O('décliné', 'd', {pecs: .25}, null, 'Banc légèrement décliné, pieds calés.')];
+  const GP = [N, O('prise serrée', 'ps', {tri: .5}, 'b s z m', 'Mains largeur d\'épaules, coudes près du corps.'), O('prise large', 'pl', {pecs: .25}, 'b s', 'Mains plus larges que d\'habitude.'), O('prise neutre', 'pn', {tri: .25}, 'h', 'Paumes face à face.')];
+  const GR = [N, O('prise pronation', 'pr', {rhomb: .25}), O('prise supination', 'su', {bi: .5}), O('prise neutre', 'pn', {bi: .25})];
+  const ARM = [N, O('à un bras', 'u', {obl: .25}, 'h h1 k p e l m', 'Une main après l\'autre, buste qui ne tourne pas.')];
+  const LEG = [N, O('sur une jambe', 'u', {gmed: .5}, null, 'Charge par jambe, bassin bien horizontal.')];
+  const PAUSE = [N, OE('avec pause', 'pa', null, 'b s sf x tb', 'Arrêt de 2 s en bas, sans relâcher.'), OE('tempo lent', 'te', null, 'b s h k sf', 'Descente en 3 à 4 s.')];
+  const SIT = [N, O('assis', 'as', null, null, 'Assis, dos calé.'), O('debout', 'de', {transv: .25}, null, 'Debout, gainé.')];
+  const KNEE = [N, O('à genoux', 'ag', {transv: .25}), O('en demi-genou', 'dg', {transv: .25, obl: .25}, null, 'Un genou au sol, fessier serré.')];
+  const ISO = [N, OE('en isométrie', 'is', null, null, 'Tiens la position, 20 à 45 s.', 's'), OE('excentrique lent', 'ex', null, null, 'Descente en 4 à 5 s, remonte aidé.')];
+  const R = (n, a, b) => O(n, a, b);
+  // [id, name, family, muscles, cue, equipment, variant groups, unit (default kg), English]
+  const M = [
+    // ----- Bas du corps
+    ['sq', 'Squat', 'Bas du corps', {quads: 1, glutes: .75, adduct: .5, erect: .5}, 'Descends sous le parallèle, dos neutre, pousse fort dans le sol.', 'b s sf h k k2 l e w v c sa', [[N, O('avant', 'av', {quads: .25}, 'b s k2 h', 'Coudes hauts, buste droit.'), O('sumo', 'su', {adduct: .5}, 'h k b', 'Pieds écartés, pointes ouvertes.'), O('gobelet', 'go', null, 'h1 k', 'Charge contre la poitrine.')], [N, O('sur box', 'bx', null, 'b s sf l', 'Assieds-toi sur la box sans relâcher.'), O('partiel', 'pt', null, 'b s sf', 'Demi-amplitude, charge lourde.')], PAUSE], 'kg', 'Squat'],
+    ['sqz', 'Squat Zercher', 'Bas du corps', {quads: 1, glutes: .75, abs: .5, bi: .25}, 'Barre dans le creux des coudes, buste droit.', 'b', [PAUSE], 'kg', 'Zercher squat'],
+    ['sqo', 'Squat bras tendus au-dessus de la tête', 'Bas du corps', {quads: 1, glutes: .5, shoul: .5, traps: .5}, 'Bras verrouillés, charge au-dessus du milieu du pied.', 'b h1 k e w', [N], 'kg', 'Overhead squat'],
+    ['sqh', 'Hack squat', 'Bas du corps', {quads: 1, glutes: .5}, 'Dos collé au dossier, genoux qui avancent.', 'm b', [[N, O('pieds serrés', 'ps', {quads: .25}), O('pieds hauts', 'ph', {glutes: .25})], PAUSE], 'kg', 'Hack squat', ['hacksquat', 'pendulum']],
+    ['sqc', 'Squat ceinture', 'Bas du corps', {quads: 1, glutes: .75}, 'Charge à la ceinture : le dos ne porte rien.', 'm pl k', [N], 'kg', 'Belt squat', ['beltsquat']],
+    ['sqp', 'Squat pistol', 'Bas du corps', {quads: 1, glutes: .75, gmed: .5}, 'Sur une jambe, l\'autre tendue devant, descends contrôlé.', 'w h1 k e', [[N, O('sur box', 'bx', null, null, 'Descends jusqu\'à toucher la box.')]], 'reps', 'Pistol squat'],
+    ['sqs', 'Sissy squat', 'Bas du corps', {quads: 1}, 'Genoux vers l\'avant, talons levés, buste aligné avec les cuisses.', 'w d m', [N], 'reps', 'Sissy squat'],
+    ['sqw', 'Squat au mur', 'Prévention', {quads: 1, glutes: .25}, 'Dos au mur, cuisses parallèles au sol.', 'w h d', [[N, O('sur une jambe', 'u', {gmed: .25})]], 's', 'Wall sit'],
+    ['sqsp', 'Squat espagnol', 'Prévention', {quads: 1}, 'Élastique derrière les genoux, buste droit, tibias verticaux.', 'e', [[N, OE('en isométrie', 'is', null, null, '', 's')]], 'reps', 'Spanish squat'],
+    ['lp', 'Presse à cuisses', 'Bas du corps', {quads: 1, glutes: .75, adduct: .25}, 'Bas du dos collé, descends sans décoller le bassin.', 'm pl', [[N, O('pieds hauts', 'ph', {glutes: .25, hams: .25}), O('pieds serrés', 'ps', {quads: .25}), O('pieds écartés', 'pe', {adduct: .5})], LEG, [N, OE('avec pause', 'pa')]], 'kg', 'Leg press', ['legpress']],
+    ['lx', 'Leg extension', 'Bas du corps', {quads: 1}, 'Monte jusqu\'à la jambe tendue, redescends lentement.', 'm e p', [LEG, [N, OE('avec pause en haut', 'pa', null, null, 'Tiens 1 à 2 s jambe tendue.'), OE('en isométrie', 'is', null, null, 'Jambe tendue, 30 à 45 s.', 's')]], 'kg', 'Leg extension', ['legext']],
+    ['fs', 'Fente statique', 'Bas du corps', {quads: 1, glutes: .75, adduct: .25}, 'Genou arrière qui frôle le sol, buste droit. Reps par jambe.', 'b h k k2 s l w v e sa', [[N, O('pied avant surélevé', 'pa', {quads: .25}), O('pied arrière surélevé', 'pb', {quads: .25, psoas: .25})]], 'kg', 'Split squat'],
+    ['fa', 'Fente avant', 'Bas du corps', {quads: 1, glutes: .75}, 'Grand pas devant, freine puis repousse. Reps par jambe.', 'b h k k2 w v s sa', [[N, O('marchée', 'ma', {gmed: .25}, null, 'Avance à chaque pas.')]], 'kg', 'Forward lunge'],
+    ['fr', 'Fente arrière', 'Bas du corps', {glutes: 1, quads: .75}, 'Pas en arrière, genou avant dans l\'axe. Reps par jambe.', 'b h k k2 w v s l sa', [[N, O('depuis un step', 'de', {glutes: .25}, null, 'Pied avant sur un step de 10 à 15 cm.')]], 'kg', 'Reverse lunge'],
+    ['fl', 'Fente latérale', 'Bas du corps', {adduct: 1, quads: .75, glutes: .5}, 'Pas de côté, hanches en arrière, jambe opposée tendue.', 'h k w v e', [N], 'kg', 'Lateral lunge'],
+    ['fc', 'Fente croisée', 'Bas du corps', {glutes: 1, gmed: .75, quads: .5}, 'Jambe qui passe en arrière en diagonale, bassin de face.', 'h k w', [N], 'kg', 'Curtsy lunge'],
+    ['su', 'Step-up', 'Bas du corps', {quads: 1, glutes: .75}, 'Pousse avec la jambe sur la box seulement.', 'b h k k2 w v s sa', [[N, O('latéral', 'la', {gmed: .5}), O('croisé', 'cr', {gmed: .5})]], 'kg', 'Step-up'],
+    ['sd', 'Step-down', 'Prévention', {quads: 1, gmed: .5}, 'Descends très lentement d\'un step, genou dans l\'axe.', 'w h k', [[N, O('latéral', 'la'), O('avant', 'av')]], 'reps', 'Step-down'],
+    ['ad', 'Adducteurs', 'Bas du corps', {adduct: 1}, 'Ramène les jambes l\'une vers l\'autre sans à-coup.', 'm p e', [[N, OE('en isométrie', 'is', null, null, '', 's')]], 'kg', 'Hip adduction', ['adductor']],
+    ['ab', 'Abducteurs', 'Bas du corps', {gmed: 1, piri: .5}, 'Écarte les jambes, bassin immobile.', 'm p e', [[N, OE('en isométrie', 'is', null, null, '', 's')]], 'kg', 'Hip abduction', ['abductor']],
+    ['cs', 'Mollets debout', 'Bas du corps', {calves: 1, soleus: .5, foot: .25}, 'Monte haut sur la pointe, pause, descends sous le niveau du step.', 'm b h s k w', [LEG, [N, OE('avec pause', 'pa'), OE('excentrique lent', 'ex')]], 'kg', 'Standing calf raise', ['calf_stand']],
+    ['ca', 'Mollets assis', 'Bas du corps', {soleus: 1, calves: .5}, 'Genoux pliés : c\'est le soléaire qui travaille.', 'm b h s', [LEG, [N, OE('avec pause', 'pa'), OE('en isométrie', 'is', null, null, '', 's')]], 'kg', 'Seated calf raise', ['calf_seat']],
+    ['ti', 'Relevé de pointe des pieds', 'Prévention', {tib: 1}, 'Talons au sol, relève les pointes au maximum.', 'w e k d m', [LEG], 'reps', 'Tibialis raise'],
+    ['hp', 'Montée de genou', 'Prévention', {psoas: 1, quads: .25}, 'Monte le genou au-dessus de la hanche, buste droit.', 'e p m w', [[N, O('debout', 'de'), O('allongé', 'al')], [N, OE('en isométrie', 'is', null, null, '', 's')]], 'reps', 'Hip flexion'],
+    // ----- Chaîne postérieure
+    ['dl', 'Soulevé de terre', 'Chaîne postérieure', {glutes: 1, hams: .75, erect: .75, quads: .5, forearm: .5, traps: .25}, 'Barre collée aux tibias, pousse le sol, verrouille debout.', 'b x tb h k l', [[N, O('sumo', 'su', {adduct: .5, quads: .25}, 'b h k', 'Pieds larges, mains entre les jambes.'), O('déficit', 'de', {quads: .25}, 'b x tb', 'Debout sur un disque de 5 cm.'), O('partiel depuis les blocs', 'bl', null, 'b x tb', 'Barre à hauteur des genoux.')], PAUSE], 'kg', 'Deadlift'],
+    ['rd', 'Soulevé de terre roumain', 'Chaîne postérieure', {hams: 1, glutes: .75, erect: .5, forearm: .25}, 'Genoux souples, recule les hanches, arrête quand les ischios tirent.', 'b h k l s x p e', [[N, O('sur une jambe', 'u', {gmed: .5}, 'h h1 k l p e', 'Bassin horizontal, jambe arrière alignée.')], [N, OE('tempo lent', 'te', null, 'b h', 'Descente en 3 à 4 s.')]], 'kg', 'Romanian deadlift'],
+    ['jt', 'Soulevé de terre jambes tendues', 'Chaîne postérieure', {hams: 1, erect: .75, glutes: .5}, 'Jambes presque tendues, dos neutre.', 'b h k', [N], 'kg', 'Stiff-legged deadlift'],
+    ['gm', 'Good morning', 'Chaîne postérieure', {hams: 1, erect: .75, glutes: .5}, 'Barre sur le haut du dos, recule les hanches dos droit.', 'b sf s e', [[N, O('assis', 'as', {erect: .25})]], 'kg', 'Good morning'],
+    ['ht', 'Hip thrust', 'Chaîne postérieure', {glutes: 1, hams: .25, quads: .25}, 'Haut du dos sur le banc, menton rentré, serre les fessiers en haut.', 'b h k s m e w l', [LEG, [N, OE('avec pause', 'pa', null, null, 'Tiens 2 s en haut.')]], 'kg', 'Hip thrust', ['hipthrust_plat', 'bench', 'hipthrust_m']],
+    ['pf', 'Pont fessier', 'Chaîne postérieure', {glutes: 1, hams: .5}, 'Dos au sol, pousse dans les talons, bassin en haut.', 'w b h k e', [LEG, [N, O('pieds surélevés', 'ps', {hams: .5})]], 'reps', 'Glute bridge'],
+    ['lc', 'Leg curl', 'Chaîne postérieure', {hams: 1, calves: .25}, 'Ramène les talons vers les fessiers, redescends lentement.', 'm e p', [[N, O('allongé', 'al'), O('assis', 'as', {hams: .25}), O('debout', 'de')], LEG, [N, OE('excentrique lent', 'ex'), OE('en isométrie', 'is', null, null, '', 's')]], 'kg', 'Leg curl', ['legcurl_ly', 'legcurl_seat']],
+    ['no', 'Nordic', 'Chaîne postérieure', {hams: 1, calves: .25}, 'Pieds tenus, descends le plus lentement possible.', 'w e v', [[N, O('assisté', 'as', null, null, 'Élastique dans le dos pour t\'aider.')]], 'reps', 'Nordic hamstring curl'],
+    ['gh', 'Glute-ham raise', 'Chaîne postérieure', {hams: 1, glutes: .5, calves: .25}, 'Sur le GHD, tire avec les ischios jusqu\'au buste vertical.', 'w v', [N], 'reps', 'Glute-ham raise', ['ghd']],
+    ['hy', 'Hyperextension', 'Chaîne postérieure', {erect: 1, glutes: .75, hams: .5}, 'Hanches au bord du banc, monte jusqu\'à l\'alignement.', 'w d b h e', [[N, O('à 45°', '45'), O('à 90°', '90')], [N, O('sur une jambe', 'u', {gmed: .25})]], 'reps', 'Back extension', ['lumbar', 'ghd', 'romaine']],
+    ['rh', 'Reverse hyper', 'Chaîne postérieure', {glutes: 1, hams: .5, erect: .5}, 'Buste sur le banc, monte les jambes tendues.', 'm w e', [N], 'kg', 'Reverse hyperextension'],
+    ['pt', 'Tirage entre les jambes', 'Chaîne postérieure', {glutes: 1, hams: .75}, 'Dos à la poulie, recule les hanches puis pousse-les vers l\'avant.', 'p e', [N], 'kg', 'Pull-through'],
+    ['sw', 'Swing', 'Chaîne postérieure', {glutes: 1, hams: .75, erect: .5, forearm: .5}, 'Mouvement de hanches, bras relâchés, la cloche flotte.', 'k h1', [[N, O('à un bras', 'u', {obl: .25}), O('américain', 'am', {shoul: .25}, 'k', 'La cloche monte au-dessus de la tête.')]], 'kg', 'Swing'],
+    ['ck', 'Ruade', 'Chaîne postérieure', {glutes: 1, hams: .25}, 'Pousse le talon vers l\'arrière sans cambrer.', 'p m e w', [[N, O('à quatre pattes', 'qp'), O('debout', 'de')]], 'reps', 'Glute kickback'],
+    ['ce', 'Abduction de hanche allongé', 'Prévention', {gmed: 1, piri: .5}, 'Sur le côté, jambe du dessus tendue un peu en arrière.', 'w e d', [N], 'reps', 'Side-lying hip abduction'],
+    ['clm', 'Clamshell', 'Prévention', {piri: 1, gmed: .75}, 'Sur le côté, genoux pliés, ouvre le genou sans tourner le bassin.', 'w e', [N], 'reps', 'Clamshell'],
+    // ----- Haut du corps : poussées
+    ['dc', 'Développé couché', 'Haut du corps', {pecs: 1, tri: .75, shoul: .5}, 'Omoplates serrées, pieds au sol, barre au bas des pectoraux.', 'b h k s m e c bp', [ANG, GP, [N, OE('avec pause', 'pa', null, 'b s h', 'Barre posée 1 s sur la poitrine.')]], 'kg', 'Bench press', ['bench']],
+    ['ds', 'Développé au sol', 'Haut du corps', {pecs: 1, tri: 1}, 'Coudes qui touchent le sol, puis pousse.', 'b h k', [GP], 'kg', 'Floor press'],
+    ['dm', 'Développé militaire', 'Haut du corps', {shoul: 1, tri: .75, traps: .25}, 'Gainé, la barre passe devant le visage et finit au-dessus de la tête.', 'b h k s m z', [SIT, ARM], 'kg', 'Overhead press'],
+    ['da', 'Développé Arnold', 'Haut du corps', {shoul: 1, tri: .5}, 'Paumes vers toi en bas, tourne en poussant.', 'h k', [SIT], 'kg', 'Arnold press'],
+    ['dl1', 'Développé landmine', 'Haut du corps', {shoul: 1, pecs: .5, tri: .5, serr: .5}, 'Pousse la barre vers le haut et l\'avant.', 'l', [ARM, KNEE], 'kg', 'Landmine press'],
+    ['pp', 'Push press', 'Haltérophilie', {shoul: 1, quads: .5, tri: .5}, 'Petite flexion des jambes, pousse avec les jambes puis les bras.', 'b h k', [N], 'kg', 'Push press'],
+    ['ec', 'Écarté', 'Haut du corps', {pecs: 1, shoul: .25}, 'Bras légèrement fléchis, ouvre large, referme en serrant.', 'h p m e', [ANG, ARM], 'kg', 'Chest fly'],
+    ['ev', 'Écarté à la poulie vis-à-vis', 'Haut du corps', {pecs: 1}, 'Un pas en avant, ramène les mains devant toi.', 'p', [[N, O('de bas en haut', 'bh', {shoul: .25}), O('de haut en bas', 'hb')]], 'kg', 'Cable crossover'],
+    ['pd', 'Pec deck', 'Haut du corps', {pecs: 1}, 'Coudes à hauteur d\'épaules, ferme lentement.', 'm', [ARM], 'kg', 'Pec deck', ['pecdeck']],
+    ['po', 'Pompes', 'Haut du corps', {pecs: 1, tri: .75, shoul: .5, serr: .5, transv: .25}, 'Corps gainé, poitrine qui frôle le sol.', 'w v e', [[N, O('déclinées', 'de', {shoul: .25}, null, 'Pieds surélevés.'), O('inclinées', 'in', null, null, 'Mains sur un banc.'), O('diamant', 'di', {tri: .5}, null, 'Mains jointes sous la poitrine.'), O('mains larges', 'ml', {pecs: .25}), O('sur les genoux', 'ge')], [N, OE('avec pause', 'pa'), O('explosives', 'ex', null, null, 'Les mains décollent.')]], 'reps', 'Push-up'],
+    ['pa', 'Pompes aux anneaux', 'Haut du corps', {pecs: 1, tri: .5, serr: .5, transv: .5}, 'Anneaux stables, coudes près du corps.', 'a t', [N], 'reps', 'Ring push-up'],
+    ['di', 'Dips', 'Haut du corps', {tri: 1, pecs: .75, shoul: .5}, 'Descends jusqu\'aux épaules au niveau des coudes.', 'w v m a', [[N, O('assistés', 'as', null, 'w m', 'Élastique ou machine qui t\'aide.')]], 'reps', 'Dips', ['dips', 'romaine']],
+    ['db', 'Dips entre deux bancs', 'Haut du corps', {tri: 1, shoul: .25}, 'Mains sur le banc derrière toi, coudes vers l\'arrière.', 'w v', [N], 'reps', 'Bench dips'],
+    ['el', 'Élévation latérale', 'Haut du corps', {shoul: 1, traps: .25}, 'Monte les bras sur le côté jusqu\'à l\'horizontale, coudes souples.', 'h p e m k', [[N, O('assis', 'as'), O('penché', 'pe', {rotat: .25}), O('allongé sur le côté', 'al')], ARM], 'kg', 'Lateral raise'],
+    ['ef', 'Élévation frontale', 'Haut du corps', {shoul: 1}, 'Monte les bras devant toi jusqu\'aux yeux.', 'h b p e d k', [ARM], 'kg', 'Front raise'],
+    ['oi', 'Oiseau', 'Haut du corps', {shoul: 1, rhomb: .5, rotat: .25}, 'Buste penché, ouvre les bras en serrant les omoplates.', 'h p m e', [[N, O('assis', 'as'), O('allongé sur banc incliné', 'bi')], ARM], 'kg', 'Reverse fly'],
+    ['ym', 'Élévation en Y', 'Prévention', {traps: 1, shoul: .5, rotat: .25}, 'Pouces vers le haut, monte les bras en Y.', 'h e p w', [[N, O('allongé sur banc incliné', 'bi')]], 'reps', 'Y raise'],
+    ['tm', 'Tirage menton', 'Haut du corps', {shoul: 1, traps: .75}, 'Coudes plus hauts que les mains, jusqu\'au sternum.', 'b h p z k e', [N], 'kg', 'Upright row'],
+    ['sh', 'Haussement d\'épaules', 'Haut du corps', {traps: 1, forearm: .5}, 'Monte les épaules vers les oreilles, pause, redescends.', 'b h k s x m tb', [N], 'kg', 'Shrug'],
+    ['ro', 'Rotation externe', 'Prévention', {rotat: 1}, 'Coude collé au corps à 90°, tourne l\'avant-bras vers l\'extérieur.', 'p e h1', [[N, O('coude à hauteur d\'épaule', 'ce'), O('allongé sur le côté', 'al')]], 'reps', 'External rotation'],
+    ['ri', 'Rotation interne', 'Prévention', {rotat: 1, pecs: .25}, 'Coude collé au corps, ramène la main vers le ventre.', 'p e', [N], 'reps', 'Internal rotation'],
+    ['fp', 'Face pull', 'Haut du corps', {rotat: .75, rhomb: .75, shoul: .75, traps: .5}, 'Tire la corde vers le front, coudes hauts, mains qui s\'écartent.', 'p e', [[N, O('à genoux', 'ag')]], 'kg', 'Face pull'],
+    ['sp', 'Protraction des omoplates', 'Prévention', {serr: 1}, 'Bras tendus, pousse les omoplates vers l\'avant.', 'w p e b', [N], 'reps', 'Scapular push-up'],
+    // ----- Haut du corps : tirages
+    ['tr', 'Tractions', 'Haut du corps', {lats: 1, bi: .75, rhomb: .5, forearm: .5}, 'Pars bras tendus, monte le menton au-dessus de la barre.', 'w v e', [[N, O('prise large', 'pl', {lats: .25}), O('prise serrée', 'ps', {bi: .25}), O('prise supination', 'su', {bi: .5}), O('prise neutre', 'pn', {bi: .25})], [N, OE('excentriques', 'ex', null, null, 'Saute en haut, descends en 4 à 5 s.')]], 'reps', 'Pull-up', ['pullup']],
+    ['tv', 'Tirage vertical', 'Haut du corps', {lats: 1, bi: .5, rhomb: .5}, 'Tire la barre vers le haut de la poitrine, buste légèrement en arrière.', 'p m e', [[N, O('prise large', 'pl'), O('prise serrée', 'ps'), O('prise supination', 'su', {bi: .5}), O('prise neutre', 'pn', {bi: .25})], ARM], 'kg', 'Lat pulldown', ['tirage_v']],
+    ['th', 'Tirage horizontal', 'Haut du corps', {lats: .75, rhomb: 1, bi: .5, traps: .5}, 'Dos droit, tire vers le ventre en serrant les omoplates.', 'p m e', [GR, ARM], 'kg', 'Seated row', ['tirage_h', 'tirage_h_plate']],
+    ['rw', 'Rowing', 'Haut du corps', {lats: 1, rhomb: .75, bi: .5, erect: .25}, 'Buste penché dos plat, tire vers le nombril.', 'b h k s l z m e', [GR, ARM, [N, O('poitrine appuyée', 'pa', null, 'h k m', 'Buste sur un banc incliné : le dos ne travaille pas.'), O('buste à l\'horizontale', 'ho', {erect: .25}, 'b', 'Barre posée au sol entre chaque rep.')]], 'kg', 'Bent-over row'],
+    ['rt', 'Rowing T-bar', 'Haut du corps', {lats: 1, rhomb: .75, bi: .5}, 'Pieds de part et d\'autre, tire vers la poitrine.', 'l m', [[N, O('poitrine appuyée', 'pa')]], 'kg', 'T-bar row', ['tbar', 'rack']],
+    ['ri2', 'Rowing inversé', 'Haut du corps', {rhomb: 1, lats: .75, bi: .5, transv: .25}, 'Corps gainé sous la barre, tire la poitrine vers elle.', 'b s t a', [[N, O('pieds surélevés', 'ps')]], 'reps', 'Inverted row'],
+    ['po2', 'Pull-over', 'Haut du corps', {lats: 1, pecs: .5, tri: .25}, 'Bras presque tendus, descends derrière la tête puis ramène.', 'h p b z', [N], 'kg', 'Pullover'],
+    ['bt', 'Tirage bras tendus à la poulie', 'Haut du corps', {lats: 1, tri: .25}, 'Bras tendus, ramène la barre vers les cuisses.', 'p e', [N], 'kg', 'Straight-arm pulldown'],
+    ['sc', 'Abaissement des omoplates', 'Prévention', {lats: 1, traps: .5}, 'Suspendu, descends les épaules sans plier les bras.', 'w p', [N], 'reps', 'Scapular pull-up'],
+    // ----- Bras
+    ['cu', 'Curl', 'Haut du corps', {bi: 1, forearm: .5}, 'Coudes fixes, monte sans balancer.', 'b h z p e k m', [[N, O('marteau', 'ma', {forearm: .5}, 'h p e k', 'Paumes face à face.'), O('prise inversée', 'pi', {forearm: .75}, 'b z h p', 'Paumes vers le bas.'), O('incliné', 'in', null, 'h', 'Assis sur un banc incliné, bras derrière le corps.'), O('pupitre', 'pu', null, 'b z h m', 'Bras posés sur le pupitre.'), O('concentré', 'co', null, 'h', 'Coude contre la cuisse.'), O('araignée', 'ar', null, 'b z h', 'Buste sur un banc incliné, bras pendants.')], ARM], 'kg', 'Curl'],
+    ['te', 'Extension triceps', 'Haut du corps', {tri: 1}, 'Coudes fixes, tends complètement les bras.', 'p h z b e m', [[N, O('au-dessus de la tête', 'oh', {tri: .25}), O('à la corde', 'co', null, 'p'), O('nuque', 'nu', null, 'h z')], ARM], 'kg', 'Triceps extension'],
+    ['bf', 'Barre au front', 'Haut du corps', {tri: 1}, 'Allongé, descends la barre vers le front, coudes fixes.', 'z b h', [[N, O('incliné', 'in'), O('décliné', 'de')]], 'kg', 'Skull crusher'],
+    ['kb2', 'Kickback triceps', 'Haut du corps', {tri: 1}, 'Buste penché, coude au corps, tends le bras vers l\'arrière.', 'h p e', [N], 'kg', 'Triceps kickback'],
+    ['fw', 'Flexion des poignets', 'Haut du corps', {forearm: 1}, 'Avant-bras posés, monte les poignets.', 'b h z p', [[N, O('prise inversée', 'pi')]], 'kg', 'Wrist curl'],
+    ['rp', 'Rouleau de poignet', 'Haut du corps', {forearm: 1, shoul: .25}, 'Bras tendus, enroule la corde jusqu\'en haut puis déroule.', 'd', [N], 'kg', 'Wrist roller'],
+    ['gr', 'Suspension à la barre', 'Haut du corps', {forearm: 1, lats: .25}, 'Suspendu bras tendus, épaules actives.', 'w v', [[N, O('à un bras', 'u')]], 's', 'Dead hang'],
+    ['pi', 'Pince disques', 'Haut du corps', {forearm: 1}, 'Tiens deux disques entre le pouce et les doigts.', 'd', [N], 's', 'Plate pinch'],
+    // ----- Tronc
+    ['gn', 'Gainage', 'Tronc', {abs: 1, transv: 1, shoul: .25}, 'Coudes sous les épaules, corps aligné, fessiers serrés.', 'w v sb', [[N, O('sur les mains', 'ma'), O('avec levée de jambe', 'lj', {glutes: .25}), O('avec levée de bras', 'lb', {obl: .25})]], 's', 'Plank'],
+    ['gl', 'Gainage latéral', 'Tronc', {obl: 1, ql: .75, gmed: .5}, 'Sur le coude, bassin haut, corps aligné.', 'w v', [[N, O('avec levée de jambe', 'lj', {gmed: .5}), O('genoux au sol', 'ge')]], 's', 'Side plank'],
+    ['gc', 'Gainage Copenhague', 'Prévention', {adduct: 1, obl: .75}, 'Jambe du dessus sur le banc, bassin haut.', 'w', [[N, O('genou sur le banc', 'ge', null, null, 'Version plus facile.')]], 's', 'Copenhagen plank'],
+    ['cr', 'Crunch', 'Tronc', {abs: 1}, 'Enroule le buste, bas du dos au sol.', 'w p m d sb e', [[N, O('inversé', 'in', {psoas: .25}, 'w', 'Ramène les genoux vers la poitrine.'), O('oblique', 'ob', {obl: .75})]], 'reps', 'Crunch', null],
+    ['rb', 'Relevé de buste', 'Tronc', {abs: 1, psoas: .5}, 'Pieds calés, monte jusqu\'à la verticale.', 'w d mb', [[N, O('décliné', 'de')]], 'reps', 'Sit-up'],
+    ['rj', 'Relevé de jambes', 'Tronc', {abs: 1, psoas: .75}, 'Monte les jambes sans balancer.', 'w v', [[N, O('suspendu', 'su', {forearm: .5}), O('allongé', 'al'), O('à la chaise romaine', 'cr')], [N, O('genoux pliés', 'gp')]], 'reps', 'Leg raise'],
+    ['ru', 'Roulette abdominale', 'Tronc', {abs: 1, transv: .75, lats: .25}, 'Déroule loin en gardant le dos plat.', 'w b', [[N, O('à genoux', 'ag'), O('debout', 'de')]], 'reps', 'Ab wheel rollout'],
+    ['pa2', 'Pallof press', 'Tronc', {transv: 1, obl: .75}, 'De profil à la poulie, pousse les mains devant toi sans tourner.', 'p e', [[N, O('à genoux', 'ag'), O('en demi-genou', 'dg'), O('en fente', 'fe')]], 'reps', 'Pallof press'],
+    ['bu', 'Bûcheron', 'Tronc', {obl: 1, abs: .5, shoul: .25}, 'Rotation du buste en diagonale, bras tendus.', 'p e mb h1 k', [[N, O('de haut en bas', 'hb'), O('de bas en haut', 'bh')]], 'reps', 'Woodchop'],
+    ['rr', 'Rotation russe', 'Tronc', {obl: 1, abs: .5}, 'Assis, pieds décollés, tourne d\'un côté à l\'autre.', 'w d mb h1 k', [N], 'reps', 'Russian twist'],
+    ['dbg', 'Dead bug', 'Tronc', {transv: 1, abs: .75}, 'Bas du dos plaqué, bras et jambe opposés qui s\'allongent.', 'w e k', [N], 'reps', 'Dead bug'],
+    ['bd', 'Bird dog', 'Tronc', {erect: .75, glutes: .5, transv: .75}, 'À quatre pattes, bras et jambe opposés tendus, bassin stable.', 'w e', [N], 'reps', 'Bird dog'],
+    ['hb', 'Hollow', 'Tronc', {abs: 1, transv: .75}, 'Bas du dos au sol, bras et jambes tendus et décollés.', 'w d', [[N, O('avec balancier', 'ba')]], 's', 'Hollow hold'],
+    ['cl', 'Flexion latérale', 'Tronc', {obl: 1, ql: .75}, 'Penche-toi sur le côté, remonte en contractant.', 'h1 k p', [N], 'kg', 'Side bend'],
+    ['lw', 'Essuie-glace', 'Tronc', {obl: 1, abs: .5}, 'Jambes en l\'air, bascule d\'un côté à l\'autre.', 'w', [[N, O('suspendu', 'su')]], 'reps', 'Windshield wiper'],
+    ['tg', 'Relevé turc', 'Tronc', {shoul: .75, obl: .75, glutes: .5, transv: .5}, 'Bras verrouillé au-dessus, passe du sol à debout.', 'k h1', [N], 'kg', 'Turkish get-up'],
+    // ----- Portés et force athlétique
+    ['fm', 'Marche du fermier', 'Tronc', {forearm: 1, traps: .75, ql: .5, transv: .5}, 'Debout grand, épaules basses, petits pas rapides.', 'h k tb', [[N, O('à un bras', 'u', {obl: .75, ql: .5}), O('charge au-dessus de la tête', 'oh', {shoul: .75})]], 'kg', 'Farmer carry'],
+    ['ws', 'Portage serveur', 'Tronc', {shoul: 1, rotat: .5, transv: .5}, 'Bras tendu au-dessus de la tête, marche sans pencher.', 'k h1', [N], 'kg', 'Waiter carry'],
+    ['zc', 'Portage Zercher', 'Tronc', {transv: 1, quads: .5, bi: .25}, 'Charge dans les coudes, marche droit.', 'b sa', [N], 'kg', 'Zercher carry'],
+    ['sl', 'Poussée de traîneau', 'Cardio', {quads: 1, glutes: .75, calves: .5}, 'Bras tendus, corps penché, pousse avec les jambes.', 'tr', [[N, O('bras pliés', 'bp'), O('lourde et lente', 'lo')]], 'kg', 'Sled push', ['sled']],
+    ['st', 'Tirage de traîneau', 'Cardio', {quads: .75, glutes: .75, hams: .5}, 'Harnais ou sangle, tire en marchant.', 'tr', [[N, O('en marche arrière', 'ar', {quads: .5}), O('en marche avant', 'av'), O('à la corde, main sur main', 'co', {lats: .75, bi: .5, forearm: .75})]], 'kg', 'Sled drag', ['sled']],
+    ['tp', 'Retournement de pneu', 'Cardio', {glutes: 1, hams: .75, quads: .5, erect: .5, shoul: .25}, 'Mains sous le pneu, pousse avec les jambes puis retourne.', 'w', [N], 'reps', 'Tire flip'],
+    ['sbg', 'Sac lesté sur l\'épaule', 'Cardio', {glutes: 1, hams: .5, erect: .5, bi: .25}, 'Ramasse le sac et jette-le sur une épaule, en alternant.', 'sa', [N], 'kg', 'Sandbag to shoulder'],
+    ['sm', 'Coups de masse sur pneu', 'Cardio', {obl: 1, shoul: .5, lats: .5, forearm: .5}, 'Pieds stables, frappe en alternant les côtés.', 'w', [N], 'reps', 'Sledgehammer slam'],
+    // ----- Haltérophilie
+    ['ep', 'Épaulé', 'Haltérophilie', {glutes: 1, quads: .75, hams: .5, traps: .75, erect: .5}, 'Tire vite et haut, passe les coudes sous la barre.', 'b h k', [[N, O('debout', 'de', null, 'b h k', 'Réception en quart de squat.'), O('suspendu', 'su', null, 'b h k', 'Départ barre au-dessus des genoux.'), O('depuis les blocs', 'bl', null, 'b', 'Barre posée sur des blocs.')]], 'kg', 'Clean'],
+    ['ar', 'Arraché', 'Haltérophilie', {glutes: 1, quads: .75, traps: .75, shoul: .5}, 'Prise large, la barre monte d\'une traite au-dessus de la tête.', 'b h1 k', [[N, O('debout', 'de'), O('suspendu', 'su'), O('depuis les blocs', 'bl', null, 'b')]], 'kg', 'Snatch'],
+    ['tir', 'Tirage d\'épaulé', 'Haltérophilie', {traps: 1, glutes: .75, hams: .5}, 'Comme l\'épaulé sans réception : extension complète et haussement.', 'b', [[N, O('prise arraché', 'pa'), O('suspendu', 'su')]], 'kg', 'Clean pull'],
+    ['je', 'Jeté', 'Haltérophilie', {shoul: 1, quads: .75, tri: .5}, 'Impulsion des jambes, passe sous la barre bras tendus.', 'b h', [[N, O('fendu', 'fe'), O('en puissance', 'pu')]], 'kg', 'Jerk'],
+    ['hm', 'Haussé', 'Haltérophilie', {traps: 1, glutes: .5, calves: .25}, 'Barre suspendue, extension explosive des hanches et des épaules.', 'b h tb', [N], 'kg', 'High pull'],
+    ['th2', 'Thruster', 'Cardio', {quads: 1, shoul: .75, glutes: .5, tri: .5}, 'Squat avant puis pousse au-dessus de la tête d\'un seul mouvement.', 'b h k mb sa', [N], 'kg', 'Thruster'],
+    // ----- Pliométrie et puissance chargée
+    ['js', 'Squat sauté', 'Pliométrie', {quads: 1, glutes: .75, calves: .5}, 'Descends vite au quart, saute le plus haut possible.', 'w h b k e x', [[N, OE('avec réception stabilisée', 'rs')]], 'reps', 'Jump squat'],
+    ['jf', 'Fente sautée', 'Pliométrie', {quads: 1, glutes: .75, calves: .5}, 'Change de jambe en l\'air, réception douce.', 'w h', [N], 'reps', 'Jump lunge'],
+    ['bj', 'Saut sur box', 'Pliométrie', {quads: 1, glutes: .75, calves: .5}, 'Bras qui balancent, réception silencieuse sur la box.', 'w v h', [[N, O('sur une jambe', 'u'), O('assis', 'as', null, null, 'Départ assis sur un banc.')]], 'reps', 'Box jump'],
+    ['lb', 'Lancer de médecine-ball', 'Pliométrie', {glutes: .75, obl: .75, shoul: .5, pecs: .5}, 'Lance le plus fort possible, le corps entier pousse.', 'mb', [[N, O('poitrine', 'po', {pecs: .5, tri: .5}), O('rotatif contre le mur', 'ro', {obl: .5}), O('par-dessus la tête vers l\'arrière', 'ar', {hams: .5}), O('vers le sol', 'so', {abs: .5, lats: .5}), O('vertical', 've', {quads: .5})]], 'reps', 'Medicine ball throw'],
+    ['wb', 'Wall ball', 'Cardio', {quads: 1, shoul: .75, glutes: .5}, 'Squat puis lance le ballon sur la cible.', 'mb', [N], 'reps', 'Wall ball'],
+    // ----- Cardio et aérox
+    ['bp2', 'Burpees', 'Cardio', {quads: .75, pecs: .5, shoul: .5, abs: .5}, 'Poitrine au sol, relève-toi et saute.', 'w v', [[N, O('avec saut sur box', 'bx'), O('sans pompe', 'sp')]], 'reps', 'Burpee'],
+    ['mc', 'Grimpeur', 'Cardio', {abs: .75, psoas: .75, shoul: .5}, 'En appui, ramène les genoux vite et en alternance.', 'w e', [N], 's', 'Mountain climber'],
+    ['cdr', 'Corde ondulatoire', 'Cardio', {shoul: 1, forearm: .5, abs: .5}, 'Genoux fléchis, vagues rapides avec les bras.', 'w', [[N, O('en alternance', 'al'), O('en slams', 'sl', {lats: .5})]], 's', 'Battle rope'],
+    ['jr', 'Corde à sauter', 'Cardio', {calves: 1, soleus: .5, shoul: .25}, 'Petits rebonds sur l\'avant du pied.', 'w', [[N, O('double tour', 'dt')]], 's', 'Jump rope'],
+    ['rw2', 'Rameur', 'Cardio', {quads: .75, lats: .75, glutes: .5}, 'Jambes, buste puis bras ; et l\'inverse au retour.', 'm', [N], 'min', 'Rowing machine', ['rower']],
+    ['sk', 'SkiErg', 'Cardio', {lats: 1, tri: .5, abs: .5}, 'Tire vers le bas avec les bras et le buste.', 'cm', [N], 'min', 'SkiErg', ['skierg']],
+    ['ab2', 'Vélo assault', 'Cardio', {quads: 1, glutes: .5, shoul: .25}, 'Pousse et tire avec les bras et les jambes.', 'cm', [N], 'min', 'Air bike', ['airbike']],
+    ['kc', 'Kettlebell complexe', 'Cardio', {glutes: .75, shoul: .75, quads: .75}, 'Swing, épaulé, développé, squat sans poser la cloche.', 'k k2', [N], 'kg', 'Kettlebell complex'],
+    ['ma', 'Man maker', 'Cardio', {shoul: .75, pecs: .5, quads: .75, lats: .5}, 'Pompe, rowing de chaque côté, épaulé, développé.', 'h', [N], 'kg', 'Man maker'],
+    ['bjk', 'Jumping jacks', 'Cardio', {calves: .75, shoul: .25}, 'Écarte bras et jambes en sautant.', 'w', [N], 's', 'Jumping jack'],
+    // ----- Rééducation, prévention (renfo doux)
+    ['is', 'Isométrie quadriceps', 'Prévention', {quads: 1}, 'Pousse contre l\'appui sans bouger, 30 à 45 s.', 'm e w', [[N, O('à 60° de flexion', '60'), O('à 90° de flexion', '90')]], 's', 'Isometric quad'],
+    ['ih', 'Isométrie ischios', 'Prévention', {hams: 1}, 'Talon qui tire contre l\'appui, 20 à 45 s.', 'm e w', [[N, O('jambe presque tendue', 'jt'), O('genou à 90°', '90')]], 's', 'Isometric hamstring'],
+    ['ia', 'Isométrie adducteurs', 'Prévention', {adduct: 1}, 'Ballon ou poing entre les genoux, serre fort.', 'w sb', [[N, O('genoux pliés', 'gp'), O('jambes tendues', 'jt')]], 's', 'Adductor squeeze'],
+    ['ic', 'Isométrie mollet', 'Prévention', {calves: 1, soleus: .75}, 'Sur la pointe, tiens la position haute.', 'w m s', [LEG, [N, O('genou plié', 'gp', {soleus: .5})]], 's', 'Isometric calf'],
+    ['mp', 'Marche sur la pointe des pieds', 'Prévention', {calves: 1, foot: .75}, 'Talons hauts, genoux tendus.', 'w h k', [N], 's', 'Toe walk'],
+    ['ft', 'Renforcement du pied', 'Prévention', {foot: 1}, 'Serre une serviette avec les orteils, voûte active.', 'w e', [[N, O('short foot', 'sf'), O('ramassé de serviette', 'se')]], 'reps', 'Foot strengthening'],
+    ['ev2', 'Éversion de cheville', 'Prévention', {pero: 1}, 'Élastique autour du pied, tourne vers l\'extérieur.', 'e', [N], 'reps', 'Ankle eversion'],
+    ['in2', 'Inversion de cheville', 'Prévention', {tib: .75, foot: .5}, 'Élastique autour du pied, tourne vers l\'intérieur.', 'e', [N], 'reps', 'Ankle inversion'],
+    ['nk', 'Renforcement du cou', 'Prévention', {traps: 1}, 'Petites poussées de la tête contre la main, sans bouger.', 'w e', [[N, O('flexion', 'fl'), O('extension', 'ex'), O('latéral', 'la')]], 's', 'Neck isometric'],
+    ['sv', 'Équilibre unipodal', 'Prévention', {foot: 1, gmed: .5, pero: .5}, 'Sur une jambe, genou souple.', 'w sb k', [[N, O('yeux fermés', 'yf'), O('sur coussin instable', 'ci')]], 's', 'Single-leg balance'],
+    ['hk', 'Extension de hanche allongé', 'Prévention', {glutes: 1, hams: .25}, 'À plat ventre, décolle la jambe tendue sans cambrer.', 'w e', [N], 'reps', 'Prone hip extension'],
+    ['wy', 'W, Y, T allongé', 'Prévention', {traps: 1, rhomb: .75, rotat: .5}, 'À plat ventre, dessine W, Y puis T avec les bras.', 'w h', [N], 'reps', 'Prone W Y T'],
+    // ----- Encore des classiques
+    ['sb', 'Squat bulgare', 'Bas du corps', {quads: 1, glutes: .75, adduct: .25, gmed: .25}, 'Pied arrière sur le banc, genou avant dans l\'axe. Reps par jambe.', 'b h k s l w v e sf', [[N, O('avec déficit', 'df', {glutes: .25}, null, 'Pied avant sur un disque.'), O('buste penché', 'bp', {glutes: .5}, null, 'Buste vers l\'avant : plus de fessiers.')]], 'kg', 'Bulgarian split squat'],
+    ['spt', 'Squat patineur', 'Bas du corps', {quads: 1, glutes: .75, gmed: .5}, 'Sur une jambe, genou arrière qui vient toucher le sol.', 'w h k v', [N], 'reps', 'Skater squat'],
+    ['sqf', 'Squat cycliste', 'Bas du corps', {quads: 1}, 'Talons surélevés, pieds serrés, genoux loin devant.', 'b h k s w', [N], 'kg', 'Cyclist squat'],
+    ['pi2', 'Pont ischios', 'Chaîne postérieure', {hams: 1, glutes: .5}, 'Talons sur un banc, genoux presque tendus, monte le bassin.', 'w b e', [LEG], 'reps', 'Hamstring bridge'],
+    ['sld', 'Soulevé de terre sur une jambe', 'Chaîne postérieure', {hams: 1, glutes: .75, gmed: .5}, 'Bassin horizontal, jambe arrière alignée avec le buste.', 'h h1 k l p e w', [[N, O('en appui sur un mur', 'mu')]], 'kg', 'Single-leg deadlift'],
+    ['kh', 'Hip thrust en B-stance', 'Chaîne postérieure', {glutes: 1, hams: .25}, 'Un pied en avant, l\'autre en appui léger sur le talon.', 'b h k s m', [N], 'kg', 'B-stance hip thrust'],
+    ['frp', 'Frog pump', 'Chaîne postérieure', {glutes: 1, adduct: .25}, 'Plantes des pieds collées, genoux ouverts, monte le bassin.', 'w h d e', [N], 'reps', 'Frog pump'],
+    ['pk', 'Pompes pike', 'Haut du corps', {shoul: 1, tri: .75}, 'Hanches hautes, tête qui descend entre les mains.', 'w v', [[N, O('pieds surélevés', 'ps', {shoul: .25})]], 'reps', 'Pike push-up'],
+    ['pac', 'Pompes archer', 'Haut du corps', {pecs: 1, tri: .75, shoul: .5}, 'Mains très larges, descends sur un bras, l\'autre tendu.', 'w v', [N], 'reps', 'Archer push-up'],
+    ['hsp', 'Pompes en équilibre', 'Haut du corps', {shoul: 1, tri: 1, traps: .5}, 'Contre le mur, tête qui descend vers le sol.', 'w e', [[N, O('amplitude partielle', 'pt')]], 'reps', 'Handstand push-up'],
+    ['zp', 'Z press', 'Haut du corps', {shoul: 1, tri: .75, transv: .5}, 'Assis au sol jambes tendues, pousse sans te pencher en arrière.', 'b h k', [N], 'kg', 'Z press'],
+    ['bdp', 'Développé Bradford', 'Haut du corps', {shoul: 1, tri: .5}, 'Barre qui passe devant puis derrière la tête, sans verrouiller.', 'b s', [N], 'kg', 'Bradford press'],
+    ['jm', 'JM press', 'Haut du corps', {tri: 1, pecs: .25}, 'Entre le développé serré et la barre au front : barre vers le menton.', 'b s z', [N], 'kg', 'JM press'],
+    ['tdc', 'Développé couché triceps', 'Haut du corps', {tri: 1, pecs: .5}, 'Haltères parallèles collés, coudes près du corps.', 'h', [ANG], 'kg', 'Tate press'],
+    ['kr', 'Rowing Kroc', 'Haut du corps', {lats: 1, rhomb: .5, bi: .5, forearm: .75}, 'Rowing lourd à un bras, un peu d\'élan autorisé.', 'h', [N], 'kg', 'Kroc row'],
+    ['mr', 'Rowing Meadows', 'Haut du corps', {lats: 1, rhomb: .5, bi: .5}, 'Debout de profil à la landmine, tire le bout de la barre.', 'l', [N], 'kg', 'Meadows row'],
+    ['yr', 'Rowing Yates', 'Haut du corps', {lats: 1, rhomb: .5, bi: .75, traps: .5}, 'Buste à 45°, prise supination, tire vers le bas du ventre.', 'b s z', [N], 'kg', 'Yates row'],
+    ['sr', 'Rowing allongé sur banc', 'Haut du corps', {rhomb: 1, lats: .75, bi: .5}, 'À plat ventre sur un banc haut, aucune aide du dos.', 'b h k', [[N, O('prise neutre', 'pn')]], 'kg', 'Seal row'],
+    ['hr', 'Rowing haut vers le visage', 'Haut du corps', {rhomb: 1, shoul: .75, traps: .5}, 'Coudes ouverts à hauteur d\'épaules, tire vers le haut de la poitrine.', 'b h p e m', [N], 'kg', 'High row'],
+    ['by', 'Curl Bayesian', 'Haut du corps', {bi: 1}, 'Dos à la poulie, bras qui part derrière le corps.', 'p e', [N], 'kg', 'Bayesian curl'],
+    ['dr', 'Curl drag', 'Haut du corps', {bi: 1, shoul: .25}, 'La barre glisse le long du corps, coudes qui reculent.', 'b z h', [N], 'kg', 'Drag curl'],
+    ['zt', 'Curl Zottman', 'Haut du corps', {bi: 1, forearm: .75}, 'Monte paumes vers le haut, tourne, redescends paumes vers le bas.', 'h', [ARM], 'kg', 'Zottman curl'],
+    ['cpr', 'Cuban press', 'Prévention', {rotat: 1, shoul: .5, traps: .5}, 'Tirage menton, rotation externe, puis développé.', 'h b e', [N], 'kg', 'Cuban press'],
+    ['lu', 'Élévation en L', 'Prévention', {rotat: 1, shoul: .5}, 'Coudes à 90°, monte et tourne les avant-bras vers le haut.', 'h e p', [N], 'kg', 'L raise'],
+    ['rpo', 'Pull-over à la corde', 'Haut du corps', {lats: 1, tri: .25}, 'Corde à la poulie haute, ramène-la vers les cuisses en reculant les hanches.', 'p', [[N, O('à genoux', 'ag')]], 'kg', 'Rope pullover'],
+    ['csp', 'Développé assis', 'Haut du corps', {shoul: 1, tri: .75}, 'Dos collé, pousse jusqu\'aux bras tendus.', 'm pl', [[N, O('prise neutre', 'pn')], ARM], 'kg', 'Machine shoulder press', ['shoulder_m']],
+    ['cpm', 'Développé poitrine', 'Haut du corps', {pecs: 1, tri: .75, shoul: .5}, 'Poignées à hauteur de poitrine, pousse sans décoller le dos.', 'm pl bp', [[N, O('incliné', 'i', {shoul: .5}), O('décliné', 'd')], ARM], 'kg', 'Machine chest press', ['chest_m']],
+    ['rmc', 'Rowing assis', 'Haut du corps', {lats: 1, rhomb: .75, bi: .5}, 'Poitrine contre le support, tire en serrant les omoplates.', 'm pl', [[N, O('prise haute', 'ph', {rhomb: .25}), O('prise basse', 'pb', {lats: .25})], ARM], 'kg', 'Machine row', ['tirage_h', 'tirage_h_plate']],
+    ['sq2', 'Squat sur box', 'Prévention', {quads: 1, glutes: .75}, 'Assieds-toi sur la box et relève-toi sans les mains.', 'w h k', [[N, O('sur une jambe', 'u', {gmed: .5})]], 'reps', 'Box squat'],
+  ];
+  const MN = {glutes: 'Fessiers', hams: 'Ischio-jambiers', quads: 'Quadriceps', calves: 'Mollets', adduct: 'Adducteurs', psoas: 'Psoas', tib: 'Tibial antérieur', erect: 'Lombaires', abs: 'Abdominaux', obl: 'Obliques', lats: 'Grand dorsal', rhomb: 'Rhomboïdes', shoul: 'Épaules', pecs: 'Pectoraux', tri: 'Triceps', bi: 'Biceps', gmed: 'Moyen fessier', piri: 'Pelvi-trochantériens', soleus: 'Soléaire', pero: 'Fibulaires', foot: 'Pied', traps: 'Trapèzes', rotat: 'Coiffe des rotateurs', serr: 'Dentelé', transv: 'Transverse', ql: 'Carré des lombes', forearm: 'Avant-bras'};
+  const TEMPO = [N, OE('tempo lent', 'te', null, null, 'Descente en 3 à 4 s.'), OE('excentrique lent', 'ex', null, null, 'Descente en 4 à 5 s.'), OE('en isométrie', 'is', null, null, 'Tiens la position la plus dure, 20 à 45 s.', 's')];
+  const seen = new Set(EX.map(e => e.n.toLowerCase())), add = [];
+  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  for (const [id, n, cat, mus, cue, eqs, groups0, u0, en, need] of M) {
+    const has = groups0.some(g => (Array.isArray(g) ? g : [g]).some(o => ['te', 'ex', 'is'].includes(o.c)));
+    const groups = has || !['Bas du corps', 'Chaîne postérieure', 'Haut du corps'].includes(cat) || ['s', 'min'].includes(u0) ? groups0 : [...groups0, TEMPO];
+    for (const q of eqs.split(' ')) {
+      // every combination of one option per group, keeping only options that go with this equipment
+      let combos = [[]];
+      for (const g of groups) { const opts = (Array.isArray(g) ? g : [g]).filter(o => !o.only || o.only.includes(q)); combos = combos.flatMap(c => opts.map(o => [...c, o])); }
+      for (const c of combos) {
+        const used = c.filter(o => o.c), [eq, eqw, equ, eqn] = Q[q];
+        // a one-arm or one-leg variant with "two kettlebells" makes no sense
+        if (q === 'k2' && used.some(o => o.c === 'u')) continue;
+        if (used.filter(o => o.end).length > 1) continue;   // one way of doing the tempo at a time
+        const name = cap([n, ...used.filter(o => !o.end).map(o => o.w), n.toLowerCase().includes(eq.toLowerCase()) ? '' : eqw, ...used.filter(o => o.end).map(o => o.w)].filter(Boolean).join(' ').replace(/\s+/g, ' ')).replace(/^Développé couché (incliné|décliné)/, 'Développé $1');
+        const key = name.toLowerCase(); if (seen.has(key)) continue; seen.add(key);
+        const gid = 'g_' + id + '_' + q + (used.length ? '_' + used.map(o => o.c).join('') : '');
+        const mu = {...mus}; for (const o of used) for (const k in o.mu || {}) mu[k] = Math.min(1, (mu[k] || 0) + o.mu[k]);
+        const unit = used.find(o => o.u)?.u || (u0 === 'kg' && equ ? equ : u0);
+        add.push({id: gid, n: name, t: 'gym', cat, eq, en: [en, ...used.map(o => o.c)].join(' '), u: unit, c: [cue, ...used.map(o => o.cue).filter(Boolean)].join(' '),
+          m: Object.entries(mu).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k]) => MN[k] || k).join(', '), gen: 1});
+        MUSC_GEN[gid] = mu;
+        const nd = (['m', 'pl', 'bp', 'tr', 'cm'].includes(q) ? need : null) || eqn; if (nd) EQ_GEN[gid] = nd;
+      }
+    }
+  }
+  EX.push(...add);
+})();
 // Variants: the same movement done another way. Each keeps its own history; the chip next to the name swaps between them.
 const FAM = [['squat', 'fsquat', 'pausesquat', 'boxsquat', 'smithsquat', 'halfsquat', 'goblet', 'pistol', 'hacksquat', 'pendulum', 'zercher', 'ssbsquat', 'pinsquat', 'cyclistsq', 'dbsquat', 'lmsquat', 'beltsquat', 'ohsquat'], ['legext', 'legext1', 'legext_iso1'],
   ['legcurl', 'seatcurl', 'legcurl1', 'legcurl_iso1', 'ballcurl', 'slider'], ['calf', 'seatcalf', 'slcalf', 'legpresscalf', 'isocalf'], ['deadlift', 'sumodl', 'deficitdl', 'rackpull', 'hbdl', 'isodl_rack', 'sgdl'],
@@ -6236,7 +6489,7 @@ const MUSC = {
   tibkb: {tib: 1}, abwheel: {abs: 1, lats: .25}, curl: {bi: 1}, triext: {tri: 1}, latraise: {shoul: 1}, frontraise: {shoul: 1}, reardelt: {shoul: .75, rhomb: .75},
   deadbug: {abs: 1, obl: .5}, dbhip: {glutes: 1, abs: .75}, pogo: {calves: 1, tib: .5}
 };
-Object.assign(MUSC, MUSC_MORE, MUSC_NEW, MUSC_X, MUSC_DB);
+Object.assign(MUSC, MUSC_MORE, MUSC_NEW, MUSC_X, MUSC_DB, MUSC_GEN);
 // Deep and small muscles: they work as helpers of the big ones (anatomy and EMG studies), plus the exercises that target them.
 for (const [ex, c] of Object.entries(MUSC)) {
   const g = c.glutes || 0, ca = c.calves || 0, add = (k, v) => { if (v >= .1 && !(k in c)) c[k] = Math.round(v * 4) / 4 || .25; };
@@ -7790,7 +8043,7 @@ const EQ_NEED = {legext: ['legext'], legext1: ['legext'], legext_iso1: ['legext'
   isosquat_rack: ['iso_rack'], isodl_rack: ['iso_rack'], trx_row: ['trx', 'rings'], wallball: ['wallball'], sledpush: ['sled'], sleddrag: ['sled'], slider: ['sliders'], abwheel: ['abwheel'], legraise: ['pullup', 'romaine'], ballcurl: ['swiss']};
 const EQ_BY = {Barre: ['rack'], 'Haltères': ['halt'], Kettlebell: ['kb', 'halt'], Poulie: ['poulie'], 'Élastique': ['band'], 'Médecine-ball': ['medball'], Smith: ['smith'], Box: ['box', 'step'], Banc: ['bench'],
   'Barre de traction': ['pullup'], Anneaux: ['rings', 'dips'], 'Barres parallèles': ['dips', 'romaine'], 'Traîneau': ['sled'], Ballon: ['swiss'], 'Barre hexagonale': ['hexbar'], Landmine: ['rack'], 'Barre EZ': ['rack', 'halt']};
-const eqNeed = id => EQ_NEED[id] || EQ_BY[exOf(id).eq] || [];
+const eqNeed = id => EQ_NEED[id] || EQ_GEN[id] || EQ_BY[exOf(id).eq] || [];
 const gymHas = (g, id) => { const n = eqNeed(id); return !n.length || n.some(x => GYM_EQ[g].includes(x)); };
 const gymName = g => GYMS.find(x => x[0] === g)?.[1] || '';
 const missTxt = (f, items) => f.miss.map(x => esc(exOf(x).n) + (GYM_MAX[f.g] && gymHas(f.g, x) ? ` (plus de ${GYM_MAX[f.g]} kg)` : '')).join(', ');
