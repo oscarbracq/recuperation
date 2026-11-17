@@ -4830,6 +4830,9 @@ const rxDone = (k, id) => (S.manual[k]?.recov || []).some(a => a.t === RX[id]?.n
 // Two recovery exercises a day: for the muscles the most tired (fatigue of the last 3 weeks), changing every day.
 function rxDay() {
   const st = musState().sort((a, b) => b.fatPct - a.fatPct).map(x => x.k), seed = Math.floor(Date.parse(TODAY) / 864e5), out = [];
+  // A pain noted these 3 days comes first: a gentle exercise for its zone (mobility, stretch, soft tissue, warmth), marked « Douleur ».
+  for (const pn of painNow().sort((a, b) => b.v - a.v)) { if (out.length >= 1) break;
+    for (const m of pn.ks) { const c = RLIB.map(r => RX[r[0]]).filter(x => x && (x.mus || []).includes(m) && ['mob', 'etir', 'tissu', 'chaud'].includes(x.kind)); if (c.length) { out.push({id: c[seed % c.length].id, m, pain: pn.l}); break; } } }
   for (const m of [...st, 'hams', 'psoas', 'erect', 'calves']) { if (out.length >= 2) break;
     const c = RLIB.map(r => RX[r[0]]).filter(x => x && (x.mus || []).includes(m) && !out.some(o => o.id === x.id)); if (c.length) out.push({id: c[seed % c.length].id, m}); }
   return out;
