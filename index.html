@@ -1128,7 +1128,7 @@ body.bdragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
 .bchip.src.xchip{box-shadow:inset 3px 0 0 color-mix(in srgb,var(--accent) 60%,#fff)}
 .libsearch{position:relative;margin:16px 0 6px}.libsearch svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--fg3);pointer-events:none}.libsearch .search{padding-left:42px;margin:0;width:100%;box-shadow:inset 0 0 0 1px var(--line)}
 .pc .rtoolbar{grid-column:1/-1;flex-wrap:wrap;align-self:start;height:auto;overflow:visible}.rtoolbar .chip{height:auto}
-.vidbtn{display:flex;align-items:center;gap:12px;margin:12px 0 0;padding:12px 14px;border-radius:14px;background:var(--card);color:var(--fg);text-decoration:none}.vidbtn span{display:flex;flex-direction:column;flex:1;min-width:0}.vidbtn b{font-size:.9375rem}.vidbtn small{font-size:.75rem;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.vidbtn .kc{flex:none;color:var(--fg3)}
+.vidbtn{display:flex;align-items:center;gap:12px;margin:12px 0;padding:12px 14px;border-radius:14px;background:var(--card);color:var(--fg);text-decoration:none}.vidbtn span{display:flex;flex-direction:column;flex:1;min-width:0}.vidbtn b{font-size:.9375rem}.vidbtn small{font-size:.75rem;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.vidbtn .kc{flex:none;color:var(--fg3)}
 .sct2{display:grid;gap:10px;margin:12px 0 4px}.pc .sct2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .sct-i{background:var(--card2);border-radius:16px;padding:14px 16px 12px;animation:sctin .5s cubic-bezier(.22,.8,.3,1) both;animation-delay:var(--d)}
 .sct-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.sct-n{display:flex;flex-direction:column;gap:2px;min-width:0}.sct-n b{font-size:.9375rem;font-weight:600}.sct-n small{font-size:.75rem;color:var(--fg2)}
@@ -1388,13 +1388,13 @@ html.one.pc body{padding-left:0!important}
 .one-mp{position:absolute;left:0;top:4px;bottom:4px;border-radius:14px;background:color-mix(in srgb,var(--one-c) 20%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--one-c) 40%,transparent),0 0 18px color-mix(in srgb,var(--one-c) 28%,transparent);transition:background .3s,box-shadow .3s}
 @media(max-width:345px){.one-mods button span{display:none}}
 html.one .mm-space{height:66px!important}
-html.one #v-today>header.top:first-child,html.one #v-trends>header.top:first-child,html.one #v-rsess>header.top:first-child,html.one #v-rlib>header.top:first-child,html.one #v-reports>header.top:first-child,html.one #v-profile>header.top:first-child{margin-top:12px!important}
+html.one :is(#v-today,.gv-v-today)>header.top:first-child,html.one :is(#v-trends,.gv-v-trends)>header.top:first-child,html.one :is(#v-rsess,.gv-v-rsess)>header.top:first-child,html.one :is(#v-rlib,.gv-v-rlib)>header.top:first-child,html.one :is(#v-reports,.gv-v-reports)>header.top:first-child,html.one :is(#v-profile,.gv-v-profile)>header.top:first-child{margin-top:12px!important}
 /* Chaque onglet commence au même endroit en Training, Nutrition et Recovery : même en-tête, même hauteur. */
-html.one :is(#t-view,#f-view,#v-today,#v-trends,#v-rsess,#v-rlib,#v-reports,#v-profile)>header.top{box-sizing:border-box;height:62px;margin-bottom:12px!important;padding-bottom:0!important;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
-html.one :is(#t-view,#f-view,#v-today,#v-trends,#v-rsess,#v-rlib,#v-reports,#v-profile)>header.top:has(>.pmsg){height:86px;justify-content:flex-start}
-html.one :is(#t-view,#f-view,#v-today,#v-trends,#v-rsess,#v-rlib,#v-reports,#v-profile)>header.top .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-html.one :is(#t-view,#f-view,#v-today,#v-trends,#v-rsess,#v-rlib,#v-reports,#v-profile)>header.top .pmsg{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-html.one :is(#t-view,#f-view,#v-today,#v-trends,#v-rsess,#v-rlib,#v-reports,#v-profile)>header.tophead{flex-direction:row;align-items:flex-end;justify-content:space-between;gap:10px}
+html.one :is(:is(#t-view,.gv-t-view),:is(#f-view,.gv-f-view),:is(#v-today,.gv-v-today),:is(#v-trends,.gv-v-trends),:is(#v-rsess,.gv-v-rsess),:is(#v-rlib,.gv-v-rlib),:is(#v-reports,.gv-v-reports),:is(#v-profile,.gv-v-profile))>header.top{box-sizing:border-box;height:62px;margin-bottom:12px!important;padding-bottom:0!important;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
+html.one :is(:is(#t-view,.gv-t-view),:is(#f-view,.gv-f-view),:is(#v-today,.gv-v-today),:is(#v-trends,.gv-v-trends),:is(#v-rsess,.gv-v-rsess),:is(#v-rlib,.gv-v-rlib),:is(#v-reports,.gv-v-reports),:is(#v-profile,.gv-v-profile))>header.top:has(>.pmsg){height:86px;justify-content:flex-start}
+html.one :is(:is(#t-view,.gv-t-view),:is(#f-view,.gv-f-view),:is(#v-today,.gv-v-today),:is(#v-trends,.gv-v-trends),:is(#v-rsess,.gv-v-rsess),:is(#v-rlib,.gv-v-rlib),:is(#v-reports,.gv-v-reports),:is(#v-profile,.gv-v-profile))>header.top .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.one :is(:is(#t-view,.gv-t-view),:is(#f-view,.gv-f-view),:is(#v-today,.gv-v-today),:is(#v-trends,.gv-v-trends),:is(#v-rsess,.gv-v-rsess),:is(#v-rlib,.gv-v-rlib),:is(#v-reports,.gv-v-reports),:is(#v-profile,.gv-v-profile))>header.top .pmsg{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+html.one :is(:is(#t-view,.gv-t-view),:is(#f-view,.gv-f-view),:is(#v-today,.gv-v-today),:is(#v-trends,.gv-v-trends),:is(#v-rsess,.gv-v-rsess),:is(#v-rlib,.gv-v-rlib),:is(#v-reports,.gv-v-reports),:is(#v-profile,.gv-v-profile))>header.tophead{flex-direction:row;align-items:flex-end;justify-content:space-between;gap:10px}
 html.one header.tophead>div:first-child{min-width:0}html.one header.tophead .unitseg{flex:none;width:auto;margin:0 0 4px}
 html.one .one-segsp{height:var(--one-segh,40px)}
 /* Fond « Aurore » (choisi dans labo/fonds) : 3 grandes taches de couleur floues qui se promènent dans tout l'écran.
@@ -1448,15 +1448,15 @@ html.one #sheet.one-qs .row{transition:background .2s}
 /* Mon corps : même rangée de réglages, puis deux silhouettes de 145 px, au pixel près, dans les trois modules */
 html.one .seg.msrc{margin-top:12px}html.one .seg.msrc button{white-space:nowrap;font-size:.75rem;padding-left:4px;padding-right:4px}
 html.one .one-segsp{height:37px;margin-top:12px}
-html.one :is(#t-view .mbody,#v-reports .rbody2,#f-view .one-2body){display:grid!important;grid-template-columns:145px 145px!important;justify-content:center;gap:16px!important;margin-top:10px!important}
-html.one :is(#t-view .mbody,#v-reports .rbody2,#f-view .one-2body) svg{width:145px!important;height:auto!important;display:block}
-html.one #t-view .mbody figure{display:flex;flex-direction:column;margin:0}html.one #t-view .mbody figcaption{order:-1}
-html.one :is(#t-view .mbody figcaption,#v-reports .rbody2 .lab,#f-view .one-2body .lab){display:block;height:16px;margin:0 0 4px;text-align:center;font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--fg3);font-weight:600}
-html.one #t-view .card:has(>.mbody)>.chead,html.one #f-view .segbody>.chead,html.one #v-reports .card:has(>.rbody2)>.eyebrow{display:flex;min-height:20px;margin:0!important}
-html.one #f-view .one-segw{grid-template-columns:1fr}
-html.one :is(#t-view,#f-view,#v-today,#v-trends,#v-rsess,#v-rlib,#v-reports,#v-profile)>header.top+*{margin-top:0!important}
-html.one .seg.msrc{box-sizing:border-box;min-height:37px}html.one #t-view .seg.msrc+*{margin-top:12px!important}html.one .one-segsp{margin-bottom:12px}
-html.one #f-view .segbody>.chead{height:20px;align-items:center}html.one #f-view .segbody>.chead .num{font-size:1rem}
+html.one :is(:is(#t-view,.gv-t-view) .mbody,:is(#v-reports,.gv-v-reports) .rbody2,:is(#f-view,.gv-f-view) .one-2body){display:grid!important;grid-template-columns:145px 145px!important;justify-content:center;gap:16px!important;margin-top:10px!important}
+html.one :is(:is(#t-view,.gv-t-view) .mbody,:is(#v-reports,.gv-v-reports) .rbody2,:is(#f-view,.gv-f-view) .one-2body) svg{width:145px!important;height:auto!important;display:block}
+html.one :is(#t-view,.gv-t-view) .mbody figure{display:flex;flex-direction:column;margin:0}html.one :is(#t-view,.gv-t-view) .mbody figcaption{order:-1}
+html.one :is(:is(#t-view,.gv-t-view) .mbody figcaption,:is(#v-reports,.gv-v-reports) .rbody2 .lab,:is(#f-view,.gv-f-view) .one-2body .lab){display:block;height:16px;margin:0 0 4px;text-align:center;font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--fg3);font-weight:600}
+html.one :is(#t-view,.gv-t-view) .card:has(>.mbody)>.chead,html.one :is(#f-view,.gv-f-view) .segbody>.chead,html.one :is(#v-reports,.gv-v-reports) .card:has(>.rbody2)>.eyebrow{display:flex;min-height:20px;margin:0!important}
+html.one :is(#f-view,.gv-f-view) .one-segw{grid-template-columns:1fr}
+html.one :is(:is(#t-view,.gv-t-view),:is(#f-view,.gv-f-view),:is(#v-today,.gv-v-today),:is(#v-trends,.gv-v-trends),:is(#v-rsess,.gv-v-rsess),:is(#v-rlib,.gv-v-rlib),:is(#v-reports,.gv-v-reports),:is(#v-profile,.gv-v-profile))>header.top+*{margin-top:0!important}
+html.one .seg.msrc{box-sizing:border-box;min-height:37px}html.one :is(#t-view,.gv-t-view) .seg.msrc+*{margin-top:12px!important}html.one .one-segsp{margin-bottom:12px}
+html.one :is(#f-view,.gv-f-view) .segbody>.chead{height:20px;align-items:center}html.one :is(#f-view,.gv-f-view) .segbody>.chead .num{font-size:1rem}
 /* La lentille : du verre liquide, clair et bombé, bords qui accrochent la lumière ; la barre a un peu de marge pour l'élan. */
 html.one .one-tabs{padding:6px 14px!important}html.one .one-mods{padding:4px 10px!important}
 html.one .one-pill{border-radius:20px!important}html.one .one-mp{border-radius:14px!important}
@@ -1480,7 +1480,7 @@ html.one.one-home .one-mp{opacity:0}
 html.one #mod-home .hm-dock,html.one #mod-home .hm-pcmods{display:none!important}
 html.one #one-tabs button[data-one-h]{position:relative;z-index:1;flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;background:none;color:var(--fg3);font:inherit;font-size:.625rem;font-weight:600;cursor:pointer;padding:0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 html.one #one-tabs button[data-one-h] svg{width:22px;height:22px;flex:none}html.one #one-tabs button[data-one-h].on{color:var(--fg)}
-html.one #mod-home #hm-head{margin-top:56px;overflow:visible}
+html.one #mod-home #hm-head,html.one .tab-ghost .hm-head{margin-top:56px;overflow:visible}
 /* Accueil : T N R bien au milieu de leur bulle ; le bouton IA dans le coin en haut à gauche, à la même hauteur que la barre. */
 html.one.one-home .one-mods button{justify-content:center}
 html.one.one-home .one-mods button b{height:28px;line-height:1;padding-bottom:2px;box-sizing:border-box}
@@ -1522,12 +1522,14 @@ html.one.one-pl .one-act{opacity:0!important;pointer-events:none!important}
 .one-act svg{width:18px;height:18px}
 
 /* ---------- Actus : les stories plein écran (comme la première version test) ---------- */
-.one-st{position:fixed;inset:0;z-index:160;color:#fff;background:radial-gradient(120% 80% at 80% 0%,color-mix(in srgb,var(--c) 85%,#000) 0%,color-mix(in srgb,var(--c) 35%,#000) 45%,#050506 100%);opacity:0;transform:scale(1.04);transition:opacity .3s,transform .35s cubic-bezier(.2,.8,.2,1),background .5s;overflow:hidden;-webkit-user-select:none;user-select:none;touch-action:none;-webkit-touch-callout:none}
+.one-st{position:fixed;inset:0;z-index:160;color:#fff;background:radial-gradient(110% 70% at 85% 0%,color-mix(in srgb,var(--c) 88%,#000) 0%,transparent 70%),radial-gradient(120% 70% at 0% 100%,color-mix(in srgb,var(--c2) 80%,#000) 0%,transparent 72%),linear-gradient(165deg,color-mix(in srgb,var(--c) 55%,#000),color-mix(in srgb,var(--c2) 45%,#000));opacity:0;transform:scale(1.04);transition:opacity .3s,transform .35s cubic-bezier(.2,.8,.2,1),background .5s;overflow:hidden;-webkit-user-select:none;user-select:none;touch-action:none;-webkit-touch-callout:none}
 .one-st.on{opacity:1;transform:none}
+.one-st::before{content:'';position:absolute;width:120vmax;height:120vmax;left:-10vmax;top:30%;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--c2) 55%,transparent),transparent);filter:blur(30px);opacity:.75;animation:onestb 9s ease-in-out infinite alternate;pointer-events:none}
+@keyframes onestb{to{transform:translate(18vw,-14vh) scale(1.15)}}
 .one-st .bars{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:12px;right:12px;display:flex;gap:4px;z-index:3}
 .one-st .bars i{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.25);overflow:hidden}
-.one-st .bars b{display:block;height:100%;width:0;background:#fff}.one-st .bars .d b{width:100%}
-.one-st .bars .c b{animation:onesf var(--dur,8s) linear forwards}.one-st.paused .bars .c b{animation-play-state:paused}
+.one-st .bars b{display:block;height:100%;width:100%;background:#fff;transform:scaleX(0);transform-origin:0 50%}.one-st .bars .d b{transform:none}
+
 @keyframes onesf{to{width:100%}}
 .one-st .ax,.one-st .as{position:absolute;z-index:4;width:44px;height:44px;display:grid;place-items:center;color:#fff;background:none;border:0;padding:0;cursor:pointer}
 .one-st .ax{top:calc(22px + env(safe-area-inset-top,0px));right:8px}
@@ -1539,13 +1541,15 @@ html.one.one-pl .one-act{opacity:0!important;pointer-events:none!important}
 .one-st .k{font-size:.72rem;font-weight:800;letter-spacing:.16em;opacity:.8}
 .one-st .big{font-weight:900;font-size:clamp(64px,22vw,128px);line-height:.9;letter-spacing:-.04em;margin:8px 0 4px;font-variant-numeric:tabular-nums}.one-st .big small{font-size:.3em;letter-spacing:0;opacity:.8}
 .one-st .ttl{font-weight:850;font-size:clamp(22px,6.5vw,34px);text-transform:uppercase;letter-spacing:-.01em;margin-bottom:16px}
-.one-st .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}.one-st .grid div{background:rgba(255,255,255,.12);border-radius:14px;padding:10px}
+.one-st .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}.one-st .grid.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.one-st .grid div{background:rgba(255,255,255,.12);border-radius:14px;padding:10px}
 .one-st .grid b{display:block;font-size:1.05rem}.one-st .grid span{font-size:.72rem;opacity:.8}
-.one-st .tip{background:rgba(0,0,0,.25);border-radius:14px;padding:12px 14px;margin:4px 0 0;font-size:1rem;line-height:1.45}
+.one-st .syn{list-style:none;background:rgba(0,0,0,.22);border-radius:14px;padding:10px 14px;margin:2px 0 0;font-size:.97rem;line-height:1.4}.one-st .syn li{position:relative;padding-left:14px}.one-st .syn li+li{margin-top:6px}.one-st .syn li::before{content:'';position:absolute;left:0;top:.55em;width:6px;height:6px;border-radius:50%;background:#fff;opacity:.7}
 @media(prefers-reduced-motion:reduce){.one-st,.one-st *{animation:none!important;transition:none!important}}
 
 /* ---------- Glissement au pouce : la page voisine (copie) et la vraie page arrivent sans petite animation d'entrée
    (plus de blocs qui descendent puis remontent, plus de flash quand la vraie page remplace la copie). ---------- */
+/* La copie qui glisse est un bloc à part : la marge du titre de Recovery y resterait dedans (12 px trop bas). */
+html.one :is(#one-tabs,.tab-ghost)>header.top:first-child{margin-top:0!important}
 html.one .tab-ghost,html.one .tab-ghost *,html.one.one-sw .tab-ghost *{animation:none!important;transition:none!important}
 
 /* ---------- Barre du bas : Accueil un peu plus large (on sait où on est) ; la lentille ne déborde presque plus sur les voisins ---------- */
@@ -1561,6 +1565,19 @@ html.one .plfs-top [data-plturn]{order:-1}
 html.one .plfs-top .plfs-t{flex:1}
 /* Questionnaire du jour en page complète, toute noire, comme le planning (il monte du bas) */
 html.one .sheet.full .sheet-card{background:#000;min-height:100%}
+
+/* Haut d'écran plus doux : le fond coloré est un peu moins vif, et la couleur de la barre du téléphone fond dans la page
+   sur une grande hauteur (plusieurs paliers), au lieu d'une bande courte et d'un fond éclatant juste dessous. */
+html.one .aura span{opacity:calc(.44 * var(--aura-k,1))!important}
+html.one .aura span:nth-child(3){opacity:calc(.32 * var(--aura-k,1))!important}
+html.one body::before{height:calc(env(safe-area-inset-top,0px) + 30px)!important;background:linear-gradient(to bottom,var(--band) env(safe-area-inset-top,0px),color-mix(in srgb,var(--band) 55%,transparent) calc(env(safe-area-inset-top,0px) + 14px),transparent)!important}
+/* Sous les blocs (pas par-dessus) : un voile qui part de la couleur de la barre et s'efface lentement sur le haut de l'écran. */
+html.one .aura::after{content:'';position:absolute;inset:0 0 auto;height:calc(env(safe-area-inset-top,0px) + 300px);background:linear-gradient(to bottom,var(--band) 0,color-mix(in srgb,var(--band) 80%,transparent) calc(env(safe-area-inset-top,0px) + 40px),color-mix(in srgb,var(--band) 50%,transparent) calc(env(safe-area-inset-top,0px) + 120px),color-mix(in srgb,var(--band) 20%,transparent) calc(env(safe-area-inset-top,0px) + 210px),transparent);pointer-events:none}
+
+/* Textes d'aide masqués : un petit « Afficher » discret à leur place. */
+html.one .one-tipb{display:inline-flex;align-items:center;gap:4px;margin:6px 4px 0;padding:3px 10px;border:0;border-radius:999px;background:rgba(255,255,255,.07);color:var(--fg2);font:inherit;font-size:.72rem;cursor:pointer}
+html.one .one-tipb::before{content:'i';display:grid;place-items:center;width:13px;height:13px;border-radius:50%;border:1px solid currentColor;font-size:.6rem;font-weight:700;font-style:italic}
+html.one label .hint,html.one .l .hint{display:none}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -1716,7 +1733,7 @@ function loadDay(k) {
   const aR = M(k, 'actRpe') || {};
   let L = G(k, 'acts') ? acts.reduce((s, a) => s + ((a === gA && gR) || (a === tA && tR) ? 0 : aR[a.start] ? aR[a.start] * (a.min || 0) / 4 : trimpOf(a)), 0) : (G(k, 'trimp') || 0);
   if (gR) L += gR * (M(k, 'gymMin') || gA?.min || 90) / 4;
-  for (const x of logsOn(k)) if (x.kind === 'extra') L += (x.rpe || 5) * (x.min || 0) / 4;
+  for (const x of logsOn(k)) if (x.kind === 'extra' && !x.planned) L += (x.rpe || 5) * (x.min || 0) / 4;
   if (tR) L += tR * (M(k, 'trackMin') || tA?.min || 75) / 4;
   for (const a of M(k, 'acts') || []) L += (a.rpe || 5) * (a.min || 0) / 4;
   return L;
@@ -7476,7 +7493,7 @@ function painCoach() {
   const cache = {};
   const sideScroll = el => { for (let n = el; n && n !== document.body; n = n.parentElement) if (n.scrollWidth > n.clientWidth + 4 && /(auto|scroll)/.test(getComputedStyle(n).overflowX)) return true; return false; };
   const view = () => S.mod === 'R' ? $('#v-' + S.tab) : S.mod === 'T' ? $('#t-view') : S.mod === 'N' ? $('#f-view') : null;
-  const tabs = () => { const bar = S.mod === 'R' ? document.querySelector('.tabbar:not([id])') : $('#tb-' + S.mod); if (!bar) return null;
+  const tabs = () => { if (S.mod === 'home') return window.TAB_XNB ? {B: [], i: -1, home: true} : null; const bar = S.mod === 'R' ? document.querySelector('.tabbar:not([id])') : $('#tb-' + S.mod); if (!bar) return null;
     const B = [...bar.querySelectorAll('[role=tab]')].filter(b => !b.hidden && b.offsetParent !== null); return {B, i: B.findIndex(b => b.getAttribute('aria-selected') === 'true')}; };
   const tabKey = b => b.dataset.tab || b.dataset.mtab;
   // The neighbour page, drawn the same way as when it is open (kept a little while, so the swipe starts at once).
@@ -7495,9 +7512,12 @@ function painCoach() {
   function warm() { const T = tabs(); if (!T || T.i < 0 || S.mod === 'home') return; const m = S.mod; [T.B[T.i - 1], T.B[T.i + 1]].forEach(b => b && idle(() => { if (S.mod === m) pageHtml(m, tabKey(b)); })); }
   window.tabWarm = () => { for (const k in cache) delete cache[k]; warm(); };
   document.addEventListener('click', e => { if (e.target.closest?.('[data-tab],[data-mtab]')) setTimeout(warm, 400); }, true);
-  function ghost(el, b) {
-    const g = document.createElement('div'), r = el.getBoundingClientRect();
-    g.className = el.className + ' tab-ghost'; g.setAttribute('aria-hidden', 'true'); g.innerHTML = pageHtml(S.mod, tabKey(b));
+  // The page on each side: the next tab of the part, or (when a page asks for it, TAB_XNB) a page beyond the tabs.
+  // vid: the page the copy shows (its styles follow it: gv-v-trends, gv-t-view…).
+  const nbOf = (T, k) => { const b = T.B[T.i + k]; if (b) return {vid: S.mod === 'R' ? 'v-' + tabKey(b) : S.mod === 'T' ? 't-view' : 'f-view', html: () => pageHtml(S.mod, tabKey(b)), go: () => b.click()}; return window.TAB_XNB?.(k, T, pageHtml) || null; };
+  function ghost(el, n) {
+    const g = document.createElement('div'), r = (n.box || el).getBoundingClientRect();
+    g.className = (n.cls ?? el.className) + ' tab-ghost' + (n.vid ? ' gv-' + n.vid : ''); g.setAttribute('aria-hidden', 'true'); g.innerHTML = n.html();
     // Page ids go (no double ids), but not those of drawing definitions (blur filters, clips, gradients): without
     // them the body glow would show as hard dots, then "pop" when the real page arrives.
     g.querySelectorAll('[id]').forEach(n => { if (!n.closest('defs, filter, clipPath, linearGradient, radialGradient, mask, pattern')) n.removeAttribute('id'); });
@@ -7507,7 +7527,7 @@ function painCoach() {
   }
   const clear = w => { if (!w) return; w.el.style.transform = ''; w.el.style.willChange = ''; (w.gs || []).forEach(g => g?.remove()); };
   const finish = () => { if (!A) return; const a = A; a.done?.(true); };
-  const ok = e => e.touches.length === 1 && S.mod !== 'home' && !S.sheet && !P.stack.length && !$('.drawer.on') && !PLFS.on && !HP.busy && !(typeof isPC === 'function' && isPC());
+  const ok = e => e.touches.length === 1 && (S.mod !== 'home' || window.TAB_XNB) && !S.sheet && !P.stack.length && !$('.drawer.on') && !PLFS.on && !HP.busy && !(typeof isPC === 'function' && isPC());
   document.addEventListener('touchstart', e => {
     finish(); W = null;
     if (!ok(e)) return;
@@ -7534,10 +7554,10 @@ function painCoach() {
     if (!W.on) {
       if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
       if (Math.abs(dx) < Math.abs(dy) * 1.2) { W = null; return; }   // vertical: ordinary scrolling
-      const T = tabs(); if (!T || T.i < 0) { W = null; return; }
-      W.on = true; W.T = T; W.el = view(); W.x = t.clientX; if (!W.el) { W = null; return; }
+      const T = tabs(); if (!T || (T.i < 0 && !T.home)) { W = null; return; }
+      W.on = true; W.T = T; W.el = T.home ? $('#home-view') : view(); W.x = t.clientX; if (!W.el) { W = null; return; }
       W.el.style.willChange = 'transform'; W.s = W.el.getBoundingClientRect().width + GAP;
-      W.gs = [T.B[T.i - 1] ? ghost(W.el, T.B[T.i - 1]) : null, T.B[T.i + 1] ? ghost(W.el, T.B[T.i + 1]) : null];
+      W.nb = [nbOf(T, -1), nbOf(T, 1)]; W.gs = W.nb.map(n => n ? ghost(W.el, n) : null);
     }
     e.preventDefault();
     const d = t.clientX - W.x, now = performance.now(); W.v = (t.clientX - W.lx) / Math.max(1, now - W.lt); W.lx = t.clientX; W.lt = now;
@@ -7547,7 +7567,7 @@ function painCoach() {
   };
   const end = () => {
     if (!W) return; const w = W; W = null; if (!w.on) return;
-    const d = w.d || 0, dir = d < 0 ? 1 : -1, nb = w.T.B[w.T.i + dir], s = w.s;
+    const d = w.d || 0, dir = d < 0 ? 1 : -1, nb = w.nb[dir > 0 ? 1 : 0], s = w.s;
     const go = !!nb && (Math.abs(d) > s * .25 || (Math.abs(w.v) > .35 && Math.sign(w.v) === Math.sign(d) && Math.abs(d) > 20));
     const to = go ? -dir * s : 0, v = Math.abs(w.v), rest = Math.abs(to - d);
     // The glide keeps the thumb's speed: a fast flick lands quickly, a slow drag settles gently.
@@ -7560,7 +7580,7 @@ function painCoach() {
     const done = () => {
       if (!A || A.anims !== anims) return; A = null;
       // The real page replaces its copy in the same frame, at the same place: nothing jumps.
-      if (go) { const R = document.documentElement; R.classList.add('pcnt'); setTimeout(() => R.classList.remove('pcnt'), 450); nb.click(); const top = () => { window.scrollTo(0, 0); document.scrollingElement && (document.scrollingElement.scrollTop = 0); }; top(); requestAnimationFrame(top); setTimeout(top, 120); setTimeout(top, 400); }
+      if (go) { const R = document.documentElement; R.classList.add('pcnt'); setTimeout(() => R.classList.remove('pcnt'), 450); nb.go(); const top = () => { window.scrollTo(0, 0); document.scrollingElement && (document.scrollingElement.scrollTop = 0); }; top(); requestAnimationFrame(top); setTimeout(top, 120); setTimeout(top, 400); }
       anims.forEach(x => { try { x.cancel(); } catch (e) {} }); clear(w);
     };
     A = {anims, done}; anims[0].onfinish = done; setTimeout(done, ms + 80);
@@ -8441,16 +8461,73 @@ function editBody() {
 }
 const EQUIPS = ['Barre', 'Haltères', 'Kettlebell', 'Machine', 'Poulie', 'Poids du corps', 'Élastique', 'Médecine-ball', 'Barre hexagonale', 'Landmine', 'Barre EZ', 'Smith', 'Box', 'Banc', 'Barre de traction', 'Barres parallèles', 'Traîneau', 'Ballon', 'Haies'];
 const exGroups = kind => [...new Set(EX.filter(e => kind === 'any' || e.t === kind).map(e => e.cat))];
-// Returns [exercise, name to show] for a query: French match first, else English.
+// Smart search: each word typed is understood (synonyms in French and English, gym slang, plurals, a typo or two),
+// then every exercise gets a score (name first, then muscles, equipment, family) and the best come first.
+const EX_SYN = [
+  ['traineau', 'sled', 'prowler', 'luge'], ['pousse', 'poussee', 'push', 'pousser'], ['tirage', 'tire', 'pull', 'tirer', 'drag'],
+  ['abdos', 'abdo', 'abdominaux', 'abs', 'crunch', 'gainage', 'tronc', 'core', 'sangle'], ['gainage', 'planche', 'plank', 'gainer'],
+  ['pompes', 'pompe', 'push-up', 'pushup'], ['tractions', 'traction', 'pull-up', 'pullup', 'chin-up', 'chinup', 'barre fixe'],
+  ['developpe', 'dev', 'press', 'presse'], ['couche', 'bench'], ['dc', 'developpe couche', 'bench press'], ['dm', 'developpe militaire'], ['di', 'developpe incline'],
+  ['souleve', 'deadlift', 'terre'], ['sdt', 'souleve de terre', 'deadlift'], ['rdl', 'roumain', 'romanian'], ['hip', 'hanche', 'hanches'],
+  ['squat', 'squats', 'flexion'], ['fente', 'fentes', 'lunge', 'lunges', 'split'], ['bulgare', 'bss', 'split squat'],
+  ['ischio', 'ischios', 'ischiojambiers', 'hamstring', 'hamstrings', 'leg curl', 'nordic', 'nordique'], ['quadri', 'quadriceps', 'quads', 'cuisse', 'cuisses', 'leg extension'],
+  ['fessier', 'fessiers', 'fesses', 'glute', 'glutes', 'hip thrust', 'pont'], ['mollet', 'mollets', 'calf', 'calves', 'soleaire'],
+  ['adducteur', 'adducteurs', 'adductor', 'copenhague', 'copenhagen'], ['abducteur', 'abducteurs', 'abductor', 'moyen fessier'],
+  ['pec', 'pecs', 'pectoraux', 'pectoral', 'poitrine', 'chest'], ['dos', 'back', 'dorsaux', 'grand dorsal', 'lats', 'lat'], ['lombaire', 'lombaires', 'lombes', 'lower back', 'erecteurs'],
+  ['epaule', 'epaules', 'shoulder', 'shoulders', 'deltoide', 'deltoides', 'delts'], ['trapeze', 'trapezes', 'traps', 'shrug', 'haussement'],
+  ['biceps', 'bicep', 'curl'], ['triceps', 'tricep', 'dips', 'barre au front', 'skullcrusher'], ['avant-bras', 'avant bras', 'forearm', 'poignet', 'grip'],
+  ['halteres', 'haltere', 'dumbbell', 'dumbbells', 'db'], ['barre', 'barbell', 'bb'], ['kettlebell', 'kb', 'kettle'], ['poulie', 'cable', 'vis-a-vis'], ['machine', 'guidee', 'smith'],
+  ['elastique', 'elastiques', 'band', 'bande'], ['medecine-ball', 'medecine ball', 'medicine ball', 'medball'], ['poids du corps', 'pdc', 'bodyweight', 'sans materiel'],
+  ['saut', 'sauts', 'jump', 'jumps', 'bond', 'bonds', 'pliometrie', 'plyo', 'bounds'], ['box', 'boite', 'caisson'], ['corde', 'cordes', 'rope', 'battle rope'],
+  ['clean', 'epaule'], ['arrache', 'snatch'], ['jete', 'jerk'], ['tirage menton', 'upright row'], ['rowing', 'row', 'rameur'], ['velo', 'bike', 'assault', 'airbike'],
+  ['mobilite', 'etirement', 'etirements', 'stretch', 'souplesse'], ['reeducation', 'reathletisation', 'rehab', 'prevention', 'isometrique', 'iso'], ['rotation', 'rotateurs', 'coiffe', 'rotator'],
+  ['swing', 'swings'], ['farmer', 'fermier', 'portage', 'carry'], ['hyperextension', 'extension lombaire', 'back extension'], ['aerox', 'cardio', 'conditioning', 'hiit', 'circuit']
+];
+const exNorm = t => String(t || '').toLowerCase().normalize('NFD').replace(/\p{M}/gu, '').replace(/[’']/g, ' ').replace(/[^a-z0-9%\- ]+/g, ' ').replace(/\s+/g, ' ').trim();
+const exStem = w => w.length > 4 ? w.replace(/aux$/, 'al').replace(/(es|s|x)$/, '') : w;
+const EX_SYNI = (() => { const m = {}; for (const g of EX_SYN) { const n = g.map(exNorm); for (const w of n) { const k = exStem(w); m[k] ||= new Set(); n.forEach(x => m[k].add(x)); } } return m; })();
+function exLev(a, b, max) {   // letters to change to go from a to b (stops early above max)
+  if (Math.abs(a.length - b.length) > max) return max + 1; let p = Array.from({length: b.length + 1}, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) { const c = [i]; let lo = i; for (let j = 1; j <= b.length; j++) { c[j] = Math.min(p[j] + 1, c[j - 1] + 1, p[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); lo = Math.min(lo, c[j]); } if (lo > max) return max + 1; p = c; }
+  return p[b.length];
+}
+// What a typed word can mean: itself, its synonyms, and the synonyms of a close spelling (worked out once per search).
+function exQW(w) {
+  const sw = exStem(w), syn = new Set(EX_SYNI[sw] || []);
+  if (w.length >= 4) for (const k in EX_SYNI) if (k.length >= 4 && k !== sw && exLev(sw, k, 1) <= 1) EX_SYNI[k].forEach(y => syn.add(y));
+  syn.delete(w); const L = [...syn];
+  return {w, sw, multi: L.filter(y => y.includes(' ')), one: L.filter(y => !y.includes(' ')), oneS: L.filter(y => !y.includes(' ')).map(exStem), max: w.length >= 8 ? 2 : 1};
+}
+// A text cut into words and roots, kept for each exercise.
+const exBag = txt => { const w = txt.split(' '); return {txt, w, ws: new Set(w), ss: new Set(w.map(exStem))}; };
+// How well one typed word matches a text (0 = not at all): whole word, start of a word, same root, synonym, close spelling.
+function exWord(Q, B) {
+  const {w, sw} = Q;
+  if (B.ws.has(w)) return 10; if (B.w.some(x => x.startsWith(w))) return w.length >= 3 ? 8 : 5;
+  if (B.ss.has(sw)) return 9; if (w.length >= 4 && B.txt.includes(w)) return 6;
+  for (const y of Q.multi) if (B.txt.includes(y)) return 8.5;
+  for (let i = 0; i < Q.one.length; i++) { const y = Q.one[i]; if (B.ws.has(y) || B.ss.has(Q.oneS[i]) || (y.length >= 4 && B.w.some(x => x.startsWith(y)))) return 8.5; }
+  if (w.length >= 4) for (const x of B.w) if (x.length >= 3 && Math.abs(x.length - w.length) <= Q.max + 3 && (exLev(w, x, Q.max) <= Q.max || (x.length > w.length && exLev(w, x.slice(0, w.length), Q.max) <= Q.max))) return 4;
+  return 0;
+}
+const EX_TXT = new Map();
 function exSearch(q, kind, f = {}) {
-  const w = normName(q || '');
-  return EX.filter(e => (kind === 'any' || e.t === kind) && (!f.cat || e.cat === f.cat) && (!f.eq || e.eq === f.eq) && e.id !== 'warmup' && !e.hide).map(e => {
-    if (!w.length) return [e, e.n];
-    const fr = normName(e.n + ' ' + (e.m || '')).join(' '), enN = normName(e.en || '').join(' ');
-    if (w.every(x => fr.includes(x))) return [e, e.n];
-    if (e.en && w.every(x => enN.includes(x))) return [e, e.n];
-    return null;
-  }).filter(Boolean);
+  const ws = exNorm(q).split(' ').filter(Boolean).map(exQW);
+  const L = EX.filter(e => (kind === 'any' || e.t === kind) && (!f.cat || e.cat === f.cat) && (!f.eq || e.eq === f.eq) && e.id !== 'warmup' && !e.hide);
+  if (!ws.length) return L.map(e => [e, e.n]);
+  const out = [], q0 = exNorm(q);
+  for (const e of L) {
+    let T = EX_TXT.get(e);
+    if (!T) { const n = exNorm(e.n); T = {n, N: exBag(n), X: exBag(n + ' ' + exNorm([e.en, e.m, e.eq, e.cat, ...(e.kw || [])].filter(Boolean).join(' ')))}; EX_TXT.set(e, T); }
+    let sc = 0, ok = true;
+    for (const w of ws) { const a = exWord(w, T.N), b = a ? 0 : exWord(w, T.X) * .6; if (!a && !b) { ok = false; break; } sc += a || b; }
+    if (T.n.startsWith(q0)) sc += 6;
+    if (!ok) continue;
+    sc -= T.N.w.length * .15;   // the plain, short name first
+    if (e.cat === 'Mobilité') sc -= 3;   // strength work before stretches and self-massage
+    out.push([e, e.n, sc]);
+  }
+  return out.sort((a, b) => b[2] - a[2]).map(([e, n]) => [e, n]);
 }
 function recentEx(kind) {
   const seen = [];
@@ -8742,7 +8819,7 @@ async function saveLive2() {
   const items = L.items.filter(it => !it.test).map(it => it.reps ? {ex: it.ex, pct: it.tg?.pct || null, ...(exOf(it.ex).u === 'min' ? {min: it.reps.filter(r => r.done).reduce((a, r) => a + (+r.min || +it.tg?.min || 0), 0)} : {}), ...((it.rest ?? it.tg?.rest) ? {rest: it.rest ?? it.tg.rest} : {}), reps: it.reps.filter(r => r.done).map(r => ({dist: +r.dist || 0, t: +r.t || null}))}
     : {ex: it.ex, ...(it.u === 's' ? {u: 's'} : {}), ...(it.ct ? {ct: it.ct} : {}), ...(it.cn ? {cn: it.cn} : {}), sets: it.sets.filter(s => s.done).map(s => ({kg: +s.kg || 0, reps: +s.reps || 0, ...(s.rpe !== undefined && s.rpe !== '' ? {rpe: +s.rpe} : s.rir !== undefined && s.rir !== '' ? {rpe: 10 - +s.rir, rir: +s.rir} : {})}))}).filter(it => (it.reps || it.sets).length);
   if (!items.length) { toast('Valide au moins une série avec ✓'); return; }
-  const tonnage = items.reduce((s, it) => s + (it.u === 's' ? 0 : (it.sets || []).reduce((a, x) => a + x.kg * x.reps, 0)), 0);
+  const tonnage = items.reduce((s, it) => s + (it.u === 's' ? 0 : (it.sets || []).reduce((a, x) => a + (x.kg + sledBase(it.ex)) * x.reps, 0)), 0);
   const sprintM = items.reduce((s, it) => s + (it.reps && SPRINT_CATS.includes(exOf(it.ex).cat) && (it.pct ?? 100) >= 90 ? it.reps.reduce((a, r) => a + (+r.dist || 0), 0) : 0), 0);
   const doc = {id: L.id, plan: L.plan, name: L.name, kind: L.kind, gym: L.gym || null, date: L.date, start: L.start, min, rpe, note, items, shoes: L.shoes || null, cond: L.cond || null, tonnage: Math.round(tonnage), sprintM, updatedAt: new Date().toISOString()};
   S.logs[doc.id] = doc;
@@ -8837,6 +8914,10 @@ function musTiers(id) {
     ${T.filter(t => t[1].length).map(([n, X]) => `<div class="mtier"><div class="sec-label" style="margin:4px 0 2px">${n}</div>${X.map(([k, v]) => `<div class="mrow"><span>${esc(MUSI[k].n)}</span><i><s style="width:${Math.round(v * 100)}%"></s></i><small>${Math.round(v * 100)} % · ${fx(Math.min(10, v * ff * 10), 1)}</small></div>`).join('')}</div>`).join('')}
     ${detailsBox(`Part : 100 % = muscle moteur, chaque série compte 1 série pour lui ; 40 à 75 % = muscle d'appoint, chaque série compte environ une demi-série (Pelland et coll. 2024, méta-régression de 67 études sur le volume) ; sous 40 % = stabilisateur. Fatigue sur 10 = part × facteur de l'exercice (${fx(ff, 2)} ici) : plus haut quand le muscle travaille étiré en freinant (soulevé de terre jambes tendues, nordic, sprint à pleine vitesse), car les dégâts musculaires et le temps de récupération y sont plus grands (Nosaka et Sakamoto 2001). La part entre dans ta charge par muscle, tes équilibres et tes tendances ; la fatigue dans la fatigue restante de chaque muscle.`)}</div>`;
 }
+// Sled (traîneau, prowler): the empty sled has its own weight; the sets note only the plates, the sled is added to the total.
+const isSled = id => { const e = exOf(id); return e.t !== 'track' && /tra[iî]neau|sled|prowler/i.test(e.n + ' ' + (e.eq || '') + ' ' + (e.en || '')); };
+const sledBase = id => isSled(id) ? (+S.tset?.sledKg || 0) : 0;
+document.addEventListener('change', async e => { const i = e.target.closest?.('[data-sledkg]'); if (!i) return; const v = +String(i.value).replace(',', '.'); if (!S.tset) return; S.tset.sledKg = v > 0 ? v : 0; if (await dbSet('settings/training', S.tset)) toast(v > 0 ? `Traîneau : ${fx(v, v % 1 ? 1 : 0)} kg ajoutés à chaque série` : 'Poids du traîneau retiré'); });
 function exView(id) {
   openPane({title: 'Exercice', render: () => {
     const e = exOf(id), h = exHistory(id), b = bestE1rm(id);
@@ -8846,6 +8927,7 @@ function exView(id) {
       ${e.img ? `<div class="demo" data-demo><img src="${IMG}${e.img}/0.jpg" alt="" loading="lazy"><img class="b" src="${IMG}${e.img}/1.jpg" alt="" loading="lazy"><button class="play" aria-label="Lancer ou arrêter la démonstration"><svg class="ip" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg><svg class="is" viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/></svg></button></div>` : ''}
       <a class="vidbtn" href="https://www.youtube.com/results?search_query=${encodeURIComponent((e.en || e.n) + (e.t === 'track' ? ' sprint drill' : ' exercise') + ' technique')}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="4" fill="#FF0033"/><path d="M10 9l5 3-5 3z" fill="#fff"/></svg><span><b>Voir en vidéo</b><small>${esc(e.en || e.n)}, la bonne technique</small></span><span class="kc">↗</span></a>
       <div class="card why">${esc(e.c)}</div>
+      ${isSled(id) ? `<div class="list" style="margin-top:12px"><div class="row"><label for="sled-kg">Traîneau à vide</label><input class="mini-in" id="sled-kg" inputmode="decimal" style="width:90px" value="${S.tset?.sledKg || ''}" placeholder="kg" data-sledkg></div></div><p class="small muted" style="margin:6px 4px 0">Note seulement les disques : le poids du traîneau s'ajoute tout seul au total.</p>` : ''}
       ${e.t === 'gym' ? `<button class="btn" style="margin:12px 0" data-bonus="${id}">Je l'ai fait : le noter</button>` : ''}${(S.tset?.myEx || []).includes(id) ? `<button class="btn ghost" style="margin:0 0 12px" data-myexdel="${esc(id)}">Retirer de mes exercices</button>` : ''}
       ${musTiers(id)}
       ${e.t === 'gym' && e.u === 'kg' ? rmBlock(id) : ''}
@@ -8862,9 +8944,9 @@ let BX = null;
 const bonusLogs = (days = 7) => logs().filter(l => l.kind === 'extra' && l.date >= addDays(TODAY, -(days - 1)));
 function bonusBlock() {
   const L = bonusLogs(1);
-  const row = l => { const it = l.items?.[0] || {}; return `<button class="rowbtn" data-bxv="${esc(l.id)}"><span><b>${esc(exOf(it.ex).n)}</b><span class="meta">${l.start ? esc(tfr(l.start)) + ' · ' : ''}${esc(setsTxt(it))} · RPE ${l.rpe}</span></span><span class="kc">${l.min} min</span></button>`; };
-  return `<h2>Exercices ajoutés aujourd'hui <small>comptés dans ta charge</small></h2>
-    <div class="list">${L.map(row).join('')}<button class="rowbtn" data-bxadd><span><b style="color:var(--accent)">+ Ajouter un exercice à la journée</b><span class="meta">Un exercice fait en dehors d'une séance</span></span><span class="kc">›</span></button></div>`;
+  const row = l => { const it = l.items?.[0] || {}; return `<button class="rowbtn" data-bxv="${esc(l.id)}"><span><b>${esc(exOf(it.ex).n)}</b><span class="meta">${l.planned ? 'Prévu ' + esc(fmtShort(l.date)) + ' · ' : ''}${l.start ? esc(tfr(l.start)) + ' · ' : ''}${esc(setsTxt(it))} · RPE ${l.rpe}</span></span><span class="kc">${l.min} min</span></button>`; };
+  return `<h2>Exercices du jour</h2>
+    <div class="list">${L.map(row).join('')}<button class="rowbtn" data-bxadd><span><b style="color:var(--accent)">+ Ajouter un exercice</b></span><span class="kc">›</span></button></div>`;
 }
 const setsTxt = it => (it.sets || []).map(s => (s.kg ? fx(s.kg, s.kg % 1 ? 1 : 0) + ' kg × ' : '') + uVal(it, s.reps)).join(', ') + (it.ct ? ' · ' + ctName(it.ct) : '');
 function bonusPane(ex) {
@@ -8872,17 +8954,18 @@ function bonusPane(ex) {
   const nowHM = new Date().toTimeString().slice(0, 5);
   BX = {ex, date: TODAY, start: nowHM, ct: prev?.ct || (iso ? 'iso' : ''), u: iso ? 's' : prev?.u || 'reps', rpe: 6, min: '', note: '',
     sets: (prev?.sets?.length ? prev.sets : [{kg: '', reps: iso ? 30 : 10}, {kg: '', reps: iso ? 30 : 10}, {kg: '', reps: iso ? 30 : 10}]).map(s => ({kg: s.kg || '', reps: s.reps || ''}))};
-  openPane({title: 'Exercice de la journée', render: bonusBody});
+  openPane({title: 'Exercice du jour', render: bonusBody});
 }
 function bonusBody() {
   const B = BX, e = exOf(B.ex), secs = B.ct === 'iso' || B.u === 's', est = Math.max(2, Math.round(B.sets.length * (secs ? 1.5 : 2)));
   return `<div class="dhead"><div class="eyebrow" style="color:var(--accent)">${esc(e.cat)}</div><div class="bigname" style="font-size:1.6rem">${esc(e.n)}</div><p class="small muted">Fait en dehors d'une séance : il compte quand même dans ta charge du jour et dans celle de chaque muscle.</p></div>
-    <div class="list"><div class="row"><label for="bx-date">Date</label><input type="date" id="bx-date" value="${B.date}" max="${TODAY}" data-bxf="date"></div>
+    <div class="list"><div class="row"><label for="bx-date">Date</label><input type="date" id="bx-date" value="${B.date}" max="${addDays(TODAY, 14)}" data-bxf="date"></div>
       <div class="row"><label for="bx-start">Heure</label><input type="time" id="bx-start" value="${B.start}" data-bxf="start"></div></div>
     <div class="sec-label">Contraction</div><div class="seg segsm">${CT.map(([c, l]) => `<button type="button" data-bxct="${c}" aria-pressed="${(B.ct || '') === c}">${l}</button>`).join('')}</div>
     <div class="sec-label">Séries <button type="button" class="hdtog" data-bxu>${secs ? 'Secondes' : 'Répétitions'}${B.ct === 'iso' ? '' : ' ⇄'}</button></div>
     <div class="sets">${B.sets.map((s, j) => `<div class="setrow bx${s.done ? ' done' : ''}"><span class="n">${j + 1}</span><input class="mini-in" inputmode="decimal" data-bxs="${j}.kg" value="${s.kg}" placeholder="${e.u === 'kg' ? 'kg' : '+ kg'}" aria-label="Charge"><input class="mini-in" inputmode="numeric" data-bxs="${j}.reps" value="${s.reps}" placeholder="${secs ? 's' : 'rép.'}" aria-label="${secs ? 'Secondes' : 'Répétitions'}"><button type="button" class="ok" data-bxok="${j}" aria-label="Valider la série ${j + 1}" aria-pressed="${!!s.done}">${TICK}</button><button type="button" class="rm" data-bxrm="${j}" aria-label="Retirer la série">×</button></div>`).join('')}</div>
     <div class="tools"><button type="button" data-bxadds>+ Série</button></div>
+    ${rmOf(B.ex)?.kg ? `<div class="list" style="margin-top:10px"><div class="row"><label for="bx-pct">% de ton max (${fx(rmOf(B.ex).kg)} kg)</label><input class="mini-in" id="bx-pct" inputmode="numeric" style="width:80px" value="${B.pct || ''}" placeholder="%" data-bxpct></div></div>` : ''}
     <p class="small muted" style="margin:6px 4px 0">Touche ✓ quand la série est faite : seules les séries validées comptent.</p>
     <div class="list" style="margin-top:12px"><div class="row col"><span class="l">Difficulté ressentie (RPE)<span class="hint">0 = repos, 10 = maximal</span></span><div style="display:flex;gap:12px;align-items:center"><input type="range" min="1" max="10" step="1" value="${B.rpe}" data-bxf="rpe" style="flex:1"><b class="num" id="bx-rpe">${B.rpe}</b></div></div>
       <div class="row col"><div class="row" style="padding:0;min-height:0;background:none"><label for="bx-min">Durée totale <span class="hint">récup comprise : 10, 1 h…</span></label><input class="mini-in" id="bx-min" inputmode="text" data-bxf="min" value="${B.min}" placeholder="${durTxt(est)}" style="width:96px"></div>${durChips('bx-min')}</div></div>
@@ -8890,11 +8973,12 @@ function bonusBody() {
     <button class="btn" style="margin-top:16px" data-bxsave>Ajouter à ma journée</button>`;
 }
 function bonusView(id) {
-  openPane({title: 'Exercice de la journée', render: () => { const l = S.logs[id]; if (!l) return ''; const it = l.items?.[0] || {};
+  openPane({title: 'Exercice du jour', render: () => { const l = S.logs[id]; if (!l) return ''; const it = l.items?.[0] || {};
     return `<div class="dhead"><div class="eyebrow" style="color:var(--accent)">Ajouté à ta journée</div><div class="bigname" style="font-size:1.6rem">${esc(exOf(it.ex).n)}</div><p class="small muted">${esc(cap(fmtDay(l.date)))}${l.start ? ' · ' + esc(tfr(l.start)) : ''}</p></div>
       <div class="stats"><div><b>${(it.sets || []).length}</b><span>séries</span></div><div><b>${l.rpe}</b><span>RPE</span></div><div><b>${l.min} min</b><span>durée</span></div></div>
       <div class="card" style="margin-top:12px"><p class="small" style="margin:0">${esc(setsTxt(it))}</p>${l.note ? `<p class="small muted" style="margin:8px 0 0">${esc(l.note)}</p>` : ''}</div>
       <p class="small muted" style="margin:10px 2px 0">Compté dans ton effort du ${esc(fmtShort(l.date))} : RPE ${l.rpe} × ${l.min} min, et dans la charge de chaque muscle travaillé.</p>
+      ${l.planned ? `<button class="btn" style="margin-top:14px" data-bxdone="${esc(l.id)}">C'est fait</button>` : ''}
       <button class="btn ghost" style="margin-top:14px" data-tex="${esc(it.ex)}">Voir l'exercice</button>
       <button class="btn ghost" style="margin-top:10px;color:var(--bad)" data-bxdel="${esc(l.id)}">Supprimer</button>`; }});
 }
@@ -8903,11 +8987,23 @@ document.addEventListener('input', e => {
   if (f) { BX[f.dataset.bxf] = e.target.value; if (f.dataset.bxf === 'rpe') $('#bx-rpe').textContent = e.target.value; }
   if (st) { const [j, k] = st.dataset.bxs.split('.'); BX.sets[+j][k] = e.target.value; }
 });
+// Un % du max remplit la charge de toutes les séries (arrondie à 2,5 kg).
+document.addEventListener('change', e => { const i = e.target.closest?.('[data-bxpct]'); if (!i || !BX) return; const p = +i.value, rm = rmOf(BX.ex)?.kg; BX.pct = p > 0 ? p : '';
+  if (p > 0 && rm) { const kg = Math.round(rm * p / 100 / 2.5) * 2.5; BX.sets.forEach(x => { x.kg = kg; }); paneRender(); } });
+// Garder le doigt sur un exercice du jour : le refaire (aujourd'hui, demain…), déjà rempli.
+function bonusAgain(id) { const l = S.logs[id], it = l?.items?.[0]; if (!it) return; bonusPane(it.ex);
+  Object.assign(BX, {rpe: l.rpe || 6, min: l.min ? String(l.min) : '', ct: it.ct || BX.ct, u: it.u || BX.u, pct: l.pct || '', sets: (it.sets || []).map(x => ({kg: x.kg || '', reps: x.reps || ''}))}); paneRender(); }
+(() => { let t = null; const stop = () => { clearTimeout(t); t = null; };
+  document.addEventListener('pointerdown', e => { const b = e.target.closest?.('[data-bxv]'); if (!b) return; stop(); t = setTimeout(() => { t = 'long'; navigator.vibrate?.(10); bonusAgain(b.dataset.bxv); }, 550); });
+  for (const ev of ['pointerup', 'pointercancel', 'pointermove']) document.addEventListener(ev, e => { if (ev === 'pointermove' && Math.abs(e.movementY || 0) + Math.abs(e.movementX || 0) < 3) return; if (t !== 'long') stop(); });
+  document.addEventListener('click', e => { if (t === 'long' && e.target.closest?.('[data-bxv]')) { e.stopImmediatePropagation(); e.preventDefault(); t = null; } }, true);
+  document.addEventListener('contextmenu', e => { if (e.target.closest?.('[data-bxv]')) e.preventDefault(); }); })();
 document.addEventListener('click', async e => {
   const at = q => e.target.closest(q); let b;
   if ((b = at('[data-bonus]'))) { bonusPane(b.dataset.bonus); return; }
   if (at('[data-bxadd]')) { pickExercise('gym', id => bonusPane(id)); return; }
   if ((b = at('[data-bxv]'))) { bonusView(b.dataset.bxv); return; }
+  if ((b = at('[data-bxdone]'))) { const l = S.logs[b.dataset.bxdone]; if (!l) return; delete l.planned; l.date = l.date > TODAY ? TODAY : l.date; l.updatedAt = new Date().toISOString(); closePane(); renderMod(); render(); toast('Exercice compté dans ta journée'); await dbSet('training/' + l.id, l); return; }
   if ((b = at('[data-bxdel]'))) { const l = S.logs[b.dataset.bxdel]; if (!l) return; l.deleted = true; closePane(); renderMod(); render(); toast('Exercice retiré de ta journée'); await dbSet('training/' + l.id, l); return; }
   if (!BX) return;
   if ((b = at('[data-bxct]'))) { const was = BX.ct; BX.ct = b.dataset.bxct; if (BX.ct === 'iso') { BX.u = 's'; BX.sets.forEach(s => { if (!s.reps || +s.reps < 10) s.reps = 30; }); } else if (was === 'iso' && exOf(BX.ex).u !== 's') { BX.u = 'reps'; BX.sets.forEach(s => s.reps = 10); } paneRender(); return; }
@@ -8917,15 +9013,15 @@ document.addEventListener('click', async e => {
     st.done = !st.done; b.closest('.setrow').classList.toggle('done', st.done); b.setAttribute('aria-pressed', st.done); if (st.done && PREFS.haptic) navigator.vibrate?.(8); return; }
   if ((b = at('[data-bxrm]'))) { if (BX.sets.length > 1) BX.sets.splice(+b.dataset.bxrm, 1); paneRender(); return; }
   if (at('[data-bxsave]')) {
-    const B = BX, sets = B.sets.filter(s => s.done && +s.reps > 0).map(s => ({kg: +String(s.kg).replace(',', '.') || 0, reps: +s.reps, rpe: +B.rpe}));
+    const B = BX, fut = (B.date || TODAY) > TODAY, sets = B.sets.filter(s => (fut || s.done) && +s.reps > 0).map(s => ({kg: +String(s.kg).replace(',', '.') || 0, reps: +s.reps, rpe: +B.rpe}));
     if (!sets.length) { toast('Valide au moins une série avec ✓'); return; }
     const secs = B.ct === 'iso' || B.u === 's', min = (/^\s*\d+[.,]\d+\s*$/.test(String(B.min || '')) ? Math.max(1, Math.round(+String(B.min).replace(',', '.'))) : parseDur(String(B.min || ''))) || Math.max(2, Math.round(sets.length * (secs ? 1.5 : 2)));
     const it = {ex: B.ex, ...(secs ? {u: 's'} : {}), ...(B.ct ? {ct: B.ct} : {}), sets};
-    const doc = {id: 'x' + Date.now().toString(36), kind: 'extra', name: exOf(B.ex).n, date: B.date || TODAY, start: B.start || '', min, rpe: +B.rpe, note: (B.note || '').trim(), items: [it],
-      tonnage: secs ? 0 : Math.round(sets.reduce((a, x) => a + x.kg * x.reps, 0)), updatedAt: new Date().toISOString()};
+    const doc = {id: 'x' + Date.now().toString(36), kind: 'extra', ...(fut ? {planned: true} : {}), ...(B.pct ? {pct: +B.pct} : {}), name: exOf(B.ex).n, date: B.date || TODAY, start: B.start || '', min, rpe: +B.rpe, note: (B.note || '').trim(), items: [it],
+      tonnage: secs ? 0 : Math.round(sets.reduce((a, x) => a + (x.kg + sledBase(B.ex)) * x.reps, 0)), updatedAt: new Date().toISOString()};
     S.logs[doc.id] = doc; BX = null;
     while (P.stack.length) closePane();
-    renderMod(); render(); toast('Exercice ajouté à ta journée');
+    renderMod(); render(); toast(fut ? 'Exercice prévu le ' + fmtShort(doc.date) : 'Exercice ajouté à ta journée');
     await dbSet('training/' + doc.id, doc);
   }
 });
@@ -10311,6 +10407,8 @@ function oneTab(i) {
   if (k === oneCur()) { window.scrollTo({top: 0, behavior: 'smooth'}); return; }
   // Le retour du téléphone depuis un onglet ramène à Aujourd'hui (une seule étape dans l'historique).
   if (i > 0 && !history.state?.one) try { history.pushState({mod: S.mod, one: 1}, ''); } catch (e) {}
+  // La nouvelle page arrive sur place : pas de titres ni de blocs qui remontent.
+  oneCalmIn();
   if (S.mod === 'R') setTab(k); else { if (S.mod === 'T') S.ttab = k; else { S.ftab = k; if (k === 'journal') S.fday = TODAY; } saveUi(); renderMod(true); window.scrollTo(0, 0); pcSync(); }
   oneSync(); oneHap(5);
 }
@@ -10370,6 +10468,8 @@ function oneSync() {
   const tabs = $('#one-tabs'), top = $('#one-top'), home = S.mod === 'home'; if (!tabs || (!home && !ONE.mods.includes(S.mod))) return;
   if (!home) ONE.lm = S.mod; const m = home ? ONE.lm || 'R' : S.mod;
   document.documentElement.classList.toggle('one-home', home);
+  // À l'Accueil, le haut de l'écran (heure, batterie) est toujours noir, comme la page.
+  if (home && ONE.barTo !== '#000000' && !window.TNR_SPLASH_ON) syncBars();
   document.documentElement.style.setProperty('--one-c', home ? '#8E9BB5' : ONE.col[m]);
   const src = [...(pcBar(m)?.querySelectorAll('[role=tab]') || [])], i = home ? -1 : oneIdx();
   tabs.querySelectorAll('[data-one-t]').forEach((b, j) => { const s = src[j]; if (!s) return; const h = s.innerHTML; if (b._h !== h) { b.innerHTML = h; b._h = h; } b.setAttribute('aria-label', s.textContent.trim()); b.classList.toggle('on', j === i); });
@@ -10575,16 +10675,25 @@ fBody = () => {
   return h.replace(m[0], `<div class="one-2body">${fig('sgA', 'BRAS', ells.filter(arm))}${fig('sgB', 'TRONC ET JAMBES', ells.filter(e => !arm(e)))}</div><div class="segw one-segw">`);
 };
 
+/* ---------- au pouce, l'Accueil est la page juste à gauche d'Aujourd'hui (et Aujourd'hui juste à droite de l'Accueil) ---------- */
+window.TAB_XNB = (k, T, html) => {
+  if (T.home) { if (k < 0) return null; const m = ONE.lm || 'R', key = ONE.keys[m][0];
+    return {cls: '', box: $('#home-view'), html: () => `<div class="wrap">${m === 'R' ? '<div class="mm-space"></div>' : ''}<section class="gv-${m === 'R' ? 'v-' + key : m === 'T' ? 't-view' : 'f-view'}">${html(m, key)}</section></div>`, go: () => oneSwitch(m, 0)}; }
+  if (k < 0 && T.i === 0 && ONE.mods.includes(S.mod)) return {cls: '', box: $('#mod-' + S.mod), html: () => vHome(), go: () => oneHome()};
+  return null;
+};
 /* ---------- la bulle du bas suit le pouce pendant qu'on glisse d'un onglet à l'autre (dès le premier pixel) ---------- */
 window.TAB_DRAG = (i, f, ms) => {
   oneCalmIn();
   if (ms && f) ONE.swiped = performance.now() + ms;
-  const tabs = $('#one-tabs'), p = tabs?.querySelector('.one-pill'); if (!p || S.mod === 'home') return;
-  const bs = [...tabs.querySelectorAll('[data-one-t]')], a = bs[i]; if (!a) return;
-  const b = bs[i + Math.sign(f)] || a, x = Math.max(3, a.offsetLeft - ONE_EXT / 2 + (b.offsetLeft - a.offsetLeft) * Math.abs(f));
+  const tabs = $('#one-tabs'), p = tabs?.querySelector('.one-pill'); if (!p) return;
+  // Les boutons dans l'ordre : Accueil, puis les 6 onglets (Accueil = position -1).
+  const bs = [...tabs.querySelectorAll('button')], a = bs[i + 1]; if (!a) return;
+  const b = bs[i + 1 + Math.sign(f)] || a, q = Math.abs(f);
+  const x = Math.max(3, a.offsetLeft - ONE_EXT / 2 + (b.offsetLeft - a.offsetLeft) * q), w = a.offsetWidth + (b.offsetWidth - a.offsetWidth) * q + ONE_EXT;
   p.getAnimations().forEach(an => an.cancel());
-  const from = p.style.transform; p.style.transform = `translateX(${x}px)`; p._x = x;
-  if (ms && from) { p.animate([{transform: from}, {transform: p.style.transform}], {duration: ms, easing: 'cubic-bezier(.22,.8,.3,1)'}); oneMag(tabs, p, ms + 40); }
+  const from = p.style.transform, fw = p.style.width; p.style.transform = `translateX(${x}px)`; p.style.width = w + 'px'; p._x = x; p._w = w;
+  if (ms && from) { p.animate([{transform: from, width: fw || w + 'px'}, {transform: p.style.transform, width: w + 'px'}], {duration: ms, easing: 'cubic-bezier(.22,.8,.3,1)'}); oneMag(tabs, p, ms + 40); }
   else oneMag(tabs, p, 0);
 };
 
@@ -10594,19 +10703,25 @@ const oneRgb = c => { c = String(c || '').trim(); let m = c.match(/^#([0-9a-f]{3
   m = c.match(/^rgba?\((\d+)\D+(\d+)\D+(\d+)/i); return m ? [+m[1], +m[2], +m[3]] : null; };
 const ONE_BAR = {cur: null, raf: 0}, ONE_BAND = .3;   // même dosage que --band (one.css)
 syncBars = function () {
-  const O1 = document.documentElement.classList.contains('one-pl') ? null : {T: '#FF3B30', N: '#30D158', R: '#0A84FF'}[S.mod], c1 = oneRgb(O1);
-  const to = window.TNR_SPLASH_ON ? '#0B1733' : c1 ? '#' + c1.map(v => Math.round(v * ONE_BAND).toString(16).padStart(2, '0')).join('') : '#000000';
-  const set = c => document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.media = ''; m.content = c; });
-  const A = oneRgb(ONE_BAR.cur), B = oneRgb(to); cancelAnimationFrame(ONE_BAR.raf);
-  // Vers l'Accueil (ou le planning), le haut d'écran passe au noir tout de suite, comme la page.
-  if (!A || !B || window.TNR_SPLASH_ON || oneCalm() || document.hidden || !c1) { ONE_BAR.cur = to; set(to); return; }
-  const t0 = performance.now(), D = 1600, ease = t => t * t * (3 - 2 * t);
-  const f = now => { const k = Math.min(1, (now - t0) / D), e = ease(k), c = `rgb(${A.map((v, j) => Math.round(v + (B[j] - v) * e)).join(',')})`;
-    ONE_BAR.cur = c; set(c); if (k < 1) ONE_BAR.raf = requestAnimationFrame(f); };
+  const R = document.documentElement, set = c => { if (ONE_BAR.cur === c) return; ONE_BAR.cur = c; document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.media = ''; m.content = c; }); };
+  cancelAnimationFrame(ONE_BAR.raf);
+  if (window.TNR_SPLASH_ON) { ONE.barTo = '#0B1733'; set('#0B1733'); return; }
+  const c1 = R.classList.contains('one-pl') ? null : oneRgb({T: '#FF3B30', N: '#30D158', R: '#0A84FF'}[S.mod]);
+  // Accueil, planning, questionnaire : noir tout de suite, comme la page.
+  if (!c1) { ONE.barTo = '#000000'; set('#000000'); return; }
+  const hex = v => '#' + v.map(x => Math.round(x * ONE_BAND).toString(16).padStart(2, '0')).join('');
+  ONE.barTo = hex(c1);
+  // Ailleurs : la barre lit, image par image, la couleur que la page est en train d'afficher (--o1, qui glisse en 1,6 s),
+  // donc elle change exactement au même rythme que le fond et le dégradé.
+  const t0 = performance.now(), to = ONE.barTo;
+  const f = now => { if (ONE.barTo !== to) return; const c = oneRgb(getComputedStyle(R).getPropertyValue('--o1')) || c1, h = hex(c);
+    set(h); if (h !== to && now - t0 < 2500) ONE_BAR.raf = requestAnimationFrame(f); else set(to); };
+  if (oneCalm() || document.hidden) { set(to); return; }
   ONE_BAR.raf = requestAnimationFrame(f);
-  // Si l'appli passe en arrière-plan pendant le fondu, la barre finit quand même sur la bonne couleur.
-  clearTimeout(ONE_BAR.t); ONE_BAR.t = setTimeout(() => { if (ONE_BAR.cur !== to && oneRgb(ONE_BAR.cur)?.join() !== B.join()) { ONE_BAR.cur = to; set(to); } }, D + 250);
 };
+
+// En revenant dans l'appli, la barre reprend la couleur de la page affichée.
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { ONE_BAR.cur = null; syncBars(); } });
 
 /* ---------- Planning et questionnaire du jour : une page à part, toute noire (sans fond coloré, sans dégradé en haut,
    sans les barres). Le planning monte du bas en s'ouvrant, comme le questionnaire. ---------- */
@@ -10628,51 +10743,141 @@ syncBars = function () {
 const onePaneShow0 = paneShow;
 paneShow = function (...a) { const r = onePaneShow0.apply(this, a); const v = P.stack.at(-1); if (v) { $('#pn-back').hidden = true; $('#pn-close').hidden = !(v.fixed || P.stack[0]?.side || (typeof isPC === 'function' && isPC())); } return r; };
 
+/* ---------- Les petits textes d'aide (« Touche un bloc pour… », « Garde le doigt… ») sont masqués :
+   à leur place, un petit « Afficher » pour les lire si besoin. Les chiffres et les vraies infos restent visibles. ---------- */
+(function oneTips() {
+  const SEL = 'p.small.muted, p.hint, p.small.hint, .tools .hint, h2 small, .sec-label small';
+  const skip = el => el.closest('.one-st, #one-top, #one-tabs, .toast, .dhead, .chartbox, svg') || el.dataset.tip;
+  const run = root => {
+    root.querySelectorAll?.(SEL).forEach(el => {
+      if (skip(el)) return; el.dataset.tip = '1';
+      const t = el.textContent.trim();
+      if (el.matches('h2 small, .sec-label small')) { if (t.length > 22) el.hidden = true; return; }
+      if (t.length < 46) return;
+      el.hidden = true; el.classList.add('one-tipx');
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'one-tipb'; b.textContent = 'Afficher';
+      b.onclick = e => { e.stopPropagation(); el.hidden = !el.hidden; b.textContent = el.hidden ? 'Afficher' : 'Masquer'; };
+      el.before(b);
+    });
+  };
+  // Juste après chaque changement de page, avant qu'elle s'affiche (la copie qui glisse au pouce aussi) : rien ne saute.
+  new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1) { if (n.matches(SEL)) run(n.parentNode); else run(n); } }).observe(document.body, {childList: true, subtree: true});
+  run(document.body);
+})();
+
 /* ================= TNR · Actus : les nouvelles du jour en stories =================
-   Un carré « Actus » en haut à droite de l'Accueil (en face de l'IA). Les stories reprennent celles de la première
-   version test : plein écran, barres de progression, grand chiffre, mot géant en fond. Chaque story garde la couleur
-   de sa partie, en nuances : Recovery en bleus, Training en rouges et orangés, Nutrition en verts.
+   Un carré « Actus » en haut à droite de l'Accueil (en face de l'IA). Plein écran, barres de progression, grand chiffre,
+   mot géant en fond, et une courte synthèse (2 ou 3 lignes) avec tout ce qui compte. Chaque story garde la couleur de sa
+   partie, en nuances, jusqu'en bas de l'écran : Recovery en bleus, Training en rouges et orangés, Nutrition en verts.
    · touche à droite : la suivante ; à gauche : la précédente ; reste appuyé : tout s'arrête (temps et voix), relâche : ça reprend ;
-   · environ 8 s par story (plus si le texte est long) ;
-   · le petit haut-parleur lit la story à voix haute ; la story attend la fin de la phrase avant de passer à la suivante ;
+   · le haut-parleur lit toute la story ; allumé, la story repart de zéro et la barre du haut finit pile avec la voix ;
    · elles s'ouvrent toutes seules à la première ouverture de l'appli de la journée. */
 const AC = {T: ['#FF3B30', '#FF6A2B', '#FF9F0A'], N: ['#30D158', '#3DDC97', '#0FB9A6'], R: ['#0A84FF', '#5E5CE6', '#64D2FF']};
 const acT = (f, d = null) => { try { const v = f(); return v ?? d; } catch (e) { return d; } };
+// Pour la voix : « 7 heures 32 », « 5,2 » se lit « 5 virgule 2 », les signes en mots.
+const acHm = h => { const m = Math.round(h * 60), H = Math.floor(m / 60), mn = m % 60; return H + (H > 1 ? ' heures' : ' heure') + (mn ? ' ' + mn : ''); };
+const acSg = (v, d = 0) => (v > 0 ? '+' : v < 0 ? '−' : '±') + fx(Math.abs(v), d);
+const acSay = (v, d = 0) => (v < 0 ? 'moins ' : 'plus ') + fx(Math.abs(v), d);
 function acList() {
-  const L = [], kG = acT(() => lastKey('hrv')) || TODAY, rec = acT(() => recovery(kG)?.score), sl = acT(() => VAL.sleepH(kG)), need = acT(() => sleepGoal(), 9);
-  const hrv = acT(() => G(kG, 'hrv')), hb = acT(() => base('hrv', kG, 60)), rhr = acT(() => G(kG, 'rhr')), rb = acT(() => base('rhr', kG, 60));
-  const pct = (v, b) => v != null && b ? (v >= b ? '+' : '−') + Math.abs(Math.round((v / b - 1) * 100)) + ' %' : '–';
-  // Recovery (bleus)
-  if (rec != null) L.push({c: AC.R[0], w: 'RÉCUP', k: 'RECOVERY · CE MATIN', big: Math.round(rec) + '<small> %</small>', t: rec >= 67 ? 'Prêt à envoyer' : rec >= 34 ? 'Corps qui tient la charge' : 'Journée à alléger',
-    g: [[hmH(sl), 'sommeil'], [hrv != null ? hrv + ' ms' : '–', 'VFC'], [rhr != null ? rhr + ' bpm' : '–', 'FC repos']],
-    say: `Récupération à ${Math.round(rec)} pour cent ce matin. ${rec >= 67 ? 'Tu es prêt à envoyer.' : rec >= 34 ? 'Ton corps tient la charge.' : 'Journée à alléger.'}`});
-  if (sl != null) L.push({c: AC.R[1], w: 'NUIT', k: 'SOMMEIL · ' + acT(() => fmtShort(kG).toUpperCase(), ''), big: hmH(sl), t: sl >= need - .3 ? 'Nuit complète' : sl >= need - 1 ? 'Un peu courte' : 'Nuit trop courte',
-    g: [[hmH(need), 'ton besoin'], [acT(() => { const s = series('sleepH', 7).map(p => p.v).filter(v => v != null); return s.length ? hmH(mean(s)) : '–'; }, '–'), 'moyenne 7 nuits']],
-    say: `Tu as dormi ${Math.floor(sl)} heures ${Math.round(sl % 1 * 60)}. ${sl >= need - .3 ? 'Nuit complète.' : sl >= need - 1 ? 'Un peu court.' : 'C\'est trop court, essaie de te coucher plus tôt ce soir.'}`});
-  if (hrv != null) L.push({c: AC.R[2], w: 'VFC', k: 'VARIABILITÉ CARDIAQUE', big: hrv + '<small> ms</small>', t: !hb ? 'Base en calcul' : hrv >= hb.m * .95 ? 'Dans ta zone' : hrv >= hb.m * .85 ? 'Un peu basse' : 'Basse',
-    g: [[hb ? Math.round(hb.m) + ' ms' : '–', 'ta base'], [pct(hrv, hb?.m), 'par rapport à ta base'], [rhr != null ? rhr + ' bpm' : '–', 'FC repos' + (rb && rhr != null ? ' (' + (rhr - rb.m > 0 ? '+' : '') + Math.round(rhr - rb.m) + ')' : '')]],
-    say: `Ta variabilité cardiaque est à ${hrv} millisecondes. ${!hb ? 'Ta base est encore en calcul.' : hrv >= hb.m * .95 ? 'C\'est dans ta zone.' : 'Elle est un peu basse par rapport à ta base.'}`});
-  // Training (rouges, orangés)
-  const plan = acT(() => planFor(TODAY)), done = acT(() => logsOn(TODAY).length, 0), eff = acT(() => effortDay(addDays(TODAY, -1)));
-  L.push({c: AC.T[0], w: 'SÉANCE', k: 'TRAINING · AUJOURD\'HUI', big: plan ? (done ? '✓' : (plan.kind === 'track' ? 'Sprint' : 'Muscu')) : 'Repos', t: plan ? esc(plan.name || '') : 'Pas de séance prévue',
-    g: plan ? [[acT(() => (plan.items || []).length, 0) + '', 'exercices'], [acT(() => estMin(plan) + ' min', '–'), 'durée prévue'], [eff != null ? fx(eff, 1) + ' /21' : '–', 'effort hier']] : [[eff != null ? fx(eff, 1) + ' /21' : '–', 'effort hier']],
-    say: plan ? `${done ? 'Séance faite, bien joué.' : 'Aujourd\'hui, ' + (plan.kind === 'track' ? 'séance de sprint' : 'séance de musculation') + ' : ' + (plan.name || '') + '.'}` : 'Pas de séance prévue aujourd\'hui. Profites-en pour récupérer.'});
-  const wk = acT(() => { let n = 0, d = 0; for (let i = 0; i < 7; i++) { const k = addDays(TODAY, -i); if (logsOn(k).length) n++; d += effortDay(k) || 0; } return {n, d: d / 7}; });
-  if (wk) L.push({c: AC.T[1], w: 'CHARGE', k: 'TRAINING · 7 DERNIERS JOURS', big: wk.n + '<small> séances</small>', t: wk.d >= 14 ? 'Grosse semaine' : wk.d >= 8 ? 'Semaine solide' : 'Semaine légère',
-    g: [[fx(wk.d, 1) + ' /21', 'effort moyen'], [acT(() => fx(series('sprintM', 7).reduce((a, p) => a + (p.v || 0), 0)) + ' m', '–'), 'sprint']], say: `Sur les 7 derniers jours : ${wk.n} séances, effort moyen ${fx(wk.d, 1)} sur 21.`});
-  // Nutrition (verts)
-  const fg = acT(() => fuelGoal(TODAY)), ft = acT(() => dayTotals(TODAY));
-  if (fg) L.push({c: AC.N[0], w: 'FUEL', k: 'NUTRITION · AUJOURD\'HUI', big: Math.round(fg.kcal) + '<small> kcal</small>', t: 'Ton objectif du jour',
-    g: [[Math.round(fg.p) + ' g', 'protéines'], [Math.round(fg.c) + ' g', 'glucides'], [Math.round(fg.f) + ' g', 'lipides']],
-    say: `Objectif du jour : ${Math.round(fg.kcal)} calories, dont ${Math.round(fg.p)} grammes de protéines.${ft?.kcal ? ' Tu en es à ' + Math.round(ft.kcal) + '.' : ''}`});
+  const L = [], h = new Date().getHours(), hello = h < 12 ? 'Bonjour' : h < 18 ? 'Salut' : 'Bonsoir';
+  const kG = acT(() => lastKey('hrv')) || TODAY, rec = acT(() => recovery(kG)?.score), recY = acT(() => recovery(addDays(kG, -1))?.score);
+  const sl = acT(() => VAL.sleepH(kG)), need = acT(() => sleepGoal(), 9);
+  const hrv = acT(() => G(kG, 'hrv')), hb = acT(() => base('hrv', kG, 60)), h7 = acT(() => avgN('hrv', 7, kG)), rhr = acT(() => G(kG, 'rhr')), rb = acT(() => base('rhr', kG, 60));
+  const pc = (v, b) => v != null && b ? Math.round((v / b - 1) * 100) : null;
+  const high = acT(() => highDay(TODAY), true), tg = acT(() => effortTarget(rec, high));
+  const first = [];   // la toute première story commence par bonjour
+  const hi = s => { if (first.length) return s; first.push(1); return hello + ' ! ' + s; };
+
+  // ---------- Recovery (bleus) ----------
+  if (rec != null) {
+    const z = zoneOf(rec), dH = pc(hrv, hb?.m), dR = rhr != null && rb ? Math.round(rhr - rb.m) : null;
+    L.push({c: AC.R[0], c2: AC.R[1], w: 'RÉCUP', k: 'RECOVERY · CE MATIN', big: rec + '<small> %</small>', t: ZONE[z],
+      g: [[hmH(sl), 'sommeil'], [hrv != null ? hrv + ' ms' : '–', 'VFC'], [rhr != null ? rhr + ' bpm' : '–', 'FC repos'], [recY != null ? acSg(rec - recY) + ' pts' : '–', 'vs hier']],
+      syn: [ZONE_SUB[z] + '.', [dH != null ? 'VFC ' + acSg(dH) + ' % vs ta base' : '', dR != null ? 'FC repos ' + acSg(dR) + ' bpm' : ''].filter(Boolean).join(' · '), tg ? 'Effort conseillé : ' + tg.lvl[2].toLowerCase() + ' (' + tg.lvl[0] + ' à ' + tg.lvl[1] + ' sur 21)' : ''].filter(Boolean),
+      say: hi(`On commence par ta récup : ${rec} pour cent ce matin${recY != null && recY !== rec ? `, ${Math.abs(rec - recY)} points de ${rec > recY ? 'plus' : 'moins'} qu'hier` : ''}. ${ZONE_SUB[z]}. `) +
+        (dH != null ? `Ta VFC est à ${acSay(dH)} pour cent de ta base${dR != null ? `, ta fréquence cardiaque au repos à ${acSay(dR)} battements` : ''}. ` : '') + (tg ? tg.text : '')});
+  }
+  if (sl != null) {
+    const n7 = acT(() => series('sleepH', 7, kG).map(p => p.v).filter(v => v != null), []), avg = n7.length ? mean(n7) : null, debt = n7.reduce((s, v) => s + Math.max(0, need - v), 0), gap = sl - need;
+    const verdict = gap >= -.3 ? 'Nuit complète' : gap >= -1 ? 'Un peu courte' : 'Nuit trop courte';
+    L.push({c: AC.R[1], c2: AC.R[2], w: 'NUIT', k: 'SOMMEIL · ' + acT(() => fmtShort(kG).toUpperCase(), ''), big: hmH(sl), t: verdict,
+      g: [[hmH(need), 'ton besoin'], [(gap >= 0 ? '+' : '−') + hmH(Math.abs(gap)), 'écart'], [avg != null ? hmH(avg) : '–', 'moy. 7 nuits'], [debt > .1 ? hmH(debt) : '0 h', 'dette 7 nuits']],
+      syn: [verdict + (gap < -.3 ? ' : il te manque ' + hmH(-gap) + '.' : '.'), avg != null ? 'Sur 7 nuits : ' + hmH(avg) + ' en moyenne, dette ' + (debt > .1 ? hmH(debt) : 'nulle') + '.' : '', debt > 1.5 ? 'Rattrape : sieste de 20 min ou coucher plus tôt.' : 'Garde la même heure de coucher.'].filter(Boolean),
+      say: hi(`Ta nuit : ${acHm(sl)} de sommeil, pour un besoin de ${acHm(need)}. `) + (gap < -.3 ? `Il te manque ${acHm(-gap)}. ` : 'C\'est une nuit complète. ') +
+        (avg != null ? `Sur les sept dernières nuits, tu dors ${acHm(avg)} en moyenne${debt > .1 ? `, avec une dette de ${acHm(debt)}` : ', sans dette'}. ` : '') + (debt > 1.5 ? 'Essaie de rattraper avec une petite sieste ou en te couchant plus tôt.' : 'Garde la même heure de coucher, ça marche.')});
+  }
+  if (hrv != null) {
+    const d = pc(hrv, hb?.m), d7 = pc(h7, hb?.m), dR = rhr != null && rb ? Math.round(rhr - rb.m) : null;
+    const tired = hb && h7 && h7 < hb.m * .9 && dR != null && dR >= 3, fresh = hb && h7 && h7 >= hb.m;
+    const t = !hb ? 'Base en calcul' : hrv >= hb.m * .95 ? 'Dans ta zone' : hrv >= hb.m * .85 ? 'Un peu basse' : 'Basse';
+    L.push({c: AC.R[2], c2: AC.R[0], w: 'VFC', k: 'VARIABILITÉ CARDIAQUE', big: hrv + '<small> ms</small>', t,
+      g: [[hb ? Math.round(hb.m) + ' ms' : '–', 'ta base'], [d != null ? acSg(d) + ' %' : '–', 'vs ta base'], [h7 ? Math.round(h7) + ' ms' : '–', 'moy. 7 jours'], [rhr != null ? rhr + ' bpm' : '–', 'FC repos' + (dR != null ? ' (' + acSg(dR) + ')' : '')]],
+      syn: [h7 && d7 != null ? 'Moyenne 7 jours : ' + Math.round(h7) + ' ms (' + acSg(d7) + ' %).' : '', tired ? 'VFC basse et cœur plus rapide : la fatigue s\'installe, allège un peu.' : fresh ? 'Tendance au-dessus de ta base : système nerveux frais.' : 'Rien d\'inquiétant, continue comme ça.'].filter(Boolean),
+      say: hi(`Ta variabilité cardiaque est à ${hrv} millisecondes. `) + (!hb ? 'Ta base est encore en calcul. ' : `C'est ${acSay(d)} pour cent par rapport à ta base de ${Math.round(hb.m)}. `) +
+        (h7 && d7 != null ? `Sur sept jours, tu es à ${Math.round(h7)} en moyenne. ` : '') + (tired ? 'Avec un cœur un peu plus rapide au repos, la fatigue s\'installe : allège un peu.' : fresh ? 'La tendance est au-dessus de ta base, ton système nerveux est frais.' : 'Rien d\'inquiétant, continue comme ça.')});
+  }
+  // Une douleur notée ces 3 derniers jours : elle compte dans la récup, on la rappelle.
+  const pk = acT(() => { for (let i = 0; i < 3; i++) { const k = addDays(TODAY, -i); if ((maxPain(k) ?? 0) > 0) return k; } return null; });
+  if (pk) {
+    const P = Object.entries(acT(() => pains(pk), {})).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]), [l0, v0] = P[0] || ['', 0];
+    let run = 0; for (let i = 0; i < 30; i++) { if ((acT(() => maxPain(addDays(pk, -i))) ?? 0) > 0) run++; else break; }
+    L.push({c: AC.R[1], c2: AC.T[0], w: 'DOULEUR', k: 'DOULEURS · ' + acT(() => fmtShort(pk).toUpperCase(), ''), big: v0 + '<small> /10</small>', t: esc(painWords(l0)),
+      g: P.slice(0, 3).map(([l, v]) => [v + ' /10', esc(painWords(l))]).concat([[run + (run > 1 ? ' jours' : ' jour'), 'd\'affilée']]).slice(0, 4),
+      syn: [P.length > 1 ? P.length + ' zones notées.' : 'Une zone notée.', v0 >= 3 ? 'À 3 sur 10 et plus, ta récup est plafonnée à 33 %. Adapte la séance.' : 'Légère : garde un œil dessus.'],
+      say: hi(`Côté douleurs : ${painWords(l0)} à ${v0} sur 10${run > 1 ? `, depuis ${run} jours` : ''}. `) + (P.length > 1 ? `Et ${P.slice(1, 3).map(([l, v]) => painWords(l) + ' à ' + v).join(', ')}. ` : '') + (v0 >= 3 ? 'Tant que c\'est à 3 ou plus, ta récup est plafonnée : adapte la séance.' : 'C\'est léger, garde juste un œil dessus.')});
+  }
+
+  // ---------- Training (rouges, orangés) ----------
+  const plan = acT(() => planFor(TODAY)), logs = acT(() => logsOn(TODAY), []), eff = acT(() => effortDay(addDays(TODAY, -1)));
+  const exs = plan ? acT(() => (plan.items || []).map(it => exOf(it.ex)?.n).filter(Boolean), []) : [], min = plan ? acT(() => estMin(plan)) : null, l0 = logs[0];
+  L.push({c: AC.T[0], c2: AC.T[2], w: 'SÉANCE', k: 'TRAINING · AUJOURD\'HUI', big: l0 ? '✓' : plan ? (plan.kind === 'track' ? 'Sprint' : 'Muscu') : 'Repos', t: plan ? esc(plan.name || '') : 'Pas de séance prévue',
+    g: plan ? [[exs.length + '', 'exercices'], [min ? min + ' min' : '–', 'durée prévue'], [eff != null ? fx(eff, 1) + ' /21' : '–', 'effort hier'], [tg ? tg.lvl[2] : '–', 'effort conseillé']]
+      : [[eff != null ? fx(eff, 1) + ' /21' : '–', 'effort hier'], [tg ? tg.lvl[2] : '–', 'effort conseillé'], [rec != null ? rec + ' %' : '–', 'récup']],
+    syn: l0 ? [l0.tonnage ? 'Faite : ' + fx(l0.tonnage) + ' kg soulevés.' : l0.sprintM ? 'Faite : ' + fx(l0.sprintM) + ' m de sprint.' : 'Séance faite.', 'Bien bossé. Pense à manger dans l\'heure.']
+      : plan ? [exs.length ? 'Au menu : ' + esc(exs.slice(0, 4).join(', ')) + (exs.length > 4 ? '…' : '.') : '', tg ? tg.text : ''].filter(Boolean)
+      : ['Jour sans séance : le corps se construit au repos.', 'Mobilité, marche ou vélo très facile.'],
+    say: hi(l0 ? `Séance du jour faite${l0.tonnage ? ` : ${fx(l0.tonnage)} kilos soulevés` : l0.sprintM ? ` : ${fx(l0.sprintM)} mètres de sprint` : ''}. Bien bossé, pense à bien manger dans l'heure.`
+      : plan ? `Aujourd'hui, ${plan.kind === 'track' ? 'séance de sprint' : 'séance de muscu'} : ${plan.name || ''}. ${exs.length ? `${exs.length} exercices, dont ${exs.slice(0, 3).join(', ')}. ` : ''}${min ? `Compte environ ${min} minutes. ` : ''}${tg ? tg.text : ''}`
+      : `Pas de séance prévue aujourd'hui. Profites-en pour récupérer : mobilité, marche ou vélo tranquille.`)});
+  const wk = acT(() => { const f = o => { let n = 0, d = 0, r = 0; for (let i = 0; i < 7; i++) { const k = addDays(TODAY, -i - o), e = effortDay(k) || 0; if (logsOn(k).length) n++; d += e; if (e < 3) r++; } return {n, d: d / 7, r}; }; return {...f(0), prev: f(7).d}; });
+  if (wk) {
+    const sp = acT(() => series('sprintM', 7).reduce((a, p) => a + (p.v || 0), 0), 0), dv = wk.prev > .5 ? Math.round((wk.d / wk.prev - 1) * 100) : null;
+    const t = wk.d >= 14 ? 'Grosse semaine' : wk.d >= 8 ? 'Semaine solide' : 'Semaine légère';
+    L.push({c: AC.T[1], c2: AC.T[0], w: 'CHARGE', k: 'TRAINING · 7 DERNIERS JOURS', big: wk.n + `<small> séance${wk.n > 1 ? 's' : ''}</small>`, t,
+      g: [[fx(wk.d, 1) + ' /21', 'effort moyen'], [dv != null ? acSg(dv) + ' %' : '–', 'vs semaine d\'avant'], [fx(sp) + ' m', 'sprint'], [wk.r + '', 'jours de repos']],
+      syn: [dv != null ? 'Effort ' + acSg(dv) + ' % par rapport à la semaine d\'avant.' : '', dv != null && dv > 15 ? 'Ça monte vite : reste sous +15 % par semaine.' : wk.r < 1 ? 'Aucun vrai jour de repos : prévois-en un.' : 'Progression bien dosée.'].filter(Boolean),
+      say: hi(`Ta charge sur sept jours : ${wk.n} séance${wk.n > 1 ? 's' : ''}, un effort moyen de ${fx(wk.d, 1)} sur 21${sp ? `, et ${fx(sp)} mètres de sprint` : ''}. `) +
+        (dv != null ? `C'est ${acSay(dv)} pour cent par rapport à la semaine d'avant. ` : '') + (dv != null && dv > 15 ? 'Ça monte vite, essaie de rester sous plus quinze pour cent par semaine.' : wk.r < 1 ? 'Tu n\'as pas eu de vrai jour de repos, pense à en prévoir un.' : 'La progression est bien dosée.')});
+  }
+
+  // ---------- Nutrition (verts) ----------
+  const fg = acT(() => fuelGoal(TODAY)), ft = acT(() => dayTotals(TODAY), {}), td = acT(() => trainDay(TODAY), high);
+  if (fg) {
+    const ate = Math.round(ft?.kcal || 0), rest = Math.round(fg.kcal - ate), pr = Math.round(ft?.p || 0);
+    L.push({c: AC.N[0], c2: AC.N[2], w: 'FUEL', k: 'NUTRITION · AUJOURD\'HUI', big: fx(Math.round(fg.kcal)) + '<small> kcal</small>', t: td ? 'Jour d\'entraînement' : 'Jour de repos',
+      g: [[Math.round(fg.p) + ' g', 'protéines'], [Math.round(fg.c) + ' g', 'glucides'], [Math.round(fg.f) + ' g', 'lipides'], [ate ? fx(ate) + ' kcal' : '0', 'déjà mangé']],
+      syn: [td ? 'Objectif plus haut : tu t\'entraînes.' : 'Objectif plus bas : jour de repos.', ate ? 'Reste ' + fx(Math.max(0, rest)) + ' kcal, dont ' + Math.max(0, Math.round(fg.p) - pr) + ' g de protéines.' : 'Rien de noté pour l\'instant.'],
+      say: hi(`Côté assiette : objectif ${fx(Math.round(fg.kcal))} calories aujourd'hui, ${td ? 'parce que tu t\'entraînes' : 'c\'est un jour de repos'}. Dont ${Math.round(fg.p)} grammes de protéines, ${Math.round(fg.c)} de glucides et ${Math.round(fg.f)} de lipides. `) +
+        (ate ? `Tu en es à ${fx(ate)}, il te reste ${fx(Math.max(0, rest))} calories.` : 'Rien de noté pour l\'instant.')});
+  }
   const kW = acT(() => lastKey('weight')), wt = kW ? acT(() => W(kW, 'weight')) : null;
-  if (wt != null) L.push({c: AC.N[2], w: 'POIDS', k: 'COMPOSITION · ' + acT(() => fmtShort(kW).toUpperCase(), ''), big: fx(wt, 1) + '<small> kg</small>', t: 'Withings',
-    g: [[acT(() => fx(W(kW, 'fatPct'), 1) + ' %', '–'), 'masse grasse'], [acT(() => { const s = series('weight', 30).map(p => p.v).filter(v => v != null); return s.length > 1 ? (s.at(-1) - s[0] > 0 ? '+' : '') + fx(s.at(-1) - s[0], 1) + ' kg' : '–'; }, '–'), 'sur 30 jours']],
-    say: `Ton poids : ${fx(wt, 1)} kilos.`});
+  if (wt != null) {
+    const fat = acT(() => W(kW, 'fatPct')), mus = acT(() => W(kW, 'muscleKg'));
+    const s30 = acT(() => series('weight', 30).map(p => p.v).filter(v => v != null), []), d30 = s30.length > 1 ? s30.at(-1) - s30[0] : null;
+    const w1 = acT(() => avgN('weight', 7)), w0 = acT(() => avgN('weight', 7, addDays(TODAY, -7))), dw = w1 && w0 ? w1 - w0 : null;
+    L.push({c: AC.N[2], c2: AC.N[1], w: 'POIDS', k: 'COMPOSITION · ' + acT(() => fmtShort(kW).toUpperCase(), ''), big: fx(wt, 1) + '<small> kg</small>', t: dw == null ? 'Withings' : Math.abs(dw) < .2 ? 'Stable' : dw > 0 ? 'En hausse' : 'En baisse',
+      g: [[fat != null ? fx(fat, 1) + ' %' : '–', 'masse grasse'], [mus != null ? fx(mus, 1) + ' kg' : '–', 'muscle'], [dw != null ? acSg(dw, 1) + ' kg' : '–', 'sur 7 jours'], [d30 != null ? acSg(d30, 1) + ' kg' : '–', 'sur 30 jours']],
+      syn: [dw != null ? 'Moyenne 7 jours : ' + fx(w1, 1) + ' kg (' + acSg(dw, 1) + ' kg en une semaine).' : '', 'Un seul jour ne veut rien dire : regarde la moyenne.'].filter(Boolean),
+      say: hi(`Pour finir, ton poids : ${fx(wt, 1)} kilos${fat != null ? `, avec ${fx(fat, 1)} pour cent de masse grasse` : ''}. `) + (dw != null ? `Ta moyenne sur sept jours est ${Math.abs(dw) < .2 ? 'stable' : `à ${acSay(dw, 1)} kilo en une semaine`}. ` : '') + 'Bonne journée !'});
+  }
   return L;
 }
-const ACS = {on: false, i: 0, L: [], t0: 0, left: 0, dur: 0, timer: 0, paused: false, spoke: true, audio: false};
-try { ACS.audio = localStorage.getItem('tnr-actus-audio') === '1'; } catch (e) {}
+
+/* ---------- le temps de chaque story ---------- */
+// Sans la voix : le temps de lire (8 à 14 s). Avec la voix : la barre suit la phrase et finit pile avec elle.
+const ACS = {on: false, i: 0, L: [], el0: 0, t0: 0, D: 8000, raf: 0, paused: false, voice: false, ended: true, pEnd: 0, tEnd: 0, audio: false, cps: 14};
+try { ACS.audio = localStorage.getItem('tnr-actus-audio') === '1'; ACS.cps = +localStorage.getItem('tnr-actus-cps') || 14; } catch (e) {}
+const acReadMs = s => Math.max(8000, Math.min(14000, 4500 + (s.syn.join(' ').length + s.g.length * 14) * 45));
 const acIc = {spk: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>',
   mute: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m16 9 5 6M21 9l-5 6"/></svg>',
   x: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'};
@@ -10685,38 +10890,80 @@ function acOpen(i = 0) {
 function acShow(i) {
   const el = document.getElementById('one-st'); if (!el) return;
   if (i < 0) i = 0; if (i >= ACS.L.length) { acClose(); return; }
-  clearTimeout(ACS.timer); try { speechSynthesis.cancel(); } catch (e) {}
+  cancelAnimationFrame(ACS.raf); acHush();
   const s = ACS.L[i]; ACS.i = i; ACS.paused = false; el.classList.remove('paused');
-  // Durée : environ 8 s, plus si le texte est long (lecture lente) ; avec la voix, la story attend aussi la fin de la phrase.
-  ACS.dur = Math.max(7000, Math.min(12000, 5500 + s.say.length * 45)); ACS.left = ACS.dur; ACS.spoke = !ACS.audio;
-  el.style.setProperty('--c', s.c); el.style.setProperty('--dur', ACS.dur + 'ms');
-  el.innerHTML = `<div class="bars">${ACS.L.map((x, k) => `<i class="${k < i ? 'd' : k === i ? 'c' : ''}" style="--c2:${x.c}"><b></b></i>`).join('')}</div>
+  el.style.setProperty('--c', s.c); el.style.setProperty('--c2', s.c2 || s.c);
+  el.innerHTML = `<div class="bars">${ACS.L.map((x, k) => `<i class="${k < i ? 'd' : k === i ? 'c' : ''}"><b></b></i>`).join('')}</div>
     <button class="ax" data-acx aria-label="Fermer">${acIc.x}</button><button class="as${ACS.audio ? ' on' : ''}" data-acs aria-label="${ACS.audio ? 'Couper la voix' : 'Lire à voix haute'}">${ACS.audio ? acIc.spk : acIc.mute}</button>
     <div class="bgw" aria-hidden="true">${s.w}</div><div class="ct"><span class="k">${s.k}</span><div class="big">${s.big}</div><div class="ttl">${s.t}</div>
-    <div class="grid">${s.g.map(([b, l]) => `<div><b>${b}</b><span>${l}</span></div>`).join('')}</div><p class="tip">${esc(s.say)}</p></div>`;
-  ACS.t0 = performance.now(); ACS.timer = setTimeout(acTick, ACS.left);
-  if (ACS.audio) acSpeak(s.say);
+    <div class="grid${s.g.length === 4 ? ' g4' : ''}">${s.g.map(([b, l]) => `<div><b>${b}</b><span>${l}</span></div>`).join('')}</div>
+    <ul class="syn">${s.syn.map(x => `<li>${x}</li>`).join('')}</ul></div>`;
+  acRun(ACS.audio);
   try { if (PREFS.haptic !== false) navigator.vibrate?.(5); } catch (e) {}
 }
-// Au bout du temps : on passe à la suivante, sauf si la voix n'a pas fini (elle passera à la fin de la phrase).
-function acTick() { ACS.left = 0; if (ACS.spoke) acShow(ACS.i + 1); }
+// Lance (ou relance de zéro) le temps de la story en cours, avec ou sans la voix.
+function acRun(voice) {
+  const s = ACS.L[ACS.i]; cancelAnimationFrame(ACS.raf);
+  ACS.voice = voice; ACS.ended = !voice; ACS.el0 = 0; ACS.t0 = performance.now();
+  ACS.D = voice ? acSpeakMs(s.say) : acReadMs(s);
+  if (voice) acSpeak(s.say);
+  ACS.raf = requestAnimationFrame(acFrame);
+}
+const acSpeakMs = txt => 400 + txt.length / ACS.cps * 1000;
+const acElapsed = () => ACS.el0 + (ACS.paused ? 0 : performance.now() - ACS.t0);
+// Où en est la barre (0 à 1). Avec la voix, elle ralentit tout près de la fin si la phrase n'est pas finie,
+// puis finit en un instant quand la voix se tait : les deux s'arrêtent ensemble.
+function acProg() {
+  const t = acElapsed(), D = ACS.D;
+  if (!ACS.voice) return t / D;
+  if (ACS.ended) return Math.min(1, ACS.pEnd + (1 - ACS.pEnd) * (performance.now() - ACS.tEnd) / 220);
+  return t < .92 * D ? t / D : .92 + .07 * (1 - Math.exp(-(t - .92 * D) / (.3 * D)));
+}
+function acFrame() {
+  if (!ACS.on) return;
+  const p = acProg(), b = document.querySelector('#one-st .bars .c b'); if (b) b.style.transform = `scaleX(${Math.max(0, Math.min(1, p))})`;
+  if (p >= 1 && !ACS.paused) { acShow(ACS.i + 1); return; }
+  ACS.raf = requestAnimationFrame(acFrame);
+}
+// La voix la plus naturelle du téléphone : d'abord les voix « naturelles » ou « améliorées », puis celles de Google,
+// puis les voix en ligne ; jamais les voix robotiques de secours.
+function acVoice() {
+  let V = []; try { V = speechSynthesis.getVoices().filter(v => /^fr\b|^fr[-_]/i.test(v.lang)); } catch (e) {}
+  const sc = v => { const n = v.name + ' ' + v.voiceURI; let s = 0;
+    if (/natural|neural|premium|enhanced|wavenet|studio|journey|polyglot/i.test(n)) s += 50;
+    if (/online|network/i.test(n)) s += 20; if (/google/i.test(n)) s += 15; if (v.localService === false) s += 10; if (/fr[-_]fr/i.test(v.lang)) s += 6;
+    if (/denise|vivienne|eloise|amélie|amelie|audrey|aurélie|aurelie|marie|julie/i.test(n)) s += 8;
+    if (/compact|espeak|robot/i.test(n)) s -= 40; return s; };
+  return V.sort((a, b) => sc(b) - sc(a))[0] || null;
+}
+try { speechSynthesis.getVoices(); speechSynthesis.addEventListener?.('voiceschanged', () => {}); } catch (e) {}
+// La phrase est lue morceau par morceau (une phrase à la fois) : certaines voix s'arrêtent seules au bout de 15 s.
 function acSpeak(txt) {
   try {
-    const u = new SpeechSynthesisUtterance(txt); u.lang = 'fr-FR'; u.rate = .95;
-    const v = speechSynthesis.getVoices().find(x => /^fr/i.test(x.lang)); if (v) u.voice = v;
-    const i = ACS.i; u.onend = () => { if (ACS.i !== i || !ACS.on) return; ACS.spoke = true; if (ACS.left <= 0 && !ACS.paused) acShow(i + 1); };
-    speechSynthesis.speak(u);
-  } catch (e) { ACS.spoke = true; }
+    const i = ACS.i, parts = txt.match(/[^.!?]+[.!?]*\s*/g) || [txt], v = acVoice(); let t0 = 0;
+    parts.forEach((p, k) => {
+      const u = new SpeechSynthesisUtterance(p.trim()); u.lang = v?.lang || 'fr-FR'; if (v) u.voice = v; u.rate = 1.02; u.pitch = 1;
+      if (k === 0) u.onstart = () => { if (ACS.i !== i || !ACS.voice) return; t0 = performance.now();
+        // La voix démarre : la barre se recale sur le vrai départ (le temps d'attente ne compte pas).
+        ACS.D = acElapsed() + txt.length / ACS.cps * 1000; };
+      if (k === parts.length - 1) u.onend = () => { if (ACS.i !== i || !ACS.on || !ACS.voice || ACS.ended) return;
+        if (t0) { const cps = txt.length / ((performance.now() - t0) / 1000); if (cps > 6 && cps < 30) { ACS.cps = ACS.cps * .4 + cps * .6; try { localStorage.setItem('tnr-actus-cps', ACS.cps.toFixed(2)); } catch (e) {} } }
+        ACS.pEnd = acProg(); ACS.tEnd = performance.now(); ACS.ended = true; };
+      u.onerror = () => { if (ACS.i === i && ACS.voice && !ACS.ended) { ACS.pEnd = acProg(); ACS.tEnd = performance.now(); ACS.ended = true; } };
+      speechSynthesis.speak(u);
+    });
+  } catch (e) { ACS.pEnd = acProg(); ACS.tEnd = performance.now(); ACS.ended = true; }
 }
+function acHush() { try { speechSynthesis.cancel(); } catch (e) {} }
 function acPause(on) {
   const el = document.getElementById('one-st'); if (!el || !ACS.on || ACS.paused === on) return;
-  ACS.paused = on; el.classList.toggle('paused', on);
-  if (on) { clearTimeout(ACS.timer); ACS.left = Math.max(0, ACS.left - (performance.now() - ACS.t0)); try { speechSynthesis.pause(); } catch (e) {} }
-  else { ACS.t0 = performance.now(); try { speechSynthesis.resume(); } catch (e) {} if (ACS.left > 0) ACS.timer = setTimeout(acTick, ACS.left); else if (ACS.spoke) acShow(ACS.i + 1); }
+  if (on) { ACS.el0 = acElapsed(); ACS.paused = true; if (ACS.ended && ACS.voice) ACS.pEnd = acProg(); try { speechSynthesis.pause(); } catch (e) {} }
+  else { ACS.t0 = performance.now(); ACS.paused = false; if (ACS.ended && ACS.voice) ACS.tEnd = performance.now(); try { speechSynthesis.resume(); } catch (e) {} }
+  el.classList.toggle('paused', on);
 }
 function acClose(fromBack) {
   const el = document.getElementById('one-st'); if (!el || !ACS.on) return;
-  ACS.on = false; clearTimeout(ACS.timer); try { speechSynthesis.cancel(); } catch (e) {}
+  ACS.on = false; cancelAnimationFrame(ACS.raf); acHush();
   el.classList.remove('on'); setTimeout(() => { if (!ACS.on) el.hidden = true; }, 320);
   if (!fromBack && history.state?.acst) { try { POP_SKIP = true; } catch (e) {} history.back(); }
 }
@@ -10735,12 +10982,15 @@ function acBind(el) {
     if (e.target.closest('[data-acx]')) { acClose(); return; }
     const s = e.target.closest('[data-acs]'); if (!s) return;
     ACS.audio = !ACS.audio; try { localStorage.setItem('tnr-actus-audio', ACS.audio ? '1' : '0'); } catch (err) {}
-    s.classList.toggle('on', ACS.audio); s.innerHTML = ACS.audio ? acIc.spk : acIc.mute;
-    if (ACS.audio) { ACS.spoke = false; acSpeak(ACS.L[ACS.i].say); } else { try { speechSynthesis.cancel(); } catch (err) {} ACS.spoke = true; if (ACS.left <= 0) acShow(ACS.i + 1); }
+    s.classList.toggle('on', ACS.audio); s.innerHTML = ACS.audio ? acIc.spk : acIc.mute; s.setAttribute('aria-label', ACS.audio ? 'Couper la voix' : 'Lire à voix haute');
+    if (ACS.audio) { acHush(); ACS.paused = false; el.classList.remove('paused'); acRun(true); }   // la voix allumée : la story repart de zéro avec elle
+    else { const p = acProg(); acHush(); ACS.voice = false; ACS.ended = true; ACS.D = acReadMs(ACS.L[ACS.i]); ACS.el0 = Math.min(.999, p) * ACS.D; ACS.t0 = performance.now(); }
   });
 }
 addEventListener('popstate', () => { if (ACS.on) acClose(true); }, true);
 addEventListener('keydown', e => { if (!ACS.on) return; if (e.key === 'Escape') acClose(); if (e.key === 'ArrowRight') acShow(ACS.i + 1); if (e.key === 'ArrowLeft') acShow(ACS.i - 1); });
+// L'appli passe en arrière-plan : les actus se mettent en pause (et la voix se tait).
+document.addEventListener('visibilitychange', () => { if (document.hidden && ACS.on) acPause(true); });
 // Le carré « Actus » : allumé tant que les actus du jour n'ont pas été vues.
 const acSeenToday = () => { try { return localStorage.getItem('tnr-actus-day') === TODAY; } catch (e) { return false; } };
 function acSeen() { try { localStorage.setItem('tnr-actus-day', TODAY); } catch (e) {} document.querySelector('.one-act')?.classList.add('seen'); }

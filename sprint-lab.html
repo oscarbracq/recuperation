@@ -1025,7 +1025,7 @@ body.bdragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
 .bchip.src.xchip{box-shadow:inset 3px 0 0 color-mix(in srgb,var(--accent) 60%,#fff)}
 .libsearch{position:relative;margin:16px 0 6px}.libsearch svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--fg3);pointer-events:none}.libsearch .search{padding-left:42px;margin:0;width:100%;box-shadow:inset 0 0 0 1px var(--line)}
 .pc .rtoolbar{grid-column:1/-1;flex-wrap:wrap;align-self:start;height:auto;overflow:visible}.rtoolbar .chip{height:auto}
-.vidbtn{display:flex;align-items:center;gap:12px;margin:12px 0 0;padding:12px 14px;border-radius:14px;background:var(--card);color:var(--fg);text-decoration:none}.vidbtn span{display:flex;flex-direction:column;flex:1;min-width:0}.vidbtn b{font-size:.9375rem}.vidbtn small{font-size:.75rem;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.vidbtn .kc{flex:none;color:var(--fg3)}
+.vidbtn{display:flex;align-items:center;gap:12px;margin:12px 0;padding:12px 14px;border-radius:14px;background:var(--card);color:var(--fg);text-decoration:none}.vidbtn span{display:flex;flex-direction:column;flex:1;min-width:0}.vidbtn b{font-size:.9375rem}.vidbtn small{font-size:.75rem;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.vidbtn .kc{flex:none;color:var(--fg3)}
 .sct2{display:grid;gap:10px;margin:12px 0 4px}.pc .sct2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .sct-i{background:var(--card2);border-radius:16px;padding:14px 16px 12px;animation:sctin .5s cubic-bezier(.22,.8,.3,1) both;animation-delay:var(--d)}
 .sct-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.sct-n{display:flex;flex-direction:column;gap:2px;min-width:0}.sct-n b{font-size:.9375rem;font-weight:600}.sct-n small{font-size:.75rem;color:var(--fg2)}
@@ -1413,7 +1413,7 @@ function loadDay(k) {
   const aR = M(k, 'actRpe') || {};
   let L = G(k, 'acts') ? acts.reduce((s, a) => s + ((a === gA && gR) || (a === tA && tR) ? 0 : aR[a.start] ? aR[a.start] * (a.min || 0) / 4 : trimpOf(a)), 0) : (G(k, 'trimp') || 0);
   if (gR) L += gR * (M(k, 'gymMin') || gA?.min || 90) / 4;
-  for (const x of logsOn(k)) if (x.kind === 'extra') L += (x.rpe || 5) * (x.min || 0) / 4;
+  for (const x of logsOn(k)) if (x.kind === 'extra' && !x.planned) L += (x.rpe || 5) * (x.min || 0) / 4;
   if (tR) L += tR * (M(k, 'trackMin') || tA?.min || 75) / 4;
   for (const a of M(k, 'acts') || []) L += (a.rpe || 5) * (a.min || 0) / 4;
   return L;
@@ -7173,7 +7173,7 @@ function painCoach() {
   const cache = {};
   const sideScroll = el => { for (let n = el; n && n !== document.body; n = n.parentElement) if (n.scrollWidth > n.clientWidth + 4 && /(auto|scroll)/.test(getComputedStyle(n).overflowX)) return true; return false; };
   const view = () => S.mod === 'R' ? $('#v-' + S.tab) : S.mod === 'T' ? $('#t-view') : S.mod === 'N' ? $('#f-view') : null;
-  const tabs = () => { const bar = S.mod === 'R' ? document.querySelector('.tabbar:not([id])') : $('#tb-' + S.mod); if (!bar) return null;
+  const tabs = () => { if (S.mod === 'home') return window.TAB_XNB ? {B: [], i: -1, home: true} : null; const bar = S.mod === 'R' ? document.querySelector('.tabbar:not([id])') : $('#tb-' + S.mod); if (!bar) return null;
     const B = [...bar.querySelectorAll('[role=tab]')].filter(b => !b.hidden && b.offsetParent !== null); return {B, i: B.findIndex(b => b.getAttribute('aria-selected') === 'true')}; };
   const tabKey = b => b.dataset.tab || b.dataset.mtab;
   // The neighbour page, drawn the same way as when it is open (kept a little while, so the swipe starts at once).
@@ -7192,9 +7192,12 @@ function painCoach() {
   function warm() { const T = tabs(); if (!T || T.i < 0 || S.mod === 'home') return; const m = S.mod; [T.B[T.i - 1], T.B[T.i + 1]].forEach(b => b && idle(() => { if (S.mod === m) pageHtml(m, tabKey(b)); })); }
   window.tabWarm = () => { for (const k in cache) delete cache[k]; warm(); };
   document.addEventListener('click', e => { if (e.target.closest?.('[data-tab],[data-mtab]')) setTimeout(warm, 400); }, true);
-  function ghost(el, b) {
-    const g = document.createElement('div'), r = el.getBoundingClientRect();
-    g.className = el.className + ' tab-ghost'; g.setAttribute('aria-hidden', 'true'); g.innerHTML = pageHtml(S.mod, tabKey(b));
+  // The page on each side: the next tab of the part, or (when a page asks for it, TAB_XNB) a page beyond the tabs.
+  // vid: the page the copy shows (its styles follow it: gv-v-trends, gv-t-view…).
+  const nbOf = (T, k) => { const b = T.B[T.i + k]; if (b) return {vid: S.mod === 'R' ? 'v-' + tabKey(b) : S.mod === 'T' ? 't-view' : 'f-view', html: () => pageHtml(S.mod, tabKey(b)), go: () => b.click()}; return window.TAB_XNB?.(k, T, pageHtml) || null; };
+  function ghost(el, n) {
+    const g = document.createElement('div'), r = (n.box || el).getBoundingClientRect();
+    g.className = (n.cls ?? el.className) + ' tab-ghost' + (n.vid ? ' gv-' + n.vid : ''); g.setAttribute('aria-hidden', 'true'); g.innerHTML = n.html();
     // Page ids go (no double ids), but not those of drawing definitions (blur filters, clips, gradients): without
     // them the body glow would show as hard dots, then "pop" when the real page arrives.
     g.querySelectorAll('[id]').forEach(n => { if (!n.closest('defs, filter, clipPath, linearGradient, radialGradient, mask, pattern')) n.removeAttribute('id'); });
@@ -7204,7 +7207,7 @@ function painCoach() {
   }
   const clear = w => { if (!w) return; w.el.style.transform = ''; w.el.style.willChange = ''; (w.gs || []).forEach(g => g?.remove()); };
   const finish = () => { if (!A) return; const a = A; a.done?.(true); };
-  const ok = e => e.touches.length === 1 && S.mod !== 'home' && !S.sheet && !P.stack.length && !$('.drawer.on') && !PLFS.on && !HP.busy && !(typeof isPC === 'function' && isPC());
+  const ok = e => e.touches.length === 1 && (S.mod !== 'home' || window.TAB_XNB) && !S.sheet && !P.stack.length && !$('.drawer.on') && !PLFS.on && !HP.busy && !(typeof isPC === 'function' && isPC());
   document.addEventListener('touchstart', e => {
     finish(); W = null;
     if (!ok(e)) return;
@@ -7231,10 +7234,10 @@ function painCoach() {
     if (!W.on) {
       if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
       if (Math.abs(dx) < Math.abs(dy) * 1.2) { W = null; return; }   // vertical: ordinary scrolling
-      const T = tabs(); if (!T || T.i < 0) { W = null; return; }
-      W.on = true; W.T = T; W.el = view(); W.x = t.clientX; if (!W.el) { W = null; return; }
+      const T = tabs(); if (!T || (T.i < 0 && !T.home)) { W = null; return; }
+      W.on = true; W.T = T; W.el = T.home ? $('#home-view') : view(); W.x = t.clientX; if (!W.el) { W = null; return; }
       W.el.style.willChange = 'transform'; W.s = W.el.getBoundingClientRect().width + GAP;
-      W.gs = [T.B[T.i - 1] ? ghost(W.el, T.B[T.i - 1]) : null, T.B[T.i + 1] ? ghost(W.el, T.B[T.i + 1]) : null];
+      W.nb = [nbOf(T, -1), nbOf(T, 1)]; W.gs = W.nb.map(n => n ? ghost(W.el, n) : null);
     }
     e.preventDefault();
     const d = t.clientX - W.x, now = performance.now(); W.v = (t.clientX - W.lx) / Math.max(1, now - W.lt); W.lx = t.clientX; W.lt = now;
@@ -7244,7 +7247,7 @@ function painCoach() {
   };
   const end = () => {
     if (!W) return; const w = W; W = null; if (!w.on) return;
-    const d = w.d || 0, dir = d < 0 ? 1 : -1, nb = w.T.B[w.T.i + dir], s = w.s;
+    const d = w.d || 0, dir = d < 0 ? 1 : -1, nb = w.nb[dir > 0 ? 1 : 0], s = w.s;
     const go = !!nb && (Math.abs(d) > s * .25 || (Math.abs(w.v) > .35 && Math.sign(w.v) === Math.sign(d) && Math.abs(d) > 20));
     const to = go ? -dir * s : 0, v = Math.abs(w.v), rest = Math.abs(to - d);
     // The glide keeps the thumb's speed: a fast flick lands quickly, a slow drag settles gently.
@@ -7257,7 +7260,7 @@ function painCoach() {
     const done = () => {
       if (!A || A.anims !== anims) return; A = null;
       // The real page replaces its copy in the same frame, at the same place: nothing jumps.
-      if (go) { const R = document.documentElement; R.classList.add('pcnt'); setTimeout(() => R.classList.remove('pcnt'), 450); nb.click(); const top = () => { window.scrollTo(0, 0); document.scrollingElement && (document.scrollingElement.scrollTop = 0); }; top(); requestAnimationFrame(top); setTimeout(top, 120); setTimeout(top, 400); }
+      if (go) { const R = document.documentElement; R.classList.add('pcnt'); setTimeout(() => R.classList.remove('pcnt'), 450); nb.go(); const top = () => { window.scrollTo(0, 0); document.scrollingElement && (document.scrollingElement.scrollTop = 0); }; top(); requestAnimationFrame(top); setTimeout(top, 120); setTimeout(top, 400); }
       anims.forEach(x => { try { x.cancel(); } catch (e) {} }); clear(w);
     };
     A = {anims, done}; anims[0].onfinish = done; setTimeout(done, ms + 80);
@@ -8138,16 +8141,73 @@ function editBody() {
 }
 const EQUIPS = ['Barre', 'Haltères', 'Kettlebell', 'Machine', 'Poulie', 'Poids du corps', 'Élastique', 'Médecine-ball', 'Barre hexagonale', 'Landmine', 'Barre EZ', 'Smith', 'Box', 'Banc', 'Barre de traction', 'Barres parallèles', 'Traîneau', 'Ballon', 'Haies'];
 const exGroups = kind => [...new Set(EX.filter(e => kind === 'any' || e.t === kind).map(e => e.cat))];
-// Returns [exercise, name to show] for a query: French match first, else English.
+// Smart search: each word typed is understood (synonyms in French and English, gym slang, plurals, a typo or two),
+// then every exercise gets a score (name first, then muscles, equipment, family) and the best come first.
+const EX_SYN = [
+  ['traineau', 'sled', 'prowler', 'luge'], ['pousse', 'poussee', 'push', 'pousser'], ['tirage', 'tire', 'pull', 'tirer', 'drag'],
+  ['abdos', 'abdo', 'abdominaux', 'abs', 'crunch', 'gainage', 'tronc', 'core', 'sangle'], ['gainage', 'planche', 'plank', 'gainer'],
+  ['pompes', 'pompe', 'push-up', 'pushup'], ['tractions', 'traction', 'pull-up', 'pullup', 'chin-up', 'chinup', 'barre fixe'],
+  ['developpe', 'dev', 'press', 'presse'], ['couche', 'bench'], ['dc', 'developpe couche', 'bench press'], ['dm', 'developpe militaire'], ['di', 'developpe incline'],
+  ['souleve', 'deadlift', 'terre'], ['sdt', 'souleve de terre', 'deadlift'], ['rdl', 'roumain', 'romanian'], ['hip', 'hanche', 'hanches'],
+  ['squat', 'squats', 'flexion'], ['fente', 'fentes', 'lunge', 'lunges', 'split'], ['bulgare', 'bss', 'split squat'],
+  ['ischio', 'ischios', 'ischiojambiers', 'hamstring', 'hamstrings', 'leg curl', 'nordic', 'nordique'], ['quadri', 'quadriceps', 'quads', 'cuisse', 'cuisses', 'leg extension'],
+  ['fessier', 'fessiers', 'fesses', 'glute', 'glutes', 'hip thrust', 'pont'], ['mollet', 'mollets', 'calf', 'calves', 'soleaire'],
+  ['adducteur', 'adducteurs', 'adductor', 'copenhague', 'copenhagen'], ['abducteur', 'abducteurs', 'abductor', 'moyen fessier'],
+  ['pec', 'pecs', 'pectoraux', 'pectoral', 'poitrine', 'chest'], ['dos', 'back', 'dorsaux', 'grand dorsal', 'lats', 'lat'], ['lombaire', 'lombaires', 'lombes', 'lower back', 'erecteurs'],
+  ['epaule', 'epaules', 'shoulder', 'shoulders', 'deltoide', 'deltoides', 'delts'], ['trapeze', 'trapezes', 'traps', 'shrug', 'haussement'],
+  ['biceps', 'bicep', 'curl'], ['triceps', 'tricep', 'dips', 'barre au front', 'skullcrusher'], ['avant-bras', 'avant bras', 'forearm', 'poignet', 'grip'],
+  ['halteres', 'haltere', 'dumbbell', 'dumbbells', 'db'], ['barre', 'barbell', 'bb'], ['kettlebell', 'kb', 'kettle'], ['poulie', 'cable', 'vis-a-vis'], ['machine', 'guidee', 'smith'],
+  ['elastique', 'elastiques', 'band', 'bande'], ['medecine-ball', 'medecine ball', 'medicine ball', 'medball'], ['poids du corps', 'pdc', 'bodyweight', 'sans materiel'],
+  ['saut', 'sauts', 'jump', 'jumps', 'bond', 'bonds', 'pliometrie', 'plyo', 'bounds'], ['box', 'boite', 'caisson'], ['corde', 'cordes', 'rope', 'battle rope'],
+  ['clean', 'epaule'], ['arrache', 'snatch'], ['jete', 'jerk'], ['tirage menton', 'upright row'], ['rowing', 'row', 'rameur'], ['velo', 'bike', 'assault', 'airbike'],
+  ['mobilite', 'etirement', 'etirements', 'stretch', 'souplesse'], ['reeducation', 'reathletisation', 'rehab', 'prevention', 'isometrique', 'iso'], ['rotation', 'rotateurs', 'coiffe', 'rotator'],
+  ['swing', 'swings'], ['farmer', 'fermier', 'portage', 'carry'], ['hyperextension', 'extension lombaire', 'back extension'], ['aerox', 'cardio', 'conditioning', 'hiit', 'circuit']
+];
+const exNorm = t => String(t || '').toLowerCase().normalize('NFD').replace(/\p{M}/gu, '').replace(/[’']/g, ' ').replace(/[^a-z0-9%\- ]+/g, ' ').replace(/\s+/g, ' ').trim();
+const exStem = w => w.length > 4 ? w.replace(/aux$/, 'al').replace(/(es|s|x)$/, '') : w;
+const EX_SYNI = (() => { const m = {}; for (const g of EX_SYN) { const n = g.map(exNorm); for (const w of n) { const k = exStem(w); m[k] ||= new Set(); n.forEach(x => m[k].add(x)); } } return m; })();
+function exLev(a, b, max) {   // letters to change to go from a to b (stops early above max)
+  if (Math.abs(a.length - b.length) > max) return max + 1; let p = Array.from({length: b.length + 1}, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) { const c = [i]; let lo = i; for (let j = 1; j <= b.length; j++) { c[j] = Math.min(p[j] + 1, c[j - 1] + 1, p[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); lo = Math.min(lo, c[j]); } if (lo > max) return max + 1; p = c; }
+  return p[b.length];
+}
+// What a typed word can mean: itself, its synonyms, and the synonyms of a close spelling (worked out once per search).
+function exQW(w) {
+  const sw = exStem(w), syn = new Set(EX_SYNI[sw] || []);
+  if (w.length >= 4) for (const k in EX_SYNI) if (k.length >= 4 && k !== sw && exLev(sw, k, 1) <= 1) EX_SYNI[k].forEach(y => syn.add(y));
+  syn.delete(w); const L = [...syn];
+  return {w, sw, multi: L.filter(y => y.includes(' ')), one: L.filter(y => !y.includes(' ')), oneS: L.filter(y => !y.includes(' ')).map(exStem), max: w.length >= 8 ? 2 : 1};
+}
+// A text cut into words and roots, kept for each exercise.
+const exBag = txt => { const w = txt.split(' '); return {txt, w, ws: new Set(w), ss: new Set(w.map(exStem))}; };
+// How well one typed word matches a text (0 = not at all): whole word, start of a word, same root, synonym, close spelling.
+function exWord(Q, B) {
+  const {w, sw} = Q;
+  if (B.ws.has(w)) return 10; if (B.w.some(x => x.startsWith(w))) return w.length >= 3 ? 8 : 5;
+  if (B.ss.has(sw)) return 9; if (w.length >= 4 && B.txt.includes(w)) return 6;
+  for (const y of Q.multi) if (B.txt.includes(y)) return 8.5;
+  for (let i = 0; i < Q.one.length; i++) { const y = Q.one[i]; if (B.ws.has(y) || B.ss.has(Q.oneS[i]) || (y.length >= 4 && B.w.some(x => x.startsWith(y)))) return 8.5; }
+  if (w.length >= 4) for (const x of B.w) if (x.length >= 3 && Math.abs(x.length - w.length) <= Q.max + 3 && (exLev(w, x, Q.max) <= Q.max || (x.length > w.length && exLev(w, x.slice(0, w.length), Q.max) <= Q.max))) return 4;
+  return 0;
+}
+const EX_TXT = new Map();
 function exSearch(q, kind, f = {}) {
-  const w = normName(q || '');
-  return EX.filter(e => (kind === 'any' || e.t === kind) && (!f.cat || e.cat === f.cat) && (!f.eq || e.eq === f.eq) && e.id !== 'warmup' && !e.hide).map(e => {
-    if (!w.length) return [e, e.n];
-    const fr = normName(e.n + ' ' + (e.m || '')).join(' '), enN = normName(e.en || '').join(' ');
-    if (w.every(x => fr.includes(x))) return [e, e.n];
-    if (e.en && w.every(x => enN.includes(x))) return [e, e.n];
-    return null;
-  }).filter(Boolean);
+  const ws = exNorm(q).split(' ').filter(Boolean).map(exQW);
+  const L = EX.filter(e => (kind === 'any' || e.t === kind) && (!f.cat || e.cat === f.cat) && (!f.eq || e.eq === f.eq) && e.id !== 'warmup' && !e.hide);
+  if (!ws.length) return L.map(e => [e, e.n]);
+  const out = [], q0 = exNorm(q);
+  for (const e of L) {
+    let T = EX_TXT.get(e);
+    if (!T) { const n = exNorm(e.n); T = {n, N: exBag(n), X: exBag(n + ' ' + exNorm([e.en, e.m, e.eq, e.cat, ...(e.kw || [])].filter(Boolean).join(' ')))}; EX_TXT.set(e, T); }
+    let sc = 0, ok = true;
+    for (const w of ws) { const a = exWord(w, T.N), b = a ? 0 : exWord(w, T.X) * .6; if (!a && !b) { ok = false; break; } sc += a || b; }
+    if (T.n.startsWith(q0)) sc += 6;
+    if (!ok) continue;
+    sc -= T.N.w.length * .15;   // the plain, short name first
+    if (e.cat === 'Mobilité') sc -= 3;   // strength work before stretches and self-massage
+    out.push([e, e.n, sc]);
+  }
+  return out.sort((a, b) => b[2] - a[2]).map(([e, n]) => [e, n]);
 }
 function recentEx(kind) {
   const seen = [];
@@ -8439,7 +8499,7 @@ async function saveLive2() {
   const items = L.items.filter(it => !it.test).map(it => it.reps ? {ex: it.ex, pct: it.tg?.pct || null, ...(exOf(it.ex).u === 'min' ? {min: it.reps.filter(r => r.done).reduce((a, r) => a + (+r.min || +it.tg?.min || 0), 0)} : {}), ...((it.rest ?? it.tg?.rest) ? {rest: it.rest ?? it.tg.rest} : {}), reps: it.reps.filter(r => r.done).map(r => ({dist: +r.dist || 0, t: +r.t || null}))}
     : {ex: it.ex, ...(it.u === 's' ? {u: 's'} : {}), ...(it.ct ? {ct: it.ct} : {}), ...(it.cn ? {cn: it.cn} : {}), sets: it.sets.filter(s => s.done).map(s => ({kg: +s.kg || 0, reps: +s.reps || 0, ...(s.rpe !== undefined && s.rpe !== '' ? {rpe: +s.rpe} : s.rir !== undefined && s.rir !== '' ? {rpe: 10 - +s.rir, rir: +s.rir} : {})}))}).filter(it => (it.reps || it.sets).length);
   if (!items.length) { toast('Valide au moins une série avec ✓'); return; }
-  const tonnage = items.reduce((s, it) => s + (it.u === 's' ? 0 : (it.sets || []).reduce((a, x) => a + x.kg * x.reps, 0)), 0);
+  const tonnage = items.reduce((s, it) => s + (it.u === 's' ? 0 : (it.sets || []).reduce((a, x) => a + (x.kg + sledBase(it.ex)) * x.reps, 0)), 0);
   const sprintM = items.reduce((s, it) => s + (it.reps && SPRINT_CATS.includes(exOf(it.ex).cat) && (it.pct ?? 100) >= 90 ? it.reps.reduce((a, r) => a + (+r.dist || 0), 0) : 0), 0);
   const doc = {id: L.id, plan: L.plan, name: L.name, kind: L.kind, gym: L.gym || null, date: L.date, start: L.start, min, rpe, note, items, shoes: L.shoes || null, cond: L.cond || null, tonnage: Math.round(tonnage), sprintM, updatedAt: new Date().toISOString()};
   S.logs[doc.id] = doc;
@@ -8534,6 +8594,10 @@ function musTiers(id) {
     ${T.filter(t => t[1].length).map(([n, X]) => `<div class="mtier"><div class="sec-label" style="margin:4px 0 2px">${n}</div>${X.map(([k, v]) => `<div class="mrow"><span>${esc(MUSI[k].n)}</span><i><s style="width:${Math.round(v * 100)}%"></s></i><small>${Math.round(v * 100)} % · ${fx(Math.min(10, v * ff * 10), 1)}</small></div>`).join('')}</div>`).join('')}
     ${detailsBox(`Part : 100 % = muscle moteur, chaque série compte 1 série pour lui ; 40 à 75 % = muscle d'appoint, chaque série compte environ une demi-série (Pelland et coll. 2024, méta-régression de 67 études sur le volume) ; sous 40 % = stabilisateur. Fatigue sur 10 = part × facteur de l'exercice (${fx(ff, 2)} ici) : plus haut quand le muscle travaille étiré en freinant (soulevé de terre jambes tendues, nordic, sprint à pleine vitesse), car les dégâts musculaires et le temps de récupération y sont plus grands (Nosaka et Sakamoto 2001). La part entre dans ta charge par muscle, tes équilibres et tes tendances ; la fatigue dans la fatigue restante de chaque muscle.`)}</div>`;
 }
+// Sled (traîneau, prowler): the empty sled has its own weight; the sets note only the plates, the sled is added to the total.
+const isSled = id => { const e = exOf(id); return e.t !== 'track' && /tra[iî]neau|sled|prowler/i.test(e.n + ' ' + (e.eq || '') + ' ' + (e.en || '')); };
+const sledBase = id => isSled(id) ? (+S.tset?.sledKg || 0) : 0;
+document.addEventListener('change', async e => { const i = e.target.closest?.('[data-sledkg]'); if (!i) return; const v = +String(i.value).replace(',', '.'); if (!S.tset) return; S.tset.sledKg = v > 0 ? v : 0; if (await dbSet('settings/training', S.tset)) toast(v > 0 ? `Traîneau : ${fx(v, v % 1 ? 1 : 0)} kg ajoutés à chaque série` : 'Poids du traîneau retiré'); });
 function exView(id) {
   openPane({title: 'Exercice', render: () => {
     const e = exOf(id), h = exHistory(id), b = bestE1rm(id);
@@ -8543,6 +8607,7 @@ function exView(id) {
       ${e.img ? `<div class="demo" data-demo><img src="${IMG}${e.img}/0.jpg" alt="" loading="lazy"><img class="b" src="${IMG}${e.img}/1.jpg" alt="" loading="lazy"><button class="play" aria-label="Lancer ou arrêter la démonstration"><svg class="ip" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg><svg class="is" viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/></svg></button></div>` : ''}
       <a class="vidbtn" href="https://www.youtube.com/results?search_query=${encodeURIComponent((e.en || e.n) + (e.t === 'track' ? ' sprint drill' : ' exercise') + ' technique')}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="4" fill="#FF0033"/><path d="M10 9l5 3-5 3z" fill="#fff"/></svg><span><b>Voir en vidéo</b><small>${esc(e.en || e.n)}, la bonne technique</small></span><span class="kc">↗</span></a>
       <div class="card why">${esc(e.c)}</div>
+      ${isSled(id) ? `<div class="list" style="margin-top:12px"><div class="row"><label for="sled-kg">Traîneau à vide</label><input class="mini-in" id="sled-kg" inputmode="decimal" style="width:90px" value="${S.tset?.sledKg || ''}" placeholder="kg" data-sledkg></div></div><p class="small muted" style="margin:6px 4px 0">Note seulement les disques : le poids du traîneau s'ajoute tout seul au total.</p>` : ''}
       ${e.t === 'gym' ? `<button class="btn" style="margin:12px 0" data-bonus="${id}">Je l'ai fait : le noter</button>` : ''}${(S.tset?.myEx || []).includes(id) ? `<button class="btn ghost" style="margin:0 0 12px" data-myexdel="${esc(id)}">Retirer de mes exercices</button>` : ''}
       ${musTiers(id)}
       ${e.t === 'gym' && e.u === 'kg' ? rmBlock(id) : ''}
@@ -8559,9 +8624,9 @@ let BX = null;
 const bonusLogs = (days = 7) => logs().filter(l => l.kind === 'extra' && l.date >= addDays(TODAY, -(days - 1)));
 function bonusBlock() {
   const L = bonusLogs(1);
-  const row = l => { const it = l.items?.[0] || {}; return `<button class="rowbtn" data-bxv="${esc(l.id)}"><span><b>${esc(exOf(it.ex).n)}</b><span class="meta">${l.start ? esc(tfr(l.start)) + ' · ' : ''}${esc(setsTxt(it))} · RPE ${l.rpe}</span></span><span class="kc">${l.min} min</span></button>`; };
-  return `<h2>Exercices ajoutés aujourd'hui <small>comptés dans ta charge</small></h2>
-    <div class="list">${L.map(row).join('')}<button class="rowbtn" data-bxadd><span><b style="color:var(--accent)">+ Ajouter un exercice à la journée</b><span class="meta">Un exercice fait en dehors d'une séance</span></span><span class="kc">›</span></button></div>`;
+  const row = l => { const it = l.items?.[0] || {}; return `<button class="rowbtn" data-bxv="${esc(l.id)}"><span><b>${esc(exOf(it.ex).n)}</b><span class="meta">${l.planned ? 'Prévu ' + esc(fmtShort(l.date)) + ' · ' : ''}${l.start ? esc(tfr(l.start)) + ' · ' : ''}${esc(setsTxt(it))} · RPE ${l.rpe}</span></span><span class="kc">${l.min} min</span></button>`; };
+  return `<h2>Exercices du jour</h2>
+    <div class="list">${L.map(row).join('')}<button class="rowbtn" data-bxadd><span><b style="color:var(--accent)">+ Ajouter un exercice</b></span><span class="kc">›</span></button></div>`;
 }
 const setsTxt = it => (it.sets || []).map(s => (s.kg ? fx(s.kg, s.kg % 1 ? 1 : 0) + ' kg × ' : '') + uVal(it, s.reps)).join(', ') + (it.ct ? ' · ' + ctName(it.ct) : '');
 function bonusPane(ex) {
@@ -8569,17 +8634,18 @@ function bonusPane(ex) {
   const nowHM = new Date().toTimeString().slice(0, 5);
   BX = {ex, date: TODAY, start: nowHM, ct: prev?.ct || (iso ? 'iso' : ''), u: iso ? 's' : prev?.u || 'reps', rpe: 6, min: '', note: '',
     sets: (prev?.sets?.length ? prev.sets : [{kg: '', reps: iso ? 30 : 10}, {kg: '', reps: iso ? 30 : 10}, {kg: '', reps: iso ? 30 : 10}]).map(s => ({kg: s.kg || '', reps: s.reps || ''}))};
-  openPane({title: 'Exercice de la journée', render: bonusBody});
+  openPane({title: 'Exercice du jour', render: bonusBody});
 }
 function bonusBody() {
   const B = BX, e = exOf(B.ex), secs = B.ct === 'iso' || B.u === 's', est = Math.max(2, Math.round(B.sets.length * (secs ? 1.5 : 2)));
   return `<div class="dhead"><div class="eyebrow" style="color:var(--accent)">${esc(e.cat)}</div><div class="bigname" style="font-size:1.6rem">${esc(e.n)}</div><p class="small muted">Fait en dehors d'une séance : il compte quand même dans ta charge du jour et dans celle de chaque muscle.</p></div>
-    <div class="list"><div class="row"><label for="bx-date">Date</label><input type="date" id="bx-date" value="${B.date}" max="${TODAY}" data-bxf="date"></div>
+    <div class="list"><div class="row"><label for="bx-date">Date</label><input type="date" id="bx-date" value="${B.date}" max="${addDays(TODAY, 14)}" data-bxf="date"></div>
       <div class="row"><label for="bx-start">Heure</label><input type="time" id="bx-start" value="${B.start}" data-bxf="start"></div></div>
     <div class="sec-label">Contraction</div><div class="seg segsm">${CT.map(([c, l]) => `<button type="button" data-bxct="${c}" aria-pressed="${(B.ct || '') === c}">${l}</button>`).join('')}</div>
     <div class="sec-label">Séries <button type="button" class="hdtog" data-bxu>${secs ? 'Secondes' : 'Répétitions'}${B.ct === 'iso' ? '' : ' ⇄'}</button></div>
     <div class="sets">${B.sets.map((s, j) => `<div class="setrow bx${s.done ? ' done' : ''}"><span class="n">${j + 1}</span><input class="mini-in" inputmode="decimal" data-bxs="${j}.kg" value="${s.kg}" placeholder="${e.u === 'kg' ? 'kg' : '+ kg'}" aria-label="Charge"><input class="mini-in" inputmode="numeric" data-bxs="${j}.reps" value="${s.reps}" placeholder="${secs ? 's' : 'rép.'}" aria-label="${secs ? 'Secondes' : 'Répétitions'}"><button type="button" class="ok" data-bxok="${j}" aria-label="Valider la série ${j + 1}" aria-pressed="${!!s.done}">${TICK}</button><button type="button" class="rm" data-bxrm="${j}" aria-label="Retirer la série">×</button></div>`).join('')}</div>
     <div class="tools"><button type="button" data-bxadds>+ Série</button></div>
+    ${rmOf(B.ex)?.kg ? `<div class="list" style="margin-top:10px"><div class="row"><label for="bx-pct">% de ton max (${fx(rmOf(B.ex).kg)} kg)</label><input class="mini-in" id="bx-pct" inputmode="numeric" style="width:80px" value="${B.pct || ''}" placeholder="%" data-bxpct></div></div>` : ''}
     <p class="small muted" style="margin:6px 4px 0">Touche ✓ quand la série est faite : seules les séries validées comptent.</p>
     <div class="list" style="margin-top:12px"><div class="row col"><span class="l">Difficulté ressentie (RPE)<span class="hint">0 = repos, 10 = maximal</span></span><div style="display:flex;gap:12px;align-items:center"><input type="range" min="1" max="10" step="1" value="${B.rpe}" data-bxf="rpe" style="flex:1"><b class="num" id="bx-rpe">${B.rpe}</b></div></div>
       <div class="row col"><div class="row" style="padding:0;min-height:0;background:none"><label for="bx-min">Durée totale <span class="hint">récup comprise : 10, 1 h…</span></label><input class="mini-in" id="bx-min" inputmode="text" data-bxf="min" value="${B.min}" placeholder="${durTxt(est)}" style="width:96px"></div>${durChips('bx-min')}</div></div>
@@ -8587,11 +8653,12 @@ function bonusBody() {
     <button class="btn" style="margin-top:16px" data-bxsave>Ajouter à ma journée</button>`;
 }
 function bonusView(id) {
-  openPane({title: 'Exercice de la journée', render: () => { const l = S.logs[id]; if (!l) return ''; const it = l.items?.[0] || {};
+  openPane({title: 'Exercice du jour', render: () => { const l = S.logs[id]; if (!l) return ''; const it = l.items?.[0] || {};
     return `<div class="dhead"><div class="eyebrow" style="color:var(--accent)">Ajouté à ta journée</div><div class="bigname" style="font-size:1.6rem">${esc(exOf(it.ex).n)}</div><p class="small muted">${esc(cap(fmtDay(l.date)))}${l.start ? ' · ' + esc(tfr(l.start)) : ''}</p></div>
       <div class="stats"><div><b>${(it.sets || []).length}</b><span>séries</span></div><div><b>${l.rpe}</b><span>RPE</span></div><div><b>${l.min} min</b><span>durée</span></div></div>
       <div class="card" style="margin-top:12px"><p class="small" style="margin:0">${esc(setsTxt(it))}</p>${l.note ? `<p class="small muted" style="margin:8px 0 0">${esc(l.note)}</p>` : ''}</div>
       <p class="small muted" style="margin:10px 2px 0">Compté dans ton effort du ${esc(fmtShort(l.date))} : RPE ${l.rpe} × ${l.min} min, et dans la charge de chaque muscle travaillé.</p>
+      ${l.planned ? `<button class="btn" style="margin-top:14px" data-bxdone="${esc(l.id)}">C'est fait</button>` : ''}
       <button class="btn ghost" style="margin-top:14px" data-tex="${esc(it.ex)}">Voir l'exercice</button>
       <button class="btn ghost" style="margin-top:10px;color:var(--bad)" data-bxdel="${esc(l.id)}">Supprimer</button>`; }});
 }
@@ -8600,11 +8667,23 @@ document.addEventListener('input', e => {
   if (f) { BX[f.dataset.bxf] = e.target.value; if (f.dataset.bxf === 'rpe') $('#bx-rpe').textContent = e.target.value; }
   if (st) { const [j, k] = st.dataset.bxs.split('.'); BX.sets[+j][k] = e.target.value; }
 });
+// Un % du max remplit la charge de toutes les séries (arrondie à 2,5 kg).
+document.addEventListener('change', e => { const i = e.target.closest?.('[data-bxpct]'); if (!i || !BX) return; const p = +i.value, rm = rmOf(BX.ex)?.kg; BX.pct = p > 0 ? p : '';
+  if (p > 0 && rm) { const kg = Math.round(rm * p / 100 / 2.5) * 2.5; BX.sets.forEach(x => { x.kg = kg; }); paneRender(); } });
+// Garder le doigt sur un exercice du jour : le refaire (aujourd'hui, demain…), déjà rempli.
+function bonusAgain(id) { const l = S.logs[id], it = l?.items?.[0]; if (!it) return; bonusPane(it.ex);
+  Object.assign(BX, {rpe: l.rpe || 6, min: l.min ? String(l.min) : '', ct: it.ct || BX.ct, u: it.u || BX.u, pct: l.pct || '', sets: (it.sets || []).map(x => ({kg: x.kg || '', reps: x.reps || ''}))}); paneRender(); }
+(() => { let t = null; const stop = () => { clearTimeout(t); t = null; };
+  document.addEventListener('pointerdown', e => { const b = e.target.closest?.('[data-bxv]'); if (!b) return; stop(); t = setTimeout(() => { t = 'long'; navigator.vibrate?.(10); bonusAgain(b.dataset.bxv); }, 550); });
+  for (const ev of ['pointerup', 'pointercancel', 'pointermove']) document.addEventListener(ev, e => { if (ev === 'pointermove' && Math.abs(e.movementY || 0) + Math.abs(e.movementX || 0) < 3) return; if (t !== 'long') stop(); });
+  document.addEventListener('click', e => { if (t === 'long' && e.target.closest?.('[data-bxv]')) { e.stopImmediatePropagation(); e.preventDefault(); t = null; } }, true);
+  document.addEventListener('contextmenu', e => { if (e.target.closest?.('[data-bxv]')) e.preventDefault(); }); })();
 document.addEventListener('click', async e => {
   const at = q => e.target.closest(q); let b;
   if ((b = at('[data-bonus]'))) { bonusPane(b.dataset.bonus); return; }
   if (at('[data-bxadd]')) { pickExercise('gym', id => bonusPane(id)); return; }
   if ((b = at('[data-bxv]'))) { bonusView(b.dataset.bxv); return; }
+  if ((b = at('[data-bxdone]'))) { const l = S.logs[b.dataset.bxdone]; if (!l) return; delete l.planned; l.date = l.date > TODAY ? TODAY : l.date; l.updatedAt = new Date().toISOString(); closePane(); renderMod(); render(); toast('Exercice compté dans ta journée'); await dbSet('training/' + l.id, l); return; }
   if ((b = at('[data-bxdel]'))) { const l = S.logs[b.dataset.bxdel]; if (!l) return; l.deleted = true; closePane(); renderMod(); render(); toast('Exercice retiré de ta journée'); await dbSet('training/' + l.id, l); return; }
   if (!BX) return;
   if ((b = at('[data-bxct]'))) { const was = BX.ct; BX.ct = b.dataset.bxct; if (BX.ct === 'iso') { BX.u = 's'; BX.sets.forEach(s => { if (!s.reps || +s.reps < 10) s.reps = 30; }); } else if (was === 'iso' && exOf(BX.ex).u !== 's') { BX.u = 'reps'; BX.sets.forEach(s => s.reps = 10); } paneRender(); return; }
@@ -8614,15 +8693,15 @@ document.addEventListener('click', async e => {
     st.done = !st.done; b.closest('.setrow').classList.toggle('done', st.done); b.setAttribute('aria-pressed', st.done); if (st.done && PREFS.haptic) navigator.vibrate?.(8); return; }
   if ((b = at('[data-bxrm]'))) { if (BX.sets.length > 1) BX.sets.splice(+b.dataset.bxrm, 1); paneRender(); return; }
   if (at('[data-bxsave]')) {
-    const B = BX, sets = B.sets.filter(s => s.done && +s.reps > 0).map(s => ({kg: +String(s.kg).replace(',', '.') || 0, reps: +s.reps, rpe: +B.rpe}));
+    const B = BX, fut = (B.date || TODAY) > TODAY, sets = B.sets.filter(s => (fut || s.done) && +s.reps > 0).map(s => ({kg: +String(s.kg).replace(',', '.') || 0, reps: +s.reps, rpe: +B.rpe}));
     if (!sets.length) { toast('Valide au moins une série avec ✓'); return; }
     const secs = B.ct === 'iso' || B.u === 's', min = (/^\s*\d+[.,]\d+\s*$/.test(String(B.min || '')) ? Math.max(1, Math.round(+String(B.min).replace(',', '.'))) : parseDur(String(B.min || ''))) || Math.max(2, Math.round(sets.length * (secs ? 1.5 : 2)));
     const it = {ex: B.ex, ...(secs ? {u: 's'} : {}), ...(B.ct ? {ct: B.ct} : {}), sets};
-    const doc = {id: 'x' + Date.now().toString(36), kind: 'extra', name: exOf(B.ex).n, date: B.date || TODAY, start: B.start || '', min, rpe: +B.rpe, note: (B.note || '').trim(), items: [it],
-      tonnage: secs ? 0 : Math.round(sets.reduce((a, x) => a + x.kg * x.reps, 0)), updatedAt: new Date().toISOString()};
+    const doc = {id: 'x' + Date.now().toString(36), kind: 'extra', ...(fut ? {planned: true} : {}), ...(B.pct ? {pct: +B.pct} : {}), name: exOf(B.ex).n, date: B.date || TODAY, start: B.start || '', min, rpe: +B.rpe, note: (B.note || '').trim(), items: [it],
+      tonnage: secs ? 0 : Math.round(sets.reduce((a, x) => a + (x.kg + sledBase(B.ex)) * x.reps, 0)), updatedAt: new Date().toISOString()};
     S.logs[doc.id] = doc; BX = null;
     while (P.stack.length) closePane();
-    renderMod(); render(); toast('Exercice ajouté à ta journée');
+    renderMod(); render(); toast(fut ? 'Exercice prévu le ' + fmtShort(doc.date) : 'Exercice ajouté à ta journée');
     await dbSet('training/' + doc.id, doc);
   }
 });

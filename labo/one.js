@@ -36,6 +36,8 @@ function oneTab(i) {
   if (k === oneCur()) { window.scrollTo({top: 0, behavior: 'smooth'}); return; }
   // Le retour du téléphone depuis un onglet ramène à Aujourd'hui (une seule étape dans l'historique).
   if (i > 0 && !history.state?.one) try { history.pushState({mod: S.mod, one: 1}, ''); } catch (e) {}
+  // La nouvelle page arrive sur place : pas de titres ni de blocs qui remontent.
+  oneCalmIn();
   if (S.mod === 'R') setTab(k); else { if (S.mod === 'T') S.ttab = k; else { S.ftab = k; if (k === 'journal') S.fday = TODAY; } saveUi(); renderMod(true); window.scrollTo(0, 0); pcSync(); }
   oneSync(); oneHap(5);
 }
@@ -95,6 +97,8 @@ function oneSync() {
   const tabs = $('#one-tabs'), top = $('#one-top'), home = S.mod === 'home'; if (!tabs || (!home && !ONE.mods.includes(S.mod))) return;
   if (!home) ONE.lm = S.mod; const m = home ? ONE.lm || 'R' : S.mod;
   document.documentElement.classList.toggle('one-home', home);
+  // À l'Accueil, le haut de l'écran (heure, batterie) est toujours noir, comme la page.
+  if (home && ONE.barTo !== '#000000' && !window.TNR_SPLASH_ON) syncBars();
   document.documentElement.style.setProperty('--one-c', home ? '#8E9BB5' : ONE.col[m]);
   const src = [...(pcBar(m)?.querySelectorAll('[role=tab]') || [])], i = home ? -1 : oneIdx();
   tabs.querySelectorAll('[data-one-t]').forEach((b, j) => { const s = src[j]; if (!s) return; const h = s.innerHTML; if (b._h !== h) { b.innerHTML = h; b._h = h; } b.setAttribute('aria-label', s.textContent.trim()); b.classList.toggle('on', j === i); });
@@ -300,16 +304,25 @@ fBody = () => {
   return h.replace(m[0], `<div class="one-2body">${fig('sgA', 'BRAS', ells.filter(arm))}${fig('sgB', 'TRONC ET JAMBES', ells.filter(e => !arm(e)))}</div><div class="segw one-segw">`);
 };
 
+/* ---------- au pouce, l'Accueil est la page juste à gauche d'Aujourd'hui (et Aujourd'hui juste à droite de l'Accueil) ---------- */
+window.TAB_XNB = (k, T, html) => {
+  if (T.home) { if (k < 0) return null; const m = ONE.lm || 'R', key = ONE.keys[m][0];
+    return {cls: '', box: $('#home-view'), html: () => `<div class="wrap">${m === 'R' ? '<div class="mm-space"></div>' : ''}<section class="gv-${m === 'R' ? 'v-' + key : m === 'T' ? 't-view' : 'f-view'}">${html(m, key)}</section></div>`, go: () => oneSwitch(m, 0)}; }
+  if (k < 0 && T.i === 0 && ONE.mods.includes(S.mod)) return {cls: '', box: $('#mod-' + S.mod), html: () => vHome(), go: () => oneHome()};
+  return null;
+};
 /* ---------- la bulle du bas suit le pouce pendant qu'on glisse d'un onglet à l'autre (dès le premier pixel) ---------- */
 window.TAB_DRAG = (i, f, ms) => {
   oneCalmIn();
   if (ms && f) ONE.swiped = performance.now() + ms;
-  const tabs = $('#one-tabs'), p = tabs?.querySelector('.one-pill'); if (!p || S.mod === 'home') return;
-  const bs = [...tabs.querySelectorAll('[data-one-t]')], a = bs[i]; if (!a) return;
-  const b = bs[i + Math.sign(f)] || a, x = Math.max(3, a.offsetLeft - ONE_EXT / 2 + (b.offsetLeft - a.offsetLeft) * Math.abs(f));
+  const tabs = $('#one-tabs'), p = tabs?.querySelector('.one-pill'); if (!p) return;
+  // Les boutons dans l'ordre : Accueil, puis les 6 onglets (Accueil = position -1).
+  const bs = [...tabs.querySelectorAll('button')], a = bs[i + 1]; if (!a) return;
+  const b = bs[i + 1 + Math.sign(f)] || a, q = Math.abs(f);
+  const x = Math.max(3, a.offsetLeft - ONE_EXT / 2 + (b.offsetLeft - a.offsetLeft) * q), w = a.offsetWidth + (b.offsetWidth - a.offsetWidth) * q + ONE_EXT;
   p.getAnimations().forEach(an => an.cancel());
-  const from = p.style.transform; p.style.transform = `translateX(${x}px)`; p._x = x;
-  if (ms && from) { p.animate([{transform: from}, {transform: p.style.transform}], {duration: ms, easing: 'cubic-bezier(.22,.8,.3,1)'}); oneMag(tabs, p, ms + 40); }
+  const from = p.style.transform, fw = p.style.width; p.style.transform = `translateX(${x}px)`; p.style.width = w + 'px'; p._x = x; p._w = w;
+  if (ms && from) { p.animate([{transform: from, width: fw || w + 'px'}, {transform: p.style.transform, width: w + 'px'}], {duration: ms, easing: 'cubic-bezier(.22,.8,.3,1)'}); oneMag(tabs, p, ms + 40); }
   else oneMag(tabs, p, 0);
 };
 
@@ -319,19 +332,25 @@ const oneRgb = c => { c = String(c || '').trim(); let m = c.match(/^#([0-9a-f]{3
   m = c.match(/^rgba?\((\d+)\D+(\d+)\D+(\d+)/i); return m ? [+m[1], +m[2], +m[3]] : null; };
 const ONE_BAR = {cur: null, raf: 0}, ONE_BAND = .3;   // même dosage que --band (one.css)
 syncBars = function () {
-  const O1 = document.documentElement.classList.contains('one-pl') ? null : {T: '#FF3B30', N: '#30D158', R: '#0A84FF'}[S.mod], c1 = oneRgb(O1);
-  const to = window.TNR_SPLASH_ON ? '#0B1733' : c1 ? '#' + c1.map(v => Math.round(v * ONE_BAND).toString(16).padStart(2, '0')).join('') : '#000000';
-  const set = c => document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.media = ''; m.content = c; });
-  const A = oneRgb(ONE_BAR.cur), B = oneRgb(to); cancelAnimationFrame(ONE_BAR.raf);
-  // Vers l'Accueil (ou le planning), le haut d'écran passe au noir tout de suite, comme la page.
-  if (!A || !B || window.TNR_SPLASH_ON || oneCalm() || document.hidden || !c1) { ONE_BAR.cur = to; set(to); return; }
-  const t0 = performance.now(), D = 1600, ease = t => t * t * (3 - 2 * t);
-  const f = now => { const k = Math.min(1, (now - t0) / D), e = ease(k), c = `rgb(${A.map((v, j) => Math.round(v + (B[j] - v) * e)).join(',')})`;
-    ONE_BAR.cur = c; set(c); if (k < 1) ONE_BAR.raf = requestAnimationFrame(f); };
+  const R = document.documentElement, set = c => { if (ONE_BAR.cur === c) return; ONE_BAR.cur = c; document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.media = ''; m.content = c; }); };
+  cancelAnimationFrame(ONE_BAR.raf);
+  if (window.TNR_SPLASH_ON) { ONE.barTo = '#0B1733'; set('#0B1733'); return; }
+  const c1 = R.classList.contains('one-pl') ? null : oneRgb({T: '#FF3B30', N: '#30D158', R: '#0A84FF'}[S.mod]);
+  // Accueil, planning, questionnaire : noir tout de suite, comme la page.
+  if (!c1) { ONE.barTo = '#000000'; set('#000000'); return; }
+  const hex = v => '#' + v.map(x => Math.round(x * ONE_BAND).toString(16).padStart(2, '0')).join('');
+  ONE.barTo = hex(c1);
+  // Ailleurs : la barre lit, image par image, la couleur que la page est en train d'afficher (--o1, qui glisse en 1,6 s),
+  // donc elle change exactement au même rythme que le fond et le dégradé.
+  const t0 = performance.now(), to = ONE.barTo;
+  const f = now => { if (ONE.barTo !== to) return; const c = oneRgb(getComputedStyle(R).getPropertyValue('--o1')) || c1, h = hex(c);
+    set(h); if (h !== to && now - t0 < 2500) ONE_BAR.raf = requestAnimationFrame(f); else set(to); };
+  if (oneCalm() || document.hidden) { set(to); return; }
   ONE_BAR.raf = requestAnimationFrame(f);
-  // Si l'appli passe en arrière-plan pendant le fondu, la barre finit quand même sur la bonne couleur.
-  clearTimeout(ONE_BAR.t); ONE_BAR.t = setTimeout(() => { if (ONE_BAR.cur !== to && oneRgb(ONE_BAR.cur)?.join() !== B.join()) { ONE_BAR.cur = to; set(to); } }, D + 250);
 };
+
+// En revenant dans l'appli, la barre reprend la couleur de la page affichée.
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { ONE_BAR.cur = null; syncBars(); } });
 
 /* ---------- Planning et questionnaire du jour : une page à part, toute noire (sans fond coloré, sans dégradé en haut,
    sans les barres). Le planning monte du bas en s'ouvrant, comme le questionnaire. ---------- */
@@ -352,3 +371,25 @@ syncBars = function () {
 // seulement là où on ne peut pas les descendre (fenêtres fixes, comme l'éditeur de séance, et sur ordinateur).
 const onePaneShow0 = paneShow;
 paneShow = function (...a) { const r = onePaneShow0.apply(this, a); const v = P.stack.at(-1); if (v) { $('#pn-back').hidden = true; $('#pn-close').hidden = !(v.fixed || P.stack[0]?.side || (typeof isPC === 'function' && isPC())); } return r; };
+
+/* ---------- Les petits textes d'aide (« Touche un bloc pour… », « Garde le doigt… ») sont masqués :
+   à leur place, un petit « Afficher » pour les lire si besoin. Les chiffres et les vraies infos restent visibles. ---------- */
+(function oneTips() {
+  const SEL = 'p.small.muted, p.hint, p.small.hint, .tools .hint, h2 small, .sec-label small';
+  const skip = el => el.closest('.one-st, #one-top, #one-tabs, .toast, .dhead, .chartbox, svg') || el.dataset.tip;
+  const run = root => {
+    root.querySelectorAll?.(SEL).forEach(el => {
+      if (skip(el)) return; el.dataset.tip = '1';
+      const t = el.textContent.trim();
+      if (el.matches('h2 small, .sec-label small')) { if (t.length > 22) el.hidden = true; return; }
+      if (t.length < 46) return;
+      el.hidden = true; el.classList.add('one-tipx');
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'one-tipb'; b.textContent = 'Afficher';
+      b.onclick = e => { e.stopPropagation(); el.hidden = !el.hidden; b.textContent = el.hidden ? 'Afficher' : 'Masquer'; };
+      el.before(b);
+    });
+  };
+  // Juste après chaque changement de page, avant qu'elle s'affiche (la copie qui glisse au pouce aussi) : rien ne saute.
+  new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1) { if (n.matches(SEL)) run(n.parentNode); else run(n); } }).observe(document.body, {childList: true, subtree: true});
+  run(document.body);
+})();

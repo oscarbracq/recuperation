@@ -18,13 +18,13 @@ html.one.pc body{padding-left:0!important}
 .one-mp{position:absolute;left:0;top:4px;bottom:4px;border-radius:14px;background:color-mix(in srgb,var(--one-c) 20%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--one-c) 40%,transparent),0 0 18px color-mix(in srgb,var(--one-c) 28%,transparent);transition:background .3s,box-shadow .3s}
 @media(max-width:345px){.one-mods button span{display:none}}
 html.one .mm-space{height:66px!important}
-html.one #v-today>header.top:first-child,html.one #v-trends>header.top:first-child,html.one #v-rsess>header.top:first-child,html.one #v-rlib>header.top:first-child,html.one #v-reports>header.top:first-child,html.one #v-profile>header.top:first-child{margin-top:12px!important}
+html.one :is(#v-today,.gv-v-today)>header.top:first-child,html.one :is(#v-trends,.gv-v-trends)>header.top:first-child,html.one :is(#v-rsess,.gv-v-rsess)>header.top:first-child,html.one :is(#v-rlib,.gv-v-rlib)>header.top:first-child,html.one :is(#v-reports,.gv-v-reports)>header.top:first-child,html.one :is(#v-profile,.gv-v-profile)>header.top:first-child{margin-top:12px!important}
 /* Chaque onglet commence au même endroit en Training, Nutrition et Recovery : même en-tête, même hauteur. */
-html.one :is(#t-view,#f-view,#v-today,#v-trends,#v-rsess,#v-rlib,#v-reports,#v-profile)>header.top{box-sizing:border-box;height:62px;margin-bottom:12px!important;padding-bottom:0!important;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
-html.one :is(#t-view,#f-view,#v-today,#v-trends,#v-rsess,#v-rlib,#v-reports,#v-profile)>header.top:has(>.pmsg){height:86px;justify-content:flex-start}
-html.one :is(#t-view,#f-view,#v-today,#v-trends,#v-rsess,#v-rlib,#v-reports,#v-profile)>header.top .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-html.one :is(#t-view,#f-view,#v-today,#v-trends,#v-rsess,#v-rlib,#v-reports,#v-profile)>header.top .pmsg{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-html.one :is(#t-view,#f-view,#v-today,#v-trends,#v-rsess,#v-rlib,#v-reports,#v-profile)>header.tophead{flex-direction:row;align-items:flex-end;justify-content:space-between;gap:10px}
+html.one :is(:is(#t-view,.gv-t-view),:is(#f-view,.gv-f-view),:is(#v-today,.gv-v-today),:is(#v-trends,.gv-v-trends),:is(#v-rsess,.gv-v-rsess),:is(#v-rlib,.gv-v-rlib),:is(#v-reports,.gv-v-reports),:is(#v-profile,.gv-v-profile))>header.top{box-sizing:border-box;height:62px;margin-bottom:12px!important;padding-bottom:0!important;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
+html.one :is(:is(#t-view,.gv-t-view),:is(#f-view,.gv-f-view),:is(#v-today,.gv-v-today),:is(#v-trends,.gv-v-trends),:is(#v-rsess,.gv-v-rsess),:is(#v-rlib,.gv-v-rlib),:is(#v-reports,.gv-v-reports),:is(#v-profile,.gv-v-profile))>header.top:has(>.pmsg){height:86px;justify-content:flex-start}
+html.one :is(:is(#t-view,.gv-t-view),:is(#f-view,.gv-f-view),:is(#v-today,.gv-v-today),:is(#v-trends,.gv-v-trends),:is(#v-rsess,.gv-v-rsess),:is(#v-rlib,.gv-v-rlib),:is(#v-reports,.gv-v-reports),:is(#v-profile,.gv-v-profile))>header.top .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.one :is(:is(#t-view,.gv-t-view),:is(#f-view,.gv-f-view),:is(#v-today,.gv-v-today),:is(#v-trends,.gv-v-trends),:is(#v-rsess,.gv-v-rsess),:is(#v-rlib,.gv-v-rlib),:is(#v-reports,.gv-v-reports),:is(#v-profile,.gv-v-profile))>header.top .pmsg{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+html.one :is(:is(#t-view,.gv-t-view),:is(#f-view,.gv-f-view),:is(#v-today,.gv-v-today),:is(#v-trends,.gv-v-trends),:is(#v-rsess,.gv-v-rsess),:is(#v-rlib,.gv-v-rlib),:is(#v-reports,.gv-v-reports),:is(#v-profile,.gv-v-profile))>header.tophead{flex-direction:row;align-items:flex-end;justify-content:space-between;gap:10px}
 html.one header.tophead>div:first-child{min-width:0}html.one header.tophead .unitseg{flex:none;width:auto;margin:0 0 4px}
 html.one .one-segsp{height:var(--one-segh,40px)}
 /* Fond « Aurore » (choisi dans labo/fonds) : 3 grandes taches de couleur floues qui se promènent dans tout l'écran.
@@ -78,15 +78,15 @@ html.one #sheet.one-qs .row{transition:background .2s}
 /* Mon corps : même rangée de réglages, puis deux silhouettes de 145 px, au pixel près, dans les trois modules */
 html.one .seg.msrc{margin-top:12px}html.one .seg.msrc button{white-space:nowrap;font-size:.75rem;padding-left:4px;padding-right:4px}
 html.one .one-segsp{height:37px;margin-top:12px}
-html.one :is(#t-view .mbody,#v-reports .rbody2,#f-view .one-2body){display:grid!important;grid-template-columns:145px 145px!important;justify-content:center;gap:16px!important;margin-top:10px!important}
-html.one :is(#t-view .mbody,#v-reports .rbody2,#f-view .one-2body) svg{width:145px!important;height:auto!important;display:block}
-html.one #t-view .mbody figure{display:flex;flex-direction:column;margin:0}html.one #t-view .mbody figcaption{order:-1}
-html.one :is(#t-view .mbody figcaption,#v-reports .rbody2 .lab,#f-view .one-2body .lab){display:block;height:16px;margin:0 0 4px;text-align:center;font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--fg3);font-weight:600}
-html.one #t-view .card:has(>.mbody)>.chead,html.one #f-view .segbody>.chead,html.one #v-reports .card:has(>.rbody2)>.eyebrow{display:flex;min-height:20px;margin:0!important}
-html.one #f-view .one-segw{grid-template-columns:1fr}
-html.one :is(#t-view,#f-view,#v-today,#v-trends,#v-rsess,#v-rlib,#v-reports,#v-profile)>header.top+*{margin-top:0!important}
-html.one .seg.msrc{box-sizing:border-box;min-height:37px}html.one #t-view .seg.msrc+*{margin-top:12px!important}html.one .one-segsp{margin-bottom:12px}
-html.one #f-view .segbody>.chead{height:20px;align-items:center}html.one #f-view .segbody>.chead .num{font-size:1rem}
+html.one :is(:is(#t-view,.gv-t-view) .mbody,:is(#v-reports,.gv-v-reports) .rbody2,:is(#f-view,.gv-f-view) .one-2body){display:grid!important;grid-template-columns:145px 145px!important;justify-content:center;gap:16px!important;margin-top:10px!important}
+html.one :is(:is(#t-view,.gv-t-view) .mbody,:is(#v-reports,.gv-v-reports) .rbody2,:is(#f-view,.gv-f-view) .one-2body) svg{width:145px!important;height:auto!important;display:block}
+html.one :is(#t-view,.gv-t-view) .mbody figure{display:flex;flex-direction:column;margin:0}html.one :is(#t-view,.gv-t-view) .mbody figcaption{order:-1}
+html.one :is(:is(#t-view,.gv-t-view) .mbody figcaption,:is(#v-reports,.gv-v-reports) .rbody2 .lab,:is(#f-view,.gv-f-view) .one-2body .lab){display:block;height:16px;margin:0 0 4px;text-align:center;font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--fg3);font-weight:600}
+html.one :is(#t-view,.gv-t-view) .card:has(>.mbody)>.chead,html.one :is(#f-view,.gv-f-view) .segbody>.chead,html.one :is(#v-reports,.gv-v-reports) .card:has(>.rbody2)>.eyebrow{display:flex;min-height:20px;margin:0!important}
+html.one :is(#f-view,.gv-f-view) .one-segw{grid-template-columns:1fr}
+html.one :is(:is(#t-view,.gv-t-view),:is(#f-view,.gv-f-view),:is(#v-today,.gv-v-today),:is(#v-trends,.gv-v-trends),:is(#v-rsess,.gv-v-rsess),:is(#v-rlib,.gv-v-rlib),:is(#v-reports,.gv-v-reports),:is(#v-profile,.gv-v-profile))>header.top+*{margin-top:0!important}
+html.one .seg.msrc{box-sizing:border-box;min-height:37px}html.one :is(#t-view,.gv-t-view) .seg.msrc+*{margin-top:12px!important}html.one .one-segsp{margin-bottom:12px}
+html.one :is(#f-view,.gv-f-view) .segbody>.chead{height:20px;align-items:center}html.one :is(#f-view,.gv-f-view) .segbody>.chead .num{font-size:1rem}
 /* La lentille : du verre liquide, clair et bombé, bords qui accrochent la lumière ; la barre a un peu de marge pour l'élan. */
 html.one .one-tabs{padding:6px 14px!important}html.one .one-mods{padding:4px 10px!important}
 html.one .one-pill{border-radius:20px!important}html.one .one-mp{border-radius:14px!important}
@@ -110,7 +110,7 @@ html.one.one-home .one-mp{opacity:0}
 html.one #mod-home .hm-dock,html.one #mod-home .hm-pcmods{display:none!important}
 html.one #one-tabs button[data-one-h]{position:relative;z-index:1;flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;background:none;color:var(--fg3);font:inherit;font-size:.625rem;font-weight:600;cursor:pointer;padding:0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 html.one #one-tabs button[data-one-h] svg{width:22px;height:22px;flex:none}html.one #one-tabs button[data-one-h].on{color:var(--fg)}
-html.one #mod-home #hm-head{margin-top:56px;overflow:visible}
+html.one #mod-home #hm-head,html.one .tab-ghost .hm-head{margin-top:56px;overflow:visible}
 /* Accueil : T N R bien au milieu de leur bulle ; le bouton IA dans le coin en haut à gauche, à la même hauteur que la barre. */
 html.one.one-home .one-mods button{justify-content:center}
 html.one.one-home .one-mods button b{height:28px;line-height:1;padding-bottom:2px;box-sizing:border-box}
@@ -152,12 +152,14 @@ html.one.one-pl .one-act{opacity:0!important;pointer-events:none!important}
 .one-act svg{width:18px;height:18px}
 
 /* ---------- Actus : les stories plein écran (comme la première version test) ---------- */
-.one-st{position:fixed;inset:0;z-index:160;color:#fff;background:radial-gradient(120% 80% at 80% 0%,color-mix(in srgb,var(--c) 85%,#000) 0%,color-mix(in srgb,var(--c) 35%,#000) 45%,#050506 100%);opacity:0;transform:scale(1.04);transition:opacity .3s,transform .35s cubic-bezier(.2,.8,.2,1),background .5s;overflow:hidden;-webkit-user-select:none;user-select:none;touch-action:none;-webkit-touch-callout:none}
+.one-st{position:fixed;inset:0;z-index:160;color:#fff;background:radial-gradient(110% 70% at 85% 0%,color-mix(in srgb,var(--c) 88%,#000) 0%,transparent 70%),radial-gradient(120% 70% at 0% 100%,color-mix(in srgb,var(--c2) 80%,#000) 0%,transparent 72%),linear-gradient(165deg,color-mix(in srgb,var(--c) 55%,#000),color-mix(in srgb,var(--c2) 45%,#000));opacity:0;transform:scale(1.04);transition:opacity .3s,transform .35s cubic-bezier(.2,.8,.2,1),background .5s;overflow:hidden;-webkit-user-select:none;user-select:none;touch-action:none;-webkit-touch-callout:none}
 .one-st.on{opacity:1;transform:none}
+.one-st::before{content:'';position:absolute;width:120vmax;height:120vmax;left:-10vmax;top:30%;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--c2) 55%,transparent),transparent);filter:blur(30px);opacity:.75;animation:onestb 9s ease-in-out infinite alternate;pointer-events:none}
+@keyframes onestb{to{transform:translate(18vw,-14vh) scale(1.15)}}
 .one-st .bars{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:12px;right:12px;display:flex;gap:4px;z-index:3}
 .one-st .bars i{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.25);overflow:hidden}
-.one-st .bars b{display:block;height:100%;width:0;background:#fff}.one-st .bars .d b{width:100%}
-.one-st .bars .c b{animation:onesf var(--dur,8s) linear forwards}.one-st.paused .bars .c b{animation-play-state:paused}
+.one-st .bars b{display:block;height:100%;width:100%;background:#fff;transform:scaleX(0);transform-origin:0 50%}.one-st .bars .d b{transform:none}
+
 @keyframes onesf{to{width:100%}}
 .one-st .ax,.one-st .as{position:absolute;z-index:4;width:44px;height:44px;display:grid;place-items:center;color:#fff;background:none;border:0;padding:0;cursor:pointer}
 .one-st .ax{top:calc(22px + env(safe-area-inset-top,0px));right:8px}
@@ -169,13 +171,15 @@ html.one.one-pl .one-act{opacity:0!important;pointer-events:none!important}
 .one-st .k{font-size:.72rem;font-weight:800;letter-spacing:.16em;opacity:.8}
 .one-st .big{font-weight:900;font-size:clamp(64px,22vw,128px);line-height:.9;letter-spacing:-.04em;margin:8px 0 4px;font-variant-numeric:tabular-nums}.one-st .big small{font-size:.3em;letter-spacing:0;opacity:.8}
 .one-st .ttl{font-weight:850;font-size:clamp(22px,6.5vw,34px);text-transform:uppercase;letter-spacing:-.01em;margin-bottom:16px}
-.one-st .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}.one-st .grid div{background:rgba(255,255,255,.12);border-radius:14px;padding:10px}
+.one-st .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}.one-st .grid.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.one-st .grid div{background:rgba(255,255,255,.12);border-radius:14px;padding:10px}
 .one-st .grid b{display:block;font-size:1.05rem}.one-st .grid span{font-size:.72rem;opacity:.8}
-.one-st .tip{background:rgba(0,0,0,.25);border-radius:14px;padding:12px 14px;margin:4px 0 0;font-size:1rem;line-height:1.45}
+.one-st .syn{list-style:none;background:rgba(0,0,0,.22);border-radius:14px;padding:10px 14px;margin:2px 0 0;font-size:.97rem;line-height:1.4}.one-st .syn li{position:relative;padding-left:14px}.one-st .syn li+li{margin-top:6px}.one-st .syn li::before{content:'';position:absolute;left:0;top:.55em;width:6px;height:6px;border-radius:50%;background:#fff;opacity:.7}
 @media(prefers-reduced-motion:reduce){.one-st,.one-st *{animation:none!important;transition:none!important}}
 
 /* ---------- Glissement au pouce : la page voisine (copie) et la vraie page arrivent sans petite animation d'entrée
    (plus de blocs qui descendent puis remontent, plus de flash quand la vraie page remplace la copie). ---------- */
+/* La copie qui glisse est un bloc à part : la marge du titre de Recovery y resterait dedans (12 px trop bas). */
+html.one :is(#one-tabs,.tab-ghost)>header.top:first-child{margin-top:0!important}
 html.one .tab-ghost,html.one .tab-ghost *,html.one.one-sw .tab-ghost *{animation:none!important;transition:none!important}
 
 /* ---------- Barre du bas : Accueil un peu plus large (on sait où on est) ; la lentille ne déborde presque plus sur les voisins ---------- */
@@ -191,3 +195,16 @@ html.one .plfs-top [data-plturn]{order:-1}
 html.one .plfs-top .plfs-t{flex:1}
 /* Questionnaire du jour en page complète, toute noire, comme le planning (il monte du bas) */
 html.one .sheet.full .sheet-card{background:#000;min-height:100%}
+
+/* Haut d'écran plus doux : le fond coloré est un peu moins vif, et la couleur de la barre du téléphone fond dans la page
+   sur une grande hauteur (plusieurs paliers), au lieu d'une bande courte et d'un fond éclatant juste dessous. */
+html.one .aura span{opacity:calc(.44 * var(--aura-k,1))!important}
+html.one .aura span:nth-child(3){opacity:calc(.32 * var(--aura-k,1))!important}
+html.one body::before{height:calc(env(safe-area-inset-top,0px) + 30px)!important;background:linear-gradient(to bottom,var(--band) env(safe-area-inset-top,0px),color-mix(in srgb,var(--band) 55%,transparent) calc(env(safe-area-inset-top,0px) + 14px),transparent)!important}
+/* Sous les blocs (pas par-dessus) : un voile qui part de la couleur de la barre et s'efface lentement sur le haut de l'écran. */
+html.one .aura::after{content:'';position:absolute;inset:0 0 auto;height:calc(env(safe-area-inset-top,0px) + 300px);background:linear-gradient(to bottom,var(--band) 0,color-mix(in srgb,var(--band) 80%,transparent) calc(env(safe-area-inset-top,0px) + 40px),color-mix(in srgb,var(--band) 50%,transparent) calc(env(safe-area-inset-top,0px) + 120px),color-mix(in srgb,var(--band) 20%,transparent) calc(env(safe-area-inset-top,0px) + 210px),transparent);pointer-events:none}
+
+/* Textes d'aide masqués : un petit « Afficher » discret à leur place. */
+html.one .one-tipb{display:inline-flex;align-items:center;gap:4px;margin:6px 4px 0;padding:3px 10px;border:0;border-radius:999px;background:rgba(255,255,255,.07);color:var(--fg2);font:inherit;font-size:.72rem;cursor:pointer}
+html.one .one-tipb::before{content:'i';display:grid;place-items:center;width:13px;height:13px;border-radius:50%;border:1px solid currentColor;font-size:.6rem;font-weight:700;font-style:italic}
+html.one label .hint,html.one .l .hint{display:none}
