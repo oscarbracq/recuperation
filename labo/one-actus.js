@@ -118,7 +118,18 @@ function acOpen(i = 0) {
   ACS.L = acList(); if (!ACS.L.length) return;
   let el = document.getElementById('one-st'); if (!el) { el = document.createElement('div'); el.id = 'one-st'; el.className = 'one-st'; document.body.appendChild(el); acBind(el); }
   if (!ACS.on) { ACS.on = true; try { history.pushState({...(history.state || {}), acst: 1}, ''); } catch (e) {} }
-  el.hidden = false; requestAnimationFrame(() => el.classList.add('on')); acShow(i); acSeen();
+  el.hidden = false; el.classList.add('on'); acShow(i); acSeen(); acZoom(el, true);
+}
+// Comme une story : l'écran sort du carré « Actus » et grandit vers toi ; à la fin, il y retourne en se refermant.
+function acZoom(el, open, done) {
+  const sq = document.querySelector('.one-act'), r = sq?.getBoundingClientRect();
+  el.getAnimations().forEach(a => a.cancel());
+  if (!r || !r.width || matchMedia('(prefers-reduced-motion: reduce)').matches) { if (!open) done?.(); return; }
+  const W = innerWidth, H = innerHeight, from = `inset(${r.top}px ${W - r.right}px ${H - r.bottom}px ${r.left}px round 14px)`, to = 'inset(0px 0px 0px 0px round 0px)';
+  const a = el.animate([{clipPath: open ? from : to, opacity: open ? .6 : 1}, {clipPath: open ? to : from, opacity: open ? 1 : .4}],
+    {duration: open ? 460 : 380, easing: open ? 'cubic-bezier(.2,.9,.25,1)' : 'cubic-bezier(.5,0,.75,.4)', fill: open ? 'none' : 'forwards'});
+  const ct = el.querySelector('.ct'); if (ct) ct.animate([{transform: open ? 'scale(.86)' : 'none'}, {transform: open ? 'none' : 'scale(.86)'}], {duration: open ? 460 : 380, easing: 'cubic-bezier(.2,.9,.25,1)', fill: open ? 'none' : 'forwards'});
+  if (!open) { let ok = false; const f = () => { if (ok) return; ok = true; done?.(); }; a.finished.then(f).catch(f); setTimeout(f, 500); }
 }
 function acShow(i) {
   const el = document.getElementById('one-st'); if (!el) return;
@@ -130,7 +141,7 @@ function acShow(i) {
     <button class="ax" data-acx aria-label="Fermer">${acIc.x}</button><button class="as${ACS.audio ? ' on' : ''}" data-acs aria-label="${ACS.audio ? 'Couper la voix' : 'Lire à voix haute'}">${ACS.audio ? acIc.spk : acIc.mute}</button>
     <div class="bgw" aria-hidden="true">${s.w}</div><div class="ct"><span class="k">${s.k}</span><div class="big">${s.big}</div><div class="ttl">${s.t}</div>
     <div class="grid${s.g.length === 4 ? ' g4' : ''}">${s.g.map(([b, l]) => `<div><b>${b}</b><span>${l}</span></div>`).join('')}</div>
-    <ul class="syn">${s.syn.map(x => `<li>${x}</li>`).join('')}</ul></div>`;
+    <p class="syn">${s.syn.map(x => /[.!?…]$/.test(x) ? x : x + '.').join(' ')}</p></div>`;
   acRun(ACS.audio);
   try { if (PREFS.haptic !== false) navigator.vibrate?.(5); } catch (e) {}
 }
@@ -197,11 +208,13 @@ function acPause(on) {
 function acClose(fromBack) {
   const el = document.getElementById('one-st'); if (!el || !ACS.on) return;
   ACS.on = false; cancelAnimationFrame(ACS.raf); acHush();
-  el.classList.remove('on'); setTimeout(() => { if (!ACS.on) el.hidden = true; }, 320);
+  acZoom(el, false, () => { if (ACS.on) return; el.classList.remove('on'); el.hidden = true; el.getAnimations().forEach(a => a.cancel()); });
   if (!fromBack && history.state?.acst) { try { POP_SKIP = true; } catch (e) {} history.back(); }
 }
 function acBind(el) {
   let down = null;
+  // Les gestes dans les actus restent dans les actus (avant, glisser ici changeait aussi d'onglet dans l'appli dessous).
+  for (const ev of ['touchstart', 'touchmove', 'touchend']) el.addEventListener(ev, e => e.stopPropagation(), {passive: true});
   el.addEventListener('pointerdown', e => { if (e.target.closest('[data-acx],[data-acs]')) return; down = {x: e.clientX, y: e.clientY, t: performance.now(), hold: setTimeout(() => acPause(true), 220)}; });
   el.addEventListener('pointerup', e => {
     if (!down) return; const d = down; down = null; clearTimeout(d.hold);

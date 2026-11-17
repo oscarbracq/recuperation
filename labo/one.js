@@ -187,8 +187,10 @@ const oneSetTab0 = setTab; setTab = function (t) { const v = $('#v-' + t); if (v
 const oneRender0 = render; render = function (...a) { const r = oneRender0(...a); if (S.mod === 'R') oneAfter(); return r; };
 const oneRenderMod0 = renderMod; renderMod = function (f) { oneRenderMod0(f); oneSync(); if (S.mod === 'T' || S.mod === 'N') oneAfter(); };
 oneMount();
-addEventListener('popstate', () => {
-  if (S.sheet || P.stack.length || PLFS.on || POP_SKIP || !ONE.mods.includes(S.mod)) return; if (oneIdx() > 0) oneTab(0);
+// Retour du téléphone : on revient à Aujourd'hui seulement si l'étape où l'on revient n'est pas déjà un onglet
+// (fermer un volet, comme le détail de la masse musculaire, ramène à l'onglet où l'on était : Tendances reste Tendances).
+addEventListener('popstate', e => {
+  if (e.state?.one || e.state?.sheet || S.sheet || P.stack.length || PLFS.on || POP_SKIP || !ONE.mods.includes(S.mod)) return; if (oneIdx() > 0) oneTab(0);
 }, true);
 // Au démarrage : directement dans le dernier module et le dernier onglet utilisés (Training · Aujourd'hui la première fois).
 try { history.scrollRestoration = 'manual'; } catch (e) {}
@@ -384,12 +386,23 @@ paneShow = function (...a) { const r = onePaneShow0.apply(this, a); const v = P.
       if (el.matches('h2 small, .sec-label small')) { if (t.length > 22) el.hidden = true; return; }
       if (t.length < 46) return;
       el.hidden = true; el.classList.add('one-tipx');
-      const b = document.createElement('button'); b.type = 'button'; b.className = 'one-tipb'; b.textContent = 'Afficher';
-      b.onclick = e => { e.stopPropagation(); el.hidden = !el.hidden; b.textContent = el.hidden ? 'Afficher' : 'Masquer'; };
-      el.before(b);
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'one-tipb'; b.textContent = 'Détail';
+      b.onclick = e => { e.stopPropagation(); el.hidden = !el.hidden; b.textContent = el.hidden ? 'Détail' : 'Masquer'; };
+      el.after(b);
     });
   };
   // Juste après chaque changement de page, avant qu'elle s'affiche (la copie qui glisse au pouce aussi) : rien ne saute.
   new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1) { if (n.matches(SEL)) run(n.parentNode); else run(n); } }).observe(document.body, {childList: true, subtree: true});
   run(document.body);
 })();
+
+/* ---------- Sur téléphone, toutes les fenêtres montent du bas (tirette) : plus aucune qui arrive par le côté. ---------- */
+const oneOpenPane0 = openPane;
+openPane = function (v, ...a) { if (v?.side && !(typeof isPC === 'function' && isPC())) v.side = false; return oneOpenPane0(v, ...a); };
+
+/* ---------- Tendances : toute la carte s'ouvre (avant, seul le petit bouton du bas ouvrait le détail) ---------- */
+document.addEventListener('click', e => {
+  if (e.defaultPrevented || e.target.closest('button, a, input, select, textarea, label, summary, .chartbox, .seg, [data-metric]')) return;
+  const c = e.target.closest('.card'); if (!c || !c.closest('#t-view, #f-view, [id^="v-"]')) return;
+  const m = c.querySelectorAll('[data-metric]'); if (m.length === 1) m[0].click();
+});

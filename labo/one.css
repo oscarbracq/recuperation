@@ -6,7 +6,7 @@ html.one{--tbh:98px!important;--pcw:0px!important}
 html.one.pc body{padding-left:0!important}
 
 /* en haut : + · Training Nutrition Recovery · IA */
-.one-top{position:fixed;z-index:30;top:calc(26px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);width:calc(100% - 16px);max-width:520px;display:flex;gap:6px;pointer-events:none}
+.one-top{position:fixed;z-index:30;top:calc(19px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);width:calc(100% - 16px);max-width:520px;display:flex;gap:6px;pointer-events:none}
 .one-sq{pointer-events:auto;flex:none;width:46px;height:46px;border-radius:17px;display:grid;place-items:center;align-content:center;gap:1px;color:var(--fg);font:inherit;font-size:.56rem;font-weight:800;letter-spacing:.04em;
   background:color-mix(in srgb,var(--one-c) 20%,color-mix(in srgb,var(--card,#1c1c1e) 70%,transparent));backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8);border:1px solid color-mix(in srgb,var(--one-c) 38%,transparent);box-shadow:0 8px 28px rgba(0,0,0,.28);cursor:pointer;transition:transform .3s cubic-bezier(.34,1.56,.64,1),background .3s,border-color .3s}
 .one-sq:active{transform:scale(.9)}.one-aib svg{width:18px;height:18px}
@@ -17,7 +17,7 @@ html.one.pc body{padding-left:0!important}
 .one-mods button.on{color:var(--fg)}.one-mods button.on b{opacity:1;transform:scale(1.08)}
 .one-mp{position:absolute;left:0;top:4px;bottom:4px;border-radius:14px;background:color-mix(in srgb,var(--one-c) 20%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--one-c) 40%,transparent),0 0 18px color-mix(in srgb,var(--one-c) 28%,transparent);transition:background .3s,box-shadow .3s}
 @media(max-width:345px){.one-mods button span{display:none}}
-html.one .mm-space{height:66px!important}
+html.one .mm-space{height:60px!important}
 html.one :is(#v-today,.gv-v-today)>header.top:first-child,html.one :is(#v-trends,.gv-v-trends)>header.top:first-child,html.one :is(#v-rsess,.gv-v-rsess)>header.top:first-child,html.one :is(#v-rlib,.gv-v-rlib)>header.top:first-child,html.one :is(#v-reports,.gv-v-reports)>header.top:first-child,html.one :is(#v-profile,.gv-v-profile)>header.top:first-child{margin-top:12px!important}
 /* Chaque onglet commence au même endroit en Training, Nutrition et Recovery : même en-tête, même hauteur. */
 html.one :is(:is(#t-view,.gv-t-view),:is(#f-view,.gv-f-view),:is(#v-today,.gv-v-today),:is(#v-trends,.gv-v-trends),:is(#v-rsess,.gv-v-rsess),:is(#v-rlib,.gv-v-rlib),:is(#v-reports,.gv-v-reports),:is(#v-profile,.gv-v-profile))>header.top{box-sizing:border-box;height:62px;margin-bottom:12px!important;padding-bottom:0!important;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
@@ -114,7 +114,7 @@ html.one #mod-home #hm-head,html.one .tab-ghost .hm-head{margin-top:56px;overflo
 /* Accueil : T N R bien au milieu de leur bulle ; le bouton IA dans le coin en haut à gauche, à la même hauteur que la barre. */
 html.one.one-home .one-mods button{justify-content:center}
 html.one.one-home .one-mods button b{height:28px;line-height:1;padding-bottom:2px;box-sizing:border-box}
-.one-hai{position:fixed;z-index:31;left:calc(8px + env(safe-area-inset-left,0px));top:calc(26px + env(safe-area-inset-top,0px));opacity:0;pointer-events:none;transform:scale(.6);transition:opacity .35s,transform .45s cubic-bezier(.34,1.56,.64,1)}
+.one-hai{position:fixed;z-index:31;left:calc(8px + env(safe-area-inset-left,0px));top:calc(19px + env(safe-area-inset-top,0px));opacity:0;pointer-events:none;transform:scale(.6);transition:opacity .35s,transform .45s cubic-bezier(.34,1.56,.64,1)}
 html.one.one-home .one-hai{opacity:1;pointer-events:auto;transform:none}
 
 html.one-notr .one-top,html.one-notr .one-top *{transition:none!important}
@@ -144,7 +144,7 @@ html.one.one-pl .plfs{background:#000!important}
 html.one[data-mod="home"]{--band:#000!important}
 
 /* ---------- Actus : le carré en haut à droite de l'Accueil, en face de l'IA ---------- */
-.one-act{position:fixed;z-index:31;right:calc(8px + env(safe-area-inset-right,0px));top:calc(26px + env(safe-area-inset-top,0px));opacity:0;pointer-events:none;transform:scale(.6);transition:opacity .35s,transform .45s cubic-bezier(.34,1.56,.64,1);
+.one-act{position:fixed;z-index:31;right:calc(8px + env(safe-area-inset-right,0px));top:calc(19px + env(safe-area-inset-top,0px));opacity:0;pointer-events:none;transform:scale(.6);transition:opacity .35s,transform .45s cubic-bezier(.34,1.56,.64,1);
   border:0!important;background:linear-gradient(#141416,#141416) padding-box,conic-gradient(from 200deg,#FF3B30,#FF9F0A,#30D158,#0FB9A6,#0A84FF,#5E5CE6,#FF3B30) border-box!important;border:2px solid transparent!important}
 html.one.one-home .one-act{opacity:1;pointer-events:auto;transform:none}
 html.one.one-pl .one-act{opacity:0!important;pointer-events:none!important}
@@ -205,6 +205,30 @@ html.one body::before{height:calc(env(safe-area-inset-top,0px) + 30px)!important
 html.one .aura::after{content:'';position:absolute;inset:0 0 auto;height:calc(env(safe-area-inset-top,0px) + 300px);background:linear-gradient(to bottom,var(--band) 0,color-mix(in srgb,var(--band) 80%,transparent) calc(env(safe-area-inset-top,0px) + 40px),color-mix(in srgb,var(--band) 50%,transparent) calc(env(safe-area-inset-top,0px) + 120px),color-mix(in srgb,var(--band) 20%,transparent) calc(env(safe-area-inset-top,0px) + 210px),transparent);pointer-events:none}
 
 /* Textes d'aide masqués : un petit « Afficher » discret à leur place. */
-html.one .one-tipb{display:inline-flex;align-items:center;gap:4px;margin:6px 4px 0;padding:3px 10px;border:0;border-radius:999px;background:rgba(255,255,255,.07);color:var(--fg2);font:inherit;font-size:.72rem;cursor:pointer}
-html.one .one-tipb::before{content:'i';display:grid;place-items:center;width:13px;height:13px;border-radius:50%;border:1px solid currentColor;font-size:.6rem;font-weight:700;font-style:italic}
+/* « Détail » : juste le mot, en gris, dans le coin à droite (là où tombe le pouce) ; « Masquer » pour refermer. */
+html.one .one-tipb,html.one button.more{display:block;width:auto;margin:6px 0 0 auto;padding:6px 2px;border:0;border-radius:0;background:none!important;color:var(--fg3,#8e8e93);font:inherit;font-size:.8rem;font-weight:500;text-align:right;cursor:pointer}
+html.one button.more svg{display:none}
+html.one details.dets>summary,html.one details.hidebox>summary{list-style:none;text-align:right;color:var(--fg3,#8e8e93);font-size:.8rem;font-weight:500;background:none!important;padding:6px 2px;cursor:pointer}
+html.one details.dets>summary::-webkit-details-marker{display:none}
 html.one label .hint,html.one .l .hint{display:none}
+
+/* Accueil : le fond passe au noir d'un coup, en même temps que la barre du téléphone (plus de petit décalage). */
+html.one[data-mod="home"]{transition:none!important}
+
+/* Actus, version plus détendue : pas de bulles ; les chiffres posés en deux colonnes aérées, la synthèse en simple texte.
+   L'écran ne fait plus de fondu : il sort du carré « Actus » (one-actus.js). */
+html.one .one-st{opacity:1!important;transform:none!important;transition:background .5s!important}
+html.one .one-st .grid,html.one .one-st .grid.g4{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px;margin:6px 0 22px}
+html.one .one-st .grid div{background:none;border-radius:0;padding:0 0 0 12px;border-left:2px solid rgba(255,255,255,.35)}
+html.one .one-st .grid b{font-size:1.35rem;font-weight:800;letter-spacing:-.01em}
+html.one .one-st .grid span{display:block;font-size:.78rem;opacity:.75;margin-top:1px}
+html.one .one-st .syn{background:none;padding:0;margin:0;font-size:1.06rem;line-height:1.5;opacity:.92;font-weight:500}
+html.one .one-st .ttl{text-transform:none;font-size:clamp(22px,6.5vw,32px);margin-bottom:18px}
+
+html.one .card:has(> [data-metric]),html.one .card:has(.more[data-metric]),html.one .tcard{cursor:pointer}
+
+/* Titres toujours centrés, même quand un petit bouton (kg / %, ajouter…) est à droite : le bouton se pose dans le coin. */
+html.one header.top.tophead{position:relative;justify-content:center!important}
+html.one header.top.tophead>div:first-child{flex:1 1 auto;text-align:center;min-width:0}
+html.one header.top.tophead:has(>*:nth-child(2))>div:first-child{padding:0 66px}
+html.one header.top.tophead>*:nth-child(2){position:absolute;right:0;bottom:0;margin:0 0 4px!important}

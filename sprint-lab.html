@@ -1025,6 +1025,7 @@ body.bdragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
 .bchip.src.xchip{box-shadow:inset 3px 0 0 color-mix(in srgb,var(--accent) 60%,#fff)}
 .libsearch{position:relative;margin:16px 0 6px}.libsearch svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--fg3);pointer-events:none}.libsearch .search{padding-left:42px;margin:0;width:100%;box-shadow:inset 0 0 0 1px var(--line)}
 .pc .rtoolbar{grid-column:1/-1;flex-wrap:wrap;align-self:start;height:auto;overflow:visible}.rtoolbar .chip{height:auto}
+.eqthumb{flex:none;width:44px;height:44px;border-radius:12px;background:#fff center/30px 30px no-repeat;box-shadow:0 1px 3px rgba(0,0,0,.25)}.rowbtn.exrow{gap:12px}
 .vidbtn{display:flex;align-items:center;gap:12px;margin:12px 0;padding:12px 14px;border-radius:14px;background:var(--card);color:var(--fg);text-decoration:none}.vidbtn span{display:flex;flex-direction:column;flex:1;min-width:0}.vidbtn b{font-size:.9375rem}.vidbtn small{font-size:.75rem;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.vidbtn .kc{flex:none;color:var(--fg3)}
 .sct2{display:grid;gap:10px;margin:12px 0 4px}.pc .sct2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .sct-i{background:var(--card2);border-radius:16px;padding:14px 16px 12px;animation:sctin .5s cubic-bezier(.22,.8,.3,1) both;animation-delay:var(--d)}
@@ -1723,10 +1724,13 @@ function POP(id) {
     sleepH: {mean: 7, lo: 5, hi: 10, txt: 'Jeunes adultes : 7 h en moyenne mesurées par montre. Recommandé aux athlètes : 8 à 10 h.', better: 'high'},
     vo2: {mean: lerpAge(VO2_NORM, a), lo: 30, hi: 70, txt: `Hommes de ${a} ans : médiane ≈ ${fx(lerpAge(VO2_NORM, a))} ml/kg/min (registre FRIEND). Sprinteurs : souvent 50 à 58.`, better: 'high'},
     pwv: {mean: lerpAge(PWV_NORM, a), lo: 4, hi: 10, txt: `Hommes de ${a} ans en bonne santé : ≈ ${fx(lerpAge(PWV_NORM, a), 1)} m/s. Plus bas = artères plus souples.`, better: 'low'},
+    fat: {mean: a < 40 ? 23 : 25, lo: 5, hi: 35, txt: `Hommes de ${a < 40 ? '20-39' : '40-59'} ans : moyenne ≈ ${a < 40 ? 23 : 25} % de masse grasse (mesures DXA de NHANES, Kelly 2009). Zone saine : 8 à 19 % (Gallagher 2000). Sprinteurs de haut niveau : 6 à 10 %.`, better: 'low'},
     ffmi: {mean: 19.5, lo: 16, hi: 26, txt: 'Hommes non entraînés : ≈ 19,5 (Kouri 1995). Athlétique : 21 à 22. Sprinteurs de haut niveau : 22 à 24.', better: 'high'}
   }[id];
 }
 function popBlock(id, v) {
+  // Muscle mass alone means little without your height: it is compared through the fat-free mass index (lean mass ÷ height²).
+  if (id === 'muscle') { id = 'ffmi'; v = VAL.ffmi(lastKey('weight') || TODAY); }
   const p = POP(id); if (!p || v == null) return '';
   const P = x => clamp((x - p.lo) / (p.hi - p.lo) * 100, 2, 98);
   const good = p.better === 'high' ? v >= p.mean : v <= p.mean;
@@ -4606,7 +4610,7 @@ function vTrends() {
     const {pts, html} = metricChart(m), vals = pts.map(p => p.v).filter(x => x != null);
     const v = vals.length ? (m.weekly ? vals.reduce((a, b) => a + b, 0) : mean(vals)) : null;
     const big = day || v == null ? '' : (m.fmt ? m.fmt(v) : fx(v, m.dec || 0) + ' ' + m.unit);
-    return `<div class="card"><div class="chead" style="margin-bottom:6px"><span class="eyebrow" style="color:${m.c}">${m.lab.replace(' 7 j', '')}${day ? '' : m.weekly ? ' · total' : ' · moyenne'}</span><b class="num">${big}</b></div><p class="small muted" style="margin-bottom:${day ? 8 : 30}px">${esc(m.src || '')}</p>${html}<button class="more" data-metric="${m.id}">Détail et explication ${ICON.chev}</button></div>`;
+    return `<div class="card"><div class="chead" style="margin-bottom:6px"><span class="eyebrow" style="color:${m.c}">${m.lab.replace(' 7 j', '')}${day ? '' : m.weekly ? ' · total' : ' · moyenne'}</span><b class="num">${big}</b></div><p class="small muted" style="margin-bottom:${day ? 8 : 30}px">${esc(m.src || '')}</p>${html}<button class="more" data-metric="${m.id}">Détail ${ICON.chev}</button></div>`;
   };
   const testo = `<button type="button" class="card tgcard" data-testo><span class="eyebrow" style="color:#E0A030">${TESTO_OPEN ? 'Testostérone' : ''}</span><span class="small">${TESTO_OPEN ? 'Masquer' : 'Afficher'}</span></button>${TESTO_OPEN ? testoCard() : ''}`;
   return `
@@ -5475,7 +5479,7 @@ function noteBody(k) {
     <textarea id="e-notes" rows="3" placeholder="Sensations, repas, digestion, consignes du kiné…">${esc(draft.notes || '')}</textarea>
     <div class="sec-label">Information pour l'appli <small>un changement de programme, un voyage, une blessure</small></div>
     <div class="list">${activeNotes().map(n => `<div class="row"><span class="l">${esc(n.text)}</span></div>`).join('')}<button class="addbtn" data-hnote>${activeNotes().length ? 'Modifier ou ajouter' : '+ Écrire une information'}</button></div>
-    <details class="hidebox"${draft.mast ? ' open' : ''}><summary><span class="o">Afficher</span><span class="c">Masquer</span></summary>
+    <details class="hidebox"${draft.mast ? ' open' : ''}><summary><span class="o">Détail</span><span class="c">Masquer</span></summary>
       <div class="list" style="margin-top:6px"><div class="row"><label class="ck"><input type="checkbox" data-emast${draft.mast ? ' checked' : ''}> Moment solo <span class="small muted">(on ne juge pas)</span></label><span class="stepper"><button type="button" data-emastn="-1" aria-label="Une fois de moins">−</button><b class="num">${draft.mast || 0}</b><button type="button" data-emastn="1" aria-label="Une fois de plus">+</button></span></div></div>
       <p class="small muted" style="margin:6px 4px 0">Rien que pour la science. Ça reste entre toi et l'appli, et ça sert seulement à la tendance testostérone.</p></details>
     <p class="small muted" style="margin:14px 4px 0">« Enregistrer » clôture la journée, en général le soir. Avant, tout est déjà gardé.</p>`;
@@ -8473,9 +8477,62 @@ function exFilters(f, kind) {
   return `<div class="chipsx">${['', ...exGroups(kind)].map(c => `<button class="chip" data-exf="cat.${esc(c)}" aria-pressed="${(f.cat || '') === c}">${c || 'Tous'}</button>`).join('')}</div>
     <div class="chipsx">${['', ...EQUIPS.filter(q => EX.some(e => e.eq === q && (kind === 'any' || e.t === kind)))].map(q => `<button class="chip" data-exf="eq.${esc(q)}" aria-pressed="${(f.eq || '') === q}">${q || 'Tout matériel'}</button>`).join('')}</div>`;
 }
+// The equipment an exercise needs, drawn small on a white rounded square in the lists (one simple drawing per kind).
+const EQ_IC = (() => {
+  const P = (d, f) => `<path d="${d}"${f ? ` fill="${f}"` : ''}/>`;
+  const plate = (x, h = 18, w = 4) => `<rect x="${x}" y="${20 - h / 2}" width="${w}" height="${h}" rx="1.5" fill="#2b2b2e" stroke="none"/>`;
+  const bar = (x0, x1, y = 20) => `<path d="M${x0} ${y}H${x1}"/>`;
+  const I = {
+    Barre: bar(3, 37) + plate(8) + plate(13, 13, 3) + plate(28) + plate(24, 13, 3),
+    'Barre EZ': '<path d="M4 20h7l3-3 4 6 4-6 4 6 3-3h7"/>' + plate(5, 13, 3) + plate(32, 13, 3),
+    'Barre hexagonale': '<path d="M3 20h7M30 20h7M10 20l4-7h12l4 7-4 7H14z"/><path d="M17 16v8M23 16v8"/>' + plate(5, 14, 3) + plate(32, 14, 3),
+    'Haltères': '<g transform="rotate(-25 20 20)"><path d="M11 20h18"/>' + plate(6, 14, 5) + plate(29, 14, 5) + '<rect x="3" y="15" width="3" height="10" rx="1.2" fill="#2b2b2e" stroke="none"/><rect x="34" y="15" width="3" height="10" rx="1.2" fill="#2b2b2e" stroke="none"/></g>',
+    Kettlebell: '<path d="M13.5 19v-6a6.5 6.5 0 0 1 13 0v6" stroke-width="3"/><path d="M12 18h16l2.5 5a10.5 10.5 0 1 1-21 0z" fill="#2b2b2e"/>',
+    Machine: '<rect x="6" y="5" width="6" height="30" rx="1.5"/><path d="M12 9h16v6H12M20 15v10M14 33h18M26 25h6v8"/><path d="M7 11h4M7 15h4M7 19h4M7 23h4" stroke-width="1.4"/>',
+    Smith: '<path d="M8 4v32M32 4v32M5 36h30M8 16h24"/>' + plate(11, 12, 3) + plate(26, 12, 3),
+    Poulie: '<path d="M10 4v32M6 36h12M10 7h16"/><circle cx="26" cy="9" r="3"/><path d="M26 12v14"/><path d="M22 26h8l-2 6h-4z" fill="#2b2b2e"/>',
+    'Élastique': '<path d="M8 28c0-14 24-14 24 0" stroke-width="3.2" stroke="#2b2b2e"/><path d="M5 28h6M29 28h6" stroke-width="3"/>',
+    'Médecine-ball': '<circle cx="20" cy="21" r="12" fill="#2b2b2e"/><path d="M9 18c7 3 15 3 22 0M12 28c5-2 11-2 16 0" stroke="#fff" stroke-width="1.6"/>',
+    Ballon: '<circle cx="20" cy="20" r="14"/><path d="M8 15c8 4 16 4 24 0" stroke-width="1.5"/>',
+    Landmine: '<path d="M5 34L33 10"/><circle cx="6" cy="33" r="3" fill="#2b2b2e"/>' + '<rect x="27" y="6" width="4" height="13" rx="1.5" transform="rotate(50 29 12)" fill="#2b2b2e" stroke="none"/>',
+    Box: '<path d="M7 16l9-6h17l-9 6zM7 16v16h17V16M24 32l9-6V10"/>',
+    Banc: '<path d="M5 18h30v4H5zM10 22v10M30 22v10M7 32h6M27 32h6M20 22v6"/>',
+    'Barre de traction': '<path d="M6 8h28M10 8v28M30 8v28"/><path d="M17 8v6a3 3 0 0 0 6 0V8" stroke-width="1.6"/>',
+    'Barres parallèles': '<path d="M6 14h14M20 20h14M9 14v20M17 14v20M23 20v14M31 20v14M5 34h30"/>',
+    'Traîneau': '<path d="M5 30h26l4-4M8 30v-6h18v6M14 24V12M14 12h6"/>' + plate(16, 10, 3),
+    Anneaux: '<path d="M14 3v16M26 3v16"/><circle cx="14" cy="25" r="6"/><circle cx="26" cy="25" r="6"/>',
+    'Poids du corps': '<circle cx="20" cy="7" r="3.5" fill="#2b2b2e"/><path d="M20 11v12M11 15l9 2 9-2M20 23l-6 11M20 23l6 11"/>',
+    Cordes: '<path d="M5 14c5-6 9 6 14 0s9 6 15 0M5 27c5-6 9 6 14 0s9 6 15 0"/><circle cx="5" cy="14" r="2" fill="#2b2b2e"/><circle cx="5" cy="27" r="2" fill="#2b2b2e"/>',
+    Pneu: '<ellipse cx="20" cy="22" rx="15" ry="8" fill="#2b2b2e"/><ellipse cx="20" cy="21" rx="7" ry="3.2" fill="#fff" stroke="none"/>',
+    Roulette: '<circle cx="20" cy="22" r="8" fill="#2b2b2e"/><path d="M5 22h30"/><circle cx="20" cy="22" r="2.5" fill="#fff" stroke="none"/>',
+    Haies: '<path d="M8 12h24M10 12v22M30 12v22M6 34h8M26 34h8"/><path d="M8 16h24" stroke-width="1.4"/>',
+    Lattes: '<path d="M6 30l8-6M16 30l8-6M26 30l8-6" stroke-width="3"/>',
+    'Blocs de départ': '<path d="M4 32h32M10 32l4-10h4l-2 10M22 32l4-8h4l-2 8"/>',
+    Autre: '<circle cx="20" cy="20" r="11"/><path d="M15 20h10M20 15v10"/>',
+    // recovery
+    Bain: '<path d="M5 18h30v5a9 9 0 0 1-9 9H14a9 9 0 0 1-9-9zM9 18V9a3 3 0 0 1 6 0M12 32l-2 3M28 32l2 3"/><path d="M12 24c2 1.5 4-1.5 6 0s4 1.5 6 0" stroke-width="1.4"/>',
+    Lit: '<path d="M4 30V12M4 22h32v8M36 30v-8M8 22v-5h9v5"/><path d="M27 10h5l-5 5h5" stroke-width="1.5"/>',
+    Rouleau: '<rect x="7" y="13" width="26" height="14" rx="7" fill="#2b2b2e"/><path d="M13 13v14M20 13v14M27 13v14" stroke="#fff" stroke-width="1.4"/>',
+    'Vélo': '<circle cx="10" cy="26" r="6"/><circle cx="30" cy="26" r="6"/><path d="M10 26l6-11h9l5 11M16 15l4 11h-10M14 12h5"/>',
+    Piscine: '<path d="M4 26c3 2 6 2 8 0s5-2 8 0 5 2 8 0 5-2 8 0M4 32c3 2 6 2 8 0s5-2 8 0 5 2 8 0 5-2 8 0M26 22V8a3 3 0 0 1 6 0M18 22V8a3 3 0 0 1 6 0"/>',
+    Massage: '<path d="M6 30h28M10 30c0-6 4-9 10-9s10 3 10 9"/><path d="M20 21v-6l5-4" stroke-width="1.6"/>',
+    Pistolet: '<path d="M8 12h18a4 4 0 0 1 0 8H18l-3 12h-5l2-12H8z" fill="#2b2b2e"/><path d="M30 16h4" stroke-width="3"/>',
+    Compression: '<path d="M14 5h10v20l4 8-6 3-8-10z" fill="#2b2b2e"/><path d="M14 10h10M14 15h10M14 20h10" stroke="#fff" stroke-width="1.3"/>',
+    'Respiration': '<path d="M20 5v13M20 14l-3 4M20 14l3 4"/><path d="M16 15c-5 0-9 7-9 15 0 4 4 5 7 3 2-1 3-3 3-6V18z" fill="#2b2b2e"/><path d="M24 15c5 0 9 7 9 15 0 4-4 5-7 3-2-1-3-3-3-6V18z" fill="#2b2b2e"/>'
+  };
+  const svg = b => `<svg viewBox="0 0 40 40" width="30" height="30" fill="none" stroke="#2b2b2e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${b}</svg>`;
+  return eq => svg(I[eq] || I.Autre);
+})();
+const EQ_CLS = {};
+const eqThumb = eq => { const k = eq || 'Autre'; if (!EQ_CLS[k]) { const n = 'eqi' + Object.keys(EQ_CLS).length; EQ_CLS[k] = n;
+    const st = document.getElementById('eq-ic-css') || document.head.appendChild(Object.assign(document.createElement('style'), {id: 'eq-ic-css'}));
+    st.textContent += `.eqthumb.${n}{background-image:url("data:image/svg+xml,${encodeURIComponent(EQ_IC(k).replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" '))}")}`; }
+  return `<span class="eqthumb ${EQ_CLS[k]}" aria-hidden="true"></span>`; };
 function exRows(list, attr) {
+  // 5 000 exercises: the first 150 only (the best matches come first); typing narrows it down.
+  const more = list.length > 150 ? list.length - 150 : 0; if (more) list = list.slice(0, 150);
   const cats = [...new Set(list.map(([e]) => e.cat))];
-  return cats.map(c => `<div class="sec-label">${esc(c)}</div><div class="list">${list.filter(([e]) => e.cat === c).map(([e, n]) => `<button class="rowbtn" ${attr}="${e.id}"><span><b>${esc(n)}</b><span class="meta">${esc([e.eq, e.m].filter(Boolean).join(' · '))}${exMax(e.id) ? ' · ' + exMax(e.id) : ''}</span></span>${attr === 'data-pk' ? '<span class="kc">+</span>' : ICON.chev}</button>`).join('')}</div>`).join('') || '<div class="empty small">Aucun exercice trouvé.</div>';
+  return cats.map(c => `<div class="sec-label">${esc(c)}</div><div class="list">${list.filter(([e]) => e.cat === c).map(([e, n]) => `<button class="rowbtn exrow" ${attr}="${e.id}">${eqThumb(e.eq)}<span><b>${esc(n)}</b><span class="meta">${esc([e.eq, e.m].filter(Boolean).join(' · '))}${exMax(e.id) ? ' · ' + exMax(e.id) : ''}</span></span>${attr === 'data-pk' ? '<span class="kc">+</span>' : ICON.chev}</button>`).join('')}</div>`).join('') + (more ? `<p class="small muted" style="text-align:center;margin:14px 0">Et ${fx(more)} autres : précise ta recherche ou choisis un filtre.</p>` : '') || '<div class="empty small">Aucun exercice trouvé.</div>';
 }
 document.addEventListener('click', e => { const d = e.target.closest('[data-demo]'); if (d) d.classList.toggle('on'); });
 document.addEventListener('click', e => {
@@ -8490,7 +8547,7 @@ function pickExercise(kind, onPick) {
   const rows = () => {
     const G = ED && ED.kind === 'gym' && ED.gym, ok = id => !G || exOf(id).t !== 'gym' || gymHas(G, id);
     const rec = (!F.q && !F.cat && !F.eq ? recentEx(kind) : []).filter(ok);
-    return (G ? `<p class="hint" style="margin:10px 2px 0">Seulement ce qu'on peut faire à ${esc(gymName(G))}.</p>` : '') + (rec.length ? `<div class="sec-label">Récents</div><div class="list">${rec.map(id => { const e = exOf(id); return `<button class="rowbtn" data-pk="${id}"><span><b>${esc(e.n)}</b><span class="meta">${esc(e.eq || e.cat)}${exMax(id) ? ' · ' + exMax(id) : ''}</span></span><span class="kc">+</span></button>`; }).join('')}</div>` : '') + exRows(exSearch(F.q, kind, F).filter(([e]) => ok(e.id)), 'data-pk');
+    return (G ? `<p class="hint" style="margin:10px 2px 0">Seulement ce qu'on peut faire à ${esc(gymName(G))}.</p>` : '') + (rec.length ? `<div class="sec-label">Récents</div><div class="list">${rec.map(id => { const e = exOf(id); return `<button class="rowbtn exrow" data-pk="${id}">${eqThumb(e.eq)}<span><b>${esc(e.n)}</b><span class="meta">${esc(e.eq || e.cat)}${exMax(id) ? ' · ' + exMax(id) : ''}</span></span><span class="kc">+</span></button>`; }).join('')}</div>` : '') + exRows(exSearch(F.q, kind, F).filter(([e]) => ok(e.id)), 'data-pk');
   };
   openPane({title: 'Ajouter un exercice', render: () => `<div style="margin-top:14px"><input class="search" id="pk-q" type="search" placeholder="Rechercher, en français ou en anglais" data-pkq aria-label="Rechercher" value="${esc(F.q)}"></div>${exFilters(F, kind)}<div id="pk-res">${rows()}</div>`,
     pick: id => { closePane(); onPick(id); }, setQ: v => { F.q = v; $('#pk-res').innerHTML = rows(); }, filt: F});
@@ -9267,9 +9324,9 @@ function fProgress() {
   const wk = Object.keys(S.w || {}).filter(k => k <= TODAY && W(k, 'weight') != null).sort(), lk = wk.at(-1), pk = wk.at(-2);
   const tile = ([f, n, u, dec, c, dir]) => { const b = lk ? wbVal(lk, f) : null; if (b == null) return ''; const a = pk ? wbVal(pk, f) : null, d = a != null ? b - a : null, cls = d == null || !dir || Math.abs(d) < .05 ? '' : (d * dir < 0 ? 'up' : 'down');
     return `<div class="wbt"><span style="color:${c}">${n}${u === '%' ? ' (%)' : ''}</span><b>${fx(b, dec)}<small> ${u}</small></b>${d != null ? `<small class="${cls}">${d >= 0 ? '+' : '−'}${fx(Math.abs(d), dec)} ${u}</small>` : ''}</div>`; };
-  const lastCard = lk ? `<div class="card pc6"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Dernière pesée · ${esc(cap(fmtShort(lk)))}${W(lk, 'time') ? ' · ' + esc(W(lk, 'time')) : ''}</span><span class="small muted">écart avec la pesée d'avant</span></div><div class="wbts">${WBM.map(tile).join('')}</div></div>` : '';
+  const lastCard = lk ? `<div class="card pc6 tcard" data-metric="weight"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Dernière pesée · ${esc(cap(fmtShort(lk)))}${W(lk, 'time') ? ' · ' + esc(W(lk, 'time')) : ''}</span><span class="small muted">écart avec la pesée d'avant</span></div><div class="wbts">${WBM.map(tile).join('')}</div></div>` : '';
   const extra = S.gran === 'day' ? '' : WBM.filter(([f]) => ['waterKg', 'pwv', 'metaAge'].includes(f)).map(([f, n, u, dec, c]) => { const L = wbSeries(P, k => wbVal(k, f)); if (L.length < 2) return '';
-    return `<div class="card pc3"><div class="chead" style="margin-bottom:22px"><span class="eyebrow" style="color:${c}">${n}</span><b class="num">${fx(L.at(-1).v, dec)} ${u}</b></div>${chart(L, {color: c, dec, unit: u})}</div>`; }).join('');
+    return `<div class="card pc3 tcard" data-metric="${({pwv: 'pwv', metaAge: 'physio'})[f] || 'weight'}"><div class="chead" style="margin-bottom:22px"><span class="eyebrow" style="color:${c}">${n}</span><b class="num">${fx(L.at(-1).v, dec)} ${u}</b></div>${chart(L, {color: c, dec, unit: u})}</div>`; }).join('');
   return `
     <header class="top tophead"><div><div class="sub">Ton corps et ton assiette</div><h1>Tendances</h1></div><div class="seg unitseg" role="group" aria-label="Unité">${[['kg', 'kg'], ['pct', '%']].map(([v, l]) => `<button type="button" data-nunit="${v}" aria-pressed="${(S.nunit || 'kg') === v}">${l}</button>`).join('')}</div></header>
     ${granSeg()}
@@ -9277,12 +9334,24 @@ function fProgress() {
     <div class="stack" style="margin-top:12px">
       ${big(B.m)}${big(B.f)}${big(B.w)}${big(B.l)}
       ${extra}
-      <div class="card pc6"><span class="eyebrow">Macros mangées</span><div class="mleg"><span style="--c:#E0352B">Protéines</span><span style="--c:#F2C200">Lipides</span><span style="--c:#F07A1A">Glucides</span></div>${macroChart(days.length > 1 ? days : [...Array(7)].map((_, i) => { const k = addDays(TODAY, i - 6); return {k, lab: DOW[(dow(k) + 6) % 7], tip: cap(fmtShort(k)), ...dayTotals(k)}; }))}</div>
+      <div class="card pc6 tcard" data-fmacro><span class="eyebrow">Macros mangées</span><div class="mleg"><span style="--c:#E0352B">Protéines</span><span style="--c:#F2C200">Lipides</span><span style="--c:#F07A1A">Glucides</span></div>${macroChart(days.length > 1 ? days : [...Array(7)].map((_, i) => { const k = addDays(TODAY, i - 6); return {k, lab: DOW[(dow(k) + 6) % 7], tip: cap(fmtShort(k)), ...dayTotals(k)}; }))}</div>
       ${bloodTrend()}
     </div>`;
 }
 try { S.bloodAll = localStorage.getItem('fl-blood') === '1'; } catch (e) {}
 document.addEventListener('click', e => { if (!e.target.closest('[data-fbtog]')) return; S.bloodAll = !S.bloodAll; try { localStorage.setItem('fl-blood', S.bloodAll ? '1' : '0'); } catch (err) {} renderMod(); });
+function macroPane() {
+  openPane({title: 'Macros mangées', render: () => {
+    const P = periodOf(S.gran, S.off), D = []; for (let k = P.from; k <= P.to && k <= TODAY; k = addDays(k, 1)) { const t = dayTotals(k); if (t?.kcal) D.push({k, t, g: fuelGoal(k)}); }
+    if (!D.length) return '<div class="card empty" style="margin-top:14px"><b>Rien de noté sur cette période</b>Change de période.</div>';
+    const avg = f => mean(D.map(d => d.t[f] || 0)), goal = f => mean(D.map(d => d.g?.[f] || 0));
+    const row = (f, n, c, u = 'g') => { const a = avg(f), g = goal(f), r = g ? a / g : null;
+      return `<div class="row col"><div class="chead" style="margin:0"><span style="color:${c};font-weight:700">${n}</span><b class="num">${fx(Math.round(a))} ${u}${g ? ` <small class="muted">/ ${fx(Math.round(g))}</small>` : ''}</b></div>${r != null ? `<div class="range" style="margin-top:8px"><i style="left:${clamp(r * 50, 2, 98)}%;--cur:${r > .9 && r < 1.1 ? 'var(--good)' : 'var(--warn)'}"></i></div><div class="rlab"><span>0</span><span>objectif</span><span>× 2</span></div>` : ''}</div>`; };
+    return `<div class="dhead"><div class="eyebrow" style="color:var(--accent)">Moyenne par jour · ${esc(P.title.toLowerCase())}</div><div class="big num">${fx(Math.round(avg('kcal')))}<small> kcal</small></div><p class="small muted">${D.length} jour${D.length > 1 ? 's' : ''} noté${D.length > 1 ? 's' : ''} · objectif moyen ${fx(Math.round(goal('kcal')))} kcal</p></div>
+      <div class="list" style="margin-top:12px">${row('p', 'Protéines', '#E0352B')}${row('c', 'Glucides', '#F07A1A')}${row('f', 'Lipides', '#F2C200')}</div>
+      ${detailsBox('Protéines : 1,6 à 2,2 g par kg de poids de corps pour garder et construire du muscle (Morton 2018, méta-analyse de 49 études). Glucides : 5 à 7 g/kg les jours d\'entraînement de vitesse (ISSN). Le reste en lipides, au moins 20 % des calories.')}`; }});
+}
+document.addEventListener('click', e => { if (e.target.closest('[data-fmacro]') && !e.target.closest('.chartbox')) macroPane(); });
 document.addEventListener('click', e => { const b = e.target.closest('[data-nunit]'); if (!b) return; S.nunit = b.dataset.nunit === 'pct' ? 'pct' : 'kg'; renderMod(); });
 // Blood tests over time: one small chart per value, a dot per bilan, a line when there are two or more.
 function bloodTrend() {
@@ -9967,7 +10036,7 @@ function fGoals() {
       <p><b style="color:var(--fg)">Carences</b> : la dernière valeur de chaque prise de sang, comparée à la norme de son laboratoire et à la précédente, plus ton poids et ton menu.</p>`)}`;
 }
 // Explanations of a calculation stay folded: "Détails" opens them, "Masquer" folds them again.
-const detailsBox = html => `<details class="dets"><summary><span class="o">Détails</span><span class="c">Masquer</span></summary><div class="small muted stack">${html}</div></details>`;
+const detailsBox = html => `<details class="dets"><summary><span class="o">Détail</span><span class="c">Masquer</span></summary><div class="small muted stack">${html}</div></details>`;
 document.addEventListener('keydown', e => {
   const t = e.target; if (e.key !== 'Enter' || !t.dataset?.ftag) return; e.preventDefault();
   const v = t.value.trim(); if (!v) return; const k = t.dataset.ftag; saveFset({[k]: [...(S.fset[k] || []), v]});
