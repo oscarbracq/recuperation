@@ -173,3 +173,21 @@ html.one.one-pl .one-act{opacity:0!important;pointer-events:none!important}
 .one-st .grid b{display:block;font-size:1.05rem}.one-st .grid span{font-size:.72rem;opacity:.8}
 .one-st .tip{background:rgba(0,0,0,.25);border-radius:14px;padding:12px 14px;margin:4px 0 0;font-size:1rem;line-height:1.45}
 @media(prefers-reduced-motion:reduce){.one-st,.one-st *{animation:none!important;transition:none!important}}
+
+/* ---------- Glissement au pouce : la page voisine (copie) et la vraie page arrivent sans petite animation d'entrée
+   (plus de blocs qui descendent puis remontent, plus de flash quand la vraie page remplace la copie). ---------- */
+html.one .tab-ghost,html.one .tab-ghost *,html.one.one-sw .tab-ghost *{animation:none!important;transition:none!important}
+
+/* ---------- Barre du bas : Accueil un peu plus large (on sait où on est) ; la lentille ne déborde presque plus sur les voisins ---------- */
+html.one #one-tabs button[data-one-h]{flex:1.3 1 0!important}
+
+/* ---------- Croix en haut à droite (facile au pouce droit), plus de flèche retour ---------- */
+html.one #sh-back{grid-column:3;grid-row:1;justify-self:end}
+html.one #sheet-title{grid-column:2;grid-row:1}
+html.one #pn-back{display:none!important}
+/* Planning : la croix à droite, le bouton pour tourner l'écran à gauche */
+html.one .plfs-top [data-plx]{order:9}
+html.one .plfs-top [data-plturn]{order:-1}
+html.one .plfs-top .plfs-t{flex:1}
+/* Questionnaire du jour en page complète, toute noire, comme le planning (il monte du bas) */
+html.one .sheet.full .sheet-card{background:#000;min-height:100%}

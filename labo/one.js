@@ -4,7 +4,7 @@
    · une barre flottante en verre avec les 6 onglets (leurs noms suivent le module), et le pouce glisse d'un onglet à l'autre ;
    · en haut : « + » (questionnaire du jour) · T · N · R (même onglet, autre module) · « IA » (ouvre l'appli Claude, projet TNR) ;
    · les chiffres, courbes, blocs et anneaux s'animent quand une page arrive ou quand on change de période. */
-const ONE_EXT = 10;
+const ONE_EXT = 4;
 const ONE = {mods: ['T', 'N', 'R'], keys: {T: ['today', 'progress', 'sessions', 'library', 'body', 'profile'], N: ['journal', 'progress', 'menu', 'foods', 'nbody', 'goals'], R: ['today', 'trends', 'rsess', 'rlib', 'reports', 'profile']},
   name: {T: 'Training', N: 'Nutrition', R: 'Recovery'}, col: Object.fromEntries(HOME_K), ready: false, act: 0, seen: new WeakSet()};
 const oneCur = () => S.mod === 'R' ? S.tab : S.mod === 'T' ? S.ttab : S.mod === 'N' ? S.ftab : null;
@@ -302,6 +302,7 @@ fBody = () => {
 
 /* ---------- la bulle du bas suit le pouce pendant qu'on glisse d'un onglet à l'autre (dès le premier pixel) ---------- */
 window.TAB_DRAG = (i, f, ms) => {
+  oneCalmIn();
   if (ms && f) ONE.swiped = performance.now() + ms;
   const tabs = $('#one-tabs'), p = tabs?.querySelector('.one-pill'); if (!p || S.mod === 'home') return;
   const bs = [...tabs.querySelectorAll('[data-one-t]')], a = bs[i]; if (!a) return;
@@ -332,9 +333,22 @@ syncBars = function () {
   clearTimeout(ONE_BAR.t); ONE_BAR.t = setTimeout(() => { if (ONE_BAR.cur !== to && oneRgb(ONE_BAR.cur)?.join() !== B.join()) { ONE_BAR.cur = to; set(to); } }, D + 250);
 };
 
-/* ---------- Planning : une page à part, toute noire (sans fond coloré ni dégradé en haut, sans les barres) ---------- */
+/* ---------- Planning et questionnaire du jour : une page à part, toute noire (sans fond coloré, sans dégradé en haut,
+   sans les barres). Le planning monte du bas en s'ouvrant, comme le questionnaire. ---------- */
 (function onePlanWatch() {
-  const el = document.getElementById('plfs'); if (!el) { setTimeout(onePlanWatch, 300); return; }
-  const sync = () => { const on = el.classList.contains('on'); if (on === document.documentElement.classList.contains('one-pl')) return; document.documentElement.classList.toggle('one-pl', on); syncBars(); };
-  new MutationObserver(sync).observe(el, {attributes: true, attributeFilter: ['class']}); sync();
+  const el = document.getElementById('plfs'), sh = document.getElementById('sheet'); if (!el || !sh) { setTimeout(onePlanWatch, 300); return; }
+  let was = false;
+  const sync = () => {
+    const pl = el.classList.contains('on'), full = sh.classList.contains('on') && sh.classList.contains('full'), on = pl || full;
+    if (pl && !was && !oneCalm()) el.animate([{transform: 'translateY(100%)'}, {transform: 'none'}], {duration: 420, easing: 'cubic-bezier(.32,.72,0,1)'});
+    was = pl;
+    if (on === document.documentElement.classList.contains('one-pl')) return; document.documentElement.classList.toggle('one-pl', on); syncBars(); };
+  new MutationObserver(sync).observe(el, {attributes: true, attributeFilter: ['class']});
+  new MutationObserver(sync).observe(sh, {attributes: true, attributeFilter: ['class']}); sync();
+  // La flèche du questionnaire devient une croix (en haut à droite).
+  const b = document.getElementById('sh-back'); if (b) { b.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>'; b.setAttribute('aria-label', 'Fermer'); }
 })();
+// Fenêtres qui montent du bas : plus de flèche retour (on les descend avec la tirette) ; une croix en haut à droite
+// seulement là où on ne peut pas les descendre (fenêtres fixes, comme l'éditeur de séance, et sur ordinateur).
+const onePaneShow0 = paneShow;
+paneShow = function (...a) { const r = onePaneShow0.apply(this, a); const v = P.stack.at(-1); if (v) { $('#pn-back').hidden = true; $('#pn-close').hidden = !(v.fixed || P.stack[0]?.side || (typeof isPC === 'function' && isPC())); } return r; };
