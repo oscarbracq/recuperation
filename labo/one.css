@@ -124,3 +124,6 @@ html.one-notr .one-top,html.one-notr .one-top *{transition:none!important}
 html.one #one-tabs button{text-overflow:clip;letter-spacing:-.02em}
 @media (max-width:430px){html.one .one-tabs{padding:6px 7px!important}html.one #one-tabs button,html.one #one-tabs button[data-one-h]{font-size:.5625rem;padding:0;gap:4px;letter-spacing:-.03em}}
 @media (max-width:350px){html.one #one-tabs button{font-size:.5rem;letter-spacing:-.03em}}
+
+/* Ordinateur : la mise en page en colonnes reste ; on garde juste la place de la barre du haut pour que la date et le titre ne passent pas dessous. */
+html.one.pc .mm-space{display:block!important;height:58px!important}

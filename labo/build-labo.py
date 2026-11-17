@@ -1,40 +1,43 @@
-# Builds the LABO version (labo/index.html): the main app (sprint-lab.html), entered in one place
-# (labo/one.js + labo/one.css: floating tab bar, T/N/R switch) and a sandbox (labo/nx-head.js) so nothing reaches the real account.
+# Builds the two apps from the same page (sprint-lab.html):
+#   · index.html (the real app, phone and computer) = the page + labo/one.css + labo/one.js: floating glass bars,
+#     T/N/R switch, Accueil, animations, opening where the letters fly into place;
+#   · labo/index.html = the classic page (the app as it was before the switch), kept to reach what only it still has.
+# Both read and write the real account (no sandbox any more).
 # Run from the app folder:  python -I labo/build-labo.py
-# The main app is rebuilt afterwards, so index.html at the root stays the real app.
 import os, re, shutil, subprocess
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
 src = open('sprint-lab.html', encoding='utf-8', newline='').read()
 css = open('labo/one.css', encoding='utf-8').read()
 js = open('labo/one.js', encoding='utf-8').read()
-head = open('labo/nx-head.js', encoding='utf-8').read()
-i = src.index('</style>'); src = src[:i] + css + src[i:]
-j = src.rindex('</script>'); src = src[:j] + '\n' + js + '\n' + src[j:]
-src = '<script>\n' + head + '\n</script>\n' + src
-open('labo/labo-src.html', 'w', encoding='utf-8', newline='').write(src)
 ps = ['powershell', '-ExecutionPolicy', 'Bypass', '-File', 'build.ps1', '-Source']
-subprocess.run(ps + ['labo/labo-src.html'], check=True)
-shutil.move('index.html', 'labo/index.html')
+
+def must(h, o, n, cnt=None):
+    c = h.count(o); assert c >= 1 and (cnt is None or c == cnt), (c, o); return h.replace(o, n)
+
+# 1) The classic page, moved to labo/ (same account, no install, no service worker).
 subprocess.run(ps + ['sprint-lab.html'], check=True)
-h = open('labo/index.html', encoding='utf-8').read()
-def must(o, n, cnt=None):
-    global h
-    c = h.count(o); assert c >= 1 and (cnt is None or c == cnt), (c, o); h = h.replace(o, n)
-must('<link rel="manifest" href="manifest.webmanifest">', '')
-must('src="icon-192.png', 'src="../icon-192.png')
-must('href="icon-192.png', 'href="../icon-192.png')
-must('href="apple-touch-icon.png', 'href="../apple-touch-icon.png')
-must('<script src="supabase-db.js', '<script src="../supabase-db.js')
+h = open('index.html', encoding='utf-8').read()
+h = must(h, '<link rel="manifest" href="manifest.webmanifest">', '')
+h = must(h, 'src="icon-192.png', 'src="../icon-192.png')
+h = must(h, 'href="icon-192.png', 'href="../icon-192.png')
+h = must(h, 'href="apple-touch-icon.png', 'href="../apple-touch-icon.png')
+h = must(h, '<script src="supabase-db.js', '<script src="../supabase-db.js')
 h = re.sub(r"<script>if \('serviceWorker' in navigator\) \{.*?\}</script>", '', h, count=1, flags=re.S)
 assert "navigator.serviceWorker.register('sw.js')" not in h
-# Ouverture du labo : les lettres T, N, R vont se poser dans leurs carrés (labo/one.js, ONE_SPLASH) au lieu du zoom dans le N.
-HID = "    if (document.hidden) { el.remove(); bars(); return; }" + chr(10)
-must(HID, HID + "    if (window.ONE_SPLASH && window.ONE_SPLASH(el, svg, bars)) return;" + chr(10), 1)
-must('const db = await recupGetDb();', 'const db = labSandbox(await recupGetDb());', 1)
-must('<meta name="apple-mobile-web-app-title" content="TNR Athletics">', '<meta name="apple-mobile-web-app-title" content="TNR Labo"><title>TNR Labo</title>')
-# The sandbox must run before every other script of the page.
-assert h.index('function labSandbox') < h.index('const S = {'), 'nx-head.js must come first'
+h = must(h, '<meta name="apple-mobile-web-app-title" content="TNR Athletics">', '<meta name="apple-mobile-web-app-title" content="TNR Classique"><title>TNR Classique</title>')
 open('labo/index.html', 'w', encoding='utf-8', newline='').write(h)
-os.remove('labo/labo-src.html')
-print('labo built', len(h))
+
+# 2) The real app: the same page dressed by one.css / one.js.
+i = src.index('</style>'); s2 = src[:i] + css + src[i:]
+j = s2.rindex('</script>'); s2 = s2[:j] + '\n' + js + '\n' + s2[j:]
+open('labo/app-src.html', 'w', encoding='utf-8', newline='').write(s2)
+subprocess.run(ps + ['labo/app-src.html'], check=True)
+os.remove('labo/app-src.html')
+h = open('index.html', encoding='utf-8').read()
+# Opening: the T, N and R of the logo fly into their places (labo/one.js, ONE_SPLASH) instead of the zoom into the N.
+HID = "    if (document.hidden) { el.remove(); bars(); return; }" + chr(10)
+h = must(h, HID, HID + "    if (window.ONE_SPLASH && window.ONE_SPLASH(el, svg, bars)) return;" + chr(10), 1)
+assert "navigator.serviceWorker.register('sw.js')" in h and 'labSandbox' not in h
+open('index.html', 'w', encoding='utf-8', newline='').write(h)
+print('built: index.html (nouvelle appli)', len(h), '· labo/index.html (classique)')
