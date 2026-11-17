@@ -134,3 +134,8 @@ html.one{--band:color-mix(in srgb,var(--o1) 30%,#000)}
 html.one[data-mod="home"]{--o1:#000!important;--o2:#000!important;--o3:#000!important}
 html.one body::before{height:calc(env(safe-area-inset-top,0px) + 24px)!important;background:linear-gradient(to bottom,var(--band) env(safe-area-inset-top,0px),color-mix(in srgb,var(--band) 62%,transparent) calc(env(safe-area-inset-top,0px) + 8px),color-mix(in srgb,var(--band) 25%,transparent) calc(env(safe-area-inset-top,0px) + 16px),transparent)!important}
 html.one.one-sw .mod *,html.one.one-sw .mod{animation:none!important}
+
+/* Planning ouvert : page à part, fond noir, sans dégradé ni taches de couleur, sans les barres du haut et du bas. */
+html.one.one-pl body::before,html.one.one-pl .aura,html.one.one-pl #one-top,html.one.one-pl #one-tabs,html.one.one-pl .one-hai{opacity:0!important;pointer-events:none!important;transition:opacity .25s}
+html.one.one-pl .plfs{background:#000!important}
+@media (max-width:430px){html.one .one-tabs{width:calc(100% - 16px)!important}}

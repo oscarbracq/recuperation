@@ -4,6 +4,7 @@
    · une barre flottante en verre avec les 6 onglets (leurs noms suivent le module), et le pouce glisse d'un onglet à l'autre ;
    · en haut : « + » (questionnaire du jour) · T · N · R (même onglet, autre module) · « IA » (ouvre l'appli Claude, projet TNR) ;
    · les chiffres, courbes, blocs et anneaux s'animent quand une page arrive ou quand on change de période. */
+const ONE_EXT = 10;
 const ONE = {mods: ['T', 'N', 'R'], keys: {T: ['today', 'progress', 'sessions', 'library', 'body', 'profile'], N: ['journal', 'progress', 'menu', 'foods', 'nbody', 'goals'], R: ['today', 'trends', 'rsess', 'rlib', 'reports', 'profile']},
   name: {T: 'Training', N: 'Nutrition', R: 'Recovery'}, col: Object.fromEntries(HOME_K), ready: false, act: 0, seen: new WeakSet()};
 const oneCur = () => S.mod === 'R' ? S.tab : S.mod === 'T' ? S.ttab : S.mod === 'N' ? S.ftab : null;
@@ -60,7 +61,9 @@ function oneMount() {
 // ce qui passe dessous grossit un peu, comme sous une loupe.
 function onePill(box, p, on) {
   if (!box || !on || !p) return;
-  const x = on.offsetLeft, w = on.offsetWidth, lo = 3, hi = box.clientWidth - 3 - w;
+  // En bas, la lentille déborde un peu de chaque côté du bouton : les mots longs (Aujourd'hui, Tendances) gardent leur taille
+  // et respirent dedans, même grossis par la loupe.
+  const ext = box.id === 'one-tabs' ? ONE_EXT : 0, x = Math.max(3, on.offsetLeft - ext / 2), w = on.offsetWidth + ext, lo = 3, hi = box.clientWidth - 3 - w;
   // En haut (T N R), la lentille est posée en proportion de la barre : elle reste sur le bon module même quand la barre s'élargit (sortie de l'Accueil).
   if (p.classList.contains('one-mp')) { oneMp(box, p, on); return; }
   const x0 = p._x; p._x = x; p._w = w;
@@ -118,7 +121,8 @@ vHome = () => `<div class="hm one-hm" id="hm"><header class="hm-head" id="hm-hea
 // Seulement juste après un geste (arrivée sur une page, changement de période, d'unité…), pas à chaque mise à jour silencieuse des données.
 const oneRecent = () => (ONE.reveal || (!document.getElementById('splash') && !window.TNR_SPLASH_ON)) && performance.now() - ONE.act < 1600 && ONE.done !== ONE.act;
 function oneAnim(root) {
-  if (!root || oneCalm() || !oneRecent()) return;
+  // Juste après un glissement au pouce, la page était déjà visible avec ses vrais chiffres : on ne les refait pas partir de 0.
+  if (!root || oneCalm() || !oneRecent() || performance.now() - (ONE.swiped || 0) < 900) return;
   const fresh = el => { if (ONE.seen.has(el)) return false; ONE.seen.add(el); return true; };
   root.querySelectorAll('.chartbox svg.chart').forEach(svg => {
     if (!fresh(svg)) return;
@@ -175,7 +179,7 @@ openSheet = function (kind, ...a) { const r = oneOpenSheet0(kind, ...a); $('#she
 const oneAfter = () => { const v = oneView(); onePlan(v); oneAnim(v); };
 // Arriver sur un onglet de Recovery le redessine toujours : chiffres et anneaux repartent de zéro à chaque visite
 // (avant, une page identique n'était pas redessinée, donc rien ne bougeait en revenant).
-const oneSetTab0 = setTab; setTab = function (t) { const v = $('#v-' + t); if (v && performance.now() - ONE.act < 400) v._html = null; oneSetTab0(t); oneSync(); };
+const oneSetTab0 = setTab; setTab = function (t) { const v = $('#v-' + t); if (v && performance.now() - ONE.act < 400 && performance.now() - (ONE.swiped || 0) > 900) v._html = null; oneSetTab0(t); oneSync(); };
 const oneRender0 = render; render = function (...a) { const r = oneRender0(...a); if (S.mod === 'R') oneAfter(); return r; };
 const oneRenderMod0 = renderMod; renderMod = function (f) { oneRenderMod0(f); oneSync(); if (S.mod === 'T' || S.mod === 'N') oneAfter(); };
 oneMount();
@@ -298,9 +302,10 @@ fBody = () => {
 
 /* ---------- la bulle du bas suit le pouce pendant qu'on glisse d'un onglet à l'autre (dès le premier pixel) ---------- */
 window.TAB_DRAG = (i, f, ms) => {
+  if (ms && f) ONE.swiped = performance.now() + ms;
   const tabs = $('#one-tabs'), p = tabs?.querySelector('.one-pill'); if (!p || S.mod === 'home') return;
   const bs = [...tabs.querySelectorAll('[data-one-t]')], a = bs[i]; if (!a) return;
-  const b = bs[i + Math.sign(f)] || a, x = a.offsetLeft + (b.offsetLeft - a.offsetLeft) * Math.abs(f);
+  const b = bs[i + Math.sign(f)] || a, x = Math.max(3, a.offsetLeft - ONE_EXT / 2 + (b.offsetLeft - a.offsetLeft) * Math.abs(f));
   p.getAnimations().forEach(an => an.cancel());
   const from = p.style.transform; p.style.transform = `translateX(${x}px)`; p._x = x;
   if (ms && from) { p.animate([{transform: from}, {transform: p.style.transform}], {duration: ms, easing: 'cubic-bezier(.22,.8,.3,1)'}); oneMag(tabs, p, ms + 40); }
@@ -313,7 +318,7 @@ const oneRgb = c => { c = String(c || '').trim(); let m = c.match(/^#([0-9a-f]{3
   m = c.match(/^rgba?\((\d+)\D+(\d+)\D+(\d+)/i); return m ? [+m[1], +m[2], +m[3]] : null; };
 const ONE_BAR = {cur: null, raf: 0}, ONE_BAND = .3;   // même dosage que --band (one.css)
 syncBars = function () {
-  const O1 = {T: '#FF3B30', N: '#30D158', R: '#0A84FF'}[S.mod], c1 = oneRgb(O1);
+  const O1 = document.documentElement.classList.contains('one-pl') ? null : {T: '#FF3B30', N: '#30D158', R: '#0A84FF'}[S.mod], c1 = oneRgb(O1);
   const to = window.TNR_SPLASH_ON ? '#0B1733' : c1 ? '#' + c1.map(v => Math.round(v * ONE_BAND).toString(16).padStart(2, '0')).join('') : '#000000';
   const set = c => document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.media = ''; m.content = c; });
   const A = oneRgb(ONE_BAR.cur), B = oneRgb(to); cancelAnimationFrame(ONE_BAR.raf);
@@ -325,3 +330,10 @@ syncBars = function () {
   // Si l'appli passe en arrière-plan pendant le fondu, la barre finit quand même sur la bonne couleur.
   clearTimeout(ONE_BAR.t); ONE_BAR.t = setTimeout(() => { if (ONE_BAR.cur !== to && oneRgb(ONE_BAR.cur)?.join() !== B.join()) { ONE_BAR.cur = to; set(to); } }, D + 250);
 };
+
+/* ---------- Planning : une page à part, toute noire (sans fond coloré ni dégradé en haut, sans les barres) ---------- */
+(function onePlanWatch() {
+  const el = document.getElementById('plfs'); if (!el) { setTimeout(onePlanWatch, 300); return; }
+  const sync = () => { const on = el.classList.contains('on'); if (on === document.documentElement.classList.contains('one-pl')) return; document.documentElement.classList.toggle('one-pl', on); syncBars(); };
+  new MutationObserver(sync).observe(el, {attributes: true, attributeFilter: ['class']}); sync();
+})();

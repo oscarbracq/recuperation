@@ -777,9 +777,9 @@ svg.body.sil .rg.on{stroke:none;fill:transparent}
 .plw-hd::after{content:"";width:6px;height:22px;border-radius:3px;background:var(--fg);box-shadow:0 0 0 2px var(--bg)}
 
 .plg-b.sel{z-index:4;box-shadow:0 0 0 2px var(--fg);overflow:visible}
-.plg-hd{position:absolute;left:50%;width:44px;height:22px;margin-left:-22px;display:grid;place-items:center;z-index:5;touch-action:none}
-.plg-hd.t{top:-11px}.plg-hd.b{bottom:-11px}
-.plg-hd::after{content:"";width:28px;height:6px;border-radius:3px;background:#fff;box-shadow:0 0 0 2px rgba(0,0,0,.35)}
+.plg-hd{position:absolute;left:50%;width:44px;height:16px;margin-left:-22px;display:grid;place-items:center;z-index:5;touch-action:none}
+.plg-hd.t{top:-4px}.plg-hd.b{bottom:-4px}
+.plg-hd::after{content:"";width:26px;height:5px;border-radius:3px;background:#fff;box-shadow:0 0 0 2px rgba(0,0,0,.35)}
 .plw-hd::after{background:#fff!important}
 .pld-info{flex-wrap:wrap;white-space:normal;min-height:36px}.pld-info .chip{padding:4px 10px;font-size:.75rem}.pld-info .chip:first-of-type{margin-left:auto}
 .plsaison{margin:0 0 8px}.plsaison button{font-size:.75rem;padding:6px}
@@ -1504,6 +1504,11 @@ html.one{--band:color-mix(in srgb,var(--o1) 30%,#000)}
 html.one[data-mod="home"]{--o1:#000!important;--o2:#000!important;--o3:#000!important}
 html.one body::before{height:calc(env(safe-area-inset-top,0px) + 24px)!important;background:linear-gradient(to bottom,var(--band) env(safe-area-inset-top,0px),color-mix(in srgb,var(--band) 62%,transparent) calc(env(safe-area-inset-top,0px) + 8px),color-mix(in srgb,var(--band) 25%,transparent) calc(env(safe-area-inset-top,0px) + 16px),transparent)!important}
 html.one.one-sw .mod *,html.one.one-sw .mod{animation:none!important}
+
+/* Planning ouvert : page à part, fond noir, sans dégradé ni taches de couleur, sans les barres du haut et du bas. */
+html.one.one-pl body::before,html.one.one-pl .aura,html.one.one-pl #one-top,html.one.one-pl #one-tabs,html.one.one-pl .one-hai{opacity:0!important;pointer-events:none!important;transition:opacity .25s}
+html.one.one-pl .plfs{background:#000!important}
+@media (max-width:430px){html.one .one-tabs{width:calc(100% - 16px)!important}}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -3529,7 +3534,7 @@ function plfsRender() {
   const col = ({wd, k, L}) => `<div class="plg-col${k === TODAY ? ' pltoday' : ''}" data-plcol="${wd}">${hours.map(t => `<i class="plg-h" style="top:${(t - t0) * K}px"></i>`).join('')}${plQuarters(t0, t1).map(t => `<i class="plg-h plq" style="top:${(t - t0) * K}px"></i>`).join('')}
       ${L.map(x => { const a = tmin(x.a), b = tmin(x.b), h = (b - a) * K, short = h < 30, i = plIdx(x, wd, k), on = !week && PLD.sel === String(i), sp = (x.c === 'muscu' || x.c === 'athle') && planFor(k)?.kind === (x.c === 'muscu' ? 'gym' : 'track') ? planFor(k) : null;
         const chp = short || week ? '' : plChip(x, k), mid = !!chp && h < 76;
-        return `<button class="plg-b${short ? ' short' : ''}${mid ? ' mid' : ''}${on ? ' sel' : ''}${k === TODAY && a <= nowM && nowM < b ? ' plcur' : ''}" data-plsel="${i}" data-plwd="${wd}"${k === TODAY ? ` data-pa="${a}" data-pb="${b}"` : ''} style="--pc:${PCAT[x.c]?.[1] || '#888'};top:${(a - t0) * K}px;height:${Math.max(h - 1, 8)}px"><b>${esc(x.n)}</b>${short ? '' : `<small>${x.a} – ${x.b}${x.date && !x.rs ? ' · ce jour' : ''}${x.trip ? ' · ' + esc(x.trip) : ''}</small>${chp}`}${on ? '<span class="plg-hd t" data-plhv="a"></span><span class="plg-hd b" data-plhv="b"></span>' : ''}</button>`; }).join('')}
+        return `<button class="plg-b${short ? ' short' : ''}${mid ? ' mid' : ''}${on ? ' sel' : ''}${k === TODAY && a <= nowM && nowM < b ? ' plcur' : ''}" data-plsel="${i}" data-plwd="${wd}"${k === TODAY ? ` data-pa="${a}" data-pb="${b}"` : ''} style="--pc:${PCAT[x.c]?.[1] || '#888'};top:${(a - t0) * K + 1}px;height:${Math.max(h - 3, 8)}px"><b>${esc(x.n)}</b>${short ? '' : `<small>${x.a} – ${x.b}${x.date && !x.rs ? ' · ce jour' : ''}${x.trip ? ' · ' + esc(x.trip) : ''}</small>${chp}`}${on ? '<span class="plg-hd t" data-plhv="a"></span><span class="plg-hd b" data-plhv="b"></span>' : ''}</button>`; }).join('')}
       ${k === TODAY && nowM >= t0 ? `<i class="plg-now" style="top:${(nowM - t0) * K}px"></i>` : ''}</div>`;
   const own = !!PLN().week?.[PLAN_UI.wd];
   el.className = 'plfs on ' + (week ? 'plw' : 'pld1') + (plRot() ? ' rot' : '');
@@ -3679,7 +3684,9 @@ function plwRender(el) {
   </div>`;
   const vp = el.querySelector('.plw-vp'), c = el.querySelector('.plw-c'), W = vp.offsetWidth || 600;
   // About nine hours across the screen; the thumb slides through the rest of the day.
-  const K = Math.max(W / (t1 - t0), W / ((isPC() ? 16 : 9) * 60));
+  // Zoom (deux doigts, ou Ctrl + molette) : de la journée entière à l'écran jusqu'à environ 2 h.
+  const KB = W / ((isPC() ? 16 : 9) * 60), K = Math.max(W / (t1 - t0), KB * (PLW.z || 1));
+  el.dataset.kb = KB;
   c.style.setProperty('--k', K); c.style.width = (t1 - t0) * K + 'px';
   el.dataset.t0 = t0; el.dataset.k = K;
   // A name is written only when it fits whole in its box.
@@ -3715,8 +3722,23 @@ function plwInit(el) {
   const show = d => { const x = plBlockOf(d.b.dataset.plrb, +d.b.dataset.plwd); if (!x) return null;
     const wd = PL_ORDER[(PL_ORDER.indexOf(+d.b.dataset.plwd) + (d.day || 0) + 70) % 7], f = plFit(d.b.dataset.plrb, +d.b.dataset.plwd, d.edge, d.min, wd) || [tmin(x.a), tmin(x.b)], [a, b] = f;
     const box = el.querySelector('.plw-info'); if (box) box.innerHTML = plwInfoHtml(x, wd, a, b); return [a, b]; };
+  // Deux doigts écartés ou rapprochés : le planning grossit ou rétrécit autour des doigts, jusqu'à la journée entière.
+  const PT = new Map(); let Z = null;
+  const axis = (x, y) => { const r = el.querySelector('.plw-vp').getBoundingClientRect(); return plRot() ? y - r.top : x - r.left; };
+  const zoomTo = (z, at) => {
+    const vp = el.querySelector('.plw-vp'), c = el.querySelector('.plw-c'); if (!vp || !c) return;
+    const W = vp.offsetWidth, KB = +el.dataset.kb || 1, zMin = W / 1440 / KB; z = Math.max(zMin, Math.min(4.5, z));
+    const k0 = +el.dataset.k, k1 = Math.max(W / 1440, KB * z), m = (PLW.px + at) / k0;
+    PLW.z = z; el.dataset.k = k1; c.style.setProperty('--k', k1); c.style.width = 1440 * k1 + 'px'; plwSetPx(el, m * k1 - at);
+  };
+  el.addEventListener('pointerdown', e => { if (!wk() || !e.target.closest('.plw-vp')) return; PT.set(e.pointerId, pt(e));
+    if (PT.size === 2) { const [a, b] = [...PT.values()]; clearTimeout(timer); if (D?.b) D.b.classList.remove('lift'); D = null; Z = {d0: Math.hypot(a.x - b.x, a.y - b.y) || 1, z0: PLW.z || 1}; } }, true);
+  el.addEventListener('pointermove', e => { if (!PT.has(e.pointerId)) return; PT.set(e.pointerId, pt(e)); if (!Z || PT.size < 2) return;
+    const [a, b] = [...PT.values()], d = Math.hypot(a.x - b.x, a.y - b.y); zoomTo(Z.z0 * d / Z.d0, axis((a.x + b.x) / 2, (a.y + b.y) / 2)); e.stopImmediatePropagation(); }, true);
+  const ptEnd = e => { PT.delete(e.pointerId); if (Z && PT.size < 2) { Z = null; D = null; requestAnimationFrame(() => plfsRender()); } };
+  el.addEventListener('pointerup', ptEnd, true); el.addEventListener('pointercancel', ptEnd, true);
   el.addEventListener('pointerdown', e => {
-    if (!wk() || !e.target.closest('.plw-vp')) return;
+    if (!wk() || !e.target.closest('.plw-vp') || Z) return;
     cancelAnimationFrame(raf); clearTimeout(timer);
     const h = e.target.closest('[data-plh]'), b = e.target.closest('.plw-b');
     D = {p0: pt(e), px0: PLW.px, b, edge: h?.dataset.plh, mode: h ? 'size' : b && e.pointerType === 'mouse' ? 'pan2' : 'pan', moved: false, t: performance.now(), lx: 0, v: 0, min: 0, day: 0};
@@ -3753,7 +3775,9 @@ function plwInit(el) {
     else { PLW.sel = {i: d.b.dataset.plrb, wd: +d.b.dataset.plwd}; plfsRender(); }
   });
   el.addEventListener('pointercancel', () => { clearTimeout(timer); const d = D; D = null; if (d && d.mode !== 'pan') plfsRender(); });
-  el.addEventListener('wheel', e => { if (!wk() || !e.target.closest('.plw-vp')) return; e.preventDefault(); plwSetPx(el, PLW.px + (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY)); }, {passive: false});
+  el.addEventListener('wheel', e => { if (!wk() || !e.target.closest('.plw-vp')) return; e.preventDefault();
+    if (e.ctrlKey) { clearTimeout(Z?.t); zoomTo((PLW.z || 1) * Math.exp(-e.deltaY / 300), axis(e.clientX, e.clientY)); clearTimeout(PLW.zt); PLW.zt = setTimeout(() => plfsRender(), 250); return; }
+    plwSetPx(el, PLW.px + (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY)); }, {passive: false});
   el.addEventListener('dblclick', e => { const b = e.target.closest('.plw-b'); if (!b || !wk()) return; PLAN_UI.wd = +b.dataset.plwd; blockEdit(b.dataset.plrb); });
 }
 document.addEventListener('click', e => {
@@ -10203,6 +10227,7 @@ go('home', false);
    · une barre flottante en verre avec les 6 onglets (leurs noms suivent le module), et le pouce glisse d'un onglet à l'autre ;
    · en haut : « + » (questionnaire du jour) · T · N · R (même onglet, autre module) · « IA » (ouvre l'appli Claude, projet TNR) ;
    · les chiffres, courbes, blocs et anneaux s'animent quand une page arrive ou quand on change de période. */
+const ONE_EXT = 10;
 const ONE = {mods: ['T', 'N', 'R'], keys: {T: ['today', 'progress', 'sessions', 'library', 'body', 'profile'], N: ['journal', 'progress', 'menu', 'foods', 'nbody', 'goals'], R: ['today', 'trends', 'rsess', 'rlib', 'reports', 'profile']},
   name: {T: 'Training', N: 'Nutrition', R: 'Recovery'}, col: Object.fromEntries(HOME_K), ready: false, act: 0, seen: new WeakSet()};
 const oneCur = () => S.mod === 'R' ? S.tab : S.mod === 'T' ? S.ttab : S.mod === 'N' ? S.ftab : null;
@@ -10259,7 +10284,9 @@ function oneMount() {
 // ce qui passe dessous grossit un peu, comme sous une loupe.
 function onePill(box, p, on) {
   if (!box || !on || !p) return;
-  const x = on.offsetLeft, w = on.offsetWidth, lo = 3, hi = box.clientWidth - 3 - w;
+  // En bas, la lentille déborde un peu de chaque côté du bouton : les mots longs (Aujourd'hui, Tendances) gardent leur taille
+  // et respirent dedans, même grossis par la loupe.
+  const ext = box.id === 'one-tabs' ? ONE_EXT : 0, x = Math.max(3, on.offsetLeft - ext / 2), w = on.offsetWidth + ext, lo = 3, hi = box.clientWidth - 3 - w;
   // En haut (T N R), la lentille est posée en proportion de la barre : elle reste sur le bon module même quand la barre s'élargit (sortie de l'Accueil).
   if (p.classList.contains('one-mp')) { oneMp(box, p, on); return; }
   const x0 = p._x; p._x = x; p._w = w;
@@ -10317,7 +10344,8 @@ vHome = () => `<div class="hm one-hm" id="hm"><header class="hm-head" id="hm-hea
 // Seulement juste après un geste (arrivée sur une page, changement de période, d'unité…), pas à chaque mise à jour silencieuse des données.
 const oneRecent = () => (ONE.reveal || (!document.getElementById('splash') && !window.TNR_SPLASH_ON)) && performance.now() - ONE.act < 1600 && ONE.done !== ONE.act;
 function oneAnim(root) {
-  if (!root || oneCalm() || !oneRecent()) return;
+  // Juste après un glissement au pouce, la page était déjà visible avec ses vrais chiffres : on ne les refait pas partir de 0.
+  if (!root || oneCalm() || !oneRecent() || performance.now() - (ONE.swiped || 0) < 900) return;
   const fresh = el => { if (ONE.seen.has(el)) return false; ONE.seen.add(el); return true; };
   root.querySelectorAll('.chartbox svg.chart').forEach(svg => {
     if (!fresh(svg)) return;
@@ -10374,7 +10402,7 @@ openSheet = function (kind, ...a) { const r = oneOpenSheet0(kind, ...a); $('#she
 const oneAfter = () => { const v = oneView(); onePlan(v); oneAnim(v); };
 // Arriver sur un onglet de Recovery le redessine toujours : chiffres et anneaux repartent de zéro à chaque visite
 // (avant, une page identique n'était pas redessinée, donc rien ne bougeait en revenant).
-const oneSetTab0 = setTab; setTab = function (t) { const v = $('#v-' + t); if (v && performance.now() - ONE.act < 400) v._html = null; oneSetTab0(t); oneSync(); };
+const oneSetTab0 = setTab; setTab = function (t) { const v = $('#v-' + t); if (v && performance.now() - ONE.act < 400 && performance.now() - (ONE.swiped || 0) > 900) v._html = null; oneSetTab0(t); oneSync(); };
 const oneRender0 = render; render = function (...a) { const r = oneRender0(...a); if (S.mod === 'R') oneAfter(); return r; };
 const oneRenderMod0 = renderMod; renderMod = function (f) { oneRenderMod0(f); oneSync(); if (S.mod === 'T' || S.mod === 'N') oneAfter(); };
 oneMount();
@@ -10497,9 +10525,10 @@ fBody = () => {
 
 /* ---------- la bulle du bas suit le pouce pendant qu'on glisse d'un onglet à l'autre (dès le premier pixel) ---------- */
 window.TAB_DRAG = (i, f, ms) => {
+  if (ms && f) ONE.swiped = performance.now() + ms;
   const tabs = $('#one-tabs'), p = tabs?.querySelector('.one-pill'); if (!p || S.mod === 'home') return;
   const bs = [...tabs.querySelectorAll('[data-one-t]')], a = bs[i]; if (!a) return;
-  const b = bs[i + Math.sign(f)] || a, x = a.offsetLeft + (b.offsetLeft - a.offsetLeft) * Math.abs(f);
+  const b = bs[i + Math.sign(f)] || a, x = Math.max(3, a.offsetLeft - ONE_EXT / 2 + (b.offsetLeft - a.offsetLeft) * Math.abs(f));
   p.getAnimations().forEach(an => an.cancel());
   const from = p.style.transform; p.style.transform = `translateX(${x}px)`; p._x = x;
   if (ms && from) { p.animate([{transform: from}, {transform: p.style.transform}], {duration: ms, easing: 'cubic-bezier(.22,.8,.3,1)'}); oneMag(tabs, p, ms + 40); }
@@ -10512,7 +10541,7 @@ const oneRgb = c => { c = String(c || '').trim(); let m = c.match(/^#([0-9a-f]{3
   m = c.match(/^rgba?\((\d+)\D+(\d+)\D+(\d+)/i); return m ? [+m[1], +m[2], +m[3]] : null; };
 const ONE_BAR = {cur: null, raf: 0}, ONE_BAND = .3;   // même dosage que --band (one.css)
 syncBars = function () {
-  const O1 = {T: '#FF3B30', N: '#30D158', R: '#0A84FF'}[S.mod], c1 = oneRgb(O1);
+  const O1 = document.documentElement.classList.contains('one-pl') ? null : {T: '#FF3B30', N: '#30D158', R: '#0A84FF'}[S.mod], c1 = oneRgb(O1);
   const to = window.TNR_SPLASH_ON ? '#0B1733' : c1 ? '#' + c1.map(v => Math.round(v * ONE_BAND).toString(16).padStart(2, '0')).join('') : '#000000';
   const set = c => document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.media = ''; m.content = c; });
   const A = oneRgb(ONE_BAR.cur), B = oneRgb(to); cancelAnimationFrame(ONE_BAR.raf);
@@ -10524,6 +10553,13 @@ syncBars = function () {
   // Si l'appli passe en arrière-plan pendant le fondu, la barre finit quand même sur la bonne couleur.
   clearTimeout(ONE_BAR.t); ONE_BAR.t = setTimeout(() => { if (ONE_BAR.cur !== to && oneRgb(ONE_BAR.cur)?.join() !== B.join()) { ONE_BAR.cur = to; set(to); } }, D + 250);
 };
+
+/* ---------- Planning : une page à part, toute noire (sans fond coloré ni dégradé en haut, sans les barres) ---------- */
+(function onePlanWatch() {
+  const el = document.getElementById('plfs'); if (!el) { setTimeout(onePlanWatch, 300); return; }
+  const sync = () => { const on = el.classList.contains('on'); if (on === document.documentElement.classList.contains('one-pl')) return; document.documentElement.classList.toggle('one-pl', on); syncBars(); };
+  new MutationObserver(sync).observe(el, {attributes: true, attributeFilter: ['class']}); sync();
+})();
 
 </script>
 

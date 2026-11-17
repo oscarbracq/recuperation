@@ -776,9 +776,9 @@ svg.body.sil .rg.on{stroke:none;fill:transparent}
 .plw-hd::after{content:"";width:6px;height:22px;border-radius:3px;background:var(--fg);box-shadow:0 0 0 2px var(--bg)}
 
 .plg-b.sel{z-index:4;box-shadow:0 0 0 2px var(--fg);overflow:visible}
-.plg-hd{position:absolute;left:50%;width:44px;height:22px;margin-left:-22px;display:grid;place-items:center;z-index:5;touch-action:none}
-.plg-hd.t{top:-11px}.plg-hd.b{bottom:-11px}
-.plg-hd::after{content:"";width:28px;height:6px;border-radius:3px;background:#fff;box-shadow:0 0 0 2px rgba(0,0,0,.35)}
+.plg-hd{position:absolute;left:50%;width:44px;height:16px;margin-left:-22px;display:grid;place-items:center;z-index:5;touch-action:none}
+.plg-hd.t{top:-4px}.plg-hd.b{bottom:-4px}
+.plg-hd::after{content:"";width:26px;height:5px;border-radius:3px;background:#fff;box-shadow:0 0 0 2px rgba(0,0,0,.35)}
 .plw-hd::after{background:#fff!important}
 .pld-info{flex-wrap:wrap;white-space:normal;min-height:36px}.pld-info .chip{padding:4px 10px;font-size:.75rem}.pld-info .chip:first-of-type{margin-left:auto}
 .plsaison{margin:0 0 8px}.plsaison button{font-size:.75rem;padding:6px}
@@ -3387,7 +3387,7 @@ function plfsRender() {
   const col = ({wd, k, L}) => `<div class="plg-col${k === TODAY ? ' pltoday' : ''}" data-plcol="${wd}">${hours.map(t => `<i class="plg-h" style="top:${(t - t0) * K}px"></i>`).join('')}${plQuarters(t0, t1).map(t => `<i class="plg-h plq" style="top:${(t - t0) * K}px"></i>`).join('')}
       ${L.map(x => { const a = tmin(x.a), b = tmin(x.b), h = (b - a) * K, short = h < 30, i = plIdx(x, wd, k), on = !week && PLD.sel === String(i), sp = (x.c === 'muscu' || x.c === 'athle') && planFor(k)?.kind === (x.c === 'muscu' ? 'gym' : 'track') ? planFor(k) : null;
         const chp = short || week ? '' : plChip(x, k), mid = !!chp && h < 76;
-        return `<button class="plg-b${short ? ' short' : ''}${mid ? ' mid' : ''}${on ? ' sel' : ''}${k === TODAY && a <= nowM && nowM < b ? ' plcur' : ''}" data-plsel="${i}" data-plwd="${wd}"${k === TODAY ? ` data-pa="${a}" data-pb="${b}"` : ''} style="--pc:${PCAT[x.c]?.[1] || '#888'};top:${(a - t0) * K}px;height:${Math.max(h - 1, 8)}px"><b>${esc(x.n)}</b>${short ? '' : `<small>${x.a} – ${x.b}${x.date && !x.rs ? ' · ce jour' : ''}${x.trip ? ' · ' + esc(x.trip) : ''}</small>${chp}`}${on ? '<span class="plg-hd t" data-plhv="a"></span><span class="plg-hd b" data-plhv="b"></span>' : ''}</button>`; }).join('')}
+        return `<button class="plg-b${short ? ' short' : ''}${mid ? ' mid' : ''}${on ? ' sel' : ''}${k === TODAY && a <= nowM && nowM < b ? ' plcur' : ''}" data-plsel="${i}" data-plwd="${wd}"${k === TODAY ? ` data-pa="${a}" data-pb="${b}"` : ''} style="--pc:${PCAT[x.c]?.[1] || '#888'};top:${(a - t0) * K + 1}px;height:${Math.max(h - 3, 8)}px"><b>${esc(x.n)}</b>${short ? '' : `<small>${x.a} – ${x.b}${x.date && !x.rs ? ' · ce jour' : ''}${x.trip ? ' · ' + esc(x.trip) : ''}</small>${chp}`}${on ? '<span class="plg-hd t" data-plhv="a"></span><span class="plg-hd b" data-plhv="b"></span>' : ''}</button>`; }).join('')}
       ${k === TODAY && nowM >= t0 ? `<i class="plg-now" style="top:${(nowM - t0) * K}px"></i>` : ''}</div>`;
   const own = !!PLN().week?.[PLAN_UI.wd];
   el.className = 'plfs on ' + (week ? 'plw' : 'pld1') + (plRot() ? ' rot' : '');
@@ -3537,7 +3537,9 @@ function plwRender(el) {
   </div>`;
   const vp = el.querySelector('.plw-vp'), c = el.querySelector('.plw-c'), W = vp.offsetWidth || 600;
   // About nine hours across the screen; the thumb slides through the rest of the day.
-  const K = Math.max(W / (t1 - t0), W / ((isPC() ? 16 : 9) * 60));
+  // Zoom (deux doigts, ou Ctrl + molette) : de la journée entière à l'écran jusqu'à environ 2 h.
+  const KB = W / ((isPC() ? 16 : 9) * 60), K = Math.max(W / (t1 - t0), KB * (PLW.z || 1));
+  el.dataset.kb = KB;
   c.style.setProperty('--k', K); c.style.width = (t1 - t0) * K + 'px';
   el.dataset.t0 = t0; el.dataset.k = K;
   // A name is written only when it fits whole in its box.
@@ -3573,8 +3575,23 @@ function plwInit(el) {
   const show = d => { const x = plBlockOf(d.b.dataset.plrb, +d.b.dataset.plwd); if (!x) return null;
     const wd = PL_ORDER[(PL_ORDER.indexOf(+d.b.dataset.plwd) + (d.day || 0) + 70) % 7], f = plFit(d.b.dataset.plrb, +d.b.dataset.plwd, d.edge, d.min, wd) || [tmin(x.a), tmin(x.b)], [a, b] = f;
     const box = el.querySelector('.plw-info'); if (box) box.innerHTML = plwInfoHtml(x, wd, a, b); return [a, b]; };
+  // Deux doigts écartés ou rapprochés : le planning grossit ou rétrécit autour des doigts, jusqu'à la journée entière.
+  const PT = new Map(); let Z = null;
+  const axis = (x, y) => { const r = el.querySelector('.plw-vp').getBoundingClientRect(); return plRot() ? y - r.top : x - r.left; };
+  const zoomTo = (z, at) => {
+    const vp = el.querySelector('.plw-vp'), c = el.querySelector('.plw-c'); if (!vp || !c) return;
+    const W = vp.offsetWidth, KB = +el.dataset.kb || 1, zMin = W / 1440 / KB; z = Math.max(zMin, Math.min(4.5, z));
+    const k0 = +el.dataset.k, k1 = Math.max(W / 1440, KB * z), m = (PLW.px + at) / k0;
+    PLW.z = z; el.dataset.k = k1; c.style.setProperty('--k', k1); c.style.width = 1440 * k1 + 'px'; plwSetPx(el, m * k1 - at);
+  };
+  el.addEventListener('pointerdown', e => { if (!wk() || !e.target.closest('.plw-vp')) return; PT.set(e.pointerId, pt(e));
+    if (PT.size === 2) { const [a, b] = [...PT.values()]; clearTimeout(timer); if (D?.b) D.b.classList.remove('lift'); D = null; Z = {d0: Math.hypot(a.x - b.x, a.y - b.y) || 1, z0: PLW.z || 1}; } }, true);
+  el.addEventListener('pointermove', e => { if (!PT.has(e.pointerId)) return; PT.set(e.pointerId, pt(e)); if (!Z || PT.size < 2) return;
+    const [a, b] = [...PT.values()], d = Math.hypot(a.x - b.x, a.y - b.y); zoomTo(Z.z0 * d / Z.d0, axis((a.x + b.x) / 2, (a.y + b.y) / 2)); e.stopImmediatePropagation(); }, true);
+  const ptEnd = e => { PT.delete(e.pointerId); if (Z && PT.size < 2) { Z = null; D = null; requestAnimationFrame(() => plfsRender()); } };
+  el.addEventListener('pointerup', ptEnd, true); el.addEventListener('pointercancel', ptEnd, true);
   el.addEventListener('pointerdown', e => {
-    if (!wk() || !e.target.closest('.plw-vp')) return;
+    if (!wk() || !e.target.closest('.plw-vp') || Z) return;
     cancelAnimationFrame(raf); clearTimeout(timer);
     const h = e.target.closest('[data-plh]'), b = e.target.closest('.plw-b');
     D = {p0: pt(e), px0: PLW.px, b, edge: h?.dataset.plh, mode: h ? 'size' : b && e.pointerType === 'mouse' ? 'pan2' : 'pan', moved: false, t: performance.now(), lx: 0, v: 0, min: 0, day: 0};
@@ -3611,7 +3628,9 @@ function plwInit(el) {
     else { PLW.sel = {i: d.b.dataset.plrb, wd: +d.b.dataset.plwd}; plfsRender(); }
   });
   el.addEventListener('pointercancel', () => { clearTimeout(timer); const d = D; D = null; if (d && d.mode !== 'pan') plfsRender(); });
-  el.addEventListener('wheel', e => { if (!wk() || !e.target.closest('.plw-vp')) return; e.preventDefault(); plwSetPx(el, PLW.px + (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY)); }, {passive: false});
+  el.addEventListener('wheel', e => { if (!wk() || !e.target.closest('.plw-vp')) return; e.preventDefault();
+    if (e.ctrlKey) { clearTimeout(Z?.t); zoomTo((PLW.z || 1) * Math.exp(-e.deltaY / 300), axis(e.clientX, e.clientY)); clearTimeout(PLW.zt); PLW.zt = setTimeout(() => plfsRender(), 250); return; }
+    plwSetPx(el, PLW.px + (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY)); }, {passive: false});
   el.addEventListener('dblclick', e => { const b = e.target.closest('.plw-b'); if (!b || !wk()) return; PLAN_UI.wd = +b.dataset.plwd; blockEdit(b.dataset.plrb); });
 }
 document.addEventListener('click', e => {
