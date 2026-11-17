@@ -23,10 +23,11 @@ function oneSwitch(m, i = oneIdx()) {
   if (S.sheet) closeSheet(); while (P.stack.length) closePane();
   const k = ONE.keys[m][i] || ONE.keys[m][0];
   if (m === 'R') S.tab = k; else if (m === 'T') S.ttab = k; else { S.ftab = k; if (k === 'journal') S.fday = TODAY; }
-  saveUi(); ONE.act = performance.now(); const gh = oneGhost();
+  saveUi(); ONE.act = performance.now(); const y0 = scrollY; oneCalmIn();
   oneGo0(m, false); try { history.replaceState({...(history.state || {}), mod: m}, ''); if (i > 0 && !history.state?.one) history.pushState({mod: m, one: 1}, ''); } catch (e) {}
   oneSync(); oneHap(8);
-  oneXfade(gh);
+  // Même onglet, autre module : la page reste à la même hauteur (le planning, le corps… ne bougent pas), juste un échange.
+  if (y0 > 0) { const y = Math.min(y0, document.documentElement.scrollHeight - innerHeight); window.scrollTo(0, Math.max(0, y)); }
 }
 function oneTab(i) {
   if (S.mod === 'home') { oneSwitch(ONE.lm || 'R', i); return; }
@@ -105,24 +106,11 @@ function oneSync() {
 function oneHome() {
   if (S.mod === 'home') { window.scrollTo({top: 0, behavior: 'smooth'}); return; }
   ONE.lm = S.mod; if (S.sheet) closeSheet(); while (P.stack.length) closePane();
-  ONE.act = performance.now(); const gh = oneGhost(); oneGo0('home', false); window.scrollTo(0, 0); oneSync(); oneHap(6);
-  oneXfade(gh);
+  ONE.act = performance.now(); oneCalmIn(); oneGo0('home', false); window.scrollTo(0, 0); oneSync(); oneHap(6);
 }
-// Changer de module ou aller à l'Accueil : l'ancienne page reste affichée à sa place et s'efface pendant que la nouvelle
-// apparaît (fondu croisé). Plus d'image vide entre les deux, plus de saut quand la page remonte en haut.
-const oneShown = () => S.mod === 'home' ? $('#mod-home') : oneView();
-function oneGhost() {
-  const v = oneShown(); if (!v || oneCalm() || !v.offsetHeight) return null;
-  const r = v.getBoundingClientRect(), g = v.cloneNode(true); g.removeAttribute('id'); g.hidden = false;
-  g.querySelectorAll('[id]').forEach(n => { if (!n.closest('defs, filter, clipPath, linearGradient, radialGradient, mask, pattern')) n.removeAttribute('id'); });
-  g.style.cssText = `position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;margin:0;z-index:4;pointer-events:none;contain:layout paint`;
-  g.setAttribute('aria-hidden', 'true'); document.body.appendChild(g); return g;
-}
-function oneXfade(g) {
-  const v = oneShown(), D = 300, e = 'cubic-bezier(.4,0,.2,1)';
-  if (g) { const a = g.animate([{opacity: 1}, {opacity: 0}], {duration: D, easing: e, fill: 'forwards'}); a.onfinish = () => g.remove(); setTimeout(() => g.remove(), D + 300); }
-  if (v && !oneCalm()) v.animate([{opacity: 0}, {opacity: 1}], {duration: D, easing: e});
-}
+// Pendant un changement de module, les petites entrées animées de l'appli d'origine (blocs qui montent de quelques pixels)
+// sont coupées : la page s'échange sur place, sans rebond. Les chiffres et courbes du labo s'animent toujours.
+function oneCalmIn() { const R = document.documentElement; R.classList.add('one-sw'); clearTimeout(ONE.swT); ONE.swT = setTimeout(() => R.classList.remove('one-sw'), 700); }
 // L'accueil du labo : juste la date et la phrase du jour (le reste de l'ancien accueil est retiré pour l'instant).
 vHome = () => `<div class="hm one-hm" id="hm"><header class="hm-head" id="hm-head"><div class="sub">${fmtDay(TODAY)}</div><h1 class="hello">${esc(homeGreeting())}</h1></header></div>`;
 
@@ -323,9 +311,10 @@ window.TAB_DRAG = (i, f, ms) => {
 const oneRgb = c => { c = String(c || '').trim(); let m = c.match(/^#([0-9a-f]{3})$/i); if (m) c = '#' + [...m[1]].map(x => x + x).join('');
   m = c.match(/^#([0-9a-f]{6})$/i); if (m) return [0, 2, 4].map(k => parseInt(m[1].slice(k, k + 2), 16));
   m = c.match(/^rgba?\((\d+)\D+(\d+)\D+(\d+)/i); return m ? [+m[1], +m[2], +m[3]] : null; };
-const ONE_BAR = {cur: null, raf: 0};
+const ONE_BAR = {cur: null, raf: 0}, ONE_BAND = .3;   // même dosage que --band (one.css)
 syncBars = function () {
-  const to = window.TNR_SPLASH_ON ? '#0B1733' : getComputedStyle(document.documentElement).getPropertyValue('--top').trim() || '#000';
+  const O1 = {T: '#FF3B30', N: '#30D158', R: '#0A84FF'}[S.mod], c1 = oneRgb(O1);
+  const to = window.TNR_SPLASH_ON ? '#0B1733' : c1 ? '#' + c1.map(v => Math.round(v * ONE_BAND).toString(16).padStart(2, '0')).join('') : '#000000';
   const set = c => document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.media = ''; m.content = c; });
   const A = oneRgb(ONE_BAR.cur), B = oneRgb(to); cancelAnimationFrame(ONE_BAR.raf);
   if (!A || !B || window.TNR_SPLASH_ON || oneCalm() || document.hidden) { ONE_BAR.cur = to; set(to); return; }

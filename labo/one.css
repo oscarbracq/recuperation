@@ -128,8 +128,9 @@ html.one #one-tabs button{text-overflow:clip;letter-spacing:-.02em}
 /* Ordinateur : la mise en page en colonnes reste ; on garde juste la place de la barre du haut pour que la date et le titre ne passent pas dessous. */
 html.one.pc .mm-space{display:block!important;height:76px!important}
 
-/* Le dégradé coloré tout en haut (sous l'heure) change de couleur au même rythme que le fond (1,6 s), pas d'un coup ;
-   la barre + · T N R · planning est descendue juste sous ce dégradé, qui ne passe plus dessus. */
-@property --topa{syntax:'<color>';inherits:true;initial-value:#000}
-html.one{--topa:var(--top);transition:--o1 1.6s ease,--o2 1.6s ease,--o3 1.6s ease,--topa 1.6s ease}
-html.one body::before{background:linear-gradient(to bottom,var(--topa) env(safe-area-inset-top,0px),color-mix(in srgb,var(--topa) 55%,transparent) calc(env(safe-area-inset-top,0px) + 10px),transparent)!important}
+/* Le haut de l'écran (sous l'heure) prend la couleur du fond, assombrie : plus claire qu'avant, et un dégradé plus doux.
+   Elle change au même rythme que le fond (1,6 s). À l'Accueil, fond et haut d'écran passent au noir, en douceur aussi. */
+html.one{--band:color-mix(in srgb,var(--o1) 30%,#000)}
+html.one[data-mod="home"]{--o1:#000!important;--o2:#000!important;--o3:#000!important}
+html.one body::before{height:calc(env(safe-area-inset-top,0px) + 24px)!important;background:linear-gradient(to bottom,var(--band) env(safe-area-inset-top,0px),color-mix(in srgb,var(--band) 62%,transparent) calc(env(safe-area-inset-top,0px) + 8px),color-mix(in srgb,var(--band) 25%,transparent) calc(env(safe-area-inset-top,0px) + 16px),transparent)!important}
+html.one.one-sw .mod *,html.one.one-sw .mod{animation:none!important}
