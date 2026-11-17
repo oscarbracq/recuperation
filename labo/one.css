@@ -232,3 +232,11 @@ html.one header.top.tophead{position:relative;justify-content:center!important}
 html.one header.top.tophead>div:first-child{flex:1 1 auto;text-align:center;min-width:0}
 html.one header.top.tophead:has(>*:nth-child(2))>div:first-child{padding:0 66px}
 html.one header.top.tophead>*:nth-child(2){position:absolute;right:0;bottom:0;margin:0 0 4px!important}
+
+/* Plannings : le bloc du jour (séance et exercice faits pour toi chaque jour) encadré de la couleur du module. */
+html.one .dayframe{margin:16px 0 4px;padding:12px 10px 12px;border:1.5px solid var(--one-c,#0A84FF);border-radius:18px}
+/* « Archive » en bas à droite du planning ; quand on porte un bloc, il devient la cible « Archiver » ou « Supprimer ». */
+html.one .one-archrow{display:flex;justify-content:flex-end;margin-top:8px}
+html.one .one-arch{border:0;background:none;color:var(--fg3,#8e8e93);font:inherit;font-size:.8rem;font-weight:500;padding:6px 2px;cursor:pointer;transition:transform .2s,background .2s,color .2s}
+html.one .one-arch.drop{background:rgba(255,255,255,.1);color:var(--fg);padding:12px 22px;border-radius:14px;border:1.5px dashed rgba(255,255,255,.4)}
+html.one .one-arch.drop.over{background:var(--one-c,#0A84FF);color:#fff;border-style:solid;transform:scale(1.06)}

@@ -180,7 +180,7 @@ const oneOpenSheet0 = openSheet;
 openSheet = function (kind, ...a) { const r = oneOpenSheet0(kind, ...a); $('#sheet')?.classList.toggle('one-qs', kind === 'note'); return r; };
 
 // Les fonctions du moteur qui changent de page passent par ici : barre juste, plannings alignés, animations.
-const oneAfter = () => { const v = oneView(); onePlan(v); oneAnim(v); };
+const oneAfter = () => { const v = oneView(); onePlan(v); oneAnim(v); try { archHide(v); } catch (e) {} };
 // Arriver sur un onglet de Recovery le redessine toujours : chiffres et anneaux repartent de zéro à chaque visite
 // (avant, une page identique n'était pas redessinée, donc rien ne bougeait en revenant).
 const oneSetTab0 = setTab; setTab = function (t) { const v = $('#v-' + t); if (v && performance.now() - ONE.act < 400 && performance.now() - (ONE.swiped || 0) > 900) v._html = null; oneSetTab0(t); oneSync(); };
@@ -405,4 +405,50 @@ document.addEventListener('click', e => {
   if (e.defaultPrevented || e.target.closest('button, a, input, select, textarea, label, summary, .chartbox, .seg, [data-metric]')) return;
   const c = e.target.closest('.card'); if (!c || !c.closest('#t-view, #f-view, [id^="v-"]')) return;
   const m = c.querySelectorAll('[data-metric]'); if (m.length === 1) m[0].click();
+});
+
+/* ---------- Archives des plannings (Training, Recovery, Nutrition) ----------
+   En bas de chaque planning, un bouton « Archive ». Quand on attrape une séance (ou un menu), il devient « Archiver » :
+   on la lâche dessus, elle quitte la liste (sans être perdue). Un exercice attrapé : « Supprimer » (on peut le rajouter).
+   Sans rien attraper, « Archive » ouvre les séances archivées, qu'on peut remettre. */
+const ARCH = {
+  T: {get: () => S.tset?.arch || [], set: L => saveTset({arch: L}), name: r => refName(r), attr: 'bref', ex: r => isExRef(r), del: r => saveTset({myEx: (S.tset.myEx || []).filter(x => x !== r.slice(2))})},
+  R: {get: () => S.app?.rarch || [], set: L => rsSaveApp({rarch: L}), name: r => rsRef(r)?.name || '', attr: 'rref', ex: r => isExRef(r), del: r => rsSaveApp({rmyEx: (S.app.rmyEx || []).filter(x => x !== r.slice(2))})},
+  N: {get: () => S.fset?.march || [], set: L => saveFset({march: L}), name: r => menuById(r)?.name || '', attr: 'mref', ex: () => false, del: () => {}}
+};
+const archMod = el => el?.closest('.rboard') ? 'R' : el?.closest('.mboard') ? 'N' : 'T';
+// Ce qui est archivé n'apparaît plus dans les listes à caler (le reste du planning ne change pas).
+function archHide(root = document) {
+  root.querySelectorAll?.('.sboard').forEach(b => {
+    const m = archMod(b), A = ARCH[m], L = new Set(A.get());
+    b.querySelectorAll(`.bsrc [data-${A.attr}]`).forEach(c => { c.style.display = L.has(c.dataset[A.attr]) ? 'none' : ''; });
+    if (!b.querySelector(':scope > .one-archrow')) b.insertAdjacentHTML('beforeend', `<div class="one-archrow"><button type="button" class="one-arch" data-onearch="${m}">Archive</button></div>`);
+  });
+}
+new MutationObserver(ms => { for (const x of ms) for (const n of x.addedNodes) if (n.nodeType === 1 && (n.matches?.('.sboard') || n.querySelector?.('.sboard'))) { archHide(n.parentNode || document); return; } }).observe(document.body, {childList: true, subtree: true});
+// Pendant qu'on porte un bloc de la liste : le bouton devient la cible.
+new MutationObserver(() => {
+  const on = document.body.classList.contains('bdragging'), src = document.querySelector('.bdrag');
+  document.querySelectorAll('.one-arch').forEach(b => { const mine = on && src && b.closest('.sboard')?.contains(src) && src.closest('.bsrc');
+    const m = b.dataset.onearch, ref = src?.dataset[ARCH[m].attr === 'bref' ? 'bref' : ARCH[m].attr === 'rref' ? 'rref' : 'mref'];
+    b.classList.toggle('drop', !!mine); b.textContent = mine ? (ARCH[m].ex(ref) ? 'Supprimer' : 'Archiver') : 'Archive'; });
+}).observe(document.body, {attributes: true, attributeFilter: ['class']});
+document.addEventListener('pointermove', e => { const b = document.querySelector('.one-arch.drop'); if (!b) return; const r = b.getBoundingClientRect(); b.classList.toggle('over', e.clientX > r.left - 10 && e.clientX < r.right + 10 && e.clientY > r.top - 14 && e.clientY < r.bottom + 14); }, true);
+document.addEventListener('pointerup', async e => {
+  const b = document.querySelector('.one-arch.drop.over'), src = document.querySelector('.bdrag'); if (!b || !src) return;
+  const m = b.dataset.onearch, A = ARCH[m], ref = src.dataset[A.attr === 'bref' ? 'bref' : A.attr === 'rref' ? 'rref' : 'mref']; if (!ref) return;
+  const n = A.name(ref) || 'Bloc';
+  if (A.ex(ref)) { await A.del(ref); toast(n + ' supprimé'); }
+  else { const p = A.set([...new Set([...A.get(), ref])]); archHide(); await p; archHide(); toast(n + ' archivé'); }
+  oneHap(10);
+}, true);
+function archPane(m) {
+  const A = ARCH[m];
+  openPane({title: 'Archive', render: () => { const L = A.get().filter(r => A.name(r));
+    return L.length ? `<div class="list" style="margin-top:14px">${L.map(r => `<div class="row"><span class="l">${esc(A.name(r))}</span><button type="button" class="chip" data-onerest="${m}|${esc(r)}">Remettre</button></div>`).join('')}</div>`
+      : '<div class="card empty" style="margin-top:14px"><b>Rien d\'archivé</b>Attrape une séance dans la liste et lâche-la sur « Archiver ».</div>'; }});
+}
+document.addEventListener('click', async e => {
+  const a = e.target.closest('[data-onearch]'); if (a && !a.classList.contains('drop')) { archPane(a.dataset.onearch); return; }
+  const r = e.target.closest('[data-onerest]'); if (r) { const [m, ...x] = r.dataset.onerest.split('|'), ref = x.join('|'); await ARCH[m].set(ARCH[m].get().filter(y => y !== ref)); paneRender(); archHide(); toast('Remis dans la liste'); }
 });

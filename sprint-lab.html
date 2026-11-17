@@ -4834,15 +4834,17 @@ function rsBoard() {
     return `<div class="bcell${rt ? ' slot' : ''}${past ? ' past' : ''}${k === TODAY ? ' today' : ''}" data-rday="${k}" ${past ? '' : `data-rdk="${k}"`}><span class="bd">${DOW[(dow(k) + 6) % 7]} <b>${+k.slice(8)}</b>${rt ? `<small>${tfr(rt.a)}</small>` : ''}</span>
       ${s ? `<div class="bchip rchip${done ? ' done' : past ? ' miss' : ''}" data-rref="${esc(s.id)}" data-rfrom="${k}" title="${esc(s.name)}"><span>${esc(rsShort(s))}</span>${done ? BIC_OK : past ? BIC_NO : `<button type="button" class="bx" data-rx="${k}" aria-label="Retirer ${esc(s.name)} du ${esc(fmtShort(k))}"><svg viewBox="0 0 12 12" width="9" height="9" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>`}</div>` : done ? `<div class="bchip rchip done ghost"><span>Faite</span>${BIC_OK}</div>` : '<span class="bplus"></span>'}</div>`; };
   const chip = s => { const used = Object.entries(S.app?.rdated || {}).some(([k, v]) => v === s.id && k >= TODAY); return `<div class="bchip src rchip${used ? ' on' : ''}" data-rref="${esc(s.id)}" title="${esc(s.name)}"><span>${esc(s.name)}</span><small>${esc(rsGoal(s) || (s.day ? 'faite pour ta journée' : s.items.length + ' exercice' + (s.items.length > 1 ? 's' : '')))} · ${rsDur(s)} min${used ? ' · calée' : ''}</small></div>`; };
-  return `<div class="card sboard rboard"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Mes 4 semaines · récup</span><span class="sbnav"><button type="button" data-rboff="-1" aria-label="4 semaines avant"${off <= 0 ? ' disabled' : ''}>‹</button><small>${esc(fmtShort(weeks[0]).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(weeks[3], 6)).replace(/^\S+ /, ''))}</small><button type="button" data-rboff="1" aria-label="4 semaines après">›</button></span></div>
+  return `<div class="card sboard rboard"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Mes 4 semaines · récup</span><span class="sbnav"><button type="button" data-rboff="-1" aria-label="4 semaines avant"${off <= -26 ? ' disabled' : ''}>‹</button><small>${esc(fmtShort(weeks[0]).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(weeks[3], 6)).replace(/^\S+ /, ''))}</small><button type="button" data-rboff="1" aria-label="4 semaines après">›</button></span></div>
     <div class="bgrid">${weeks.map(w => `<div class="bweek"><span class="bwk">S${seasonWeek(w)}</span>${[0, 1, 2, 3, 4, 5, 6].map(i => cell(addDays(w, i))).join('')}</div>`).join('')}</div>
-    <div class="sec-label" style="margin:14px 2px 6px">Séances <small>garde le doigt sur une séance, puis glisse-la sur un jour</small></div>
-    <div class="bsrc">${rsAll().map(chip).join('')}</div>
+    <div class="sec-label" style="margin:14px 2px 6px">Séances</div>
+    <div class="bsrc">${RS_OWN().map(chip).join('') || '<p class="small muted" style="margin:0">Crée une séance : elle apparaîtra ici.</p>'}</div>
     ${(() => { const xc = (id, sm) => { const x = RX[id]; return x ? `<div class="bchip src rchip xchip" data-rref="x:${esc(id)}" title="${esc(x.n)}"><span>${esc(x.n)}</span><small>${esc(sm)} · ${x.min} min</small></div>` : ''; };
       const mine = (S.app?.rmyEx || []).filter(id => RX[id]), day = rxDay();
-      return `<div class="sec-label" style="margin:14px 2px 6px">Exercices <small>ceux que tu as ajoutés</small></div>
+      const auto = RS_DAY.filter(s => recSteps(s.day).length), dchip = s => chip(s).replace(/<small>[\s\S]*?<\/small>/, `<small>${s.day === 'mus' ? 'Musculation' : 'Douleur'} · ${rsDur(s)} min</small>`);
+      return `<div class="sec-label" style="margin:14px 2px 6px">Exercices</div>
         <div class="bsrc">${mine.length ? mine.map(id => xc(id, RX[id].tool || 'Sans matériel')).join('') : '<p class="small muted" style="margin:0">Touche « + Ajouter un exercice » : il apparaîtra ici, prêt à être calé sur un jour.</p>'}</div>
-        ${day.length ? `<div class="sec-label" style="margin:14px 2px 6px">Exercices du jour <small>pour aller mieux</small></div><div class="bsrc">${day.map(x => xc(x.id, 'pour : ' + (MUSI[x.m]?.n || '').toLowerCase())).join('')}</div>` : ''}`; })()}
+        ${auto.length || day.length ? `<div class="dayframe">${auto.length ? `<div class="sec-label" style="margin:0 2px 6px">Séance de récupération du jour</div><div class="bsrc">${auto.map(dchip).join('')}</div>` : ''}
+          ${day.length ? `<div class="sec-label" style="margin:${auto.length ? 12 : 0}px 2px 6px">Exercice de récupération du jour</div><div class="bsrc">${day.map((x, i) => xc(x.id, x.pain ? 'Douleur' : 'Musculation')).join('')}</div>` : ''}</div>` : ''}`; })()}
     <p class="small muted" style="margin:10px 2px 0">Récup musculation et Récup douleurs sont refaites chaque jour d'après tes séances et tes douleurs. Touche un bloc pour le voir, un jour pour voir tout ce qui y est calé. Plusieurs blocs s'empilent sur un jour, le dernier posé dessus.</p></div>`;
 }
 function rsList() {
@@ -4913,7 +4915,7 @@ document.addEventListener('click', async e => {
   if ((b = e.target.closest('[data-rdopen]'))) { const r = b.dataset.rdopen; if (isExRef(r)) { const x = RX[r.slice(2)]; if (x) recRun('ex', x); } else rsView(r); return; }
   if ((b = e.target.closest('[data-rdchoose]'))) { closePane(); rsChoose(b.dataset.rdchoose); return; }
   if (e.target.closest('[data-rexadd]')) { RPK = true; rsPick(); return; }
-  if ((b = e.target.closest('[data-rboff]')) && !b.disabled) { S.rbOff = Math.max(0, (S.rbOff || 0) + +b.dataset.rboff); render(); return; }
+  if ((b = e.target.closest('[data-rboff]')) && !b.disabled) { S.rbOff = Math.max(-26, (S.rbOff || 0) + +b.dataset.rboff); render(); return; }
   if (e.target.closest('[data-rsnew]')) { rsEdit(null); return; }
   if ((b = e.target.closest('[data-rsview]'))) { rsView(b.dataset.rsview); return; }
   if ((b = e.target.closest('[data-rsgo2]'))) { const s = rsById(b.dataset.rsgo2); closePane(); if (s) rsRun(s); return; }
@@ -6209,7 +6211,7 @@ const MUSC_GEN = {}, EQ_GEN = {};
     p: ['Poulie', 'à la poulie'], e: ['Élastique', 'à l\'élastique', 'reps'], m: ['Machine', 'à la machine'], s: ['Smith', 'à la Smith'], l: ['Landmine', 'à la landmine'], z: ['Barre EZ', 'à la barre EZ'],
     x: ['Barre hexagonale', 'à la barre hexagonale'], w: ['Poids du corps', '', 'reps'], v: ['Poids du corps', 'lesté'], t: ['Anneaux', 'aux sangles', 'reps', ['trx', 'rings']], a: ['Anneaux', 'aux anneaux', 'reps', ['rings']],
     mb: ['Médecine-ball', 'au médecine-ball'], sb: ['Ballon', 'sur swiss ball', 'reps', ['swiss']], sa: ['Autre', 'au sac lesté'], sf: ['Barre', 'à la safety bar', '', ['rack']], c: ['Barre', 'à la barre avec chaînes'],
-    tb: ['Barre', 'à la barre trap'], bp: ['Machine', 'à la machine convergente'], pl: ['Machine', 'à la machine à disques'], cb: ['Autre', 'au câble de traction'], d: ['Autre', 'au disque'], tr: ['Traîneau', '', '', ['sled']], cm: ['Machine', '', '']};
+    tb: ['Barre', 'à la barre trap'], bp: ['Machine', 'à la machine convergente'], pl: ['Machine', 'à la machine à disques'], cb: ['Autre', 'au câble de traction'], d: ['Autre', 'avec un disque'], tr: ['Traîneau', '', '', ['sled']], cm: ['Machine', '', '']};
   // A variant: [words, code, muscles to add, only with these equipment codes, extra cue, unit]
   const O = (w, c, mu, only, cue, u) => ({w, c, mu, only: only ? only.split(' ') : null, cue, u});
   const OE = (...a) => ({...O(...a), end: true});
@@ -7707,14 +7709,30 @@ function balEx() {
     if (c.length) out.push({id: c[seed % c.length].id, m}); }
   return out;
 }
+// The balance session of the day: the two exercises of the day plus two more for the next lagging muscles, 3 × 12.
+function balPlan() {
+  let p = BUILTIN.find(x => x.id === 'bal-day'); if (!p) { p = {id: 'bal-day', kind: 'gym', name: 'Séance de rééquilibre', title: 'Équilibre de tes chaînes', items: []}; BUILTIN.push(p); }
+  if (p.k !== TODAY) { const b = balEx(), more = []; try { const st = musState(), v = Object.fromEntries(st.map(x => [x.k, x.week]));
+      for (const m of ['hams', 'gmed', 'rotat', 'tib', 'adduct', 'rhomb'].sort((a, c) => (v[a] || 0) / musLimit(a) - (v[c] || 0) / musLimit(c))) { if (more.length >= 2) break;
+        const e = EX.find(x => x.t === 'gym' && x.cat === 'Prévention' && (musCoef(x.id)[m] || 0) >= .75 && !b.some(y => y.id === x.id) && !more.includes(x.id)); if (e) more.push(e.id); } } catch (e) {}
+    p.items = [...b.map(x => x.id), ...more].map(ex => ({ex, sets: 3, reps: 12, rest: 60})); p.k = TODAY; }
+  return p.items.length ? p : null;
+}
 // Under the day's session in Aujourd'hui: the other blocks placed today.
 function tMore(kind) {
   const L = moreOf(TODAY, kind); if (!L.length) return '';
   return `<div class="list">${L.map(r => { const x = isExRef(r), e = x ? exOf(r.slice(2)) : null, q = x ? null : planOf(r); return `<button type="button" class="rowbtn" data-dpopen="${esc(r)}"><span><b>${esc(x ? e.n : q?.name || '')}</b><span class="meta">${x ? 'Exercice calé aujourd\'hui' + (exDone(TODAY, e.id) ? ' · fait' : '') : esc(q?.title || q?.desc || '') + ' · aussi calée aujourd\'hui'}</span></span>${ICON.chev}</button>`; }).join('')}</div>`;
 }
+// "Séance N" sessions: the number shown is the order he will do them in, after the last one done (41 done → the next
+// placed is 42, whatever number the session was created with).
+const seqDone = kind => { let n = 0; for (const l of logs()) if (l.kind === kind) { const m = (l.name || '').match(/^Séance (\d+)/); if (m) n = Math.max(n, +m[1]); } return n; };
+function seqRank(k, kind) {
+  const L = Object.entries(S.tset?.dated || {}).filter(([d, v]) => d.slice(0, 10) >= TODAY && (kind === 'track' ? d.endsWith('|t') || planOf(v)?.kind === 'track' : !d.endsWith('|t') && planOf(v)?.kind !== 'track') && /^Séance \d+/.test(planOf(v)?.name || '') && !logsOn(d.slice(0, 10)).some(l => l.kind === kind)).map(([d]) => d.slice(0, 10)).sort();
+  const i = L.indexOf(k); return i < 0 ? null : seqDone(kind) + i + 1;
+}
 const sbShort = p => { if (p.n) return 'S' + p.n; if (p.short) return p.short; if (p.coach && p.seq) return 'S' + p.seq; const m = (p.name || '').match(/^Séance (\d+)/); return m ? 'S' + m[1] : (p.name || '').slice(0, 4); };
 // The next number for a new session of that kind: after his programme (S1…S31 in muscu) and his own "Séance N".
-function nextSeq(kind) { let n = 0; for (const p of [...myPlans(), ...(kind === 'gym' ? TDV_PLANS : [])]) if (p.kind === kind) { const m = (p.name || '').match(/^Séance (\d+)/); n = Math.max(n, p.n || p.seq || (m ? +m[1] : 0)); } return n + 1; }
+function nextSeq(kind) { const fut = Object.entries(S.tset?.dated || {}).filter(([d, v]) => d.slice(0, 10) >= TODAY && planOf(v)?.kind === kind && /^Séance \d+/.test(planOf(v)?.name || '')).length; if (seqDone(kind)) return seqDone(kind) + fut + 1; let n = 0; for (const p of [...myPlans(), ...(kind === 'gym' ? TDV_PLANS : [])]) if (p.kind === kind) { const m = (p.name || '').match(/^Séance (\d+)/); n = Math.max(n, p.n || p.seq || (m ? +m[1] : 0)); } return n + 1; }
 function sesBoard(kind) {
   const off = S.sbOff || 0, mon0 = addDays(monday(TODAY), 28 * off), c = kind === 'gym' ? 'muscu' : 'athle';
   const cell = k => {
@@ -7725,20 +7743,25 @@ function sesBoard(kind) {
       ${(() => { const mo = moreOf(k, kind), top = mo.at(-1);
         const chipOf = (ref, from, dn, ms, stk) => `<div class="bchip${dn ? ' done' : ms ? ' miss' : ''}${isExRef(ref) ? ' xchip' : ''}${stk ? ' stk' : ''}" data-bref="${esc(ref)}" data-bfrom="${esc(from)}" title="${esc(refName(ref))}"><span>${esc(isExRef(ref) ? exInit(exOf(ref.slice(2)).n) : sbShort(planOf(ref) || {}))}</span>${dn ? BIC_OK : ms ? BIC_NO : `<button type="button" class="bx" data-bx="${esc(from)}" aria-label="Retirer ${esc(refName(ref))} du ${esc(fmtShort(k))}">${BX_SVG}</button>`}</div>`;
         if (top) { const x = isExRef(top), dn = x ? exDone(k, top.slice(2)) : done; return chipOf(top, `m|${k}|${kind}|${mo.length - 1}`, dn, !dn && (past || (!x && kindSkip(k, kind))), !!p || mo.length > 1); }
+        const rk = p && !done && k >= TODAY && /^Séance \d+/.test(p.name || '') ? seqRank(k, kind) : null;
+        if (rk) return chipOf(caleRef(p), dk, done, miss, false).replace(`<span>${esc(sbShort(p))}</span>`, `<span>S${rk}</span>`);
         return p ? chipOf(caleRef(p), dk, done, miss, false) : done ? `<div class="bchip done ghost"><span>${esc(lg || 'Faite')}</span>${BIC_OK}</div>` : past ? '' : `<span class="bplus">${b ? '+' : ''}</span>`; })()}</div>`;
   };
   const weeks = [0, 1, 2, 3].map(w => addDays(mon0, 7 * w));
   const src = [...(kind === 'gym' ? tdvTodo(8) : []), ...myPlans().filter(x => x.kind === kind)];
   const placed = new Set(Object.entries(S.tset?.dated || {}).filter(([d]) => d >= TODAY).map(([, v]) => v));
-  return `<div class="card sboard"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Mes 4 semaines · ${kind === 'gym' ? 'muscu' : 'sprint'}</span><span class="sbnav"><button type="button" data-sboff="-1" aria-label="4 semaines avant"${off <= 0 ? ' disabled' : ''}>‹</button><small>${esc(fmtShort(weeks[0]).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(weeks[3], 6)).replace(/^\S+ /, ''))}</small><button type="button" data-sboff="1" aria-label="4 semaines après">›</button></span></div>
+  return `<div class="card sboard"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Mes 4 semaines · ${kind === 'gym' ? 'muscu' : 'sprint'}</span><span class="sbnav"><button type="button" data-sboff="-1" aria-label="4 semaines avant"${off <= -26 ? ' disabled' : ''}>‹</button><small>${esc(fmtShort(weeks[0]).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(weeks[3], 6)).replace(/^\S+ /, ''))}</small><button type="button" data-sboff="1" aria-label="4 semaines après">›</button></span></div>
     <div class="bgrid">${weeks.map(w => `<div class="bweek"><span class="bwk">S${seasonWeek(w)}</span>${[0, 1, 2, 3, 4, 5, 6].map(i => cell(addDays(w, i))).join('')}</div>`).join('')}</div>
-    <div class="sec-label" style="margin:14px 2px 6px">Séances <small>${isPC() ? 'glisse une séance sur un jour' : 'garde le doigt sur une séance, puis glisse-la sur un jour'}</small></div>
+    <div class="sec-label" style="margin:14px 2px 6px">Séances</div>
     <div class="bsrc">${src.length ? src.map(x => { const r = caleRef(x), on = placed.has(r); return `<div class="bchip src${on ? ' on' : ''}" data-bref="${esc(r)}" title="${esc(x.name)}${x.title ? ' · ' + esc(x.title) : ''}"><span>${esc(x.name)}</span><small>${(x.title || x.desc) ? esc(x.title || x.desc) + ' · ' : ''}${estMin(x)} min${on ? ' · calée' : ''}</small></div>`; }).join('') : '<p class="small muted" style="margin:0">Crée une séance ci-dessous : elle apparaîtra ici, prête à être calée.</p>'}</div>
     ${(() => { const xc = (id, sm) => { const e = exOf(id); return `<div class="bchip src xchip" data-bref="x:${esc(id)}" title="${esc(e.n)}"><span>${esc(e.n)}</span><small>${esc(sm)}</small></div>`; };
       const mine = (S.tset?.myEx || []).filter(id => exOf(id).t === kind), bal = balEx();
-      return `<div class="sec-label" style="margin:14px 2px 6px">Exercices <small>ceux que tu as ajoutés</small></div>
+      const bp = kind === 'gym' ? balPlan() : null;
+      return `<div class="sec-label" style="margin:14px 2px 6px">Exercices</div>
         <div class="bsrc">${mine.length ? mine.map(id => xc(id, exOf(id).cat || 'Exercice')).join('') : '<p class="small muted" style="margin:0">Touche « + Ajouter un exercice » : il apparaîtra ici, prêt à être calé sur un jour.</p>'}</div>
-        ${bal.length ? `<div class="sec-label" style="margin:14px 2px 6px">Exercices du jour <small>pour équilibrer tes chaînes</small></div><div class="bsrc">${bal.map(x => xc(x.id, 'pour : ' + (MUSI[x.m]?.n || '').toLowerCase())).join('')}</div>` : ''}`; })()}
+        ${kind === 'gym' && bal.length ? `<div class="dayframe"><div class="sec-label" style="margin:0 2px 6px">Séance de rééquilibre du jour</div>
+          <div class="bsrc">${bp ? `<div class="bchip src" data-bref="${esc(bp.id)}" title="${esc(bp.name)}"><span>${esc(bp.name)}</span><small>Équilibre de tes chaînes · ${estMin(bp)} min</small></div>` : ''}</div>
+          <div class="sec-label" style="margin:12px 2px 6px">Exercice de rééquilibre du jour</div><div class="bsrc">${bal.map(x => xc(x.id, 'Équilibre de tes chaînes')).join('')}</div></div>` : ''}`; })()}
     <p class="small muted" style="margin:10px 2px 0">Touche un bloc pour le voir, un jour pour voir tout ce qui y est calé. Plusieurs blocs peuvent aller sur un même jour : ils s'empilent, le dernier posé dessus. Les jours encadrés sont tes créneaux ${kind === 'gym' ? 'de muscu' : 'd\'athlé'}.</p></div>`;
 }
 // Drag and drop: with the mouse it moves at once; with the thumb, after a short hold (so the page still scrolls).
@@ -7792,7 +7815,7 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('click', async e => {
   const b = e.target.closest('[data-bx]'), o = e.target.closest('[data-sboff]');
-  if (o && !o.disabled) { S.sbOff = Math.max(0, (S.sbOff || 0) + +o.dataset.sboff); renderMod(); return; }
+  if (o && !o.disabled) { S.sbOff = Math.max(-26, (S.sbOff || 0) + +o.dataset.sboff); renderMod(); return; }
   if (!b) return; e.stopPropagation(); if (b.closest('#pane') && !b.dataset.bxstay) closePane();
   const k = b.dataset.bx, mk = k.startsWith('m|') ? k.split('|') : null, n = mk ? refName((S.tset.more?.[mKey(mk[1], mk[2])] || [])[+mk[3]]) : planOf(S.tset.dated?.[k])?.name;
   await boardRemove(k); toast((n || 'Bloc') + ' retiré du ' + fmtShort(mk ? mk[1] : k.slice(0, 10)));
@@ -9480,11 +9503,11 @@ function menuBoard() {
     return `<div class="bcell${past ? ' past' : ''}${k === TODAY ? ' today' : ''}" ${past ? '' : `data-mdk="${k}"`}><span class="bd">${DOW[(dow(k) + 6) % 7]} <b>${+k.slice(8)}</b></span>
       ${dm ? `<div class="bchip mchip${dm.kind === 'day' ? ' mday' : ''}" data-mref="${dm.id}" data-mfrom="${k}" title="${esc(dm.name)}"><span>${esc(menuShort(dm))}</span>${past ? '' : `<button type="button" class="bx" data-mx="${k}" aria-label="Retirer ${esc(dm.name)} du ${esc(fmtShort(k))}"><svg viewBox="0 0 12 12" width="9" height="9" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>`}</div>` : wm ? `<div class="bchip mchip" data-mref="${wm.id}" title="${esc(wm.name)}"><span>${esc(menuShort(wm))}</span></div>` : '<span class="bplus"></span>'}</div>`; };
   const wks = myMenus().filter(m => m.kind !== 'day'), dys = myMenus().filter(m => m.kind === 'day');
-  return `<div class="card sboard mboard"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Mes 4 semaines · menus</span><span class="sbnav"><button type="button" data-mboff="-1" aria-label="4 semaines avant"${off <= 0 ? ' disabled' : ''}>‹</button><small>${esc(fmtShort(weeks[0]).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(weeks[3], 6)).replace(/^\S+ /, ''))}</small><button type="button" data-mboff="1" aria-label="4 semaines après">›</button></span></div>
+  return `<div class="card sboard mboard"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Mes 4 semaines · menus</span><span class="sbnav"><button type="button" data-mboff="-1" aria-label="4 semaines avant"${off <= -26 ? ' disabled' : ''}>‹</button><small>${esc(fmtShort(weeks[0]).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(weeks[3], 6)).replace(/^\S+ /, ''))}</small><button type="button" data-mboff="1" aria-label="4 semaines après">›</button></span></div>
     <div class="bgrid">${weeks.map(w => { const wm = menuById(S.fset.menuWeek?.[w]); return `<div class="bweek" data-mwrow="${w}"><button type="button" class="bwk mwk${wm ? ' on' : ''}" data-mweek="${w}" aria-label="Menu de la semaine ${seasonWeek(w)}">S${seasonWeek(w)}</button>${[0, 1, 2, 3, 4, 5, 6].map(i => cell(addDays(w, i))).join('')}</div>`; }).join('')}</div>
-    <div class="sec-label" style="margin:14px 2px 6px">Menus semaine <small>glisse-les sur une semaine</small></div>
+    <div class="sec-label" style="margin:14px 2px 6px">Menu semaine</div>
     <div class="bsrc">${wks.length ? wks.map(m => mchip(m)).join('') : '<p class="small muted" style="margin:0">Aucun bloc semaine.</p>'}</div>
-    <div class="sec-label" style="margin:14px 2px 6px">Menus jour <small>glisse-les sur un jour spécial</small></div>
+    <div class="sec-label" style="margin:14px 2px 6px">Menu jour</div>
     <div class="bsrc">${dys.length ? dys.map(m => mchip(m)).join('') : '<p class="small muted" style="margin:0">Crée un bloc jour ci-dessous pour un jour différent (compétition, repas de famille…).</p>'}</div>
     <p class="small muted" style="margin:10px 2px 0">Garde le doigt sur un bloc, puis glisse-le. Tu peux aussi toucher une semaine (S${seasonWeek(weeks[0])}…) ou un jour pour choisir. Un jour vide, c'est ton menu de base.</p></div>`;
 }
@@ -9540,7 +9563,7 @@ async function menuNew(from, kind) {
 }
 document.addEventListener('click', async e => {
   let b;
-  if ((b = e.target.closest('[data-mboff]')) && !b.disabled) { S.mbOff = Math.max(0, (S.mbOff || 0) + +b.dataset.mboff); renderMod(true); return; }
+  if ((b = e.target.closest('[data-mboff]')) && !b.disabled) { S.mbOff = Math.max(-26, (S.mbOff || 0) + +b.dataset.mboff); renderMod(true); return; }
   if ((b = e.target.closest('[data-mview]'))) { menuView(b.dataset.mview); return; }
   if ((b = e.target.closest('[data-medit]'))) { if (P.stack.at(-1)?.title === (menuById(b.dataset.medit)?.name || 'Menu de base')) closePane(); menuOpen(b.dataset.medit); return; }
   if ((b = e.target.closest('[data-mplace]'))) { const m = menuById(b.dataset.mplace); closePane(); if (m?.kind === 'day') menuChoose([TODAY], cap(fmtShort(TODAY))); else menuChoose([], 'Semaine ' + seasonWeek(TODAY), monday(TODAY)); return; }
