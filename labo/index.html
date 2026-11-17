@@ -9394,12 +9394,12 @@ function segSheet(id) {
     for (let k = P.from; k <= P.to && k <= TODAY; k = addDays(k, 1)) { const v = W(k, 'seg')?.[m]?.[id]; if (v != null) raw.push({k, v}); }
     let pts = raw.map(x => ({k: x.k, v: x.v, tip: cap(fmtShort(x.k))}));
     if (SGV.gran === 'year' || SGV.gran === 'all') { const by = {}; for (const x of raw) (by[monday(x.k)] ||= []).push(x.v); pts = Object.keys(by).sort().map(w => ({k: w, v: mean(by[w]), tip: 'Semaine du ' + fmtShort(w)})); }
-    const last = raw.at(-1), d = raw.length > 1 ? last.v - raw[0].v : null, good = d == null ? null : m === 'mm' ? d >= 0 : d <= 0;
+    const last = raw.at(-1), d = raw.length > 1 ? last.v - raw[0].v : null, good = d == null ? null : d >= 0;
     return `<div class="seg" role="group" aria-label="Période" style="margin-top:14px">${[['week', 'Semaine'], ['month', 'Mois'], ['year', 'Année'], ['all', 'Tout']].map(([v, l]) => `<button type="button" data-sgg="${v}" aria-pressed="${SGV.gran === v}">${l}</button>`).join('')}</div>
       <div class="card" style="margin-top:12px"><div class="chead"><span class="eyebrow" style="color:${col}">${esc(lab)}</span><b class="num">${last ? fx(last.v, 2) + ' kg' : '–'}</b></div>
         <div class="sbnav" style="justify-content:space-between;width:100%;margin:6px 0 10px"><button type="button" data-sgo="1" aria-label="Période d'avant"${SGV.gran === 'all' ? ' disabled' : ''}>‹</button><small>${esc(P.title)}</small><button type="button" data-sgo="-1" aria-label="Période d'après"${SGV.off <= 0 ? ' disabled' : ''}>›</button></div>
         ${pts.length > 1 ? chart(pts, {color: col, dec: 2, unit: 'kg'}) : '<p class="small muted" style="margin:0">Pas assez de pesées sur cette période.</p>'}
-        ${d != null ? `<p class="small" style="margin:10px 0 0"><b style="color:${good ? 'var(--good)' : 'var(--warn)'}">${d >= 0 ? '+' : '−'}${fx(Math.abs(d), 2)} kg</b> entre le ${esc(fmtShort(raw[0].k))} et le ${esc(fmtShort(last.k))} · ${raw.length} pesées</p>` : ''}</div>`; }});
+        ${d != null ? `<p class="small" style="margin:10px 0 0"><b style="color:${good ? '#30D158' : '#FF453A'}">${d >= 0 ? '+' : '−'}${fx(Math.abs(d), 2)} kg</b> entre le ${esc(fmtShort(raw[0].k))} et le ${esc(fmtShort(last.k))} · ${raw.length} pesées</p>` : ''}</div>`; }});
 }
 document.addEventListener('click', e => { let b;
   if ((b = e.target.closest('[data-segjump]'))) { segSheet(b.dataset.segjump); return; }

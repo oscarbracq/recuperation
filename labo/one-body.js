@@ -18,12 +18,21 @@ function b3Key(g, sub) {
     hams: 'hams', calves: 'calves', tib: 'tib', rot: 'rotat', rhomb: 'rhomb', arm: 'bi', hip: 'psoas', hiprot: 'piri'}[g] || null;
 }
 const B3VB = {front: [94, 84, 540, 1268], back: [813.5, 84, 540, 1268]};
-const B3C = {skin: '#2f3036', ghost: '#25262b', line: '#141416'};
+const B3C = {skin: '#2f3036', ghost: '#25262b', line: '#141416', oline: '#6a6d78', obg: '#1a1b20'};
 // Le corps dessiné, en coordonnées d'origine. paint(key, sub) → {fill, cls} pour chaque muscle ; layer : 'm' (superficiels), 'deep' (moyens et profonds), 'shape' (la forme seule).
 function b3Inner(view, layer, paint) {
   const B = B3D[view], mir = `transform="translate(${2 * B.cx} 0) scale(-1 1)"`, hd = `transform="translate(${B.dx} 0)"`, nm = view === 'front' ? ['droit', 'gauche'] : ['gauche', 'droit'];
   const all = [...B.s, ...B.m.map(x => x[2])].map(d => `<path d="${d}"/>`).join(''), head = B.c.map(d => `<path d="${d}"/>`).join('');
-  const skin = [...B.s, ...B.x].map(d => `<path d="${d}" fill="${B3C.skin}"/>`).join('');
+  // La main : paume, doigts et pouce sont des formes qui se chevauchent ; on la dessine d'un seul bloc, sans trait dedans.
+  const skin = [...B.s, B.x[1]].map(d => `<path d="${d}" fill="${B3C.skin}"/>`).join('') + `<path d="${B.x[0]}" fill="${B3C.skin}" stroke="${B3C.skin}" stroke-width="1"/>`;
+  if (layer === 'outline') {
+    // Recovery : la silhouette seule, le tour du corps et le tour de chaque muscle, sans couleur.
+    const ln = B3C.oline, bg = B3C.obg, parts = [...B.s, ...B.x, ...B.m.map(x => x[2])].map(d => `<path d="${d}"/>`).join('');
+    const both = x => `${x}<g ${mir}>${x}</g><g ${hd}>${head}</g>`;
+    const lines = [...B.s, B.x[1], ...B.m.map(x => x[2])].map(d => `<path d="${d}"/>`).join('');
+    return `<g stroke-linejoin="round"><g fill="${ln}" stroke="${ln}" stroke-width="22">${both(parts)}</g><g fill="${bg}" stroke="${bg}" stroke-width="12">${both(parts)}</g>
+      <g fill="none" stroke="${ln}" stroke-opacity=".5" stroke-width="2.6">${lines}<g ${mir}>${lines}</g></g>${B.hair ? `<path ${hd} d="${B.hair}" fill="none" stroke="${ln}" stroke-opacity=".5" stroke-width="2.6"/>` : ''}</g>`;
+  }
   const mus = (list, k) => list.map(([g, sub, d]) => { const key = b3Key(g, sub), p = paint ? paint(key, sub, g) : null;
     return `<path d="${d}" class="m3${p?.cls ? ' ' + p.cls : ''}" ${key ? `data-mz3="${key}"` : ''} data-sub="${esc(sub)}" data-side="${nm[k]}" fill="${p?.fill || B3C.skin}"/>`; }).join('');
   const half = k => layer === 'shape' ? skin + B.m.map(x => `<path d="${x[2]}" fill="${B3C.skin}"/>`).join('')
@@ -80,35 +89,55 @@ document.addEventListener('click', e => { if (S.mod === 'T' && S.msel && e.targe
 const oneBodySvg0 = bodySvg;
 bodySvg = function (view) {
   const h = oneBodySvg0(view);
-  return h.replace(/<path class="silp"[^>]*\/>/, `${b3In200(view, 'shape')}`).replace(/<g fill="none" stroke="#000" stroke-opacity=".28" stroke-width="1">[\s\S]*?<\/g>/, '');
+  return h.replace(/<path class="silp"[^>]*\/>/, `${b3In200(view, 'outline')}`).replace(/<g fill="none" stroke="#000" stroke-opacity=".28" stroke-width="1">[\s\S]*?<\/g>/, '');
 };
 
 /* ---------- Nutrition · Mon corps : masse musculaire à gauche, masse grasse à droite ---------- */
+// Chaque segment : la moyenne de la période choisie (ou la pesée du jour), et l'écart avec la moyenne de la période d'avant
+// (semaine → semaine d'avant, mois → mois d'avant…). Plus = vert, moins = rouge.
+const SEG_LBL = {ra: [36, 132, 'end'], la: [164, 132, 'start'], tr: [100, 112, 'middle'], rl: [62, 300, 'end'], ll: [138, 300, 'start']};
 fBody = function () {
   const P = periodOf(S.gran, S.off), day = S.gran === 'day';
   const head = `<header class="top tophead"><div><div class="sub">Segment par segment · ta Withings Body Scan</div><h1>Mon corps</h1></div></header>${granSeg()}<div class="card" style="margin-top:10px;padding:8px 12px">${periodNav(P)}</div>`;
-  const D = {}; for (const m of ['mm', 'fm']) { D[m] = []; for (let k = P.from; k <= P.to && k <= TODAY; k = addDays(k, 1)) { const sg = W(k, 'seg'); if (sg?.[m]) D[m].push({k, sg: sg[m]}); } }
+  const span = (A, m) => { const r = []; for (let k = A.from; k <= A.to && k <= TODAY; k = addDays(k, 1)) { const sg = W(k, 'seg'); if (sg?.[m]) r.push({k, sg: sg[m]}); } return r; };
+  // La période d'avant : la pesée précédente (Jour), la période juste avant (Semaine, Mois, Année) ; rien pour « Tout ».
+  const before = m => { if (P.all) return [];
+    if (day) { for (let k = addDays(P.from, -1), n = 0; n < 120; k = addDays(k, -1), n++) { const sg = W(k, 'seg'); if (sg?.[m]) return [{k, sg: sg[m]}]; } return []; }
+    return span(periodOf(S.gran, S.off + 1), m); };
+  const D = {mm: span(P, 'mm'), fm: span(P, 'fm')};
   if (!D.mm.length && !D.fm.length) { const any = Object.values(S.w || {}).some(d => d?.seg);
     return head + `<div class="card empty" style="margin-top:12px"><b>${any ? 'Pas de pesée sur cette période' : 'Tes segments arrivent avec la prochaine pesée'}</b>${any ? 'Change de période, ou monte sur ta balance demain matin.' : 'Ta Body Scan mesure la masse grasse et la masse musculaire de chaque bras, de chaque jambe et du tronc.'}</div>`; }
+  const avg = (days, id) => { if (!days.length) return null; if (day) return days.at(-1).sg[id] ?? null; const v = days.map(d => d.sg[id]).filter(x => x != null); return v.length ? mean(v) : null; };
+  const sign = d => d == null ? '' : Math.abs(d) < .005 ? '±0' : (d > 0 ? '+' : '−') + fx(Math.abs(d), 2);
+  const tone = d => d == null || Math.abs(d) < .005 ? '#8e8e93' : d > 0 ? '#30D158' : '#FF453A';
   const one = m => { const days = D[m], [lab, col] = SEGM[m]; if (!days.length) return null;
-    const first = days[0], last = days.at(-1);
-    const val = id => { if (day) return last.sg[id] ?? null; const v = days.map(d => d.sg[id]).filter(x => x != null); return v.length ? mean(v) : null; };
-    const V = Object.fromEntries(SEGS.map(([id]) => [id, val(id)])), tot = Object.values(V).reduce((a, x) => a + (x || 0), 0);
+    const prev = before(m), last = days.at(-1);
+    const V = Object.fromEntries(SEGS.map(([id]) => [id, avg(days, id)])), tot = Object.values(V).reduce((a, x) => a + (x || 0), 0);
+    const delta = id => { const a = avg(prev, id); return a != null && V[id] != null ? V[id] - a : null; };
+    const pt = prev.length ? SEGS.reduce((a, [id]) => a + (avg(prev, id) || 0), 0) : null, dTot = pt ? tot - pt : null;
+    // Densité : la part du segment dans le total, comparée à sa part habituelle. Écart bien marqué : pâle en dessous, plein au-dessus.
     const dens = id => V[id] == null || !tot ? null : V[id] / tot / SEG_REF[id];
-    const ell = SEGS.map(([id, n, cx, cy, rx, ry]) => { const d = dens(id); if (d == null) return ''; return `<ellipse cx="${cx}" cy="${cy}" rx="${rx + 4}" ry="${ry}" fill="${col}" opacity="${(.22 + clamp((d - .8) / .4, 0, 1) * .73).toFixed(2)}" filter="url(#soft${m}n)"/>`; }).join('');
-    const delta = id => { const a = first.sg[id], b = last.sg[id]; return a != null && b != null && days.length > 1 ? b - a : null; };
-    return {m, lab, col, tot, V, delta, days, last,
-      fig: `<div><div class="lab" style="color:${col}">${m === 'mm' ? 'MASSE MUSCULAIRE' : 'MASSE GRASSE'}</div><svg viewBox="0 0 200 392" role="img" aria-label="${lab}"><defs><filter id="soft${m}n" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="5"/></filter><mask id="mk${m}n">${b3In200('front', 'shape').replace(/fill="[^"]*"/g, 'fill="#fff"').replace(/stroke="[^"]*"/g, 'stroke="#fff"')}</mask></defs>${b3In200('front', 'shape')}<g mask="url(#mk${m}n)" pointer-events="none">${ell}</g></svg><b class="num" style="display:block;margin-top:4px">${fx(tot, 1)} kg</b></div>`};
+    const ell = SEGS.map(([id, n, cx, cy, rx, ry]) => { const d = dens(id); if (d == null) return ''; const t = clamp((d - .86) / .28, 0, 1);
+      return `<ellipse cx="${cx}" cy="${cy}" rx="${rx + 4 + t * 3}" ry="${ry + t * 4}" fill="${col}" opacity="${(.05 + Math.pow(t, 1.25) * .95).toFixed(2)}" filter="url(#soft${m}n)"/>`; }).join('');
+    const lbl = SEGS.map(([id]) => { const d = delta(id); if (d == null) return ''; const [x, y, a] = SEG_LBL[id];
+      return `<text x="${x}" y="${y}" text-anchor="${a}" fill="${tone(d)}" class="b3d">${sign(d)}<tspan class="u"> kg</tspan></text>`; }).join('');
+    return {m, lab, col, tot, V, delta, days, last, prev, dTot,
+      fig: `<div><div class="lab" style="color:${col}">${m === 'mm' ? 'MASSE MUSCULAIRE' : 'MASSE GRASSE'}</div><svg viewBox="-40 0 280 392" role="img" aria-label="${lab}"><defs><filter id="soft${m}n" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="4.5"/></filter><mask id="mk${m}n">${b3In200('front', 'shape').replace(/fill="[^"]*"/g, 'fill="#fff"').replace(/stroke="[^"]*"/g, 'stroke="#fff"')}</mask></defs>${b3In200('front', 'shape')}<g mask="url(#mk${m}n)" pointer-events="none">${ell}</g>${lbl}</svg>
+        <b class="num" style="display:block;margin-top:4px">${fx(tot, 1)} kg${dTot != null ? ` <small style="color:${tone(dTot)};font-weight:600">${sign(dTot)}</small>` : ''}</b></div>`};
   };
   const A = one('mm'), B = one('fm');
-  const dTxt = (d, good) => d == null ? '' : `<small class="${(good ? d >= 0 : d <= 0) ? 'up' : 'down'}">${d >= 0 ? '+' : '−'}${fx(Math.abs(d), 2)} kg</small>`;
+  const vs = {day: 'la pesée d\'avant', week: 'la moyenne de la semaine d\'avant', month: 'la moyenne du mois d\'avant', year: 'la moyenne de l\'année d\'avant'}[S.gran];
   const block = X => X ? `<div class="card pc6"><div class="chead" style="margin-bottom:6px"><span class="eyebrow" style="color:${X.col}">${X.lab} · ${day ? esc(cap(fmtShort(X.last.k))) : 'moyenne de ' + X.days.length + ' pesée' + (X.days.length > 1 ? 's' : '')}</span><b class="num nowrap">${fx(X.tot, 1)} kg</b></div>
-    <div class="list segl3">${SEGS.map(([id, n]) => X.V[id] != null ? `<div class="row"><span class="l">${n}</span><b class="num">${fx(X.V[id], 2)} kg ${dTxt(X.delta(id), X.m === 'mm')}</b></div>` : '').join('')}</div></div>` : '';
+    <div class="segl3">${SEGS.map(([id, n]) => { if (X.V[id] == null) return ''; const d = X.delta(id);
+      return `<button type="button" class="row" data-segjump="${id}" data-segm="${X.m}"><span class="l">${n}</span><b class="num">${fx(X.V[id], 2)} kg${d != null ? ` <small style="color:${tone(d)}">${sign(d)}</small>` : ''}</b>${ICON.chev}</button>`; }).join('')}</div>
+    ${vs && X.prev.length ? `<p class="small muted" style="margin:8px 2px 0">Écart avec ${vs}. Touche un segment pour sa courbe.</p>` : ''}</div>` : '';
   const sym = (a, b) => a && b ? Math.abs(a - b) / ((a + b) / 2) * 100 : null;
   const sA = A && sym(A.V.ra, A.V.la), sL = A && sym(A.V.rl, A.V.ll);
   return head + `<div class="stack" style="margin-top:12px">
     <div class="card pc6"><div class="one-2body b3n">${A ? A.fig : '<div></div>'}${B ? B.fig : '<div></div>'}</div>
-      <div class="segleg"><span>moins dense</span><i style="background:linear-gradient(90deg,#ffffff22,#ffffffcc)"></i><span>plus dense</span></div>
-      <p class="small muted" style="margin:8px 0 0">Couleur : la part de chaque segment dans ton total, comparée à la part habituelle de ce segment. Écart gauche / droite (muscle) : bras ${sA != null ? fx(sA, 1) + ' %' : '–'}, jambes ${sL != null ? fx(sL, 1) + ' %' : '–'} ; au-delà de 10 % sur les jambes, un déséquilibre de force est probable.</p></div>
+      <div class="segleg"><span>moins dense</span><i style="background:linear-gradient(90deg,#ffffff10,#ffffff)"></i><span>plus dense</span></div>
+      <p class="small muted" style="margin:8px 0 0">Couleur : la part de chaque segment dans ton total, comparée à la part habituelle de ce segment. Chiffres : l'écart avec ${vs || 'la période d\'avant'}${P.all ? ' (pas d\'écart sur « Tout »)' : ''}, en vert si ça monte, en rouge si ça baisse. Écart gauche / droite (muscle) : bras ${sA != null ? fx(sA, 1) + ' %' : '–'}, jambes ${sL != null ? fx(sL, 1) + ' %' : '–'}.</p></div>
     ${block(A)}${block(B)}</div>`;
 };
+// Toucher un segment (bras droit, tronc…) dans un des deux blocs : sa courbe, pour la bonne mesure.
+document.addEventListener('click', e => { const b = e.target.closest('[data-segm]'); if (b) S.nseg = b.dataset.segm; }, true);

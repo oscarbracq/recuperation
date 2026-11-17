@@ -252,4 +252,8 @@ html.one svg.b3 .m3.pick{filter:brightness(1.25) drop-shadow(0 0 6px rgba(255,25
 html.one .b3seg{margin:8px 0 10px}
 html.one .one-2body.b3n{display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center}
 html.one .one-2body.b3n .lab{font-size:.7rem;font-weight:800;letter-spacing:.12em;margin-bottom:6px}
-html.one .segl3 .row{min-height:44px}
+html.one .segl3{display:grid}html.one .segl3 .row{min-height:44px;width:100%;padding:10px 4px;background:none;color:var(--fg);font:inherit;text-align:left;cursor:pointer;gap:8px}
+html.one .segl3 .row .l{flex:1}html.one .segl3 .row b small{font-size:.75rem;font-weight:600;margin-left:4px}html.one .segl3 .row svg{width:14px;height:14px;opacity:.4;flex:none}
+html.one :is(#f-view,.gv-f-view) .one-2body.b3n{grid-template-columns:1fr 1fr!important;gap:4px!important}
+html.one :is(#f-view,.gv-f-view) .one-2body.b3n svg{width:100%!important;max-width:210px;margin:0 auto}
+html.one .b3n text.b3d{font:700 15px/1 var(--display,system-ui);paint-order:stroke;stroke:var(--card,#1c1c1e);stroke-width:5px;stroke-linejoin:round;font-variant-numeric:tabular-nums}html.one .b3n text.b3d .u{font-size:11px;font-weight:600}
