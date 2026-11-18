@@ -4998,7 +4998,7 @@ function rsView(id, from) {
         ${I.zones.length ? `<div class="sec-label" style="margin:12px 0 6px">${s.day === 'pain' ? 'Zones soulagées' : 'Muscles détendus'}</div><p style="margin:0">${esc(I.zones.join(', '))}</p>` : ''}
         <p class="small muted" style="margin:12px 0 0">${s.day ? 'Refaite chaque jour par l\'appli, d\'après ' + (s.day === 'pain' ? 'tes douleurs notées ces 3 derniers jours' : 'tes dernières séances') + '.' : 'Ta séance.'}${on.length ? ' Calée le ' + esc(on.join(', ').toLowerCase().replace(/\.$/, '')) + '.' : ''}</p></div>
       <div class="sec-label" style="margin-top:18px">Déroulé</div>
-      <div class="list rsteps2">${steps.map((x, i) => `${phHead(steps, i)}<div class="row">${x.id ? eqThumb(rxEq(x)) : `<span class="rsn">${i + 1}</span>`}<span class="l"><b>${esc(x.n)}</b><span class="hint">${esc(x.how || '')}</span></span>${x.min ? `<span class="kc">${x.min} min</span>` : ''}</div>`).join('') || '<div class="row"><span class="muted">Rien à faire aujourd\'hui pour cette séance.</span></div>'}</div>
+      <div class="list rsteps2">${steps.map((x, i) => `${phHead(steps, i)}<div class="row"><span class="rsn">${i + 1}</span><span class="l"><b>${esc(x.n)}</b><span class="hint">${esc(x.how || '')}</span></span>${x.min ? `<span class="kc">${x.min} min</span>` : ''}</div>`).join('') || '<div class="row"><span class="muted">Rien à faire aujourd\'hui pour cette séance.</span></div>'}</div>
       <div class="btnrow" style="margin-top:14px"><button class="btn" data-rsgo2="${esc(id)}"${steps.length ? '' : ' disabled'}>Lancer</button>${s.day ? '' : `<button class="btn ghost" data-rsdup="${esc(id)}">${s.auto ? 'Dupliquer et modifier' : 'Modifier'}</button>`}</div>
       ${from && from >= TODAY ? `<button class="btn ghost" style="margin-top:10px;width:100%" data-rx="${from}">Retirer du ${esc(fmtShort(from))}</button>` : ''}
       ${!s.auto && !s.day ? `<button class="btn ghost" style="margin-top:10px;width:100%;color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent)" data-rsdel="${esc(id)}">Supprimer cette séance</button>` : ''}`; }});
@@ -8750,7 +8750,9 @@ const EQ_IC = (() => {
   return eq => svg(I[eq] || I.Autre);
 })();
 const EQ_CLS = {};
-const eqThumb = eq => { const k = eq || 'Autre'; if (!EQ_CLS[k]) { const n = 'eqi' + Object.keys(EQ_CLS).length; EQ_CLS[k] = n;
+// Les petits dessins de matériel sont retirés (en attendant de vraies photos) : les noms restent alignés.
+const eqThumb = () => '';
+const eqThumb0 = eq => { const k = eq || 'Autre'; if (!EQ_CLS[k]) { const n = 'eqi' + Object.keys(EQ_CLS).length; EQ_CLS[k] = n;
     const st = document.getElementById('eq-ic-css') || document.head.appendChild(Object.assign(document.createElement('style'), {id: 'eq-ic-css'}));
     st.textContent += `.eqthumb.${n}{background-image:url("data:image/svg+xml,${encodeURIComponent(EQ_IC(k).replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" '))}")}`; }
   return `<span class="eqthumb ${EQ_CLS[k]}" aria-hidden="true"></span>`; };
@@ -9276,7 +9278,41 @@ const FOODS = [
   ['Pizza', 266, 11, 33, 10, 300, 'demi-pizza'], ['Burger', 254, 13, 28, 10, 220, 'burger'], ['Sandwich jambon-beurre', 255, 11, 32, 9, 250, 'sandwich'], ['Makis', 150, 5, 28, 2, 180, '6 makis'],
   ['Quiche lorraine', 270, 10, 18, 18, 150, 'part'], ['Lasagnes', 160, 9, 14, 7, 300, 'part'], ['Hachis parmentier', 140, 8, 11, 7, 300, 'part'], ['Glace', 207, 3.5, 24, 11, 100, '2 boules'], ['Chips', 536, 6.6, 53, 34, 30, 'petit paquet'],
   ['Whey', 380, 75, 8, 6, 30, 'dose'], ['Boisson d\'effort', 25, 0, 6, 0, 500, 'gourde'], ['Gel énergétique', 270, 0, 67, 0, 32, 'gel'], ['Soda', 42, 0, 10.6, 0, 330, 'canette'], ['Bière', 43, 0.5, 3.6, 0, 250, 'demi'],
-  ['Bœuf maigre cuit', 170, 28, 0, 6, 140, 'portion'], ['Légumes pour couscous', 30, 1, 5, 0.3, 250, 'portion']
+  ['Bœuf maigre cuit', 170, 28, 0, 6, 140, 'portion'], ['Légumes pour couscous', 30, 1, 5, 0.3, 250, 'portion'],
+  // Plats de tous les jours, pour 100 g, avec la portion habituelle.
+  ['Poulet curry et riz', 150, 10, 17, 4.5, 400, 'assiette'], ['Poulet basquaise', 105, 11, 4, 5, 300, 'portion'], ['Poulet rôti et pommes de terre', 155, 13, 11, 6.5, 350, 'assiette'],
+  ['Poulet tikka masala', 135, 12, 5, 7.5, 300, 'portion'], ['Poulet teriyaki et riz', 150, 10, 21, 3, 400, 'assiette'], ['Fajitas au poulet', 175, 11, 18, 6.5, 250, '2 fajitas'],
+  ['Wok de poulet aux légumes', 95, 10, 6, 3.5, 350, 'assiette'], ['Nouilles sautées au poulet', 155, 8, 21, 4.5, 350, 'assiette'], ['Pad thaï', 175, 8, 24, 5.5, 350, 'assiette'],
+  ['Riz cantonais', 165, 6, 25, 4.5, 300, 'assiette'], ['Poke bowl saumon', 140, 8, 17, 4.5, 450, 'bol'], ['Poke bowl poulet', 130, 9, 17, 3, 450, 'bol'],
+  ['Buddha bowl', 120, 5, 15, 4.5, 400, 'bol'], ['Bibimbap', 130, 7, 18, 3.5, 450, 'bol'], ['Sushis assortis', 150, 6, 27, 2, 250, 'plateau de 10'],
+  ['Chili con carne', 115, 8, 9, 5, 350, 'assiette'], ['Chili sin carne', 95, 5, 13, 2.5, 350, 'assiette'], ['Bœuf bourguignon', 120, 15, 3, 5.5, 300, 'portion'],
+  ['Bœuf carottes', 100, 12, 4, 4, 300, 'portion'], ['Pot-au-feu', 90, 10, 5, 3.5, 400, 'assiette'], ['Blanquette de veau', 120, 12, 4, 6.5, 300, 'portion'],
+  ['Steak frites', 215, 14, 19, 9, 350, 'assiette'], ['Steak haché et purée', 150, 10, 10, 7.5, 350, 'assiette'], ['Hamburger maison', 240, 14, 23, 10, 250, 'burger'],
+  ['Tacos (français)', 250, 11, 25, 12, 400, 'tacos'], ['Kebab', 230, 13, 20, 11, 350, 'kebab'], ['Wrap poulet crudités', 190, 11, 20, 7, 250, 'wrap'],
+  ['Couscous au poulet', 140, 9, 17, 4, 450, 'assiette'], ['Couscous royal', 160, 10, 16, 6.5, 500, 'assiette'], ['Tajine de poulet', 110, 11, 7, 4.5, 350, 'portion'],
+  ['Paëlla', 155, 10, 18, 4.5, 400, 'assiette'], ['Risotto aux champignons', 135, 3.5, 20, 4.5, 300, 'assiette'], ['Risotto au poulet', 145, 8, 19, 4, 350, 'assiette'],
+  ['Pâtes bolognaise', 150, 7.5, 20, 4.5, 400, 'assiette'], ['Pâtes carbonara', 195, 8, 22, 8.5, 350, 'assiette'], ['Pâtes au thon et tomate', 140, 9, 19, 3, 400, 'assiette'],
+  ['Pâtes au pesto', 210, 6, 26, 9, 300, 'assiette'], ['Pâtes au saumon et crème', 180, 9, 19, 7.5, 350, 'assiette'], ['Pâtes au poulet et crème', 170, 10, 19, 6, 350, 'assiette'],
+  ['Gratin de pâtes au jambon', 165, 8.5, 17, 7, 350, 'portion'], ['Lasagnes au saumon', 150, 9, 13, 7, 300, 'part'], ['Cannellonis ricotta épinards', 150, 7, 15, 7, 300, 'portion'],
+  ['Gnocchis sauce tomate', 135, 3.5, 25, 2.5, 300, 'assiette'], ['Ravioles', 230, 9, 30, 8, 250, 'assiette'], ['Tortellinis au fromage', 220, 9, 31, 6.5, 250, 'assiette'],
+  ['Gratin dauphinois', 125, 3, 12, 7.5, 250, 'portion'], ['Tartiflette', 200, 9, 12, 13, 350, 'portion'], ['Raclette (assiette)', 260, 13, 14, 17, 400, 'assiette'],
+  ['Croque-monsieur', 250, 13, 24, 11, 150, 'croque'], ['Quiche aux légumes', 230, 7, 18, 14, 150, 'part'], ['Tarte au thon', 240, 9, 19, 14, 150, 'part'],
+  ['Omelette aux pommes de terre', 145, 7, 10, 8.5, 250, 'portion'], ['Œufs brouillés', 165, 11, 1.5, 12.5, 150, '3 œufs'], ['Shakshuka', 95, 6, 5, 5.5, 300, 'poêlée'],
+  ['Saumon et riz', 155, 10, 17, 5, 400, 'assiette'], ['Saumon, patate douce et brocoli', 125, 9, 11, 5, 450, 'assiette'], ['Cabillaud, riz et légumes', 100, 9, 13, 1.5, 450, 'assiette'],
+  ['Fish and chips', 230, 10, 22, 11.5, 350, 'portion'], ['Moules frites', 165, 10, 15, 7.5, 600, 'assiette'], ['Brandade de morue', 140, 9, 9, 7.5, 300, 'portion'],
+  ['Thon, riz et haricots verts', 115, 10, 15, 1.5, 400, 'assiette'], ['Crevettes sautées et riz', 140, 9, 20, 2.5, 400, 'assiette'], ['Curry de crevettes', 120, 9, 6, 6.5, 300, 'portion'],
+  ['Dahl de lentilles', 120, 6.5, 16, 3, 350, 'bol'], ['Curry de pois chiches', 125, 5, 14, 5, 350, 'bol'], ['Falafels', 330, 13, 32, 17, 120, '6 falafels'],
+  ['Houmous', 270, 8, 14, 20, 50, 'portion'], ['Taboulé', 160, 3.5, 25, 5, 200, 'portion'], ['Salade de riz au thon', 150, 7, 19, 5, 300, 'saladier individuel'],
+  ['Salade niçoise', 95, 6, 5, 5.5, 350, 'assiette'], ['Salade César au poulet', 150, 11, 6, 9, 350, 'assiette'], ['Salade de pâtes au poulet', 165, 9, 20, 5, 350, 'saladier individuel'],
+  ['Salade de lentilles', 125, 7, 15, 4, 300, 'assiette'], ['Salade de quinoa', 130, 4.5, 18, 4.5, 300, 'assiette'], ['Velouté de potiron', 45, 1, 6, 2, 300, 'bol'],
+  ['Soupe miso', 30, 2, 3, 1, 250, 'bol'], ['Soupe de lentilles', 70, 4.5, 10, 1, 350, 'bol'], ['Ramen', 110, 6, 14, 3.5, 500, 'bol'],
+  ['Pho au bœuf', 70, 5.5, 8, 1.5, 600, 'bol'], ['Burrito', 200, 9, 26, 6.5, 350, 'burrito'], ['Quesadilla', 270, 12, 25, 13, 200, 'quesadilla'],
+  ['Nachos au fromage', 340, 9, 36, 18, 150, 'portion'], ['Pizza margherita', 245, 10, 31, 8.5, 300, 'demi-pizza'], ['Pizza reine', 230, 11, 28, 8, 300, 'demi-pizza'],
+  ['Hot-dog', 270, 10, 26, 14, 150, 'hot-dog'], ['Croque au saumon', 230, 13, 22, 10, 150, 'croque'], ['Bagel saumon fromage frais', 250, 12, 30, 9, 180, 'bagel'],
+  ['Club sandwich poulet', 225, 13, 22, 9, 250, 'sandwich'], ['Panini jambon fromage', 270, 13, 30, 10.5, 220, 'panini'], ['Bowl de porridge', 115, 4.5, 18, 2.5, 300, 'bol'],
+  ['Overnight oats', 140, 6, 20, 4, 300, 'pot'], ['Pancakes', 225, 6, 33, 7.5, 150, '3 pancakes'], ['Crêpe sucrée', 230, 6, 33, 8, 90, '2 crêpes'],
+  ['Galette complète (jambon, œuf, fromage)', 200, 11, 17, 10, 250, 'galette'], ['Smoothie banane et fruits rouges', 60, 1, 13, 0.4, 300, 'verre'], ['Shake whey, lait et banane', 85, 7.5, 10, 1.5, 450, 'shaker'],
+  ['Riz au lait', 125, 3.5, 21, 3, 150, 'pot'], ['Tiramisu', 285, 5, 28, 17, 100, 'part'], ['Fondant au chocolat', 430, 6, 40, 27, 80, 'part']
 ].map(([n, kcal, p, c, f, g, unit], i) => ({id: 'b' + i, n, kcal, p, c, f, g, unit}));
 const MEALS = [['breakfast', 'Petit-déjeuner'], ['lunch', 'Déjeuner'], ['snack', 'Collation'], ['dinner', 'Dîner']];
 // Each meal takes the name and time of the meal block of that day's planning (by its time: morning, midday, afternoon, evening).

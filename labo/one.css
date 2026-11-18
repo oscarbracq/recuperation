@@ -206,9 +206,9 @@ html.one .aura::after{content:'';position:absolute;inset:0 0 auto;height:calc(en
 
 /* Textes d'aide masqués : un petit « Afficher » discret à leur place. */
 /* « Détail » : juste le mot, en gris, dans le coin à droite (là où tombe le pouce) ; « Masquer » pour refermer. */
-html.one .one-tipb,html.one button.more{display:block;width:auto;margin:6px 0 0 auto;padding:6px 2px;border:0;border-radius:0;background:none!important;color:var(--fg3,#8e8e93);font:inherit;font-size:.8rem;font-weight:500;text-align:right;cursor:pointer}
+html.one .one-tipb,html.one button.more{display:block;width:auto;margin:2px 0 -6px auto;padding:2px 0;line-height:1.25;min-height:0;border:0;border-radius:0;background:none!important;color:var(--fg3,#8e8e93);font:inherit;font-size:.8rem;font-weight:500;text-align:right;cursor:pointer}
 html.one button.more svg{display:none}
-html.one details.dets>summary,html.one details.hidebox>summary{list-style:none;text-align:right;color:var(--fg3,#8e8e93);font-size:.8rem;font-weight:500;background:none!important;padding:6px 2px;cursor:pointer}
+html.one details.dets>summary,html.one details.hidebox>summary{list-style:none;text-align:right;color:var(--fg3,#8e8e93);font-size:.8rem;font-weight:500;background:none!important;padding:2px 0;margin-bottom:-6px;line-height:1.25;cursor:pointer}
 html.one details.dets>summary::-webkit-details-marker{display:none}
 html.one label .hint,html.one .l .hint{display:none}
 
@@ -254,6 +254,21 @@ html.one .one-2body.b3n{display:grid;grid-template-columns:1fr 1fr;gap:10px;text
 html.one .one-2body.b3n .lab{font-size:.7rem;font-weight:800;letter-spacing:.12em;margin-bottom:6px}
 html.one .segl3{display:grid}html.one .segl3 .row{min-height:44px;width:100%;padding:10px 4px;background:none;color:var(--fg);font:inherit;text-align:left;cursor:pointer;gap:8px}
 html.one .segl3 .row .l{flex:1}html.one .segl3 .row b small{font-size:.75rem;font-weight:600;margin-left:4px}html.one .segl3 .row svg{width:14px;height:14px;opacity:.4;flex:none}
-html.one :is(#f-view,.gv-f-view) .one-2body.b3n{grid-template-columns:1fr 1fr!important;gap:4px!important}
-html.one :is(#f-view,.gv-f-view) .one-2body.b3n svg{width:100%!important;max-width:210px;margin:0 auto}
 html.one .b3n text.b3d{font:700 15px/1 var(--display,system-ui);paint-order:stroke;stroke:var(--card,#1c1c1e);stroke-width:5px;stroke-linejoin:round;font-variant-numeric:tabular-nums}html.one .b3n text.b3d .u{font-size:11px;font-weight:600}
+
+/* Boutons secondaires (Archive, + Créer une séance, + Ajouter…) : un fond plus sombre et plein, qui se détache mieux du fond coloré. */
+html.one .btn.ghost{background:color-mix(in srgb,var(--accent) 12%,#0c0d10)!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 22%,transparent)}
+@media (prefers-color-scheme:light){html.one:not([data-theme="dark"]) .btn.ghost{background:color-mix(in srgb,var(--accent) 16%,#fff)!important}}
+/* Impact des habitudes : le repère du milieu, un petit point gris pas plus haut que la ligne. */
+html.one .imb s{top:1px!important;width:4px!important;height:4px!important;margin-left:-2px!important;border:0!important;box-shadow:none!important;background:#8e8e93!important;border-radius:50%!important}
+html.one .segleg2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}html.one .segleg2 .segleg{margin:0;font-size:.6875rem;gap:6px}html.one .segleg2 .segleg i{min-width:24px}
+html.one :is(#f-view,.gv-f-view) .one-2body.b3n{margin-top:7px!important}
+/* Accueil · Bilan de la semaine : un bloc posé sous la phrase du jour, qui tient dans l'écran sans défiler. */
+html.one .wk{margin:12px 0 0;padding:14px 14px 12px;border-radius:22px;background:linear-gradient(160deg,rgba(142,155,181,.16),rgba(142,155,181,.05) 60%,rgba(142,155,181,.02));box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}
+html.one .wk-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px}html.one .wk-h small{color:var(--fg3,#8e8e93);font-size:.75rem}
+html.one .wk-t{margin:6px 0 4px;font-size:1.05rem;line-height:1.25;font-weight:700;letter-spacing:-.01em}
+html.one .wk-p{margin:0;font-size:.8125rem;line-height:1.4;color:var(--fg2,#c7c7cc)}
+html.one .wk-n{margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)}
+html.one .wk-n ol{margin:6px 0 0;padding:0;list-style:none;counter-reset:wk;display:grid;gap:5px}
+html.one .wk-n li{counter-increment:wk;display:grid;grid-template-columns:18px 1fr;gap:8px;font-size:.78rem;line-height:1.32}
+html.one .wk-n li::before{content:counter(wk);width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:.6875rem;font-weight:700;background:rgba(142,155,181,.22);color:#fff}

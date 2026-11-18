@@ -121,15 +121,22 @@ function acOpen(i = 0) {
   el.hidden = false; el.classList.add('on'); acShow(i); acSeen(); acZoom(el, true);
 }
 // Comme une story : l'écran sort du carré « Actus » et grandit vers toi ; à la fin, il y retourne en se refermant.
+// La story naît du carré « Actus » : un carré arrondi de sa taille qui grandit jusqu'à l'écran entier, puis y retourne.
+// Tout passe par transform (fait par la carte graphique), pas par une découpe : c'est fluide même sur téléphone.
 function acZoom(el, open, done) {
   const sq = document.querySelector('.one-act'), r = sq?.getBoundingClientRect();
-  el.getAnimations().forEach(a => a.cancel());
+  el.getAnimations({subtree: true}).forEach(a => a.cancel());
   if (!r || !r.width || matchMedia('(prefers-reduced-motion: reduce)').matches) { if (!open) done?.(); return; }
-  const W = innerWidth, H = innerHeight, from = `inset(${r.top}px ${W - r.right}px ${H - r.bottom}px ${r.left}px round 14px)`, to = 'inset(0px 0px 0px 0px round 0px)';
-  const a = el.animate([{clipPath: open ? from : to, opacity: open ? .6 : 1}, {clipPath: open ? to : from, opacity: open ? 1 : .4}],
-    {duration: open ? 460 : 380, easing: open ? 'cubic-bezier(.2,.9,.25,1)' : 'cubic-bezier(.5,0,.75,.4)', fill: open ? 'none' : 'forwards'});
-  const ct = el.querySelector('.ct'); if (ct) ct.animate([{transform: open ? 'scale(.86)' : 'none'}, {transform: open ? 'none' : 'scale(.86)'}], {duration: open ? 460 : 380, easing: 'cubic-bezier(.2,.9,.25,1)', fill: open ? 'none' : 'forwards'});
-  if (!open) { let ok = false; const f = () => { if (ok) return; ok = true; done?.(); }; a.finished.then(f).catch(f); setTimeout(f, 500); }
+  const W = innerWidth, H = innerHeight, sx = r.width / W, sy = r.height / H, rad = 16;
+  const small = {transform: `translate(${r.left}px, ${r.top}px) scale(${sx}, ${sy})`, borderRadius: `${rad / sx}px / ${rad / sy}px`},
+    big = {transform: 'translate(0px, 0px) scale(1, 1)', borderRadius: '0px / 0px'};
+  el.style.transformOrigin = '0 0'; el.style.willChange = 'transform';
+  const dur = open ? 520 : 400, ease = open ? 'cubic-bezier(.32,.72,0,1)' : 'cubic-bezier(.4,0,.6,1)';
+  const a = el.animate(open ? [small, big] : [big, small], {duration: dur, easing: ease, fill: open ? 'none' : 'forwards'});
+  // Le contenu apparaît une fois le carré ouvert (et disparaît vite à la fermeture) : on ne le voit jamais déformé.
+  for (const c of el.children) c.animate(open ? [{opacity: 0}, {opacity: 0, offset: .35}, {opacity: 1}] : [{opacity: 1}, {opacity: 0, offset: .4}, {opacity: 0}], {duration: dur, easing: 'ease-out', fill: open ? 'none' : 'forwards'});
+  a.finished.then(() => { el.style.willChange = ''; }).catch(() => {});
+  if (!open) { let ok = false; const f = () => { if (ok) return; ok = true; done?.(); }; a.finished.then(f).catch(f); setTimeout(f, dur + 120); }
 }
 function acShow(i) {
   const el = document.getElementById('one-st'); if (!el) return;
@@ -138,11 +145,11 @@ function acShow(i) {
   const s = ACS.L[i]; ACS.i = i; ACS.paused = false; el.classList.remove('paused');
   el.style.setProperty('--c', s.c); el.style.setProperty('--c2', s.c2 || s.c);
   el.innerHTML = `<div class="bars">${ACS.L.map((x, k) => `<i class="${k < i ? 'd' : k === i ? 'c' : ''}"><b></b></i>`).join('')}</div>
-    <button class="ax" data-acx aria-label="Fermer">${acIc.x}</button><button class="as${ACS.audio ? ' on' : ''}" data-acs aria-label="${ACS.audio ? 'Couper la voix' : 'Lire à voix haute'}">${ACS.audio ? acIc.spk : acIc.mute}</button>
+    <button class="ax" data-acx aria-label="Fermer">${acIc.x}</button>
     <div class="bgw" aria-hidden="true">${s.w}</div><div class="ct"><span class="k">${s.k}</span><div class="big">${s.big}</div><div class="ttl">${s.t}</div>
     <div class="grid${s.g.length === 4 ? ' g4' : ''}">${s.g.map(([b, l]) => `<div><b>${b}</b><span>${l}</span></div>`).join('')}</div>
     <p class="syn">${s.syn.map(x => /[.!?…]$/.test(x) ? x : x + '.').join(' ')}</p></div>`;
-  acRun(ACS.audio);
+  ACS.audio = false; acRun(false);
   try { if (PREFS.haptic !== false) navigator.vibrate?.(5); } catch (e) {}
 }
 // Lance (ou relance de zéro) le temps de la story en cours, avec ou sans la voix.

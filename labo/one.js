@@ -388,8 +388,11 @@ paneShow = function (...a) { const r = onePaneShow0.apply(this, a); const v = P.
       // Dans les plannings : l'aide est juste cachée, sans « Détail » qui prend de la place.
       if (el.closest('.sboard')) { el.hidden = true; return; }
       el.hidden = true; el.classList.add('one-tipx');
-      const b = document.createElement('button'); b.type = 'button'; b.className = 'one-tipb'; b.textContent = 'Détail';
-      b.onclick = e => { e.stopPropagation(); el.hidden = !el.hidden; b.textContent = el.hidden ? 'Détail' : 'Masquer'; };
+      // Deux « Détail » d'affilée : un seul, qui ouvre les deux textes.
+      let pv = el.previousElementSibling; while (pv && pv.classList.contains('one-tipx')) pv = pv.previousElementSibling;
+      if (pv?.classList.contains('one-tipb') && pv._els) { pv._els.push(el); el.after(pv); return; }
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'one-tipb'; b.textContent = 'Détail'; b._els = [el];
+      b.onclick = e => { e.stopPropagation(); const h = !b._els[0].hidden; b._els.forEach(x => { x.hidden = h; }); b.textContent = h ? 'Détail' : 'Masquer'; };
       el.after(b);
     });
   };
@@ -434,7 +437,7 @@ new MutationObserver(ms => { for (const x of ms) for (const n of x.addedNodes) i
 // Pendant qu'on porte un bloc de la liste : le bouton devient la cible.
 new MutationObserver(() => {
   const on = document.body.classList.contains('bdragging'), src = document.querySelector('.bdrag');
-  document.querySelectorAll('.one-arch').forEach(b => { const mine = on && src && b.closest('.sboard')?.contains(src) && src.closest('.bsrc');
+  document.querySelectorAll('.one-arch').forEach(b => { const mine = on && src && src.closest('.bsrc') && archMod(src) === b.dataset.onearch;
     const m = b.dataset.onearch, ref = src?.dataset[ARCH[m].attr === 'bref' ? 'bref' : ARCH[m].attr === 'rref' ? 'rref' : 'mref'];
     b.classList.toggle('drop', !!mine); b.textContent = mine ? (ARCH[m].ex(ref) ? 'Supprimer' : 'Archiver') : 'Archive'; });
 }).observe(document.body, {attributes: true, attributeFilter: ['class']});
