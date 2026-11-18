@@ -124,7 +124,8 @@ function wkCoach0(end, A) {
 }
 let WK = null;
 function wkCard() {
-  const C = wkSafe(() => (WK && WK.end === wkFriday() ? WK : (WK = wkCoach())));
+  // Recalculé à chaque affichage (une quinzaine de ms) : au démarrage les données arrivent par morceaux, un bilan gardé de côté serait faux.
+  const C = wkSafe(() => (WK = wkCoach()));
   if (!C) return '';
   const range = `${fmtShort(C.from).replace(/\.$/, '')} – ${fmtShort(C.end)}`;
   return `<section class="wk" aria-label="Bilan de la semaine"><div class="wk-h"><span class="eyebrow">Bilan de la semaine</span><small>${esc(range)}</small></div>
@@ -134,7 +135,9 @@ function wkCard() {
 // L'accueil : la date, la phrase du jour, puis le bilan juste en dessous.
 vHome = () => `<div class="hm one-hm" id="hm"><header class="hm-head" id="hm-head"><div class="sub">${fmtDay(TODAY)}</div><h1 class="hello">${esc(homeGreeting())}</h1></header>${wkCard()}</div>`;
 // À l'arrivée sur l'accueil : le bilan monte doucement, ligne par ligne.
-new MutationObserver(() => { const w = document.querySelector('#hm .wk:not([data-in])'); if (!w || matchMedia('(prefers-reduced-motion: reduce)').matches) return; w.dataset.in = '1';
+let WKIN = 0;
+new MutationObserver(() => { const w = document.querySelector('#hm .wk:not([data-in])'); if (!w) return; w.dataset.in = '1'; // seulement juste après être arrivé sur l'accueil (pas à chaque mise à jour des données)
+  if (performance.now() - (ONE.act || 0) > 1600 || performance.now() - WKIN < 1600 || matchMedia('(prefers-reduced-motion: reduce)').matches) return; WKIN = performance.now();
   [...w.querySelectorAll('.wk-h, .wk-t, .wk-p, .wk-n .eyebrow, li')].forEach((el, i) => el.animate([{opacity: 0, transform: 'translateY(10px)'}, {opacity: 1, transform: 'none'}], {duration: 520, delay: 80 + i * 70, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards'})); }).observe(document.body, {childList: true, subtree: true});
 // Le vendredi à 20 h, le bilan change tout seul si l'appli est ouverte.
 setInterval(() => { if (WK && WK.end !== wkFriday()) { WK = null; if (S.mod === 'home') render(); } }, 60000);

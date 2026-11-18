@@ -31,7 +31,10 @@ function b3Inner(view, layer, paint) {
     const both = x => `${x}<g ${mir}>${x}</g><g ${hd}>${head}</g>`, L = [...B.s, B.x[1], ...B.m.map(x => x[2])].map(d => `<path d="${d}"/>`).join('');
     return `<g stroke-linejoin="round"><g fill="${ln}" stroke="${ln}" stroke-width="28">${both(parts)}</g><g fill="${bg}" stroke="${bg}" stroke-width="20">${both(parts)}</g><rect x="${B.cx - 14}" y="300" width="28" height="470" fill="${bg}"/>
       ${lines ? `<g fill="none" stroke="${ln}" stroke-opacity=".45" stroke-width="2.6">${L}<g ${mir}>${L}</g></g>${B.hair ? `<path ${hd} d="${B.hair}" fill="none" stroke="${ln}" stroke-opacity=".45" stroke-width="2.6"/>` : ''}` : ''}</g>`; };
-  if (layer === 'outline' || layer === 'sil') return outline(layer === 'outline');
+  // La silhouette de Recovery et Nutrition : un seul contour lissé autour de tout le corps (tracé une fois, gardé dans B3D),
+  // sans creux aux épaules, aux coudes ni aux hanches, et sans trou aux genoux ; dedans, c'est vide.
+  if (layer === 'sil') return B.sil ? `<path d="${B.sil}" fill="${B3C.obg}" stroke="${B3C.oline}" stroke-width="5" stroke-linejoin="round"/>` : outline(false);
+  if (layer === 'outline') return outline(true);
   const mus = (list, k) => list.map(([g, sub, d]) => { const key = b3Key(g, sub), p = paint ? paint(key, sub, g) : null;
     return `<path d="${d}" class="m3${p?.cls ? ' ' + p.cls : ''}" ${key ? `data-mz3="${key}"` : ''} data-sub="${esc(sub)}" data-side="${nm[k]}" fill="${p?.fill || B3C.skin}"/>`; }).join('');
   // Profonds : les muscles superficiels ne sont plus qu'un contour, les muscles profonds en couleur par-dessus.
@@ -93,6 +96,7 @@ function b3Clip(view) {
   if (B3CLIP[view]) return B3CLIP[view];
   const B = B3D[view], fit = b3Fit(view), mir = `translate(${2 * B.cx} 0) scale(-1 1)`, hd = `translate(${B.dx} 0)`;
   const P = (d, t = '') => `<path transform="${fit}${t ? ' ' + t : ''}" d="${d}"/>`, parts = [...B.s, ...B.x, ...B.m.map(x => x[2])];
+  if (B.sil) return (B3CLIP[view] = P(B.sil));
   return (B3CLIP[view] = parts.map(d => P(d) + P(d, mir)).join('') + B.c.map(d => P(d, hd)).join(''));
 }
 silBase = function (view, u = '') {
@@ -133,7 +137,7 @@ fBody = function () {
     const ell = SEGS.map(([id, n, cx, cy, rx, ry]) => { const d = dens(id); if (d == null) return ''; const t = clamp((d - .86) / .28, 0, 1);
       return `<ellipse cx="${cx}" cy="${cy}" rx="${rx + 4 + t * 3}" ry="${ry + t * 4}" fill="${col}" opacity="${(.05 + Math.pow(t, 1.25) * .95).toFixed(2)}" filter="url(#soft${m}n)"/>`; }).join('');
     return {m, lab, col, tot, V, delta, days, last, prev, dTot,
-      fig: `<div><div class="lab" style="color:${col}">${m === 'mm' ? 'MASSE MUSCULAIRE' : 'MASSE GRASSE'}</div><svg viewBox="0 0 200 392" role="img" aria-label="${lab}"><defs><filter id="soft${m}n" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="4.5"/></filter><mask id="mk${m}n"><g fill="#fff" stroke="#fff" stroke-width="12" stroke-linejoin="round">${b3Clip('front')}</g></mask></defs>${b3In200('front', 'sil')}<g mask="url(#mk${m}n)" pointer-events="none">${ell}</g></svg>
+      fig: `<div><div class="lab" style="color:${col}">${m === 'mm' ? 'MASSE MUSCULAIRE' : 'MASSE GRASSE'}</div><svg viewBox="0 0 200 392" role="img" aria-label="${lab}"><defs><filter id="soft${m}n" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="4.5"/></filter><mask id="mk${m}n"><g fill="#fff" stroke="#fff" stroke-width="2" stroke-linejoin="round">${b3Clip('front')}</g></mask></defs>${b3In200('front', 'sil')}<g mask="url(#mk${m}n)" pointer-events="none">${ell}</g></svg>
         <b class="num" style="display:block;margin-top:4px">${fx(tot, 1)}${u}${dTot != null ? ` <small style="color:${tone(dTot)};font-weight:600">${sign(dTot)}</small>` : ''}</b></div>`};
   };
   const A = one('mm'), B = one('fm');

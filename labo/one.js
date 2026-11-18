@@ -422,8 +422,19 @@ const ARCH = {
   N: {get: () => S.fset?.march || [], set: L => saveFset({march: L}), name: r => menuById(r)?.name || '', attr: 'mref', ex: () => false, del: () => {}}
 };
 const archMod = el => el?.closest('.rboard') ? 'R' : el?.closest('.mboard') ? 'N' : 'T';
+// Une séance faite (musculation ou sprint) part toute seule dans l'archive ; si on la remet, elle n'y repart plus.
+let ARCH_SIG = '';
+function archAuto() {
+  try {
+    const L = logs().filter(l => (l.kind === 'gym' || l.kind === 'track') && l.plan && !l.deleted), sig = L.length + '|' + (S.tset?.arch || []).length; if (sig === ARCH_SIG) return; ARCH_SIG = sig;
+    const no = new Set(S.tset?.archNo || []), have = new Set(S.tset?.arch || []), add = [];
+    for (const l of L) { const p = planById(l.plan); if (!p || p.id === 'bal-day') continue; const r = caleRef(p); if (r && !have.has(r) && !no.has(r)) { have.add(r); add.push(r); } }
+    if (add.length) saveTset({arch: [...(S.tset.arch || []), ...add]});
+  } catch (e) {}
+}
 // Ce qui est archivé n'apparaît plus dans les listes à caler (le reste du planning ne change pas).
 function archHide(root = document) {
+  archAuto();
   root.querySelectorAll?.('.sboard').forEach(b => {
     const m = archMod(b), A = ARCH[m], L = new Set(A.get());
     b.querySelectorAll(`.bsrc [data-${A.attr}]`).forEach(c => { c.style.display = L.has(c.dataset[A.attr]) ? 'none' : ''; });
@@ -458,5 +469,7 @@ function archPane(m) {
 }
 document.addEventListener('click', async e => {
   const a = e.target.closest('[data-onearch]'); if (a && !a.classList.contains('drop')) { archPane(a.dataset.onearch); return; }
-  const r = e.target.closest('[data-onerest]'); if (r) { const [m, ...x] = r.dataset.onerest.split('|'), ref = x.join('|'); await ARCH[m].set(ARCH[m].get().filter(y => y !== ref)); paneRender(); archHide(); toast('Remis dans la liste'); }
+  const r = e.target.closest('[data-onerest]'); if (r) { const [m, ...x] = r.dataset.onerest.split('|'), ref = x.join('|');
+    if (m === 'T') S.tset = {...S.tset, archNo: [...new Set([...(S.tset.archNo || []), ref])]};
+    await ARCH[m].set(ARCH[m].get().filter(y => y !== ref)); paneRender(); archHide(); toast('Remis dans la liste'); }
 });

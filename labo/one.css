@@ -272,3 +272,14 @@ html.one .wk-n{margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255
 html.one .wk-n ol{margin:6px 0 0;padding:0;list-style:none;counter-reset:wk;display:grid;gap:5px}
 html.one .wk-n li{counter-increment:wk;display:grid;grid-template-columns:18px 1fr;gap:8px;font-size:.78rem;line-height:1.32}
 html.one .wk-n li::before{content:counter(wk);width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:.6875rem;font-weight:700;background:rgba(142,155,181,.22);color:#fff}
+/* Accueil : la phrase du jour garde sa taille, le bilan se centre dans la place qui reste (au-dessus de la barre d'onglets). */
+html.one #hm.one-hm .hm-head{flex:0 0 auto!important;padding-bottom:0!important;-webkit-mask-image:none!important;mask-image:none!important}
+html.one #hm.one-hm{padding-bottom:calc(118px + env(safe-area-inset-bottom,0px))!important}
+html.one #hm.one-hm .wk{margin-top:auto!important;margin-bottom:auto!important}
+/* Tous les blocs teintés (Ma saison, Mes max, Prise de sang, boutons secondaires, pastilles…) : un fond plein et sombre,
+   teinté de la couleur du module, qui ne laisse plus voir le fond à travers. */
+html.one{--accent-soft:color-mix(in srgb,var(--accent) 14%,#0c0d10)}
+html.one .banner{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 22%,transparent)}
+html.one .restb:not(:empty){background:color-mix(in srgb,var(--accent) 18%,#0c0d10)}
+html.one .hdtog,html.one .varbtn{background:color-mix(in srgb,var(--accent) 14%,#0c0d10)}
+html.one .vam[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 18%,#0c0d10)}

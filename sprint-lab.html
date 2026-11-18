@@ -1026,6 +1026,7 @@ body.bdragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
 .libsearch{position:relative;margin:16px 0 6px}.libsearch svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--fg3);pointer-events:none}.libsearch .search{padding-left:42px;margin:0;width:100%;box-shadow:inset 0 0 0 1px var(--line)}
 .pc .rtoolbar{grid-column:1/-1;flex-wrap:wrap;align-self:start;height:auto;overflow:visible}.rtoolbar .chip{height:auto}
 .eqthumb{flex:none;width:44px;height:44px;border-radius:12px;background:#fff center/30px 30px no-repeat;box-shadow:0 1px 3px rgba(0,0,0,.25)}.rowbtn.exrow{gap:12px}
+.edsave2{margin-top:6px}.edsave2 .btn{width:100%}
 .rphh{font-size:.6875rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);padding:12px 4px 4px}.rsteps2 .row .eqthumb{margin-right:10px}
 .vidbtn{display:flex;align-items:center;gap:12px;margin:12px 0;padding:12px 14px;border-radius:14px;background:var(--card);color:var(--fg);text-decoration:none}.vidbtn span{display:flex;flex-direction:column;flex:1;min-width:0}.vidbtn b{font-size:.9375rem}.vidbtn small{font-size:.75rem;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.vidbtn .kc{flex:none;color:var(--fg3)}
 .sct2{display:grid;gap:10px;margin:12px 0 4px}.pc .sct2{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -8353,6 +8354,8 @@ document.addEventListener('input', e => { const t = e.target; if (ED && t.datase
 document.addEventListener('click', e => {
   if (!ED) return; const at = q => e.target.closest(q); let b;
   if ((b = at('[data-edwk]'))) { ED.wk = addDays(ED.wk, +b.dataset.edwk); paneRender(); return; }
+  if ((b = at('[data-edstart]'))) { const [i, v] = b.dataset.edstart.split('.'), it = ED.items[+i]; it.start = v; if (v === 'fly' && !it.run) it.run = 20; partNorm(it); edKeep(() => paneRender()); return; }
+  if ((b = at('[data-edim]'))) { const it = ED.items[+b.dataset.edim]; it.im = it.im === 'rpe' ? 'pct' : 'rpe'; if (it.im === 'rpe' && !it.rpe) it.rpe = 8; partNorm(it); edKeep(() => paneRender()); return; }
   if (at('[data-edpart]')) { const prev = [...ED.items].reverse().find(x => x.seq); ED.items.push(partNorm({seq: prev ? [60] : [30], blocks: prev ? 2 : 4, pct: 95, rest: 120, brest: 480})); paneRender(); return; }
   if (at('[data-edtech]')) { ED.tech = ''; paneRender(); setTimeout(() => document.querySelector('[data-edtechv]')?.focus(), 50); return; }
   if (at('[data-edtechx]')) { delete ED.tech; paneRender(); return; }
@@ -8393,6 +8396,16 @@ document.addEventListener('touchend', () => {
   let to = L.findIndex(b => { const r = b.getBoundingClientRect(); return d.y < r.top + r.height / 2; }); if (to < 0) to = L.length;
   const it = ED.items.splice(d.i, 1)[0]; ED.items.splice(to, 0, it); paneRender();
 });
+// La fiche de séance garde sa position quand elle se redessine ; après un ajout, on descend sur le nouvel exercice.
+const edBox = () => document.querySelector('#pane-scroll') || document.scrollingElement;
+const edScroll = () => edBox()?.scrollTop || 0;
+function edKeep(fn, y = edScroll(), toLast = false) { fn();
+  // Le choix d'exercice se ferme juste après et la fiche se redessine : à chaque image, pendant ce temps, on la garde à sa
+  // place (plus de saut en haut), puis on descend doucement sur l'exercice ajouté.
+  const t0 = performance.now(), hold = () => { const b = edBox(); if (!ED || !b) return; if (Math.abs(b.scrollTop - y) > 2 && !b.closest('[hidden]')) b.scrollTop = y;
+    if (performance.now() - t0 < 520) return setTimeout(hold, 16);
+    if (toLast) { const L = document.querySelectorAll('#ed-list .exbox'), el = L[L.length - 1]; if (el) el.scrollIntoView({block: 'center'}); } };
+  hold(); }
 function editPlan(id, date, dup = false) {
   const p = id ? planById(id) : null, mine = p && !BUILTIN.includes(p) && !TDV_PLANS.includes(p) && !dup;
   ED = p ? structuredClone(p) : {kind: S.tkind === 'track' ? 'track' : 'gym', name: '', desc: '', items: [], seqAuto: true};
@@ -8458,15 +8471,18 @@ function coolPick() {
 let LBL = [];
 // Sprint main session, in parts: distances in a row (30, 10, 100), done as a block several times, with the rest between
 // reps and between blocks. "2 × 30 then 2 × 60" = two parts. The kind of run (acceleration, top speed…) follows the distance.
-const partEx = it => { const mx = Math.max(...it.seq), pc = +it.pct || 95; return pc < 80 ? 'tempo' : mx <= 40 ? 'accel' : mx <= 80 ? 'fly' : mx <= 200 ? 'speedend' : 'tempo'; };
+const partEx = it => { const mx = Math.max(...it.seq), pc = it.im === 'rpe' ? (+it.rpe || 8) * 10 + 10 : +it.pct || 95; return pc < 80 ? 'tempo' : it.start === 'fly' && mx <= 80 ? 'fly' : mx <= 40 ? 'accel' : mx <= 80 ? 'fly' : mx <= 200 ? 'speedend' : 'tempo'; };
 function partNorm(it) { it.seq = (it.seq || []).filter(x => x > 0); if (!it.seq.length) it.seq = [30]; it.blocks = Math.max(1, +it.blocks || 1); it.reps = it.seq.length * it.blocks; it.dist = Math.round(it.seq.reduce((a, b) => a + b, 0) / it.seq.length); it.ex = partEx(it); return it; }
+// Le départ : depuis les blocs, debout, ou lancé (avec une distance d'élan : « 30 m lancés »).
+const STARTS = [['blocks', 'Blocs'], ['stand', 'Debout'], ['fly', 'Lancé']];
 function partBody(it, i, num, rest) {
-  const one = it.seq.length === 1;
-  return `<div class="edrow" style="grid-template-columns:1.6fr 1fr 1fr"><label>Distances (m)<input class="mini-in big" inputmode="text" data-edseq="${i}" value="${esc(it.seq.join(', '))}" placeholder="30, 60"></label><label>${one ? 'Répét.' : 'Blocs'}${num(i, 'blocks', it.blocks, '4')}</label><label>Intensité %${num(i, 'pct', it.pct, '95')}</label></div>
+  const one = it.seq.length === 1, rpe = it.im === 'rpe';
+  return `<div class="ctrow"><span>Départ</span><div class="seg">${STARTS.map(([v, l]) => `<button type="button" data-edstart="${i}.${v}" aria-pressed="${(it.start || 'stand') === v}">${l}</button>`).join('')}</div></div>
+    <div class="edrow" style="grid-template-columns:1.6fr 1fr 1fr${it.start === 'fly' ? ' 1fr' : ''}"><label>Distances (m)<input class="mini-in big" inputmode="text" data-edseq="${i}" value="${esc(it.seq.join(', '))}" placeholder="30, 60"></label>${it.start === 'fly' ? `<label>Élan (m)${num(i, 'run', it.run, '20')}</label>` : ''}<label>${one ? 'Répét.' : 'Blocs'}${num(i, 'blocks', it.blocks, '4')}</label><label><button type="button" class="hdtog" data-edim="${i}">${rpe ? 'RPE' : 'Intensité %'} ⇄</button>${rpe ? num(i, 'rpe', it.rpe, '8') : num(i, 'pct', it.pct, '95')}</label></div>
     <div class="edrow" style="grid-template-columns:1fr${one ? '' : ' 1fr'}"><label>${one ? 'Récup' : 'Récup entre répét.'}${rest(i, it.rest, '2:00')}</label>${one ? '' : `<label>Récup entre blocs<input class="mini-in big" inputmode="decimal" data-edbrest="${i}" value="${restIn(it.brest)}" placeholder="8:00"></label>`}</div>
     <p class="hint" style="margin:4px 2px 0">${esc(partTxt(it))}</p>`;
 }
-const partTxt = it => `${it.seq.length > 1 ? it.seq.join(' + ') + ' m, ' + it.blocks + ' bloc' + (it.blocks > 1 ? 's' : '') : it.blocks + ' × ' + it.seq[0] + ' m'}${it.pct ? ' à ' + it.pct + ' %' : ''}${it.rest ? ' · ' + fmtRest(it.rest) + (it.seq.length > 1 ? ' entre répét.' : ' de récup') : ''}${it.brest && it.seq.length > 1 ? ' · ' + fmtRest(it.brest) + ' entre blocs' : ''} · ${fx(it.seq.reduce((a, b) => a + b, 0) * it.blocks)} m au total`;
+const partTxt = it => `${it.seq.length > 1 ? it.seq.join(' + ') + ' m, ' + it.blocks + ' bloc' + (it.blocks > 1 ? 's' : '') : it.blocks + ' × ' + it.seq[0] + ' m'}${it.start === 'fly' ? ' lancés' + (it.run ? ' (' + it.run + ' m d\'élan)' : '') : it.start === 'blocks' ? ' depuis les blocs' : ''}${it.im === 'rpe' ? (it.rpe ? ' à RPE ' + it.rpe : '') : it.pct ? ' à ' + it.pct + ' %' : ''}${it.rest ? ' · ' + fmtRest(it.rest) + (it.seq.length > 1 ? ' entre répét.' : ' de récup') : ''}${it.brest && it.seq.length > 1 ? ' · ' + fmtRest(it.brest) + ' entre blocs' : ''} · ${fx(it.seq.reduce((a, b) => a + b, 0) * it.blocks)} m au total`;
 function techBox() {
   if (ED.tech == null) return `<button class="btn ghost" data-edtech>+ Ajouter un travail technique</button>`;
   return `<div class="exbox wbox"><h3>Travail technique</h3><textarea class="mini-in techta" data-edtechv placeholder="Ce que tu travailles : gammes, départs, placement du bassin, griffé…" aria-label="Travail technique">${esc(ED.tech)}</textarea>
@@ -8506,6 +8522,7 @@ function editBody() {
     ${trk ? `<button class="btn ghost" data-edpart>${ED.items.some(x => x.seq) ? '+ Ajouter une partie à la séance principale' : '+ Séance principale'}</button>` : '<button class="btn ghost" data-edadd>+ Ajouter un exercice</button>'}
     ${coolBox()}
     </div>
+    <div class="edsave2"><button class="btn" data-edtoday>Enregistrer et faire aujourd'hui</button><p class="hint" style="margin:6px 2px 0">La séance est calée aujourd'hui${(() => { const q = edPlanned(TODAY); return q && !logsOn(TODAY).some(l => l.kind === ED.kind) ? ` à la place de « ${esc(q.name)} », qui part dans l'archive` : ''; })()}.</p></div>
     </div>`;
 }
 const EQUIPS = ['Barre', 'Haltères', 'Kettlebell', 'Machine', 'Poulie', 'Poids du corps', 'Élastique', 'Médecine-ball', 'Barre hexagonale', 'Landmine', 'Barre EZ', 'Smith', 'Box', 'Banc', 'Barre de traction', 'Barres parallèles', 'Traîneau', 'Ballon', 'Haies'];
@@ -8718,13 +8735,23 @@ function defaultItem(id) {
   if (e.t === 'track') return e.u === 'g' ? {ex: id, reps: 2, dist: 20} : {ex: id, reps: 4, dist: 30, pct: 95, rest: 180};
   return {ex: id, sets: 3, reps: e.u === 's' ? 30 : 10, rest: 180, tempo: e.u === 's' ? undefined : [3, 0, 1, 0]};
 }
+// « Enregistrer et faire aujourd'hui » : la séance prend la place du jour. Celle qui était prévue aujourd'hui (pas encore faite)
+// est annulée : elle quitte le jour et part dans l'archive.
+async function savePlanToday() {
+  if (!ED) return; if (!ED.items.length) { toast('Ajoute au moins un exercice'); return; }
+  const q = edPlanned(TODAY), done = logsOn(TODAY).some(l => l.kind === ED.kind);
+  if (q && !done) { const dated = {...(S.tset.dated || {})}; for (const k of [TODAY, TODAY + '|t']) if (dated[k] === caleRef(q) || dated[k] === q.id) delete dated[k];
+    const arch = [...new Set([...(S.tset.arch || []), caleRef(q)])]; S.tset = {...S.tset, dated, arch}; }
+  ED.date = TODAY; ED.wk = monday(TODAY); ED.today = true;
+  await savePlan();
+}
 async function savePlan() {
   if (!ED) return;
   if (!ED.items.length) { toast('Ajoute au moins un exercice'); return; }
   const A = sessionAuto(ED);
   if (ED.autoName) ED.name = A.name; if (ED.autoDesc) ED.desc = A.desc;
   ED.name = (ED.name || '').trim() || 'Ma séance';
-  const {date, date0, wk, gym, ...doc0} = ED, doc = {...doc0, updatedAt: new Date().toISOString()};
+  const {date, date0, wk, gym, today, ...doc0} = ED, doc = {...doc0, updatedAt: new Date().toISOString()};
   S.plans[doc.id] = doc;
   await dbSet('plans/' + doc.id, doc);
   const dated = {...(S.tset.dated || {})};
@@ -8733,6 +8760,7 @@ async function savePlan() {
   const gymPlan = {...(S.tset.gymPlan || {})}; if (doc.kind === 'gym' && gym) gymPlan[doc.id] = gym; else delete gymPlan[doc.id];
   S.tset = {...S.tset, dated, gymPlan}; await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()});
   closePane(); if (P.stack.length) closePane();
+  if (today) { toast(doc.name + ' calée aujourd\'hui'); if (S.mod === 'T') { S.ttab = 'today'; renderMod(true); } return; }
   toast('Séance enregistrée'); planView(doc.id);
 }
 
@@ -10354,7 +10382,9 @@ document.addEventListener('click', e => {
   if (at('[data-tlive]')) { openLive(); return; }
   // Plan editor
   if ((b = at('[data-edkind]'))) { ED.kind = b.dataset.edkind; paneRender(); return; }
-  if (at('[data-edadd]')) { pickExercise(ED.kind, id => { ED.items.push(defaultItem(id)); paneRender(); }); return; }
+  if (at('[data-edtoday]')) { savePlanToday(); return; }
+  // Ajouter un exercice : la fiche se remet là où on était, sur l'exercice ajouté (plus de retour en haut).
+  if (at('[data-edadd]')) { const y = edScroll(); pickExercise(ED.kind, id => { ED.items.push(defaultItem(id)); edKeep(() => paneRender(), y, true); }); return; }
   if (at('[data-edtest]')) { pickTest(id => { const at0 = ED.items.findIndex(x => x.ex !== 'warmup' && exOf(x.ex).t !== 'test'); ED.items.splice(at0 < 0 ? ED.items.length : at0, 0, defaultItem(id)); paneRender(); toast('Test placé juste après l\'échauffement'); }); return; }
   if ((b = at('[data-edlink]'))) { const it = ED.items[+b.dataset.edlink]; it.link = !it.link; if (it.link) delete it.meth; paneRender(); return; }
   if ((b = at('[data-edrm]'))) { ED.items.splice(+b.dataset.edrm, 1); paneRender(); return; }
