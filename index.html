@@ -692,10 +692,38 @@ svg.body.sil .rg.on{stroke:none;fill:transparent}
 .edtbl .lb{width:46px;text-align:center;font-weight:800;color:var(--accent)}.edtbl .lb button{width:40px;height:30px;border-radius:8px;border:1px dashed color-mix(in srgb,var(--accent) 45%,transparent);background:none;color:var(--accent);font:inherit;font-weight:800;cursor:pointer}.edtbl .lb button[aria-pressed="true"]{border-style:solid;background:color-mix(in srgb,var(--accent) 14%,transparent)}
 .edtbl .tp{width:146px;white-space:nowrap}.edtbl .tp input{display:inline-block;width:30px;padding:0;margin-right:3px}.edtbl .tp input:last-child{margin-right:0}
 .edtbl .in{width:150px}.edtbl .in div{display:flex;gap:4px}.edtbl .in span{display:block;margin-top:3px;font-size:.75rem;font-weight:700;text-align:center;min-height:15px}.edtbl .in span small{font-weight:500;color:var(--fg3)}
+.edtbl .rp{width:96px}.edtbl .ub{display:block;width:100%;border:0;background:none;color:var(--fg3);font:inherit;font-size:.625rem;font-weight:600;cursor:pointer;padding:0 0 2px}.edtbl .ub:hover{color:var(--accent)}
+.sfw{position:relative;display:block;flex:1}.sfw i{position:absolute;right:7px;top:50%;transform:translateY(-50%);font-style:normal;font-size:.75rem;color:var(--fg2);pointer-events:none}.sfw input{padding-right:20px}
 .edtbl .x button{width:28px;height:28px;border:0;background:none;color:var(--fg3);font-size:1.1rem;cursor:pointer;border-radius:8px}.edtbl .x button:hover{color:var(--bad)}
 .edtbl tfoot td{font-weight:700;padding:8px 6px;text-align:center}.edtbl tfoot td:first-child{text-align:left}.edtbl tfoot .max td{color:var(--fg2);font-weight:600}.edtbl tfoot .over{color:var(--bad)!important}
 .edsug{position:absolute;left:4px;right:4px;top:40px;z-index:20;background:var(--card);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.45),0 0 0 1px var(--line);padding:4px;max-height:300px;overflow:auto}
 .edsug button{display:block;width:100%;text-align:left;border:0;background:none;color:var(--fg);font:inherit;padding:7px 10px;border-radius:8px;cursor:pointer}.edsug button:hover{background:color-mix(in srgb,var(--accent) 14%,transparent)}.edsug small{display:block;color:var(--fg3);font-size:.6875rem}.edsug .none{display:block;padding:8px 10px;color:var(--fg3)}
+.ltbl .lx td{font-weight:600}.ltbl .lx td small{display:block;font-weight:500;color:var(--fg3);font-size:.6875rem}.ltbl .lx .exn{text-align:left}.ltbl td{text-align:center}
+.ltbl .ls td{padding:0 6px 10px;border-bottom:1px solid var(--line)}.ltbl .lx td{border-bottom:0}
+.lsets{display:flex;flex-direction:column;gap:6px;padding:8px 10px;border-radius:12px;background:color-mix(in srgb,var(--fg) 4%,transparent)}
+.lset{display:grid;grid-template-columns:70px 40px repeat(3,minmax(0,150px));gap:10px;align-items:end;text-align:left}.lset .n{align-self:center;font-size:.75rem;font-weight:700;color:var(--fg2)}
+.lset label{display:flex;flex-direction:column;gap:3px;font-size:.625rem;color:var(--fg3);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.lset .ck{width:34px;height:34px;border-radius:10px;border:1.5px solid var(--line);background:none;color:transparent;cursor:pointer;display:grid;place-items:center}.lset .ck[aria-pressed="true"]{background:var(--good);border-color:var(--good);color:#fff}
+.lset.done{opacity:.75}.addset{align-self:flex-start;border:0;background:none;color:var(--accent);font:inherit;font-weight:600;cursor:pointer;padding:4px 0}
+.scal{margin-top:14px}.scsea{font-size:1.25rem;font-weight:800;margin:4px 2px 8px}.scsea small{display:block;font-size:.75rem;font-weight:500;color:var(--fg3);margin-top:2px}.scgap{height:26px}
+.scmo{font-size:.6875rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--fg3);margin:12px 4px 6px}
+.scblk{display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--fg2);margin:10px 4px 6px}.scblk::before{content:'';width:9px;height:9px;border-radius:3px;background:var(--sbc)}.scblk b{color:var(--fg)}
+.scw{display:grid;grid-template-columns:44px 1fr auto auto;gap:10px;align-items:center;width:100%;text-align:left;border:0;margin:0 0 4px;padding:10px 12px;border-radius:12px;font:inherit;color:var(--fg);cursor:pointer;background:linear-gradient(90deg,color-mix(in srgb,var(--sbc) 18%,transparent),color-mix(in srgb,var(--sbc) 5%,transparent));box-shadow:inset 3px 0 0 var(--sbc)}
+.scw.pre{opacity:.6}.scw.now{box-shadow:inset 3px 0 0 var(--sbc),0 0 0 1.5px var(--fg)}.scw .sw{font-size:.75rem;font-weight:800;color:color-mix(in srgb,var(--sbc) 75%,var(--fg))}.scw .sd{font-size:.875rem;font-weight:600}.scw .sb,.scw .sc{font-size:.75rem;color:var(--fg2)}
+.sedit{margin-top:18px}.sedit>summary{cursor:pointer;font-weight:700;color:var(--accent);padding:10px 4px;list-style:none}
+.prohint{margin:6px 2px 14px;font-size:.8125rem;color:var(--fg2)}.proh{display:flex;align-items:center;justify-content:space-between;gap:12px}.probtn{font:inherit;font-size:inherit;font-weight:700;color:var(--accent);background:none;border:1.5px solid var(--accent);border-radius:12px;padding:4px 12px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}.probtn:hover{background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.procrumb{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px;font-weight:700}.procrumb i{font-style:normal;color:var(--fg3)}.procrumb button{border:0;background:none;color:var(--accent);font:inherit;cursor:pointer;padding:0}.procrumb button[style]{color:var(--sbc)}.procrumb span{color:var(--fg)}
+.prorow{margin-bottom:16px}.prolab{font-weight:800;margin:0 2px 8px}.prolab small{font-weight:500;color:var(--fg3);margin-left:8px}
+.probar{display:flex;gap:6px}.problk{position:relative;min-width:0;text-align:left;border:0;border-radius:14px;padding:12px 12px 26px;font:inherit;color:var(--fg);cursor:pointer;background:linear-gradient(160deg,color-mix(in srgb,var(--sbc) 34%,transparent),color-mix(in srgb,var(--sbc) 12%,transparent));box-shadow:inset 0 3px 0 var(--sbc);transition:transform .15s}
+.problk:hover{transform:translateY(-2px)}.problk.now{box-shadow:inset 0 3px 0 var(--sbc),0 0 0 1.5px var(--fg)}.problk b{display:block;font-size:.95rem}.problk span{display:block;font-size:.75rem;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.problk small{font-size:.6875rem;color:var(--fg3)}
+.proticks{position:absolute;left:10px;right:10px;bottom:8px;display:flex!important;gap:2px;height:12px;align-items:flex-end}.proticks i{flex:1;height:calc(3px + var(--h) * 9px);border-radius:2px;background:color-mix(in srgb,var(--sbc) 80%,var(--fg))}.problk em{position:absolute;top:0;bottom:0;width:2px;background:var(--fg);border-radius:2px}
+.proweeks{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}.prowk{text-align:left;border:0;border-radius:14px;padding:12px;font:inherit;color:var(--fg);cursor:pointer;background:color-mix(in srgb,var(--sbc) 14%,transparent);box-shadow:inset 3px 0 0 var(--sbc)}.prowk.now{box-shadow:inset 3px 0 0 var(--sbc),0 0 0 1.5px var(--fg)}
+.prowk b{display:block}.prowk b small{display:block;font-weight:500;color:var(--fg3);font-size:.6875rem}.pron{display:block;font-size:.75rem;color:var(--fg2);margin:4px 0 8px}.prodots{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}.prodots i{font-style:normal;font-size:.625rem;color:var(--fg3);display:flex;flex-direction:column;align-items:center;gap:3px}
+u.g,u.t{display:block;width:10px;height:10px;border-radius:50%;border:2px solid #E5484D}u.t{border-color:#FF9F0A}u.g.d{background:#E5484D}u.t.d{background:#FF9F0A}u.lg{display:inline-block;vertical-align:-1px}
+.prodays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:12px}.proday{border-radius:14px;padding:10px 8px;background:color-mix(in srgb,var(--fg) 4%,transparent);min-width:0}.proday.now{box-shadow:0 0 0 1.5px var(--accent)}.proday>b{display:block;font-size:.8125rem;margin-bottom:8px}
+.prok{margin-bottom:10px}.prok>span{display:block;font-size:.625rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--fg3);margin-bottom:4px}
+.proses{display:block;width:100%;text-align:left;border:0;border-radius:10px;padding:7px 8px;margin-bottom:4px;font:inherit;color:var(--fg);cursor:pointer;background:color-mix(in srgb,var(--accent) 16%,transparent)}.proses b{display:block;font-size:.75rem}.proses small{font-size:.625rem;color:var(--fg2)}.proses.done{background:color-mix(in srgb,var(--good) 18%,transparent)}
+.proadd{display:flex;gap:4px}.proadd button{flex:1;border:1px dashed var(--line);background:none;border-radius:8px;color:var(--fg2);font:inherit;font-size:.6875rem;padding:4px 0;cursor:pointer}.proadd button:hover{color:var(--accent);border-color:var(--accent)}
 .wkrow{display:grid;grid-template-columns:40px 1fr 40px;align-items:center;text-align:center}
 .wkrow button{height:36px;border-radius:10px;font-size:1.375rem;color:var(--accent)}
 .wkrow b small{display:block;font-size:.75rem;color:var(--fg2);font-weight:500}
@@ -1066,7 +1094,7 @@ ul.bil{margin:4px 0 0;padding-left:18px;font-size:.875rem;line-height:1.45}ul.bi
 .bgrid{display:grid;gap:6px}
 .bweek{display:grid;grid-template-columns:22px repeat(7,minmax(0,1fr));gap:3px;align-items:stretch}.bcell{min-width:0;overflow:hidden}
 .bweek.sebk{background:linear-gradient(90deg,color-mix(in srgb,var(--sbc) 16%,transparent),color-mix(in srgb,var(--sbc) 5%,transparent) 60%);border-radius:10px;box-shadow:inset 3px 0 0 color-mix(in srgb,var(--sbc) 70%,transparent)}.bweek.sebk .bwk{color:color-mix(in srgb,var(--sbc) 80%,var(--fg))}
-.seleg{display:flex;flex-wrap:wrap;gap:6px 14px;margin:8px 2px 0;font-size:.6875rem;color:var(--fg3)}.seleg span::before{content:'';display:inline-block;width:8px;height:8px;border-radius:3px;margin-right:5px;background:var(--sbc);vertical-align:0}
+.sbhd{display:flex;flex-direction:column;gap:3px;min-width:0}.seleg{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;font-size:.6875rem;font-weight:600;color:var(--fg2)}.seleg i{font-style:normal;color:var(--fg3)}.seleg span::before{content:'';display:inline-block;width:8px;height:8px;border-radius:3px;margin-right:5px;background:var(--sbc);vertical-align:0}
 .sedot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:0}
 .bwk{writing-mode:vertical-rl;transform:rotate(180deg);font-size:.625rem;font-weight:700;color:var(--fg3);text-align:center;letter-spacing:.06em}
 .bcell{min-height:62px;border-radius:10px;background:var(--card2);padding:4px 3px;display:flex;flex-direction:column;gap:3px;opacity:.55;transition:background .15s,box-shadow .15s,opacity .15s}
@@ -2252,12 +2280,28 @@ const seGymGoal = (a, b) => { const d = [...new Set([a, b].map(n => (typeof tdvN
 const seasonGymDef = () => ({start: (() => { const L = typeof tdvLast === 'function' ? tdvLast() : {n: 0}; return L.n ? addDays(monday(L.d), -7 * (Math.ceil(L.n / 3) - 1)) : S.tset?.season?.start || monday(TODAY); })(), blocks: SEASON_GYM.map(([n, w, a, b]) => [n, w, seGymGoal(a, b)]), comp: S.tset?.season?.comp || '', kind: 'gym'});
 let SE_KIND = 'track';
 const SE_COL = ['#3E9BFF', '#B678E8', '#FF9F0A', '#E5484D', '#30B46C', '#6CC3E6'];
+// Ma saison : du 1er septembre aux dernières compétitions d'été, semaine par semaine, mois par mois ;
+// la saison hivernale puis, après un espace, la saison estivale. Chaque semaine a la couleur de son bloc.
+function seCal(se) {
+  const tot = se.blocks.reduce((a, b) => a + (+b[1] || 0), 0), end = addDays(se.start, tot * 7 - 1), MO = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  const cnt = (w, kind) => { let n = 0; for (let i = 0; i < 7; i++) { const k = addDays(w, i); if (k < TODAY ? kindDone(k, kind) : S.tset?.dated?.[dKey(k, kind)]) n++; } return n; };
+  let out = '', sea = null, mo = null, blk = null;
+  for (let w = monday(se.start.slice(0, 4) + '-09-01'); w <= end; w = addDays(w, 7)) {
+    const n = seasonNow(w), inB = n && !n.before && !n.after, nm = inB ? n.name : 'Avant la saison', ss = /été/.test(nm) ? 'ete' : 'hiver';
+    if (ss !== sea) { out += `${sea ? '<div class="scgap"></div>' : ''}<div class="scsea">${ss === 'ete' ? 'Saison estivale' : 'Saison hivernale'}<small>${ss === 'ete' ? 'jusqu\'aux dernières compétitions de 100 m · ' + esc(fmtShort(se.comp2 || end)) : 'jusqu\'aux dernières compétitions de 60 m · ' + esc(fmtShort(se.comp || end))}</small></div>`; sea = ss; mo = null; }
+    const mth = +addDays(w, 3).slice(5, 7) - 1; if (mth !== mo) { out += `<div class="scmo">${cap(MO[mth])}</div>`; mo = mth; }
+    if (nm !== blk) { if (inB) out += `<div class="scblk" style="--sbc:${n.col}"><b>${esc(nm.split(' · ')[0])}</b> · ${n.of} semaine${n.of > 1 ? 's' : ''} · ${esc(n.goal)}</div>`; blk = nm; }
+    const g = cnt(w, 'gym'), t = cnt(w, 'track'), now = w === monday(TODAY);
+    out += `<button type="button" class="scw${now ? ' now' : ''}${inB ? '' : ' pre'}" data-sewk="${w}" style="--sbc:${inB ? n.col : '#8E8E93'}"><span class="sw">S${seasonWeek(w)}</span><span class="sd">${esc(fmtShort(w).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(w, 6)).replace(/^\S+ /, ''))}</span><span class="sb">${inB ? `semaine ${n.week}/${n.of}` : ''}</span><span class="sc">${g ? g + ' muscu' : ''}${g && t ? ' · ' : ''}${t ? t + ' sprint' : ''}</span></button>`;
+  }
+  return `<div class="scal">${out}</div>`;
+}
 function seasonPane() {
   openPane({title: SE_KIND === 'gym' ? 'Ma saison de musculation' : 'Ma saison', render: () => {
     const se = seDraft(), tot = se.blocks.reduce((a, b) => a + (+b[1] || 0), 0), now = daysBetween(se.start, TODAY), wNow = Math.floor(now / 7);
     let w = 0; const weeks = [];
     se.blocks.forEach((b, i) => { for (let j = 0; j < (+b[1] || 0); j++, w++) weeks.push({i, w, k: addDays(se.start, w * 7)}); });
-    return `${SE_KIND === 'gym' ? '<p class="small muted" style="margin:16px 4px 10px">Ta planification de musculation, bloc par bloc. Change les noms, les semaines et les objectifs comme tu l\'as prévue.</p>' : ''}<div class="seg" role="group" style="margin:16px 0 10px;${SE_KIND === 'gym' ? 'display:none' : ''}">${Object.entries(SEASON_TPL).map(([k, t]) => `<button type="button" data-stpl="${k}" aria-pressed="${(se.kind || 'hiver') === k}">${t.name}</button>`).join('')}</div>
+    return seCal(se) + `<details class="sedit"><summary>Modifier mes blocs et mes dates</summary>${SE_KIND === 'gym' ? '<p class="small muted" style="margin:16px 4px 10px">Ta planification de musculation, bloc par bloc. Change les noms, les semaines et les objectifs comme tu l\'as prévue.</p>' : ''}<div class="seg" role="group" style="margin:16px 0 10px;${SE_KIND === 'gym' ? 'display:none' : ''}">${Object.entries(SEASON_TPL).map(([k, t]) => `<button type="button" data-stpl="${k}" aria-pressed="${(se.kind || 'hiver') === k}">${t.name}</button>`).join('')}</div>
       <div class="list"><div class="row"><label for="se-start">Début</label><input type="date" id="se-start" class="mini-in" value="${se.start}" data-se="start"></div>
         <div class="row"><label for="se-comp">Dernières compétitions · 60 m</label><input type="date" id="se-comp" class="mini-in" value="${se.comp || ''}" data-se="comp"></div>
         <div class="row"><label for="se-comp2">Dernières compétitions · 100 m</label><input type="date" id="se-comp2" class="mini-in" value="${se.comp2 || ''}" data-se="comp2"></div></div>
@@ -2266,7 +2310,7 @@ function seasonPane() {
         <div class="row col"><div class="sewh"><label>Semaines</label><span class="stepper"><button type="button" data-sew="${i}.-1" aria-label="Une semaine de moins">−</button><b class="num">${b[1]}</b><button type="button" data-sew="${i}.1" aria-label="Une semaine de plus">+</button></span></div>
           <div class="sefrise">${weeks.filter(x => x.i === i).map(x => `<button type="button" data-sewk="${x.k}" style="--bc:${SE_COL[x.i % SE_COL.length]}" class="${x.w === wNow ? 'now' : ''}"><b>${x.w + 1}</b><small>${esc(fmtShort(x.k).replace(/^\S+ /, ''))}</small></button>`).join('')}</div></div>
         <div class="row col"><label>Objectif</label><input class="mini-in" style="text-align:left;width:100%" value="${esc(b[2])}" data-seb="${i}.2" aria-label="Objectif du bloc"></div></div>`).join('')}</div>
-      <div class="stack" style="margin-top:12px"><button class="btn ghost" data-seadd>+ Ajouter un bloc</button><button class="btn" data-sesave>Enregistrer ma saison</button></div>`;
+      <div class="stack" style="margin-top:12px"><button class="btn ghost" data-seadd>+ Ajouter un bloc</button><button class="btn" data-sesave>Enregistrer ma saison</button></div></details>`;
   }, onClose: () => { SE_DRAFT = null; }});
 }
 document.addEventListener('click', e => {
@@ -6439,7 +6483,8 @@ function mmFollow() {
   mmPaint(1);
   if (MM.d || Math.hypot(MM.tx - MM.x, MM.ty - MM.y) > .5) MM.raf = requestAnimationFrame(mmFollow); else MM.raf = 0;
 }
-const mmOk = e => MM_NAME[S.mod] && !S.sheet && !P.stack.length && !$('.drawer.on') && !HP.busy
+// Nouvelle appli (html.one) : plus de retour à l'accueil en tirant la page vers le bas.
+const mmOk = e => !document.documentElement.classList.contains('one') && MM_NAME[S.mod] && !S.sheet && !P.stack.length && !$('.drawer.on') && !HP.busy
   && !e.target.closest('input, textarea, select, .tabbar, .sheet, .pane, [data-jq]');
 document.addEventListener('touchstart', e => {
   if (e.touches.length !== 1 || !mmOk(e) || scrollY > 2) { MM.d = null; return; }
@@ -8320,9 +8365,9 @@ function sesBoard(kind) {
   const weeks = [0, 1, 2, 3].map(w => addDays(mon0, 7 * w));
   const src = [...(kind === 'gym' ? tdvTodo(8) : []), ...myPlans().filter(x => x.kind === kind)];
   const placed = new Set(Object.entries(S.tset?.dated || {}).filter(([d]) => d >= TODAY).map(([, v]) => v));
-  return `<div class="card sboard"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Mes 4 semaines · ${kind === 'gym' ? 'muscu' : 'sprint'}</span><span class="sbnav"><button type="button" data-sboff="-1" aria-label="4 semaines avant"${off <= -26 ? ' disabled' : ''}>‹</button><small>${esc(fmtShort(weeks[0]).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(weeks[3], 6)).replace(/^\S+ /, ''))}</small><button type="button" data-sboff="1" aria-label="4 semaines après">›</button></span></div>
+  return `<div class="card sboard"><div class="chead" style="margin-bottom:10px"><span class="sbhd"><span class="eyebrow">Mes 4 semaines · ${kind === 'gym' ? 'muscu' : 'sprint'}</span>${(() => { const seen = []; weeks.forEach(w => { const n = seasonNow(w); if (n && !n.before && !n.after && !seen.some(x => x.name === n.name)) seen.push(n); }); return seen.length ? `<span class="seleg">${seen.map(n => `<span style="--sbc:${n.col}">${esc(n.name.split(' · ')[0])}</span>`).join('<i>→</i>')}</span>` : ''; })()}</span><span class="sbnav"><button type="button" data-sboff="-1" aria-label="4 semaines avant"${off <= -26 ? ' disabled' : ''}>‹</button><small>${esc(fmtShort(weeks[0]).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(weeks[3], 6)).replace(/^\S+ /, ''))}</small><button type="button" data-sboff="1" aria-label="4 semaines après">›</button></span></div>
     <div class="bgrid">${weeks.map(w => { const n = seasonNow(w), c = n && !n.before && !n.after ? n.col : null; return `<div class="bweek${c ? ' sebk' : ''}"${c ? ` style="--sbc:${c}" title="${esc(n.name)} · semaine ${n.week}/${n.of}"` : ''}><span class="bwk">S${seasonWeek(w)}</span>${[0, 1, 2, 3, 4, 5, 6].map(i => cell(addDays(w, i))).join('')}</div>`; }).join('')}</div>
-    ${(() => { const seen = []; weeks.forEach(w => { const n = seasonNow(w); if (n && !n.before && !n.after && !seen.some(x => x.name === n.name)) seen.push(n); }); return seen.length ? `<div class="seleg">${seen.map(n => `<span style="--sbc:${n.col}">${esc(n.name.split(' · ')[0])}</span>`).join('')}</div>` : ''; })()}
+
     <div class="sec-label" style="margin:14px 2px 6px">Séances</div>
     <div class="bsrc">${src.length ? src.map(x => { const r = caleRef(x), on = placed.has(r); return `<div class="bchip src${on ? ' on' : ''}" data-bref="${esc(r)}" title="${esc(x.name)}${x.title ? ' · ' + esc(x.title) : ''}"><span>${esc(x.name)}</span><small>${(x.title || x.desc) ? esc(x.title || x.desc) + ' · ' : ''}${estMin(x)} min${on ? ' · calée' : ''}</small></div>`; }).join('') : '<p class="small muted" style="margin:0">Crée une séance ci-dessous : elle apparaîtra ici, prête à être calée.</p>'}</div>
     ${(() => { const xc = (id, sm) => { const e = exOf(id); return `<div class="bchip src xchip" data-bref="x:${esc(id)}" title="${esc(e.n)}"><span>${esc(e.n)}</span><small>${esc(sm)}</small></div>`; };
@@ -8397,6 +8442,56 @@ document.addEventListener('click', e => {
   if (at('[data-texadd]')) { const kind = S.tkind === 'track' ? 'track' : 'gym'; pickExercise(kind, id => { const L = S.tset.myEx || []; if (L.includes(id)) { toast('Déjà dans tes exercices'); return; } saveTset({myEx: [...L, id]}); toast(exOf(id).n + ' ajouté : glisse-le sur un jour'); }); return; }
   if ((b = at('[data-myexdel]'))) { const id = b.dataset.myexdel; closePane(); saveTset({myEx: (S.tset.myEx || []).filter(x => x !== id)}); toast('Retiré de tes exercices'); }
 });
+// L'outil du coach (ordinateur) : toute la saison en frise (hiver puis été). On zoome : un bloc → ses semaines et leurs séances,
+// une semaine → ses 7 jours, une séance → son contenu. On crée une séance (le tableau) ou on cale une séance existante sur n'importe quel jour.
+const PRO = {lvl: 'season', bi: 0, wk: null};
+function proSes(k, kind) { const p = planForK(k, kind); return p ? [{p, ref: caleRef(p), done: kindDone(k, kind)}] : kindDone(k, kind) ? [{p: null, done: true}] : []; }
+function proWeekCount(w) { let n = 0; for (let i = 0; i < 7; i++) { const k = addDays(w, i); n += proSes(k, 'gym').length + proSes(k, 'track').length; } return n; }
+function proBlocks(se) { let w = se.start; return se.blocks.map((b, i) => { const r = {i, name: b[0], weeks: +b[1] || 0, goal: b[2], from: w, col: seCol(b[0])}; w = addDays(w, r.weeks * 7); r.to = addDays(w, -1); return r; }); }
+function proBody() {
+  const se = S.tset?.season?.start ? S.tset.season : SEASON_2627(), B = proBlocks(se), cur = B.find(b => TODAY >= b.from && TODAY <= b.to);
+  const crumb = [`<button type="button" data-prolvl="season">Ma saison</button>`];
+  if (PRO.lvl !== 'season') crumb.push(`<button type="button" data-prolvl="block" style="--sbc:${B[PRO.bi].col}">${esc(B[PRO.bi].name)}</button>`);
+  if (PRO.lvl === 'week') crumb.push(`<span>Semaine du ${esc(fmtShort(PRO.wk))}</span>`);
+  const head = `<div class="procrumb">${crumb.join('<i>›</i>')}</div>`;
+  if (PRO.lvl === 'season') {
+    const row = (lab, L) => { const tw = L.reduce((a, b) => a + b.weeks, 0); return `<div class="prorow"><div class="prolab">${lab}<small>${tw} semaines</small></div><div class="probar">${L.map(b => { let n = 0; for (let w = b.from; w <= b.to; w = addDays(w, 7)) n += proWeekCount(w);
+      const now = b === cur, pos = now ? Math.min(100, daysBetween(b.from, TODAY) / (b.weeks * 7) * 100) : null;
+      return `<button type="button" class="problk${now ? ' now' : ''}" data-problk="${b.i}" style="--sbc:${b.col};flex:${b.weeks} 1 0"><b>${esc(b.name.split(' · ')[0])}</b><span>${b.weeks} sem. · ${n} séance${n > 1 ? 's' : ''}</span><small>${esc(fmtShort(b.from).replace(/^\S+ /, ''))}</small>
+        <span class="proticks">${[...Array(b.weeks)].map((_, j) => { const c = proWeekCount(addDays(b.from, j * 7)); return `<i style="--h:${Math.min(1, c / 6)}"></i>`; }).join('')}</span>${pos != null ? `<em style="left:${pos}%"></em>` : ''}</button>`; }).join('')}</div></div>`; };
+    return head + `<p class="prohint">Clique un bloc pour voir ses semaines et ses séances.${cur ? ` Tu es en <b style="color:${cur.col}">${esc(cur.name)}</b>.` : ''}</p>`
+      + row('Saison hivernale', B.filter(b => !/été/.test(b.name))) + row('Saison estivale', B.filter(b => /été/.test(b.name)))
+      + `<div class="btnrow two" style="margin-top:18px"><button class="btn" data-pronew>+ Créer une séance</button><button class="btn ghost" data-tseason>Modifier ma saison</button></div>`;
+  }
+  const b = B[PRO.bi];
+  if (PRO.lvl === 'block') {
+    const W = [...Array(b.weeks)].map((_, j) => addDays(b.from, j * 7));
+    return head + `<p class="prohint">${b.weeks} semaines · ${esc(b.goal)} · du ${esc(fmtShort(b.from))} au ${esc(fmtShort(b.to))}. Clique une semaine pour la voir jour par jour.</p>
+      <div class="proweeks">${W.map((w, j) => { const days = [...Array(7)].map((_, i) => addDays(w, i)), n = proWeekCount(w);
+        return `<button type="button" class="prowk${w === monday(TODAY) ? ' now' : ''}" data-prowk="${w}" style="--sbc:${b.col}"><b>Semaine ${j + 1}<small>S${seasonWeek(w)} · ${esc(fmtShort(w).replace(/^\S+ /, ''))}</small></b><span class="pron">${n} séance${n > 1 ? 's' : ''}</span>
+          <span class="prodots">${days.map(k => `<i>${DOW[(dow(k) + 6) % 7]}${proSes(k, 'gym').map(x => `<u class="g${x.done ? ' d' : ''}" title="${esc(x.p?.name || 'Faite')}"></u>`).join('')}${proSes(k, 'track').map(x => `<u class="t${x.done ? ' d' : ''}" title="${esc(x.p?.name || 'Faite')}"></u>`).join('')}</i>`).join('')}</span></button>`; }).join('')}</div>
+      <p class="small muted" style="margin:10px 2px 0"><u class="lg g"></u> muscu · <u class="lg t"></u> sprint · plein = faite</p>`;
+  }
+  const days = [...Array(7)].map((_, i) => addDays(PRO.wk, i));
+  return head + `<div class="prodays">${days.map(k => `<div class="proday${k === TODAY ? ' now' : ''}"><b>${esc(cap(fmtShort(k)))}</b>${['gym', 'track'].map(kind => `<div class="prok"><span>${kind === 'gym' ? 'Muscu' : 'Sprint'}${slotOf(k, kind)?.a ? ' · ' + tfr(slotOf(k, kind).a) : ''}</span>
+      ${proSes(k, kind).map(x => x.p ? `<button type="button" class="proses${x.done ? ' done' : ''}" data-proview="${esc(x.p.id)}"${x.p.n ? ` data-pron="${x.p.n}"` : ''}><b>${esc(x.p.name)}</b><small>${x.p.items?.length || 0} exercice${(x.p.items?.length || 0) > 1 ? 's' : ''} · ${estMin(x.p)} min</small></button>` : '<span class="proses done"><b>Faite</b></span>').join('')}
+      ${k >= TODAY ? `<span class="proadd"><button type="button" data-proput="${k}|${kind}">+ Caler</button><button type="button" data-procreate="${k}|${kind}">+ Créer</button></span>` : ''}</div>`).join('')}</div>`).join('')}</div>`;
+}
+function proPane() { PRO.lvl = 'season'; openPane({title: 'Programme et séance pro', render: proBody}); }
+document.addEventListener('click', e => {
+  const at = q => e.target.closest(q); let b;
+  if (at('[data-propen]')) { proPane(); return; }
+  if (!P.stack.length || P.stack.at(-1).render !== proBody) return;
+  if ((b = at('[data-prolvl]'))) { PRO.lvl = b.dataset.prolvl; paneRender(); return; }
+  if ((b = at('[data-problk]'))) { PRO.bi = +b.dataset.problk; PRO.lvl = 'block'; paneRender(); return; }
+  if ((b = at('[data-prowk]'))) { PRO.wk = b.dataset.prowk; PRO.lvl = 'week'; paneRender(); return; }
+  if ((b = at('[data-proview]'))) { planView(b.dataset.proview, b.dataset.pron ? +b.dataset.pron : null); return; }
+  if (at('[data-pronew]')) { S.tkind = 'gym'; editPlan(null); if (ED) ED.fromPro = true; return; }
+  if ((b = at('[data-procreate]'))) { const [k, kind] = b.dataset.procreate.split('|'); S.tkind = kind; editPlan(null, k); if (ED) { ED.date0 = null; ED.fromPro = true; } return; }
+  if ((b = at('[data-proput]'))) { const [k, kind] = b.dataset.proput.split('|'), L = [...(kind === 'gym' ? tdvTodo(8) : []), ...myPlans().filter(x => x.kind === kind)];
+    openPane({title: 'Caler une séance le ' + fmtShort(k), render: () => L.length ? `<div class="list" style="margin-top:14px">${L.map(x => `<button class="rowbtn" data-proputp="${k}|${kind}|${esc(caleRef(x))}"><span><b>${esc(x.name)}</b><span class="meta">${x.title || x.desc ? esc(x.title || x.desc) + ' · ' : ''}${estMin(x)} min</span></span><span class="kc">+</span></button>`).join('')}</div>` : '<div class="empty" style="margin-top:14px">Crée d\'abord une séance.</div>'}); return; }
+});
+document.addEventListener('click', async e => { const b = e.target.closest('[data-proputp]'); if (!b) return; const [k, kind, ref] = b.dataset.proputp.split('|'); closePane(); await boardPlace(k, kind, ref, null); toast(`${refName(ref) || 'Séance'} calée le ${fmtShort(k)}`); paneRender(); });
 function tSessions() {
   if (S.tkind === 'class') S.tkind = 'gym';
   const k = S.tkind, mine = myPlans().filter(p => p.kind === k), base = BUILTIN.filter(p => p.kind === k);
@@ -8407,7 +8502,7 @@ function tSessions() {
     <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
     ${sesBoard(k)}
     <div class="btnrow two" style="margin-top:16px"><button class="btn ghost" data-tnew>+ Créer une séance</button><button class="btn ghost" data-texadd>+ Ajouter un exercice</button></div>
-    <h2>Mes séances</h2><div class="list">${mine.map(row).join('') || '<div class="row"><span class="muted">Aucune séance à toi pour l\'instant.</span></div>'}</div>
+    <h2 class="proh">Mes séances${typeof isPC === 'function' && isPC() ? '<button type="button" class="probtn" data-propen>Programme et séance pro <span aria-hidden="true">→</span></button>' : ''}</h2><div class="list">${mine.map(row).join('') || '<div class="row"><span class="muted">Aucune séance à toi pour l\'instant.</span></div>'}</div>
     ${k === 'gym' && TDV_PLANS.length ? progList() : ''}
     ${k === 'track' ? (() => { const L = logs().filter(l => l.kind === 'track').slice(0, 12); return L.length ? `<h2>Séances faites</h2><div class="list donel">${L.map(l => `<button class="rowbtn doneses" data-tlog="${l.id}"><span><b>${esc(l.name)}</b><span class="meta">${esc(cap(fmtShort(l.date)))}${l.min ? ' · ' + l.min + ' min' : ''}${l.rpe ? ' · RPE ' + l.rpe : ''}</span></span><span class="kc">${fx(l.sprintM || 0)} m</span></button>`).join('')}</div>` : ''; })() : ''}
     ${base.length ? `<h2>Programmes <small>à dupliquer et adapter</small></h2><div class="list">${base.map(row).join('')}</div>` : ''}`;
@@ -8979,6 +9074,14 @@ function edLoad(it) {
   const f = it.pct ? it.pct / 100 : it.rpe && it.reps ? 1 / (1 + (+it.reps + 10 - it.rpe) / 30) : null;
   return f ? `${fx(r25(rm * f * recFactor().k))} kg<small> · max ${fx(rm)}</small>` : `<small>max ${fx(rm)} kg</small>`;
 }
+// Un temps tapé chiffre par chiffre, les deux-points restent toujours là : 3 → 0:03, 30 → 0:30, 300 → 3:00.
+const mmss = v => v == null || v === '' ? '' : `${Math.floor(+v / 60)}:${String(+v % 60).padStart(2, '0')}`;
+document.addEventListener('input', e => {
+  const t = e.target; if (t.dataset?.tmask == null || !ED) return;
+  const [f, i] = t.dataset.tmask.split('.'), d = t.value.replace(/\D/g, '').replace(/^0+/, '').slice(-4).padStart(3, '0');
+  t.value = `${+d.slice(0, -2)}:${d.slice(-2)}`; t.setSelectionRange?.(t.value.length, t.value.length);
+  const it = ED.items[+i]; if (it) it[f] = +d.slice(0, -2) * 60 + Math.min(59, +d.slice(-2));
+});
 function edTable() {
   const L = itemLabels(ED.items), groups = new Set(L.filter(Boolean).map(x => x[0])).size, n = Math.max(5, ED.items.length + (ED.extraRows || 0));
   const row = i => {
@@ -8988,14 +9091,14 @@ function edTable() {
       <td class="lb">${it && i > 0 ? `<button type="button" data-edlink="${i}" aria-pressed="${!!it.link}" title="${it.link ? 'En superset avec la ligne d\'avant (touche pour séparer)' : 'Mettre en superset avec la ligne d\'avant'}">${lab}</button>` : `<span>${lab}</span>`}</td>
       <td class="exc"><input class="tx" data-edtx="${i}" value="${esc(e?.n || '')}" placeholder="Choisir un exercice" autocomplete="off" spellcheck="false"><div class="edsug" hidden></div></td>
       <td><input inputmode="numeric" data-ed="${i}.sets" value="${v(it?.sets)}"${off}></td>
-      <td><input inputmode="numeric" data-ed="${i}.reps" value="${v(it?.reps)}"${off}></td>
+      <td class="rp">${(() => { const u = it ? unitOf(it) : 'reps'; return `<button type="button" class="ub" ${it ? `data-edu="${i}.${U_NEXT[u]}"` : 'disabled'} title="Répétitions, temps ou mètres">${{reps: 'rép.', s: 'temps', m: 'mètres'}[u]} ⇄</button>${u === 's' ? `<input inputmode="numeric" data-tmask="reps.${i}" value="${it ? mmss(it.reps) : ''}" placeholder="0:30"${off}>` : `<span class="sfw"><input inputmode="numeric" data-ed="${i}.reps" value="${v(it?.reps)}"${off}>${u === 'm' ? '<i>m</i>' : ''}</span>`}`; })()}</td>
       <td class="mt"><input data-ednote="${i}" value="${esc(it?.note || '')}" placeholder="${it ? 'Méthode, note…' : ''}"${off}></td>
       <td class="tp">${[0, 1, 2, 3].map(j => `<input inputmode="numeric" data-edt="${i}.${j}" value="${v((it?.tempo || [])[j])}" aria-label="${['Excentrique', 'Pause bas', 'Concentrique', 'Pause haut'][j]}"${off}>`).join('')}</td>
-      <td class="in"><div><input inputmode="decimal" data-ed="${i}.pct" value="${v(it?.pct)}" placeholder="%"${off}><input inputmode="decimal" data-ed="${i}.rpe" value="${v(it?.rpe)}" placeholder="RPE"${off}></div><span data-edkg="${i}">${it ? edLoad(it) : ''}</span></td>
-      <td><input data-edrest="${i}" value="${it ? restIn(it.rest) : ''}" placeholder="3:00"${off}></td>
+      <td class="in"><div><span class="sfw"><input inputmode="decimal" data-ed="${i}.pct" value="${v(it?.pct)}"${off}><i>%</i></span><input inputmode="decimal" data-ed="${i}.rpe" value="${v(it?.rpe)}" placeholder="RPE"${off}></div><span data-edkg="${i}">${it ? edLoad(it) : ''}</span></td>
+      <td><input inputmode="numeric" data-tmask="rest.${i}" value="${it ? mmss(it.rest) : ''}" placeholder="3:00"${off}></td>
       <td class="x"><button type="button" data-edtrm="${i}" aria-label="Retirer la ligne">×</button></td></tr>`; };
   const c = planCheck(ED.items.filter(it => it.ex));
-  return `<div class="edtbl-w"><table class="edtbl"><thead><tr><th>Exo</th><th>Exercice</th><th>Séries</th><th>Rép.</th><th>Méthode et commentaire</th><th>Tempo<small>E · I1 · C · I2</small></th><th>Intensité<small>% · RPE → charge</small></th><th>Récup</th><th></th></tr></thead>
+  return `<div class="edtbl-w"><table class="edtbl"><thead><tr><th>Exo</th><th>Exercice</th><th>Séries</th><th>Rép. / temps</th><th>Méthode et commentaire</th><th>Tempo<small>E · I1 · C · I2</small></th><th>Intensité<small>% · RPE → charge</small></th><th>Récup</th><th></th></tr></thead>
     <tbody>${[...Array(n)].map((_, i) => row(i)).join('')}</tbody>
     <tfoot><tr class="tot"><td colspan="2">Total</td><td data-edtot="sets">${c.sets}</td><td data-edtot="reps">${c.reps}</td><td colspan="2"></td><td colspan="3" data-edtot="min">${c.min} min d'effort</td></tr>
     <tr class="max"><td colspan="2">Indice maximal à ne pas dépasser</td><td class="${c.sets > 30 ? 'over' : ''}">30</td><td class="${c.reps > 500 ? 'over' : ''}">500</td><td colspan="2"></td><td colspan="3" class="${c.min > 30 ? 'over' : ''}">30 min</td></tr></tfoot></table></div>
@@ -9284,7 +9387,7 @@ async function savePlan() {
   const A = sessionAuto(ED);
   if (ED.autoName) ED.name = A.name; if (ED.autoDesc) ED.desc = A.desc;
   ED.name = (ED.name || '').trim() || 'Ma séance';
-  const {date, date0, wk, gym, today, ...doc0} = ED, doc = {...doc0, updatedAt: new Date().toISOString()};
+  const {date, date0, wk, gym, today, fromPro, tbl, extraRows, ...doc0} = ED, doc = {...doc0, updatedAt: new Date().toISOString()};
   S.plans[doc.id] = doc;
   await dbSet('plans/' + doc.id, doc);
   const dated = {...(S.tset.dated || {})};
@@ -9292,7 +9395,8 @@ async function savePlan() {
   if (date) { for (const k of [date, date + '|t']) if (dated[k] === doc.id) delete dated[k]; dated[dKey(date, doc.kind)] = doc.id; }
   const gymPlan = {...(S.tset.gymPlan || {})}; if (doc.kind === 'gym' && gym) gymPlan[doc.id] = gym; else delete gymPlan[doc.id];
   S.tset = {...S.tset, dated, gymPlan}; await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()});
-  closePane(); if (P.stack.length) closePane();
+  closePane(); if (fromPro) { toast(doc.name + (date ? ' calée le ' + fmtShort(date) : ' enregistrée')); paneRender(); return; }
+  if (P.stack.length) closePane();
   if (today) { toast(doc.name + ' calée aujourd\'hui'); if (S.mod === 'T') { S.ttab = 'today'; renderMod(true); } return; }
   toast('Séance enregistrée'); planView(doc.id);
 }
@@ -9365,11 +9469,27 @@ function liveBody() {
     <div class="livehead"><span class="chiptag">${L.kind === 'gym' ? 'Musculation' : L.kind === 'class' ? 'Cours collectif' : 'Sprint'} · ${doneSets}/${all}</span>${gA ? `<b>${fx(gA.min)} min</b>` : ''}</div>
     ${L.kind === 'track' ? `<div class="edrow" style="margin-top:10px;grid-template-columns:1fr 1fr"><label>Chaussures<select class="mini-in" data-lmeta="shoes">${['', 'Pointes carbone', 'Pointes', 'Running fractionné', 'Running long'].map(o => `<option${(L.shoes || '') === o ? ' selected' : ''}>${o}</option>`).join('')}</select></label><label>Conditions<select class="mini-in" data-lmeta="cond">${['', 'Piste, vent favorable', 'Piste, sans vent', 'Piste, vent contraire', 'Indoor', 'Pluie'].map(o => `<option${(L.cond || '') === o ? ' selected' : ''}>${o}</option>`).join('')}</select></label></div>` : ''}
     ${L.fill ? `<p class="small muted" style="margin:10px 4px 0">Tout est rempli comme prévu. Corrige ce qui a changé et décoche ce que tu n'as pas fait.</p>` : ''}
-    ${L.items.map((it, i) => liveBox(it, i)).join('')}
+    ${L.kind === 'gym' && typeof isPC === 'function' && isPC() ? liveTable() : L.items.map((it, i) => liveBox(it, i)).join('')}
     ${back ? `<div class="rmback">${back}</div>` : ''}
     ${liveBodyCard()}
     <div class="stack" style="margin-top:14px"><button class="btn ghost" data-tladd>+ Ajouter un exercice</button><button class="btn" data-tfinish>Terminer la séance</button>
     <button class="small muted" data-tcancel style="padding:10px">Abandonner sans enregistrer</button></div>`;
+}
+// Ordinateur : la séance en cours dans le même tableau que la création. Sous chaque exercice, ses séries s'ouvrent :
+// on coche ce qui est fait, on corrige la charge et les répétitions, on note le RPE réel de chaque série.
+function liveTable() {
+  const L = S.live, LB = itemLabels(L.items.map(it => ({ex: it.ex, link: it.tg?.link})));
+  const rows = L.items.map((it, i) => {
+    const e = exOf(it.ex), tg = it.tg || {}, u = unitOf({...tg, ex: it.ex, u: it.u}), ul = {reps: 'rép.', s: 'sec.', m: 'm'}[u];
+    if (!it.sets) return `<tr class="lx"><td class="lb">${LB[i] || ''}</td><td colspan="8">${liveBox(it, i)}</td></tr>`;
+    const sg = suggest(tg), tgt = [tg.pct ? tg.pct + ' %' : '', tg.rpe ? 'RPE ' + tg.rpe : ''].filter(Boolean).join(' · '), last = lastText(it.ex), nd = it.sets.filter(x => x.done).length;
+    return `<tr class="lx"><td class="lb">${LB[i] || ''}</td><td class="exn"><b>${esc(e.n)}</b>${last ? `<small>${esc(last)}</small>` : ''}</td><td>${nd}/${it.sets.length}</td><td>${tg.reps != null && tg.reps !== '' ? (u === 's' ? mmss(tg.reps) : tg.reps + ' ' + ul) : '–'}</td>
+      <td class="mt">${esc(tg.note || '')}</td><td>${(tg.tempo || []).some(x => x !== '' && x != null) ? tg.tempo.map(x => x === '' || x == null ? '–' : x).join('-') : '–'}</td><td>${tgt || '–'}${sg ? `<small>≈ ${fx(sg.kg, sg.kg % 1 ? 1 : 0)} kg</small>` : ''}</td><td>${tg.rest ? mmss(tg.rest) : '–'}</td><td class="x"><button type="button" data-tlrm="${i}" aria-label="Retirer l'exercice">×</button></td></tr>
+      <tr class="ls"><td></td><td colspan="8"><div class="lsets">${it.sets.map((st, j) => `<div class="lset${st.done ? ' done' : ''}"><span class="n">Série ${j + 1}</span><button type="button" class="ck" data-tok="${i}.${j}" aria-pressed="${!!st.done}" aria-label="Série faite">${TICK}</button>
+        <label>Charge<span class="sfw"><input inputmode="decimal" data-lv="${i}.${j}.kg" value="${esc(st.kg ?? '')}"><i>kg</i></span></label><label>${u === 's' ? 'Secondes' : u === 'm' ? 'Mètres' : 'Répétitions'}<input inputmode="numeric" data-lv="${i}.${j}.reps" value="${esc(st.reps ?? '')}"></label><label>RPE réel<input inputmode="decimal" data-lv="${i}.${j}.rpe" value="${esc(st.rpe ?? '')}" placeholder="${tg.rpe || ''}"></label></div>`).join('')}
+        <button type="button" class="addset" data-tlset="${i}">+ Série</button></div></td></tr>`;
+  }).join('');
+  return `<div class="edtbl-w" style="margin-top:12px"><table class="edtbl ltbl"><thead><tr><th>Exo</th><th>Exercice</th><th>Faites</th><th>Rép. / temps</th><th>Méthode et commentaire</th><th>Tempo</th><th>Intensité</th><th>Récup</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 const restTxt = s => !s ? '' : s % 60 ? s + ' s' : s / 60 + '\'';
 const restParse = v => { const t = String(v || '').trim().replace(',', '.'); if (!t) return null; const m = t.match(/^(\d+(?:\.\d+)?)\s*(s|sec)?/i); if (!m) return null; return Math.round(m[2] ? +m[1] : +m[1] * 60); };
