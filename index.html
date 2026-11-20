@@ -743,6 +743,20 @@ u.g,u.t{display:block;width:10px;height:10px;border-radius:50%;border:2px solid 
 .promap[data-z="0"] .mmdays,.promap[data-z="0"] .mmwk small,.promap[data-z="0"] .mmblk em{visibility:hidden}.promap[data-z="0"] .mmwk{opacity:.7}.promap[data-z="0"] .mmblk b{font-size:2.1rem}.promap[data-z="0"] .mmblk small{font-size:1.3rem}.promap[data-z="0"] .mmroot b{font-size:2.3rem}.promap[data-z="0"] .mmsea b{font-size:1.9rem;white-space:normal;line-height:1.05}.promap[data-z="0"] .mmsea{width:200px!important;min-width:0!important;white-space:normal}.promap[data-z="0"] .mmsea small{font-size:1.2rem}.promap[data-z="0"] .mmblk,.promap[data-z="0"] .mmsea,.promap[data-z="0"] .mmroot{width:auto;min-width:230px}
 .mmtop .seg{width:auto}.mmtop .seg button{padding:0 14px;white-space:nowrap}
 .promap[data-z="1"] .mms{font-size:0;width:12px;height:12px;padding:0;border-radius:50%}.promap[data-z="1"] .mmadd{display:none}
+.mpsea{width:1160px;padding:22px 24px 26px;border-radius:26px;background:color-mix(in srgb,var(--fg) 3%,transparent);box-shadow:0 0 0 1px var(--line)}
+.mpsea-h{display:flex;align-items:baseline;gap:14px;margin:0 4px 18px}.mpsea-h b{font-size:1.6rem;font-weight:800}.mpsea-h span{color:var(--fg2);font-size:.875rem}
+.mpb{border-radius:20px;padding:14px 14px 10px;margin-bottom:18px;background:linear-gradient(180deg,color-mix(in srgb,var(--sbc) 16%,var(--card)),color-mix(in srgb,var(--sbc) 6%,var(--card)));box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--sbc) 60%,transparent)}
+.mpb.now{box-shadow:inset 0 0 0 2px var(--sbc),0 0 0 2px color-mix(in srgb,var(--sbc) 30%,transparent)}
+.mpb-h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 4px 10px;cursor:pointer}.mpb-h b{font-size:1.15rem;color:color-mix(in srgb,var(--sbc) 55%,var(--fg))}.mpb-h span{font-size:.8125rem;color:var(--fg2)}.mpb-h em{font-style:normal;font-size:.75rem;color:var(--fg3)}
+.mpmo{display:flex;align-items:center;gap:10px;margin:10px 4px 8px;font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--fg2)}.mpmo::after{content:'';flex:1;height:1px;background:color-mix(in srgb,var(--fg) 14%,transparent)}
+.mpr{display:grid;grid-template-columns:150px 1fr;gap:10px;margin-bottom:10px;border-radius:14px}.mpr.now{box-shadow:0 0 0 1.5px var(--fg);padding:4px;margin:0 -4px 10px}
+.mpw{text-align:left;border:0;border-radius:12px;padding:8px 10px;font:inherit;color:var(--fg);cursor:pointer;background:color-mix(in srgb,var(--sbc) 22%,transparent)}.mpw b{display:block;font-size:.875rem}.mpw small{display:block;font-size:.6875rem;color:var(--fg2)}
+.mpds{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.mpd{position:relative;min-height:62px;border-radius:12px;padding:5px 6px;background:color-mix(in srgb,var(--bg) 70%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--fg) 8%,transparent);display:flex;flex-direction:column;gap:3px;min-width:0}
+.mpd>i{font-style:normal;font-size:.6875rem;font-weight:700;color:var(--fg2)}.mpd.past{opacity:.5}.mpd.today{box-shadow:inset 0 0 0 2px var(--accent)}.mpd.m1{box-shadow:inset 3px 0 0 var(--fg2)}.mpd.m1>i{color:var(--fg)}
+.mps{border:0;border-radius:7px;font:inherit;font-size:.6875rem;font-weight:700;padding:3px 6px;cursor:pointer;color:#fff;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:#E5484D}.mps.t{background:#FF9F0A}.mps.d{opacity:.6}
+.mpadd{position:absolute;right:4px;top:3px;width:20px;height:20px;border-radius:7px;border:0;background:none;color:var(--fg3);font-weight:800;cursor:pointer;opacity:0}.mpd:hover .mpadd{opacity:1}.mpadd:hover{color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent)}
+.promap[data-z="1"] .mps{font-size:0;height:9px;padding:0;border-radius:5px}.promap[data-z="1"] .mpadd{display:none}
 .mmhelp{margin:0;padding:8px 18px;font-size:.75rem;color:var(--fg3);border-top:1px solid var(--line);background:var(--bg)}
 .wkrow{display:grid;grid-template-columns:40px 1fr 40px;align-items:center;text-align:center}
 .wkrow button{height:36px;border-radius:10px;font-size:1.375rem;color:var(--accent)}
@@ -8508,58 +8522,52 @@ function proPane() { mmOpen(); }
 /* La carte de la saison : une carte qu'on zoome et qu'on déplace. Tout dézoomé : la saison, ses blocs (PPG, PPS…).
    On zoome : les semaines apparaissent ; encore : les séances de chaque jour, avec leur nom ; un clic sur une séance l'ouvre.
    Hivernale, estivale ou les deux. « + » sur un jour : créer une séance (le tableau) ou caler une séance existante. */
-const MP = {sea: 'both', k: .4, x: 0, y: 0, W: 0, H: 0, drag: null, pts: new Map()};
-function mmLayout() {
-  const se = S.tset?.season?.start ? S.tset.season : SEASON_2627(), B = proBlocks(se).filter(b => MP.sea === 'both' || (MP.sea === 'ete') === /été/.test(b.name));
-  const R = 46, X = {root: 0, sea: 230, blk: 470, wk: 760, day: 1010}, N = []; let y = 0, lastSea = null;
-  const seas = [];
-  for (const b of B) { const sk = /été/.test(b.name) ? 'ete' : 'hiver'; if (sk !== lastSea) { if (lastSea) y += 70; seas.push({k: sk, blocks: []}); lastSea = sk; } else y += 22;
-    const wk = []; for (let j = 0; j < b.weeks; j++) { const w = addDays(b.from, j * 7); wk.push({w, j, y: y + R / 2}); y += R; }
-    seas.at(-1).blocks.push({...b, wk, y: (wk[0].y + wk.at(-1).y) / 2}); }
-  for (const s2 of seas) s2.y = (s2.blocks[0].y + s2.blocks.at(-1).y) / 2;
-  return {seas, X, R, H: y, root: seas.length ? (seas[0].y + seas.at(-1).y) / 2 : 0};
-}
+const MP = {sea: null, k: 1, x: 0, y: 0, drag: null, pts: new Map()};
+const MP_MIN = .4, MP_MAX = 2.4;
+// La saison où l'on est aujourd'hui (la transition compte avec l'hiver).
+const mpSeaNow = () => /été/.test(seasonNow()?.name || '') ? 'ete' : 'hiver';
 function mmHtml() {
-  const L = mmLayout(), {X} = L, now = monday(TODAY), lines = [];
-  const link = (x1, y1, x2, y2, c) => lines.push(`<path d="M${x1} ${y1}C${(x1 + x2) / 2} ${y1} ${(x1 + x2) / 2} ${y2} ${x2} ${y2}" stroke="${c}"/>`);
-  let h = `<div class="mmn mmroot" style="left:${X.root}px;top:${L.root}px"><b>Ma saison</b><small>2026-2027</small></div>`;
-  for (const sa of L.seas) {
-    link(X.root + 170, L.root, X.sea, sa.y, '#6a6d78');
-    h += `<div class="mmn mmsea" style="left:${X.sea}px;top:${sa.y}px" data-mmfit="${sa.k}"><b>${sa.k === 'ete' ? 'Saison estivale' : 'Saison hivernale'}</b><small>${sa.blocks.reduce((a, b) => a + b.weeks, 0)} semaines</small></div>`;
-    for (const b of sa.blocks) {
-      let n = 0; for (const w of b.wk) n += proWeekCount(w.w);
-      link(X.sea + 190, sa.y, X.blk, b.y, b.col);
-      h += `<div class="mmn mmblk${TODAY >= b.from && TODAY <= b.to ? ' now' : ''}" style="left:${X.blk}px;top:${b.y}px;--sbc:${b.col}" data-mmblk="${b.i}"><b>${esc(seLab(b.name))}</b><small>${b.weeks} sem. · ${n} séance${n > 1 ? 's' : ''}</small><em>${esc(b.goal)}</em></div>`;
-      for (const w of b.wk) {
-        link(X.blk + 230, b.y, X.wk, w.y, b.col);
-        const days = [...Array(7)].map((_, i) => addDays(w.w, i)), c = proWeekCount(w.w);
-        h += `<div class="mmn mmwk${w.w === now ? ' now' : ''}" style="left:${X.wk}px;top:${w.y}px;--sbc:${b.col}" data-mmwk="${w.w}"><b>Semaine ${w.j + 1}</b><small>${esc(fmtShort(w.w).replace(/^\S+ /, ''))} · ${c} séance${c > 1 ? 's' : ''}</small></div>`;
-        h += `<div class="mmdays" style="left:${X.day}px;top:${w.y}px">${days.map(k => `<div class="mmd${k === TODAY ? ' today' : ''}"><i>${DOW[(dow(k) + 6) % 7]} ${+k.slice(8)}</i>${['gym', 'track'].map(kind => proSes(k, kind).map(x => x.p ? `<button type="button" class="mms ${kind === 'gym' ? 'g' : 't'}${x.done ? ' d' : ''}" data-mmview="${esc(x.p.id)}"${x.p.n ? ` data-mmn="${x.p.n}"` : ''} title="${esc(x.p.name)}">${esc(x.p.name)}</button>` : `<span class="mms ${kind === 'gym' ? 'g' : 't'} d">Faite</span>`).join('')).join('')}${k >= TODAY ? `<button type="button" class="mmadd" data-mmadd="${k}" aria-label="Ajouter une séance le ${esc(fmtShort(k))}">+</button>` : ''}</div>`).join('')}</div>`;
-      }
-    }
-  }
-  MP.W = X.day + 7 * 128; MP.H = L.H;
-  return `<svg class="mmlines" width="${MP.W}" height="${MP.H + 40}" fill="none" stroke-width="2">${lines.join('')}</svg>${h}`;
+  const se = S.tset?.season?.start ? S.tset.season : SEASON_2627(), ete = MP.sea === 'ete', B = proBlocks(se).filter(b => /été/.test(b.name) === ete);
+  if (!B.length) return '<div class="mpsea"><div class="mpsea-h">Pas de bloc pour cette saison</div></div>';
+  const MO = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'], now = monday(TODAY), tw = B.reduce((a, b) => a + b.weeks, 0);
+  let lastMo = null;
+  const blocks = B.map(b => {
+    let n = 0; const rows = [...Array(b.weeks)].map((_, j) => { const w = addDays(b.from, j * 7), days = [...Array(7)].map((_, i) => addDays(w, i)), c = proWeekCount(w); n += c;
+      const first = days.find(k => k.endsWith('-01')), mo = +(first || w).slice(5, 7) - 1, div = lastMo === null || first ? `<div class="mpmo"><span>${cap(MO[mo])}</span></div>` : ''; lastMo = mo;
+      return `${div}<div class="mpr${w === now ? ' now' : ''}"><button type="button" class="mpw" data-mpwk="${w}"><b>Semaine ${j + 1}</b><small>${esc(fmtShort(w).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(w, 6)).replace(/^\S+ /, ''))}</small><small>${c} séance${c > 1 ? 's' : ''}</small></button>
+        <div class="mpds">${days.map(k => `<div class="mpd${k < TODAY ? ' past' : ''}${k === TODAY ? ' today' : ''}${k.endsWith('-01') ? ' m1' : ''}"><i>${DOW[(dow(k) + 6) % 7]} ${+k.slice(8)}${k.endsWith('-01') ? ' ' + ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'][+k.slice(5, 7) - 1] : ''}</i>${['gym', 'track'].map(kind => proSes(k, kind).map(x => x.p ? `<button type="button" class="mps ${kind === 'gym' ? 'g' : 't'}${x.done ? ' d' : ''}" data-mpview="${esc(x.p.id)}"${x.p.n ? ` data-mpn="${x.p.n}"` : ''} title="${esc(x.p.name)}">${esc(x.p.name)}</button>` : `<span class="mps ${kind === 'gym' ? 'g' : 't'} d">Faite</span>`).join('')).join('')}${k >= TODAY ? `<button type="button" class="mpadd" data-mmadd="${k}" aria-label="Ajouter une séance le ${esc(fmtShort(k))}">+</button>` : ''}</div>`).join('')}</div></div>`; }).join('');
+    return `<section class="mpb${TODAY >= b.from && TODAY <= b.to ? ' now' : ''}" style="--sbc:${b.col}" data-mpblk="${b.i}"><header class="mpb-h" data-mpfit="${b.i}"><b>${esc(seLab(b.name))}</b><span>${b.weeks} semaine${b.weeks > 1 ? 's' : ''} · ${n} séance${n > 1 ? 's' : ''}</span><em>${esc(b.goal)}</em></header>${rows}</section>`;
+  }).join('');
+  return `<div class="mpsea"><div class="mpsea-h"><b>${ete ? 'Saison estivale' : 'Saison hivernale'}</b><span>${tw} semaines · du ${esc(fmtShort(B[0].from))} au ${esc(fmtShort(B.at(-1).to))}</span></div>${blocks}</div>`;
 }
-function mmApply() { const w = $('#mm-world'), el = $('#promap'); if (!w || !el) return; w.style.transform = `translate(${MP.x}px,${MP.y}px) scale(${MP.k})`; el.dataset.z = MP.k < .55 ? '0' : MP.k < 1.05 ? '1' : '2'; const z = el.querySelector('.mmzoom b'); if (z) z.textContent = Math.round(MP.k * 100) + ' %'; }
-function mmFit(y0 = 0, y1 = MP.H, x0 = 0, x1 = MP.W) {
-  const v = $('#mm-view').getBoundingClientRect(), k = Math.min(2.2, Math.max(.15, Math.min((v.width - 60) / (x1 - x0), (v.height - 60) / (y1 - y0 + 40))));
-  MP.k = k; MP.x = (v.width - (x1 - x0) * k) / 2 - x0 * k; MP.y = (v.height - (y1 - y0) * k) / 2 - y0 * k + 10; mmApply();
+function mmApply() { const w = $('#mm-world'), el = $('#promap'); if (!w || !el) return; w.style.transform = `translate(${MP.x}px,${MP.y}px) scale(${MP.k})`; el.dataset.z = MP.k < .75 ? '1' : '2'; const z = el.querySelector('.mmzoom b'); if (z) z.textContent = Math.round(MP.k * 100) + ' %'; }
+// Cadre une partie de la carte (en coordonnées de la carte) au centre de l'écran.
+function mmFitBox(x0, y0, w, h, top) {
+  const v = $('#mm-view').getBoundingClientRect(), k = Math.min(MP_MAX, Math.max(MP_MIN, Math.min((v.width - 60) / w, (v.height - 60) / h)));
+  MP.k = k; MP.x = (v.width - w * k) / 2 - x0 * k; MP.y = top != null ? 30 - y0 * k : (v.height - h * k) / 2 - y0 * k; mmApply();
 }
-function mmZoomAt(f, cx, cy) { const k = Math.min(2.4, Math.max(.12, MP.k * f)); MP.x = cx - (cx - MP.x) * k / MP.k; MP.y = cy - (cy - MP.y) * k / MP.k; MP.k = k; mmApply(); }
+const mmBox = el => { let x = 0, y = 0, n = el; const W = $('#mm-world'); while (n && n !== W) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; } return {x, y, w: el.offsetWidth, h: el.offsetHeight}; };
+function mmFit() { const s0 = $('#mm-world .mpsea'); if (!s0) return; const b = mmBox(s0); mmFitBox(b.x, b.y, b.w, b.h); }
+// À l'ouverture : toute la largeur de la saison, la semaine en cours en haut de l'écran.
+function mmHome() {
+  const s0 = $('#mm-world .mpsea'), r = $('#mm-world .mpr.now') || $('#mm-world .mpb.now'), v = $('#mm-view').getBoundingClientRect(); if (!s0) return; const b = mmBox(s0);
+  MP.k = Math.min(1.1, Math.max(MP_MIN, (v.width - 60) / b.w)); MP.x = (v.width - b.w * MP.k) / 2 - b.x * MP.k;
+  MP.y = r ? Math.min(30 - b.y * MP.k, 120 - mmBox(r).y * MP.k) : 30 - b.y * MP.k; mmApply();
+}
+function mmZoomAt(f, cx, cy) { const k = Math.min(MP_MAX, Math.max(MP_MIN, MP.k * f)); MP.x = cx - (cx - MP.x) * k / MP.k; MP.y = cy - (cy - MP.y) * k / MP.k; MP.k = k; mmApply(); }
 function mmRender(keep) {
-  const el = $('#promap'); if (!el) return;
-  el.innerHTML = `<header class="mmtop"><b>Programmes et séances Pro</b><div class="seg segsm" role="group" aria-label="Saison">${[['hiver', 'Hivernale'], ['ete', 'Estivale'], ['both', 'Les deux']].map(([v, l]) => `<button type="button" data-mmsea="${v}" aria-pressed="${MP.sea === v}">${l}</button>`).join('')}</div>
-    <div class="mmzoom"><button type="button" data-mmz="-1" aria-label="Dézoomer">−</button><b></b><button type="button" data-mmz="1" aria-label="Zoomer">+</button><button type="button" data-mmall>Tout voir</button></div>
+  const el = $('#promap'); if (!el) return; MP.sea ||= mpSeaNow();
+  el.innerHTML = `<header class="mmtop"><b>Programmes et séances Pro</b><div class="seg segsm" role="group" aria-label="Saison">${[['hiver', 'Saison hivernale'], ['ete', 'Saison estivale']].map(([v, l]) => `<button type="button" data-mmsea="${v}" aria-pressed="${MP.sea === v}">${l}</button>`).join('')}</div>
+    <div class="mmzoom"><button type="button" data-mmz="-1" aria-label="Dézoomer">−</button><b></b><button type="button" data-mmz="1" aria-label="Zoomer">+</button><button type="button" data-mmall>Toute la saison</button><button type="button" data-mmnow>Aujourd'hui</button></div>
     <button type="button" class="btn" data-mmnew>+ Créer une séance</button><button type="button" class="mmx" data-mmx aria-label="Fermer">${'<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>'}</button></header>
     <div id="mm-view" class="mmview"><div id="mm-world" class="mmworld">${mmHtml()}</div></div>
-    <p class="mmhelp">Molette ou pincer : zoomer · glisser : se déplacer · clic sur un bloc ou une semaine : y aller · clic sur une séance : l'ouvrir</p>`;
-  if (keep) mmApply(); else mmFit();
+    <p class="mmhelp">Molette ou pincer : zoomer · glisser : se déplacer · clic sur un bloc ou une semaine : y aller · clic sur une séance : l'ouvrir · « + » sur un jour : créer ou caler une séance</p>`;
+  if (keep) mmApply(); else mmHome();
 }
 window.proMapRender = () => { if ($('#promap')?.classList.contains('on')) mmRender(true); };
 function mmOpen() {
   let el = $('#promap'); if (!el) { el = document.createElement('div'); el.id = 'promap'; el.className = 'promap'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Programmes et séances Pro'); document.body.appendChild(el); mmBind(el); }
-  el.classList.add('on'); document.body.style.overflow = 'hidden'; mmRender(false);
+  el.classList.add('on'); document.body.style.overflow = 'hidden'; MP.sea = mpSeaNow(); mmRender(false);
 }
 function mmClose() { $('#promap')?.classList.remove('on'); if (!P.stack.length) document.body.style.overflow = ''; renderMod(); }
 function mmBind(el) {
@@ -8577,16 +8585,15 @@ function mmBind(el) {
     if (MP.skip && Date.now() - MP.skip < 250) return; const at = q => e.target.closest(q); let b;
     if (at('[data-mmx]')) { mmClose(); return; }
     if ((b = at('[data-mmsea]'))) { MP.sea = b.dataset.mmsea; mmRender(false); return; }
+    if (at('[data-mmnow]')) { MP.sea = mpSeaNow(); mmRender(false); return; }
     if ((b = at('[data-mmz]'))) { const v = $('#mm-view').getBoundingClientRect(); mmZoomAt(+b.dataset.mmz > 0 ? 1.35 : 1 / 1.35, v.width / 2, v.height / 2); return; }
     if (at('[data-mmall]')) { mmFit(); return; }
     if (at('[data-mmnew]')) { S.tkind = 'gym'; editPlan(null); if (ED) ED.fromPro = true; return; }
-    if ((b = at('[data-mmview]'))) { planView(b.dataset.mmview, b.dataset.mmn ? +b.dataset.mmn : null); return; }
+    if ((b = at('[data-mpview]'))) { planView(b.dataset.mpview, b.dataset.mpn ? +b.dataset.mpn : null); return; }
     if ((b = at('[data-mmadd]'))) { const k = b.dataset.mmadd;
       openPane({title: 'Le ' + fmtShort(k), render: () => `<div class="stack" style="margin-top:14px">${['gym', 'track'].map(kind => `<div class="sec-label">${kind === 'gym' ? 'Musculation' : 'Sprint'}</div><div class="btnrow two"><button class="btn" data-mmcreate="${k}|${kind}">+ Créer une séance</button><button class="btn ghost" data-mmput="${k}|${kind}">Caler une séance existante</button></div>`).join('')}</div>`}); return; }
-    if ((b = at('[data-mmblk]'))) { const n = el.querySelector(`[data-mmblk="${b.dataset.mmblk}"]`), ws = [...el.querySelectorAll('.mmwk')].filter(x => x.style.getPropertyValue('--sbc') === n.style.getPropertyValue('--sbc'));
-      const y = parseFloat(n.style.top), wk = mmLayout().seas.flatMap(x => x.blocks).find(x => String(x.i) === b.dataset.mmblk); if (wk) mmFit(wk.wk[0].y - 30, wk.wk.at(-1).y + 30, 450, MP.W); else mmFit(y - 200, y + 200); return; }
-    if ((b = at('[data-mmwk]'))) { const y = parseFloat(b.style.top); mmFit(y - 60, y + 60, 740, MP.W); return; }
-    if ((b = at('[data-mmfit]'))) { const sa = mmLayout().seas.find(x => x.k === b.dataset.mmfit); if (sa) mmFit(sa.blocks[0].wk[0].y - 30, sa.blocks.at(-1).wk.at(-1).y + 30, 200, 1000); }
+    if ((b = at('[data-mpfit]'))) { const x = mmBox(b.closest('.mpb')); mmFitBox(x.x, x.y, x.w, x.h); return; }
+    if ((b = at('[data-mpwk]'))) { const x = mmBox(b.closest('.mpr')); mmFitBox(x.x, x.y - 20, x.w, x.h + 40); return; }
   });
 }
 document.addEventListener('click', e => { const at = q => e.target.closest(q); let b;
