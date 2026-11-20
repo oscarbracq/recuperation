@@ -45,7 +45,7 @@ function b3Inner(view, layer, paint) {
     // … et ils commencent sous le crâne (pas dans la tête).
     const sq = `transform="translate(${B.cx} 0) scale(.74 1) translate(${-B.cx} 0)"`, side = k => mus(A, k) + `<g ${sq} clip-path="url(#nclip-${view})">${mus(N, k)}</g>`;
     const clip = B.sil ? `<defs><clipPath id="dclip-${view}"><path d="${B.sil}"/></clipPath><clipPath id="nclip-${view}"><rect x="0" y="238" width="4000" height="2000"/></clipPath></defs>` : '';
-    return outline(true) + clip + `<g ${clip ? `clip-path="url(#dclip-${view})"` : ''} stroke="${B3C.line}" stroke-width="3.2" stroke-linejoin="round">${side(0)}<g ${mir}>${side(1)}</g></g>`;
+    return outline(true) + clip + `<g stroke="${B3C.line}" stroke-width="3.2" stroke-linejoin="round">${side(0)}<g ${mir}>${side(1)}</g></g>`;
   }
   const half = k => layer === 'shape' ? skin + B.m.map(x => `<path d="${x[2]}" fill="${B3C.skin}"/>`).join('') : skin + mus(B.m, k);
   const top = B.hair ? `<g ${hd}><g fill="${B3C.skin}" stroke="${B3C.skin}">${head}</g><path d="${B.hair}" fill="#26272d" stroke="${B3C.line}" stroke-width="3"/></g>` : `<g ${hd} fill="${B3C.skin}">${head}</g>`;

@@ -533,3 +533,7 @@ const oneInitCharts0 = initCharts;
 initCharts = function (root) { if (ONE_HOVER.matches) return; return oneInitCharts0(root); };
 const oneChartOff = b => { const sc = b.querySelector('.sc'), bu = b.querySelector('.bubble'); if (sc) sc.innerHTML = ''; if (bu) bu.hidden = true; };
 document.addEventListener('pointerout', e => { if (e.pointerType !== 'mouse') return; const b = e.target.closest?.('.chartbox'); if (b && !b.contains(e.relatedTarget)) oneChartOff(b); });
+
+/* ---------- La page qui glisse sous le pouce (sa copie) reçoit les mêmes finitions que la vraie page : les « + » des cases vides
+   du planning, l'archive à sa place. Sinon, elle change d'un coup en arrivant. ---------- */
+new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1 && n.classList.contains('tab-ghost')) { onePlan(n); try { archHide(n); } catch (e) {} } }).observe(document.body, {childList: true});

@@ -678,6 +678,23 @@ svg.body.sil .rg.on{stroke:none;fill:transparent}
 .edx .grip{color:var(--fg3);margin-right:6px;letter-spacing:-2px}
 .edx .tools{align-items:center}
 .whenb{display:flex;flex-direction:column;gap:8px}
+.edtbl-w{overflow-x:auto;margin-top:6px;border-radius:14px;box-shadow:0 0 0 1px var(--line)}
+.edtbl{width:100%;border-collapse:collapse;font-size:.8125rem;min-width:860px}
+.edtbl th{position:sticky;top:0;background:var(--card);text-align:left;font-weight:700;font-size:.6875rem;letter-spacing:.04em;text-transform:uppercase;color:var(--fg2);padding:9px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+.edtbl th small{display:block;text-transform:none;letter-spacing:0;font-weight:500;color:var(--fg3)}
+.edtbl td{padding:4px;border-bottom:1px solid var(--line);vertical-align:middle}
+.edtbl input{width:100%;min-width:0;height:34px;border:1px solid transparent;border-radius:8px;background:color-mix(in srgb,var(--fg) 5%,transparent);color:var(--fg);font:inherit;padding:0 8px;text-align:center}
+.edtbl input:focus{outline:none;border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.edtbl input:disabled{background:none;opacity:.35}
+.edtbl .exc{position:relative;width:26%}.edtbl .exc input,.edtbl .mt input{text-align:left}.edtbl .mt{width:18%}
+.edtbl td:nth-child(3),.edtbl td:nth-child(4){width:60px}.edtbl td:nth-child(8){width:70px}
+.edtbl .lb{width:46px;text-align:center;font-weight:800;color:var(--accent)}.edtbl .lb button{width:40px;height:30px;border-radius:8px;border:1px dashed color-mix(in srgb,var(--accent) 45%,transparent);background:none;color:var(--accent);font:inherit;font-weight:800;cursor:pointer}.edtbl .lb button[aria-pressed="true"]{border-style:solid;background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.edtbl .tp{width:146px;white-space:nowrap}.edtbl .tp input{display:inline-block;width:30px;padding:0;margin-right:3px}.edtbl .tp input:last-child{margin-right:0}
+.edtbl .in{width:150px}.edtbl .in div{display:flex;gap:4px}.edtbl .in span{display:block;margin-top:3px;font-size:.75rem;font-weight:700;text-align:center;min-height:15px}.edtbl .in span small{font-weight:500;color:var(--fg3)}
+.edtbl .x button{width:28px;height:28px;border:0;background:none;color:var(--fg3);font-size:1.1rem;cursor:pointer;border-radius:8px}.edtbl .x button:hover{color:var(--bad)}
+.edtbl tfoot td{font-weight:700;padding:8px 6px;text-align:center}.edtbl tfoot td:first-child{text-align:left}.edtbl tfoot .max td{color:var(--fg2);font-weight:600}.edtbl tfoot .over{color:var(--bad)!important}
+.edsug{position:absolute;left:4px;right:4px;top:40px;z-index:20;background:var(--card);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.45),0 0 0 1px var(--line);padding:4px;max-height:300px;overflow:auto}
+.edsug button{display:block;width:100%;text-align:left;border:0;background:none;color:var(--fg);font:inherit;padding:7px 10px;border-radius:8px;cursor:pointer}.edsug button:hover{background:color-mix(in srgb,var(--accent) 14%,transparent)}.edsug small{display:block;color:var(--fg3);font-size:.6875rem}.edsug .none{display:block;padding:8px 10px;color:var(--fg3)}
 .wkrow{display:grid;grid-template-columns:40px 1fr 40px;align-items:center;text-align:center}
 .wkrow button{height:36px;border-radius:10px;font-size:1.375rem;color:var(--accent)}
 .wkrow b small{display:block;font-size:.75rem;color:var(--fg2);font-weight:500}
@@ -8635,15 +8652,67 @@ function techBox() {
   return `<div class="exbox wbox"><h3>Travail technique</h3><textarea class="mini-in techta" data-edtechv placeholder="Ce que tu travailles : gammes, départs, placement du bassin, griffé…" aria-label="Travail technique">${esc(ED.tech)}</textarea>
     <div class="tools"><button type="button" class="rm" data-edtechx>Retirer le travail technique</button></div></div>`;
 }
+// Ordinateur, musculation : la séance principale en tableau, comme sa feuille « S 1 PPG » (Train de vie performance).
+// Une ligne par exercice (A1, A2 = superset), au moins 5 lignes ; séries, répétitions, méthode et commentaire, tempo en 4 cases
+// (classique 3-0-1-0 par défaut), intensité en % et/ou RPE avec la charge calculée dessous (si le max est connu), récup 3 min.
+// En bas : le total et l'indice maximal à ne pas dépasser (30 séries, 500 répétitions, 30 minutes d'effort).
+function edLoad(it) {
+  const e = exOf(it.ex); if (!it || e.u !== 'kg') return '';
+  const rm = rmOf(it.ex)?.kg; if (!rm) return it.pct || it.rpe ? '<small>max pas encore connu</small>' : '';
+  const f = it.pct ? it.pct / 100 : it.rpe && it.reps ? 1 / (1 + (+it.reps + 10 - it.rpe) / 30) : null;
+  return f ? `${fx(r25(rm * f * recFactor().k))} kg<small> · max ${fx(rm)}</small>` : `<small>max ${fx(rm)} kg</small>`;
+}
+function edTable() {
+  const L = itemLabels(ED.items), groups = new Set(L.filter(Boolean).map(x => x[0])).size, n = Math.max(5, ED.items.length + (ED.extraRows || 0));
+  const row = i => {
+    const it = ED.items[i], e = it ? exOf(it.ex) : null, off = it ? '' : ' disabled', v = x => x ?? '';
+    const lab = it ? L[i] || '' : String.fromCharCode(65 + ((groups + i - ED.items.length) % 26)) + '1';
+    return `<tr class="${it ? '' : 'empty'}">
+      <td class="lb">${it && i > 0 ? `<button type="button" data-edlink="${i}" aria-pressed="${!!it.link}" title="${it.link ? 'En superset avec la ligne d\'avant (touche pour séparer)' : 'Mettre en superset avec la ligne d\'avant'}">${lab}</button>` : `<span>${lab}</span>`}</td>
+      <td class="exc"><input class="tx" data-edtx="${i}" value="${esc(e?.n || '')}" placeholder="Choisir un exercice" autocomplete="off" spellcheck="false"><div class="edsug" hidden></div></td>
+      <td><input inputmode="numeric" data-ed="${i}.sets" value="${v(it?.sets)}"${off}></td>
+      <td><input inputmode="numeric" data-ed="${i}.reps" value="${v(it?.reps)}"${off}></td>
+      <td class="mt"><input data-ednote="${i}" value="${esc(it?.note || '')}" placeholder="${it ? 'Méthode, note…' : ''}"${off}></td>
+      <td class="tp">${[0, 1, 2, 3].map(j => `<input inputmode="numeric" data-edt="${i}.${j}" value="${v((it?.tempo || [])[j])}" aria-label="${['Excentrique', 'Pause bas', 'Concentrique', 'Pause haut'][j]}"${off}>`).join('')}</td>
+      <td class="in"><div><input inputmode="decimal" data-ed="${i}.pct" value="${v(it?.pct)}" placeholder="%"${off}><input inputmode="decimal" data-ed="${i}.rpe" value="${v(it?.rpe)}" placeholder="RPE"${off}></div><span data-edkg="${i}">${it ? edLoad(it) : ''}</span></td>
+      <td><input data-edrest="${i}" value="${it ? restIn(it.rest) : ''}" placeholder="3:00"${off}></td>
+      <td class="x"><button type="button" data-edtrm="${i}" aria-label="Retirer la ligne">×</button></td></tr>`; };
+  const c = planCheck(ED.items.filter(it => it.ex));
+  return `<div class="edtbl-w"><table class="edtbl"><thead><tr><th>Exo</th><th>Exercice</th><th>Séries</th><th>Rép.</th><th>Méthode et commentaire</th><th>Tempo<small>E · I1 · C · I2</small></th><th>Intensité<small>% · RPE → charge</small></th><th>Récup</th><th></th></tr></thead>
+    <tbody>${[...Array(n)].map((_, i) => row(i)).join('')}</tbody>
+    <tfoot><tr class="tot"><td colspan="2">Total</td><td data-edtot="sets">${c.sets}</td><td data-edtot="reps">${c.reps}</td><td colspan="2"></td><td colspan="3" data-edtot="min">${c.min} min d'effort</td></tr>
+    <tr class="max"><td colspan="2">Indice maximal à ne pas dépasser</td><td class="${c.sets > 30 ? 'over' : ''}">30</td><td class="${c.reps > 500 ? 'over' : ''}">500</td><td colspan="2"></td><td colspan="3" class="${c.min > 30 ? 'over' : ''}">30 min</td></tr></tfoot></table></div>
+    <div class="btnrow two" style="margin-top:8px"><button type="button" class="btn ghost" data-edtadd>+ Ajouter une ligne</button><button type="button" class="btn ghost" data-edtless>− Retirer une ligne vide</button></div>
+    <p class="hint" style="margin:6px 2px 0">Touche la lettre (A2, B2…) pour mettre un exercice en superset avec celui d'au-dessus.</p>`;
+}
+document.addEventListener('input', e => {
+  const t = e.target; if (!ED?.tbl) return;
+  if (t.dataset?.edtx != null) { const box = t.nextElementSibling, q = t.value.trim(); if (!q) { box.hidden = true; return; }
+    const L = exSearch(q, ED.kind).slice(0, 8); box.innerHTML = L.map(([x, n]) => `<button type="button" data-edtxp="${t.dataset.edtx}|${x.id}"><b>${esc(n)}</b><small>${esc(x.cat || '')}${x.eq ? ' · ' + esc(x.eq) : ''}</small></button>`).join('') || '<span class="none">Aucun exercice trouvé</span>'; box.hidden = false; return; }
+  const m = t.dataset?.ed?.match(/^(\d+)\.(pct|rpe|reps|sets)$/); if (m) setTimeout(() => { if (!ED) return; const it = ED.items[+m[1]], o = document.querySelector(`[data-edkg="${m[1]}"]`); if (it && o) o.innerHTML = edLoad(it);
+    const c = planCheck(ED.items.filter(x => x.ex)), set = (k, v, over) => { const el = document.querySelector(`[data-edtot="${k}"]`); if (el) { el.textContent = v; el.classList.toggle('over', over); } };
+    set('sets', c.sets, c.sets > 30); set('reps', c.reps, c.reps > 500); set('min', c.min + " min d'effort", c.min > 30); });
+});
+document.addEventListener('keydown', e => { const t = e.target; if (!ED?.tbl || t.dataset?.edtx == null || e.key !== 'Enter') return; e.preventDefault(); t.nextElementSibling.querySelector('[data-edtxp]')?.click(); });
+document.addEventListener('focusout', e => { const t = e.target; if (t.dataset?.edtx == null) return; setTimeout(() => { const b = t.nextElementSibling; if (b && !b.contains(document.activeElement)) b.hidden = true; }, 180); });
+document.addEventListener('click', e => {
+  if (!ED?.tbl) return; const at = q => e.target.closest(q); let b;
+  if ((b = at('[data-edtxp]'))) { const [i, id] = b.dataset.edtxp.split('|'), it = ED.items[+i];
+    if (it) it.ex = id; else { const d = defaultItem(id); d.sets = null; d.reps = null; d.rest = 180; ED.items.push(d); ED.extraRows = Math.max(0, (ED.extraRows || 0) - 1); }
+    paneRender(); return; }
+  if ((b = at('[data-edtrm]'))) { const i = +b.dataset.edtrm; if (ED.items[i]) { ED.items.splice(i, 1); if (ED.items[i]) ED.items[i].link = ED.items[i].link && i > 0; } else ED.extraRows = Math.max(0, (ED.extraRows || 0) - 1); paneRender(); return; }
+  if (at('[data-edtadd]')) { ED.extraRows = (ED.extraRows || 0) + 1; paneRender(); return; }
+  if (at('[data-edtless]')) { if (ED.extraRows > 0) ED.extraRows--; else toast('Il reste au moins 5 lignes'); paneRender(); }
+});
 function editBody() {
   if (!ED) return '';
   const trk = ED.kind === 'track', A = sessionAuto(ED); if (ED.seqAuto) ED.name = 'Séance ' + nextSeq(ED.kind);
+  ED.tbl = !trk && typeof isPC === 'function' && isPC();
   GYM_CTX = !trk && ED.gym || null;
   const num = (i, f, v, ph) => `<input class="mini-in big" inputmode="decimal" data-ed="${i}.${f}" value="${v ?? ''}" placeholder="${ph}">`;
   const rest = (i, v, ph) => `<input class="mini-in big" inputmode="decimal" data-edrest="${i}" value="${restIn(v)}" placeholder="${ph}">`;
   return `<div class="stack" style="margin-top:16px">
     <div class="seg" role="group">${[['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button type="button" data-edkind="${v}" aria-pressed="${ED.kind === v}">${l}</button>`).join('')}</div>
-    ${whenRow()}
     <div class="field"><label class="eyebrow" for="ed-name">Nom${ED.autoName ? ' · rempli tout seul' : ''}</label><input id="ed-name" data-ed="name" maxlength="24" value="${esc(ED.autoName ? A.name : ED.name)}" placeholder="Ajoute des exercices : le nom se remplit"></div>
     <div class="field"><label class="eyebrow" for="ed-desc">Objectif${ED.autoDesc ? ' · rempli tout seul' : ''}</label><input id="ed-desc" data-ed="desc" value="${esc(ED.autoDesc ? A.desc : ED.desc || '')}" placeholder="Il suit la logique de tes exercices"></div>
     ${plannedBox()}
@@ -8653,7 +8722,7 @@ function editBody() {
     ${warmBox()}
     ${trk ? techBox() : ''}
     ${trk && ED.items.some(x => x.seq) ? '<div class="sec-label" style="margin:6px 2px 0">Séance principale</div>' : ''}
-    <div id="ed-list"${ED.items.length ? '' : ' hidden'}>${(LBL = itemLabels(ED.items), '')}${ED.items.map((it, i) => { const e = exOf(it.ex), rm = !trk && e.u === 'kg' ? rmOf(it.ex)?.kg : null, kg = rm && it.pct ? r25(rm * it.pct / 100 * recFactor().k) : null; return `<div class="exbox edx${it.link ? ' linked' : ''}" data-edi="${i}"><h3><span class="grip" aria-hidden="true">⋮⋮</span><span class="pcmv"><button type="button" data-edmv="${i}.-1" aria-label="Monter"${i ? '' : ' disabled'}>↑</button><button type="button" data-edmv="${i}.1" aria-label="Descendre"${i < ED.items.length - 1 ? '' : ' disabled'}>↓</button></span>${it.seq ? `Partie ${ED.items.slice(0, i + 1).filter(x => x.seq).length}<small>${esc(exOf(it.ex).cat)}</small>` : `${LBL[i] ? `<span class="exlbl">${LBL[i]}</span>` : ''}${esc(e.n)}<small>${esc(e.eq || e.cat)}</small>`}</h3>
+    ${ED.tbl ? '<div class="sec-label" style="margin:6px 2px 0">Séance principale</div>' + edTable() : ''}<div id="ed-list"${ED.items.length && !ED.tbl ? '' : ' hidden'}>${(LBL = itemLabels(ED.items), '')}${ED.items.map((it, i) => { const e = exOf(it.ex), rm = !trk && e.u === 'kg' ? rmOf(it.ex)?.kg : null, kg = rm && it.pct ? r25(rm * it.pct / 100 * recFactor().k) : null; return `<div class="exbox edx${it.link ? ' linked' : ''}" data-edi="${i}"><h3><span class="grip" aria-hidden="true">⋮⋮</span><span class="pcmv"><button type="button" data-edmv="${i}.-1" aria-label="Monter"${i ? '' : ' disabled'}>↑</button><button type="button" data-edmv="${i}.1" aria-label="Descendre"${i < ED.items.length - 1 ? '' : ' disabled'}>↓</button></span>${it.seq ? `Partie ${ED.items.slice(0, i + 1).filter(x => x.seq).length}<small>${esc(exOf(it.ex).cat)}</small>` : `${LBL[i] ? `<span class="exlbl">${LBL[i]}</span>` : ''}${esc(e.n)}<small>${esc(e.eq || e.cat)}</small>`}</h3>
       ${e.t === 'test' ? `<div class="edrow" style="grid-template-columns:1fr"><label>Essais${num(i, 'reps', it.reps, '3')}</label></div><p class="hint" style="margin:4px 2px 0">Fait juste après l'échauffement. Pendant la séance, « Lancer le test » ouvre le protocole ; le résultat va dans Profil › Tests.</p>`
       : it.ex === 'warmup' ? `<div class="edrow" style="grid-template-columns:1fr"><label>Minutes${num(i, 'min', it.min, '15')}</label></div>`
         : it.seq ? partBody(it, i, num, rest)
@@ -8665,8 +8734,8 @@ function editBody() {
       ${exOf(it.ex).t === 'test' ? '' : `<div class="field exnote"><input class="mini-in" data-ednote="${i}" value="${esc(it.note || '')}" placeholder="Note (ex. en chaussettes, prise large…)" aria-label="Note sur l'exercice"></div>`}
       ${LBL[i] && !it.seq ? `<div class="mlink">${i > 0 && LBL[i - 1] ? `<button type="button" class="chip" data-edlink="${i}" aria-pressed="${!!it.link}">${it.link ? 'Enchaîné avec ' + LBL[i - 1] : 'Enchaîner avec ' + LBL[i - 1]}</button>` : ''}</div>` : ''}
       <div class="tools"><span class="hint">Appuie longuement pour déplacer</span><button type="button" class="rm" data-edrm="${i}">Retirer</button></div></div>`; }).join('')}</div>
-    ${ED.items.length && !trk ? capsLine(planCheck(ED.items)) : ''}
-    ${trk ? `<button class="btn ghost" data-edpart>${ED.items.some(x => x.seq) ? '+ Ajouter une partie à la séance principale' : '+ Séance principale'}</button>` : '<button class="btn ghost" data-edadd>+ Ajouter un exercice</button>'}
+    ${ED.items.length && !trk && !ED.tbl ? capsLine(planCheck(ED.items)) : ''}
+    ${trk ? `<button class="btn ghost" data-edpart>${ED.items.some(x => x.seq) ? '+ Ajouter une partie à la séance principale' : '+ Séance principale'}</button>` : ED.tbl ? '' : '<button class="btn ghost" data-edadd>+ Ajouter un exercice</button>'}
     ${coolBox()}
     </div>
     <div class="edsave2"><button class="btn" data-edtoday>Enregistrer et faire aujourd'hui</button><p class="hint" style="margin:6px 2px 0">La séance est calée aujourd'hui${(() => { const q = edPlanned(TODAY); return q && !logsOn(TODAY).some(l => l.kind === ED.kind) ? ` à la place de « ${esc(q.name)} », qui part dans l'archive` : ''; })()}.</p></div>
