@@ -945,6 +945,9 @@ ul.bil{margin:4px 0 0;padding-left:18px;font-size:.875rem;line-height:1.45}ul.bi
 .sbnav{display:flex;align-items:center;gap:6px}.sbnav button{width:30px;height:30px;border-radius:50%;background:var(--card2);color:var(--fg);font-size:1.0625rem}.sbnav button:disabled{opacity:.3}.sbnav small{font-size:.75rem;color:var(--fg2);font-variant-numeric:tabular-nums}
 .bgrid{display:grid;gap:6px}
 .bweek{display:grid;grid-template-columns:22px repeat(7,minmax(0,1fr));gap:3px;align-items:stretch}.bcell{min-width:0;overflow:hidden}
+.bweek.sebk{background:linear-gradient(90deg,color-mix(in srgb,var(--sbc) 16%,transparent),color-mix(in srgb,var(--sbc) 5%,transparent) 60%);border-radius:10px;box-shadow:inset 3px 0 0 color-mix(in srgb,var(--sbc) 70%,transparent)}.bweek.sebk .bwk{color:color-mix(in srgb,var(--sbc) 80%,var(--fg))}
+.seleg{display:flex;flex-wrap:wrap;gap:6px 14px;margin:8px 2px 0;font-size:.6875rem;color:var(--fg3)}.seleg span::before{content:'';display:inline-block;width:8px;height:8px;border-radius:3px;margin-right:5px;background:var(--sbc);vertical-align:0}
+.sedot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:0}
 .bwk{writing-mode:vertical-rl;transform:rotate(180deg);font-size:.625rem;font-weight:700;color:var(--fg3);text-align:center;letter-spacing:.06em}
 .bcell{min-height:62px;border-radius:10px;background:var(--card2);padding:4px 3px;display:flex;flex-direction:column;gap:3px;opacity:.55;transition:background .15s,box-shadow .15s,opacity .15s}
 .bcell.slot{opacity:1;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--accent) 45%,transparent)}
@@ -1779,12 +1782,24 @@ const SEASON_TPL = {
   hiver: {name: 'Saison hivernale', blocks: [['PPG', 5, 'Force max'], ['PPS', 3, 'Puissance : conversion force → vitesse'], ['Pré-compétition', 2, 'Vitesse / force'], ['Compétition', 2, 'Affûtage']]},
   ete: {name: 'Saison estivale', blocks: [['PPG', 8, 'Force max'], ['PPS', 6, 'Puissance : conversion force → vitesse'], ['Pré-compétition', 3, 'Vitesse / force'], ['Compétition', 3, 'Affûtage']]}
 };
-// Where today falls: the block, its week, and the goal of the block.
-function seasonNow(k = TODAY, kind = 'track') {
-  const se = kind === 'gym' ? S.tset?.seasonGym || seasonGymDef() : S.tset?.season; if (!se?.start || !se.blocks?.length) return null;
-  let d = daysBetween(se.start, k); if (d < 0) return {before: -d, se};
-  for (const [i, b] of se.blocks.entries()) { if (d < b[1] * 7) return {se, i, name: b[0], goal: b[2], week: Math.floor(d / 7) + 1, of: b[1], comp: se.comp ? daysBetween(k, se.comp) : null}; d -= b[1] * 7; }
-  return {after: true, se, comp: se.comp ? daysBetween(k, se.comp) : null};
+// Sa saison 2026-2027, une seule pour le sprint et la muscu (elles sont liées). Calée à l'envers depuis les dernières
+// compétitions : 60 m en salle vers le 7 mars 2027, 100 m dehors vers le 18 juillet 2027. Les blocs gardent les proportions
+// de sa planification « Train de vie performance » (hiver 5-3-2-2, été 8-6-3-3) : l'hiver est allongé (il reprend après
+// sa blessure, il vise les dernières compétitions et pas celles de novembre), l'été un peu raccourci.
+const SEASON_2627 = () => ({start: '2026-11-16', comp: '2027-03-07', comp2: '2027-07-18', kind: 'annee', blocks: [
+  ['PPG · hiver', 6, 'Force max'], ['PPS · hiver', 4, 'Force / vitesse : conversion force → vitesse'], ['Pré-compétition · hiver', 3, 'Vitesse / force · conserver les qualités'], ['Compétition · hiver', 3, 'Affûtage · dernières compétitions de 60 m'],
+  ['Transition', 1, 'Récupération active'],
+  ['PPG · été', 7, 'Force max'], ['PPS · été', 5, 'Force / vitesse : conversion force → vitesse'], ['Pré-compétition · été', 3, 'Vitesse / force · conserver les qualités'], ['Compétition · été', 3, 'Affûtage · dernières compétitions de 100 m']]});
+SEASON_TPL.annee = {name: 'Saison 2026-2027', blocks: SEASON_2627().blocks};
+// La couleur de chaque bloc (douce sur le planning des séances).
+const seCol = n => /^PPG/i.test(n) ? '#3E9BFF' : /^PPS/i.test(n) ? '#B678E8' : /^Pré/i.test(n) ? '#FF9F0A' : /^Comp/i.test(n) ? '#E5484D' : /^Trans/i.test(n) ? '#8E8E93' : '#30B46C';
+// Where today falls: the block, its week, and the goal of the block (the same season for muscu and sprint).
+function seasonNow(k = TODAY) {
+  const se = S.tset?.season?.start ? S.tset.season : SEASON_2627(); if (!se?.start || !se.blocks?.length) return null;
+  const nx = [se.comp, se.comp2].filter(c => c && c >= k).sort()[0], comp = nx ? daysBetween(k, nx) : null;
+  let d = daysBetween(se.start, k); if (d < 0) return {before: -d, se, comp};
+  for (const [i, b] of se.blocks.entries()) { if (d < b[1] * 7) return {se, i, name: b[0], goal: b[2], week: Math.floor(d / 7) + 1, of: b[1], comp, col: seCol(b[0]), left: b[1] * 7 - d}; d -= b[1] * 7; }
+  return {after: true, se, comp};
 }
 function seasonLine() {
   const n = seasonNow();
@@ -1806,7 +1821,8 @@ function seasonPane() {
     se.blocks.forEach((b, i) => { for (let j = 0; j < (+b[1] || 0); j++, w++) weeks.push({i, w, k: addDays(se.start, w * 7)}); });
     return `${SE_KIND === 'gym' ? '<p class="small muted" style="margin:16px 4px 10px">Ta planification de musculation, bloc par bloc. Change les noms, les semaines et les objectifs comme tu l\'as prévue.</p>' : ''}<div class="seg" role="group" style="margin:16px 0 10px;${SE_KIND === 'gym' ? 'display:none' : ''}">${Object.entries(SEASON_TPL).map(([k, t]) => `<button type="button" data-stpl="${k}" aria-pressed="${(se.kind || 'hiver') === k}">${t.name}</button>`).join('')}</div>
       <div class="list"><div class="row"><label for="se-start">Début</label><input type="date" id="se-start" class="mini-in" value="${se.start}" data-se="start"></div>
-        <div class="row"><label for="se-comp">Compétition visée</label><input type="date" id="se-comp" class="mini-in" value="${se.comp || ''}" data-se="comp"></div></div>
+        <div class="row"><label for="se-comp">Dernières compétitions · 60 m</label><input type="date" id="se-comp" class="mini-in" value="${se.comp || ''}" data-se="comp"></div>
+        <div class="row"><label for="se-comp2">Dernières compétitions · 100 m</label><input type="date" id="se-comp2" class="mini-in" value="${se.comp2 || ''}" data-se="comp2"></div></div>
       <div class="sec-label">Blocs <small>${tot} semaines · touche une semaine pour ses séances</small></div>
       <div id="se-blocks">${se.blocks.map((b, i) => `<div class="seblk" data-seblk="${i}" style="--bc:${SE_COL[i % SE_COL.length]}"><div class="sebh"><span class="grip" aria-hidden="true">⋮⋮</span><b>Bloc ${i + 1}</b><input class="mini-in" style="text-align:left;flex:1" value="${esc(String(b[0]).replace(/^Bloc \d+\s*[:·-]\s*/, ''))}" data-seb="${i}.0" aria-label="Nom du bloc"><button type="button" class="sex" data-sedel="${i}" aria-label="Supprimer le bloc ${i + 1}">×</button></div>
         <div class="row col"><div class="sewh"><label>Semaines</label><span class="stepper"><button type="button" data-sew="${i}.-1" aria-label="Une semaine de moins">−</button><b class="num">${b[1]}</b><button type="button" data-sew="${i}.1" aria-label="Une semaine de plus">+</button></span></div>
@@ -1831,7 +1847,7 @@ document.addEventListener('click', e => {
     const se = seDraft(), [m] = se.blocks.splice(from, 1); se.blocks.splice(to, 0, m); paneRender(); });
 })();
 let SE_DRAFT = null;
-const seDraft = () => SE_DRAFT ||= (() => { const se = structuredClone((SE_KIND === 'gym' ? S.tset?.seasonGym || seasonGymDef() : S.tset?.season) || {start: monday(TODAY), blocks: SEASON_TPL.hiver.blocks.map(b => [...b]), comp: '', kind: 'hiver'}); se.blocks = se.blocks.map(b => [String(b[0]).replace(/^Bloc \d+\s*[:·-]\s*/, '').replace(/\s*\/\s*(Force|Puissance)$/i, ''), b[1], b[2]]); return se; })();
+const seDraft = () => SE_DRAFT ||= (() => { const se = structuredClone(S.tset?.season?.start ? S.tset.season : SEASON_2627()); se.blocks = se.blocks.map(b => [String(b[0]).replace(/^Bloc \d+\s*[:·-]\s*/, '').replace(/\s*\/\s*(Force|Puissance)$/i, ''), b[1], b[2]]); return se; })();
 
 /* ---------- backup sessions when running is not possible (Oscar's "Séance de secours") ---------- */
 const BACKUP = [
@@ -3144,7 +3160,18 @@ const wdOf = k => new Date(k + 'T12:00:00').getDay();
 // Two plannings: winter (the default) and summer (more time); summer starts as a copy of winter until he changes it.
 const weekKey = () => PLN().saison === 'ete' ? 'weekEte' : 'week';
 const weekPlan = wd => (PLN()[weekKey()]?.[wd] || PLN().week?.[wd] || PLAN_BASE[wd]).map(x => ({...x}));
-const dayPlan = k => tripFix(k, planCut(weekPlan(wdOf(k)), (PLN().extra?.[k] || []).map(x => ({...x, date: k}))));
+// Deux façons de changer le planning : debout (une journée), le changement ne vaut que pour cette date (PLN().days) ;
+// couché (toute la semaine) et sur ordinateur, il change la semaine type, donc toutes les semaines suivantes.
+const basePlan = k => (PLN().days?.[k] || weekPlan(wdOf(k))).map(x => ({...x}));
+const dayPlan = k => tripFix(k, planCut(basePlan(k), (PLN().extra?.[k] || []).map(x => ({...x, date: k}))));
+const plOne = () => PLFS.on && PLFS.mode !== 'week';
+// Dans la vue semaine on voit (et on change) la semaine type ; dans la vue jour, la journée datée.
+const plList = k => PLFS.on && PLFS.mode === 'week' ? tripFix(k, planCut(weekPlan(wdOf(k)), (PLN().extra?.[k] || []).map(x => ({...x, date: k})))) : dayPlan(k);
+const plBase = wd => plOne() ? basePlan(plDay(wd)) : weekPlan(wd);
+async function plSaveBase(map) {
+  if (plOne()) { const days = {...(PLN().days || {})}; for (const wd in map) days[plDay(+wd)] = map[wd]; return savePlanning({days}); }
+  return savePlanning({[weekKey()]: {...(PLN()[weekKey()] || {}), ...map}});
+}
 // Trips as he really does them. Bike: he rides about 1,6 times faster than Google's estimate (31 min → 19 min).
 // Car: Google's time without traffic, times Lille's traffic at that hour (TomTom Traffic Index: peaks around 8 h and
 // 17-18 h on weekdays). Then a margin so he always arrives a little early. Minutes are his, in settings/app.trips.
@@ -3215,7 +3242,7 @@ function planPreview(k, nb) {
   const V = L.filter(x => { const a = tmin(x.a), b = tmin(x.b) <= a ? 1440 : tmin(x.b); return b > A && a < B; });
   return `<div class="list plprev">${V.map(x => `<div class="row${x._new ? ' new' : ''}"><span class="t num">${tfr(x.a)} – ${tfr(x.b)}</span><span class="l">${esc(x.n)}${x._new ? '<span class="hint">ajouté ici</span>' : ''}</span></div>`).join('')}</div>`;
 }
-const shownPlan = k => PLFS.on && PLFS.only ? dayPlan(k).filter(x => PLFS.only.includes(x.c)) : dayPlan(k);
+const shownPlan = k => PLFS.on && PLFS.only ? plList(k).filter(x => PLFS.only.includes(x.c)) : plList(k);
 const planHas = (k, c) => dayPlan(k).some(x => x.c === c);
 const tmin = t => { const [h, m] = String(t).split(':').map(Number); return h * 60 + (m || 0); };
 const tstr = m => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
@@ -3252,7 +3279,7 @@ const PLFS = {on: false, mode: 'day'};
 const PLD = {sel: null};
 const plMonday = () => addDays(TODAY, -((wdOf(TODAY) + 6) % 7) + 7 * (PLFS.wk || 0));
 const plDay = wd => addDays(plMonday(), (wd + 6) % 7);
-const plIdx = (x, wd, k) => x.date ? 'x' + (PLN().extra[k] || []).findIndex(y => y.a === x.a && y.n === x.n) : weekPlan(wd).findIndex(y => y.a === (x.oa || x.a) && y.n === x.n);
+const plIdx = (x, wd, k) => x.date ? 'x' + (PLN().extra[k] || []).findIndex(y => y.a === x.a && y.n === x.n) : plBase(wd).findIndex(y => y.a === (x.oa || x.a) && y.n === x.n);
 const ICON_TURN = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="3" width="8" height="14" rx="1.6" transform="rotate(-35 12 10)"/><path d="M3 13a9 9 0 0 0 7 8"/><path d="M8 21h2.4v-2.4"/><path d="M21 11a9 9 0 0 0-7-8"/><path d="M16 3h-2.4v2.4"/></svg>';
 function planningPane(opt = {}) {
   PLAN_UI = {wd: opt.wk ? 1 : wdOf(TODAY)}; PLD.sel = null; PLFS.wk = opt.wk || 0; PLFS.pf = opt.pf || ''; PLFS.only = PFILT[PLFS.pf] || null; PLFS.title = opt.title || 'Mon planning';
@@ -3291,7 +3318,7 @@ function plfsRender() {
         const chp = short || week ? '' : plChip(x, k), mid = !!chp && h < 76;
         return `<button class="plg-b${short ? ' short' : ''}${mid ? ' mid' : ''}${on ? ' sel' : ''}${k === TODAY && a <= nowM && nowM < b ? ' plcur' : ''}" data-plsel="${i}" data-plwd="${wd}"${k === TODAY ? ` data-pa="${a}" data-pb="${b}"` : ''} style="--pc:${PCAT[x.c]?.[1] || '#888'};top:${(a - t0) * K + 1}px;height:${Math.max(h - 3, 8)}px"><b>${esc(x.n)}</b>${short ? '' : `<small>${x.a} – ${x.b}${x.date && !x.rs ? ' · ce jour' : ''}${x.trip ? ' · ' + esc(x.trip) : ''}</small>${chp}`}${on ? '<span class="plg-hd t" data-plhv="a"></span><span class="plg-hd b" data-plhv="b"></span>' : ''}</button>`; }).join('')}
       ${k === TODAY && nowM >= t0 ? `<i class="plg-now" style="top:${(nowM - t0) * K}px"></i>` : ''}</div>`;
-  const own = !!PLN().week?.[PLAN_UI.wd];
+  const own = !!PLN().week?.[PLAN_UI.wd], ownDay = !!PLN().days?.[plDay(PLAN_UI.wd)];
   el.className = 'plfs on ' + (week ? 'plw' : 'pld1') + (plRot() ? ' rot' : '');
   el.innerHTML = `<div class="plfs-in">
     <header class="plfs-top"><button class="plfs-ic" data-plx aria-label="Fermer le planning"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
@@ -3302,7 +3329,7 @@ function plfsRender() {
       return `<i style="background:${PCAT[x.c]?.[1] || '#888'}"></i><b>${esc(x.n)}${sp ? ' · ' + esc(sp.name) : ''}</b><span>${tfr(x.a)} – ${tfr(x.b)}${x.trip ? ' · ' + esc(x.trip) : ''}</span>${x.c === 'dep' ? '<button class="chip" data-trips>Mes trajets</button>' : ''}${sp ? `<button class="chip" data-tplanv="${sp.id}"${sp.n ? ` data-tn="${sp.n}"` : ''}>Voir la séance</button>` : ''}<button class="chip" data-plb="${PLD.sel}">Modifier</button>`; })()}</div>`}
     ${week ? `<div class="plg-head"><span></span>${lists.map(d => `<span class="${d.k === TODAY ? 'pltoday' : ''}">${DAYS_FR[d.wd].slice(0, 3)} <b>${+d.k.slice(8)}</b></span>`).join('')}</div>` : ''}
     <div class="plg-scroll"><div class="plg" style="height:${H + 8}px"><div class="plg-axis">${hours.map(t => `<span style="top:${(t - t0) * K}px">${String(t / 60 % 24).padStart(2, '0')} h</span>`).join('')}</div>${lists.map(col).join('')}</div>
-      ${week ? '' : `<div class="stack" style="margin:14px 0 24px"><button class="btn ghost" data-pladd>+ Ajouter un bloc</button><button class="btn ghost" data-trips>Mes trajets</button>${own ? '<button class="btn ghost" data-plreset>Revenir au planning de mon fichier</button>' : ''}</div>`}</div>
+      ${week ? '' : `<div class="stack" style="margin:14px 0 24px"><button class="btn ghost" data-pladd>+ Ajouter un bloc</button><button class="btn ghost" data-trips>Mes trajets</button>${ownDay ? '<button class="btn ghost" data-plreset>Remettre cette journée comme d\'habitude</button>' : own ? '<button class="btn ghost" data-plreset>Revenir au planning de mon fichier</button>' : ''}</div><p class="small muted" style="margin:-12px 4px 20px">Ici, un changement ne vaut que pour ce jour-là. Pour changer toutes les semaines, tourne le planning (vue semaine).</p>`}</div>
     <div class="plg-leg">${used.map(c => `<span><i style="background:${PCAT[c][1]}"></i>${esc(PCAT[c][0])}</span>`).join('')}</div>
   </div>`;
   el.dataset.t0 = t0; el.dataset.k = K;
@@ -3549,13 +3576,13 @@ async function plResize(i, wd, edge, min) {
     const k = plDay(wd), ex = {...(PLN().extra || {})}, l = [...(ex[k] || [])]; l[+String(i).slice(1)] = {...l[+String(i).slice(1)], a: nx.a, b: nx.b}; ex[k] = l;
     PLW.sel = {i, wd}; await savePlanning({extra: ex});
   } else {
-    const week = {...(PLN()[weekKey()] || {})}, L = weekPlan(wd); L[+i] = nx; L.sort((p, q) => p.a.localeCompare(q.a));
-    week[wd] = L; PLW.sel = {i: String(L.indexOf(nx)), wd}; await savePlanning({[weekKey()]: week});
+    const L = plBase(wd); L[+i] = nx; L.sort((p, q) => p.a.localeCompare(q.a));
+    PLW.sel = {i: String(L.indexOf(nx)), wd}; await plSaveBase({[wd]: L});
   }
   toast(`${x.n} : ${tfr(nx.a)} – ${tfr(nx.b)}`);
 }
 // Blocks never overlap: a move goes to the nearest free place, a stretch stops at the next block.
-function plOthers(i, wd) { const x = plBlockOf(i, wd); return dayPlan(plDay(wd)).filter(y => !((y.oa || y.a) === x?.a && y.n === x?.n && (y.ob || y.b) === x?.b)).map(y => [tmin(y.a), tmin(y.b)]).sort((p, q) => p[0] - q[0]); }
+function plOthers(i, wd) { const x = plBlockOf(i, wd); return plList(plDay(wd)).filter(y => !((y.oa || y.a) === x?.a && y.n === x?.n && (y.ob || y.b) === x?.b)).map(y => [tmin(y.a), tmin(y.b)]).sort((p, q) => p[0] - q[0]); }
 function plFree(others, a, len) {
   const gaps = []; let t = 0;
   for (const [x, y] of others) { if (x > t) gaps.push([t, x]); t = Math.max(t, y); }
@@ -3567,13 +3594,13 @@ function plFree(others, a, len) {
 function plFit(i, wd, edge, min, toWd = wd) {
   const x = plBlockOf(i, wd); if (!x) return null;
   let a = tmin(x.a), b = tmin(x.b);
-  const others = toWd === wd ? plOthers(i, wd) : dayPlan(plDay(toWd)).map(y => [tmin(y.a), tmin(y.b)]).sort((p, q) => p[0] - q[0]);
+  const others = toWd === wd ? plOthers(i, wd) : plList(plDay(toWd)).map(y => [tmin(y.a), tmin(y.b)]).sort((p, q) => p[0] - q[0]);
   if (edge === 'a') { const lim = Math.max(0, ...others.filter(o => o[1] <= a).map(o => o[1])); a = clamp(a + min, lim, b - PL_STEP); }
   else if (edge === 'b') { const lim = Math.min(24 * 60, ...others.filter(o => o[0] >= b).map(o => o[0])); b = clamp(b + min, a + PL_STEP, lim); }
   else { const len = b - a, na = plFree(others, clamp(a + min, 0, 24 * 60 - len), len); if (na == null) return null; a = na; b = na + len; }
   return [a, b];
 }
-function plBlockOf(i, wd) { const k = plDay(wd); return String(i).startsWith('x') ? (PLN().extra?.[k] || [])[+String(i).slice(1)] : weekPlan(wd)[+i]; }
+function plBlockOf(i, wd) { const k = plDay(wd); return String(i).startsWith('x') ? (PLN().extra?.[k] || [])[+String(i).slice(1)] : plBase(wd)[+i]; }
 function plShiftLabel(d) {
   const x = plBlockOf(d.b.dataset.plsel, +d.b.dataset.plwd); if (!x) return '';
   const wd = PL_ORDER[(PL_ORDER.indexOf(+d.b.dataset.plwd) + d.day + 70) % 7];
@@ -3589,11 +3616,11 @@ async function plMove(i, wd, min, dayShift) {
     const k = plDay(wd), ex = {...(PLN().extra || {})}, l = [...(ex[k] || [])]; l[+String(i).slice(1)] = {...l[+String(i).slice(1)], a: moved.a, b: moved.b}; ex[k] = l;
     await savePlanning({extra: ex}); toast(`Bloc déplacé à ${tfr(moved.a)}`); return;
   }
-  const to = PL_ORDER[(PL_ORDER.indexOf(wd) + dayShift + 70) % 7], week = {...(PLN()[weekKey()] || {})};
-  const from = weekPlan(wd).filter((_, j) => j !== +i);
-  if (to === wd) week[wd] = [...from, moved].sort((p, q) => p.a.localeCompare(q.a));
-  else { week[wd] = from; week[to] = [...weekPlan(to), moved].sort((p, q) => p.a.localeCompare(q.a)); }
-  await savePlanning({[weekKey()]: week});
+  const to = PL_ORDER[(PL_ORDER.indexOf(wd) + dayShift + 70) % 7], map = {};
+  const from = plBase(wd).filter((_, j) => j !== +i);
+  if (to === wd) map[wd] = [...from, moved].sort((p, q) => p.a.localeCompare(q.a));
+  else { map[wd] = from; map[to] = [...plBase(to), moved].sort((p, q) => p.a.localeCompare(q.a)); }
+  await plSaveBase(map);
   toast(to === wd ? `Bloc déplacé à ${tfr(moved.a)}` : `Bloc déplacé au ${DAYS_FR[to].toLowerCase()} à ${tfr(moved.a)}`);
 }
 document.addEventListener('click', e => {
@@ -3607,7 +3634,7 @@ addEventListener('keydown', e => { if (e.key === 'Escape' && PLFS.on && !P.stack
 let PB = null;
 function blockEdit(i) {
   const wd = PLAN_UI.wd, k = plDay(wd);
-  const extra = String(i).startsWith('x'), list = extra ? (PLN().extra?.[k] || []) : weekPlan(wd), idx = extra ? +String(i).slice(1) : +i;
+  const extra = String(i).startsWith('x'), list = extra ? (PLN().extra?.[k] || []) : plBase(wd), idx = extra ? +String(i).slice(1) : +i;
   const blk = i === 'new' ? BLK('15:00', '15:30', '', 'recup') : {...list[idx]};
   PB = {wd, k, extra, idx: i === 'new' ? -1 : idx, blk, copy: []};
   openPane({title: i === 'new' ? 'Nouveau bloc' : 'Modifier le bloc', left: {label: 'Enregistrer', fn: blockSave}, render: () => {
@@ -3626,20 +3653,20 @@ function blockEdit(i) {
 async function blockSave() {
   const b = PB.blk; b.n = b.n.trim() || PCAT[b.c][0]; if (b.b === '23:59') b.b = '24:00';
   if (tmin(b.b) <= tmin(b.a)) { toast('La fin doit être après le début'); return; }
-  const cur = PB.idx >= 0 ? (PB.extra ? (PLN().extra?.[PB.k] || [])[PB.idx] : weekPlan(PB.wd)[PB.idx]) : null;
-  for (const d of [PB.wd, ...PB.copy]) { const hit = dayPlan(plDay(d)).find(y => !(cur && (y.oa || y.a) === cur.a && y.n === cur.n && d === PB.wd) && tmin(y.a) < tmin(b.b) && tmin(y.b) > tmin(b.a)); if (hit) { toast(`Chevauche « ${hit.n} » (${hit.a} – ${hit.b})${d !== PB.wd ? ' le ' + DAYS_FR[d].toLowerCase() : ''} : change les heures`); return; } }
+  const cur = PB.idx >= 0 ? (PB.extra ? (PLN().extra?.[PB.k] || [])[PB.idx] : plBase(PB.wd)[PB.idx]) : null;
+  for (const d of [PB.wd, ...PB.copy]) { const hit = plList(plDay(d)).find(y => !(cur && (y.oa || y.a) === cur.a && y.n === cur.n && d === PB.wd) && tmin(y.a) < tmin(b.b) && tmin(y.b) > tmin(b.a)); if (hit) { toast(`Chevauche « ${hit.n} » (${hit.a} – ${hit.b})${d !== PB.wd ? ' le ' + DAYS_FR[d].toLowerCase() : ''} : change les heures`); return; } }
   if (PB.extra) { const ex = {...(PLN().extra || {})}, l = [...(ex[PB.k] || [])]; l[PB.idx] = {...l[PB.idx], ...b}; ex[PB.k] = l; closePane(); await savePlanning({extra: ex}); return; }
-  const week = {...(PLN()[weekKey()] || {})};
+  const map = {};
   for (const d of [PB.wd, ...PB.copy]) {
-    const l = weekPlan(d);
+    const l = plBase(d);
     if (d === PB.wd && PB.idx >= 0) l[PB.idx] = b; else l.push({...b});
-    week[d] = l.sort((x, y) => x.a.localeCompare(y.a));
+    map[d] = l.sort((x, y) => x.a.localeCompare(y.a));
   }
-  closePane(); await savePlanning({[weekKey()]: week}); toast(PB.copy.length ? `Bloc enregistré sur ${PB.copy.length + 1} jours` : 'Bloc enregistré');
+  closePane(); await plSaveBase(map); toast(PB.copy.length ? `Bloc enregistré sur ${PB.copy.length + 1} jours` : 'Bloc enregistré');
 }
 async function blockDel() {
   if (PB.extra) { const ex = {...(PLN().extra || {})}; ex[PB.k] = (ex[PB.k] || []).filter((_, j) => j !== PB.idx); closePane(); await savePlanning({extra: ex}); return; }
-  const week = {...(PLN()[weekKey()] || {})}; week[PB.wd] = weekPlan(PB.wd).filter((_, j) => j !== PB.idx); closePane(); await savePlanning({[weekKey()]: week});
+  const l = plBase(PB.wd).filter((_, j) => j !== PB.idx); closePane(); await plSaveBase({[PB.wd]: l});
 }
 document.addEventListener('input', e => { const f = e.target.dataset?.pbf; if (f && PB) PB.blk[f] = e.target.value; });
 document.addEventListener('click', e => {
@@ -3648,7 +3675,8 @@ document.addEventListener('click', e => {
   if ((b = at('[data-plsel]')) && PLFS.mode !== 'week') { if (PLD.skip) { PLD.skip = false; return; } PLD.sel = PLD.sel === b.dataset.plsel ? null : b.dataset.plsel; PLAN_UI.wd = +b.dataset.plwd; plfsRender(); return; }
   if ((b = at('[data-plb]'))) { blockEdit(b.dataset.plb); return; }
   if (at('[data-pladd]')) { blockEdit('new'); return; }
-  if (at('[data-plreset]')) { const week = {...(PLN()[weekKey()] || {})}; delete week[PLAN_UI.wd]; savePlanning({[weekKey()]: week}); return; }
+  if (at('[data-plreset]')) { const k = plDay(PLAN_UI.wd); if (PLN().days?.[k]) { const days = {...PLN().days}; delete days[k]; savePlanning({days}); toast('Journée remise comme d\'habitude'); return; }
+    const week = {...(PLN()[weekKey()] || {})}; delete week[PLAN_UI.wd]; savePlanning({[weekKey()]: week}); return; }
   if ((b = at('[data-pbc]')) && PB) { PB.blk.c = b.dataset.pbc; if (!PB.blk.n) PB.blk.n = PCAT[PB.blk.c][0]; paneRender(); return; }
   if ((b = at('[data-pbsh]')) && PB) { const d = +b.dataset.pbsh, a = tmin(PB.blk.a) + d, z = tmin(PB.blk.b) + d; if (a >= 0 && z <= 24 * 60) { PB.blk.a = tstr(a); PB.blk.b = tstr(z); paneRender(); } return; }
   if ((b = at('[data-pbcp]')) && PB) { const d = +b.dataset.pbcp; PB.copy = PB.copy.includes(d) ? PB.copy.filter(x => x !== d) : [...PB.copy, d]; paneRender(); return; }
@@ -7385,11 +7413,25 @@ function vT() {
   const body = ({today: tToday, sessions: tSessions, library: tLibrary, progress: tProgress, body: tBody, profile: tProfile}[S.ttab] || tToday)();
   return trfMark() + body;
 }
+// Les créneaux d'une semaine (les jours entourés) : ceux du planning ; mais une séance calée à la main un autre jour
+// prend la place du créneau libre le plus proche de la même semaine (séance mise le 21 au lieu du 20 : c'est le 21 qui est entouré).
+const SLOTC = {t: 0, m: {}};
+function slotWeek(mon, kind) {
+  const now = Date.now(); if (now - SLOTC.t > 300) { SLOTC.m = {}; SLOTC.t = now; }
+  const id = mon + kind; if (SLOTC.m[id]) return SLOTC.m[id];
+  const c = kind === 'gym' ? 'muscu' : 'athle', ks = [0, 1, 2, 3, 4, 5, 6].map(i => addDays(mon, i));
+  const base = ks.map(k => dayPlan(k).find(x => x.c === c) || null), dated = ks.map(k => !!S.tset?.dated?.[dKey(k, kind)]), out = base.slice();
+  ks.forEach((k, i) => { if (!dated[i] || base[i]) return;
+    const free = ks.map((_, j) => j).filter(j => out[j] && base[j] && !dated[j] && ks[j] >= TODAY && !kindDone(ks[j], kind)).sort((x, y) => Math.abs(x - i) - Math.abs(y - i))[0];
+    if (free == null) { out[i] = {a: '', c}; return; } out[i] = {...out[free]}; out[free] = null; });
+  return (SLOTC.m[id] = out);
+}
+const slotOf = (k, kind) => slotWeek(monday(k), kind)[(dow(k) + 6) % 7];
 function weekKind(mon, kind) {
   const c = kind === 'gym' ? 'muscu' : 'athle', days = [];
   let n = 0, done = 0, vol = 0;
   for (let i = 0; i < 7; i++) {
-    const k = addDays(mon, i), b = dayPlan(k).find(x => x.c === c), L = logsOn(k).filter(l => l.kind === kind), pl = planFor(k), noted = M(k, kind === 'gym' ? 'gymRpe' : 'trackRpe');
+    const k = addDays(mon, i), b = slotOf(k, kind), L = logsOn(k).filter(l => l.kind === kind), pl = planFor(k), noted = M(k, kind === 'gym' ? 'gymRpe' : 'trackRpe');
     const planned = !!b || (pl && pl.kind === kind);
     if (planned) n++; if (L.length || noted) done++;
     vol += L.reduce((a, l) => a + (kind === 'gym' ? l.tonnage || 0 : l.sprintM || 0), 0);
@@ -7826,7 +7868,7 @@ function nextSeq(kind) { const fut = Object.entries(S.tset?.dated || {}).filter(
 function sesBoard(kind) {
   const off = S.sbOff || 0, mon0 = addDays(monday(TODAY), 28 * off), c = kind === 'gym' ? 'muscu' : 'athle';
   const cell = k => {
-    const p = planForK(k, kind), dk = p && S.tset.dated?.[dKey(k, kind)] === caleRef(p) ? dKey(k, kind) : k, b = dayPlan(k).find(x => x.c === c), past = k < TODAY, done = logsOn(k).some(l => l.kind === kind) || !!M(k, kind === 'gym' ? 'gymRpe' : 'trackRpe'), miss = !done && (past || kindSkip(k, kind));
+    const p = planForK(k, kind), dk = p && S.tset.dated?.[dKey(k, kind)] === caleRef(p) ? dKey(k, kind) : k, b = slotOf(k, kind), past = k < TODAY, done = logsOn(k).some(l => l.kind === kind) || !!M(k, kind === 'gym' ? 'gymRpe' : 'trackRpe'), miss = !done && (past || kindSkip(k, kind));
     // Done without a block placed: the code of the session he did (S31), from its log.
     const lg = (() => { const l = logsOn(k).find(x => x.kind === kind), m = (l?.name || '').match(/^Séance (\d+)/); return m ? 'S' + m[1] : ''; })();
     return `<div class="bcell${b ? ' slot' : ''}${past ? ' past' : ''}${k === TODAY ? ' today' : ''}" data-bday="${k}" ${past ? '' : `data-bdk="${k}"`}><span class="bd">${DOW[(dow(k) + 6) % 7]} <b>${+k.slice(8)}</b>${b ? `<small>${tfr(b.a)}</small>` : ''}</span>
@@ -7841,7 +7883,8 @@ function sesBoard(kind) {
   const src = [...(kind === 'gym' ? tdvTodo(8) : []), ...myPlans().filter(x => x.kind === kind)];
   const placed = new Set(Object.entries(S.tset?.dated || {}).filter(([d]) => d >= TODAY).map(([, v]) => v));
   return `<div class="card sboard"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Mes 4 semaines · ${kind === 'gym' ? 'muscu' : 'sprint'}</span><span class="sbnav"><button type="button" data-sboff="-1" aria-label="4 semaines avant"${off <= -26 ? ' disabled' : ''}>‹</button><small>${esc(fmtShort(weeks[0]).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(weeks[3], 6)).replace(/^\S+ /, ''))}</small><button type="button" data-sboff="1" aria-label="4 semaines après">›</button></span></div>
-    <div class="bgrid">${weeks.map(w => `<div class="bweek"><span class="bwk">S${seasonWeek(w)}</span>${[0, 1, 2, 3, 4, 5, 6].map(i => cell(addDays(w, i))).join('')}</div>`).join('')}</div>
+    <div class="bgrid">${weeks.map(w => { const n = seasonNow(w), c = n && !n.before && !n.after ? n.col : null; return `<div class="bweek${c ? ' sebk' : ''}"${c ? ` style="--sbc:${c}" title="${esc(n.name)} · semaine ${n.week}/${n.of}"` : ''}><span class="bwk">S${seasonWeek(w)}</span>${[0, 1, 2, 3, 4, 5, 6].map(i => cell(addDays(w, i))).join('')}</div>`; }).join('')}</div>
+    ${(() => { const seen = []; weeks.forEach(w => { const n = seasonNow(w); if (n && !n.before && !n.after && !seen.some(x => x.name === n.name)) seen.push(n); }); return seen.length ? `<div class="seleg">${seen.map(n => `<span style="--sbc:${n.col}">${esc(n.name.split(' · ')[0])}</span>`).join('')}</div>` : ''; })()}
     <div class="sec-label" style="margin:14px 2px 6px">Séances</div>
     <div class="bsrc">${src.length ? src.map(x => { const r = caleRef(x), on = placed.has(r); return `<div class="bchip src${on ? ' on' : ''}" data-bref="${esc(r)}" title="${esc(x.name)}${x.title ? ' · ' + esc(x.title) : ''}"><span>${esc(x.name)}</span><small>${(x.title || x.desc) ? esc(x.title || x.desc) + ' · ' : ''}${estMin(x)} min${on ? ' · calée' : ''}</small></div>`; }).join('') : '<p class="small muted" style="margin:0">Crée une séance ci-dessous : elle apparaîtra ici, prête à être calée.</p>'}</div>
     ${(() => { const xc = (id, sm) => { const e = exOf(id); return `<div class="bchip src xchip" data-bref="x:${esc(id)}" title="${esc(e.n)}"><span>${esc(e.n)}</span><small>${esc(sm)}</small></div>`; };
@@ -7922,7 +7965,7 @@ function tSessions() {
   const row = p => `<button class="rowbtn" data-tplanv="${p.id}"><span><b>${esc(p.name)}</b><span class="meta">${p.title ? esc(p.title) + ' · ' : ''}${estMin(p)} min${!p.title && p.desc ? ' · ' + esc(p.desc) : ''}${caledOn(caleRef(p)).length ? ' · calée' : ''}</span></span>${ICON.chev}</button>`;
   return `
     <header class="top"><div class="sub">Programmes et séances</div><h1>Séances</h1></header>
-    <button class="banner" data-tseason style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;margin-bottom:8px"><span><b>${k === 'gym' ? 'Ma saison de musculation' : 'Ma saison de sprint'}</b><br><span class="small muted">${(() => { const n = seasonNow(TODAY, k === 'gym' ? 'gym' : 'track'); return n && !n.before && !n.after ? `Bloc ${n.i + 1} · ${esc(n.name)} · semaine ${n.week}/${n.of}` : k === 'gym' ? 'Tes blocs de musculation' : 'Tes blocs : PPG, PPS, pré-compétition, compétition'; })()}</span></span>${ICON.chev}</button>
+    <button class="banner" data-tseason style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;margin-bottom:8px"><span><b>Ma saison</b><br><span class="small muted">${(() => { const n = seasonNow(TODAY), nb = n && !n.before && !n.after ? n.se.blocks[n.i + 1] : null; return n && !n.before && !n.after ? `<i class="sedot" style="background:${n.col}"></i>${esc(n.name)} · semaine ${n.week}/${n.of}${nb ? ` · puis ${esc(String(nb[0]).split(' · ')[0])} dans ${Math.ceil(n.left / 7)} sem.` : ''}` : 'Tes blocs : PPG, PPS, pré-compétition, compétition'; })()}</span></span>${ICON.chev}</button>
     <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
     ${sesBoard(k)}
     <div class="btnrow two" style="margin-top:16px"><button class="btn ghost" data-tnew>+ Créer une séance</button><button class="btn ghost" data-texadd>+ Ajouter un exercice</button></div>
@@ -10436,10 +10479,10 @@ document.addEventListener('click', e => {
   if ((b = at('[data-mpick]'))) { P.stack.at(-1).pick(b.dataset.mpick); return; }
   if (at('[data-mreset]')) { saveFset({menu: null}).then(() => { PLAN_ITEMS.src = null; paneRender(); toast('Plan de ton fichier remis'); }); return; }
   if ((b = at('[data-fbottle]'))) { const i = +b.dataset.fbottle, d = structuredClone(fday(S.fday)); d.items ||= []; const bt = [...(d.bottles || [])]; bt[i] = !bt[i]; d.bottles = bt; d.water = bt.filter(Boolean).length * 4; saveDay(S.fday, d); return; }
-  if (at('[data-tseason]')) { SE_KIND = S.tkind === 'track' ? 'track' : 'gym'; SE_DRAFT = null; seDraft(); seasonPane(); return; }
+  if (at('[data-tseason]')) { SE_KIND = 'track'; SE_DRAFT = null; seDraft(); seasonPane(); return; }
   if ((b = at('[data-stpl]'))) { const d = seDraft(); d.blocks = SEASON_TPL[b.dataset.stpl].blocks.map(x => [...x]); S.tset = {...(S.tset || {}), season: d}; paneRender(); return; }
   if (at('[data-seadd]')) { const d = seDraft(); d.blocks.push(['Nouveau bloc', 2, 'Objectif']); paneRender(); return; }
-  if (at('[data-sesave]')) { S.tset = {...(S.tset || {}), [SE_KIND === 'gym' ? 'seasonGym' : 'season']: seDraft()}; dbSet('settings/training', S.tset).then(ok => { if (ok) { toast('Saison enregistrée'); closePane(); renderMod(); } }); return; }
+  if (at('[data-sesave]')) { S.tset = {...(S.tset || {}), season: seDraft()}; dbSet('settings/training', S.tset).then(ok => { if (ok) { toast('Saison enregistrée'); closePane(); renderMod(); } }); return; }
   if (at('[data-ttests]')) { testsPane(); return; }
   if (at('[data-tsavetests]')) { saveTests(); return; }
   if ((b = at('[data-mgran]'))) { S.mgran = b.dataset.mgran; renderMod(true); return; }
@@ -10513,6 +10556,7 @@ function bootTNR(db) {
   const col = (name, key) => db.collection(name).onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); S[key] = o; renderMod(); }, () => {});
   col('plans', 'plans'); col('training', 'logs'); col('fuel', 'fuel'); col('foods', 'foods');
   db.doc('settings/training').onSnapshot(s => { S.tset = s.exists ? s.data() : {};
+    if (s.exists && S.tset.seasonV !== 2) { S.tset = {...S.tset, seasonOld: S.tset.season || null, season: SEASON_2627(), seasonV: 2}; dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()}); }
     if (s.exists && !S.tset.board1) { const dated = Object.fromEntries(Object.entries(S.tset.dated || {}).filter(([k]) => k < TODAY)); S.tset = {...S.tset, dated, board1: TODAY}; dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()}); }
     renderMod(); }, () => {});
   db.doc('settings/jumps').onSnapshot(s => { JUMPS = (s.exists ? s.data().list : null) || []; renderMod(); if (P.stack.length) paneRender(); }, () => {});
