@@ -309,3 +309,5 @@ html.one .one-hastip{position:relative}
 html.one .one-tipb.one-tipc{position:absolute;right:14px;bottom:4px;margin:0;font-size:.75rem;z-index:2}
 /* v127 · Sur ordinateur, pas d'actus (le carré disparaît) */
 html.one.pc .one-act{display:none!important}
+/* v131 · « Ma saison » sur toute la largeur (ordinateur) */
+html.one.pc :is(#t-view,.tab-ghost)>div:has(>[data-tseason]){grid-column:1 / -1!important}

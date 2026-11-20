@@ -705,13 +705,15 @@ svg.body.sil .rg.on{stroke:none;fill:transparent}
 .lset label{display:flex;flex-direction:column;gap:3px;font-size:.625rem;color:var(--fg3);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
 .lset .ck{width:34px;height:34px;border-radius:10px;border:1.5px solid var(--line);background:none;color:transparent;cursor:pointer;display:grid;place-items:center}.lset .ck[aria-pressed="true"]{background:var(--good);border-color:var(--good);color:#fff}
 .lset.done{opacity:.75}.addset{align-self:flex-start;border:0;background:none;color:var(--accent);font:inherit;font-weight:600;cursor:pointer;padding:4px 0}
+#pane.sefull{left:0!important;right:0!important;width:auto!important;top:0!important;bottom:0!important;z-index:95!important}#pane.sefull .sheet-card{max-width:none!important;min-height:100%}#pane.sefull .sheet-gap{display:none}
+.scsec{margin-bottom:26px}.scmos{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px}.scmc{flex:1 0 170px;min-width:170px}
 .scal{margin-top:14px}.scsea{font-size:1.25rem;font-weight:800;margin:4px 2px 8px}.scsea small{display:block;font-size:.75rem;font-weight:500;color:var(--fg3);margin-top:2px}.scgap{height:26px}
 .scmo{font-size:.6875rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--fg3);margin:12px 4px 6px}
 .scblk{display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--fg2);margin:10px 4px 6px}.scblk::before{content:'';width:9px;height:9px;border-radius:3px;background:var(--sbc)}.scblk b{color:var(--fg)}
-.scw{display:grid;grid-template-columns:44px 1fr auto auto;gap:10px;align-items:center;width:100%;text-align:left;border:0;margin:0 0 4px;padding:10px 12px;border-radius:12px;font:inherit;color:var(--fg);cursor:pointer;background:linear-gradient(90deg,color-mix(in srgb,var(--sbc) 18%,transparent),color-mix(in srgb,var(--sbc) 5%,transparent));box-shadow:inset 3px 0 0 var(--sbc)}
+.scw{display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;width:100%;text-align:left;border:0;margin:0 0 4px;padding:8px 10px;border-radius:10px;font:inherit;color:var(--fg);background:linear-gradient(90deg,color-mix(in srgb,var(--sbc) 18%,transparent),color-mix(in srgb,var(--sbc) 5%,transparent));box-shadow:inset 3px 0 0 var(--sbc)}
 .scw.pre{opacity:.6}.scw.now{box-shadow:inset 3px 0 0 var(--sbc),0 0 0 1.5px var(--fg)}.scw .sw{font-size:.75rem;font-weight:800;color:color-mix(in srgb,var(--sbc) 75%,var(--fg))}.scw .sd{font-size:.875rem;font-weight:600}.scw .sb,.scw .sc{font-size:.75rem;color:var(--fg2)}
 .sedit{margin-top:18px}.sedit>summary{cursor:pointer;font-weight:700;color:var(--accent);padding:10px 4px;list-style:none}
-.prohint{margin:6px 2px 14px;font-size:.8125rem;color:var(--fg2)}.proh{display:flex;align-items:center;justify-content:space-between;gap:12px}.probtn{font:inherit;font-size:inherit;font-weight:700;color:var(--accent);background:none;border:1.5px solid var(--accent);border-radius:12px;padding:4px 12px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}.probtn:hover{background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.prohint{margin:6px 2px 14px;font-size:.8125rem;color:var(--fg2)}.prosub{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}.probtn{font:inherit;font-size:inherit;font-weight:700;color:var(--accent);background:none;border:1.5px solid var(--accent);border-radius:12px;padding:4px 12px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}.probtn:hover{background:color-mix(in srgb,var(--accent) 12%,transparent)}
 .procrumb{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px;font-weight:700}.procrumb i{font-style:normal;color:var(--fg3)}.procrumb button{border:0;background:none;color:var(--accent);font:inherit;cursor:pointer;padding:0}.procrumb button[style]{color:var(--sbc)}.procrumb span{color:var(--fg)}
 .prorow{margin-bottom:16px}.prolab{font-weight:800;margin:0 2px 8px}.prolab small{font-weight:500;color:var(--fg3);margin-left:8px}
 .probar{display:flex;gap:6px}.problk{position:relative;min-width:0;text-align:left;border:0;border-radius:14px;padding:12px 12px 26px;font:inherit;color:var(--fg);cursor:pointer;background:linear-gradient(160deg,color-mix(in srgb,var(--sbc) 34%,transparent),color-mix(in srgb,var(--sbc) 12%,transparent));box-shadow:inset 0 3px 0 var(--sbc);transition:transform .15s}
@@ -724,6 +726,24 @@ u.g,u.t{display:block;width:10px;height:10px;border-radius:50%;border:2px solid 
 .prok{margin-bottom:10px}.prok>span{display:block;font-size:.625rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--fg3);margin-bottom:4px}
 .proses{display:block;width:100%;text-align:left;border:0;border-radius:10px;padding:7px 8px;margin-bottom:4px;font:inherit;color:var(--fg);cursor:pointer;background:color-mix(in srgb,var(--accent) 16%,transparent)}.proses b{display:block;font-size:.75rem}.proses small{font-size:.625rem;color:var(--fg2)}.proses.done{background:color-mix(in srgb,var(--good) 18%,transparent)}
 .proadd{display:flex;gap:4px}.proadd button{flex:1;border:1px dashed var(--line);background:none;border-radius:8px;color:var(--fg2);font:inherit;font-size:.6875rem;padding:4px 0;cursor:pointer}.proadd button:hover{color:var(--accent);border-color:var(--accent)}
+.promap{position:fixed;inset:0;z-index:70;background:#050506;display:none;flex-direction:column}.promap.on{display:flex}
+.mmtop{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--bg)}.mmtop>b{font-size:1.05rem;margin-right:auto}.mmtop .btn{width:auto;padding:0 16px;height:38px}
+.mmzoom{display:flex;align-items:center;gap:6px}.mmzoom button{height:34px;min-width:34px;border-radius:10px;border:1px solid var(--line);background:none;color:var(--fg);font:inherit;font-weight:700;cursor:pointer;padding:0 10px}.mmzoom b{min-width:52px;text-align:center;font-size:.8125rem;color:var(--fg2)}
+.mmx{width:42px;height:42px;border-radius:12px;border:0;background:none;color:var(--fg);cursor:pointer;display:grid;place-items:center}.mmx:hover{background:color-mix(in srgb,var(--fg) 10%,transparent)}
+.mmview{position:relative;flex:1;overflow:hidden;cursor:grab;touch-action:none;background:radial-gradient(circle at 1px 1px,rgba(255,255,255,.07) 1px,transparent 0) 0 0/26px 26px}.mmview:active{cursor:grabbing}
+.mmworld{position:absolute;left:0;top:0;transform-origin:0 0}.mmlines{position:absolute;left:0;top:0;overflow:visible;pointer-events:none;opacity:.55}
+.mmn{position:absolute;transform:translateY(-50%);border-radius:14px;padding:10px 14px;background:var(--card);box-shadow:0 0 0 1px var(--line);cursor:pointer;white-space:nowrap}.mmn b{display:block}.mmn small{display:block;font-size:.75rem;color:var(--fg2)}
+.mmroot{width:170px;cursor:default}.mmroot b{font-size:1.15rem}.mmsea{width:190px}.mmsea b{font-size:1rem}
+.mmblk{width:230px;background:linear-gradient(160deg,color-mix(in srgb,var(--sbc) 34%,var(--card)),color-mix(in srgb,var(--sbc) 10%,var(--card)));box-shadow:inset 0 3px 0 var(--sbc)}.mmblk em{display:block;font-style:normal;font-size:.6875rem;color:var(--fg3);white-space:normal}.mmblk.now,.mmwk.now{box-shadow:inset 0 3px 0 var(--sbc),0 0 0 2px var(--fg)}
+.mmwk{width:220px;padding:6px 12px;background:color-mix(in srgb,var(--sbc) 16%,var(--card));box-shadow:inset 3px 0 0 var(--sbc)}.mmwk.now{box-shadow:inset 3px 0 0 var(--sbc),0 0 0 2px var(--fg)}
+.mmdays{position:absolute;transform:translateY(-50%);display:flex;gap:6px}.mmd{position:relative;width:122px;height:40px;border-radius:10px;background:color-mix(in srgb,var(--fg) 5%,transparent);padding:3px 5px;overflow:hidden;display:flex;flex-wrap:wrap;gap:2px;align-content:flex-start}.mmd.today{box-shadow:0 0 0 1.5px var(--accent)}
+.mmd>i{width:100%;font-style:normal;font-size:.5625rem;color:var(--fg3);font-weight:700}
+.mms{border:0;border-radius:6px;font:inherit;font-size:.625rem;font-weight:700;padding:1px 5px;cursor:pointer;color:#fff;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:#E5484D}.mms.t{background:#FF9F0A}.mms.d{opacity:.55}
+.mmadd{position:absolute;right:3px;top:2px;width:18px;height:18px;border-radius:6px;border:0;background:none;color:var(--fg3);font-weight:800;cursor:pointer;opacity:0}.mmd:hover .mmadd{opacity:1}.mmadd:hover{color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent)}
+.promap[data-z="0"] .mmdays,.promap[data-z="0"] .mmwk small,.promap[data-z="0"] .mmblk em{visibility:hidden}.promap[data-z="0"] .mmwk{opacity:.7}.promap[data-z="0"] .mmblk b{font-size:2.1rem}.promap[data-z="0"] .mmblk small{font-size:1.3rem}.promap[data-z="0"] .mmroot b{font-size:2.3rem}.promap[data-z="0"] .mmsea b{font-size:1.9rem;white-space:normal;line-height:1.05}.promap[data-z="0"] .mmsea{width:200px!important;min-width:0!important;white-space:normal}.promap[data-z="0"] .mmsea small{font-size:1.2rem}.promap[data-z="0"] .mmblk,.promap[data-z="0"] .mmsea,.promap[data-z="0"] .mmroot{width:auto;min-width:230px}
+.mmtop .seg{width:auto}.mmtop .seg button{padding:0 14px;white-space:nowrap}
+.promap[data-z="1"] .mms{font-size:0;width:12px;height:12px;padding:0;border-radius:50%}.promap[data-z="1"] .mmadd{display:none}
+.mmhelp{margin:0;padding:8px 18px;font-size:.75rem;color:var(--fg3);border-top:1px solid var(--line);background:var(--bg)}
 .wkrow{display:grid;grid-template-columns:40px 1fr 40px;align-items:center;text-align:center}
 .wkrow button{height:36px;border-radius:10px;font-size:1.375rem;color:var(--accent)}
 .wkrow b small{display:block;font-size:.75rem;color:var(--fg2);font-weight:500}
@@ -1730,6 +1750,8 @@ html.one .one-hastip{position:relative}
 html.one .one-tipb.one-tipc{position:absolute;right:14px;bottom:4px;margin:0;font-size:.75rem;z-index:2}
 /* v127 · Sur ordinateur, pas d'actus (le carré disparaît) */
 html.one.pc .one-act{display:none!important}
+/* v131 · « Ma saison » sur toute la largeur (ordinateur) */
+html.one.pc :is(#t-view,.tab-ghost)>div:has(>[data-tseason]){grid-column:1 / -1!important}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -2248,14 +2270,19 @@ const SEASON_TPL = {
   hiver: {name: 'Saison hivernale', blocks: [['PPG', 5, 'Force max'], ['PPS', 3, 'Puissance : conversion force → vitesse'], ['Pré-compétition', 2, 'Vitesse / force'], ['Compétition', 2, 'Affûtage']]},
   ete: {name: 'Saison estivale', blocks: [['PPG', 8, 'Force max'], ['PPS', 6, 'Puissance : conversion force → vitesse'], ['Pré-compétition', 3, 'Vitesse / force'], ['Compétition', 3, 'Affûtage']]}
 };
-// Sa saison 2026-2027, une seule pour le sprint et la muscu (elles sont liées). Calée à l'envers depuis les dernières
+// Le nom d'un bloc sans la saison : « PPG · Foncier 3 », « PPS ».
+const seLab = n => String(n || '').replace(/ · (hiver|été)$/, '');
+// Sa saison 2026-2027, une seule pour le sprint et la muscu (elles sont liées). La PPG a commencé début septembre ;
+// elle est coupée en fonciers. Proportions de sa planification : PPG le plus gros bloc, PPS un peu moins, pré-compétition et compétition à égalité. Calée à l'envers depuis les dernières
 // compétitions : 60 m en salle vers le 7 mars 2027, 100 m dehors vers le 18 juillet 2027. Les blocs gardent les proportions
 // de sa planification « Train de vie performance » (hiver 5-3-2-2, été 8-6-3-3) : l'hiver est allongé (il reprend après
 // sa blessure, il vise les dernières compétitions et pas celles de novembre), l'été un peu raccourci.
-const SEASON_2627 = () => ({start: '2026-11-16', comp: '2027-03-07', comp2: '2027-07-18', kind: 'annee', blocks: [
-  ['PPG · hiver', 6, 'Force max'], ['PPS · hiver', 4, 'Force / vitesse : conversion force → vitesse'], ['Pré-compétition · hiver', 3, 'Vitesse / force · conserver les qualités'], ['Compétition · hiver', 3, 'Affûtage · dernières compétitions de 60 m'],
+const SEASON_2627 = () => ({start: '2026-08-31', comp: '2027-03-07', comp2: '2027-07-18', kind: 'annee', blocks: [
+  ['PPG · Foncier 1 · hiver', 4, 'Adaptation anatomique, reconstruction des schémas'], ['PPG · Foncier 2 · hiver', 4, 'Construction de force'], ['PPG · Foncier 3 · hiver', 4, 'Force max'],
+  ['PPS · hiver', 7, 'Force / vitesse : conversion force → vitesse, pliométrie'], ['Pré-compétition · hiver', 4, 'Vitesse / force · moins de volume de force, plus de vitesse'], ['Compétition · hiver', 4, 'Affûtage · dernières compétitions de 60 m'],
   ['Transition', 1, 'Récupération active'],
-  ['PPG · été', 7, 'Force max'], ['PPS · été', 5, 'Force / vitesse : conversion force → vitesse'], ['Pré-compétition · été', 3, 'Vitesse / force · conserver les qualités'], ['Compétition · été', 3, 'Affûtage · dernières compétitions de 100 m']]});
+  ['PPG · Foncier 1 · été', 4, 'Reconstruction, force'], ['PPG · Foncier 2 · été', 3, 'Force max'], ['PPS · été', 5, 'Force / vitesse : conversion force → vitesse, pliométrie'],
+  ['Pré-compétition · été', 3, 'Vitesse / force · moins de volume de force, plus de vitesse'], ['Compétition · été', 3, 'Affûtage · dernières compétitions de 100 m']]});
 SEASON_TPL.annee = {name: 'Saison 2026-2027', blocks: SEASON_2627().blocks};
 // La couleur de chaque bloc (douce sur le planning des séances).
 const seCol = n => /^PPG/i.test(n) ? '#3E9BFF' : /^PPS/i.test(n) ? '#B678E8' : /^Pré/i.test(n) ? '#FF9F0A' : /^Comp/i.test(n) ? '#E5484D' : /^Trans/i.test(n) ? '#8E8E93' : '#30B46C';
@@ -2285,19 +2312,19 @@ const SE_COL = ['#3E9BFF', '#B678E8', '#FF9F0A', '#E5484D', '#30B46C', '#6CC3E6'
 function seCal(se) {
   const tot = se.blocks.reduce((a, b) => a + (+b[1] || 0), 0), end = addDays(se.start, tot * 7 - 1), MO = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
   const cnt = (w, kind) => { let n = 0; for (let i = 0; i < 7; i++) { const k = addDays(w, i); if (k < TODAY ? kindDone(k, kind) : S.tset?.dated?.[dKey(k, kind)]) n++; } return n; };
-  let out = '', sea = null, mo = null, blk = null;
+  const sea = {hiver: [], ete: []}; let blk = null;
   for (let w = monday(se.start.slice(0, 4) + '-09-01'); w <= end; w = addDays(w, 7)) {
-    const n = seasonNow(w), inB = n && !n.before && !n.after, nm = inB ? n.name : 'Avant la saison', ss = /été/.test(nm) ? 'ete' : 'hiver';
-    if (ss !== sea) { out += `${sea ? '<div class="scgap"></div>' : ''}<div class="scsea">${ss === 'ete' ? 'Saison estivale' : 'Saison hivernale'}<small>${ss === 'ete' ? 'jusqu\'aux dernières compétitions de 100 m · ' + esc(fmtShort(se.comp2 || end)) : 'jusqu\'aux dernières compétitions de 60 m · ' + esc(fmtShort(se.comp || end))}</small></div>`; sea = ss; mo = null; }
-    const mth = +addDays(w, 3).slice(5, 7) - 1; if (mth !== mo) { out += `<div class="scmo">${cap(MO[mth])}</div>`; mo = mth; }
-    if (nm !== blk) { if (inB) out += `<div class="scblk" style="--sbc:${n.col}"><b>${esc(nm.split(' · ')[0])}</b> · ${n.of} semaine${n.of > 1 ? 's' : ''} · ${esc(n.goal)}</div>`; blk = nm; }
-    const g = cnt(w, 'gym'), t = cnt(w, 'track'), now = w === monday(TODAY);
-    out += `<button type="button" class="scw${now ? ' now' : ''}${inB ? '' : ' pre'}" data-sewk="${w}" style="--sbc:${inB ? n.col : '#8E8E93'}"><span class="sw">S${seasonWeek(w)}</span><span class="sd">${esc(fmtShort(w).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(w, 6)).replace(/^\S+ /, ''))}</span><span class="sb">${inB ? `semaine ${n.week}/${n.of}` : ''}</span><span class="sc">${g ? g + ' muscu' : ''}${g && t ? ' · ' : ''}${t ? t + ' sprint' : ''}</span></button>`;
+    const n = seasonNow(w), inB = n && !n.before && !n.after, nm = inB ? n.name : '', ss = /été/.test(nm) ? 'ete' : 'hiver', mth = +addDays(w, 3).slice(5, 7) - 1;
+    const L = sea[ss]; let col = L.at(-1); if (!col || col.m !== mth) { col = {m: mth, w: []}; L.push(col); }
+    const g = cnt(w, 'gym'), t = cnt(w, 'track');
+    col.w.push(`${inB && nm !== blk ? `<div class="scblk" style="--sbc:${n.col}"><b>${esc(seLab(nm))}</b> · ${n.of} sem.</div>` : ''}<div class="scw${w === monday(TODAY) ? ' now' : ''}${inB ? '' : ' pre'}" style="--sbc:${inB ? n.col : '#8E8E93'}"><span class="sd">${esc(fmtShort(w).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(w, 6)).replace(/^\S+ /, ''))}</span>${inB ? `<span class="sb">semaine ${n.week}/${n.of}</span>` : ''}<span class="sc">${g ? g + ' muscu' : ''}${g && t ? ' · ' : ''}${t ? t + ' sprint' : ''}</span></div>`);
+    if (inB) blk = nm;
   }
-  return `<div class="scal">${out}</div>`;
+  const part = (k, lab, sub) => sea[k].length ? `<section class="scsec"><div class="scsea">${lab}<small>${sub}</small></div><div class="scmos">${sea[k].map(c => `<div class="scmc"><div class="scmo">${cap(MO[c.m])}</div>${c.w.join('')}</div>`).join('')}</div></section>` : '';
+  return `<div class="scal">${part('hiver', 'Saison hivernale', 'jusqu\'aux dernières compétitions de 60 m · ' + esc(fmtShort(se.comp || end)))}${part('ete', 'Saison estivale', 'jusqu\'aux dernières compétitions de 100 m · ' + esc(fmtShort(se.comp2 || end)))}</div>`;
 }
 function seasonPane() {
-  openPane({title: SE_KIND === 'gym' ? 'Ma saison de musculation' : 'Ma saison', render: () => {
+  openPane({title: 'Ma saison', full: true, fixed: true, render: () => {
     const se = seDraft(), tot = se.blocks.reduce((a, b) => a + (+b[1] || 0), 0), now = daysBetween(se.start, TODAY), wNow = Math.floor(now / 7);
     let w = 0; const weeks = [];
     se.blocks.forEach((b, i) => { for (let j = 0; j < (+b[1] || 0); j++, w++) weeks.push({i, w, k: addDays(se.start, w * 7)}); });
@@ -8365,7 +8392,7 @@ function sesBoard(kind) {
   const weeks = [0, 1, 2, 3].map(w => addDays(mon0, 7 * w));
   const src = [...(kind === 'gym' ? tdvTodo(8) : []), ...myPlans().filter(x => x.kind === kind)];
   const placed = new Set(Object.entries(S.tset?.dated || {}).filter(([d]) => d >= TODAY).map(([, v]) => v));
-  return `<div class="card sboard"><div class="chead" style="margin-bottom:10px"><span class="sbhd"><span class="eyebrow">Mes 4 semaines · ${kind === 'gym' ? 'muscu' : 'sprint'}</span>${(() => { const seen = []; weeks.forEach(w => { const n = seasonNow(w); if (n && !n.before && !n.after && !seen.some(x => x.name === n.name)) seen.push(n); }); return seen.length ? `<span class="seleg">${seen.map(n => `<span style="--sbc:${n.col}">${esc(n.name.split(' · ')[0])}</span>`).join('<i>→</i>')}</span>` : ''; })()}</span><span class="sbnav"><button type="button" data-sboff="-1" aria-label="4 semaines avant"${off <= -26 ? ' disabled' : ''}>‹</button><small>${esc(fmtShort(weeks[0]).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(weeks[3], 6)).replace(/^\S+ /, ''))}</small><button type="button" data-sboff="1" aria-label="4 semaines après">›</button></span></div>
+  return `<div class="card sboard"><div class="chead" style="margin-bottom:10px"><span class="sbhd"><span class="eyebrow">Mes 4 semaines · ${kind === 'gym' ? 'muscu' : 'sprint'}</span>${(() => { const seen = []; weeks.forEach(w => { const n = seasonNow(w); if (n && !n.before && !n.after && !seen.some(x => x.name === n.name)) seen.push(n); }); return seen.length ? `<span class="seleg">${seen.map(n => `<span style="--sbc:${n.col}">${esc(seLab(n.name))}</span>`).join('<i>→</i>')}</span>` : ''; })()}</span><span class="sbnav"><button type="button" data-sboff="-1" aria-label="4 semaines avant"${off <= -26 ? ' disabled' : ''}>‹</button><small>${esc(fmtShort(weeks[0]).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(weeks[3], 6)).replace(/^\S+ /, ''))}</small><button type="button" data-sboff="1" aria-label="4 semaines après">›</button></span></div>
     <div class="bgrid">${weeks.map(w => { const n = seasonNow(w), c = n && !n.before && !n.after ? n.col : null; return `<div class="bweek${c ? ' sebk' : ''}"${c ? ` style="--sbc:${c}" title="${esc(n.name)} · semaine ${n.week}/${n.of}"` : ''}><span class="bwk">S${seasonWeek(w)}</span>${[0, 1, 2, 3, 4, 5, 6].map(i => cell(addDays(w, i))).join('')}</div>`; }).join('')}</div>
 
     <div class="sec-label" style="margin:14px 2px 6px">Séances</div>
@@ -8477,7 +8504,97 @@ function proBody() {
       ${proSes(k, kind).map(x => x.p ? `<button type="button" class="proses${x.done ? ' done' : ''}" data-proview="${esc(x.p.id)}"${x.p.n ? ` data-pron="${x.p.n}"` : ''}><b>${esc(x.p.name)}</b><small>${x.p.items?.length || 0} exercice${(x.p.items?.length || 0) > 1 ? 's' : ''} · ${estMin(x.p)} min</small></button>` : '<span class="proses done"><b>Faite</b></span>').join('')}
       ${k >= TODAY ? `<span class="proadd"><button type="button" data-proput="${k}|${kind}">+ Caler</button><button type="button" data-procreate="${k}|${kind}">+ Créer</button></span>` : ''}</div>`).join('')}</div>`).join('')}</div>`;
 }
-function proPane() { PRO.lvl = 'season'; openPane({title: 'Programme et séance pro', render: proBody}); }
+function proPane() { mmOpen(); }
+/* La carte de la saison : une carte qu'on zoome et qu'on déplace. Tout dézoomé : la saison, ses blocs (PPG, PPS…).
+   On zoome : les semaines apparaissent ; encore : les séances de chaque jour, avec leur nom ; un clic sur une séance l'ouvre.
+   Hivernale, estivale ou les deux. « + » sur un jour : créer une séance (le tableau) ou caler une séance existante. */
+const MP = {sea: 'both', k: .4, x: 0, y: 0, W: 0, H: 0, drag: null, pts: new Map()};
+function mmLayout() {
+  const se = S.tset?.season?.start ? S.tset.season : SEASON_2627(), B = proBlocks(se).filter(b => MP.sea === 'both' || (MP.sea === 'ete') === /été/.test(b.name));
+  const R = 46, X = {root: 0, sea: 230, blk: 470, wk: 760, day: 1010}, N = []; let y = 0, lastSea = null;
+  const seas = [];
+  for (const b of B) { const sk = /été/.test(b.name) ? 'ete' : 'hiver'; if (sk !== lastSea) { if (lastSea) y += 70; seas.push({k: sk, blocks: []}); lastSea = sk; } else y += 22;
+    const wk = []; for (let j = 0; j < b.weeks; j++) { const w = addDays(b.from, j * 7); wk.push({w, j, y: y + R / 2}); y += R; }
+    seas.at(-1).blocks.push({...b, wk, y: (wk[0].y + wk.at(-1).y) / 2}); }
+  for (const s2 of seas) s2.y = (s2.blocks[0].y + s2.blocks.at(-1).y) / 2;
+  return {seas, X, R, H: y, root: seas.length ? (seas[0].y + seas.at(-1).y) / 2 : 0};
+}
+function mmHtml() {
+  const L = mmLayout(), {X} = L, now = monday(TODAY), lines = [];
+  const link = (x1, y1, x2, y2, c) => lines.push(`<path d="M${x1} ${y1}C${(x1 + x2) / 2} ${y1} ${(x1 + x2) / 2} ${y2} ${x2} ${y2}" stroke="${c}"/>`);
+  let h = `<div class="mmn mmroot" style="left:${X.root}px;top:${L.root}px"><b>Ma saison</b><small>2026-2027</small></div>`;
+  for (const sa of L.seas) {
+    link(X.root + 170, L.root, X.sea, sa.y, '#6a6d78');
+    h += `<div class="mmn mmsea" style="left:${X.sea}px;top:${sa.y}px" data-mmfit="${sa.k}"><b>${sa.k === 'ete' ? 'Saison estivale' : 'Saison hivernale'}</b><small>${sa.blocks.reduce((a, b) => a + b.weeks, 0)} semaines</small></div>`;
+    for (const b of sa.blocks) {
+      let n = 0; for (const w of b.wk) n += proWeekCount(w.w);
+      link(X.sea + 190, sa.y, X.blk, b.y, b.col);
+      h += `<div class="mmn mmblk${TODAY >= b.from && TODAY <= b.to ? ' now' : ''}" style="left:${X.blk}px;top:${b.y}px;--sbc:${b.col}" data-mmblk="${b.i}"><b>${esc(seLab(b.name))}</b><small>${b.weeks} sem. · ${n} séance${n > 1 ? 's' : ''}</small><em>${esc(b.goal)}</em></div>`;
+      for (const w of b.wk) {
+        link(X.blk + 230, b.y, X.wk, w.y, b.col);
+        const days = [...Array(7)].map((_, i) => addDays(w.w, i)), c = proWeekCount(w.w);
+        h += `<div class="mmn mmwk${w.w === now ? ' now' : ''}" style="left:${X.wk}px;top:${w.y}px;--sbc:${b.col}" data-mmwk="${w.w}"><b>Semaine ${w.j + 1}</b><small>${esc(fmtShort(w.w).replace(/^\S+ /, ''))} · ${c} séance${c > 1 ? 's' : ''}</small></div>`;
+        h += `<div class="mmdays" style="left:${X.day}px;top:${w.y}px">${days.map(k => `<div class="mmd${k === TODAY ? ' today' : ''}"><i>${DOW[(dow(k) + 6) % 7]} ${+k.slice(8)}</i>${['gym', 'track'].map(kind => proSes(k, kind).map(x => x.p ? `<button type="button" class="mms ${kind === 'gym' ? 'g' : 't'}${x.done ? ' d' : ''}" data-mmview="${esc(x.p.id)}"${x.p.n ? ` data-mmn="${x.p.n}"` : ''} title="${esc(x.p.name)}">${esc(x.p.name)}</button>` : `<span class="mms ${kind === 'gym' ? 'g' : 't'} d">Faite</span>`).join('')).join('')}${k >= TODAY ? `<button type="button" class="mmadd" data-mmadd="${k}" aria-label="Ajouter une séance le ${esc(fmtShort(k))}">+</button>` : ''}</div>`).join('')}</div>`;
+      }
+    }
+  }
+  MP.W = X.day + 7 * 128; MP.H = L.H;
+  return `<svg class="mmlines" width="${MP.W}" height="${MP.H + 40}" fill="none" stroke-width="2">${lines.join('')}</svg>${h}`;
+}
+function mmApply() { const w = $('#mm-world'), el = $('#promap'); if (!w || !el) return; w.style.transform = `translate(${MP.x}px,${MP.y}px) scale(${MP.k})`; el.dataset.z = MP.k < .55 ? '0' : MP.k < 1.05 ? '1' : '2'; const z = el.querySelector('.mmzoom b'); if (z) z.textContent = Math.round(MP.k * 100) + ' %'; }
+function mmFit(y0 = 0, y1 = MP.H, x0 = 0, x1 = MP.W) {
+  const v = $('#mm-view').getBoundingClientRect(), k = Math.min(2.2, Math.max(.15, Math.min((v.width - 60) / (x1 - x0), (v.height - 60) / (y1 - y0 + 40))));
+  MP.k = k; MP.x = (v.width - (x1 - x0) * k) / 2 - x0 * k; MP.y = (v.height - (y1 - y0) * k) / 2 - y0 * k + 10; mmApply();
+}
+function mmZoomAt(f, cx, cy) { const k = Math.min(2.4, Math.max(.12, MP.k * f)); MP.x = cx - (cx - MP.x) * k / MP.k; MP.y = cy - (cy - MP.y) * k / MP.k; MP.k = k; mmApply(); }
+function mmRender(keep) {
+  const el = $('#promap'); if (!el) return;
+  el.innerHTML = `<header class="mmtop"><b>Programmes et séances Pro</b><div class="seg segsm" role="group" aria-label="Saison">${[['hiver', 'Hivernale'], ['ete', 'Estivale'], ['both', 'Les deux']].map(([v, l]) => `<button type="button" data-mmsea="${v}" aria-pressed="${MP.sea === v}">${l}</button>`).join('')}</div>
+    <div class="mmzoom"><button type="button" data-mmz="-1" aria-label="Dézoomer">−</button><b></b><button type="button" data-mmz="1" aria-label="Zoomer">+</button><button type="button" data-mmall>Tout voir</button></div>
+    <button type="button" class="btn" data-mmnew>+ Créer une séance</button><button type="button" class="mmx" data-mmx aria-label="Fermer">${'<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>'}</button></header>
+    <div id="mm-view" class="mmview"><div id="mm-world" class="mmworld">${mmHtml()}</div></div>
+    <p class="mmhelp">Molette ou pincer : zoomer · glisser : se déplacer · clic sur un bloc ou une semaine : y aller · clic sur une séance : l'ouvrir</p>`;
+  if (keep) mmApply(); else mmFit();
+}
+window.proMapRender = () => { if ($('#promap')?.classList.contains('on')) mmRender(true); };
+function mmOpen() {
+  let el = $('#promap'); if (!el) { el = document.createElement('div'); el.id = 'promap'; el.className = 'promap'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Programmes et séances Pro'); document.body.appendChild(el); mmBind(el); }
+  el.classList.add('on'); document.body.style.overflow = 'hidden'; mmRender(false);
+}
+function mmClose() { $('#promap')?.classList.remove('on'); if (!P.stack.length) document.body.style.overflow = ''; renderMod(); }
+function mmBind(el) {
+  el.addEventListener('wheel', e => { if (!e.target.closest('#mm-view')) return; e.preventDefault(); const r = $('#mm-view').getBoundingClientRect(); mmZoomAt(Math.exp(-e.deltaY * .0015), e.clientX - r.left, e.clientY - r.top); }, {passive: false});
+  el.addEventListener('pointerdown', e => { if (!e.target.closest('#mm-view') || e.target.closest('button')) return; MP.pts.set(e.pointerId, {x: e.clientX, y: e.clientY}); MP.drag = {x: e.clientX, y: e.clientY, ox: MP.x, oy: MP.y, moved: false}; try { e.target.setPointerCapture?.(e.pointerId); } catch (x) {} });
+  el.addEventListener('pointermove', e => {
+    if (!MP.pts.has(e.pointerId)) return; const prev = MP.pts.get(e.pointerId); MP.pts.set(e.pointerId, {x: e.clientX, y: e.clientY});
+    if (MP.pts.size === 2) { const [a, b] = [...MP.pts.values()], o = [...MP.pts.entries()].find(([id]) => id !== e.pointerId)[1], d0 = Math.hypot(prev.x - o.x, prev.y - o.y), d1 = Math.hypot(a.x - b.x, a.y - b.y), r = $('#mm-view').getBoundingClientRect();
+      if (d0 > 0) mmZoomAt(d1 / d0, (a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top); MP.drag = null; return; }
+    const d = MP.drag; if (!d) return; if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > 4) d.moved = true; MP.x = d.ox + e.clientX - d.x; MP.y = d.oy + e.clientY - d.y; mmApply();
+  });
+  const up = e => { MP.pts.delete(e.pointerId); if (MP.drag?.moved) MP.skip = Date.now(); MP.drag = null; };
+  el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+  el.addEventListener('click', e => {
+    if (MP.skip && Date.now() - MP.skip < 250) return; const at = q => e.target.closest(q); let b;
+    if (at('[data-mmx]')) { mmClose(); return; }
+    if ((b = at('[data-mmsea]'))) { MP.sea = b.dataset.mmsea; mmRender(false); return; }
+    if ((b = at('[data-mmz]'))) { const v = $('#mm-view').getBoundingClientRect(); mmZoomAt(+b.dataset.mmz > 0 ? 1.35 : 1 / 1.35, v.width / 2, v.height / 2); return; }
+    if (at('[data-mmall]')) { mmFit(); return; }
+    if (at('[data-mmnew]')) { S.tkind = 'gym'; editPlan(null); if (ED) ED.fromPro = true; return; }
+    if ((b = at('[data-mmview]'))) { planView(b.dataset.mmview, b.dataset.mmn ? +b.dataset.mmn : null); return; }
+    if ((b = at('[data-mmadd]'))) { const k = b.dataset.mmadd;
+      openPane({title: 'Le ' + fmtShort(k), render: () => `<div class="stack" style="margin-top:14px">${['gym', 'track'].map(kind => `<div class="sec-label">${kind === 'gym' ? 'Musculation' : 'Sprint'}</div><div class="btnrow two"><button class="btn" data-mmcreate="${k}|${kind}">+ Créer une séance</button><button class="btn ghost" data-mmput="${k}|${kind}">Caler une séance existante</button></div>`).join('')}</div>`}); return; }
+    if ((b = at('[data-mmblk]'))) { const n = el.querySelector(`[data-mmblk="${b.dataset.mmblk}"]`), ws = [...el.querySelectorAll('.mmwk')].filter(x => x.style.getPropertyValue('--sbc') === n.style.getPropertyValue('--sbc'));
+      const y = parseFloat(n.style.top), wk = mmLayout().seas.flatMap(x => x.blocks).find(x => String(x.i) === b.dataset.mmblk); if (wk) mmFit(wk.wk[0].y - 30, wk.wk.at(-1).y + 30, 450, MP.W); else mmFit(y - 200, y + 200); return; }
+    if ((b = at('[data-mmwk]'))) { const y = parseFloat(b.style.top); mmFit(y - 60, y + 60, 740, MP.W); return; }
+    if ((b = at('[data-mmfit]'))) { const sa = mmLayout().seas.find(x => x.k === b.dataset.mmfit); if (sa) mmFit(sa.blocks[0].wk[0].y - 30, sa.blocks.at(-1).wk.at(-1).y + 30, 200, 1000); }
+  });
+}
+document.addEventListener('click', e => { const at = q => e.target.closest(q); let b;
+  if ((b = at('[data-mmcreate]'))) { const [k, kind] = b.dataset.mmcreate.split('|'); closePane(); S.tkind = kind; editPlan(null, k); if (ED) { ED.date0 = null; ED.fromPro = true; } return; }
+  if ((b = at('[data-mmput]'))) { const [k, kind] = b.dataset.mmput.split('|'), L = [...(kind === 'gym' ? tdvTodo(8) : []), ...myPlans().filter(x => x.kind === kind)]; closePane();
+    openPane({title: 'Caler une séance le ' + fmtShort(k), render: () => L.length ? `<div class="list" style="margin-top:14px">${L.map(x => `<button class="rowbtn" data-proputp="${k}|${kind}|${esc(caleRef(x))}"><span><b>${esc(x.name)}</b><span class="meta">${x.title || x.desc ? esc(x.title || x.desc) + ' · ' : ''}${estMin(x)} min</span></span><span class="kc">+</span></button>`).join('')}</div>` : '<div class="empty" style="margin-top:14px">Crée d\'abord une séance.</div>'}); }
+});
+addEventListener('keydown', e => { if (e.key === 'Escape' && $('#promap')?.classList.contains('on') && !P.stack.length) mmClose(); });
 document.addEventListener('click', e => {
   const at = q => e.target.closest(q); let b;
   if (at('[data-propen]')) { proPane(); return; }
@@ -8491,18 +8608,18 @@ document.addEventListener('click', e => {
   if ((b = at('[data-proput]'))) { const [k, kind] = b.dataset.proput.split('|'), L = [...(kind === 'gym' ? tdvTodo(8) : []), ...myPlans().filter(x => x.kind === kind)];
     openPane({title: 'Caler une séance le ' + fmtShort(k), render: () => L.length ? `<div class="list" style="margin-top:14px">${L.map(x => `<button class="rowbtn" data-proputp="${k}|${kind}|${esc(caleRef(x))}"><span><b>${esc(x.name)}</b><span class="meta">${x.title || x.desc ? esc(x.title || x.desc) + ' · ' : ''}${estMin(x)} min</span></span><span class="kc">+</span></button>`).join('')}</div>` : '<div class="empty" style="margin-top:14px">Crée d\'abord une séance.</div>'}); return; }
 });
-document.addEventListener('click', async e => { const b = e.target.closest('[data-proputp]'); if (!b) return; const [k, kind, ref] = b.dataset.proputp.split('|'); closePane(); await boardPlace(k, kind, ref, null); toast(`${refName(ref) || 'Séance'} calée le ${fmtShort(k)}`); paneRender(); });
+document.addEventListener('click', async e => { const b = e.target.closest('[data-proputp]'); if (!b) return; const [k, kind, ref] = b.dataset.proputp.split('|'); closePane(); await boardPlace(k, kind, ref, null); toast(`${refName(ref) || 'Séance'} calée le ${fmtShort(k)}`); paneRender(); window.proMapRender?.(); });
 function tSessions() {
   if (S.tkind === 'class') S.tkind = 'gym';
   const k = S.tkind, mine = myPlans().filter(p => p.kind === k), base = BUILTIN.filter(p => p.kind === k);
   const row = p => `<button class="rowbtn" data-tplanv="${p.id}"><span><b>${esc(p.name)}</b><span class="meta">${p.title ? esc(p.title) + ' · ' : ''}${estMin(p)} min${!p.title && p.desc ? ' · ' + esc(p.desc) : ''}${caledOn(caleRef(p)).length ? ' · calée' : ''}</span></span>${ICON.chev}</button>`;
   return `
-    <header class="top"><div class="sub">Programmes et séances</div><h1>Séances</h1></header>
-    <button class="banner" data-tseason style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;margin-bottom:8px"><span><b>Ma saison</b><br><span class="small muted">${(() => { const n = seasonNow(TODAY), nb = n && !n.before && !n.after ? n.se.blocks[n.i + 1] : null; return n && !n.before && !n.after ? `<i class="sedot" style="background:${n.col}"></i>${esc(n.name)} · semaine ${n.week}/${n.of}${nb ? ` · puis ${esc(String(nb[0]).split(' · ')[0])} dans ${Math.ceil(n.left / 7)} sem.` : ''}` : 'Tes blocs : PPG, PPS, pré-compétition, compétition'; })()}</span></span>${ICON.chev}</button>
+    <header class="top"><div class="sub prosub">Programmes et séances${typeof isPC === 'function' && isPC() ? '<button type="button" class="probtn" data-propen>Programmes et séances Pro <span aria-hidden="true">→</span></button>' : ''}</div><h1>Séances</h1></header>
+    <button class="banner" data-tseason style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;margin-bottom:8px"><span><b>Ma saison</b><br><span class="small muted">${(() => { const n = seasonNow(TODAY), nb = n && !n.before && !n.after ? n.se.blocks[n.i + 1] : null; return n && !n.before && !n.after ? `<i class="sedot" style="background:${n.col}"></i>${esc(seLab(n.name))} · semaine ${n.week}/${n.of}${nb ? ` · puis ${esc(seLab(nb[0]))} dans ${Math.ceil(n.left / 7)} sem.` : ''}` : 'Tes blocs : PPG, PPS, pré-compétition, compétition'; })()}</span></span>${ICON.chev}</button>
     <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
     ${sesBoard(k)}
     <div class="btnrow two" style="margin-top:16px"><button class="btn ghost" data-tnew>+ Créer une séance</button><button class="btn ghost" data-texadd>+ Ajouter un exercice</button></div>
-    <h2 class="proh">Mes séances${typeof isPC === 'function' && isPC() ? '<button type="button" class="probtn" data-propen>Programme et séance pro <span aria-hidden="true">→</span></button>' : ''}</h2><div class="list">${mine.map(row).join('') || '<div class="row"><span class="muted">Aucune séance à toi pour l\'instant.</span></div>'}</div>
+    <h2>Mes séances</h2><div class="list">${mine.map(row).join('') || '<div class="row"><span class="muted">Aucune séance à toi pour l\'instant.</span></div>'}</div>
     ${k === 'gym' && TDV_PLANS.length ? progList() : ''}
     ${k === 'track' ? (() => { const L = logs().filter(l => l.kind === 'track').slice(0, 12); return L.length ? `<h2>Séances faites</h2><div class="list donel">${L.map(l => `<button class="rowbtn doneses" data-tlog="${l.id}"><span><b>${esc(l.name)}</b><span class="meta">${esc(cap(fmtShort(l.date)))}${l.min ? ' · ' + l.min + ' min' : ''}${l.rpe ? ' · RPE ' + l.rpe : ''}</span></span><span class="kc">${fx(l.sprintM || 0)} m</span></button>`).join('')}</div>` : ''; })() : ''}
     ${base.length ? `<h2>Programmes <small>à dupliquer et adapter</small></h2><div class="list">${base.map(row).join('')}</div>` : ''}`;
@@ -9395,7 +9512,7 @@ async function savePlan() {
   if (date) { for (const k of [date, date + '|t']) if (dated[k] === doc.id) delete dated[k]; dated[dKey(date, doc.kind)] = doc.id; }
   const gymPlan = {...(S.tset.gymPlan || {})}; if (doc.kind === 'gym' && gym) gymPlan[doc.id] = gym; else delete gymPlan[doc.id];
   S.tset = {...S.tset, dated, gymPlan}; await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()});
-  closePane(); if (fromPro) { toast(doc.name + (date ? ' calée le ' + fmtShort(date) : ' enregistrée')); paneRender(); return; }
+  closePane(); if (fromPro) { toast(doc.name + (date ? ' calée le ' + fmtShort(date) : ' enregistrée')); paneRender(); window.proMapRender?.(); return; }
   if (P.stack.length) closePane();
   if (today) { toast(doc.name + ' calée aujourd\'hui'); if (S.mod === 'T') { S.ttab = 'today'; renderMod(true); } return; }
   toast('Séance enregistrée'); planView(doc.id);
@@ -11166,7 +11283,7 @@ function bootTNR(db) {
   const col = (name, key) => db.collection(name).onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); S[key] = o; renderMod(); }, () => {});
   col('plans', 'plans'); col('training', 'logs'); col('fuel', 'fuel'); col('foods', 'foods');
   db.doc('settings/training').onSnapshot(s => { S.tset = s.exists ? s.data() : {};
-    if (s.exists && S.tset.seasonV !== 2) { S.tset = {...S.tset, seasonOld: S.tset.season || null, season: SEASON_2627(), seasonV: 2}; dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()}); }
+    if (s.exists && S.tset.seasonV !== 3) { S.tset = {...S.tset, seasonOld: S.tset.seasonOld || S.tset.season || null, season: SEASON_2627(), seasonV: 3}; dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()}); }
     if (s.exists && !S.tset.board1) { const dated = Object.fromEntries(Object.entries(S.tset.dated || {}).filter(([k]) => k < TODAY)); S.tset = {...S.tset, dated, board1: TODAY}; dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()}); }
     renderMod(); }, () => {});
   db.doc('settings/jumps').onSnapshot(s => { JUMPS = (s.exists ? s.data().list : null) || []; renderMod(); if (P.stack.length) paneRender(); }, () => {});
@@ -11758,6 +11875,10 @@ document.addEventListener('pointerout', e => { if (e.pointerType !== 'mouse') re
 /* ---------- La page qui glisse sous le pouce (sa copie) reçoit les mêmes finitions que la vraie page : les « + » des cases vides
    du planning, l'archive à sa place. Sinon, elle change d'un coup en arrivant. ---------- */
 new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1 && n.classList.contains('tab-ghost')) { onePlan(n); try { archHide(n); } catch (e) {} } }).observe(document.body, {childList: true});
+
+/* ---------- « Ma saison » s'ouvre en page complète : seule la croix la ferme ---------- */
+const onePaneShow1 = paneShow;
+paneShow = function (...a) { const r = onePaneShow1.apply(this, a); $('#pane')?.classList.toggle('sefull', !!P.stack.at(-1)?.full); return r; };
 
 /* ================= TNR · Actus : les nouvelles du jour en stories =================
    Un carré « Actus » en haut à droite de l'Accueil (en face de l'IA). Plein écran, barres de progression, grand chiffre,

@@ -537,3 +537,7 @@ document.addEventListener('pointerout', e => { if (e.pointerType !== 'mouse') re
 /* ---------- La page qui glisse sous le pouce (sa copie) reçoit les mêmes finitions que la vraie page : les « + » des cases vides
    du planning, l'archive à sa place. Sinon, elle change d'un coup en arrivant. ---------- */
 new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1 && n.classList.contains('tab-ghost')) { onePlan(n); try { archHide(n); } catch (e) {} } }).observe(document.body, {childList: true});
+
+/* ---------- « Ma saison » s'ouvre en page complète : seule la croix la ferme ---------- */
+const onePaneShow1 = paneShow;
+paneShow = function (...a) { const r = onePaneShow1.apply(this, a); $('#pane')?.classList.toggle('sefull', !!P.stack.at(-1)?.full); return r; };
