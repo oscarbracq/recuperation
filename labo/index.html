@@ -725,38 +725,42 @@ u.g,u.t{display:block;width:10px;height:10px;border-radius:50%;border:2px solid 
 .prok{margin-bottom:10px}.prok>span{display:block;font-size:.625rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--fg3);margin-bottom:4px}
 .proses{display:block;width:100%;text-align:left;border:0;border-radius:10px;padding:7px 8px;margin-bottom:4px;font:inherit;color:var(--fg);cursor:pointer;background:color-mix(in srgb,var(--accent) 16%,transparent)}.proses b{display:block;font-size:.75rem}.proses small{font-size:.625rem;color:var(--fg2)}.proses.done{background:color-mix(in srgb,var(--good) 18%,transparent)}
 .proadd{display:flex;gap:4px}.proadd button{flex:1;border:1px dashed var(--line);background:none;border-radius:8px;color:var(--fg2);font:inherit;font-size:.6875rem;padding:4px 0;cursor:pointer}.proadd button:hover{color:var(--accent);border-color:var(--accent)}
-.promap{position:fixed;inset:0;z-index:70;background:#050506;display:none;flex-direction:column}.promap.on{display:flex}
-.mmtop{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--bg)}.mmtop>b{font-size:1.05rem;margin-right:auto}.mmtop .btn{width:auto;padding:0 16px;height:38px}
-.mmzoom{display:flex;align-items:center;gap:6px}.mmzoom button{height:34px;min-width:34px;border-radius:10px;border:1px solid var(--line);background:none;color:var(--fg);font:inherit;font-weight:700;cursor:pointer;padding:0 10px}.mmzoom b{min-width:52px;text-align:center;font-size:.8125rem;color:var(--fg2)}
-.mmx{width:42px;height:42px;border-radius:12px;border:0;background:none;color:var(--fg);cursor:pointer;display:grid;place-items:center}.mmx:hover{background:color-mix(in srgb,var(--fg) 10%,transparent)}
-.mmview{position:relative;flex:1;overflow:hidden;cursor:grab;touch-action:none;background:radial-gradient(circle at 1px 1px,rgba(255,255,255,.07) 1px,transparent 0) 0 0/26px 26px}.mmview:active{cursor:grabbing}
-.mmworld{position:absolute;left:0;top:0;transform-origin:0 0}.mmlines{position:absolute;left:0;top:0;overflow:visible;pointer-events:none;opacity:.55}
-.mmn{position:absolute;transform:translateY(-50%);border-radius:14px;padding:10px 14px;background:var(--card);box-shadow:0 0 0 1px var(--line);cursor:pointer;white-space:nowrap}.mmn b{display:block}.mmn small{display:block;font-size:.75rem;color:var(--fg2)}
-.mmroot{width:170px;cursor:default}.mmroot b{font-size:1.15rem}.mmsea{width:190px}.mmsea b{font-size:1rem}
-.mmblk{width:230px;background:linear-gradient(160deg,color-mix(in srgb,var(--sbc) 34%,var(--card)),color-mix(in srgb,var(--sbc) 10%,var(--card)));box-shadow:inset 0 3px 0 var(--sbc)}.mmblk em{display:block;font-style:normal;font-size:.6875rem;color:var(--fg3);white-space:normal}.mmblk.now,.mmwk.now{box-shadow:inset 0 3px 0 var(--sbc),0 0 0 2px var(--fg)}
-.mmwk{width:220px;padding:6px 12px;background:color-mix(in srgb,var(--sbc) 16%,var(--card));box-shadow:inset 3px 0 0 var(--sbc)}.mmwk.now{box-shadow:inset 3px 0 0 var(--sbc),0 0 0 2px var(--fg)}
-.mmdays{position:absolute;transform:translateY(-50%);display:flex;gap:6px}.mmd{position:relative;width:122px;height:40px;border-radius:10px;background:color-mix(in srgb,var(--fg) 5%,transparent);padding:3px 5px;overflow:hidden;display:flex;flex-wrap:wrap;gap:2px;align-content:flex-start}.mmd.today{box-shadow:0 0 0 1.5px var(--accent)}
-.mmd>i{width:100%;font-style:normal;font-size:.5625rem;color:var(--fg3);font-weight:700}
-.mms{border:0;border-radius:6px;font:inherit;font-size:.625rem;font-weight:700;padding:1px 5px;cursor:pointer;color:#fff;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:#E5484D}.mms.t{background:#FF9F0A}.mms.d{opacity:.55}
-.mmadd{position:absolute;right:3px;top:2px;width:18px;height:18px;border-radius:6px;border:0;background:none;color:var(--fg3);font-weight:800;cursor:pointer;opacity:0}.mmd:hover .mmadd{opacity:1}.mmadd:hover{color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent)}
-.promap[data-z="0"] .mmdays,.promap[data-z="0"] .mmwk small,.promap[data-z="0"] .mmblk em{visibility:hidden}.promap[data-z="0"] .mmwk{opacity:.7}.promap[data-z="0"] .mmblk b{font-size:2.1rem}.promap[data-z="0"] .mmblk small{font-size:1.3rem}.promap[data-z="0"] .mmroot b{font-size:2.3rem}.promap[data-z="0"] .mmsea b{font-size:1.9rem;white-space:normal;line-height:1.05}.promap[data-z="0"] .mmsea{width:200px!important;min-width:0!important;white-space:normal}.promap[data-z="0"] .mmsea small{font-size:1.2rem}.promap[data-z="0"] .mmblk,.promap[data-z="0"] .mmsea,.promap[data-z="0"] .mmroot{width:auto;min-width:230px}
+.promap{position:fixed;inset:0;z-index:70;background:var(--bg);display:none;flex-direction:column}.promap.on{display:flex}
+.mmtop{display:flex;align-items:center;gap:14px;padding:10px 18px;border-bottom:1px solid var(--line);background:var(--bg)}.mmtop>b{font-size:1.15rem;font-weight:800;margin-right:auto}
 .mmtop .seg{width:auto}.mmtop .seg button{padding:0 14px;white-space:nowrap}
-.promap[data-z="1"] .mms{font-size:0;width:12px;height:12px;padding:0;border-radius:50%}.promap[data-z="1"] .mmadd{display:none}
-.mpsea{width:1160px;padding:22px 24px 26px;border-radius:26px;background:color-mix(in srgb,var(--fg) 3%,transparent);box-shadow:0 0 0 1px var(--line)}
-.mpsea-h{display:flex;align-items:baseline;gap:14px;margin:0 4px 18px}.mpsea-h b{font-size:1.6rem;font-weight:800}.mpsea-h span{color:var(--fg2);font-size:.875rem}
-.mpb{border-radius:20px;padding:14px 14px 10px;margin-bottom:18px;background:linear-gradient(180deg,color-mix(in srgb,var(--sbc) 16%,var(--card)),color-mix(in srgb,var(--sbc) 6%,var(--card)));box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--sbc) 60%,transparent)}
+.mmx{width:42px;height:42px;border-radius:12px;border:0;background:none;color:var(--fg);cursor:pointer;display:grid;place-items:center;flex:none}.mmx:hover{background:color-mix(in srgb,var(--fg) 10%,transparent)}
+.mpbody{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 380px}
+.mpleft{display:flex;flex-direction:column;min-height:0;min-width:0}
+.mpbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 18px;border-bottom:1px solid var(--line)}
+.mpbar button,.mmzoom button{height:34px;min-width:34px;border-radius:10px;border:1px solid var(--line);background:none;color:var(--fg);font:inherit;font-size:.8125rem;font-weight:700;cursor:pointer;padding:0 12px;white-space:nowrap}.mpbar button:hover{background:color-mix(in srgb,var(--fg) 8%,transparent)}
+.mmzoom{display:flex;align-items:center;gap:6px;margin-right:6px}.mmzoom button{font-size:1rem;padding:0 10px}.mmzoom b{min-width:52px;text-align:center;font-size:.8125rem;color:var(--fg2)}
+.mpbar .mpedit{margin-left:auto}
+.mmview{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;overscroll-behavior:contain}
+.mpside{min-height:0;overflow-y:auto;border-left:1px solid var(--line);padding:16px 18px 40px;display:flex;flex-direction:column;gap:12px;overscroll-behavior:contain}
+.mpside .seg{width:100%}.mpside .sec-label{margin:6px 2px 0}.mpside .one-archrow{margin:4px 0 0}
+.pc .mpside .bsrc.mpsrc,.mpside .bsrc.mpsrc{display:flex;flex-direction:column;flex-wrap:nowrap;gap:8px}.mpside .mpsrc .bchip.src{max-width:none;width:100%;font-size:.875rem;padding:10px 12px}.mpside .mpsrc .bchip.src small{font-size:.75rem}.mpside .mpsrc .bchip.src.on{opacity:.7}
+.mptabs{display:none}
+.mpsea{margin:16px;padding:18px 18px 8px;border-radius:24px;background:color-mix(in srgb,var(--fg) 3%,transparent);box-shadow:0 0 0 1px var(--line)}
+.mpsea-h{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:0 4px 16px}.mpsea-h b{font-size:1.5rem;font-weight:800}.mpsea-h span{color:var(--fg2);font-size:.875rem}
+.mpb{border-radius:20px;padding:12px 12px 4px;margin-bottom:14px;background:linear-gradient(180deg,color-mix(in srgb,var(--sbc) 16%,var(--card)),color-mix(in srgb,var(--sbc) 6%,var(--card)));box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--sbc) 60%,transparent)}
 .mpb.now{box-shadow:inset 0 0 0 2px var(--sbc),0 0 0 2px color-mix(in srgb,var(--sbc) 30%,transparent)}
-.mpb-h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 4px 10px;cursor:pointer}.mpb-h b{font-size:1.15rem;color:color-mix(in srgb,var(--sbc) 55%,var(--fg))}.mpb-h span{font-size:.8125rem;color:var(--fg2)}.mpb-h em{font-style:normal;font-size:.75rem;color:var(--fg3)}
+.mpb-h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 4px 8px;cursor:pointer;user-select:none}.mpb-h b{font-size:1.15rem;color:color-mix(in srgb,var(--sbc) 55%,var(--fg))}.mpb-h span{font-size:.8125rem;color:var(--fg2)}.mpb-h em{font-style:normal;font-size:.75rem;color:var(--fg3)}
+.mpb-h i{font-style:normal;display:inline-block;width:14px;color:var(--fg2);transition:transform .2s}.mpb.shut .mpb-h i{transform:rotate(-90deg)}.mpb.shut>:not(.mpb-h){display:none}.mpb.shut{padding-bottom:4px}
 .mpmo{display:flex;align-items:center;gap:10px;margin:10px 4px 8px;font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--fg2)}.mpmo::after{content:'';flex:1;height:1px;background:color-mix(in srgb,var(--fg) 14%,transparent)}
-.mpr{display:grid;grid-template-columns:150px 1fr;gap:10px;margin-bottom:10px;border-radius:14px}.mpr.now{box-shadow:0 0 0 1.5px var(--fg);padding:4px;margin:0 -4px 10px}
-.mpw{text-align:left;border:0;border-radius:12px;padding:8px 10px;font:inherit;color:var(--fg);cursor:pointer;background:color-mix(in srgb,var(--sbc) 22%,transparent)}.mpw b{display:block;font-size:.875rem}.mpw small{display:block;font-size:.6875rem;color:var(--fg2)}
+.mpr{display:grid;grid-template-columns:140px 1fr;gap:10px;margin-bottom:10px;border-radius:14px}.mpr.now{box-shadow:0 0 0 1.5px var(--fg);padding:4px;margin:0 -4px 10px}
+.mpw{border-radius:12px;padding:8px 10px;color:var(--fg);background:color-mix(in srgb,var(--sbc) 22%,transparent)}.mpw b{display:block;font-size:.875rem}.mpw small{display:block;font-size:.6875rem;color:var(--fg2)}
 .mpds{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
 .mpd{position:relative;min-height:62px;border-radius:12px;padding:5px 6px;background:color-mix(in srgb,var(--bg) 70%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--fg) 8%,transparent);display:flex;flex-direction:column;gap:3px;min-width:0}
 .mpd>i{font-style:normal;font-size:.6875rem;font-weight:700;color:var(--fg2)}.mpd.past{opacity:.5}.mpd.today{box-shadow:inset 0 0 0 2px var(--accent)}.mpd.m1{box-shadow:inset 3px 0 0 var(--fg2)}.mpd.m1>i{color:var(--fg)}
-.mps{border:0;border-radius:7px;font:inherit;font-size:.6875rem;font-weight:700;padding:3px 6px;cursor:pointer;color:#fff;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:#E5484D}.mps.t{background:#FF9F0A}.mps.d{opacity:.6}
+.mpd.bover{box-shadow:inset 0 0 0 2px var(--accent);background:color-mix(in srgb,var(--accent) 18%,transparent)}
+.mpcomp{font-style:normal;font-size:.625rem;font-weight:800;color:#fff;background:#E5484D;border-radius:6px;padding:2px 5px;align-self:flex-start;white-space:nowrap}
+.mps{border-radius:7px;font-size:.6875rem;font-weight:700;padding:3px 6px;cursor:grab;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:#E5484D;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation}.mps.t{background:#FF9F0A}.mps.d{opacity:.6;cursor:pointer}.mps.bdrag{opacity:.3}
 .mpadd{position:absolute;right:4px;top:3px;width:20px;height:20px;border-radius:7px;border:0;background:none;color:var(--fg3);font-weight:800;cursor:pointer;opacity:0}.mpd:hover .mpadd{opacity:1}.mpadd:hover{color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent)}
 .promap[data-z="1"] .mps{font-size:0;height:9px;padding:0;border-radius:5px}.promap[data-z="1"] .mpadd{display:none}
-.mmhelp{margin:0;padding:8px 18px;font-size:.75rem;color:var(--fg3);border-top:1px solid var(--line);background:var(--bg)}
+@media (hover:none){.mpadd{opacity:.8}}
+@media (max-width:860px){.mmtop{gap:8px;padding:8px 10px}.mmtop .lg,.mpbar .lg{display:none}.mpbar button{padding:0 9px}.mmtop .seg button{padding:0 10px}.mpbody{grid-template-columns:minmax(0,1fr)}.mptabs{display:flex;margin:8px 12px 0;width:auto}
+  .mpbody[data-tab="sea"] .mpside,.mpbody[data-tab="ses"] .mpleft{display:none}.mpside{border-left:0}.mpbar{padding:8px 12px}.mpsea{margin:10px 8px;padding:12px 8px 4px}.mpb{padding:10px 6px 2px}
+  .mpr{grid-template-columns:minmax(0,1fr);gap:6px}.mpw{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;padding:6px 10px}.mpds{gap:3px}.mpd{padding:4px 3px;min-height:56px}.mps{padding:3px 3px;font-size:.625rem}}
 .wkrow{display:grid;grid-template-columns:40px 1fr 40px;align-items:center;text-align:center}
 .wkrow button{height:36px;border-radius:10px;font-size:1.375rem;color:var(--accent)}
 .wkrow b small{display:block;font-size:.75rem;color:var(--fg2);font-weight:500}
@@ -2018,12 +2022,14 @@ function seCal(se) {
   const part = (k, lab, sub) => sea[k].length ? `<section class="scsec"><div class="scsea">${lab}<small>${sub}</small></div><div class="scmos">${sea[k].map(c => `<div class="scmc"><div class="scmo">${cap(MO[c.m])}</div>${c.w.join('')}</div>`).join('')}</div></section>` : '';
   return `<div class="scal">${part('hiver', 'Saison hivernale', 'jusqu\'aux dernières compétitions de 60 m · ' + esc(fmtShort(se.comp || end)))}${part('ete', 'Saison estivale', 'jusqu\'aux dernières compétitions de 100 m · ' + esc(fmtShort(se.comp2 || end)))}</div>`;
 }
-function seasonPane() {
-  openPane({title: 'Ma saison', full: true, fixed: true, render: () => {
+function seasonPane() { spOpen(); }
+// Modifier ses blocs et ses dates (depuis Ma saison).
+function seEditPane() {
+  openPane({title: 'Mes blocs et mes dates', render: () => {
     const se = seDraft(), tot = se.blocks.reduce((a, b) => a + (+b[1] || 0), 0), now = daysBetween(se.start, TODAY), wNow = Math.floor(now / 7);
     let w = 0; const weeks = [];
     se.blocks.forEach((b, i) => { for (let j = 0; j < (+b[1] || 0); j++, w++) weeks.push({i, w, k: addDays(se.start, w * 7)}); });
-    return seCal(se) + `<details class="sedit"><summary>Modifier mes blocs et mes dates</summary>${SE_KIND === 'gym' ? '<p class="small muted" style="margin:16px 4px 10px">Ta planification de musculation, bloc par bloc. Change les noms, les semaines et les objectifs comme tu l\'as prévue.</p>' : ''}<div class="seg" role="group" style="margin:16px 0 10px;${SE_KIND === 'gym' ? 'display:none' : ''}">${Object.entries(SEASON_TPL).map(([k, t]) => `<button type="button" data-stpl="${k}" aria-pressed="${(se.kind || 'hiver') === k}">${t.name}</button>`).join('')}</div>
+    return `<div class="sedit">${SE_KIND === 'gym' ? '<p class="small muted" style="margin:16px 4px 10px">Ta planification de musculation, bloc par bloc. Change les noms, les semaines et les objectifs comme tu l\'as prévue.</p>' : ''}<div class="seg" role="group" style="margin:16px 0 10px;${SE_KIND === 'gym' ? 'display:none' : ''}">${Object.entries(SEASON_TPL).map(([k, t]) => `<button type="button" data-stpl="${k}" aria-pressed="${(se.kind || 'hiver') === k}">${t.name}</button>`).join('')}</div>
       <div class="list"><div class="row"><label for="se-start">Début</label><input type="date" id="se-start" class="mini-in" value="${se.start}" data-se="start"></div>
         <div class="row"><label for="se-comp">Dernières compétitions · 60 m</label><input type="date" id="se-comp" class="mini-in" value="${se.comp || ''}" data-se="comp"></div>
         <div class="row"><label for="se-comp2">Dernières compétitions · 100 m</label><input type="date" id="se-comp2" class="mini-in" value="${se.comp2 || ''}" data-se="comp2"></div></div>
@@ -2032,8 +2038,8 @@ function seasonPane() {
         <div class="row col"><div class="sewh"><label>Semaines</label><span class="stepper"><button type="button" data-sew="${i}.-1" aria-label="Une semaine de moins">−</button><b class="num">${b[1]}</b><button type="button" data-sew="${i}.1" aria-label="Une semaine de plus">+</button></span></div>
           <div class="sefrise">${weeks.filter(x => x.i === i).map(x => `<button type="button" data-sewk="${x.k}" style="--bc:${SE_COL[x.i % SE_COL.length]}" class="${x.w === wNow ? 'now' : ''}"><b>${x.w + 1}</b><small>${esc(fmtShort(x.k).replace(/^\S+ /, ''))}</small></button>`).join('')}</div></div>
         <div class="row col"><label>Objectif</label><input class="mini-in" style="text-align:left;width:100%" value="${esc(b[2])}" data-seb="${i}.2" aria-label="Objectif du bloc"></div></div>`).join('')}</div>
-      <div class="stack" style="margin-top:12px"><button class="btn ghost" data-seadd>+ Ajouter un bloc</button><button class="btn" data-sesave>Enregistrer ma saison</button></div></details>`;
-  }, onClose: () => { SE_DRAFT = null; }});
+      <div class="stack" style="margin-top:12px"><button class="btn ghost" data-seadd>+ Ajouter un bloc</button><button class="btn" data-sesave>Enregistrer ma saison</button></div></div>`;
+  }, onClose: () => { SE_DRAFT = null; window.proMapRender?.(); }});
 }
 document.addEventListener('click', e => {
   const t = e.target.closest('[data-stpl]'), d = e.target.closest('[data-sedel]'), w = e.target.closest('[data-sew]');
@@ -8001,7 +8007,7 @@ const moreOf = (k, kind) => S.tset?.more?.[mKey(k, kind)] || [];
 const exInit = n => String(n || '').split(/[\s\-·',()]+/).filter(w => w && !/^(de|du|des|la|le|les|à|au|aux|en|et|sur|d|l|a|avec|sans)$/i.test(w)).map(w => w[0]).join('').toUpperCase().slice(0, 3) || 'EX';
 const refName = r => isExRef(r) ? exOf(r.slice(2)).n : planOf(r)?.name || '';
 const exDone = (k, id) => logsOn(k).some(l => l.kind === 'extra' && l.items?.[0]?.ex === id);
-async function saveTset(patch) { S.tset = {...S.tset, ...patch}; renderMod(); render(); if (P.stack.length) paneRender(); await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()}); }
+async function saveTset(patch) { S.tset = {...S.tset, ...patch}; renderMod(); render(); if (P.stack.length) paneRender(); window.proMapRender?.(); await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()}); }
 // Put a session or an exercise on a day (from the list, or moved from another day). A session goes on an empty day as
 // the day's session; on a day that already has one, it piles on top, like an exercise.
 async function boardPlace(k, kind, ref, from) {
@@ -8199,93 +8205,123 @@ function proBody() {
       ${proSes(k, kind).map(x => x.p ? `<button type="button" class="proses${x.done ? ' done' : ''}" data-proview="${esc(x.p.id)}"${x.p.n ? ` data-pron="${x.p.n}"` : ''}><b>${esc(x.p.name)}</b><small>${x.p.items?.length || 0} exercice${(x.p.items?.length || 0) > 1 ? 's' : ''} · ${estMin(x.p)} min</small></button>` : '<span class="proses done"><b>Faite</b></span>').join('')}
       ${k >= TODAY ? `<span class="proadd"><button type="button" data-proput="${k}|${kind}">+ Caler</button><button type="button" data-procreate="${k}|${kind}">+ Créer</button></span>` : ''}</div>`).join('')}</div>`).join('')}</div>`;
 }
-function proPane() { mmOpen(); }
-/* La carte de la saison : une carte qu'on zoome et qu'on déplace. Tout dézoomé : la saison, ses blocs (PPG, PPS…).
-   On zoome : les semaines apparaissent ; encore : les séances de chaque jour, avec leur nom ; un clic sur une séance l'ouvre.
-   Hivernale, estivale ou les deux. « + » sur un jour : créer une séance (le tableau) ou caler une séance existante. */
-const MP = {sea: null, k: 1, x: 0, y: 0, drag: null, pts: new Map()};
-const MP_MIN = .4, MP_MAX = 2.4;
+function proPane() { spOpen(); }
+/* Ma saison (téléphone et ordinateur), une page entière. À gauche, la saison qui se déroule de haut en bas (molette, doigt) :
+   ses blocs (PPG · Foncier 1, PPS…), chacun avec ses semaines et leurs 7 jours ; un clic sur un bloc le replie ou le déplie.
+   « − » et « + » zooment (Ctrl + molette aussi). À droite, les séances de musculation ou de sprint : on les crée, on les
+   attrape et on les lâche sur un jour à gauche, ou sur « Archiver ». Une séance posée se déplace d'un jour à l'autre de la
+   même façon ; lâchée hors des jours, elle est retirée. Sur le téléphone : deux onglets, Saison et Séances. */
+const MP = {sea: null, k: 1, kind: 'gym', tab: 'sea', shut: null};
+const MP_MIN = .4, MP_MAX = 1.6;
 // La saison où l'on est aujourd'hui (la transition compte avec l'hiver).
 const mpSeaNow = () => /été/.test(seasonNow()?.name || '') ? 'ete' : 'hiver';
-function mmHtml() {
+function spHtml() {
   const se = S.tset?.season?.start ? S.tset.season : SEASON_2627(), ete = MP.sea === 'ete', B = proBlocks(se).filter(b => /été/.test(b.name) === ete);
-  if (!B.length) return '<div class="mpsea"><div class="mpsea-h">Pas de bloc pour cette saison</div></div>';
-  const MO = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'], now = monday(TODAY), tw = B.reduce((a, b) => a + b.weeks, 0);
+  if (!B.length) return '<div class="mpsea"><div class="mpsea-h"><b>Pas de bloc pour cette saison</b></div></div>';
+  const MO = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'], MS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+  const now = monday(TODAY), tw = B.reduce((a, b) => a + b.weeks, 0), COMP = {}; if (se.comp) COMP[se.comp] = '60 m'; if (se.comp2) COMP[se.comp2] = '100 m';
+  // Les blocs déjà finis sont repliés à l'ouverture.
+  MP.shut ||= new Set(B.filter(b => b.to < TODAY).map(b => b.i));
+  const chip = (k, kind, ref, from, done) => { const nm = refName(ref) || 'Séance', c = kind === 'gym' ? 'g' : 't';
+    return `<div class="mps ${c}${done ? ' d' : ''}" data-bref="${esc(ref)}"${from && !done && k >= TODAY ? ` data-bfrom="${esc(from)}"` : ''} title="${esc(nm)}">${esc(nm)}</div>`; };
+  const dayHtml = k => {
+    const ch = ['gym', 'track'].map(kind => { const p = planForK(k, kind), dn = kindDone(k, kind), c = kind === 'gym' ? 'g' : 't';
+      const dk = p && S.tset?.dated?.[dKey(k, kind)] === caleRef(p) ? dKey(k, kind) : k;
+      return (p ? chip(k, kind, caleRef(p), dk, dn) : dn ? `<span class="mps ${c} d">Faite</span>` : '') + moreOf(k, kind).map((r, i) => chip(k, kind, r, `m|${k}|${kind}|${i}`, false)).join(''); }).join('');
+    return `<div class="mpd${k < TODAY ? ' past' : ''}${k === TODAY ? ' today' : ''}${k.endsWith('-01') ? ' m1' : ''}"${k >= TODAY ? ` data-bdk="${k}"` : ''}><i>${DOW[(dow(k) + 6) % 7]} ${+k.slice(8)}${k.endsWith('-01') ? ' ' + MS[+k.slice(5, 7) - 1] : ''}</i>${COMP[k] ? `<em class="mpcomp">Compét. ${COMP[k]}</em>` : ''}${ch}${k >= TODAY ? `<button type="button" class="mpadd" data-mmadd="${k}" aria-label="Ajouter une séance le ${esc(fmtShort(k))}">+</button>` : ''}</div>`; };
   let lastMo = null;
   const blocks = B.map(b => {
-    let n = 0; const rows = [...Array(b.weeks)].map((_, j) => { const w = addDays(b.from, j * 7), days = [...Array(7)].map((_, i) => addDays(w, i)), c = proWeekCount(w); n += c;
+    let n = 0, d = 0; const rows = [...Array(b.weeks)].map((_, j) => { const w = addDays(b.from, j * 7), days = [...Array(7)].map((_, i) => addDays(w, i)), c = proWeekCount(w); n += c;
+      d += days.reduce((a, k) => a + (kindDone(k, 'gym') ? 1 : 0) + (kindDone(k, 'track') ? 1 : 0), 0);
       const first = days.find(k => k.endsWith('-01')), mo = +(first || w).slice(5, 7) - 1, div = lastMo === null || first ? `<div class="mpmo"><span>${cap(MO[mo])}</span></div>` : ''; lastMo = mo;
-      return `${div}<div class="mpr${w === now ? ' now' : ''}"><button type="button" class="mpw" data-mpwk="${w}"><b>Semaine ${j + 1}</b><small>${esc(fmtShort(w).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(w, 6)).replace(/^\S+ /, ''))}</small><small>${c} séance${c > 1 ? 's' : ''}</small></button>
-        <div class="mpds">${days.map(k => `<div class="mpd${k < TODAY ? ' past' : ''}${k === TODAY ? ' today' : ''}${k.endsWith('-01') ? ' m1' : ''}"><i>${DOW[(dow(k) + 6) % 7]} ${+k.slice(8)}${k.endsWith('-01') ? ' ' + ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'][+k.slice(5, 7) - 1] : ''}</i>${['gym', 'track'].map(kind => proSes(k, kind).map(x => x.p ? `<button type="button" class="mps ${kind === 'gym' ? 'g' : 't'}${x.done ? ' d' : ''}" data-mpview="${esc(x.p.id)}"${x.p.n ? ` data-mpn="${x.p.n}"` : ''} title="${esc(x.p.name)}">${esc(x.p.name)}</button>` : `<span class="mps ${kind === 'gym' ? 'g' : 't'} d">Faite</span>`).join('')).join('')}${k >= TODAY ? `<button type="button" class="mpadd" data-mmadd="${k}" aria-label="Ajouter une séance le ${esc(fmtShort(k))}">+</button>` : ''}</div>`).join('')}</div></div>`; }).join('');
-    return `<section class="mpb${TODAY >= b.from && TODAY <= b.to ? ' now' : ''}" style="--sbc:${b.col}" data-mpblk="${b.i}"><header class="mpb-h" data-mpfit="${b.i}"><b>${esc(seLab(b.name))}</b><span>${b.weeks} semaine${b.weeks > 1 ? 's' : ''} · ${n} séance${n > 1 ? 's' : ''}</span><em>${esc(b.goal)}</em></header>${rows}</section>`;
+      return `${div}<div class="mpr${w === now ? ' now' : ''}"><div class="mpw"><b>Semaine ${j + 1}</b><small>${esc(fmtShort(w).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(w, 6)).replace(/^\S+ /, ''))}</small><small>${c} séance${c > 1 ? 's' : ''}</small></div>
+        <div class="mpds">${days.map(dayHtml).join('')}</div></div>`; }).join('');
+    return `<section class="mpb${TODAY >= b.from && TODAY <= b.to ? ' now' : ''}${MP.shut.has(b.i) ? ' shut' : ''}" style="--sbc:${b.col}"><header class="mpb-h" data-mpfold="${b.i}"><i aria-hidden="true">▾</i><b>${esc(seLab(b.name))}</b><span>${b.weeks} semaine${b.weeks > 1 ? 's' : ''} · ${n} séance${n > 1 ? 's' : ''}${d ? ` · ${d} faite${d > 1 ? 's' : ''}` : ''} · ${esc(fmtShort(b.from).replace(/^\S+ /, ''))} – ${esc(fmtShort(b.to).replace(/^\S+ /, ''))}</span><em>${esc(b.goal)}</em></header>${rows}</section>`;
   }).join('');
   return `<div class="mpsea"><div class="mpsea-h"><b>${ete ? 'Saison estivale' : 'Saison hivernale'}</b><span>${tw} semaines · du ${esc(fmtShort(B[0].from))} au ${esc(fmtShort(B.at(-1).to))}</span></div>${blocks}</div>`;
 }
-function mmApply() { const w = $('#mm-world'), el = $('#promap'); if (!w || !el) return; w.style.transform = `translate(${MP.x}px,${MP.y}px) scale(${MP.k})`; el.dataset.z = MP.k < .75 ? '1' : '2'; const z = el.querySelector('.mmzoom b'); if (z) z.textContent = Math.round(MP.k * 100) + ' %'; }
-// Cadre une partie de la carte (en coordonnées de la carte) au centre de l'écran.
-function mmFitBox(x0, y0, w, h, top) {
-  const v = $('#mm-view').getBoundingClientRect(), k = Math.min(MP_MAX, Math.max(MP_MIN, Math.min((v.width - 60) / w, (v.height - 60) / h)));
-  MP.k = k; MP.x = (v.width - w * k) / 2 - x0 * k; MP.y = top != null ? 30 - y0 * k : (v.height - h * k) / 2 - y0 * k; mmApply();
+// La colonne de droite : les séances à poser sur les jours, comme dans Training (sans le rééquilibre du jour ni les exercices).
+function spSide() {
+  const kind = MP.kind, arch = new Set(S.tset?.arch || []), src = [...(kind === 'gym' ? tdvTodo(8) : []), ...myPlans().filter(x => x.kind === kind)].filter(x => !arch.has(caleRef(x)));
+  const placed = new Set(Object.entries(S.tset?.dated || {}).filter(([d]) => d >= TODAY).map(([, v]) => v));
+  return `<div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button type="button" data-mpkind="${v}" aria-pressed="${kind === v}">${l}</button>`).join('')}</div>
+    <button type="button" class="btn" data-mmnew>+ Créer une séance ${kind === 'gym' ? 'de musculation' : 'de sprint'}</button>
+    <div class="sec-label">Séances <small>${src.length}</small></div>
+    <div class="bsrc mpsrc">${src.length ? src.map(x => { const r = caleRef(x), on = placed.has(r); return `<div class="bchip src${on ? ' on' : ''}" data-bref="${esc(r)}" title="${esc(x.name)}${x.title ? ' · ' + esc(x.title) : ''}"><span>${esc(x.name)}</span><small>${(x.title || x.desc) ? esc(x.title || x.desc) + ' · ' : ''}${x.items?.length || 0} exercice${(x.items?.length || 0) > 1 ? 's' : ''} · ${estMin(x)} min${on ? ' · calée' : ''}</small></div>`; }).join('') : '<p class="small muted" style="margin:0">Crée une séance : elle apparaîtra ici, prête à être posée sur un jour.</p>'}</div>
+    <div class="one-archrow"><button type="button" class="btn ghost one-arch" data-onearch="T">Archive</button></div>
+    <p class="small muted" style="margin:0 2px">Attrape une séance et lâche-la sur un jour de la saison. Lâchée sur « Archiver », elle quitte la liste (tu peux la remettre depuis « Archive »). Une séance déjà posée se déplace de la même façon ; lâchée hors des jours, elle est retirée. Un clic sur une séance l'ouvre.</p>`;
 }
-const mmBox = el => { let x = 0, y = 0, n = el; const W = $('#mm-world'); while (n && n !== W) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; } return {x, y, w: el.offsetWidth, h: el.offsetHeight}; };
-function mmFit() { const s0 = $('#mm-world .mpsea'); if (!s0) return; const b = mmBox(s0); mmFitBox(b.x, b.y, b.w, b.h); }
-// À l'ouverture : toute la largeur de la saison, la semaine en cours en haut de l'écran.
-function mmHome() {
-  const s0 = $('#mm-world .mpsea'), r = $('#mm-world .mpr.now') || $('#mm-world .mpb.now'), v = $('#mm-view').getBoundingClientRect(); if (!s0) return; const b = mmBox(s0);
-  MP.k = Math.min(1.1, Math.max(MP_MIN, (v.width - 60) / b.w)); MP.x = (v.width - b.w * MP.k) / 2 - b.x * MP.k;
-  MP.y = r ? Math.min(30 - b.y * MP.k, 120 - mmBox(r).y * MP.k) : 30 - b.y * MP.k; mmApply();
+// Le zoom : la saison garde toute la largeur de la colonne, elle grossit ou rapetisse et se déroule plus ou moins long.
+function spApply() {
+  const v = $('#mm-view'), w = $('#mm-world'), el = $('#promap'); if (!v || !w) return;
+  w.style.zoom = MP.k; w.style.width = (v.clientWidth / MP.k) + 'px'; el.dataset.z = MP.k < .75 ? '1' : '2';
+  const z = el.querySelector('.mmzoom b'); if (z) z.textContent = Math.round(MP.k * 100) + ' %';
 }
-function mmZoomAt(f, cx, cy) { const k = Math.min(MP_MAX, Math.max(MP_MIN, MP.k * f)); MP.x = cx - (cx - MP.x) * k / MP.k; MP.y = cy - (cy - MP.y) * k / MP.k; MP.k = k; mmApply(); }
-function mmRender(keep) {
+// Zoomer en gardant sous les yeux la semaine qu'on regardait.
+function spZoom(k) {
+  const v = $('#mm-view'); if (!v) return; k = Math.min(MP_MAX, Math.max(MP_MIN, k)); if (Math.abs(k - MP.k) < .001) return;
+  const vr = v.getBoundingClientRect(), mid = vr.top + vr.height / 3; let a = null;
+  for (const r of v.querySelectorAll('.mpr,.mpb-h')) { const b = r.getBoundingClientRect(); if (b.height && b.bottom > mid) { a = r; break; } }
+  const off = a ? a.getBoundingClientRect().top : 0; MP.k = k; spApply(); if (a) v.scrollTop += a.getBoundingClientRect().top - off;
+}
+// La semaine en cours en haut de la colonne.
+function spHome() { const n = $('#mm-world .mpb.now.shut'); if (n) { n.classList.remove('shut'); MP.shut?.delete(+n.querySelector('[data-mpfold]').dataset.mpfold); spFoldLab(); } const v = $('#mm-view'), r =$('#mm-world .mpr.now') || $('#mm-world .mpb.now'); if (!v) return; v.scrollTop = 0; if (r) v.scrollTop = r.getBoundingClientRect().top - v.getBoundingClientRect().top - 60; }
+function spRender(keep) {
   const el = $('#promap'); if (!el) return; MP.sea ||= mpSeaNow();
-  el.innerHTML = `<header class="mmtop"><b>Programmes et séances Pro</b><div class="seg segsm" role="group" aria-label="Saison">${[['hiver', 'Saison hivernale'], ['ete', 'Saison estivale']].map(([v, l]) => `<button type="button" data-mmsea="${v}" aria-pressed="${MP.sea === v}">${l}</button>`).join('')}</div>
-    <div class="mmzoom"><button type="button" data-mmz="-1" aria-label="Dézoomer">−</button><b></b><button type="button" data-mmz="1" aria-label="Zoomer">+</button><button type="button" data-mmall>Toute la saison</button><button type="button" data-mmnow>Aujourd'hui</button></div>
-    <button type="button" class="btn" data-mmnew>+ Créer une séance</button><button type="button" class="mmx" data-mmx aria-label="Fermer">${'<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>'}</button></header>
-    <div id="mm-view" class="mmview"><div id="mm-world" class="mmworld">${mmHtml()}</div></div>
-    <p class="mmhelp">Molette ou pincer : zoomer · glisser : se déplacer · clic sur un bloc ou une semaine : y aller · clic sur une séance : l'ouvrir · « + » sur un jour : créer ou caler une séance</p>`;
-  if (keep) mmApply(); else mmHome();
+  const sv = $('#mm-view')?.scrollTop || 0, ss = $('#mm-side')?.scrollTop || 0;
+  el.innerHTML = `<header class="mmtop"><b>Ma saison</b><div class="seg segsm" role="group" aria-label="Saison">${[['hiver', 'hivernale'], ['ete', 'estivale']].map(([v, l]) => `<button type="button" data-mmsea="${v}" aria-pressed="${MP.sea === v}"><span class="lg">Saison </span>${l}</button>`).join('')}</div>
+    <button type="button" class="mmx" data-mmx aria-label="Fermer">${'<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>'}</button></header>
+    <div class="seg mptabs" role="group" aria-label="Partie">${[['sea', 'Saison'], ['ses', 'Séances']].map(([v, l]) => `<button type="button" data-mptab="${v}" aria-pressed="${MP.tab === v}">${l}</button>`).join('')}</div>
+    <div class="mpbody" data-tab="${MP.tab}">
+      <section class="mpleft"><div class="mpbar"><div class="mmzoom"><button type="button" data-mmz="-1" aria-label="Dézoomer">−</button><b></b><button type="button" data-mmz="1" aria-label="Zoomer">+</button></div><button type="button" data-mmnow>Aujourd'hui</button><button type="button" data-mpfoldall>Tout déplier</button><button type="button" class="mpedit" data-mpedit>Modifier<span class="lg"> mes blocs et mes dates</span></button></div>
+        <div id="mm-view" class="mmview"><div id="mm-world" class="mmworld">${spHtml()}</div></div></section>
+      <aside class="mpside" id="mm-side">${spSide()}</aside></div>`;
+  spApply(); spFoldLab();
+  if (keep) { $('#mm-view').scrollTop = sv; $('#mm-side').scrollTop = ss; } else spHome();
 }
-window.proMapRender = () => { if ($('#promap')?.classList.contains('on')) mmRender(true); };
-function mmOpen() {
-  let el = $('#promap'); if (!el) { el = document.createElement('div'); el.id = 'promap'; el.className = 'promap'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Programmes et séances Pro'); document.body.appendChild(el); mmBind(el); }
-  el.classList.add('on'); document.body.style.overflow = 'hidden'; MP.sea = mpSeaNow(); mmRender(false);
+function spFoldLab() { const b = $('#promap [data-mpfoldall]'); if (b) b.textContent = $('#promap .mpb.shut') ? 'Tout déplier' : 'Tout replier'; }
+window.proMapRender = () => { if ($('#promap')?.classList.contains('on')) spRender(true); };
+function spOpen() {
+  let el = $('#promap'); if (!el) { el = document.createElement('div'); el.id = 'promap'; el.className = 'promap'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Ma saison'); document.body.appendChild(el); spBind(el); }
+  el.classList.add('on'); document.body.style.overflow = 'hidden'; MP.sea = mpSeaNow(); MP.shut = null; MP.tab = 'sea'; MP.kind = S.tkind === 'track' ? 'track' : 'gym'; spRender(false);
 }
-function mmClose() { $('#promap')?.classList.remove('on'); if (!P.stack.length) document.body.style.overflow = ''; renderMod(); }
-function mmBind(el) {
-  el.addEventListener('wheel', e => { if (!e.target.closest('#mm-view')) return; e.preventDefault(); const r = $('#mm-view').getBoundingClientRect(); mmZoomAt(Math.exp(-e.deltaY * .0015), e.clientX - r.left, e.clientY - r.top); }, {passive: false});
-  el.addEventListener('pointerdown', e => { if (!e.target.closest('#mm-view') || e.target.closest('button')) return; MP.pts.set(e.pointerId, {x: e.clientX, y: e.clientY}); MP.drag = {x: e.clientX, y: e.clientY, ox: MP.x, oy: MP.y, moved: false}; try { e.target.setPointerCapture?.(e.pointerId); } catch (x) {} });
-  el.addEventListener('pointermove', e => {
-    if (!MP.pts.has(e.pointerId)) return; const prev = MP.pts.get(e.pointerId); MP.pts.set(e.pointerId, {x: e.clientX, y: e.clientY});
-    if (MP.pts.size === 2) { const [a, b] = [...MP.pts.values()], o = [...MP.pts.entries()].find(([id]) => id !== e.pointerId)[1], d0 = Math.hypot(prev.x - o.x, prev.y - o.y), d1 = Math.hypot(a.x - b.x, a.y - b.y), r = $('#mm-view').getBoundingClientRect();
-      if (d0 > 0) mmZoomAt(d1 / d0, (a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top); MP.drag = null; return; }
-    const d = MP.drag; if (!d) return; if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > 4) d.moved = true; MP.x = d.ox + e.clientX - d.x; MP.y = d.oy + e.clientY - d.y; mmApply();
+function spClose() { $('#promap')?.classList.remove('on'); if (!P.stack.length) document.body.style.overflow = ''; renderMod(); }
+function spBind(el) {
+  // La molette fait défiler (sans rien faire de spécial) ; Ctrl + molette, ou pincer le pavé tactile, zoome.
+  el.addEventListener('wheel', e => { if (!e.ctrlKey || !e.target.closest('#mm-view')) return; e.preventDefault(); spZoom(MP.k * Math.exp(-e.deltaY * .004)); }, {passive: false});
+  // Une séance portée près du haut ou du bas de la saison : la saison défile toute seule.
+  let asv = 0, asr = 0;
+  document.addEventListener('pointermove', e => {
+    const v = $('#mm-view'); if (!v || !el.classList.contains('on') || !document.body.classList.contains('bdragging')) { asv = 0; return; }
+    const r = v.getBoundingClientRect(), on = e.clientX > r.left && e.clientX < r.right;
+    asv = !on ? 0 : e.clientY < r.top + 70 ? -Math.ceil((r.top + 70 - e.clientY) / 4) : e.clientY > r.bottom - 70 ? Math.ceil((e.clientY - r.bottom + 70) / 4) : 0;
+    if (asv && !asr) { const f = () => { if (!asv || !document.body.classList.contains('bdragging')) { asr = 0; return; } $('#mm-view').scrollTop += asv; asr = requestAnimationFrame(f); }; asr = requestAnimationFrame(f); }
   });
-  const up = e => { MP.pts.delete(e.pointerId); if (MP.drag?.moved) MP.skip = Date.now(); MP.drag = null; };
-  el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
   el.addEventListener('click', e => {
-    if (MP.skip && Date.now() - MP.skip < 250) return; const at = q => e.target.closest(q); let b;
-    if (at('[data-mmx]')) { mmClose(); return; }
-    if ((b = at('[data-mmsea]'))) { MP.sea = b.dataset.mmsea; mmRender(false); return; }
-    if (at('[data-mmnow]')) { MP.sea = mpSeaNow(); mmRender(false); return; }
-    if ((b = at('[data-mmz]'))) { const v = $('#mm-view').getBoundingClientRect(); mmZoomAt(+b.dataset.mmz > 0 ? 1.35 : 1 / 1.35, v.width / 2, v.height / 2); return; }
-    if (at('[data-mmall]')) { mmFit(); return; }
-    if (at('[data-mmnew]')) { S.tkind = 'gym'; editPlan(null); if (ED) ED.fromPro = true; return; }
-    if ((b = at('[data-mpview]'))) { planView(b.dataset.mpview, b.dataset.mpn ? +b.dataset.mpn : null); return; }
+    const at = q => e.target.closest(q); let b;
+    if (at('[data-mmx]')) { spClose(); return; }
+    if ((b = at('[data-mmsea]'))) { if (MP.sea !== b.dataset.mmsea) { MP.sea = b.dataset.mmsea; MP.shut = null; spRender(false); } return; }
+    if (at('[data-mmnow]')) { if (MP.sea !== mpSeaNow()) { MP.sea = mpSeaNow(); MP.shut = null; spRender(false); } else spHome(); return; }
+    if ((b = at('[data-mmz]'))) { spZoom(MP.k * (+b.dataset.mmz > 0 ? 1.25 : 1 / 1.25)); return; }
+    if ((b = at('[data-mptab]'))) { MP.tab = b.dataset.mptab; el.querySelector('.mpbody').dataset.tab = MP.tab; el.querySelectorAll('[data-mptab]').forEach(x => x.setAttribute('aria-pressed', x === b)); if (MP.tab === 'sea') spApply(); return; }
+    if ((b = at('[data-mpkind]'))) { MP.kind = b.dataset.mpkind; $('#mm-side').innerHTML = spSide(); return; }
+    if ((b = at('[data-mpfold]'))) { const i = +b.dataset.mpfold, s0 = b.closest('.mpb'); s0.classList.toggle('shut'); if (s0.classList.contains('shut')) MP.shut.add(i); else MP.shut.delete(i); spFoldLab(); return; }
+    if (at('[data-mpfoldall]')) { const open = !!el.querySelector('.mpb.shut'); el.querySelectorAll('.mpb').forEach(x => { x.classList.toggle('shut', !open); const i = +x.querySelector('[data-mpfold]').dataset.mpfold; if (open) MP.shut.delete(i); else MP.shut.add(i); }); spFoldLab(); if (open) spHome(); return; }
+    if (at('[data-mpedit]')) { SE_KIND = 'track'; SE_DRAFT = null; seDraft(); seEditPane(); return; }
+    if (at('[data-mmnew]')) { S.tkind = MP.kind; editPlan(null); if (ED) ED.fromPro = true; return; }
     if ((b = at('[data-mmadd]'))) { const k = b.dataset.mmadd;
       openPane({title: 'Le ' + fmtShort(k), render: () => `<div class="stack" style="margin-top:14px">${['gym', 'track'].map(kind => `<div class="sec-label">${kind === 'gym' ? 'Musculation' : 'Sprint'}</div><div class="btnrow two"><button class="btn" data-mmcreate="${k}|${kind}">+ Créer une séance</button><button class="btn ghost" data-mmput="${k}|${kind}">Caler une séance existante</button></div>`).join('')}</div>`}); return; }
-    if ((b = at('[data-mpfit]'))) { const x = mmBox(b.closest('.mpb')); mmFitBox(x.x, x.y, x.w, x.h); return; }
-    if ((b = at('[data-mpwk]'))) { const x = mmBox(b.closest('.mpr')); mmFitBox(x.x, x.y - 20, x.w, x.h + 40); return; }
   });
 }
+addEventListener('resize', () => { if ($('#promap')?.classList.contains('on')) spApply(); });
 document.addEventListener('click', e => { const at = q => e.target.closest(q); let b;
   if ((b = at('[data-mmcreate]'))) { const [k, kind] = b.dataset.mmcreate.split('|'); closePane(); S.tkind = kind; editPlan(null, k); if (ED) { ED.date0 = null; ED.fromPro = true; } return; }
   if ((b = at('[data-mmput]'))) { const [k, kind] = b.dataset.mmput.split('|'), L = [...(kind === 'gym' ? tdvTodo(8) : []), ...myPlans().filter(x => x.kind === kind)]; closePane();
     openPane({title: 'Caler une séance le ' + fmtShort(k), render: () => L.length ? `<div class="list" style="margin-top:14px">${L.map(x => `<button class="rowbtn" data-proputp="${k}|${kind}|${esc(caleRef(x))}"><span><b>${esc(x.name)}</b><span class="meta">${x.title || x.desc ? esc(x.title || x.desc) + ' · ' : ''}${estMin(x)} min</span></span><span class="kc">+</span></button>`).join('')}</div>` : '<div class="empty" style="margin-top:14px">Crée d\'abord une séance.</div>'}); }
 });
-addEventListener('keydown', e => { if (e.key === 'Escape' && $('#promap')?.classList.contains('on') && !P.stack.length) mmClose(); });
+addEventListener('keydown', e => { if (e.key === 'Escape' && $('#promap')?.classList.contains('on') && !P.stack.length) spClose(); });
 document.addEventListener('click', e => {
   const at = q => e.target.closest(q); let b;
-  if (at('[data-propen]')) { proPane(); return; }
   if (!P.stack.length || P.stack.at(-1).render !== proBody) return;
   if ((b = at('[data-prolvl]'))) { PRO.lvl = b.dataset.prolvl; paneRender(); return; }
   if ((b = at('[data-problk]'))) { PRO.bi = +b.dataset.problk; PRO.lvl = 'block'; paneRender(); return; }
@@ -8302,7 +8338,7 @@ function tSessions() {
   const k = S.tkind, mine = myPlans().filter(p => p.kind === k), base = BUILTIN.filter(p => p.kind === k);
   const row = p => `<button class="rowbtn" data-tplanv="${p.id}"><span><b>${esc(p.name)}</b><span class="meta">${p.title ? esc(p.title) + ' · ' : ''}${estMin(p)} min${!p.title && p.desc ? ' · ' + esc(p.desc) : ''}${caledOn(caleRef(p)).length ? ' · calée' : ''}</span></span>${ICON.chev}</button>`;
   return `
-    <header class="top"><div class="sub prosub">Programmes et séances${typeof isPC === 'function' && isPC() ? '<button type="button" class="probtn" data-propen>Programmes et séances Pro <span aria-hidden="true">→</span></button>' : ''}</div><h1>Séances</h1></header>
+    <header class="top"><div class="sub">Programmes et séances</div><h1>Séances</h1></header>
     <button class="banner" data-tseason style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;margin-bottom:8px"><span><b>Ma saison</b><br><span class="small muted">${(() => { const n = seasonNow(TODAY), nb = n && !n.before && !n.after ? n.se.blocks[n.i + 1] : null; return n && !n.before && !n.after ? `<i class="sedot" style="background:${n.col}"></i>${esc(seLab(n.name))} · semaine ${n.week}/${n.of}${nb ? ` · puis ${esc(seLab(nb[0]))} dans ${Math.ceil(n.left / 7)} sem.` : ''}` : 'Tes blocs : PPG, PPS, pré-compétition, compétition'; })()}</span></span>${ICON.chev}</button>
     <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
     ${sesBoard(k)}
