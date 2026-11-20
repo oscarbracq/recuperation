@@ -38,7 +38,15 @@ function b3Inner(view, layer, paint) {
   const mus = (list, k) => list.map(([g, sub, d]) => { const key = b3Key(g, sub), p = paint ? paint(key, sub, g) : null;
     return `<path d="${d}" class="m3${p?.cls ? ' ' + p.cls : ''}" ${key ? `data-mz3="${key}"` : ''} data-sub="${esc(sub)}" data-side="${nm[k]}" fill="${p?.fill || B3C.skin}"/>`; }).join('');
   // Profonds : les muscles superficiels ne sont plus qu'un contour, les muscles profonds en couleur par-dessus.
-  if (layer === 'deep') return outline(true) + `<g stroke="${B3C.line}" stroke-width="3.2" stroke-linejoin="round">${mus([...B.i, ...B.d], 0)}<g ${mir}>${mus([...B.i, ...B.d], 1)}</g></g>`;
+  // Les muscles du cou (et l'élévateur de la scapula, qui part du cou) sont resserrés vers le milieu pour tenir dans le cou,
+  // et tous les muscles profonds restent dans la silhouette : rien ne dépasse du corps.
+  if (layer === 'deep') {
+    const nk = x => x[0] === 'neck' || /Élévateur/.test(x[1]), L = [...B.i, ...B.d], A = L.filter(x => !nk(x)), N = L.filter(nk);
+    // … et ils commencent sous le crâne (pas dans la tête).
+    const sq = `transform="translate(${B.cx} 0) scale(.74 1) translate(${-B.cx} 0)"`, side = k => mus(A, k) + `<g ${sq} clip-path="url(#nclip-${view})">${mus(N, k)}</g>`;
+    const clip = B.sil ? `<defs><clipPath id="dclip-${view}"><path d="${B.sil}"/></clipPath><clipPath id="nclip-${view}"><rect x="0" y="238" width="4000" height="2000"/></clipPath></defs>` : '';
+    return outline(true) + clip + `<g ${clip ? `clip-path="url(#dclip-${view})"` : ''} stroke="${B3C.line}" stroke-width="3.2" stroke-linejoin="round">${side(0)}<g ${mir}>${side(1)}</g></g>`;
+  }
   const half = k => layer === 'shape' ? skin + B.m.map(x => `<path d="${x[2]}" fill="${B3C.skin}"/>`).join('') : skin + mus(B.m, k);
   const top = B.hair ? `<g ${hd}><g fill="${B3C.skin}" stroke="${B3C.skin}">${head}</g><path d="${B.hair}" fill="#26272d" stroke="${B3C.line}" stroke-width="3"/></g>` : `<g ${hd} fill="${B3C.skin}">${head}</g>`;
   return `<g stroke="${B3C.line}" stroke-width="3.2" stroke-linejoin="round"><g fill="${B3C.skin}" stroke="${B3C.skin}" stroke-width="12">${all}<g ${mir}>${all}</g><g ${hd}>${head}</g></g>${top}${half(0)}<g ${mir}>${half(1)}</g></g>`;

@@ -137,6 +137,8 @@ vHome = () => `<div class="hm one-hm" id="hm"><header class="hm-head" id="hm-hea
 // À l'arrivée sur l'accueil : le bilan monte doucement, ligne par ligne.
 let WKIN = 0;
 new MutationObserver(() => { const w = document.querySelector('#hm .wk:not([data-in])'); if (!w) return; w.dataset.in = '1'; // seulement juste après être arrivé sur l'accueil (pas à chaque mise à jour des données)
+  // Arrivé au pouce : la page était déjà là pendant le glissement, elle ne se « réécrit » pas.
+  if (performance.now() - (ONE.swiped || 0) < 1200 || document.documentElement.classList.contains('one-fd')) return;
   if (performance.now() - (ONE.act || 0) > 1600 || performance.now() - WKIN < 1600 || matchMedia('(prefers-reduced-motion: reduce)').matches) return; WKIN = performance.now();
   [...w.querySelectorAll('.wk-h, .wk-t, .wk-p, .wk-n .eyebrow, li')].forEach((el, i) => el.animate([{opacity: 0, transform: 'translateY(10px)'}, {opacity: 1, transform: 'none'}], {duration: 520, delay: 80 + i * 70, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards'})); }).observe(document.body, {childList: true, subtree: true});
 // Le vendredi à 20 h, le bilan change tout seul si l'appli est ouverte.

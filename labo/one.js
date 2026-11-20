@@ -4,7 +4,7 @@
    · une barre flottante en verre avec les 6 onglets (leurs noms suivent le module), et le pouce glisse d'un onglet à l'autre ;
    · en haut : « + » (questionnaire du jour) · T · N · R (même onglet, autre module) · « IA » (ouvre l'appli Claude, projet TNR) ;
    · les chiffres, courbes, blocs et anneaux s'animent quand une page arrive ou quand on change de période. */
-const ONE_EXT = 4;
+const ONE_EXT = 4; const ONE_G = 1.9;
 const ONE = {mods: ['T', 'N', 'R'], keys: {T: ['today', 'progress', 'sessions', 'library', 'body', 'profile'], N: ['journal', 'progress', 'menu', 'foods', 'nbody', 'goals'], R: ['today', 'trends', 'rsess', 'rlib', 'reports', 'profile']},
   name: {T: 'Training', N: 'Nutrition', R: 'Recovery'}, col: Object.fromEntries(HOME_K), ready: false, act: 0, seen: new WeakSet()};
 const oneCur = () => S.mod === 'R' ? S.tab : S.mod === 'T' ? S.ttab : S.mod === 'N' ? S.ftab : null;
@@ -49,7 +49,7 @@ function oneMount() {
     <div class="one-mods" role="tablist" aria-label="Module"><span class="one-mp"></span>${ONE.mods.map(m => `<button role="tab" data-one-m="${m}" style="--c:${ONE.col[m]}"><b>${m}</b><span>${ONE.name[m]}</span></button>`).join('')}</div>
     <button class="one-sq" data-hplan aria-label="Planning" title="Planning">${oneIc('cal')}</button></div>
     <button class="one-sq one-aib one-hai" data-one-ai aria-label="Ouvrir Claude (projet TNR)" title="Ouvrir Claude (projet TNR)">${oneIc('ai')}<span>IA</span></button>
-    <nav id="one-tabs" class="one-tabs" aria-label="Sections"><span class="one-pill"></span><button data-one-h aria-label="Accueil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-6.5 8 6.5"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>Accueil</button>${[0, 1, 2, 3, 4, 5].map(i => `<button data-one-t="${i}"></button>`).join('')}</nav>`);
+    <nav id="one-tabs" class="one-tabs" aria-label="Sections"><span class="one-pill"></span><button data-one-h aria-label="Accueil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-6.5 8 6.5"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg><span class="lb">Accueil</span></button>${[0, 1, 2, 3, 4, 5].map(i => `<button data-one-t="${i}"></button>`).join('')}</nav>`);
   document.addEventListener('click', e => {
     const m = e.target.closest('[data-one-m]'); if (m) { if (S.mod === 'home') oneSwitch(m.dataset.oneM, 0); else if (m.dataset.oneM !== S.mod) oneSwitch(m.dataset.oneM); else window.scrollTo({top: 0, behavior: 'smooth'}); return; }
     const t = e.target.closest('[data-one-t]'); if (t) { oneTab(+t.dataset.oneT); return; }
@@ -95,16 +95,16 @@ function oneMag(box, p, ms) {
 // Met la barre et le sélecteur à jour (noms, icônes, pastilles) ; appelée après chaque changement de page.
 function oneSync() {
   const tabs = $('#one-tabs'), top = $('#one-top'), home = S.mod === 'home'; if (!tabs || (!home && !ONE.mods.includes(S.mod))) return;
-  if (!home) ONE.lm = S.mod; const m = home ? ONE.lm || 'R' : S.mod;
+  if (!home) ONE.lm = S.mod; const m = home ? 'T' : S.mod;   // à l'Accueil, la barre montre déjà Training : c'est là qu'on arrive en glissant
   document.documentElement.classList.toggle('one-home', home);
   // À l'Accueil, le haut de l'écran (heure, batterie) est toujours noir, comme la page.
   if (home && ONE.barTo !== '#000000' && !window.TNR_SPLASH_ON) syncBars();
   document.documentElement.style.setProperty('--one-c', home ? '#8E9BB5' : ONE.col[m]);
   const src = [...(pcBar(m)?.querySelectorAll('[role=tab]') || [])], i = home ? -1 : oneIdx();
-  tabs.querySelectorAll('[data-one-t]').forEach((b, j) => { const s = src[j]; if (!s) return; const h = s.innerHTML; if (b._h !== h) { b.innerHTML = h; b._h = h; } b.setAttribute('aria-label', s.textContent.trim()); b.classList.toggle('on', j === i); });
+  tabs.querySelectorAll('[data-one-t]').forEach((b, j) => { const s = src[j]; if (!s) return; const h = s.innerHTML; if (b._h !== h) { b.innerHTML = h.replace(/<\/svg>\s*([^<]+)$/, '</svg><span class="lb">$1</span>'); b._h = h; } b.setAttribute('aria-label', s.textContent.trim()); b.classList.toggle('on', j === i); });
   tabs.querySelector('[data-one-h]').classList.toggle('on', home);
   top.querySelectorAll('[data-one-m]').forEach(b => b.classList.toggle('on', !home && b.dataset.oneM === S.mod));
-  onePill(tabs, tabs.querySelector('.one-pill'), tabs.querySelector('button.on'));
+  oneTabsTo(tabs, [...tabs.querySelectorAll('button')].indexOf(tabs.querySelector('button.on')));
   const box = top.querySelector('.one-mods'), mp = top.querySelector('.one-mp');
   if (home) box.querySelectorAll('button').forEach(b => b.style.setProperty('--mag', 1));
   else onePill(box, mp, box.querySelector('.on'));
@@ -308,7 +308,7 @@ fBody = () => {
 
 /* ---------- au pouce, l'Accueil est la page juste à gauche d'Aujourd'hui (et Aujourd'hui juste à droite de l'Accueil) ---------- */
 window.TAB_XNB = (k, T, html) => {
-  if (T.home) { if (k < 0) return null; const m = ONE.lm || 'R', key = ONE.keys[m][0];
+  if (T.home) { if (k < 0) return null; const m = 'T', key = ONE.keys[m][0];
     return {cls: '', box: $('#home-view'), html: () => `<div class="wrap">${m === 'R' ? '<div class="mm-space"></div>' : ''}<section class="gv-${m === 'R' ? 'v-' + key : m === 'T' ? 't-view' : 'f-view'}">${html(m, key)}</section></div>`, go: () => oneSwitch(m, 0)}; }
   if (k < 0 && T.i === 0 && ONE.mods.includes(S.mod)) return {cls: '', box: $('#mod-' + S.mod), html: () => vHome(), go: () => oneHome()};
   return null;
@@ -317,16 +317,65 @@ window.TAB_XNB = (k, T, html) => {
 window.TAB_DRAG = (i, f, ms) => {
   oneCalmIn();
   if (ms && f) ONE.swiped = performance.now() + ms;
-  const tabs = $('#one-tabs'), p = tabs?.querySelector('.one-pill'); if (!p) return;
+  const tabs = $('#one-tabs'); if (!tabs) return;
   // Les boutons dans l'ordre : Accueil, puis les 6 onglets (Accueil = position -1).
-  const bs = [...tabs.querySelectorAll('button')], a = bs[i + 1]; if (!a) return;
-  const b = bs[i + 1 + Math.sign(f)] || a, q = Math.abs(f);
-  const x = Math.max(3, a.offsetLeft - ONE_EXT / 2 + (b.offsetLeft - a.offsetLeft) * q), w = a.offsetWidth + (b.offsetWidth - a.offsetWidth) * q + ONE_EXT;
-  p.getAnimations().forEach(an => an.cancel());
-  const from = p.style.transform, fw = p.style.width; p.style.transform = `translateX(${x}px)`; p.style.width = w + 'px'; p._x = x; p._w = w;
-  if (ms && from) { p.animate([{transform: from, width: fw || w + 'px'}, {transform: p.style.transform, width: w + 'px'}], {duration: ms, easing: 'cubic-bezier(.22,.8,.3,1)'}); oneMag(tabs, p, ms + 40); }
-  else oneMag(tabs, p, 0);
+  const bs = [...tabs.querySelectorAll('button')], ia = i + 1; if (!bs[ia]) return;
+  const ib = bs[ia + Math.sign(f)] ? ia + Math.sign(f) : ia, q = ib === ia ? 0 : Math.abs(f);
+  oneTabsSet(tabs, bs.map((_, j) => j === ia ? 1 - q : j === ib ? q : 0), ms, 'swipe');
+  oneFade(i, f, ms);
 };
+/* ---------- la barre du bas, façon jeu mobile : l'onglet ouvert prend plus de place, son icône grossit et monte,
+   et son nom apparaît dessous ; les autres ne gardent que l'icône. Tout suit le pouce pendant un glissement. ---------- */
+// ONE_G : la largeur de l'onglet ouvert, par rapport aux autres (déclarée en haut du fichier)
+// La place de chaque bouton est calculée (pas mesurée) : la bulle sait où aller avant même que les boutons aient fini de bouger.
+function oneTabsLay(tabs, ks) {
+  const cs = getComputedStyle(tabs), pl = parseFloat(cs.paddingLeft), pr = parseFloat(cs.paddingRight), W = tabs.clientWidth - pl - pr;
+  const ws = ks.map(k => 1 + (ONE_G - 1) * k), S = ws.reduce((a, b) => a + b, 0); let x = pl;
+  return ws.map(w => { const r = {x, w: W * w / S}; x += r.w; return r; });
+}
+function oneTabsTo(tabs, on) { const n = tabs.querySelectorAll('button').length; oneTabsSet(tabs, [...Array(n)].map((_, j) => j === on ? 1 : 0), oneCalm() || !ONE.ready ? 0 : 440, 'tap'); }
+function oneTabsSet(tabs, ks, ms, why) {
+  const bs = [...tabs.querySelectorAll('button')], p = tabs.querySelector('.one-pill'); if (!p || !bs.length) return;
+  const L = oneTabsLay(tabs, ks), K = ks.reduce((a, b) => a + b, 0) || 1, ix = ks.reduce((m, k, j) => k > ks[m] ? j : m, 0);
+  const X = L.reduce((a, r, j) => a + r.x * ks[j], 0) / K, Wd = L.reduce((a, r, j) => a + r.w * ks[j], 0) / K;
+  const x = Math.max(2, X - ONE_EXT / 2), w = Wd + ONE_EXT;
+  // Pendant le glissement : tout suit le doigt, sans transition. Au lâcher ou au toucher : tout part ensemble, même durée, même courbe.
+  const drag = !ms; tabs.classList.toggle('one-drag', drag);
+  const ease = why === 'tap' ? 'cubic-bezier(.3,1.3,.5,1)' : 'cubic-bezier(.22,.8,.3,1)';
+  tabs.style.setProperty('--tt', (ms || 0) + 'ms'); tabs.style.setProperty('--te', ease);
+  const cs = getComputedStyle(p), m0 = new DOMMatrix(cs.transform === 'none' ? undefined : cs.transform), x0 = m0.m41, w0 = parseFloat(cs.width) || w;
+  p.getAnimations().forEach(a => a.cancel());
+  p.style.transform = `translateX(${x}px)`; p.style.width = w + 'px'; p._x = x; p._w = w;
+  if (!drag && p._set && (Math.abs(x0 - x) > .5 || Math.abs(w0 - w) > .5)) p.animate([{transform: `translateX(${x0}px)`, width: w0 + 'px'}, {transform: `translateX(${x}px)`, width: w + 'px'}], {duration: ms, easing: ease});
+  p._set = true;
+  bs.forEach((b, j) => { b.style.setProperty('--g', (1 + (ONE_G - 1) * ks[j]).toFixed(4)); b.style.setProperty('--k', ks[j].toFixed(4)); b.classList.toggle('one-big', j === ix); });
+}
+/* ---------- Accueil ↔ Aujourd'hui : la couleur du module s'efface (ou arrive) au rythme du pouce, jusqu'au noir de l'Accueil ---------- */
+const ONE_FADE = {raf: 0, t: 0, k: null};
+function oneFade(i, f, ms) {
+  const R = document.documentElement, home = S.mod === 'home';
+  const k = home ? Math.max(0, f) : i === 0 && (f < 0 || ONE_FADE.k != null) ? 1 + Math.min(0, f) : null;
+  if (k == null) return;
+  if (!R.classList.contains('one-fd')) {
+    R.classList.add('one-fd', 'one-snap');
+    // Depuis l'Accueil : le fond prend déjà les couleurs de Training (invisibles au départ).
+    if (home) { const c = {o1: '#FF3B30', o2: '#FF9F0A', o3: '#FF375F'}; for (const v in c) R.style.setProperty('--' + v, c[v], 'important'); R.style.setProperty('--band', 'color-mix(in srgb,#FF3B30 30%,#000)', 'important'); }
+  }
+  cancelAnimationFrame(ONE_FADE.raf); clearTimeout(ONE_FADE.t);
+  const set = v => { ONE_FADE.k = v; R.style.setProperty('--one-fade', v.toFixed(3)); };
+  if (!ms) { set(k); return; }
+  const k0 = ONE_FADE.k ?? (home ? 0 : 1), t0 = performance.now(), E = t => 1 - Math.pow(1 - t, 3);
+  const step = now => { const t = Math.min(1, (now - t0) / ms); set(k0 + (k - k0) * E(t)); if (t < 1) ONE_FADE.raf = requestAnimationFrame(step); };
+  ONE_FADE.raf = requestAnimationFrame(step);
+  // Une fois la page changée (ou revenue), on rend la main aux vraies couleurs, sans transition : rien ne clignote.
+  ONE_FADE.t = setTimeout(oneFadeEnd, ms + 160);
+}
+function oneFadeEnd() {
+  const R = document.documentElement; cancelAnimationFrame(ONE_FADE.raf); ONE_FADE.k = null;
+  R.classList.add('one-snap'); ['--o1', '--o2', '--o3', '--band', '--one-fade'].forEach(v => R.style.removeProperty(v));
+  getComputedStyle(R).getPropertyValue('--o1'); R.classList.remove('one-fd');
+  const un = () => R.classList.remove('one-snap'); requestAnimationFrame(() => requestAnimationFrame(un)); setTimeout(un, 120);
+}
 
 /* ---------- la barre d'état du téléphone (en haut, avec l'heure) change de couleur au même rythme que le fond ---------- */
 const oneRgb = c => { c = String(c || '').trim(); let m = c.match(/^#([0-9a-f]{3})$/i); if (m) c = '#' + [...m[1]].map(x => x + x).join('');

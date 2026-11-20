@@ -123,20 +123,41 @@ function acOpen(i = 0) {
 // Comme une story : l'écran sort du carré « Actus » et grandit vers toi ; à la fin, il y retourne en se refermant.
 // La story naît du carré « Actus » : un carré arrondi de sa taille qui grandit jusqu'à l'écran entier, puis y retourne.
 // Tout passe par transform (fait par la carte graphique), pas par une découpe : c'est fluide même sur téléphone.
+// Comme Instagram : la story garde sa forme d'écran et grandit d'un seul tenant depuis le carré (même échelle en largeur
+// et en hauteur, donc rien n'est jamais écrasé). Seuls « transform » et « opacity » bougent : la carte graphique fait tout
+// le trajet seule, image par image, même si le téléphone est occupé au même moment (l'ouverture automatique au démarrage).
+const acSmall = () => { const r = document.querySelector('.one-act')?.getBoundingClientRect(); if (!r || !r.width) return null;
+  const W = innerWidth, H = innerHeight, s = Math.max(r.width / W, r.height / H) * 1.15;
+  return `translate(${r.left + r.width / 2 - W * s / 2}px, ${r.top + r.height / 2 - H * s / 2}px) scale(${s})`; };
 function acZoom(el, open, done) {
-  const sq = document.querySelector('.one-act'), r = sq?.getBoundingClientRect();
-  el.getAnimations({subtree: true}).forEach(a => a.cancel());
-  if (!r || !r.width || matchMedia('(prefers-reduced-motion: reduce)').matches) { if (!open) done?.(); return; }
-  const W = innerWidth, H = innerHeight, sx = r.width / W, sy = r.height / H, rad = 16;
-  const small = {transform: `translate(${r.left}px, ${r.top}px) scale(${sx}, ${sy})`, borderRadius: `${rad / sx}px / ${rad / sy}px`},
-    big = {transform: 'translate(0px, 0px) scale(1, 1)', borderRadius: '0px / 0px'};
-  el.style.transformOrigin = '0 0'; el.style.willChange = 'transform';
-  const dur = open ? 520 : 400, ease = open ? 'cubic-bezier(.32,.72,0,1)' : 'cubic-bezier(.4,0,.6,1)';
-  const a = el.animate(open ? [small, big] : [big, small], {duration: dur, easing: ease, fill: open ? 'none' : 'forwards'});
-  // Le contenu apparaît une fois le carré ouvert (et disparaît vite à la fermeture) : on ne le voit jamais déformé.
-  for (const c of el.children) c.animate(open ? [{opacity: 0}, {opacity: 0, offset: .35}, {opacity: 1}] : [{opacity: 1}, {opacity: 0, offset: .4}, {opacity: 0}], {duration: dur, easing: 'ease-out', fill: open ? 'none' : 'forwards'});
-  a.finished.then(() => { el.style.willChange = ''; }).catch(() => {});
-  if (!open) { let ok = false; const f = () => { if (ok) return; ok = true; done?.(); }; a.finished.then(f).catch(f); setTimeout(f, dur + 120); }
+  const small = acSmall(), cur = getComputedStyle(el).transform;
+  el.getAnimations().forEach(a => a.cancel());
+  let ok = false; const fin = () => { if (ok) return; ok = true; el.classList.remove('zm'); el.style.willChange = ''; if (!open) el.style.borderRadius = ''; done?.(); };
+  if (!small || matchMedia('(prefers-reduced-motion: reduce)').matches) { el.style.transform = ''; el.style.opacity = ''; fin(); return; }
+  el.style.transformOrigin = '0 0'; el.style.willChange = 'transform, opacity'; el.classList.add('zm');
+  if (open) {
+    // Ouverture : rapide au départ, puis elle se pose en douceur (0,4 s) ; elle devient opaque dans le premier quart.
+    const a = el.animate([{transform: small}, {transform: 'none'}], {duration: 400, easing: 'cubic-bezier(.22,.75,.25,1)'});
+    el.animate([{opacity: 0}, {opacity: 1}], {duration: 170, easing: 'linear'});
+    a.finished.then(fin, fin);
+  } else {
+    // Fermeture : elle repart de là où elle est (même tirée vers le bas avec le doigt) et rentre dans le carré.
+    const from = el.style.transform || (cur && cur !== 'none' ? cur : 'none'), o0 = el.style.opacity || 1;
+    el.style.transform = ''; el.style.opacity = '';
+    const a = el.animate([{transform: from}, {transform: small}], {duration: 340, easing: 'cubic-bezier(.32,0,.18,1)', fill: 'forwards'});
+    el.animate([{opacity: o0}, {opacity: o0, offset: .55}, {opacity: 0}], {duration: 340, easing: 'ease-in', fill: 'forwards'});
+    a.finished.then(fin, fin); setTimeout(fin, 460);
+  }
+}
+// Tirer la story vers le bas : elle suit le doigt en rétrécissant ; lâchée assez bas (ou d'un coup sec), elle se ferme, sinon elle remonte.
+function acDrag(el, dy) {
+  const W = innerWidth, H = innerHeight, k = Math.max(0, dy), s = 1 - Math.min(.32, k / H * .55);
+  el.style.transformOrigin = '0 0'; el.style.borderRadius = Math.min(36, k / 4) + 'px';
+  el.style.transform = `translate(${W * (1 - s) / 2}px, ${H * .35 * (1 - s) + k * .55}px) scale(${s})`;
+}
+function acBack(el) {
+  const from = el.style.transform; if (!from) return; el.style.transform = ''; el.style.borderRadius = '';
+  el.animate([{transform: from, borderRadius: '30px'}, {transform: 'none', borderRadius: '0px'}], {duration: 300, easing: 'cubic-bezier(.2,.9,.25,1)'});
 }
 function acShow(i) {
   const el = document.getElementById('one-st'); if (!el) return;
@@ -222,14 +243,20 @@ function acBind(el) {
   let down = null;
   // Les gestes dans les actus restent dans les actus (avant, glisser ici changeait aussi d'onglet dans l'appli dessous).
   for (const ev of ['touchstart', 'touchmove', 'touchend']) el.addEventListener(ev, e => e.stopPropagation(), {passive: true});
-  el.addEventListener('pointerdown', e => { if (e.target.closest('[data-acx],[data-acs]')) return; down = {x: e.clientX, y: e.clientY, t: performance.now(), hold: setTimeout(() => acPause(true), 220)}; });
+  el.addEventListener('pointerdown', e => { if (e.target.closest('[data-acx],[data-acs]')) return; down = {x: e.clientX, y: e.clientY, t: performance.now(), ly: e.clientY, lt: performance.now(), v: 0, hold: setTimeout(() => acPause(true), 220)}; });
+  el.addEventListener('pointermove', e => {
+    if (!down || !ACS.on) return; const dy = e.clientY - down.y, dx = e.clientX - down.x, now = performance.now();
+    if (!down.drag) { if (dy < 10 || dy < Math.abs(dx) * 1.2) return; down.drag = true; clearTimeout(down.hold); acPause(true); el.getAnimations().forEach(a => a.cancel()); }
+    down.v = (e.clientY - down.ly) / Math.max(1, now - down.lt); down.ly = e.clientY; down.lt = now;
+    acDrag(el, dy);
+  });
   el.addEventListener('pointerup', e => {
     if (!down) return; const d = down; down = null; clearTimeout(d.hold);
+    if (d.drag) { const dy = e.clientY - d.y; if (dy > 110 || (d.v > .6 && dy > 30)) acClose(); else { acBack(el); acPause(false); } return; }
     if (ACS.paused) { acPause(false); return; }   // on relâche après être resté appuyé : la story reprend
-    if (e.clientY - d.y > 90) { acClose(); return; }   // glisser vers le bas : fermer
     acShow(ACS.i + (e.clientX < innerWidth / 3 ? -1 : 1));
   });
-  el.addEventListener('pointercancel', () => { if (down) clearTimeout(down.hold); down = null; acPause(false); });
+  el.addEventListener('pointercancel', () => { if (down) { clearTimeout(down.hold); if (down.drag) acBack(el); } down = null; acPause(false); });
   el.addEventListener('contextmenu', e => e.preventDefault());
   el.addEventListener('click', e => {
     if (e.target.closest('[data-acx]')) { acClose(); return; }

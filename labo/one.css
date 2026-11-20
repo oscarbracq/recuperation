@@ -217,7 +217,7 @@ html.one[data-mod="home"]{transition:none!important}
 
 /* Actus, version plus détendue : pas de bulles ; les chiffres posés en deux colonnes aérées, la synthèse en simple texte.
    L'écran ne fait plus de fondu : il sort du carré « Actus » (one-actus.js). */
-html.one .one-st{opacity:1!important;transform:none!important;transition:background .5s!important}
+html.one .one-st{opacity:1;transform:none;transition:background .5s}
 html.one .one-st .grid,html.one .one-st .grid.g4{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px;margin:6px 0 22px}
 html.one .one-st .grid div{background:none;border-radius:0;padding:0 0 0 12px;border-left:2px solid rgba(255,255,255,.35)}
 html.one .one-st .grid b{font-size:1.35rem;font-weight:800;letter-spacing:-.01em}
@@ -283,3 +283,24 @@ html.one .banner{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 22%,
 html.one .restb:not(:empty){background:color-mix(in srgb,var(--accent) 18%,#0c0d10)}
 html.one .hdtog,html.one .varbtn{background:color-mix(in srgb,var(--accent) 14%,#0c0d10)}
 html.one .vam[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 18%,#0c0d10)}
+/* v126 · Actus : le doigt garde la main (tirer vers le bas pour fermer) ; pendant le zoom, le halo du fond ne bouge pas. */
+html.one .one-st{touch-action:none}
+html.one .one-st.zm::before{animation-play-state:paused}
+/* v126 · Barre du bas, façon jeu mobile : l'onglet ouvert s'élargit, son icône grossit et monte, son nom apparaît dessous.
+   Les autres onglets : l'icône seule. --k va de 0 (fermé) à 1 (ouvert) et suit le pouce pendant un glissement. */
+@property --k{syntax:'<number>';inherits:true;initial-value:0}
+html.one #one-tabs button,html.one #one-tabs button[data-one-h]{flex:var(--g,1) 1 0!important;overflow:visible!important;gap:0!important;padding:0!important;justify-content:center!important;transform:none!important;transition:flex-grow var(--tt,440ms) var(--te,ease),--k var(--tt,440ms) var(--te,ease)!important;color:color-mix(in srgb,var(--fg) calc(var(--k) * 100%),var(--fg3))!important}
+html.one #one-tabs.one-drag button,html.one #one-tabs.one-drag button[data-one-h]{transition:none!important}
+html.one #one-tabs button svg{width:23px!important;height:23px!important;transform:translateY(calc(var(--k) * -12px)) scale(calc(1 + var(--k) * .55))!important;transition:scale .15s!important;color:color-mix(in srgb,var(--one-c) calc(var(--k) * 100%),var(--fg3));filter:drop-shadow(0 0 calc(var(--k) * 7px) color-mix(in srgb,var(--one-c) calc(var(--k) * 60%),transparent))!important}
+html.one #one-tabs button:active svg{scale:.88}
+html.one #one-tabs button .lb{position:absolute;left:50%;bottom:2px;transform:translateX(-50%) translateY(calc((1 - var(--k)) * 7px)) scale(calc(.75 + var(--k) * .25));opacity:calc(var(--k) * 1.7 - .7);font-size:.6875rem;font-weight:700;letter-spacing:-.01em;color:var(--fg);white-space:nowrap;pointer-events:none}
+@media (max-width:380px){html.one #one-tabs button .lb{font-size:.625rem}}
+/* v126 · Accueil ↔ Aujourd'hui : le fond coloré suit le pouce (--one-fade), puis les vraies couleurs reprennent sans transition */
+html.one.one-fd .aura span{opacity:calc(.44 * var(--aura-k,1) * var(--one-fade,1))!important}
+html.one.one-fd .aura span:nth-child(3){opacity:calc(.32 * var(--aura-k,1) * var(--one-fade,1))!important}
+html.one.one-fd body::before,html.one.one-fd .aura::after{opacity:var(--one-fade,1)}
+html.one.one-snap,html.one.one-snap body{transition:none!important}
+/* v126 · Accueil : le bilan reste à sa place aussi dans la page qui glisse sous le pouce */
+html.one .one-hm .hm-head{flex:0 0 auto!important;padding-bottom:0!important;-webkit-mask-image:none!important;mask-image:none!important}
+html.one .one-hm{padding-bottom:calc(118px + env(safe-area-inset-bottom,0px))!important}
+html.one .one-hm .wk{margin-top:auto!important;margin-bottom:auto!important}
