@@ -9663,7 +9663,13 @@ function macroChart(D) {
   if (!D.some(d => d.kcal)) return '<div class="empty small">Pas encore de repas notés.</div>';
   const grid = [0, .5, 1].map(f => `<line x1="${L}" x2="${W0 - R}" y1="${y(mx * f)}" y2="${y(mx * f)}" stroke="var(--line)"/><text x="${L - 4}" y="${y(mx * f) + 3}" text-anchor="end" font-size="9" fill="var(--fg2)">${Math.round(mx * f)}</text>`).join('');
   const lines = keys.map(([k, c]) => { const pts = D.map((d, i) => d.kcal ? [x(i), y(d[k] || 0)] : null).filter(Boolean); return pts.length ? `<polyline fill="none" stroke="${c}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" points="${pts.map(p => p.join(',')).join(' ')}"/>${pts.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="2.2" fill="${c}"/>`).join('')}` : ''; }).join('');
-  const labs = D.map((d, i) => i % 2 ? '' : `<text x="${x(i)}" y="${H - 5}" text-anchor="middle" font-size="9" fill="var(--fg2)">${esc(d.lab)}</text>`).join('');
+  // Sous le graphique : la lettre du jour sur une semaine ou deux ; au-delà, quelques dates (jj/mm) ; sur plus de 3 mois, le début de chaque mois.
+  // Jamais plus de 7 à 8 repères : les lettres ne se chevauchent plus.
+  const MO = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'], n = D.length, tx = (i, t, a = 'middle') => `<text x="${x(i)}" y="${H - 5}" text-anchor="${a}" font-size="9" fill="var(--fg2)">${esc(t)}</text>`;
+  let labs = '';
+  if (n <= 14) labs = D.map((d, i) => n > 8 && i % 2 ? '' : tx(i, d.lab)).join('');
+  else if (n <= 92) { const st = Math.ceil((n - 1) / 6); labs = D.map((d, i) => (i % st === 0 && n - 1 - i >= st * .6) || i === n - 1 ? tx(i, d.k.slice(8, 10) + '/' + d.k.slice(5, 7), i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle') : '').join(''); }
+  else { const ms = D.map((d, i) => [i, d.k]).filter(([i, k]) => k.endsWith('-01')), st = Math.ceil(ms.length / 12); labs = ms.filter((_, j) => j % st === 0).map(([i, k]) => tx(i, MO[+k.slice(5, 7) - 1])).join(''); }
   return `<svg viewBox="0 0 ${W0} ${H}" width="100%" role="img" aria-label="Protéines, lipides et glucides par jour, en grammes">${grid}${lines}${labs}</svg>`;
 }
 const SCANIC = '<svg viewBox="0 0 28 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 3v4M3 3h4M25 3v4M25 3h-4M3 21v-4M3 21h4M25 21v-4M25 21h-4"/><path d="M8 7v10M11 7v10M13.5 7v10M16 7v10M19.5 7v10" stroke-width="1.6"/></svg>';

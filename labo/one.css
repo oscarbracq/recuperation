@@ -304,3 +304,8 @@ html.one.one-snap,html.one.one-snap body{transition:none!important}
 html.one .one-hm .hm-head{flex:0 0 auto!important;padding-bottom:0!important;-webkit-mask-image:none!important;mask-image:none!important}
 html.one .one-hm{padding-bottom:calc(118px + env(safe-area-inset-bottom,0px))!important}
 html.one .one-hm .wk{margin-top:auto!important;margin-bottom:auto!important}
+/* v127 · Un seul « Détail » par bloc, dans le coin en bas à droite : il ne prend pas de place (Masquer reste au même endroit). */
+html.one .one-hastip{position:relative}
+html.one .one-tipb.one-tipc{position:absolute;right:14px;bottom:4px;margin:0;font-size:.75rem;z-index:2}
+/* v127 · Sur ordinateur, pas d'actus (le carré disparaît) */
+html.one.pc .one-act{display:none!important}

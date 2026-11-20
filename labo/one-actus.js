@@ -115,6 +115,7 @@ const acIc = {spk: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" 
   mute: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m16 9 5 6M21 9l-5 6"/></svg>',
   x: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'};
 function acOpen(i = 0) {
+  if (typeof isPC === 'function' && isPC()) return;   // sur ordinateur : pas d'actus
   ACS.L = acList(); if (!ACS.L.length) return;
   let el = document.getElementById('one-st'); if (!el) { el = document.createElement('div'); el.id = 'one-st'; el.className = 'one-st'; document.body.appendChild(el); acBind(el); }
   if (!ACS.on) { ACS.on = true; try { history.pushState({...(history.state || {}), acst: 1}, ''); } catch (e) {} }

@@ -433,16 +433,19 @@ paneShow = function (...a) { const r = onePaneShow0.apply(this, a); const v = P.
       if (skip(el)) return; el.dataset.tip = '1';
       const t = el.textContent.trim();
       if (el.matches('h2 small, .sec-label small')) { if (t.length > 22) el.hidden = true; return; }
-      if (t.length < 46) return;
+      // Les phrases courtes qui disent ce qu'on regarde restent visibles (ex. « Moyenne de ta VFC pendant la nuit, mesurée par la Fenix »).
+      if (t.length < 70) return;
       // Dans les plannings : l'aide est juste cachée, sans « Détail » qui prend de la place.
       if (el.closest('.sboard')) { el.hidden = true; return; }
       el.hidden = true; el.classList.add('one-tipx');
-      // Deux « Détail » d'affilée : un seul, qui ouvre les deux textes.
-      let pv = el.previousElementSibling; while (pv && pv.classList.contains('one-tipx')) pv = pv.previousElementSibling;
-      if (pv?.classList.contains('one-tipb') && pv._els) { pv._els.push(el); el.after(pv); return; }
+      // Un bloc qui a déjà son propre « Détail » (il ouvre la fiche complète) : pas de deuxième bouton, l'explication y est.
+      const card = el.closest('.card, .tcard');
+      if (card && card.querySelector(':scope button.more, :scope [data-metric]') && !card.closest('.pane, .sheet')) return;
+      // Sinon : un seul « Détail » par bloc, posé dans le coin en bas à droite (il ne prend pas de place), qui ouvre tous ses textes.
+      if (card?._tipb) { card._tipb._els.push(el); return; }
       const b = document.createElement('button'); b.type = 'button'; b.className = 'one-tipb'; b.textContent = 'Détail'; b._els = [el];
       b.onclick = e => { e.stopPropagation(); const h = !b._els[0].hidden; b._els.forEach(x => { x.hidden = h; }); b.textContent = h ? 'Détail' : 'Masquer'; };
-      el.after(b);
+      if (card) { card._tipb = b; card.classList.add('one-hastip'); b.classList.add('one-tipc'); card.appendChild(b); } else el.after(b);
     });
   };
   // Juste après chaque changement de page, avant qu'elle s'affiche (la copie qui glisse au pouce aussi) : rien ne saute.
@@ -522,3 +525,11 @@ document.addEventListener('click', async e => {
     if (m === 'T') S.tset = {...S.tset, archNo: [...new Set([...(S.tset.archNo || []), ref])]};
     await ARCH[m].set(ARCH[m].get().filter(y => y !== ref)); paneRender(); archHide(); toast('Remis dans la liste'); }
 });
+
+/* ---------- Graphiques à la souris : la bulle blanche n'apparaît que quand la souris est sur le graphique, et part avec elle.
+   Au doigt (téléphone), rien ne change. ---------- */
+const ONE_HOVER = matchMedia('(hover: hover) and (pointer: fine)');
+const oneInitCharts0 = initCharts;
+initCharts = function (root) { if (ONE_HOVER.matches) return; return oneInitCharts0(root); };
+const oneChartOff = b => { const sc = b.querySelector('.sc'), bu = b.querySelector('.bubble'); if (sc) sc.innerHTML = ''; if (bu) bu.hidden = true; };
+document.addEventListener('pointerout', e => { if (e.pointerType !== 'mouse') return; const b = e.target.closest?.('.chartbox'); if (b && !b.contains(e.relatedTarget)) oneChartOff(b); });

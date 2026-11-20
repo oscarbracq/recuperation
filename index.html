@@ -1677,6 +1677,11 @@ html.one.one-snap,html.one.one-snap body{transition:none!important}
 html.one .one-hm .hm-head{flex:0 0 auto!important;padding-bottom:0!important;-webkit-mask-image:none!important;mask-image:none!important}
 html.one .one-hm{padding-bottom:calc(118px + env(safe-area-inset-bottom,0px))!important}
 html.one .one-hm .wk{margin-top:auto!important;margin-bottom:auto!important}
+/* v127 · Un seul « Détail » par bloc, dans le coin en bas à droite : il ne prend pas de place (Masquer reste au même endroit). */
+html.one .one-hastip{position:relative}
+html.one .one-tipb.one-tipc{position:absolute;right:14px;bottom:4px;margin:0;font-size:.75rem;z-index:2}
+/* v127 · Sur ordinateur, pas d'actus (le carré disparaît) */
+html.one.pc .one-act{display:none!important}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -9975,7 +9980,13 @@ function macroChart(D) {
   if (!D.some(d => d.kcal)) return '<div class="empty small">Pas encore de repas notés.</div>';
   const grid = [0, .5, 1].map(f => `<line x1="${L}" x2="${W0 - R}" y1="${y(mx * f)}" y2="${y(mx * f)}" stroke="var(--line)"/><text x="${L - 4}" y="${y(mx * f) + 3}" text-anchor="end" font-size="9" fill="var(--fg2)">${Math.round(mx * f)}</text>`).join('');
   const lines = keys.map(([k, c]) => { const pts = D.map((d, i) => d.kcal ? [x(i), y(d[k] || 0)] : null).filter(Boolean); return pts.length ? `<polyline fill="none" stroke="${c}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" points="${pts.map(p => p.join(',')).join(' ')}"/>${pts.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="2.2" fill="${c}"/>`).join('')}` : ''; }).join('');
-  const labs = D.map((d, i) => i % 2 ? '' : `<text x="${x(i)}" y="${H - 5}" text-anchor="middle" font-size="9" fill="var(--fg2)">${esc(d.lab)}</text>`).join('');
+  // Sous le graphique : la lettre du jour sur une semaine ou deux ; au-delà, quelques dates (jj/mm) ; sur plus de 3 mois, le début de chaque mois.
+  // Jamais plus de 7 à 8 repères : les lettres ne se chevauchent plus.
+  const MO = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'], n = D.length, tx = (i, t, a = 'middle') => `<text x="${x(i)}" y="${H - 5}" text-anchor="${a}" font-size="9" fill="var(--fg2)">${esc(t)}</text>`;
+  let labs = '';
+  if (n <= 14) labs = D.map((d, i) => n > 8 && i % 2 ? '' : tx(i, d.lab)).join('');
+  else if (n <= 92) { const st = Math.ceil((n - 1) / 6); labs = D.map((d, i) => (i % st === 0 && n - 1 - i >= st * .6) || i === n - 1 ? tx(i, d.k.slice(8, 10) + '/' + d.k.slice(5, 7), i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle') : '').join(''); }
+  else { const ms = D.map((d, i) => [i, d.k]).filter(([i, k]) => k.endsWith('-01')), st = Math.ceil(ms.length / 12); labs = ms.filter((_, j) => j % st === 0).map(([i, k]) => tx(i, MO[+k.slice(5, 7) - 1])).join(''); }
   return `<svg viewBox="0 0 ${W0} ${H}" width="100%" role="img" aria-label="Protéines, lipides et glucides par jour, en grammes">${grid}${lines}${labs}</svg>`;
 }
 const SCANIC = '<svg viewBox="0 0 28 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 3v4M3 3h4M25 3v4M25 3h-4M3 21v-4M3 21h4M25 21v-4M25 21h-4"/><path d="M8 7v10M11 7v10M13.5 7v10M16 7v10M19.5 7v10" stroke-width="1.6"/></svg>';
@@ -11410,16 +11421,19 @@ paneShow = function (...a) { const r = onePaneShow0.apply(this, a); const v = P.
       if (skip(el)) return; el.dataset.tip = '1';
       const t = el.textContent.trim();
       if (el.matches('h2 small, .sec-label small')) { if (t.length > 22) el.hidden = true; return; }
-      if (t.length < 46) return;
+      // Les phrases courtes qui disent ce qu'on regarde restent visibles (ex. « Moyenne de ta VFC pendant la nuit, mesurée par la Fenix »).
+      if (t.length < 70) return;
       // Dans les plannings : l'aide est juste cachée, sans « Détail » qui prend de la place.
       if (el.closest('.sboard')) { el.hidden = true; return; }
       el.hidden = true; el.classList.add('one-tipx');
-      // Deux « Détail » d'affilée : un seul, qui ouvre les deux textes.
-      let pv = el.previousElementSibling; while (pv && pv.classList.contains('one-tipx')) pv = pv.previousElementSibling;
-      if (pv?.classList.contains('one-tipb') && pv._els) { pv._els.push(el); el.after(pv); return; }
+      // Un bloc qui a déjà son propre « Détail » (il ouvre la fiche complète) : pas de deuxième bouton, l'explication y est.
+      const card = el.closest('.card, .tcard');
+      if (card && card.querySelector(':scope button.more, :scope [data-metric]') && !card.closest('.pane, .sheet')) return;
+      // Sinon : un seul « Détail » par bloc, posé dans le coin en bas à droite (il ne prend pas de place), qui ouvre tous ses textes.
+      if (card?._tipb) { card._tipb._els.push(el); return; }
       const b = document.createElement('button'); b.type = 'button'; b.className = 'one-tipb'; b.textContent = 'Détail'; b._els = [el];
       b.onclick = e => { e.stopPropagation(); const h = !b._els[0].hidden; b._els.forEach(x => { x.hidden = h; }); b.textContent = h ? 'Détail' : 'Masquer'; };
-      el.after(b);
+      if (card) { card._tipb = b; card.classList.add('one-hastip'); b.classList.add('one-tipc'); card.appendChild(b); } else el.after(b);
     });
   };
   // Juste après chaque changement de page, avant qu'elle s'affiche (la copie qui glisse au pouce aussi) : rien ne saute.
@@ -11499,6 +11513,14 @@ document.addEventListener('click', async e => {
     if (m === 'T') S.tset = {...S.tset, archNo: [...new Set([...(S.tset.archNo || []), ref])]};
     await ARCH[m].set(ARCH[m].get().filter(y => y !== ref)); paneRender(); archHide(); toast('Remis dans la liste'); }
 });
+
+/* ---------- Graphiques à la souris : la bulle blanche n'apparaît que quand la souris est sur le graphique, et part avec elle.
+   Au doigt (téléphone), rien ne change. ---------- */
+const ONE_HOVER = matchMedia('(hover: hover) and (pointer: fine)');
+const oneInitCharts0 = initCharts;
+initCharts = function (root) { if (ONE_HOVER.matches) return; return oneInitCharts0(root); };
+const oneChartOff = b => { const sc = b.querySelector('.sc'), bu = b.querySelector('.bubble'); if (sc) sc.innerHTML = ''; if (bu) bu.hidden = true; };
+document.addEventListener('pointerout', e => { if (e.pointerType !== 'mouse') return; const b = e.target.closest?.('.chartbox'); if (b && !b.contains(e.relatedTarget)) oneChartOff(b); });
 
 /* ================= TNR · Actus : les nouvelles du jour en stories =================
    Un carré « Actus » en haut à droite de l'Accueil (en face de l'IA). Plein écran, barres de progression, grand chiffre,
@@ -11617,6 +11639,7 @@ const acIc = {spk: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" 
   mute: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m16 9 5 6M21 9l-5 6"/></svg>',
   x: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'};
 function acOpen(i = 0) {
+  if (typeof isPC === 'function' && isPC()) return;   // sur ordinateur : pas d'actus
   ACS.L = acList(); if (!ACS.L.length) return;
   let el = document.getElementById('one-st'); if (!el) { el = document.createElement('div'); el.id = 'one-st'; el.className = 'one-st'; document.body.appendChild(el); acBind(el); }
   if (!ACS.on) { ACS.on = true; try { history.pushState({...(history.state || {}), acst: 1}, ''); } catch (e) {} }
