@@ -1771,9 +1771,9 @@ html.one.pc .one-act{display:none!important}
 /* v131 · « Ma saison » sur toute la largeur (ordinateur) */
 html.one.pc :is(#t-view,.tab-ghost)>div:has(>[data-tseason]){grid-column:1 / -1!important}
 
-/* ---------- Le grain du fond (comme une photo) : un bruit fin par-dessus les couleurs, en « lumière douce » ; sur le noir de l'Accueil
+/* ---------- Le grain du fond (comme une photo) : un bruit très fin (des points d'à peine un pixel) et doux (pas de points noirs) par-dessus les couleurs, en « lumière douce » ; sur le noir de l'Accueil
    il ne se voit pas. Son dosage se règle dans Réglages (Grain du fond, 50 % par défaut). ---------- */
-html.one .aura::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/220px 220px;mix-blend-mode:overlay;opacity:calc(var(--grain,.5) * .7)}
+html.one .aura::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='.5' intercept='.25'/%3E%3CfeFuncG type='linear' slope='.5' intercept='.25'/%3E%3CfeFuncB type='linear' slope='.5' intercept='.25'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/256px 256px;mix-blend-mode:overlay;opacity:var(--grain,.5)}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
