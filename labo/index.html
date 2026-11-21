@@ -21,7 +21,7 @@ img{max-width:100%}
 #login .logo,#setpw .logo{display:block;width:80px;height:80px;margin:0 auto 8px;border-radius:18px;box-shadow:0 0 0 1px var(--line),0 6px 18px rgba(11,23,51,.2)}
 #login input,#setpw input{font:inherit;padding:14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--fg)}
 #login .msg,#setpw .msg{font-size:.875rem;color:var(--fg2);min-height:1.4em;margin:0}
-#splash{position:fixed;inset:0;z-index:300;background:#000;pointer-events:none;--d:240px;--sh:0px}
+#splash{position:fixed;inset:0;z-index:300;background:#0B1733;pointer-events:none;--d:240px;--sh:0px}
 #splash svg{position:absolute;left:50%;top:50%;width:var(--d);height:var(--d);margin:calc(var(--d) / -2 - var(--sh)) 0 0 calc(var(--d) / -2);fill:#fff}
 #splash .sp{position:absolute;left:50%;top:calc(50% - var(--sh) + var(--d) * .3);width:22px;height:22px;margin:-11px 0 0 -11px;box-sizing:border-box;border-radius:50%;border:2.5px solid rgba(255,255,255,.16);border-top-color:rgba(255,255,255,.9);animation:tnrspin .75s linear infinite,tnrfade .35s ease .15s both;transition:opacity .2s}
 #splash .sp.out{opacity:0}
@@ -50,7 +50,7 @@ img{max-width:100%}
   place(); addEventListener('resize', place);
   // The phone's top bar stays navy, like Android's launch screen, until the app shows.
   window.TNR_SPLASH_ON = true;
-  try { document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) { m.content = '#000000'; }); } catch (e) {}
+  try { document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) { m.content = '#0B1733'; }); } catch (e) {}
   function bars() { window.TNR_SPLASH_ON = false; try { if (typeof syncBars === 'function') syncBars(); else document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) { m.content = '#000000'; }); } catch (e) {} }
   var PX = 504, PY = 474.6, RIN = 19; // a point in the middle of the N's diagonal, and the stroke's half width there
   function sm(a, b, x) { x = Math.max(0, Math.min(1, (x - a) / (b - a))); return x * x * (3 - 2 * x); }
@@ -75,7 +75,7 @@ img{max-width:100%}
     function draw(t) {
       fit();
       var e = t * t * t * (t * (t * 6 - 15) + 10), s = Math.exp(L * e), rev = sm(.03, .34, t), fa = 1 - sm(0, .2, t), m = dpr * s * k;
-      x.setTransform(1, 0, 0, 1, 0, 0); x.globalCompositeOperation = 'source-over'; x.globalAlpha = 1; x.fillStyle = '#000000'; x.fillRect(0, 0, c.width, c.height);
+      x.setTransform(1, 0, 0, 1, 0, 0); x.globalCompositeOperation = 'source-over'; x.globalAlpha = 1; x.fillStyle = '#0B1733'; x.fillRect(0, 0, c.width, c.height);
       x.setTransform(m, 0, 0, m, dpr * px - m * PX, dpr * py - m * PY);
       if (rev > 0) { x.globalCompositeOperation = 'destination-out'; x.globalAlpha = rev; x.fill(PN); x.globalCompositeOperation = 'source-over'; }
       x.fillStyle = '#fff'; x.globalAlpha = 1 - rev; if (rev < 1) x.fill(PN);
@@ -453,7 +453,7 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .mlegend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:-1px}
 .malert{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--bad) 12%,transparent);font-size:.8125rem;line-height:1.4}
 .malert.ok{background:color-mix(in srgb,var(--good) 12%,transparent)}
-.seasonl{display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;margin:12px 0 16px;padding:14px 18px;border-radius:20px;background:color-mix(in srgb,var(--sbc,var(--accent)) 16%,var(--card));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--sbc,var(--accent)) 35%,transparent);color:var(--fg);font-size:.8125rem}.seasonl .slk{font-size:.6875rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--fg2)}.seasonl b{font-size:1.05rem;font-weight:800;color:color-mix(in srgb,var(--sbc,var(--accent)) 45%,var(--fg))}.seasonl span{color:var(--fg2)}.seasonl .slg{color:var(--fg3);font-size:.75rem}
+.seasonl{display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;margin:12px 0 16px;padding:14px 18px;border-radius:20px;background:color-mix(in srgb,var(--sbc,var(--accent)) 16%,var(--card));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--sbc,var(--accent)) 35%,transparent);color:var(--fg);font-size:.8125rem}.banner[data-tseason] .seasonl{margin:0}.seasonl .slk{font-size:.6875rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--fg2)}.seasonl b{font-size:1.05rem;font-weight:800;color:color-mix(in srgb,var(--sbc,var(--accent)) 45%,var(--fg))}.seasonl span{color:var(--fg2)}.seasonl .slg{color:var(--fg3);font-size:.75rem}
 .malert.mid{background:color-mix(in srgb,var(--warn) 14%,transparent)}
 .hm-syn{max-width:400px;margin:18px auto 0;display:flex;flex-direction:column;gap:2px;text-align:left}
 .hm-syn details{border-radius:12px;transition:background .2s}
@@ -1492,9 +1492,9 @@ html.one .one-segsp{height:var(--one-segh,40px)}
 @property --o2{syntax:'<color>';inherits:true;initial-value:#5E5CE6}
 @property --o3{syntax:'<color>';inherits:true;initial-value:#64D2FF}
 html.one{--o1:#0A84FF;--o2:#FF3B30;--o3:#30D158;transition:--o1 1.6s ease,--o2 1.6s ease,--o3 1.6s ease}
-html.one[data-mod="T"]{--o1:#FF3B30;--o2:#FF9F0A;--o3:#FF375F}
-html.one[data-mod="N"]{--o1:#30D158;--o2:#63E6BE;--o3:#0FB9A6}
-html.one[data-mod="R"]{--o1:#0A84FF;--o2:#5E5CE6;--o3:#64D2FF}
+html.one[data-mod="T"]{--o1:#FF3B30;--o2:#FF5240;--o3:#D92B22}
+html.one[data-mod="N"]{--o1:#30D158;--o2:#3BDB6A;--o3:#22B04A}
+html.one[data-mod="R"]{--o1:#0A84FF;--o2:#2D7BFF;--o3:#0A6FE0}
 html.one .aura span{animation-play-state:running!important;left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;width:70vmax!important;height:70vmax!important;margin:-35vmax 0 0 -35vmax;border-radius:50%;filter:blur(70px)!important;opacity:calc(.55 * var(--aura-k,1))!important}
 html.one .aura span:nth-child(1){background:var(--o1)!important;animation:ro1 70s ease-in-out infinite!important}
 html.one .aura span:nth-child(2){background:var(--o2)!important;animation:ro2 83s ease-in-out -30s infinite!important}
@@ -1773,7 +1773,12 @@ html.one.pc :is(#t-view,.tab-ghost)>div:has(>[data-tseason]){grid-column:1 / -1!
 
 /* ---------- Le grain du fond (comme une photo) : un bruit très fin (des points d'à peine un pixel) et doux (pas de points noirs) par-dessus les couleurs, en « lumière douce » ; sur le noir de l'Accueil
    il ne se voit pas. Son dosage se règle dans Réglages (Grain du fond, 50 % par défaut). ---------- */
-html.one .aura::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='.5' intercept='.25'/%3E%3CfeFuncG type='linear' slope='.5' intercept='.25'/%3E%3CfeFuncB type='linear' slope='.5' intercept='.25'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/256px 256px;mix-blend-mode:overlay;opacity:var(--grain,.5)}
+html.one .aura::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.35' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='.72' intercept='.14'/%3E%3CfeFuncG type='linear' slope='.72' intercept='.14'/%3E%3CfeFuncB type='linear' slope='.72' intercept='.14'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/256px 256px;mix-blend-mode:overlay;opacity:calc(var(--grain,.5) * 1.25)}
+
+/* ---------- Le questionnaire du jour reste gris, quel que soit le module (pas de vert en Nutrition, de rouge en Training…) ---------- */
+html.one #sheet.one-qs{--one-c:#8E8E93!important;--accent:#AEAEB2!important;--accent-soft:rgba(142,142,147,.2)!important}
+/* ---------- Ma saison, page entière noire : plus de bandeau de couleur en haut ---------- */
+html.one:has(#promap.on) body::before,html.one:has(#promap.on) .aura::after{opacity:0!important}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -1826,7 +1831,7 @@ html.one .aura::before{content:'';position:absolute;inset:0;z-index:1;pointer-ev
   <div class="sheet-scroll" id="sheet-scroll">
     <div class="sheet-gap" id="sheet-gap"></div>
     <div class="sheet-card">
-      <header><button class="back" id="sh-back" hidden aria-label="Retour"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><b id="sheet-title"></b><button class="close" id="sh-cancel" hidden aria-label="Fermer"></button></header>
+      <header><button class="back" id="sh-back" hidden aria-label="Fermer"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><b id="sheet-title"></b><button class="close" id="sh-cancel" hidden aria-label="Fermer"></button></header>
       <div class="body" id="sheet-body"></div>
       <div class="sfoot" id="sh-foot"><button class="btn" id="sh-save">Enregistrer la journée</button></div>
     </div>
@@ -1836,7 +1841,7 @@ html.one .aura::before{content:'';position:absolute;inset:0;z-index:1;pointer-ev
   <div class="sheet-scroll" id="pane-scroll">
     <div class="sheet-gap" data-panegap></div>
     <div class="sheet-card">
-      <header><button class="back" id="pn-back" hidden aria-label="Retour"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><b id="pane-title"></b><button class="pn-act" id="pn-act" hidden></button><button class="close" id="pn-close" hidden aria-label="Fermer"></button></header>
+      <header><button class="back" id="pn-back" hidden aria-label="Fermer"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><b id="pane-title"></b><button class="pn-act" id="pn-act" hidden></button><button class="close" id="pn-close" hidden aria-label="Fermer"></button></header>
       <div class="body" id="pane-body"></div>
       <div class="sfoot" id="pn-foot"><button class="btn" id="pn-left"></button></div>
     </div>
@@ -6628,7 +6633,7 @@ function applyPrefs() {
 // The phone's top bar takes the colour of the top of the page shown: black on the home page, then the blue,
 // red or green of each part, in light or dark (each part sets --top).
 function syncBars() {
-  const c = window.TNR_SPLASH_ON ? '#000000' : getComputedStyle(document.documentElement).getPropertyValue('--top').trim() || '#000';
+  const c = window.TNR_SPLASH_ON ? '#0B1733' : getComputedStyle(document.documentElement).getPropertyValue('--top').trim() || '#000';
   document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.media = ''; m.content = c; });
 }
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', syncBars);
@@ -7767,7 +7772,7 @@ document.addEventListener('keydown', e => { const b = e.target.closest?.('.hm-k'
 const aiOn = () => S.app?.ai !== false;
 const AN = () => aiOn() ? S.analysis : null;
 function drawerHtml() {
-  return `<div class="dhead"><button class="dback" data-dclose aria-label="Fermer le menu"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><h2>Menu</h2></div>
+  return `<div class="dhead"><button class="dback" data-dclose aria-label="Fermer le menu"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><h2>Menu</h2></div>
     <button class="ditem" data-hset><span>Paramètres<span class="hint">Langue, notifications, clés d'accès</span></span><span aria-hidden="true">›</span></button>
     <button class="ditem" data-dlook><span>Apparence et réglages<span class="hint">Thème, actualisation, vibration, fond animé</span></span><span aria-hidden="true">›</span></button>
     ${TDV_PROTO.length ? '<button class="ditem" data-dproto><span>Mon protocole</span><span aria-hidden="true">›</span></button>' : ''}
@@ -8606,9 +8611,9 @@ function spFoldLab() { const b = $('#promap [data-mpfoldall]'); if (b) b.textCon
 window.proMapRender = () => { if ($('#promap')?.classList.contains('on')) spRender(true); };
 function spOpen() {
   let el = $('#promap'); if (!el) { el = document.createElement('div'); el.id = 'promap'; el.className = 'promap'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Ma saison'); document.body.appendChild(el); spBind(el); }
-  el.classList.add('on'); document.body.style.overflow = 'hidden'; MP.sea = mpSeaNow(); MP.shut = null; MP.tab = 'sea'; MP.kind = S.tkind === 'track' ? 'track' : 'gym'; spRender(false);
+  el.classList.add('on'); document.body.style.overflow = 'hidden'; try { syncBars(); } catch (e) {} MP.sea = mpSeaNow(); MP.shut = null; MP.tab = 'sea'; MP.kind = S.tkind === 'track' ? 'track' : 'gym'; spRender(false);
 }
-function spClose() { $('#promap')?.classList.remove('on'); if (!P.stack.length) document.body.style.overflow = ''; renderMod(); }
+function spClose() { $('#promap')?.classList.remove('on'); try { syncBars(); } catch (e) {} if (!P.stack.length) document.body.style.overflow = ''; renderMod(); }
 function spBind(el) {
   // La molette fait défiler (sans rien faire de spécial) ; Ctrl + molette, ou pincer le pavé tactile, zoome.
   el.addEventListener('wheel', e => { if (!e.ctrlKey || !e.target.closest('#mm-view')) return; e.preventDefault(); spZoom(MP.k * Math.exp(-e.deltaY * .004)); }, {passive: false});
@@ -8662,7 +8667,7 @@ function tSessions() {
   const row = p => `<button class="rowbtn" data-tplanv="${p.id}"><span><b>${esc(p.name)}</b><span class="meta">${p.title ? esc(p.title) + ' · ' : ''}${estMin(p)} min${!p.title && p.desc ? ' · ' + esc(p.desc) : ''}${caledOn(caleRef(p)).length ? ' · calée' : ''}</span></span>${ICON.chev}</button>`;
   return `
     <header class="top"><div class="sub">Programmes et séances</div><h1>Séances</h1></header>
-    <button class="banner" data-tseason style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;margin-bottom:8px"><span><b>Ma saison</b><br><span class="small muted">${(() => { const n = seasonNow(TODAY), nb = n && !n.before && !n.after ? n.se.blocks[n.i + 1] : null; return n && !n.before && !n.after ? `<i class="sedot" style="background:${n.col}"></i>${esc(seLab(n.name))} · semaine ${n.week}/${n.of}${nb ? ` · puis ${esc(seLab(nb[0]))} dans ${Math.ceil(n.left / 7)} sem.` : ''}` : 'Tes blocs : PPG, PPS, pré-compétition, compétition'; })()}</span></span>${ICON.chev}</button>
+    <button class="banner" data-tseason aria-label="Ma saison" style="display:block;width:100%;padding:0;border:0;background:none;color:inherit;font:inherit;cursor:pointer;margin-bottom:12px">${seasonLine() || '<div class="seasonl"><span class="slk">Planification</span><b>Ma saison</b><span>Tes blocs : PPG, PPS, pré-compétition, compétition</span></div>'}</button>
     <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
     ${sesBoard(k)}
     <div class="btnrow two" style="margin-top:16px"><button class="btn ghost" data-tnew>+ Créer une séance</button><button class="btn ghost" data-texadd>+ Ajouter un exercice</button></div>
@@ -11707,6 +11712,7 @@ window.TAB_DRAG = (i, f, ms) => {
   const bs = [...tabs.querySelectorAll('button')], ia = i + 1; if (!bs[ia]) return;
   const ib = bs[ia + Math.sign(f)] ? ia + Math.sign(f) : ia, q = ib === ia ? 0 : Math.abs(f);
   oneTabsSet(tabs, bs.map((_, j) => j === ia ? 1 - q : j === ib ? q : 0), ms, 'swipe');
+  if (S.mod === 'home' && ms && f > 0 && !oneCalm()) { document.documentElement.classList.remove('one-home'); oneFade(i, f, Math.max(ms, 650)); return; }
   oneFade(i, f, ms);
 };
 /* ---------- la barre du bas, façon jeu mobile : l'onglet ouvert prend plus de place, son icône grossit et monte,
@@ -11747,7 +11753,7 @@ function oneFade(i, f, ms) {
     ONE_FADE.mp = null;
     if (home) { const box = $('#one-top .one-mods'), mp = box?.querySelector('.one-mp'), tb = box?.querySelector('[data-one-m="T"]');
       if (mp && tb) { mp._i = null; oneMp(box, mp, tb); mp.style.transition = 'none'; ONE_FADE.mp = mp; } }
-    if (home) { const t = window.DA_TRI?.T || ['#FF3B30', '#FF9F0A', '#FF375F'], c = {o1: t[0], o2: t[1], o3: t[2]}; for (const v in c) R.style.setProperty('--' + v, c[v], 'important'); R.style.setProperty('--band', `color-mix(in srgb,${t[0]} 30%,#000)`, 'important'); }
+    if (home) { const t = window.DA_TRI?.T || ['#FF3B30', '#FF5240', '#D92B22'], c = {o1: t[0], o2: t[1], o3: t[2]}; for (const v in c) R.style.setProperty('--' + v, c[v], 'important'); R.style.setProperty('--band', `color-mix(in srgb,${t[0]} 30%,#000)`, 'important'); }
   }
   cancelAnimationFrame(ONE_FADE.raf); clearTimeout(ONE_FADE.t);
   const set = v => { ONE_FADE.k = v; R.style.setProperty('--one-fade', v.toFixed(3)); const mp = ONE_FADE.mp; if (mp) { const e = Math.max(0, Math.min(1, v)); mp.style.opacity = e.toFixed(3); mp.style.scale = (.25 + .75 * (1 - Math.pow(1 - e, 2))).toFixed(3); } };
@@ -11774,7 +11780,9 @@ const ONE_BAR = {cur: null, raf: 0}, ONE_BAND = .3;   // même dosage que --band
 syncBars = function () {
   const R = document.documentElement, set = c => { if (ONE_BAR.cur === c) return; ONE_BAR.cur = c; document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.media = ''; m.content = c; }); };
   cancelAnimationFrame(ONE_BAR.raf);
-  if (window.TNR_SPLASH_ON) { ONE.barTo = '#000000'; set('#000000'); return; }
+  if (window.TNR_SPLASH_ON) { ONE.barTo = '#0B1733'; set('#0B1733'); return; }
+  // Une page entière noire (Ma saison) : le haut de l'écran est noir aussi.
+  if (document.getElementById('promap')?.classList.contains('on')) { ONE.barTo = '#000000'; set('#000000'); return; }
   const c1 = R.classList.contains('one-pl') ? null : oneRgb((window.DA_TRI?.[S.mod] || {T: ['#FF3B30'], N: ['#30D158'], R: ['#0A84FF']}[S.mod] || [])[0]);
   // Accueil, planning, questionnaire : noir tout de suite, comme la page.
   if (!c1) { ONE.barTo = '#000000'; set('#000000'); return; }

@@ -33,9 +33,9 @@ html.one .one-segsp{height:var(--one-segh,40px)}
 @property --o2{syntax:'<color>';inherits:true;initial-value:#5E5CE6}
 @property --o3{syntax:'<color>';inherits:true;initial-value:#64D2FF}
 html.one{--o1:#0A84FF;--o2:#FF3B30;--o3:#30D158;transition:--o1 1.6s ease,--o2 1.6s ease,--o3 1.6s ease}
-html.one[data-mod="T"]{--o1:#FF3B30;--o2:#FF9F0A;--o3:#FF375F}
-html.one[data-mod="N"]{--o1:#30D158;--o2:#63E6BE;--o3:#0FB9A6}
-html.one[data-mod="R"]{--o1:#0A84FF;--o2:#5E5CE6;--o3:#64D2FF}
+html.one[data-mod="T"]{--o1:#FF3B30;--o2:#FF5240;--o3:#D92B22}
+html.one[data-mod="N"]{--o1:#30D158;--o2:#3BDB6A;--o3:#22B04A}
+html.one[data-mod="R"]{--o1:#0A84FF;--o2:#2D7BFF;--o3:#0A6FE0}
 html.one .aura span{animation-play-state:running!important;left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;width:70vmax!important;height:70vmax!important;margin:-35vmax 0 0 -35vmax;border-radius:50%;filter:blur(70px)!important;opacity:calc(.55 * var(--aura-k,1))!important}
 html.one .aura span:nth-child(1){background:var(--o1)!important;animation:ro1 70s ease-in-out infinite!important}
 html.one .aura span:nth-child(2){background:var(--o2)!important;animation:ro2 83s ease-in-out -30s infinite!important}
@@ -314,4 +314,9 @@ html.one.pc :is(#t-view,.tab-ghost)>div:has(>[data-tseason]){grid-column:1 / -1!
 
 /* ---------- Le grain du fond (comme une photo) : un bruit très fin (des points d'à peine un pixel) et doux (pas de points noirs) par-dessus les couleurs, en « lumière douce » ; sur le noir de l'Accueil
    il ne se voit pas. Son dosage se règle dans Réglages (Grain du fond, 50 % par défaut). ---------- */
-html.one .aura::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='.5' intercept='.25'/%3E%3CfeFuncG type='linear' slope='.5' intercept='.25'/%3E%3CfeFuncB type='linear' slope='.5' intercept='.25'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/256px 256px;mix-blend-mode:overlay;opacity:var(--grain,.5)}
+html.one .aura::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.35' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='.72' intercept='.14'/%3E%3CfeFuncG type='linear' slope='.72' intercept='.14'/%3E%3CfeFuncB type='linear' slope='.72' intercept='.14'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/256px 256px;mix-blend-mode:overlay;opacity:calc(var(--grain,.5) * 1.25)}
+
+/* ---------- Le questionnaire du jour reste gris, quel que soit le module (pas de vert en Nutrition, de rouge en Training…) ---------- */
+html.one #sheet.one-qs{--one-c:#8E8E93!important;--accent:#AEAEB2!important;--accent-soft:rgba(142,142,147,.2)!important}
+/* ---------- Ma saison, page entière noire : plus de bandeau de couleur en haut ---------- */
+html.one:has(#promap.on) body::before,html.one:has(#promap.on) .aura::after{opacity:0!important}

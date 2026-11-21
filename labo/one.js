@@ -322,6 +322,7 @@ window.TAB_DRAG = (i, f, ms) => {
   const bs = [...tabs.querySelectorAll('button')], ia = i + 1; if (!bs[ia]) return;
   const ib = bs[ia + Math.sign(f)] ? ia + Math.sign(f) : ia, q = ib === ia ? 0 : Math.abs(f);
   oneTabsSet(tabs, bs.map((_, j) => j === ia ? 1 - q : j === ib ? q : 0), ms, 'swipe');
+  if (S.mod === 'home' && ms && f > 0 && !oneCalm()) { document.documentElement.classList.remove('one-home'); oneFade(i, f, Math.max(ms, 650)); return; }
   oneFade(i, f, ms);
 };
 /* ---------- la barre du bas, façon jeu mobile : l'onglet ouvert prend plus de place, son icône grossit et monte,
@@ -362,7 +363,7 @@ function oneFade(i, f, ms) {
     ONE_FADE.mp = null;
     if (home) { const box = $('#one-top .one-mods'), mp = box?.querySelector('.one-mp'), tb = box?.querySelector('[data-one-m="T"]');
       if (mp && tb) { mp._i = null; oneMp(box, mp, tb); mp.style.transition = 'none'; ONE_FADE.mp = mp; } }
-    if (home) { const t = window.DA_TRI?.T || ['#FF3B30', '#FF9F0A', '#FF375F'], c = {o1: t[0], o2: t[1], o3: t[2]}; for (const v in c) R.style.setProperty('--' + v, c[v], 'important'); R.style.setProperty('--band', `color-mix(in srgb,${t[0]} 30%,#000)`, 'important'); }
+    if (home) { const t = window.DA_TRI?.T || ['#FF3B30', '#FF5240', '#D92B22'], c = {o1: t[0], o2: t[1], o3: t[2]}; for (const v in c) R.style.setProperty('--' + v, c[v], 'important'); R.style.setProperty('--band', `color-mix(in srgb,${t[0]} 30%,#000)`, 'important'); }
   }
   cancelAnimationFrame(ONE_FADE.raf); clearTimeout(ONE_FADE.t);
   const set = v => { ONE_FADE.k = v; R.style.setProperty('--one-fade', v.toFixed(3)); const mp = ONE_FADE.mp; if (mp) { const e = Math.max(0, Math.min(1, v)); mp.style.opacity = e.toFixed(3); mp.style.scale = (.25 + .75 * (1 - Math.pow(1 - e, 2))).toFixed(3); } };
@@ -389,7 +390,9 @@ const ONE_BAR = {cur: null, raf: 0}, ONE_BAND = .3;   // même dosage que --band
 syncBars = function () {
   const R = document.documentElement, set = c => { if (ONE_BAR.cur === c) return; ONE_BAR.cur = c; document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.media = ''; m.content = c; }); };
   cancelAnimationFrame(ONE_BAR.raf);
-  if (window.TNR_SPLASH_ON) { ONE.barTo = '#000000'; set('#000000'); return; }
+  if (window.TNR_SPLASH_ON) { ONE.barTo = '#0B1733'; set('#0B1733'); return; }
+  // Une page entière noire (Ma saison) : le haut de l'écran est noir aussi.
+  if (document.getElementById('promap')?.classList.contains('on')) { ONE.barTo = '#000000'; set('#000000'); return; }
   const c1 = R.classList.contains('one-pl') ? null : oneRgb((window.DA_TRI?.[S.mod] || {T: ['#FF3B30'], N: ['#30D158'], R: ['#0A84FF']}[S.mod] || [])[0]);
   // Accueil, planning, questionnaire : noir tout de suite, comme la page.
   if (!c1) { ONE.barTo = '#000000'; set('#000000'); return; }
