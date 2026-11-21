@@ -155,7 +155,7 @@ details.cdet>span{display:block;margin-top:4px}
 .seblk{border-radius:16px;background:var(--card);margin-bottom:8px;padding:6px 10px;border-left:4px solid var(--bc);transition:transform .15s,box-shadow .2s;touch-action:pan-y}
 .seblk.lift{z-index:5;position:relative;box-shadow:0 12px 28px rgba(0,0,0,.35);transition:none}
 .sebh{display:flex;align-items:center;gap:8px;padding:6px 0}.sebh b{flex:none}.sex{width:30px;height:30px;border-radius:50%;background:var(--card2);color:var(--fg2);font-size:1.125rem}
-div.seasonl{margin-top:6px;font-size:.8125rem;color:var(--fg2)}
+
 .todo{border-top:1px solid var(--line);padding-top:12px}
 .todo ul{margin:8px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
 .todo li{display:grid;grid-template-columns:22px 1fr;gap:10px;font-size:.9375rem}
@@ -350,7 +350,7 @@ svg.body .rg:focus-visible{stroke:var(--blue)}
 .mlegend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:-1px}
 .malert{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--bad) 12%,transparent);font-size:.8125rem;line-height:1.4}
 .malert.ok{background:color-mix(in srgb,var(--good) 12%,transparent)}
-.seasonl{display:block;margin:8px auto 0;padding:6px 12px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-size:.8125rem;font-weight:600}
+.seasonl{display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;margin:12px 0 16px;padding:14px 18px;border-radius:20px;background:color-mix(in srgb,var(--sbc,var(--accent)) 16%,var(--card));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--sbc,var(--accent)) 35%,transparent);color:var(--fg);font-size:.8125rem}.seasonl .slk{font-size:.6875rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--fg2)}.seasonl b{font-size:1.05rem;font-weight:800;color:color-mix(in srgb,var(--sbc,var(--accent)) 45%,var(--fg))}.seasonl span{color:var(--fg2)}.seasonl .slg{color:var(--fg3);font-size:.75rem}
 .malert.mid{background:color-mix(in srgb,var(--warn) 14%,transparent)}
 .hm-syn{max-width:400px;margin:18px auto 0;display:flex;flex-direction:column;gap:2px;text-align:left}
 .hm-syn details{border-radius:12px;transition:background .2s}
@@ -1893,7 +1893,9 @@ function seasonLine() {
   const n = seasonNow();
   if (!n) return '';
   const comp = n.comp != null && n.comp >= 0 ? ` · compétition dans ${n.comp} j` : '';
-  return `<div class="seasonl">${n.before ? `Saison dans ${n.before} jours` : n.after ? 'Saison terminée' : `Bloc ${n.i + 1} · ${esc(String(n.name).replace(/^Bloc \d+\s*[:·-]\s*/, ''))} · semaine ${n.week}/${n.of} · ${esc(n.goal)}`}${comp}</div>`;
+  // Où il en est dans sa planification : le bloc, sa semaine dans le bloc et dans la saison, l'objectif.
+  if (n.before || n.after) return `<div class="seasonl" style="--sbc:#8E8E93"><span class="slk">Planification</span><b>${n.before ? `Saison dans ${n.before} jours` : 'Saison terminée'}</b>${comp ? `<span>${comp.slice(3)}</span>` : ''}</div>`;
+  return `<div class="seasonl" style="--sbc:${n.col}"><span class="slk">Planification</span><b>${esc(seLab(String(n.name).replace(/^Bloc \d+\s*[:·-]\s*/, '')))}</b><span>Bloc ${n.i + 1} · semaine ${n.week}/${n.of} du bloc · semaine ${seasonWeek(TODAY)} de la saison</span><span class="slg">${esc(n.goal)}${comp}</span></div>`;
 }
 // His muscu programme (36 sessions, 3 a week), cut in blocks by what each part trains. He edits it as his coach.
 // Generic blocks with their session ranges; the goal of each comes from his private programme once it is loaded.
@@ -5314,6 +5316,7 @@ function settings() {
       ${sw('haptic', 'Vibration', "Petit retour quand tu tires pour actualiser")}
       ${sw('aura', 'Fond animé', 'Les halos bleus qui bougent doucement derrière les pages')}
       <div class="row col"><label for="pref-bg">Intensité des couleurs de fond<span class="hint">De très discret à très coloré</span></label><div class="rangeline"><input type="range" id="pref-bg" min="0" max="150" step="10" value="${PREFS.bgInt ?? 100}" data-prefbg><output>${PREFS.bgInt ?? 100} %</output></div></div>
+      <div class="row col"><label for="pref-grain">Grain du fond<span class="hint">Un fond lisse, ou un léger grain comme une photo</span></label><div class="rangeline"><input type="range" id="pref-grain" min="0" max="100" step="10" value="${PREFS.grain ?? 50}" data-prefgrain><output>${PREFS.grain ?? 50} %</output></div></div>
     </div>
     <p class="note" style="text-align:left">Réglages gardés sur ce téléphone.</p>`;
 }
@@ -6190,7 +6193,7 @@ let lastScrollY = 0;
 addEventListener('scroll', () => { const y = scrollY, a = $('.backhome'); if (a) a.classList.toggle('away', y > 60 && y > lastScrollY); lastScrollY = y; }, {passive: true});
 
 /* ---------- settings (Profil > Réglages) ---------- */
-const PREFS = {theme: 'auto', openTab: 'last', autoSync: true, haptic: true, aura: true, bgInt: 100};
+const PREFS = {theme: 'auto', openTab: 'last', autoSync: true, haptic: true, aura: true, bgInt: 100, grain: 50};
 try { Object.assign(PREFS, JSON.parse(localStorage.getItem('sl-prefs') || '{}')); if (!PREFS.v2) { PREFS.autoSync = true; PREFS.v2 = true; localStorage.setItem('sl-prefs', JSON.stringify(PREFS)); } } catch (e) {}
 function applyPrefs() {
   const root = document.documentElement;
@@ -6198,11 +6201,12 @@ function applyPrefs() {
   syncBars();
   document.querySelector('.aura')?.classList.toggle('still', !PREFS.aura);
   document.documentElement.style.setProperty('--aura-k', String((PREFS.bgInt ?? 100) / 100));
+  document.documentElement.style.setProperty('--grain', String((PREFS.grain ?? 50) / 100));
 }
 // The phone's top bar takes the colour of the top of the page shown: black on the home page, then the blue,
 // red or green of each part, in light or dark (each part sets --top).
 function syncBars() {
-  const c = window.TNR_SPLASH_ON ? '#0B1733' : getComputedStyle(document.documentElement).getPropertyValue('--top').trim() || '#000';
+  const c = window.TNR_SPLASH_ON ? '#000000' : getComputedStyle(document.documentElement).getPropertyValue('--top').trim() || '#000';
   document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.media = ''; m.content = c; });
 }
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', syncBars);
@@ -7455,6 +7459,7 @@ document.addEventListener('change', e => {
   const v = t.dataset.pfq === 'sleepGoal' ? +String(t.value).replace(',', '.') || 9 : t.value;
   S.profile = {...(S.profile || {}), [t.dataset.pfq]: v, updatedAt: new Date().toISOString()}; dbSet('profile/main', S.profile); render(); renderMod();
 });
+document.addEventListener('input', e => { const t = e.target; if (!t.matches?.('[data-prefgrain]')) return; t.nextElementSibling.value = t.value + ' %'; PREFS.grain = +t.value; document.documentElement.style.setProperty('--grain', String(PREFS.grain / 100)); try { localStorage.setItem('sl-prefs', JSON.stringify(PREFS)); } catch (err) {} });
 document.addEventListener('input', e => { const t = e.target; if (!t.matches?.('[data-prefbg]')) return; t.nextElementSibling.value = t.value + ' %'; PREFS.bgInt = +t.value; document.documentElement.style.setProperty('--aura-k', String(PREFS.bgInt / 100)); try { localStorage.setItem('sl-prefs', JSON.stringify(PREFS)); } catch (err) {} });
 document.addEventListener('change', e => {
   if (!e.target.matches?.('[data-fplannote]')) return;
@@ -7857,7 +7862,7 @@ function tToday() {
   const oth = done.filter(l => l.kind !== 'gym' && l.kind !== 'track' && l.kind !== 'extra');
   const main = oth.length ? `<article class="card"><span class="chiptag">${TICK.replace('<svg', '<svg width="12" height="12"')} Fait</span>${oth.map(l => `<div class="bigname">${esc(l.name)}</div><p class="small muted">${l.min} min · RPE ${l.rpe}/10</p>`).join('')}</article>` : '';
   return `
-    <header class="top"><div class="sub">${fmtDay(TODAY)} · semaine ${seasonWeek(TODAY)}</div>${(() => {
+    <header class="top"><div class="sub">${fmtDay(TODAY)}</div>${(() => {
       // The day's sessions are shown under their week, not up here.
       if (S.live || today.length) return ''; return `<p class="pmsg">${esc(trainMsg(p, done))}</p>`; })()}${seasonLine()}</header>
     <div class="stack">${live}${ask}

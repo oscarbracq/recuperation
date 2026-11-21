@@ -26,7 +26,7 @@ h = must(h, '<script src="supabase-db.js', '<script src="../supabase-db.js')
 h = re.sub(r"<script>if \('serviceWorker' in navigator\) \{.*?\}</script>", '', h, count=1, flags=re.S)
 assert "navigator.serviceWorker.register('sw.js')" not in h
 h = must(h, '<meta name="apple-mobile-web-app-title" content="TNR Athletics">', '<meta name="apple-mobile-web-app-title" content="TNR Classique"><title>TNR Classique</title>')
-open('labo/index.html', 'w', encoding='utf-8', newline='').write(h)
+open('labo/classique.html', 'w', encoding='utf-8', newline='').write(h)
 
 # 2) The real app: the same page dressed by one.css / one.js.
 i = src.index('</style>'); s2 = src[:i] + css + src[i:]
@@ -40,4 +40,18 @@ HID = "    if (document.hidden) { el.remove(); bars(); return; }" + chr(10)
 h = must(h, HID, HID + "    if (window.ONE_SPLASH && window.ONE_SPLASH(el, svg, bars)) return;" + chr(10), 1)
 assert "navigator.serviceWorker.register('sw.js')" in h and 'labSandbox' not in h
 open('index.html', 'w', encoding='utf-8', newline='').write(h)
-print('built: index.html (nouvelle appli)', len(h), '· labo/index.html (classique)')
+# 3) TNR Lab (labo/index.html): the real app, plus the colour tests shown before the Accueil (labo/da.css, labo/da.js).
+#    Same account, no install, no service worker.
+L = h
+L = must(L, '<link rel="manifest" href="manifest.webmanifest">', '')
+L = must(L, 'src="icon-192.png', 'src="../icon-192.png')
+L = must(L, 'href="icon-192.png', 'href="../icon-192.png')
+L = must(L, 'href="apple-touch-icon.png', 'href="../apple-touch-icon.png')
+L = must(L, '<script src="supabase-db.js', '<script src="../supabase-db.js')
+L = re.sub(r"<script>if \('serviceWorker' in navigator\) \{.*?\}</script>", '', L, count=1, flags=re.S)
+assert "navigator.serviceWorker.register('sw.js')" not in L
+L = must(L, '<meta name="apple-mobile-web-app-title" content="TNR Athletics">', '<meta name="apple-mobile-web-app-title" content="TNR Lab"><title>TNR Lab</title>')
+k = L.rindex('</body>')
+L = L[:k] + '<style>' + open('labo/da.css', encoding='utf-8').read() + '</style><script>' + open('labo/da.js', encoding='utf-8').read() + '</script>' + L[k:]
+open('labo/index.html', 'w', encoding='utf-8', newline='').write(L)
+print('built: index.html (nouvelle appli)', len(h), '· labo/index.html (TNR Lab, tests de couleurs) · labo/classique.html')

@@ -35,7 +35,7 @@ img{max-width:100%}
 #login .logo,#setpw .logo{display:block;width:80px;height:80px;margin:0 auto 8px;border-radius:18px;box-shadow:0 0 0 1px var(--line),0 6px 18px rgba(11,23,51,.2)}
 #login input,#setpw input{font:inherit;padding:14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--fg)}
 #login .msg,#setpw .msg{font-size:.875rem;color:var(--fg2);min-height:1.4em;margin:0}
-#splash{position:fixed;inset:0;z-index:300;background:#0B1733;pointer-events:none;--d:240px;--sh:0px}
+#splash{position:fixed;inset:0;z-index:300;background:#000;pointer-events:none;--d:240px;--sh:0px}
 #splash svg{position:absolute;left:50%;top:50%;width:var(--d);height:var(--d);margin:calc(var(--d) / -2 - var(--sh)) 0 0 calc(var(--d) / -2);fill:#fff}
 #splash .sp{position:absolute;left:50%;top:calc(50% - var(--sh) + var(--d) * .3);width:22px;height:22px;margin:-11px 0 0 -11px;box-sizing:border-box;border-radius:50%;border:2.5px solid rgba(255,255,255,.16);border-top-color:rgba(255,255,255,.9);animation:tnrspin .75s linear infinite,tnrfade .35s ease .15s both;transition:opacity .2s}
 #splash .sp.out{opacity:0}
@@ -64,7 +64,7 @@ img{max-width:100%}
   place(); addEventListener('resize', place);
   // The phone's top bar stays navy, like Android's launch screen, until the app shows.
   window.TNR_SPLASH_ON = true;
-  try { document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) { m.content = '#0B1733'; }); } catch (e) {}
+  try { document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) { m.content = '#000000'; }); } catch (e) {}
   function bars() { window.TNR_SPLASH_ON = false; try { if (typeof syncBars === 'function') syncBars(); else document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) { m.content = '#000000'; }); } catch (e) {} }
   var PX = 504, PY = 474.6, RIN = 19; // a point in the middle of the N's diagonal, and the stroke's half width there
   function sm(a, b, x) { x = Math.max(0, Math.min(1, (x - a) / (b - a))); return x * x * (3 - 2 * x); }
@@ -88,7 +88,7 @@ img{max-width:100%}
     function draw(t) {
       fit();
       var e = t * t * t * (t * (t * 6 - 15) + 10), s = Math.exp(L * e), rev = sm(.03, .34, t), fa = 1 - sm(0, .2, t), m = dpr * s * k;
-      x.setTransform(1, 0, 0, 1, 0, 0); x.globalCompositeOperation = 'source-over'; x.globalAlpha = 1; x.fillStyle = '#0B1733'; x.fillRect(0, 0, c.width, c.height);
+      x.setTransform(1, 0, 0, 1, 0, 0); x.globalCompositeOperation = 'source-over'; x.globalAlpha = 1; x.fillStyle = '#000000'; x.fillRect(0, 0, c.width, c.height);
       x.setTransform(m, 0, 0, m, dpr * px - m * PX, dpr * py - m * PY);
       if (rev > 0) { x.globalCompositeOperation = 'destination-out'; x.globalAlpha = rev; x.fill(PN); x.globalCompositeOperation = 'source-over'; }
       x.fillStyle = '#fff'; x.globalAlpha = 1 - rev; if (rev < 1) x.fill(PN);

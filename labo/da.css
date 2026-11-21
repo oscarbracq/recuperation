@@ -1,0 +1,15 @@
+/* TNR Lab : l'écran des tests de couleurs, avant l'Accueil */
+#da-ch{position:fixed;inset:0;z-index:500;background:#000;color:#F5F5F7;overflow-y:auto;display:none;font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#da-ch.on{display:block}
+.da-in{max-width:520px;margin:0 auto;padding:calc(36px + env(safe-area-inset-top,0px)) 18px calc(40px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
+.da-k{font-size:.75rem;font-weight:800;letter-spacing:.3em;color:#8E8E93;text-align:center}
+#da-ch h1{margin:0;text-align:center;font-size:1.9rem;font-weight:800}
+#da-ch p{margin:0 0 8px;text-align:center;color:#9C9CA4;font-size:.9rem}
+.da-c{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:16px;border-radius:20px;border:1.5px solid rgba(255,255,255,.1);background:#141416;color:inherit;font:inherit;cursor:pointer}
+.da-c.on{border-color:#F5F5F7}
+.da-c b{font-size:1.1rem}.da-c small{color:#9C9CA4;font-size:.75rem}.da-c em{font-style:normal;color:#C7C7CC;font-size:.85rem}
+.da-sw{display:flex;gap:6px;margin-bottom:6px}.da-sw i{width:44px;height:44px;border-radius:12px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.da-cur{opacity:.8}
+.da-pick{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:90;border:0;border-radius:99px;padding:7px 14px;background:rgba(255,255,255,.14);color:#fff;font:700 .75rem system-ui,sans-serif;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);cursor:pointer}
+/* Les tests : seulement les blocs, les visuels et les chiffres (les textes d'explication partent) */
+html[data-da] :is(.small,.muted,.hint,.meta,.pmsg,.slg,.one-tipb,.exl,.card p:not([class]),.sec-label small){display:none!important}
