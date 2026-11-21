@@ -11757,13 +11757,13 @@ function oneFade(i, f, ms) {
   if (!R.classList.contains('one-fd')) {
     R.classList.add('one-fd', 'one-snap');
     // Depuis l'Accueil : le fond prend déjà les couleurs de Training (invisibles au départ).
-    ONE_FADE.mp = null;
+    ONE_FADE.mp = null; ONE_FADE.c = oneRgb(home ? (window.DA_TRI?.T || ['#FF3B30'])[0] : (window.DA_TRI?.[S.mod] || {T: ['#FF3B30'], N: ['#30D158'], R: ['#0A84FF']}[S.mod] || [])[0]);
     if (home) { const box = $('#one-top .one-mods'), mp = box?.querySelector('.one-mp'), tb = box?.querySelector('[data-one-m="T"]');
       if (mp && tb) { mp._i = null; oneMp(box, mp, tb); mp.style.transition = 'none'; ONE_FADE.mp = mp; } }
     if (home) { const t = window.DA_TRI?.T || ['#FF3B30', '#FF5240', '#D92B22'], c = {o1: t[0], o2: t[1], o3: t[2]}; for (const v in c) R.style.setProperty('--' + v, c[v], 'important'); R.style.setProperty('--band', `color-mix(in srgb,${t[0]} 30%,#000)`, 'important'); }
   }
   cancelAnimationFrame(ONE_FADE.raf); clearTimeout(ONE_FADE.t);
-  const set = v => { ONE_FADE.k = v; R.style.setProperty('--one-fade', v.toFixed(3)); const mp = ONE_FADE.mp; if (mp) { const e = Math.max(0, Math.min(1, v)); mp.style.opacity = e.toFixed(3); mp.style.scale = (.25 + .75 * (1 - Math.pow(1 - e, 2))).toFixed(3); } };
+  const set = v => { ONE_FADE.k = v; R.style.setProperty('--one-fade', v.toFixed(3)); oneFadeBar(v); const mp = ONE_FADE.mp; if (mp) { const e = Math.max(0, Math.min(1, v)); mp.style.opacity = e.toFixed(3); mp.style.scale = (.25 + .75 * (1 - Math.pow(1 - e, 2))).toFixed(3); } };
   if (!ms) { set(k); return; }
   const k0 = ONE_FADE.k ?? (home ? 0 : 1), t0 = performance.now(), E = t => 1 - Math.pow(1 - t, 3);
   const step = now => { const t = Math.min(1, (now - t0) / ms); set(k0 + (k - k0) * E(t)); if (t < 1) ONE_FADE.raf = requestAnimationFrame(step); };
@@ -11771,12 +11771,18 @@ function oneFade(i, f, ms) {
   // Une fois la page changée (ou revenue), on rend la main aux vraies couleurs, sans transition : rien ne clignote.
   ONE_FADE.t = setTimeout(oneFadeEnd, ms + 160);
 }
+// La barre du haut du téléphone (heure, batterie) suit le fondu image par image : du noir à la couleur du module, au même rythme que l'écran.
+function oneFadeBar(v) {
+  const c = ONE_FADE.c; if (!c) return; const e = Math.max(0, Math.min(1, v)), hx = '#' + c.map(x => Math.round(x * ONE_BAND * e).toString(16).padStart(2, '0')).join('');
+  if (ONE_BAR.cur === hx) return; ONE_BAR.cur = hx; ONE.barTo = hx; cancelAnimationFrame(ONE_BAR.raf); document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.media = ''; m.content = hx; });
+}
 function oneFadeEnd() {
-  const R = document.documentElement; cancelAnimationFrame(ONE_FADE.raf); ONE_FADE.k = null;
+  const R = document.documentElement; cancelAnimationFrame(ONE_FADE.raf); ONE_FADE.k = null; const hadC = !!ONE_FADE.c; ONE_FADE.c = null;
   if (ONE_FADE.mp) { const mp = ONE_FADE.mp; ONE_FADE.mp = null; mp.style.opacity = mp.style.scale = ''; requestAnimationFrame(() => { mp.style.transition = ''; }); }
   R.classList.add('one-snap'); ['--o1', '--o2', '--o3', '--band', '--one-fade'].forEach(v => R.style.removeProperty(v));
   getComputedStyle(R).getPropertyValue('--o1'); R.classList.remove('one-fd');
   const un = () => R.classList.remove('one-snap'); requestAnimationFrame(() => requestAnimationFrame(un)); setTimeout(un, 120);
+  if (hadC) try { syncBars(); } catch (e) {}
 }
 
 /* ---------- la barre d'état du téléphone (en haut, avec l'heure) change de couleur au même rythme que le fond ---------- */
@@ -11788,6 +11794,7 @@ syncBars = function () {
   const R = document.documentElement, set = c => { if (ONE_BAR.cur === c) return; ONE_BAR.cur = c; document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.media = ''; m.content = c; }); };
   cancelAnimationFrame(ONE_BAR.raf);
   if (window.TNR_SPLASH_ON) { ONE.barTo = '#0B1733'; set('#0B1733'); return; }
+  if (ONE_FADE.c && R.classList.contains('one-fd')) return;
   // Une page entière noire (Ma saison) : le haut de l'écran est noir aussi.
   if (document.getElementById('promap')?.classList.contains('on')) { ONE.barTo = '#000000'; set('#000000'); return; }
   const c1 = R.classList.contains('one-pl') ? null : oneRgb((window.DA_TRI?.[S.mod] || {T: ['#FF3B30'], N: ['#30D158'], R: ['#0A84FF']}[S.mod] || [])[0]);
