@@ -13,3 +13,6 @@
 .da-pick{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:90;border:0;border-radius:99px;padding:7px 14px;background:rgba(255,255,255,.14);color:#fff;font:700 .75rem system-ui,sans-serif;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);cursor:pointer}
 /* Les tests : seulement les blocs, les visuels et les chiffres (les textes d'explication partent) */
 html[data-da] :is(.small,.muted,.hint,.meta,.pmsg,.slg,.one-tipb,.exl,.card p:not([class]),.sec-label small){display:none!important}
+
+/* Dans les tests : pas de fond coloré qui bouge ni de grain (ils créeraient des taches), le bouton du choix reste dans la palette */
+html[data-da] .aura{display:none!important}html[data-da] .da-pick{background:#000;color:#fff}
