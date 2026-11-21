@@ -325,3 +325,16 @@ html.one:has(#promap.on) body::before,html.one:has(#promap.on) .aura::after{opac
    en voile gris rosé), et la copie de Training qui glisse depuis l'Accueil a déjà ses couleurs (plus de ronds bleus qui virent au rouge) ---------- */
 html.one .aura{background:var(--bg,#000)}
 html.one[data-mod="home"] .tab-ghost{--accent:#FF5A4E;--accent-soft:rgba(255,90,78,.18);--one-c:#FF3B30}
+
+/* ---------- Onglet Exercices : mes exercices, une ligne chacun avec sa croix ; le cadre des exercices du jour ---------- */
+.myxb{margin:14px 0 0}
+.myxb .list,.dayframe .list{margin:0}
+.myxr{display:flex;align-items:center;gap:12px;width:100%;cursor:pointer}
+.myxr>span{flex:1;min-width:0}
+.myxdel{flex:none;width:34px;height:34px;margin-right:-4px;display:grid;place-items:center;border:0;border-radius:50%;background:rgba(255,255,255,.08);color:var(--fg2);cursor:pointer}
+.myxdel svg{width:14px;height:14px}
+/* Le clavier ouvert : la barre du bas reste dessous ; la recherche monte en haut de l'écran */
+html.kbd .one-tabs,html.kbd .tabbar{opacity:0!important;pointer-events:none!important}
+.libsearch{scroll-margin-top:calc(env(safe-area-inset-top,0px) + 10px)}
+html.kbdlib #t-libl,html.kbdlib .rlibl{min-height:100vh}
+html.kbdlib #one-top,html.kbdlib .one-top,html.kbdlib .one-hai{opacity:0!important;pointer-events:none!important;transition:opacity .2s}

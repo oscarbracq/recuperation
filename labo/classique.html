@@ -5111,13 +5111,8 @@ function rsBoard() {
     <div class="bgrid">${weeks.map(w => `<div class="bweek"><span class="bwk">S${seasonWeek(w)}</span>${[0, 1, 2, 3, 4, 5, 6].map(i => cell(addDays(w, i))).join('')}</div>`).join('')}</div>
     <div class="sec-label" style="margin:14px 2px 6px">Séances</div>
     <div class="bsrc">${RS_OWN().map(chip).join('') || '<p class="small muted" style="margin:0">Crée une séance : elle apparaîtra ici.</p>'}</div>
-    ${(() => { const xc = (id, sm) => { const x = RX[id]; return x ? `<div class="bchip src rchip xchip" data-rref="x:${esc(id)}" title="${esc(x.n)}"><span>${esc(x.n)}</span><small>${esc(sm)} · ${x.min} min</small></div>` : ''; };
-      const mine = (S.app?.rmyEx || []).filter(id => RX[id]), day = rxDay();
-      const auto = RS_DAY.filter(s => recSteps(s.day).length), dchip = s => chip(s).replace(/<small>[\s\S]*?<\/small>/, `<small>${s.day === 'mus' ? 'Musculation' : 'Douleur'} · ${rsDur(s)} min</small>`);
-      return `<div class="sec-label" style="margin:14px 2px 6px">Exercices</div>
-        <div class="bsrc">${mine.length ? mine.map(id => xc(id, RX[id].tool || 'Sans matériel')).join('') : '<p class="small muted" style="margin:0">Touche « + Ajouter un exercice » : il apparaîtra ici, prêt à être calé sur un jour.</p>'}</div>
-        ${auto.length || day.length ? `<div class="dayframe">${auto.length ? `<div class="sec-label" style="margin:0 2px 6px">Séance de récupération du jour</div><div class="bsrc">${auto.map(dchip).join('')}</div>` : ''}
-          ${day.length ? `<div class="sec-label" style="margin:${auto.length ? 12 : 0}px 2px 6px">Exercice de récupération du jour</div><div class="bsrc">${day.map((x, i) => xc(x.id, x.pain ? 'Douleur' : 'Musculation')).join('')}</div>` : ''}</div>` : ''}`; })()}
+    ${(() => { const auto = RS_DAY.filter(s => recSteps(s.day).length), dchip = s => chip(s).replace(/<small>[\s\S]*?<\/small>/, `<small>${s.day === 'mus' ? 'Musculation' : 'Douleur'} · ${rsDur(s)} min</small>`);
+      return auto.length ? `<div class="dayframe"><div class="sec-label" style="margin:0 2px 6px">Séance de récupération du jour</div><div class="bsrc">${auto.map(dchip).join('')}</div></div>` : ''; })()}
     <p class="small muted" style="margin:10px 2px 0">Récup musculation et Récup douleurs sont refaites chaque jour d'après tes séances et tes douleurs. Touche un bloc pour le voir, un jour pour voir tout ce qui y est calé. Plusieurs blocs s'empilent sur un jour, le dernier posé dessus.</p></div>`;
 }
 function rsList() {
@@ -5254,8 +5249,8 @@ function vRSess() {
   const days = [...Array(14)].map((_, i) => addDays(TODAY, -i)), H = days.flatMap(k => (S.manual[k]?.recov || []).map((a, i) => ({...a, k, i})));
   const w7 = H.filter(a => a.k > addDays(TODAY, -7)).reduce((t, a) => t + (+a.min || 0), 0);
   return `<header class="top" style="margin-bottom:6px"><div class="sub">Routines, soins et séances de récupération</div><h1>Séances</h1></header>
-    <div class="stack">${(() => { const s = rsDayOf(TODAY); return s ? `<div class="card"><span class="eyebrow">Calée aujourd'hui</span><div class="bigname">${esc(s.name)}</div><p class="small muted">${(() => { const x = (PLN().extra?.[TODAY] || []).find(y => y.rs === s.id); return x ? tfr(x.a) + ' · ' : ''; })()}${rsDur(s)} min${rsGoal(s) ? ' · ' + esc(rsGoal(s)) : ''}</p><button class="btn" style="margin-top:10px" data-rsgo2="${esc(s.id)}">Lancer</button></div>` : ''; })()}${rsBoard()}<div class="btnrow two"><button class="btn ghost" data-rsnew>+ Créer une séance</button><button class="btn ghost" data-rexadd>+ Ajouter un exercice</button></div>${recBlock('mus')}${recBlock('pain')}${rsList()}${careCard()}
-    <div class="card"><div class="chead"><span class="eyebrow">Fait ces 14 derniers jours</span><b class="num">${w7} min sur 7 j</b></div>${H.length ? `<div class="list" style="margin-top:8px">${H.map(a => `<button type="button" class="rowbtn" data-rxlv="${a.k}|${a.i}"><span><b>${esc(a.t)}</b><span class="meta">${esc(cap(fmtShort(a.k)))}${a.at ? ' · ' + esc(tfr(a.at)) : ''}${a.min ? ' · ' + a.min + ' min' : ''}${a.feel ? ' · effet ' + a.feel + '/10' : ''}</span></span>${ICON.chev}</button>`).join('')}</div>` : '<p class="small muted" style="margin:6px 0 0">Rien de noté pour l\'instant : touche « + Ajouter un exercice ».</p>'}</div></div>`;
+    <div class="stack">${(() => { const s = rsDayOf(TODAY); return s ? `<div class="card"><span class="eyebrow">Calée aujourd'hui</span><div class="bigname">${esc(s.name)}</div><p class="small muted">${(() => { const x = (PLN().extra?.[TODAY] || []).find(y => y.rs === s.id); return x ? tfr(x.a) + ' · ' : ''; })()}${rsDur(s)} min${rsGoal(s) ? ' · ' + esc(rsGoal(s)) : ''}</p><button class="btn" style="margin-top:10px" data-rsgo2="${esc(s.id)}">Lancer</button></div>` : ''; })()}${rsBoard()}<button class="btn ghost" style="width:100%" data-rsnew>+ Créer une séance</button>${recBlock('mus')}${recBlock('pain')}${rsList()}${careCard()}
+    <div class="card"><div class="chead"><span class="eyebrow">Fait ces 14 derniers jours</span><b class="num">${w7} min sur 7 j</b></div>${H.length ? `<div class="list" style="margin-top:8px">${H.map(a => `<button type="button" class="rowbtn" data-rxlv="${a.k}|${a.i}"><span><b>${esc(a.t)}</b><span class="meta">${esc(cap(fmtShort(a.k)))}${a.at ? ' · ' + esc(tfr(a.at)) : ''}${a.min ? ' · ' + a.min + ' min' : ''}${a.feel ? ' · effet ' + a.feel + '/10' : ''}</span></span>${ICON.chev}</button>`).join('')}</div>` : '<p class="small muted" style="margin:6px 0 0">Rien de noté pour l\'instant : ajoute un exercice depuis l\'onglet Exercices.</p>'}</div></div>`;
 }
 /* Recovery « + Ajouter un exercice », like Training's exercise of the day: once chosen, what was done (date, time, duration,
    how much good it did, zones, note) goes into the day's recovery. A later date plans it on that day of the board instead. */
@@ -5288,7 +5283,7 @@ document.addEventListener('click', async e => {
   if ((b = e.target.closest('[data-rxlagain]'))) { const [k, i] = b.dataset.rxlagain.split('|'), a = S.manual[k]?.recov?.[+i]; closePane(); if (a) rxAgain(a); return; }
   if (!RXL) return;
   if ((b = e.target.closest('[data-rxlz]'))) { const z = b.dataset.rxlz; RXL.zone = RXL.zone.includes(z) ? RXL.zone.filter(x => x !== z) : [...RXL.zone, z]; b.setAttribute('aria-pressed', RXL.zone.includes(z)); return; }
-  const keep = async () => { const L = S.app?.rmyEx || []; if (!L.includes(RXL.id)) await rsSaveApp({rmyEx: [...L, RXL.id]}); };
+  const keep = async () => { const L = S.app?.rmyEx || []; if (L[0] !== RXL.id) await rsSaveApp({rmyEx: [RXL.id, ...L.filter(x => x !== RXL.id)]}); };
   if (e.target.closest('[data-rxlkeep]')) { const n = RX[RXL.id].n; await keep(); closePane(); toast(n + ' ajouté à tes exercices : glisse-le sur un jour'); return; }
   if (e.target.closest('[data-rxlsave]')) { const L = RXL, x = RX[L.id], min = Math.max(1, Math.round(parseFloat(String(L.min).replace(',', '.')) || x.min || 1));
     if (L.date > TODAY) { await keep(); const rm = {...(S.app?.rmore || {})}; rm[L.date] = [...(rm[L.date] || []), 'x:' + L.id]; closePane(); await rsSaveApp({rmore: rm}); toast(x.n + ' prévu le ' + fmtShort(L.date)); return; }
@@ -5316,12 +5311,11 @@ const RTOOLS = [['all', 'Tout'], ['none', 'Sans matériel', x => !x.tool], ['gun
 let RTOOL = 'all';
 document.addEventListener('click', e => { const b = e.target.closest('[data-rtool]'); if (!b) return; RTOOL = b.dataset.rtool; render(); });
 function vRLib() {
-  const f = RTOOLS.find(x => x[0] === RTOOL)?.[2] || (() => true);
-  const by = {}; for (const r of RLIB) if (RX[r[0]] && f(RX[r[0]])) (by[r[2]] ||= []).push(RX[r[0]]);
   return `<header class="top" style="margin-bottom:6px"><div class="sub">${RLIB.length} exercices · touche pour être guidé</div><h1>Exercices</h1></header>
+    ${rMyEx()}
+    <div class="libsearch"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input class="search" type="search" placeholder="Rechercher un exercice de récupération" value="${esc(RQ)}" data-rlibq aria-label="Rechercher un exercice de récupération"></div>
     <div class="chipsx pc6 rtoolbar" role="group" aria-label="Matériel" style="margin-bottom:12px">${RTOOLS.map(([v, l]) => `<button type="button" class="chip" data-rtool="${v}" aria-pressed="${RTOOL === v}">${l}</button>`).join('')}</div>
-    <div class="stack">${RKINDS.filter(([k]) => by[k]).map(([k, n, why]) => `<div class="card pc3"><span class="eyebrow">${esc(n)} · ${by[k].length}</span><p class="small muted" style="margin:4px 0 8px">${esc(why)}</p>
-      <div class="list rxk">${by[k].map(x => `<button type="button" class="rowbtn exrow" data-rxgo="${x.id}">${eqThumb(rxEq(x))}<span style="flex:1;min-width:0"><b>${esc(x.n)}</b><span class="meta">${x.min} min · ${esc(x.tool ? x.tool + ' · ' : '')}${esc(x.how.length > 90 ? x.how.slice(0, 88) + '…' : x.how)}</span></span>${ICON.chev}</button>`).join('')}</div></div>`).join('')}</div>
+    <div class="rlibl">${rlibCards()}</div>
     <p class="note" style="text-align:left">Les « ondes » (sons binauraux) ne sont pas proposées : leurs effets mesurés sont faibles et peu fiables (Garcia-Argibay et coll. 2019, méta-analyse).</p>`;
 }
 
@@ -6346,6 +6340,7 @@ const modName = m => (NAMES[S.lang] || NAMES.en)[m];
 const DAYS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 Object.assign(S, {mod: 'home', plans: {}, logs: {}, tset: {}, fuel: {}, foods: {}, fset: {}, ttab: 'today', tkind: 'gym', lib: {q: '', cat: ''}, prog: 'squat', ftab: 'journal', fday: TODAY, live: null, lang: 'en'});
 try { Object.assign(S, JSON.parse(localStorage.getItem('trf-ui') || '{}')); S.fday = TODAY; S.mod = 'home'; } catch (e) {}
+S.tkind = 'gym';
 try { S.live = JSON.parse(localStorage.getItem('trf-live') || 'null'); } catch (e) {}
 const saveUi = () => { try { localStorage.setItem('trf-ui', JSON.stringify({ttab: S.ttab, tkind: S.tkind, prog: S.prog, ftab: S.ftab, lang: S.lang})); } catch (e) {} };
 const saveLive = () => { try { S.live ? localStorage.setItem('trf-live', JSON.stringify(S.live)) : localStorage.removeItem('trf-live'); } catch (e) {} };
@@ -8103,14 +8098,8 @@ function sesBoard(kind) {
 
     <div class="sec-label" style="margin:14px 2px 6px">Séances</div>
     <div class="bsrc">${src.length ? src.map(x => { const r = caleRef(x), on = placed.has(r); return `<div class="bchip src${on ? ' on' : ''}" data-bref="${esc(r)}" title="${esc(x.name)}${x.title ? ' · ' + esc(x.title) : ''}"><span>${esc(x.name)}</span><small>${(x.title || x.desc) ? esc(x.title || x.desc) + ' · ' : ''}${estMin(x)} min${on ? ' · calée' : ''}</small></div>`; }).join('') : '<p class="small muted" style="margin:0">Crée une séance ci-dessous : elle apparaîtra ici, prête à être calée.</p>'}</div>
-    ${(() => { const xc = (id, sm) => { const e = exOf(id); return `<div class="bchip src xchip" data-bref="x:${esc(id)}" title="${esc(e.n)}"><span>${esc(e.n)}</span><small>${esc(sm)}</small></div>`; };
-      const mine = (S.tset?.myEx || []).filter(id => exOf(id).t === kind), bal = balEx();
-      const bp = kind === 'gym' ? balPlan() : null;
-      return `<div class="sec-label" style="margin:14px 2px 6px">Exercices</div>
-        <div class="bsrc">${mine.length ? mine.map(id => xc(id, exOf(id).cat || 'Exercice')).join('') : '<p class="small muted" style="margin:0">Touche « + Ajouter un exercice » : il apparaîtra ici, prêt à être calé sur un jour.</p>'}</div>
-        ${kind === 'gym' && bal.length ? `<div class="dayframe"><div class="sec-label" style="margin:0 2px 6px">Séance de rééquilibre du jour</div>
-          <div class="bsrc">${bp ? `<div class="bchip src" data-bref="${esc(bp.id)}" title="${esc(bp.name)}"><span>${esc(bp.name)}</span><small>Équilibre de tes chaînes · ${estMin(bp)} min</small></div>` : ''}</div>
-          <div class="sec-label" style="margin:12px 2px 6px">Exercice de rééquilibre du jour</div><div class="bsrc">${bal.map(x => xc(x.id, 'Équilibre de tes chaînes')).join('')}</div></div>` : ''}`; })()}
+    ${(() => { const bp = kind === 'gym' && balEx().length ? balPlan() : null;
+      return bp ? `<div class="dayframe"><div class="sec-label" style="margin:0 2px 6px">Séance de rééquilibre du jour</div><div class="bsrc"><div class="bchip src" data-bref="${esc(bp.id)}" title="${esc(bp.name)}"><span>${esc(bp.name)}</span><small>Équilibre de tes chaînes · ${estMin(bp)} min</small></div></div></div>` : ''; })()}
     <p class="small muted" style="margin:10px 2px 0">Touche un bloc pour le voir, un jour pour voir tout ce qui y est calé. Plusieurs blocs peuvent aller sur un même jour : ils s'empilent, le dernier posé dessus. Les jours encadrés sont tes créneaux ${kind === 'gym' ? 'de muscu' : 'd\'athlé'}.</p></div>`;
 }
 // Drag and drop: with the mouse it moves at once; with the thumb, after a short hold (so the page still scrolls).
@@ -8347,7 +8336,7 @@ function tSessions() {
     <button class="banner" data-tseason aria-label="Ma saison" style="display:block;width:100%;padding:0;border:0;background:none;color:inherit;font:inherit;cursor:pointer;margin-bottom:12px">${seasonLine() || '<div class="seasonl"><span class="slk">Planification</span><b>Ma saison</b><span>Tes blocs : PPG, PPS, pré-compétition, compétition</span></div>'}</button>
     <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
     ${sesBoard(k)}
-    <div class="btnrow two" style="margin-top:16px"><button class="btn ghost" data-tnew>+ Créer une séance</button><button class="btn ghost" data-texadd>+ Ajouter un exercice</button></div>
+    <button class="btn ghost" style="margin-top:16px;width:100%" data-tnew>+ Créer une séance</button>
     <h2>Mes séances</h2><div class="list">${mine.map(row).join('') || '<div class="row"><span class="muted">Aucune séance à toi pour l\'instant.</span></div>'}</div>
     ${k === 'gym' && TDV_PLANS.length ? progList() : ''}
     ${k === 'track' ? (() => { const L = logs().filter(l => l.kind === 'track').slice(0, 12); return L.length ? `<h2>Séances faites</h2><div class="list donel">${L.map(l => `<button class="rowbtn doneses" data-tlog="${l.id}"><span><b>${esc(l.name)}</b><span class="meta">${esc(cap(fmtShort(l.date)))}${l.min ? ' · ' + l.min + ' min' : ''}${l.rpe ? ' · RPE ' + l.rpe : ''}</span></span><span class="kc">${fx(l.sprintM || 0)} m</span></button>`).join('')}</div>` : ''; })() : ''}
@@ -8358,10 +8347,58 @@ function tLibrary() {
   return `
     <header class="top"><div class="sub">${n} exercices ${k === 'gym' ? 'de musculation' : 'de sprint'} · chacun une seule fois, cherchable en français ou en anglais</div><h1>Exercices</h1></header>
     <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button type="button" data-libk="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
+    ${tMyEx(k)}
     <div class="libsearch"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input class="search" type="search" placeholder="Rechercher, en français ou en anglais" value="${esc(S.lib.q)}" data-tlibq aria-label="Rechercher un exercice"></div>
     <div data-libf>${exFilters(S.lib, k)}</div>
     <div class="list" id="t-libl">${libRows()}</div>`;
 }
+// Onglet Exercices : une ligne par exercice (toute la largeur), la croix au bout pour le retirer de mes exercices.
+const xRow = (attr, id, thumb, name, sub, del) => `<div class="rowbtn exrow myxr" role="button" tabindex="0" ${attr}="${esc(id)}">${thumb}<span><b>${esc(name)}</b><span class="meta">${esc(sub)}</span></span>${del ? `<button type="button" class="myxdel" ${del}="${esc(id)}" aria-label="Retirer ${esc(name)} de mes exercices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>` : ICON.chev}</div>`;
+// Training · Exercices : mes exercices (ajoutés ou faits récemment, le dernier en haut) et, en muscu, les exercices de rééquilibrage du jour.
+function tMyEx(k) {
+  const mine = (S.tset?.myEx || []).filter(id => exOf(id).t === k), bal = k === 'gym' ? balEx() : [];
+  const sub = id => { const e = exOf(id), h = exHistory(id)[0]; return h ? 'Dernière fois ' + fmtShort(h.date) + (h.it.sets ? ' · ' + setsTxt(h.it) : '') : [e.eq, e.m].filter(Boolean).join(' · ') || e.cat; };
+  return `<div class="card myxb"><div class="chead" style="margin-bottom:8px"><span class="eyebrow">Mes exercices</span>${mine.length ? `<span class="small muted">${mine.length}</span>` : ''}</div>
+    ${mine.length ? `<div class="list">${mine.map(id => xRow('data-myx', id, eqThumb(exOf(id).eq), exOf(id).n, sub(id), 'data-myxdel')).join('')}</div>` : '<p class="small muted" style="margin:0">Cherche un exercice plus bas et ajoute-le à ta journée : il restera ici, prêt à être refait.</p>'}</div>
+    ${bal.length ? `<div class="dayframe"><div class="sec-label" style="margin:0 2px 6px">Exercices de rééquilibrage du jour</div><div class="list">${bal.map(x => xRow('data-myx', x.id, eqThumb(exOf(x.id).eq), exOf(x.id).n, 'Équilibre de tes chaînes' + (MUSI[x.m] ? ' · ' + MUSI[x.m].n : ''))).join('')}</div></div>` : ''}`;
+}
+const myExFront = id => { const L = S.tset?.myEx || []; return [id, ...L.filter(x => x !== id)]; };
+document.addEventListener('click', e => {
+  const at = q => e.target.closest(q); let b;
+  if ((b = at('[data-myxdel]'))) { e.stopPropagation(); const id = b.dataset.myxdel; saveTset({myEx: (S.tset.myEx || []).filter(x => x !== id)}); toast(exOf(id).n + ' retiré de tes exercices'); return; }
+  if ((b = at('[data-myxadd]'))) { const id = b.dataset.myxadd; saveTset({myEx: myExFront(id)}); toast(exOf(id).n + ' gardé dans tes exercices'); return; }
+  if ((b = at('[data-myx]'))) { const id = b.dataset.myx; if (exOf(id).t === 'gym') bonusPane(id); else exView(id); return; }
+  if ((b = at('[data-rmyxdel]'))) { e.stopPropagation(); const id = b.dataset.rmyxdel; rsSaveApp({rmyEx: (S.app?.rmyEx || []).filter(x => x !== id)}); toast((RX[id]?.n || 'Exercice') + ' retiré de tes exercices'); return; }
+  if ((b = at('[data-rmyx]'))) { rxLogPane(b.dataset.rmyx); return; }
+});
+// Recovery · Exercices : mes exercices et les exercices de récupération du jour (cadre de la couleur du module).
+function rMyEx() {
+  const mine = (S.app?.rmyEx || []).filter(id => RX[id]), day = rxDay().filter(d => RX[d.id]);
+  const sub = x => `${x.min} min${x.tool ? ' · ' + x.tool : ''}`;
+  return `<div class="card myxb"><div class="chead" style="margin-bottom:8px"><span class="eyebrow">Mes exercices</span>${mine.length ? `<span class="small muted">${mine.length}</span>` : ''}</div>
+    ${mine.length ? `<div class="list">${mine.map(id => xRow('data-rmyx', id, eqThumb(rxEq(RX[id])), RX[id].n, sub(RX[id]), 'data-rmyxdel')).join('')}</div>` : '<p class="small muted" style="margin:0">Cherche un exercice plus bas et ajoute-le à ta journée : il restera ici, prêt à être refait.</p>'}</div>
+    ${day.length ? `<div class="dayframe"><div class="sec-label" style="margin:0 2px 6px">Exercices de récupération du jour</div><div class="list">${day.map(d => { const x = RX[d.id]; return xRow('data-rmyx', d.id, eqThumb(rxEq(x)), x.n, (d.pain ? 'Douleur · ' + d.pain : 'Muscles à soulager' + (MUSI[d.m] ? ' · ' + MUSI[d.m].n : '')) + ' · ' + x.min + ' min'); }).join('')}</div></div>` : ''}`;
+}
+let RQ = '';
+const rqFold = t => String(t || '').toLowerCase().normalize('NFD').replace(/\p{M}/gu, '');
+function rlibCards() {
+  const f = RTOOLS.find(x => x[0] === RTOOL)?.[2] || (() => true), W = rqFold(RQ).split(/\s+/).filter(Boolean);
+  const ok = x => !W.length || (t => W.every(w => t.includes(w)))(rqFold([x.n, x.tool, x.how, RKINDS.find(k => k[0] === x.kind)?.[1]].join(' ')));
+  const by = {}; for (const r of RLIB) if (RX[r[0]] && f(RX[r[0]]) && ok(RX[r[0]])) (by[r[2]] ||= []).push(RX[r[0]]);
+  const L = RKINDS.filter(([k]) => by[k]);
+  return L.length ? `<div class="stack">${L.map(([k, n, why]) => `<div class="card pc3"><span class="eyebrow">${esc(n)} · ${by[k].length}</span><p class="small muted" style="margin:4px 0 8px">${esc(why)}</p>
+      <div class="list rxk">${by[k].map(x => `<button type="button" class="rowbtn exrow" data-rxgo="${x.id}">${eqThumb(rxEq(x))}<span style="flex:1;min-width:0"><b>${esc(x.n)}</b><span class="meta">${x.min} min · ${esc(x.tool ? x.tool + ' · ' : '')}${esc(x.how.length > 90 ? x.how.slice(0, 88) + '…' : x.how)}</span></span>${ICON.chev}</button>`).join('')}</div></div>`).join('')}</div>` : '<p class="small muted" style="margin:12px 4px">Aucun exercice ne correspond.</p>';
+}
+// Le clavier : la barre du bas reste dessous (cachée), et toucher la recherche des exercices la fait monter en haut de l'écran.
+(() => {
+  const txt = el => !!el && (el.tagName === 'TEXTAREA' || el.isContentEditable || (el.tagName === 'INPUT' && !/^(range|checkbox|radio|button|submit|color|file|date|time|datetime-local|month|week)$/.test(el.type)));
+  const H = document.documentElement;
+  document.addEventListener('focusin', e => { if (!txt(e.target)) return; H.classList.add('kbd');
+    const s = e.target.closest('.libsearch'); if (!s || e.target.closest('#pane,#sheet')) return; H.classList.add('kbdlib');
+    const go = () => { const y = s.getBoundingClientRect().top + scrollY - (parseFloat(getComputedStyle(s).scrollMarginTop) || 0); scrollTo({top: Math.max(0, y), behavior: 'smooth'}); };
+    requestAnimationFrame(go); setTimeout(go, 380); });
+  document.addEventListener('focusout', () => setTimeout(() => { if (!txt(document.activeElement)) H.classList.remove('kbd', 'kbdlib'); }, 80));
+})();
 function libRows() { return exRows(exSearch(S.lib.q, S.lib.k || 'gym', {cat: S.lib.cat, eq: S.lib.eq}), 'data-tex'); }
 document.addEventListener('click', e => { const b = e.target.closest('[data-libk]'); if (!b) return; S.lib = {...S.lib, k: b.dataset.libk, cat: '', eq: ''}; renderMod(true); });
 const MAIN_LIFTS = ['squat', 'pclean', 'hipthrust', 'rdl', 'hbdl', 'bench', 'fsquat'];
@@ -9569,7 +9606,7 @@ function exView(id) {
       <a class="vidbtn" href="https://www.youtube.com/results?search_query=${encodeURIComponent((e.en || e.n) + (e.t === 'track' ? ' sprint drill' : ' exercise') + ' technique')}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="4" fill="#FF0033"/><path d="M10 9l5 3-5 3z" fill="#fff"/></svg><span><b>Voir en vidéo</b><small>${esc(e.en || e.n)}, la bonne technique</small></span><span class="kc">↗</span></a>
       <div class="card why">${esc(e.c)}</div>
       ${isSled(id) ? `<div class="list" style="margin-top:12px"><div class="row"><label for="sled-kg">Traîneau à vide</label><input class="mini-in" id="sled-kg" inputmode="decimal" style="width:90px" value="${S.tset?.sledKg || ''}" placeholder="kg" data-sledkg></div></div><p class="small muted" style="margin:6px 4px 0">Note seulement les disques : le poids du traîneau s'ajoute tout seul au total.</p>` : ''}
-      ${e.t === 'gym' ? `<button class="btn" style="margin:12px 0" data-bonus="${id}">Je l'ai fait : le noter</button>` : ''}${(S.tset?.myEx || []).includes(id) ? `<button class="btn ghost" style="margin:0 0 12px" data-myexdel="${esc(id)}">Retirer de mes exercices</button>` : ''}
+      ${e.t === 'gym' ? `<button class="btn" style="margin:12px 0" data-bonus="${id}">Je l'ai fait : le noter</button>` : ''}${(S.tset?.myEx || []).includes(id) ? `<button class="btn ghost" style="margin:0 0 12px" data-myexdel="${esc(id)}">Retirer de mes exercices</button>` : `<button class="btn ghost" style="margin:0 0 12px" data-myxadd="${esc(id)}">Garder dans mes exercices</button>`}
       ${musTiers(id)}
       ${e.t === 'gym' && e.u === 'kg' ? rmBlock(id) : ''}
       ${b ? `<div class="stats" style="margin-top:12px"><div><b>${fx(b)} kg</b><span>max estimé</span></div><div><b>${h.length}</b><span>séances</span></div><div><b>${esc(short(h[0].date))}</b><span>dernière fois</span></div></div>` : ''}
@@ -9661,6 +9698,7 @@ document.addEventListener('click', async e => {
     const doc = {id: 'x' + Date.now().toString(36), kind: 'extra', ...(fut ? {planned: true} : {}), ...(B.pct ? {pct: +B.pct} : {}), name: exOf(B.ex).n, date: B.date || TODAY, start: B.start || '', min, rpe: +B.rpe, note: (B.note || '').trim(), items: [it],
       tonnage: secs ? 0 : Math.round(sets.reduce((a, x) => a + (x.kg + sledBase(B.ex)) * x.reps, 0)), updatedAt: new Date().toISOString()};
     S.logs[doc.id] = doc; BX = null;
+    if (S.tset && (S.tset.myEx || [])[0] !== B.ex) { S.tset.myEx = myExFront(B.ex); dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()}); }
     while (P.stack.length) closePane();
     renderMod(); render(); toast(fut ? 'Exercice prévu le ' + fmtShort(doc.date) : 'Exercice ajouté à ta journée');
     await dbSet('training/' + doc.id, doc);
@@ -10972,6 +11010,7 @@ document.addEventListener('click', e => {
 document.addEventListener('input', e => {
   const t = e.target, d = t.dataset;
   if (d.tlibq !== undefined) { S.lib.q = t.value; $('#t-libl').innerHTML = libRows(); }
+  else if (d.rlibq !== undefined) { RQ = t.value; document.querySelectorAll('.rlibl').forEach(x => { x.innerHTML = rlibCards(); }); }
   else if (d.pkq !== undefined) P.stack.at(-1).setQ(t.value);
   else if (d.mpq !== undefined) P.stack.at(-1).setQ(t.value);
   else if (d.ffq !== undefined) P.stack.at(-1).setQ(t.value);
