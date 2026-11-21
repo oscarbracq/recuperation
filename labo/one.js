@@ -323,6 +323,8 @@ window.TAB_DRAG = (i, f, ms) => {
   const ib = bs[ia + Math.sign(f)] ? ia + Math.sign(f) : ia, q = ib === ia ? 0 : Math.abs(f);
   oneTabsSet(tabs, bs.map((_, j) => j === ia ? 1 - q : j === ib ? q : 0), ms, 'swipe');
   if (S.mod === 'home' && ms && f > 0 && !oneCalm()) { document.documentElement.classList.remove('one-home'); oneFade(i, f, Math.max(ms, 650)); return; }
+  // Lâché vers l'Accueil : la barre du haut se referme déjà en TNR pendant que la page glisse (plus de saut à l'arrivée).
+  if (ONE.mods.includes(S.mod) && i === 0 && ms && f < 0 && !oneCalm()) document.documentElement.classList.add('one-home');
   oneFade(i, f, ms);
 };
 /* ---------- la barre du bas, façon jeu mobile : l'onglet ouvert prend plus de place, son icône grossit et monte,

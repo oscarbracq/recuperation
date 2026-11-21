@@ -320,3 +320,8 @@ html.one .aura::before{content:'';position:absolute;inset:0;z-index:1;pointer-ev
 html.one #sheet.one-qs{--one-c:#8E8E93!important;--accent:#AEAEB2!important;--accent-soft:rgba(142,142,147,.2)!important}
 /* ---------- Ma saison, page entière noire : plus de bandeau de couleur en haut ---------- */
 html.one:has(#promap.on) body::before,html.one:has(#promap.on) .aura::after{opacity:0!important}
+
+/* ---------- Pendant le fondu Accueil ↔ module : le fond reste noir sous les couleurs (sinon le grain, posé sur du vide, s'affichait
+   en voile gris rosé), et la copie de Training qui glisse depuis l'Accueil a déjà ses couleurs (plus de ronds bleus qui virent au rouge) ---------- */
+html.one .aura{background:var(--bg,#000)}
+html.one[data-mod="home"] .tab-ghost{--accent:#FF5A4E;--accent-soft:rgba(255,90,78,.18);--one-c:#FF3B30}

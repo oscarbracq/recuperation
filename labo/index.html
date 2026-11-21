@@ -1779,6 +1779,11 @@ html.one .aura::before{content:'';position:absolute;inset:0;z-index:1;pointer-ev
 html.one #sheet.one-qs{--one-c:#8E8E93!important;--accent:#AEAEB2!important;--accent-soft:rgba(142,142,147,.2)!important}
 /* ---------- Ma saison, page entière noire : plus de bandeau de couleur en haut ---------- */
 html.one:has(#promap.on) body::before,html.one:has(#promap.on) .aura::after{opacity:0!important}
+
+/* ---------- Pendant le fondu Accueil ↔ module : le fond reste noir sous les couleurs (sinon le grain, posé sur du vide, s'affichait
+   en voile gris rosé), et la copie de Training qui glisse depuis l'Accueil a déjà ses couleurs (plus de ronds bleus qui virent au rouge) ---------- */
+html.one .aura{background:var(--bg,#000)}
+html.one[data-mod="home"] .tab-ghost{--accent:#FF5A4E;--accent-soft:rgba(255,90,78,.18);--one-c:#FF3B30}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -11713,6 +11718,8 @@ window.TAB_DRAG = (i, f, ms) => {
   const ib = bs[ia + Math.sign(f)] ? ia + Math.sign(f) : ia, q = ib === ia ? 0 : Math.abs(f);
   oneTabsSet(tabs, bs.map((_, j) => j === ia ? 1 - q : j === ib ? q : 0), ms, 'swipe');
   if (S.mod === 'home' && ms && f > 0 && !oneCalm()) { document.documentElement.classList.remove('one-home'); oneFade(i, f, Math.max(ms, 650)); return; }
+  // Lâché vers l'Accueil : la barre du haut se referme déjà en TNR pendant que la page glisse (plus de saut à l'arrivée).
+  if (ONE.mods.includes(S.mod) && i === 0 && ms && f < 0 && !oneCalm()) document.documentElement.classList.add('one-home');
   oneFade(i, f, ms);
 };
 /* ---------- la barre du bas, façon jeu mobile : l'onglet ouvert prend plus de place, son icône grossit et monte,
