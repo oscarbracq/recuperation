@@ -246,7 +246,7 @@ const oneMenu0 = fMenu; fMenu = () => oneMenu0().replace(/(<div class="btnrow" s
 /* ---------- Training · Aujourd'hui : la phrase du jour toujours là, comme en Nutrition et Recovery ---------- */
 const oneTToday0 = tToday;
 tToday = () => {
-  let h = oneTToday0(); const sl = seasonLine(); if (sl) h = h.replace(sl + '</header>', '</header>' + sl);
+  let h = oneTToday0();
   if (!/<p class="pmsg">/.test(h.slice(0, h.indexOf('</header>')))) {
     const pg = planForK(TODAY, 'gym'), ptk = planForK(TODAY, 'track'), p = pg && !kindDone(TODAY, 'gym') ? pg : ptk && !kindDone(TODAY, 'track') ? ptk : pg || ptk;
     h = h.replace(/(<header class="top"><div class="sub">[^<]*<\/div>)/, `$1<p class="pmsg">${esc(trainMsg(p, logsOn(TODAY)))}</p>`);

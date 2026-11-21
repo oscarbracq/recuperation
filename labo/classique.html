@@ -1545,7 +1545,7 @@ const mean = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
 const TODAY = key(new Date());
 const SLEEP_NEED = 8.5;
 
-const S = { db: null, g: {}, w: {}, manual: {}, analysis: null, reports: [], profile: null, hrMax: 195, tab: 'today', gran: 'month', off: 0, status: 'loading', sheet: null };
+const S = { db: null, g: {}, w: {}, manual: {}, analysis: null, reports: [], profile: null, hrMax: 195, tab: 'today', gran: 'week', off: 0, status: 'loading', sheet: null };
 // Season weeks run Monday to Sunday; week 1 is the week of 31 August 2026 unless the profile says otherwise.
 function seasonWeek(k) { const s = S.profile?.seasonStart || '2026-08-31'; return Math.floor((new Date(k + 'T12:00:00') - new Date(s + 'T12:00:00')) / 6048e5) + 1; }
 const GYM_RE = /strength|fitness_equipment|hiit|cardio_training|training/;
@@ -7968,7 +7968,7 @@ function tToday() {
   return `
     <header class="top"><div class="sub">${fmtDay(TODAY)}</div>${(() => {
       // The day's sessions are shown under their week, not up here.
-      if (S.live || today.length) return ''; return `<p class="pmsg">${esc(trainMsg(p, done))}</p>`; })()}${seasonLine()}</header>
+      if (S.live || today.length) return ''; return `<p class="pmsg">${esc(trainMsg(p, done))}</p>`; })()}</header>
     <div class="stack">${live}${ask}
       <div class="wk2 pc3"><div class="stack">${weekCard('gym')}${sc('gym')}${tMore('gym')}</div><div class="stack">${weekCard('track')}${sc('track')}${tMore('track')}</div></div>
       ${coachCard()}
