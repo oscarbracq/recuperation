@@ -6457,6 +6457,10 @@ const EX = [
   ['buttkicks', 'Talons-fesses', 'track', 'Échauffement et gammes', 'Ischios', 'Talon qui remonte sous la fesse, genou vers le bas.', 'g'],
   ['wickets', 'Course sur lattes', 'track', 'Échauffement et gammes', 'Posture, cycle de jambe', 'Lattes espacées selon ta foulée, reste grand, genou haut à chaque latte.', 'g'],
   ['strides', 'Lignes droites progressives', 'track', 'Échauffement et gammes', 'Mise en route', 'Accélère progressivement jusqu\'à 80-90 %, relâché.', 'm'],
+  ['tw_course', 'Travail technique · course', 'track', 'Technique', 'Mollets, psoas, pied', 'Course placée, relâchée, gammes, plots : la technique de course.', 'min'],
+  ['tw_haies', 'Travail technique · haies', 'track', 'Haies', 'Psoas, adducteurs, hanches', 'Mobilité, jambe d\'attaque et d\'esquive, haies en rythme.', 'min'],
+  ['tw_plio', 'Travail technique · pliométrie', 'track', 'Technique', 'Mollets, pied, quadriceps', 'Sauts, bonds, pogos, haies sautées.', 'min'],
+  ['tw_renfo', 'Travail technique · renforcement', 'track', 'Technique', 'Fessiers, ischios, tronc', 'Renforcement au poids du corps ou léger, gainage.', 'min'],
   ['techplace', 'Course placée', 'track', 'Technique', 'Posture, placement du pied', 'Plots au sol à écart régulier : reste grand, le pied se pose sous le bassin, chaque appui sur l\'avant du pied.', 'm'],
   ['h_lead', 'Jambe d\'attaque sur le côté des haies', 'track', 'Haies', 'Psoas, coordination', 'Le long des haies, en marchant ou en trottinant : seule la jambe d\'attaque passe, genou haut, pied relevé, et se repose juste derrière la haie.', 'm'],
   ['h_trail', 'Jambe d\'esquive sur le côté des haies', 'track', 'Haies', 'Adducteurs, hanche', 'Le long des haies : seule la jambe d\'esquive passe, genou ouvert sur le côté, pied relevé, puis elle revient devant sous le bassin.', 'm'],
@@ -6921,6 +6925,13 @@ const RUN_SHIFT = {'Accélération': {quads: 1, glutes: 1, hams: .85, psoas: .8,
 // Traîneau : + 1 % par kg jusqu'à + 50 % ; retenu par un partenaire : + 1 % par % de freinage jusqu'à + 50 %.
 const resF = it => (it.res === 'sled' || it.ex === 'sled') ? 1 + Math.min(.5, (+it.kg || 0) / 100) : (it.res === 'band' || it.ex === 'bandres') ? 1 + Math.min(.5, (+it.rpct || 0) / 100) : 1;
 const RUN_FS = {'Accélération': [2.5, .95], 'Vitesse max': [3, .97], 'Endurance de vitesse': [2, .92], 'Résistance': [2.5, .9], 'Tempo': [1, .75], 'Échauffement et gammes': [.5, .6], 'Technique': [1.5, .8], 'Haies': [1, .5]};
+// Travail technique noté en minutes (20 à 30 min en général) : charge par minute, puis part de chaque muscle.
+// Repères : 25 min de course technique ≈ 400 m à 75 % (facteur 1,5) ; 25 min de pliométrie ≈ 100 appuis ;
+// 25 min de renforcement ≈ 8 séries de 10 à 60 % ; les haies sont surtout de la mobilité et de la coordination.
+const TW_LOAD = {tw_course: [1.8, {calves: 1, soleus: .7, foot: .8, psoas: .9, tib: .8, hams: .75, glutes: .75, quads: .6, pero: .5}],
+  tw_haies: [1.4, {psoas: 1, adduct: .9, glutes: .8, hams: .8, calves: .8, gmed: .7, piri: .5, foot: .5}],
+  tw_plio: [2, {calves: 1, soleus: .9, foot: 1, quads: .9, glutes: .9, pero: .6, hams: .6, tib: .5}],
+  tw_renfo: [1.8, {glutes: .8, hams: .8, quads: .8, adduct: .6, abs: .6, obl: .5, gmed: .5, erect: .5, calves: .5}]};
 // Fatigue factor per exercise: muscle damage and recovery time are larger when the muscle works long and lengthening
 // (Nosaka and Sakamoto 2001; stiff-leg deadlift, Nordic, maximal sprint), smaller for short isolation and holds.
 const FATF = {nordic: 1.5, rdl: 1.3, sldl: 1.3, dbrdl: 1.3, deadlift: 1.25, hbdl: 1.15, bss: 1.2, lunge: 1.2, stepup: 1.05, squat: 1.1, fsquat: 1.1, halfsquat: 1, legpress: .95, legext: .9, legcurl: 1,
@@ -6969,6 +6980,8 @@ function logMuscle(l) {
         const inten = +st.kg > 0 && rm && e.u === 'kg' ? Math.min(1.05, +st.kg / rm) : r != null && !secs ? pctFor(reps, r) : .6;
         for (const k in c) { add(k, reps * inten * proxF(r) * c[k]); fo[k] = (fo[k] || 0) + reps * inten * proxF(r) * c[k] * fatF(it.ex) * cf; }
       }
+    } else if (TW_LOAD[it.ex] && +it.min > 0) {
+      const [pm, cw] = TW_LOAD[it.ex], w = +it.min * pm; for (const k in cw) { add(k, w * cw[k]); fo[k] = (fo[k] || 0) + w * cw[k]; }
     } else if (it.ex === 'warmup' && +it.min > 0) {
       // The warm-up is never written in the coach's sheet but takes 45 min to 1 h of a 2 h session: easy running and
       // drills. Per metre, a sprint loads the muscles far more than jogging (hamstring force rises steeply with speed,
@@ -8528,6 +8541,8 @@ function logSplit(l) {
         r.ton += (+st.kg || 0) * (+st.reps || 0); if (rm && +st.kg > 0 && !ACCESSORY(e)) { r.gW += inten * reps; r.gR += reps; }
         for (const k in c) { add(k, reps * inten * c[k], reps * c[k]); r.gL += reps * inten * c[k]; }
       }
+    } else if (TW_LOAD[it.ex] && +it.min > 0) {
+      const [pm, cw] = TW_LOAD[it.ex], w = +it.min * pm, gym = it.ex === 'tw_renfo' || it.ex === 'tw_plio'; for (const k in cw) { add(k, w * cw[k], w * cw[k]); if (gym) r.gL += w * cw[k]; else r.sL += w * cw[k]; }
     } else if (it.ex === 'warmup' && +it.min > 0) {
       // The warm-up is never written in the coach's sheet but takes 45 min to 1 h of a 2 h session: easy running and
       // drills. Per metre, a sprint loads the muscles far more than jogging (hamstring force rises steeply with speed,
@@ -8639,7 +8654,7 @@ function tBody() {
       ${chainCard(st)}
       ${bal.length ? `<div class="card"><span class="eyebrow">Équilibres · ${GRAN_TXT[S.mgran || 'week']} · ${esc(MSRC.find(x => x[0] === (S.msrc || 'all'))[1].toLowerCase())}</span>${bal.map(b => { const [a, c] = sides[b.n], T = BAL_TXT[b.n]; return `<details class="bald${b.off ? ' off' : ''}"><summary><span>${esc(b.n)}</span><b>${fx(b.r, 2)}</b><em>${b.off ? 'à rééquilibrer' : 'correct'}</em></summary>
         <p class="small">${esc(T[0].replace('{P}', PER_TXT[S.mgran || 'week']))}</p><p class="small muted">${a.map(k => esc(v[k].n) + ' ' + fx(v[k].week)).join(' · ')} <b>contre</b> ${c.map(k => esc(v[k].n) + ' ' + fx(v[k].week)).join(' · ')}</p>${b.off ? `<p class="small"><b>Que faire :</b> ${esc(T[1])}</p>` : ''}</details>`; }).join('')}</div>` : ''}</div>
-      <div class="bcol pc3">${musCard(st)}</div>
+      <div class="bcol pc3">${plyoCard()}${musCard(st)}</div>
     </div>`;
 }
 // Profil: the athlete, the tests, the max of each lift.
@@ -8873,8 +8888,12 @@ const WARM = [
   ['jbm_d1', 'Montées de genoux en marchant', 'act', '2 × 20 m', {psoas: 1, calves: .5}, 2, true], ['jbm_d2', 'Skipping A (montées de genoux rapides)', 'act', '2 × 20 m', {psoas: 1, calves: .75}, 2, true],
   ['jbm_d3', 'Skipping B (jambe tendue puis griffé)', 'act', '2 × 20 m', {hams: 1, psoas: .75}, 2, true], ['jbm_d4', 'Talons-fesses dynamiques', 'act', '2 × 20 m', {hams: .75, quads: .5}, 2, true],
   ['jbm_d5', 'Foulées bondissantes', 'act', '2 × 30 m', {glutes: 1, hams: .75, calves: .75}, 2, true],
-  ['jbm_p1', 'Course progressive jusqu\'à 70 %', 'prog', '2 × 60 m, retour en marchant', {hams: .75, glutes: .75}, 3, true], ['jbm_p2', 'Course progressive jusqu\'à 85 %', 'prog', '2 × 60 m', {hams: .75, glutes: .75, calves: .5}, 3, true],
-  ['jbm_p3', 'Accélération à 95 %', 'prog', '2 × 30 m, 2 min de récup', {hams: 1, glutes: 1, calves: .75}, 4, true]
+  ['jbm_d6', 'Ciseaux', 'act', '2 × 30 m · jambes presque tendues, pied actif sous le bassin', {hams: 1, psoas: .75, calves: .5}, 2, true],
+  ['jbm_d7', '3-4 petits pas puis montée de genou', 'act', '2 × 30 m · flexion de hanche maximale, buste droit', {psoas: 1, calves: .5}, 2, true],
+  ['jbm_d8', '3-4 petits pas puis extension de hanche', 'act', '2 × 30 m · pousse loin derrière, hanche tendue', {glutes: 1, hams: .75, psoas: .5}, 2, true],
+  ['jbm_p1', 'Accélération progressive à 50 %', 'prog', '1 × 30 m', {hams: .5, glutes: .5}, 1, true], ['jbm_p2', 'Accélération progressive à 60 %', 'prog', '1 × 30 m', {hams: .6, glutes: .6}, 1, true],
+  ['jbm_p3', 'Accélération progressive à 70 %', 'prog', '1 × 30 m', {hams: .7, glutes: .7}, 1, true], ['jbm_p4', 'Accélération progressive à 80 %', 'prog', '1 × 30 m', {hams: .8, glutes: .8, calves: .5}, 1, true],
+  ['jbm_p5', 'Accélération progressive à 90-95 %', 'prog', '1 × 30 m, retour en marchant', {hams: 1, glutes: .9, calves: .75}, 2, true]
 ].map(([id, n, g, dose, mus, min, ctx]) => ({id, n, g, dose, mus, min, trk: ctx === true || ctx === 'trk', gymOnly: ctx === 'gym'}));
 const WX = Object.fromEntries(WARM.map(w => [w.id, w]));
 function sessionMus(ed) {
@@ -8918,7 +8937,9 @@ document.addEventListener('click', e => {
   if ((b = at('[data-edim]'))) { const it = ED.items[+b.dataset.edim]; it.im = it.im === 'rpe' ? 'pct' : 'rpe'; if (it.im === 'rpe' && !it.rpe) it.rpe = 8; partNorm(it); edKeep(() => paneRender()); return; }
   if (at('[data-edpart]')) { const prev = [...ED.items].reverse().find(x => x.seq); ED.items.push(partNorm({seq: prev ? [60] : [30], blocks: prev ? 2 : 4, pct: 95, rest: 120, brest: 480})); paneRender(); return; }
   if (at('[data-edtech]')) { ED.tech = ''; paneRender(); setTimeout(() => document.querySelector('[data-edtechv]')?.focus(), 50); return; }
-  if (at('[data-edtechx]')) { delete ED.tech; ED.items = ED.items.filter(x => !x.tw); paneRender(); return; }
+  if (at('[data-edtechx]')) { delete ED.tech; delete ED.twMin; ED.items = ED.items.filter(x => !x.tw); paneRender(); return; }
+  if ((b = at('[data-edtwk]'))) { const v = b.dataset.edtwk, ks = twKinds(); twSync(ks.includes(v) ? ks.filter(x => x !== v) : [...ks, v], twTotal()); edKeep(() => paneRender()); return; }
+  if ((b = at('[data-edtwm]'))) { twSync(twKinds(), +b.dataset.edtwm); edKeep(() => paneRender()); return; }
   if ((b = at('[data-edtt]'))) { ED.ttab = b.dataset.edtt; edKeep(() => paneRender()); return; }
   if ((b = at('[data-edtwadd]'))) { const id = b.dataset.edtwadd, tw = TW_HAIES.some(x => x[0] === id) ? 'haies' : 'course';
     twAdd(exOf(id).t === 'gym' ? {...defaultItem(id), tw} : hDist({ex: id, tw, ...(TW_DEF[id] ? structuredClone(TW_DEF[id]) : {reps: 2, dist: 20, rest: 60})})); edKeep(() => paneRender()); toast(exOf(id).n + ' ajouté'); return; }
@@ -8927,7 +8948,7 @@ document.addEventListener('click', e => {
   if ((b = at('[data-edhst]'))) { const [i, n] = b.dataset.edhst.split('.').map(Number), it = ED.items[i]; it.hstep = n; it.hsp = HSTEP_SP[n]; hDist(it); edKeep(() => paneRender()); return; }
   if ((b = at('[data-edfocus]'))) { const [i, f] = b.dataset.edfocus.split('.'), it = ED.items[+i], L = it.focus || []; it.focus = L.includes(f) ? L.filter(x => x !== f) : [...L, f]; edKeep(() => paneRender()); return; }
   if ((b = at('[data-eddate]'))) { ED.date = ED.date === b.dataset.eddate ? null : b.dataset.eddate; paneRender(); return; }
-  if (at('[data-edwarm]')) { ED.warm = ED.kind === 'track' ? {sel: OSC_WARM.slice(), preset: 'osc'} : {sel: warmDefault(ED), preset: 'auto'}; paneRender(); return; }
+  if (at('[data-edwarm]')) { ED.warm = ED.kind === 'track' ? jbmWarm() : {sel: warmDefault(ED), preset: 'auto'}; paneRender(); return; }
   if ((b = at('[data-edwp]'))) { const pr = WARM_PRESETS.find(x => x[0] === b.dataset.edwp); ED.warm = {sel: pr[2] ? pr[2].slice() : warmDefault(ED), preset: pr[0]}; paneRender(); return; }
   if (at('[data-edwarmx]')) { delete ED.warm; paneRender(); return; }
   if ((b = at('[data-edwadd]'))) { warmPick(b.dataset.edwadd); return; }
@@ -8976,6 +8997,7 @@ function edKeep(fn, y = edScroll(), toLast = false) { fn();
 function editPlan(id, date, dup = false) {
   const p = id ? planById(id) : null, mine = p && !BUILTIN.includes(p) && !TDV_PLANS.includes(p) && !dup;
   ED = p ? structuredClone(p) : {kind: S.tkind === 'track' ? 'track' : 'gym', name: '', desc: '', items: [], seqAuto: true};
+  if (!p && ED.kind === 'track') ED.warm = jbmWarm();
   ED.gym = (p && S.tset?.gymPlan?.[p.id]) || null;
   if (ED.kind === 'class') ED.kind = 'gym';
   if (dup) { ED.id = uid(); ED.autoName = false; ED.autoDesc = false; ED.name = (p.name || 'Séance') + ' (copie)'; ED.wk = monday(TODAY); }
@@ -8998,17 +9020,18 @@ function whenRow() {
     <span class="hint">${ED.date ? 'Le ' + esc(fmtDay(ED.date)) + (dayPlan(ED.date).find(x => x.c === (ED.kind === 'track' ? 'athle' : 'muscu')) ? ', sur ton créneau du planning' : '') : 'Sans date : touche un jour. Le point = une séance déjà programmée ce jour-là.'}</span></div>`;
 }
 const WARM_ADD = {cardio: '+ Ajouter du cardio', mob: '+ Ajouter de la mobilité', act: '+ Ajouter une activation', prog: '+ Ajouter une course progressive'};
-const JBM_WARM = ['jbm_m1', 'jbm_m2', 'jbm_m3', 'jbm_m4', 'jbm_m5', 'jbm_d1', 'jbm_d2', 'jbm_d3', 'jbm_d4', 'jbm_d5', 'jbm_p1', 'jbm_p2', 'jbm_p3'];
+const JBM_WARM = ['jbm_m1', 'jbm_m2', 'jbm_m3', 'jbm_m4', 'jbm_m5', 'jbm_d1', 'jbm_d2', 'jbm_d3', 'jbm_d4', 'jbm_d5', 'jbm_d6', 'jbm_d7', 'jbm_d8', 'jbm_p1', 'jbm_p2', 'jbm_p3', 'jbm_p4', 'jbm_p5'];
+const jbmWarm = () => ({sel: JBM_WARM.slice(), preset: 'jbm'});
 // His favourite warm-up, as on his sheet: cardio, joint mobility, activation, running drills, accelerations.
 const OSC_WARM = ['o_fbl', 'o_inv', 'o_ev', 'o_fd', 'o_fp', 'm_9090', 'o_rotO', 'o_rotF', 'o_cobra', 'o_enf', 'm_cc', 'o_ht', 'o_ht1', 'o_frs', 'o_abd', 'o_retro', 'o_badd', 'o_bisc', 'o_ad',
   'o_whs', 'o_wkt', 'o_sw', 'o_tape', 'o_mgd', 'o_tfd', 'o_karD', 'o_karG', 'o_slD', 'o_slG', 'o_cis', 'o_askD', 'o_askG', 'o_ask', 'o_bmD', 'o_bmG', 'o_bm', 'o_fb2', 'o_acc1', 'o_acc2', 'o_acc3'];
-const WARM_PRESETS = [['osc', 'Mon échauffement', OSC_WARM], ['jbm', 'JB Morin', JBM_WARM], ['auto', 'Proposé pour la séance', null]];
+const WARM_PRESETS = [['jbm', 'JB Morin', JBM_WARM], ['osc', 'Mon échauffement', OSC_WARM], ['auto', 'Proposé pour la séance', null]];
 function warmBox() {
   if (!ED.warm) return `<button class="btn ghost" data-edwarm>+ Ajouter un échauffement</button>`;
   const sel = ED.warm.sel || [];
   return `<div class="exbox wbox"><h3>Échauffement<small>${warmMin(ED.warm)} min</small></h3>
     <div class="chips2b" style="margin-top:8px"${ED.kind === 'track' ? '' : ' hidden'}>${WARM_PRESETS.filter(([id]) => ED.kind === 'track' || id === 'auto').map(([id, n]) => `<button type="button" class="chip" data-edwp="${id}" aria-pressed="${ED.warm.preset === id}">${n}</button>`).join('')}</div>
-    ${ED.warm.preset === 'jbm' ? '<p class="hint" style="margin:6px 2px 0">Construit sur le « Sprint Warmup » de JB Morin : 10 min de mobilité, 10 de gammes, 10 de courses progressives, écrits exercice par exercice. Pour son ordre exact : <a href="https://youtu.be/mcV4l_T9n44" target="_blank" rel="noopener">la vidéo</a>.</p>' : ''}
+    ${ED.warm.preset === 'jbm' ? '<p class="hint" style="margin:6px 2px 0">L\'échauffement de JB Morin, ajouté d\'office à chaque séance de sprint : mobilité, gammes, puis 5 accélérations progressives de 50 à 95 %. Pour les gestes : <a href="https://youtu.be/mcV4l_T9n44" target="_blank" rel="noopener">la vidéo</a>.</p>' : ''}
     ${WARM_G.filter(([g]) => g !== 'prog' || ED.kind === 'track' || sel.some(id => WX[id]?.g === 'prog')).map(([g, lab, why]) => { const L = sel.map(id => WX[id]).filter(x => x && x.g === g);
       return `<div class="sec-label" style="margin:12px 0 4px">${lab}<small style="text-transform:none;letter-spacing:0;font-weight:500"> · ${why}</small></div>
       ${L.length ? `<div class="wtl">${L.map(x => `<div class="wti"><span><b>${esc(x.n)}</b><small>${esc(x.dose)}</small></span><button type="button" class="wx" data-edws="${x.id}" aria-label="Retirer ${esc(x.n)}">×</button></div>`).join('')}</div>` : ''}
@@ -9091,19 +9114,27 @@ function techExtra(it, i, num) {
     <p class="hint" style="margin:4px 2px 0">${esc(techTxt(it, it.reps || 1))}${pl ? ` · 1 pied ≈ 30 cm${+it.cones ? '' : ' · plots calculés sur la distance'}` : ''}</p>`;
 }
 function twAdd(it) { const k = ED.items.reduce((a, x, j) => x.tw ? j + 1 : a, 0); ED.items.splice(k, 0, it); if (ED.tech == null) ED.tech = ''; }
+// Le travail technique, simple : on touche ce qu'on fait (course, haies, pliométrie, renforcement), on garde la durée
+// (25 min par défaut, partagée entre les types choisis), une note si besoin. Chaque type devient un exercice en minutes de la séance.
+const TWK = [['course', 'Course'], ['haies', 'Haies'], ['plio', 'Pliométrie'], ['renfo', 'Renforcement']];
+for (const [t] of TWK) if (EXI['tw_' + t]) EXI['tw_' + t].hide = true;
+const twKinds = () => ED.items.filter(x => /^tw_/.test(x.ex)).map(x => x.ex.slice(3));
+const twTotal = () => ED.twMin || ED.items.filter(x => /^tw_/.test(x.ex)).reduce((a, x) => a + (+x.min || 0), 0) || 25;
+function twSync(kinds, total) {
+  const old = ED.items.filter(x => /^tw_/.test(x.ex)), keep = ED.items.filter(x => !/^tw_/.test(x.ex)), k = keep.reduce((a, x, j) => x.tw ? j + 1 : a, 0);
+  const add = kinds.map(t => ({...(old.find(x => x.ex === 'tw_' + t) || {}), ex: 'tw_' + t, tw: t, min: Math.round(total / kinds.length)}));
+  keep.splice(k, 0, ...add); ED.items = keep; ED.twMin = total; if (ED.tech == null) ED.tech = '';
+}
 function techBox(edItem) {
-  const tw = ED.items.some(x => x.tw);
-  if (ED.tech == null && !tw) return `<button class="btn ghost" data-edtech>+ Ajouter un travail technique</button>`;
-  const t = ED.ttab || 'course', mine = (S.tset?.myEx || []).filter(id => exOf(id).t === 'gym' && exOf(id).cat !== 'Pliométrie').slice(0, 8);
-  const plio = (() => { const all = EX.filter(e => e.cat === 'Pliométrie' && !e.hide).map(e => e.id), used = [...(S.tset?.myEx || []), ...(typeof recentEx === 'function' ? recentEx('gym') : [])].filter(id => all.includes(id)); return [...new Set([...used, ...all])].slice(0, 8); })();
-  const pal = t === 'course' || t === 'haies' ? `<div class="chips2b">${(t === 'haies' ? TW_HAIES : TW_RUN).map(([id, l]) => `<button type="button" class="chip" data-edtwadd="${id}">+ ${l}</button>`).join('')}</div>`
-    : `<div class="chips2b">${(t === 'plio' ? plio : mine).map(id => `<button type="button" class="chip" data-edtwex="${t}.${id}">+ ${esc(exOf(id).n)}</button>`).join('')}</div>
-      <button type="button" class="addln" data-edtwpick="${t}">Rechercher un exercice ${t === 'plio' ? 'de pliométrie' : 'de renforcement'}</button>`;
-  return `<div class="exbox wbox techbox"><h3>Travail technique</h3>
-    <div class="seg" style="margin-top:8px">${TW_TYPES.map(([v, l]) => `<button type="button" data-edtt="${v}" aria-pressed="${t === v}">${l}</button>`).join('')}</div>
-    <div style="margin-top:8px">${pal}</div>
-    ${tw ? `<div class="twlist">${ED.items.map((it, i) => it.tw ? edItem(it, i) : '').join('')}</div>` : '<p class="hint" style="margin:8px 2px 0">Touche un exercice pour l\'ajouter. Il se règle ensuite comme dans la séance : répétitions, distance, intensité, séries, récup.</p>'}
-    <textarea class="mini-in techta" data-edtechv placeholder="Consigne générale (facultatif) : placement du bassin, griffé…" aria-label="Consigne du travail technique">${esc(ED.tech || '')}</textarea>
+  const old = ED.items.some(x => x.tw && !/^tw_/.test(x.ex)), ks = twKinds();
+  if (ED.tech == null && !ks.length && !old) return `<button class="btn ghost" data-edtech>+ Ajouter un travail technique</button>`;
+  const tot = twTotal();
+  return `<div class="exbox wbox techbox"><h3>Travail technique<small>${tot} min</small></h3>
+    <div class="chips2b" style="margin-top:8px">${TWK.map(([v, l]) => `<button type="button" class="chip" data-edtwk="${v}" aria-pressed="${ks.includes(v)}">${l}</button>`).join('')}</div>
+    <div class="ctrow"><span>Durée</span><div class="seg">${[20, 25, 30].map(m => `<button type="button" data-edtwm="${m}" aria-pressed="${tot === m}">${m} min</button>`).join('')}</div></div>
+    ${ks.length > 1 ? `<p class="hint" style="margin:4px 2px 0">${ks.map(t => TWK.find(x => x[0] === t)[1] + ' ' + Math.round(tot / ks.length) + ' min').join(' · ')}</p>` : ''}
+    ${old ? `<div class="twlist">${ED.items.map((it, i) => it.tw && !/^tw_/.test(it.ex) ? edItem(it, i) : '').join('')}</div>` : ''}
+    <textarea class="mini-in techta" data-edtechv placeholder="Note (facultatif) : plots sur 30 m, haies basses, placement du bassin…" aria-label="Note du travail technique">${esc(ED.tech || '')}</textarea>
     <div class="tools"><button type="button" class="rm" data-edtechx>Retirer le travail technique</button></div></div>`;
 }
 // Ordinateur, musculation : la séance principale en tableau, comme sa feuille « S 1 PPG » (Train de vie performance).
@@ -9477,7 +9508,7 @@ function startSession(id, n) {
   if (S.live) { toast('Une séance est déjà en cours : termine-la d\'abord'); openLive(); return; }
   const p = (n ? tdvNum(+n) : null) || planById(id); if (!p) return;
   const gym = S.tset?.gymPlan?.[p.id] || null; GYM_CTX = gym;
-  S.live = {id: uid(), plan: p.id, name: p.name, kind: p.kind, date: TODAY, start: new Date().toISOString(), gym, items: p.items.map(liveItem), warm: p.warm || null, cool: p.cool || null};
+  S.live = {id: uid(), plan: p.id, name: p.name, kind: p.kind, date: TODAY, start: new Date().toISOString(), gym, items: p.items.map(liveItem), warm: p.warm || (p.kind === 'track' ? jbmWarm() : null), cool: p.cool || null};
   saveLive(); closeAllPanes(); openLive();
 }
 // Les réglages d'une course, repris du plan : intention (%), traîneau (kg), partenaire qui retient (%), élan (m et %).
@@ -9783,6 +9814,32 @@ function rmRow(e) {
   }
 }
 // The load on each muscle over 7 days, against its weekly limit, and the balance between opposite groups.
+// Pliométrie : appuis au sol sur la période, contre la limite. Chu & Myer (Plyometrics, 2013) et la NSCA (Essentials of
+// Strength Training and Conditioning) : 120 à 140 appuis par séance pour un athlète confirmé, 2 à 3 séances par semaine,
+// 48 à 72 h entre deux. Donc 140 par jour et 360 par semaine (3 × 120).
+const PLYO_DAY = 140, PLYO_WEEK = 360, PLYO_NOT = /lancer|passe de poitrine|pompes|wall ball|médecine/i;
+function plyoContacts(l) {
+  let n = 0;
+  for (const it of l.items || []) { const e = exOf(it.ex);
+    if (it.ex === 'tw_plio') n += (+it.min || 0) * 4; else if (it.ex === 'tw_haies') n += (+it.min || 0) * 1.6;
+    else if (it.sets && e.cat === 'Pliométrie' && !PLYO_NOT.test(e.n)) n += it.sets.reduce((a, st) => a + (+st.reps || 0) * (unitOf(it) === 'm' ? .5 : unitOf(it) === 's' ? 0 : 1), 0);
+    else if (it.ex === 'h_rhythm' && +it.hn && it.reps) n += it.reps.length * +it.hn * 2; }
+  return Math.round(n);
+}
+function plyoCard() {
+  const L = logs(); if (!L.length) return '';
+  const g = S.mgran || 'week', first = L.at(-1)?.date || TODAY, days = g === 'all' ? Math.max(7, daysBetween(first, TODAY) + 1) : {day: 1, week: 7, month: 30, year: 365}[g] || 7, from = addDays(TODAY, -(days - 1));
+  const by = {}; for (const l of L) if (l.date >= from && l.date <= TODAY) { const c = plyoContacts(l); if (c) by[l.date] = (by[l.date] || 0) + c; }
+  const n = Object.values(by).reduce((a, x) => a + x, 0), lim = g === 'day' ? PLYO_DAY : Math.round(PLYO_WEEK * days / 7), pct = n / lim * 100;
+  const ds = Object.keys(by).sort(), close = ds.some((d, i) => i && daysBetween(ds[i - 1], d) < 2), over = Object.entries(by).filter(([, c]) => c > PLYO_DAY);
+  const col = {good: 'var(--good)', mid: 'var(--warn)', bad: 'var(--bad)'}[musZone(pct)];
+  return `<div class="card"><span class="eyebrow">Charge de pliométrie max · ${GRAN_TXT[g]}</span>
+    <div class="musrow"><span>Appuis au sol</span><span class="bar"><i style="width:${Math.min(100, pct).toFixed(0)}%;background:${col}"></i></span><b>${Math.round(pct)} %</b></div>
+    <p class="small" style="margin:4px 0 0">${fx(n)} appuis sur ${fx(lim)} au maximum · ${ds.length} jour${ds.length > 1 ? 's' : ''} de pliométrie</p>
+    ${over.length ? `<p class="small" style="margin:4px 0 0;color:var(--bad)">Plus de ${PLYO_DAY} appuis en une journée : ${over.map(([d, c]) => esc(fmtShort(d)) + ' (' + c + ')').join(', ')}.</p>` : ''}
+    ${close ? `<p class="small" style="margin:4px 0 0;color:var(--warn)">Deux jours de pliométrie d'affilée : garde 48 h entre deux.</p>` : ''}
+    ${detailsBox('Limite : 120 à 140 appuis par séance pour un athlète confirmé, 2 à 3 séances par semaine, 48 à 72 h entre deux (Chu et Myer, Plyometrics, 2013 ; NSCA, Essentials of Strength Training and Conditioning). Soit 140 par jour et 360 par semaine. Comptés : les sauts (séries × répétitions), le travail technique en pliométrie (environ 4 appuis par minute) et en haies (environ 1,6 par minute). Les sprints n\'y sont pas : ils sont dans la charge par muscle.')}</div>`;
+}
 function musCard(st = musPer()) {
   const any = st.some(x => x.week > 0); if (!any) return '';
   const col = {good: 'var(--good)', mid: 'var(--warn)', bad: 'var(--bad)'}, bal = musBalance(st);
@@ -11225,7 +11282,7 @@ document.addEventListener('click', e => {
   if ((b = at('[data-tlogdel]'))) { const l = S.logs[b.dataset.tlogdel]; if (l) { l.deleted = true; dbSet('training/' + l.id, l).then(() => feedReload(l.date)); closeAllPanes(); toast('Séance supprimée'); } return; }
   if (at('[data-tlive]')) { openLive(); return; }
   // Plan editor
-  if ((b = at('[data-edkind]'))) { ED.kind = b.dataset.edkind; paneRender(); return; }
+  if ((b = at('[data-edkind]'))) { ED.kind = b.dataset.edkind; if (ED.kind === 'track' && !ED.warm) ED.warm = jbmWarm(); paneRender(); return; }
   if (at('[data-edtoday]')) { savePlanToday(); return; }
   // Ajouter un exercice : la fiche se remet là où on était, sur l'exercice ajouté (plus de retour en haut).
   if (at('[data-edadd]')) { const y = edScroll(); pickExercise(ED.kind, id => { ED.items.push(defaultItem(id)); edKeep(() => paneRender(), y, true); }); return; }
