@@ -281,10 +281,11 @@ document.addEventListener('visibilitychange', () => { if (document.hidden && ACS
 // Le carré « Actus » : allumé tant que les actus du jour n'ont pas été vues.
 const acSeenToday = () => { try { return localStorage.getItem('tnr-actus-day') === TODAY; } catch (e) { return false; } };
 function acSeen() { try { localStorage.setItem('tnr-actus-day', TODAY); } catch (e) {} document.querySelector('.one-act')?.classList.add('seen'); }
-document.body.insertAdjacentHTML('beforeend', `<button class="one-sq one-act${acSeenToday() ? ' seen' : ''}" data-acopen aria-label="Actus du jour"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 9h6M9 12h6M9 15h3"/></svg><span>Actus</span></button>`);
+if (false) document.body.insertAdjacentHTML('beforeend', `<button class="one-sq one-act${acSeenToday() ? ' seen' : ''}" data-acopen aria-label="Actus du jour"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 9h6M9 12h6M9 15h3"/></svg><span>Actus</span></button>`);
 document.addEventListener('click', e => { if (e.target.closest('[data-acopen]')) acOpen(0); });
 // Première ouverture de la journée : dès que les données sont là et que l'écran d'ouverture est parti.
 (function acAuto(n = 0) {
+  return;   // retirées (v159)
   if (acSeenToday() || n > 120) return;
   const ready = (S.status === 'ready' || S.status === 'slow') && !document.getElementById('splash') && !window.TNR_SPLASH_ON && S.mod === 'home';
   if (!ready) { setTimeout(() => acAuto(n + 1), 500); return; }

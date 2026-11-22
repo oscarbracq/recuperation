@@ -3172,7 +3172,7 @@ function aiContext() {
 }
 let AI_LAST = '';
 async function aiSave() {
-  if (S.status !== 'ready' || !window.RECUP_AI_SAVE) return;
+  if (S.status !== 'ready' || !window.RECUP_AI_SAVE || !aiOn()) return;
   let text; try { text = aiContext(); } catch (e) { return; }
   const body = text.slice(text.indexOf('\n'));
   if (body === AI_LAST) return;
@@ -3182,6 +3182,7 @@ async function aiSave() {
 const AI_URL = 'https://claude.ai/project/01a1e00d-19f9-7639-b74f-52770ce8fac5';
 // Sur Android : l'appli Claude s'ouvre directement sur le projet (sinon le navigateur, déjà connecté, prend le relais). Sur PC : un nouvel onglet.
 function aiOpenClaude() {
+  if (!aiOn()) { toast('IA coupée dans les Paramètres'); return; }
   aiSave();
   if (/Android/i.test(navigator.userAgent)) location.href = 'intent://' + AI_URL.replace(/^https:\/\//, '') + '#Intent;scheme=https;package=com.anthropic.claude;S.browser_fallback_url=' + encodeURIComponent(AI_URL) + ';end';
   else if (/iPhone|iPad/i.test(navigator.userAgent)) window.open(AI_URL, '_blank', 'noopener');
@@ -8067,7 +8068,6 @@ function tToday() {
       ${coachCard()}
       ${main}
     </div>
-    <h2>Charge <small>7 derniers jours</small>${editBtn('load')}</h2>${secHtml('load')}
     ${recentLogs()}
     ${recentSessions().replace('Séances récentes', 'Activités de la semaine')}
     ${footer()}`;

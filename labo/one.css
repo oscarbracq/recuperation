@@ -535,3 +535,22 @@ html.one :is(#t-view,#f-view,[id^="v-"],#home-view){will-change:transform}
 .rcposestat:empty{display:none}
 .rcwrap .btnrow.two .btn{font-size:.8125rem;padding-left:8px;padding-right:8px}
 .rcrepbtns [data-rcrepstep]{font-size:1.5rem;line-height:1;font-weight:700}
+
+/* v159 : la roue crantée à gauche, l'IA à droite (les Actus sont retirées) */
+.one-hai{left:auto!important;right:calc(8px + env(safe-area-inset-right,0px))}
+.one-hset{position:fixed;z-index:31;left:calc(8px + env(safe-area-inset-left,0px));top:calc(19px + env(safe-area-inset-top,0px));opacity:0;pointer-events:none;transform:scale(.6);transition:opacity .35s,transform .45s cubic-bezier(.34,1.56,.64,1)}
+html.one.one-home .one-hset{opacity:1;pointer-events:auto;transform:none}
+html.one.one-pl .one-hset,html.kbdlib .one-hset{opacity:0!important;pointer-events:none!important}
+html.one-noai .one-hai{display:none!important}
+.one-act{display:none!important}
+/* Réduire les animations */
+html.one-calmx *,html.one-calmx *::before,html.one-calmx *::after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
+/* v159 : dans les pages, plus aucune case transparente : les cases sont grises et pleines, comme les autres blocs */
+html.one .banner{background:var(--card)!important;box-shadow:none!important}
+html.one .banner.skipb{background:var(--card)!important}
+html.one .seachip{background:var(--card)!important}
+html.one .wk{background:linear-gradient(160deg,rgba(142,155,181,.10),rgba(142,155,181,.03) 60%,rgba(142,155,181,0)),var(--card)!important}
+html.one .bweek.sebk{background-color:var(--card)}
+html.one .malert{background:color-mix(in srgb,var(--bad) 12%,var(--card))}
+html.one .malert.ok{background:color-mix(in srgb,var(--good) 12%,var(--card))}
+html.one .malert.mid{background:color-mix(in srgb,var(--warn) 14%,var(--card))}
