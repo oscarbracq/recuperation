@@ -35,27 +35,29 @@ function daSet(k) {
   try { localStorage.setItem('tnr-da', k || ''); } catch (e) {}
   for (const m of ONE.mods) ONE.col[m] = t ? '#A6A6A6' : DA_COL0[m];
   document.querySelectorAll('#one-top [data-one-m]').forEach(b => b.style.setProperty('--c', ONE.col[b.dataset.oneM]));
-  const p = document.querySelector('.da-pick'); if (p) p.textContent = t ? t.name : 'Choisir un test';
+  const p = document.querySelector('.da-pick'); if (p) p.textContent = t ? 'Lab · ' + t.name : 'Lab · couleurs';
   if (t) document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.content = t.pal[0][1]; }); else try { syncBars(); } catch (e) {}
 }
 function daOpen() {
   let el = document.getElementById('da-ch');
   if (!el) { el = document.createElement('div'); el.id = 'da-ch'; document.body.appendChild(el); }
   const cur = document.documentElement.dataset.da || '';
-  el.innerHTML = `<div class="da-in"><div class="da-k">TNR Lab</div><h1>Choisis une direction</h1><p>Trois applis, chacune avec une palette de 5 couleurs seulement : le fond, les blocs, le discret, l'accent et le texte. Les textes d'explication sont retirés.</p>
+  el.innerHTML = `<div class="da-in"><div class="da-k">TNR Lab</div><h1>Choisis une direction</h1><p>Ici, tout ce que tu fais reste dans le Lab : ton vrai compte et ta vraie appli ne changent pas. Choisis une palette pour l'essayer, ou garde les vraies couleurs.</p><button type="button" class="da-c" data-da-go="" style="align-items:center"><b>Les vraies couleurs</b></button>
     ${Object.entries(DA).map(([k, t]) => `<button type="button" class="da-c${cur === k ? ' on' : ''}" data-da-go="${k}" style="background:${t.pal[1][1]};color:${t.pal[4][1]}"><span class="da-sw">${t.pal.map(([n, c]) => `<i style="background:${c}" title="${n}"></i>`).join('')}</span><b>${t.name}</b><small style="color:${t.pal[2][1]}">${t.pal.map(([n, c]) => `${n} ${c}`).join(' · ')}</small><em style="color:${t.pal[4][1]}">${t.how}</em><small style="color:${t.pal[2][1]}">Contrastes : ${t.ct}</small></button>`).join('')}</div>`;
+  el.querySelector('.da-in').insertAdjacentHTML('beforeend', `<button type="button" class="da-c" data-da-reset style="align-items:center;color:#FF6B60"><b>Repartir de mes vraies données</b><small>${window.LAB_DB?.count?.() || 0} changement(s) gardé(s) dans le Lab</small></button>`);
   el.classList.add('on'); document.documentElement.classList.add('da-open');
 }
 function daClose() { document.getElementById('da-ch')?.classList.remove('on'); document.documentElement.classList.remove('da-open'); }
 document.addEventListener('click', e => {
   const g = e.target.closest('[data-da-go]'); if (g) { daSet(g.dataset.daGo); daClose(); return; }
   if (e.target.closest('.da-pick')) daOpen();
+  if (e.target.closest('[data-da-reset]') && confirm('Effacer tout ce que tu as fait dans le Lab et repartir de tes vraies données ?')) { window.LAB_DB?.reset(); window.LAB_RAW?.wipe(); location.reload(); }
 });
 (() => {
-  document.body.insertAdjacentHTML('beforeend', `<svg width="0" height="0" style="position:absolute" aria-hidden="true">${Object.entries(DA).map(([k, t]) => daFilter(k, t)).join('')}</svg><button type="button" class="da-pick">Choisir un test</button>`);
+  document.body.insertAdjacentHTML('beforeend', `<svg width="0" height="0" style="position:absolute" aria-hidden="true">${Object.entries(DA).map(([k, t]) => daFilter(k, t)).join('')}</svg><button type="button" class="da-pick">Lab · couleurs</button>`);
   const st = document.createElement('style');
   st.textContent = `html[data-da]:not(.da-open),html[data-da]:not(.da-open) *{${DA_ROLES}}` + Object.keys(DA).map(k => `html[data-da="${k}"]:not(.da-open){filter:url(#da-f-${k});background:${DA[k].pal[0][1]}}html[data-da="${k}"]:not(.da-open) body{background:#000}`).join('');
   document.head.appendChild(st);
   let k = ''; try { k = localStorage.getItem('tnr-da') || ''; } catch (e) {}
-  daSet(DA[k] ? k : ''); daOpen();
+  daSet(DA[k] ? k : '');
 })();

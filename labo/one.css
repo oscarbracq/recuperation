@@ -416,3 +416,34 @@ html.one .one-st::before{filter:none!important;background:radial-gradient(closes
 .lrunf{display:grid;grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:8px;align-items:end}
 .lrunf label{display:flex;flex-direction:column;gap:4px;font-size:.6875rem;font-weight:600;color:var(--fg2)}
 .lrunf .mini-in{width:100%;text-align:center}
+
+/* ---------- v149 : glissements sans flash ----------
+   Le fond coloré : des dégradés ronds au lieu de grands disques floutés (le flou de 70 px sur des disques de la taille
+   de l'écran était recalculé sans cesse : le téléphone n'arrivait plus à tout dessiner et laissait des trous d'une image
+   au glissement). Même rendu doux, beaucoup moins lourd. Les pages restent prêtes (couches gardées). */
+html.one .aura span{filter:none!important;width:92vmax!important;height:92vmax!important;margin:-46vmax 0 0 -46vmax!important}
+html.one .aura span:nth-child(1){background:radial-gradient(closest-side,var(--o1) 0%,var(--o1) 36%,color-mix(in srgb,var(--o1) 55%,transparent) 60%,color-mix(in srgb,var(--o1) 18%,transparent) 80%,transparent 100%)!important}
+html.one .aura span:nth-child(2){background:radial-gradient(closest-side,var(--o2) 0%,var(--o2) 36%,color-mix(in srgb,var(--o2) 55%,transparent) 60%,color-mix(in srgb,var(--o2) 18%,transparent) 80%,transparent 100%)!important}
+html.one .aura span:nth-child(3){background:radial-gradient(closest-side,var(--o3) 0%,var(--o3) 36%,color-mix(in srgb,var(--o3) 55%,transparent) 60%,color-mix(in srgb,var(--o3) 18%,transparent) 80%,transparent 100%)!important}
+html.one :is(#t-view,#f-view,[id^="v-"],#home-view){will-change:transform}
+/* Le bouton scanner dans la barre de recherche : icône bien centrée dans son carré (la règle de la loupe ne la déplace plus), en vert */
+.libsearch .lsscan svg{position:static!important;left:auto!important;top:auto!important;transform:none!important;display:block;margin:auto;color:inherit;pointer-events:none}
+.lsscan{background:color-mix(in srgb,#30D158 26%,transparent)!important;color:#4BE374!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,#30D158 55%,transparent)}
+
+/* ---------- v149 : jauges des menus, questionnaire matin / soir ---------- */
+.mg{margin:10px 0 0}
+.mg-h{display:flex;align-items:baseline;gap:8px;font-size:.8125rem}
+.mg-h span{color:var(--fg2);font-weight:600;min-width:74px}
+.mg-h b{font-variant-numeric:tabular-nums}.mg-h b small{color:var(--fg2);font-weight:500}
+.mg-h em{margin-left:auto;font-style:normal;font-weight:700;font-size:.75rem;padding:2px 8px;border-radius:10px}
+.mg-h em.ok{color:#30D158;background:rgba(48,209,88,.14)}.mg-h em.lo{color:#FF9F0A;background:rgba(255,159,10,.14)}.mg-h em.hi{color:#64D2FF;background:rgba(100,210,255,.14)}
+.mg-bar{position:relative;height:8px;margin-top:6px;border-radius:4px;background:rgba(255,255,255,.08)}
+.mg-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px}
+.mg-bar s{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;border-radius:1px;background:var(--fg)}
+.qmseg{margin:12px 0 4px}
+.msyn{margin-top:14px;border:1.5px solid rgba(255,255,255,.12)}
+.msyn.good{border-color:rgba(48,209,88,.5)}.msyn.mid{border-color:rgba(255,159,10,.55)}.msyn.bad{border-color:rgba(255,69,58,.6)}
+.msyn-n{display:flex;align-items:center;gap:12px;margin:4px 2px 10px}
+.msyn-n b{font-size:2.2rem;font-weight:800;line-height:1}.msyn-n b small{font-size:.9rem}
+.msyn-n span{font-weight:700;line-height:1.25}.msyn-n span small{color:var(--fg2);font-weight:500}
+.msyn-t{margin:10px 2px 0;font-weight:600;line-height:1.45}

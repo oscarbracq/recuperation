@@ -57,5 +57,6 @@ function labSandbox(db) {
   window.RECUP_SYNC = async () => 'Labo : tes données sont celles de ton compte, la synchro reste dans ta vraie appli';
   if (window.RECUP_KEYS) window.RECUP_KEYS = {...window.RECUP_KEYS, save: off, linkWithings: off};
   if (window.RECUP_PUSH) window.RECUP_PUSH = {...window.RECUP_PUSH, on: off, off: off, test: off};
+  window.RECUP_AI_SAVE = async () => {};   // les analyses de l'IA faites dans le labo ne remplacent pas celles du compte
   return api;
 }

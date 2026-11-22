@@ -258,12 +258,26 @@ Deno.serve(async req => {
   let due: string | null = null;
   if (!body.test) {
     const {data: app} = await db.from('docs').select('data').eq('collection', 'settings').eq('id', 'app').maybeSingle();
-    const times: string[] = Array.isArray(app?.data?.notifTimes) ? app.data.notifTimes : ['09:00', '20:00'];
+    // The morning questionnaire (settings/app.questTime, 08:30 by default; empty = off) comes on top of the chosen times.
+    const qt = app?.data?.questTime === '' ? null : (app?.data?.questTime || '08:30');
+    const times: string[] = [...(Array.isArray(app?.data?.notifTimes) ? app.data.notifTimes : ['09:00', '20:00']), ...(qt ? [qt] : [])];
     due = times.find(t => /^\d\d:\d\d$/.test(t) && mins(hm) - mins(t) >= 0 && mins(hm) - mins(t) < 10 && (st.last || {})[t] !== TODAY) || null;
     if (!due) return json((await sessionWatch(st, TODAY, hm, token)) || {skipped: 'pas d\'envoi prévu à ' + hm});
   }
   const slot = (due ? +due.slice(0, 2) : hour) < 14 ? 'morning' : 'evening';
   if (!st.subs?.length) return json({skipped: 'aucun téléphone abonné'});
+  // The morning questionnaire: one tap opens it in the app (./?q=matin), unless it is already answered.
+  if (due && !body.test) {
+    const {data: app2} = await db.from('docs').select('data').eq('collection', 'settings').eq('id', 'app').maybeSingle();
+    const qt = app2?.data?.questTime === '' ? null : (app2?.data?.questTime || '08:30');
+    if (due === qt) {
+      const {data: man} = await db.from('docs').select('data').eq('collection', 'manual').eq('id', TODAY).maybeSingle();
+      st.last = {...(st.last || {}), [due]: TODAY}; await putPrivate('push', st);
+      if (man?.data?.mornAt) return json({skipped: 'questionnaire du matin déjà rempli'});
+      const results = await sendAll(st, {title: 'Questionnaire du matin', body: 'Comment tu te sens ce matin ? Sommeil, jambes, douleurs, moral : une minute, et ta synthèse du jour est prête.', tag: 'tnr-quest', url: './?q=matin'});
+      return json({slot: 'quest', results});
+    }
+  }
   let sync: unknown = null;
   const syncToken = token || st.syncToken;
   if (syncToken && !body.test) {

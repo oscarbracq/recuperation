@@ -40,14 +40,18 @@ HID = "    if (document.hidden) { el.remove(); bars(); return; }" + chr(10)
 h = must(h, HID, HID + "    if (window.ONE_SPLASH && window.ONE_SPLASH(el, svg, bars)) return;" + chr(10), 1)
 assert "navigator.serviceWorker.register('sw.js')" in h and 'labSandbox' not in h
 open('index.html', 'w', encoding='utf-8', newline='').write(h)
-# 3) TNR Lab (labo/index.html): the real app, plus the colour tests shown before the Accueil (labo/da.css, labo/da.js).
-#    Same account, no install, no service worker.
+# 3) TNR Lab (labo/index.html): the real app, exactly, to try things on the phone's browser. It reads the real account
+#    but every write stays on this phone (labo/nx-head.js, labSandbox): sessions, menus, questionnaires made here never
+#    reach the account nor the real app. No sync, no notification, no install, no service worker. The colour tests
+#    (labo/da.css, labo/da.js) stay one tap away.
 L = h
 L = must(L, '<link rel="manifest" href="manifest.webmanifest">', '')
 L = must(L, 'src="icon-192.png', 'src="../icon-192.png')
 L = must(L, 'href="icon-192.png', 'href="../icon-192.png')
 L = must(L, 'href="apple-touch-icon.png', 'href="../apple-touch-icon.png')
 L = must(L, '<script src="supabase-db.js', '<script src="../supabase-db.js')
+L = must(L, 'const db = await recupGetDb();', 'const db = labSandbox(await recupGetDb());', 1)
+hd = L.index('<head>') + len('<head>'); L = L[:hd] + '<script>' + open('labo/nx-head.js', encoding='utf-8').read() + '</script>' + L[hd:]
 L = re.sub(r"<script>if \('serviceWorker' in navigator\) \{.*?\}</script>", '', L, count=1, flags=re.S)
 assert "navigator.serviceWorker.register('sw.js')" not in L
 L = must(L, '<meta name="apple-mobile-web-app-title" content="TNR Athletics">', '<meta name="apple-mobile-web-app-title" content="TNR Lab"><title>TNR Lab</title>')
