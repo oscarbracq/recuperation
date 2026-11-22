@@ -10,7 +10,7 @@
      premier mouvement image par image.
    Chaque essai s'ajoute à la session (courbe) ; on enregistre la meilleure de la session, et la tendance suit. */
 const RCT = {mode: 'son', tries: {son: [], cam: [], video: []}, run: null, cam: null, vid: null, roi: {x: .2, y: .1, w: .6, h: .8}, last: null, roiOn: false};
-const RC_DEF = {start: 'starter', mkMin: 6, mkMax: 10, stMin: 1.5, stMax: 2.5, gnMin: 2, gnMax: 5, lat: 0, flash: true, place: 10, pose: true};
+const RC_DEF = {start: 'starter', mkMin: 6, mkMax: 10, stMin: 1.5, stMax: 2.5, gnMin: 2, gnMax: 5, lat: 0, flash: true, place: 10, pose: true, camId: '', zoom: null};
 const rcCfg = () => { try { return {...RC_DEF, ...JSON.parse(localStorage.getItem('tnr-react') || '{}')}; } catch (e) { return {...RC_DEF}; } };
 const rcSetCfg = p => { try { localStorage.setItem('tnr-react', JSON.stringify({...rcCfg(), ...p})); } catch (e) {} };
 const rcRnd = (a, b) => +a + Math.random() * Math.max(0, +b - +a);
@@ -124,16 +124,38 @@ function rcMotionChart(L) {
     ${on != null ? `<line x1="${X(on).toFixed(1)}" x2="${X(on).toFixed(1)}" y1="4" y2="${H - 16}" stroke="var(--good)" stroke-width="2"/><text x="${X(on).toFixed(1)}" y="${H - 4}" font-size="9" fill="var(--good)" text-anchor="middle">départ</text>` : ''}</svg>
     <p class="small muted" style="margin:4px 0 0">${S.length} images sur 1,4 s · une image toutes les ${fx(mean(S.slice(1).map((f, k) => f.t - S[k].t)), 1)} ms en moyenne : la mesure est juste à une demi-image près.</p>`;
 }
+// La caméra : la meilleure possible. Caméra arrière choisie (pas forcément le grand angle), la cadence la plus haute
+// qu'elle propose au navigateur, en 1080p si elle tient la même cadence, sinon en 720p ; zoom si le téléphone le permet.
 async function rcCamOpen() {
-  if (RCT.cam) return;
+  if (RCT.cam || RCT.camBusy) return; RCT.camBusy = true;
+  const c = rcCfg(), base = {width: {ideal: 1920}, height: {ideal: 1080}, frameRate: {ideal: 120}};
+  const v = c.camId ? {...base, deviceId: {exact: c.camId}} : {...base, facingMode: {ideal: 'environment'}};
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({audio: false, video: {facingMode: {ideal: 'environment'}, frameRate: {ideal: 240}, width: {ideal: 1280}, height: {ideal: 720}}});
-    const track = stream.getVideoTracks()[0]; try { await track.applyConstraints({frameRate: {ideal: 240}}); } catch (e) {}
+    let stream; try { stream = await navigator.mediaDevices.getUserMedia({audio: false, video: {...v, zoom: true}}); } catch (e) { stream = await navigator.mediaDevices.getUserMedia({audio: false, video: v}); }
+    const track = stream.getVideoTracks()[0], caps = track.getCapabilities?.() || {}, fmax = caps.frameRate?.max || 60;
+    const tryRes = async (w, h) => { try { await track.applyConstraints({width: {ideal: w}, height: {ideal: h}, frameRate: {ideal: fmax}}); } catch (e) {} return track.getSettings?.() || {}; };
+    let st = await tryRes(1920, 1080);
+    if ((st.frameRate || 0) < Math.min(fmax, 60) - 1) { const st2 = await tryRes(1280, 720); if ((st2.frameRate || 0) > (st.frameRate || 0) + 1) st = st2; else st = await tryRes(1920, 1080); }
+    if (caps.zoom && c.zoom) try { await track.applyConstraints({advanced: [{zoom: c.zoom}]}); } catch (e) {}
+    let devs = []; try { devs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'videoinput'); } catch (e) {}
     const el = document.createElement('video'); el.playsInline = true; el.muted = true; el.autoplay = true; el.srcObject = stream; el.className = 'rcvid'; await el.play().catch(() => {});
-    RCT.cam = {stream, track, el, fps: track.getSettings?.().frameRate || null}; el.addEventListener('resize', rcMount); paneRender(); rcPoseLive();
+    st = track.getSettings?.() || st;
+    RCT.cam = {stream, track, el, caps, devs, id: st.deviceId, fps: st.frameRate || null, w: st.width, h: st.height, zoom: st.zoom ?? c.zoom ?? null};
+    el.addEventListener('resize', rcMount); paneRender(); rcPoseLive();
   } catch (e) { toast('Caméra refusée ou indisponible'); }
+  RCT.camBusy = false;
 }
-function rcCamClose() { try { RCT.cam?.stream.getTracks().forEach(t => t.stop()); } catch (e) {} RCT.cam = null; }
+function rcCamClose() { try { RCT.cam?.stream.getTracks().forEach(t => t.stop()); } catch (e) {} RCT.cam = null; if (typeof RCP !== 'undefined') { RCP.live = false; RCP.oe = null; RCP.n = 0; RCP.t0 = 0; } }
+// Le choix de la caméra, le zoom, et ce que la caméra donne vraiment.
+function rcCamCtl() {
+  const C = RCT.cam; if (!C) return '';
+  const back = C.devs.filter(d => !/front|avant|user/i.test(d.label)), list = back.length > 1 ? back : C.devs.length > 1 ? C.devs : [];
+  const z = C.caps?.zoom;
+  return `<div class="rccamctl">
+    ${list.length ? `<label class="rcsel">Caméra<select data-rccamid>${list.map((d, i) => `<option value="${esc(d.deviceId)}"${d.deviceId === C.id ? ' selected' : ''}>${esc(d.label ? d.label.replace(/camera2 /i, 'Caméra ').replace(/, facing back/i, ' (arrière)').replace(/, facing front/i, ' (avant)') : 'Caméra ' + (i + 1))}</option>`).join('')}</select></label>` : ''}
+    ${z && z.max > z.min ? `<label class="rcsel">Zoom <span class="rczoomv">× ${fx(C.zoom || z.min, 1)}</span><input type="range" data-rczoom min="${z.min}" max="${Math.min(z.max, 10)}" step="${z.step || .1}" value="${C.zoom || z.min}"></label>` : ''}
+    <p class="rccaminfo">${C.w && C.h ? C.w + ' × ' + C.h : ''}${C.fps ? ' · ' + Math.round(C.fps) + ' im/s demandées' : ''} · <span class="rcfps">${C.real ? Math.round(C.real) + ' im/s mesurées' : 'mesure…'}</span></p></div>`;
+}
 async function rcCamGo() {
   const cam = RCT.cam; if (!cam || RCT.run) return;
   const c = rcCfg(), tok = RCT.run = {on: true, kind: 'cam'}, F = [], cap = [], st = t => { const s = document.querySelector('.rcstat'); if (s) s.textContent = t; };
@@ -194,7 +216,7 @@ async function rcVidAnalyze() {
   await new Promise(r => { el.onseeked = r; setTimeout(r, 2000); });
   el.playbackRate = .25;
   await new Promise(res => {
-    const loop = (now, md) => { const t = md.mediaTime * 1000; F.push({t, m: rcMotion(el, RCT.roi)}); if (t >= tb - 400) rcGrab(el, RCT.roi, t, cap, tb); if (md.mediaTime > V.tb + 1.3 || el.ended) { el.pause(); res(); return; } el.requestVideoFrameCallback(loop); };
+    const loop = (now, md) => { const t = md.mediaTime * 1000; F.push({t, m: rcMotion(el, RCT.roi)}); if (t >= tb - 600) rcGrab(el, RCT.roi, t, cap, tb); if (md.mediaTime > V.tb + 1.3 || el.ended) { el.pause(); res(); return; } el.requestVideoFrameCallback(loop); };
     el.requestVideoFrameCallback(loop); el.play().catch(res); setTimeout(res, 20000);
   });
   el.playbackRate = 1; el.controls = true;
@@ -246,8 +268,9 @@ function rcBody() {
     <p class="rcnote">Moins de 100 ms = faux départ</p>`;
   else if (m === 'cam') main = `${rcSettings(true)}
     ${RCT.cam ? `<div class="card rccard"><div class="rcvbox${RCT.roiOn ? ' roion' : ''}"><div class="rcroi"></div></div>
+      ${rcCamCtl()}
       <div class="rcrepgo" style="margin-top:8px"><button type="button" class="chip" data-rcposeon aria-pressed="${!!rcCfg().pose}">Bonhomme</button><span class="rcposestat small muted"></span></div>
-      <p class="small muted" style="margin:6px 2px 0">${RCT.cam.fps ? 'Caméra à ' + Math.round(RCT.cam.fps) + ' images/s. ' : ''}Pose le téléphone au sol, de profil, à 2 ou 3 m des blocs. Le cadre vert = la zone surveillée : toi seul dedans. Le bonhomme montre ce que le téléphone voit de ton corps ; il se met en pause pendant le départ pour ne pas gêner la mesure.</p>
+      <p class="small muted" style="margin:6px 2px 0">Téléphone sur trépied, de profil, à 2 ou 3 m des blocs ; zoome pour que tu remplisses le cadre. La précision dépend de la cadence mesurée : à 30 im/s, ± 17 ms ; à 60 im/s, ± 8 ms. Pour aller plus loin, filme avec l'appareil photo en « Pro vidéo » 1080p à 120 im/s, et importe la vidéo (onglet Vidéo importée) : ± 4 ms. Le cadre vert = la zone surveillée : toi seul dedans. Le bonhomme montre ce que le téléphone voit de ton corps ; il se met en pause pendant le départ pour ne pas gêner la mesure.</p>
       <div class="btnrow two" style="margin-top:8px"><button class="btn ghost" data-rcroi>${RCT.roiOn ? 'Valider le cadre' : 'Tracer le cadre'}</button><button class="btn" data-rccamgo${RCT.run ? ' disabled' : ''}>Lancer le départ</button></div>
       <p class="rcstat small" style="text-align:center;margin:8px 0 0"></p></div>` : `<button class="btn rcopen" data-rccam>Ouvrir la caméra</button><p class="rcnote">Téléphone posé au sol, de profil, toi dans les blocs</p>`}
     ${RCT.last?.mode === 'cam' ? rcAnalysis() : ''}`;

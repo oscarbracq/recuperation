@@ -554,3 +554,12 @@ html.one .bweek.sebk{background-color:var(--card)}
 html.one .malert{background:color-mix(in srgb,var(--bad) 12%,var(--card))}
 html.one .malert.ok{background:color-mix(in srgb,var(--good) 12%,var(--card))}
 html.one .malert.mid{background:color-mix(in srgb,var(--warn) 14%,var(--card))}
+
+/* v160 : réglages de la caméra */
+.rccamctl{margin-top:8px;display:grid;gap:8px}
+.rcsel{display:grid;gap:4px;font-size:.75rem;font-weight:700;color:var(--fg2);text-transform:uppercase;letter-spacing:.04em}
+.rcsel select{font:inherit;text-transform:none;letter-spacing:0;font-size:.875rem;font-weight:600;color:var(--fg);background:var(--card2);border:0;border-radius:10px;padding:10px 12px;width:100%}
+.rcsel input[type=range]{width:100%;accent-color:var(--accent)}
+.rczoomv{text-transform:none;color:var(--fg)}
+.rccaminfo{margin:0;text-align:center;font-size:.75rem;color:var(--fg3);font-variant-numeric:tabular-nums}
+.rcrepc{image-rendering:auto}

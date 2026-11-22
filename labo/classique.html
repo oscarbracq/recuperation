@@ -5449,7 +5449,7 @@ function slider(id, label, f, min, max, hint, def, step = 1, suffix = '') {
 }
 function numRow(id, label, f, hint, unit) { return `<div class="row"><label for="${id}">${label}<span class="hint">${hint}</span></label><input type="number" inputmode="numeric" id="${id}" data-f="${f}" data-num="1" value="${draft[f] ?? ''}" placeholder="${unit}"></div>`; }
 // Calibrated on his own standards: a single extra spoon of sauce already counts as a deviation.
-const NUTRITION = [['Au plan', 'tout comme prévu · 0 kcal en plus'], ['Minime', 'ta règle : un seul produit non transformé, sucré ou salé. Sucré : moins de 25 g. Salé : moins de 50 g. Transformé, ou plus que ça : coche « Petit écart »'], ['Petit écart', '≈ 150 à 500 kcal en plus : un dessert (≈ 100 g de gâteau), un snack hors plan'], ['Repas libre', 'plus de 500 kcal en plus : un repas changé, chez des amis']];
+const NUTRITION = [['Au plan', 'tout comme prévu'], ['Minime', 'un seul petit produit : sucré moins de 25 g, salé moins de 50 g'], ['Petit écart', '150 à 500 kcal en plus (dessert, snack)'], ['Repas libre', 'plus de 500 kcal en plus']];
 // What he ate beyond his menu that day, from his food journal: the foods added or bigger portions, in kcal.
 function extraOf(k) {
   const plan = {}; for (const it of planItems()) plan[it.n] = (plan[it.n] || 0) + it.kcal;
@@ -5748,10 +5748,8 @@ const qmSeg = () => `<div class="seg qmseg" role="group" aria-label="Moment du q
 const sickHtml = () => `<div class="sec-label">Signes de maladie <small>rien de coché = tu vas bien</small></div><div class="chipsx" id="e-sick">${SICK.map(([id, l]) => `<button type="button" class="chip" data-qsick="${id}" aria-pressed="${(draft.sick || []).includes(id)}">${l}</button>`).join('')}</div>`;
 function eveHtml() {
   const e = draft.eve || {}, seg = (k, L) => `<div class="seg segsm" role="group">${L.map(([v, l]) => `<button type="button" data-qeve="${k}|${v}" aria-pressed="${e[k] === v}">${l}</button>`).join('')}</div>`;
-  return `<div class="sec-label">Et aussi</div><div class="list" id="e-eve">
-    <div class="row col"><span class="l">Alcool aujourd'hui</span>${seg('alc', [[0, 'Aucun'], [1, '1 verre'], [2, '2 ou plus']])}</div>
-    <div class="row col"><span class="l">Digestion</span>${seg('dig', [[3, 'Bonne'], [2, 'Moyenne'], [1, 'Mauvaise']])}</div>
-    <div class="row col"><span class="l">Stress de la journée</span>${seg('dstr', [[1, 'Calme'], [2, 'Normal'], [3, 'Chargé'], [4, 'Très stressant']])}</div></div>`;
+  return `<div class="sec-label">Stress de la journée</div><div class="list" id="e-eve">
+    <div class="row col">${seg('dstr', [[1, 'Calme'], [2, 'Normal'], [3, 'Chargé'], [4, 'Très stressant']])}</div></div>`;
 }
 // La synthèse du matin : la nuit (montre), l'état (questionnaire), les douleurs et la maladie, puis un conseil pour la séance.
 function mornSyn(k) {
@@ -5775,12 +5773,12 @@ async function saveMorning() {
   if (!S.db) { toast('Non enregistré : ouvre la page connecté à ton compte'); return; }
   clearTimeout(NOTE_T); NOTE_T = null;
   const {k, doc} = noteCollect(); doc.mornAt = new Date().toISOString(); S.manual[k] = doc;
-  try { await S.db.collection('manual').doc(k).set(doc); S.qmForce = 'matin'; openSheet('note', k); $('#sheet-scroll').scrollTop = 0; toast('Matin enregistré : ta synthèse est prête'); }
+  try { await S.db.collection('manual').doc(k).set(doc); S.qmForce = 'matin'; S.noteEdit = true; openSheet('note', k); $('#sheet-scroll').scrollTop = 0; toast('Matin enregistré : ta synthèse est prête'); }
   catch (e) { toast('Échec de l\'enregistrement, réessaie'); }
 }
 document.addEventListener('click', async e => {
   if (S.sheet?.kind !== 'note') return; let b;
-  if ((b = e.target.closest('[data-qm]'))) { if (b.dataset.qm === S.qm) return; await noteFlush(); S.qmForce = b.dataset.qm; openSheet('note', $('#e-date')?.value || S.sheet.arg); return; }
+  if ((b = e.target.closest('[data-qm]'))) { if (b.dataset.qm === S.qm) return; await noteFlush(); S.qmForce = b.dataset.qm; S.noteEdit = true; openSheet('note', $('#e-date')?.value || S.sheet.arg); return; }
   if ((b = e.target.closest('[data-qsick]'))) { const id = b.dataset.qsick, L = new Set(draft.sick || []); L.has(id) ? L.delete(id) : L.add(id); draft.sick = [...L]; b.setAttribute('aria-pressed', L.has(id)); return; }
   if ((b = e.target.closest('[data-qeve]'))) { const [k, v] = b.dataset.qeve.split('|'); draft.eve = {...(draft.eve || {}), [k]: +v}; b.parentElement.querySelectorAll('[data-qeve]').forEach(x => x.setAttribute('aria-pressed', x === b)); }
 });
@@ -5861,7 +5859,7 @@ function noteBody(k) {
     ${acts.length ? `<div class="sec-label">Reçu de ta montre</div><div id="e-wacts">${watchActs(k)}</div><p class="note" style="text-align:left;margin-top:6px">Touche une activité pour noter ton RPE.${G(k, 'bikeKm') ? ` Vélo total, trajets compris : ${fx(G(k, 'bikeKm'), 1)} km.` : ''}</p>` : ''}
     <h2 class="qh">Le soir<small>ce que tu as mangé et bu, et le reste</small></h2>
     <div class="sec-label">Alimentation</div>
-    <div class="list"><div class="row col">${(() => { const x = extraOf(k); if (draft.nutrition == null || !draft.nutHand) draft.nutrition = x.L.length ? nutOfKcal(x.bad) : 0; return `<div class="seg" role="group" aria-label="Alimentation" id="e-nut">${NUTRITION.map(([l], i) => `<button type="button" data-nut="${i}" aria-pressed="${draft.nutrition === i}">${l}</button>`).join('')}</div><span class="hint" id="e-nut-hint">${NUTRITION[draft.nutrition][1]}.</span>${x.L.length ? `<span class="hint" style="color:var(--fg)">D'après ton journal : +${fx(x.kcal)} kcal hors menu (${esc(x.L.slice(0, 3).map(([n, v]) => n.toLowerCase() + ' ' + fx(v) + ' kcal').join(', '))})${x.goodL.length ? ` ; ${esc(x.goodL.map(([n]) => n.toLowerCase()).join(', '))} ${x.goodL.length > 1 ? 'sont de bons ajouts, ils ne comptent' : 'est un bon ajout, il ne compte'} pas comme un écart` : ''}.</span>` : '<span class="hint">Ton journal suit ton menu : rien en plus.</span>'}`; })()}</div></div>
+    <div class="list"><div class="row col">${(() => { const x = extraOf(k); if (draft.nutrition == null || !draft.nutHand) draft.nutrition = x.L.length ? nutOfKcal(x.bad) : 0; return `<div class="seg" role="group" aria-label="Alimentation" id="e-nut">${NUTRITION.map(([l], i) => `<button type="button" data-nut="${i}" aria-pressed="${draft.nutrition === i}">${l}</button>`).join('')}</div><span class="hint" id="e-nut-hint">${NUTRITION[draft.nutrition][1]}.</span>${x.L.length ? `<span class="hint" style="color:var(--fg)">Journal : +${fx(x.kcal)} kcal hors menu (${esc(x.L.slice(0, 2).map(([n]) => n.toLowerCase()).join(', '))}).</span>` : '<span class="hint">Journal : rien en plus du menu.</span>'}`; })()}</div></div>
     <div class="sec-label">Eau</div>
     <div id="e-water">${waterRow(k)}</div>
     <div class="sec-label">Temps d'écran <small>rempli tout seul · change-le si besoin</small></div>
