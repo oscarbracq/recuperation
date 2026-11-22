@@ -465,3 +465,10 @@ html.one :is(#t-view,#f-view,[id^="v-"],#home-view){will-change:transform}
 .livevol b{font-size:1.375rem;font-weight:700}
 .livevol span{font-size:.75rem;color:var(--fg2)}
 .livevol em{font-style:normal;font-size:.6875rem;color:var(--fg3)}
+
+/* v152 : travail technique en blocs */
+.techbox .chips2b{display:flex;flex-wrap:wrap;gap:6px}
+.techbox .twlist{display:grid;gap:10px;margin-top:10px}
+.techbox .twlist .exbox{margin:0;background:var(--card2)}
+.techbox .techta{margin-top:10px}
+.techbox .twlist .chip:not([aria-pressed="true"]){background:var(--card)}
