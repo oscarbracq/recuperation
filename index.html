@@ -1955,6 +1955,26 @@ html.one :is(#t-view,#f-view,[id^="v-"],#home-view){will-change:transform}
 .rcbig{font-size:2rem;font-weight:800;margin:4px 0}
 .rcset summary{cursor:pointer}
 .rcfile{display:flex;justify-content:center;margin-top:12px}
+
+/* v157 : test de réaction, tout tient dans l'écran du téléphone */
+.rcwrap{max-width:560px;margin:0 auto}
+.rcwrap .seg button{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rcwrap .btnrow.two .btn{white-space:normal!important;line-height:1.15;min-height:48px;min-width:0;overflow-wrap:anywhere;text-align:center;justify-content:center}
+.rcwrap .card{overflow:hidden}
+.rcwrap .chead{gap:10px;align-items:baseline}
+.rcwrap .chead .eyebrow{min-width:0}
+.rcwrap .rcset .edrow label{min-width:0}
+.rcwrap .rcset .mini-in{width:100%;box-sizing:border-box}
+.rcpad{height:clamp(220px,38vh,320px);transition:background .15s ease,border-color .15s ease,transform .15s ease}
+.rcpad.down{transform:scale(.985)}
+.rcpad.fs b{color:var(--bad)}
+.rcnote{margin:8px 0 0;text-align:center;font-size:.75rem;color:var(--fg3)}
+.rccard{margin-top:12px;padding:10px}
+.rccard .rcvbox{margin-top:0}
+.rcopen{display:flex;width:100%;justify-content:center;margin-top:12px}
+.rcwrap .rctry{white-space:nowrap}
+.rcwrap .list .row{gap:8px}
+.rcwrap .list .row .small{flex:1;min-width:0;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -13282,13 +13302,13 @@ function rcLift(tok, ts) {
 
 /* ---------- la courbe ---------- */
 function rcChart(vals, opt = {}) {
-  const V = vals.map((v, i) => ({i, v})).filter(x => x.v != null); if (!V.length) return '';
-  const W = 300, H = 90, lo = Math.min(...V.map(x => x.v)), hi = Math.max(...V.map(x => x.v)), pad = Math.max(10, (hi - lo) * .15), a = lo - pad, b = hi + pad;
+  const V = vals.map((v, i) => ({i, v})).filter(x => x.v != null); if (V.length < 2) return '';
+  const W = 300, H = 96, lo = Math.min(...V.map(x => x.v)), hi = Math.max(...V.map(x => x.v)), pad = Math.max(10, (hi - lo) * .15), a = lo - pad, b = hi + pad;
   const X = i => 14 + (vals.length > 1 ? i / (vals.length - 1) : .5) * (W - 28), Y = v => 10 + (1 - (v - a) / (b - a)) * (H - 24);
   const pts = V.map(x => `${X(x.i).toFixed(1)},${Y(x.v).toFixed(1)}`).join(' '), best = Math.min(...V.map(x => x.v));
   return `<svg class="rcchart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opt.label || 'Courbe')}"><polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>
     ${V.map(x => `<circle cx="${X(x.i).toFixed(1)}" cy="${Y(x.v).toFixed(1)}" r="${x.v === best ? 4.5 : 3}" fill="${x.v === best ? 'var(--good)' : 'var(--accent)'}"/>`).join('')}
-    <text x="4" y="${H - 2}" font-size="9" fill="var(--fg3)">${opt.foot || ''}</text><text x="${W - 4}" y="10" font-size="9" fill="var(--fg3)" text-anchor="end">${Math.round(hi)} ms</text><text x="${W - 4}" y="${H - 14}" font-size="9" fill="var(--fg3)" text-anchor="end">${Math.round(lo)} ms</text></svg>`;
+    ${Math.round(hi) !== Math.round(lo) ? `<text x="${W - 4}" y="${(Y(hi) - 6).toFixed(1)}" font-size="9" fill="var(--fg3)" text-anchor="end">${Math.round(hi)} ms</text>` : ''}<text x="${W - 4}" y="${(Y(lo) + 14).toFixed(1)}" font-size="9" fill="var(--fg3)" text-anchor="end">${Math.round(lo)} ms</text></svg>`;
 }
 
 /* ---------- la caméra : le mouvement dans le cadre, image par image ---------- */
@@ -13421,7 +13441,7 @@ function rcSettings(cam) {
       <div class="edrow" style="grid-template-columns:1fr 1fr">${n('stMin', 'Prêt → coup, mini (s)')}${n('stMax', 'Prêt → coup, maxi (s)')}</div>`
       : `<p class="small muted" style="margin:8px 2px 4px">Le coup part au hasard entre les deux temps.</p><div class="edrow" style="grid-template-columns:1fr 1fr">${n('gnMin', 'Attente mini (s)')}${n('gnMax', 'Attente maxi (s)')}</div>`}
     <div class="edrow" style="grid-template-columns:1fr${cam ? ' 1fr' : ''}">${n('lat', 'Latence ajoutée (ms)', 1)}${cam ? n('place', 'Temps pour te placer (s)', 1) : ''}</div>
-    <p class="small muted" style="margin:6px 2px 0">Le retard du haut-parleur du téléphone est déjà compté. Avec des écouteurs Bluetooth, mets leur retard (souvent 150 à 250 ms), ou mieux : le haut-parleur.</p>
+    <p class="small muted" style="margin:6px 2px 0">Moins de 100 ms après le coup = faux départ (règle World Athletics). Mesure au dixième de milliseconde, juste à quelques ms près (l'écran lit le doigt environ toutes les 4 ms). Le retard du haut-parleur du téléphone est déjà compté. Avec des écouteurs Bluetooth, mets leur retard (souvent 150 à 250 ms), ou mieux : le haut-parleur.</p>
     <div class="ctrow"><span>Flash au coup</span><div class="seg">${[[1, 'Oui'], [0, 'Non']].map(([v, l]) => `<button type="button" data-rcflash="${v}" aria-pressed="${!!c.flash === !!v}">${l}</button>`).join('')}</div></div></details>`;
 }
 function rcTryChip(r) { return `<span class="rctry${r.fs ? ' fs' : ''}">${r.none ? 'pas de départ vu' : r.early ? 'faux départ' + (r.ms != null ? ' · ' + rcMs(-r.ms) + ' trop tôt' : '') : rcMs(r.ms) + (r.fs ? ' · faux départ' : '')}</span>`; }
@@ -13431,32 +13451,32 @@ function rcBody() {
   const hist = tests().filter(t => t.type === 'react' && t.mode === m).sort((a, b) => a.date.localeCompare(b.date));
   let main = '';
   if (m === 'son') main = `${rcSettings(false)}
-    <div class="rcpad" role="button" aria-label="Pose ton doigt ici, lève-le au coup"><b>${last ? (last.fs ? (last.early ? 'Faux départ' : rcMs(last.ms) + ' · faux départ') : rcMs(last.ms)) : 'Pose ton doigt ici'}</b><small>${last ? 'Repose ton doigt pour un nouvel essai' : 'Garde-le posé, et lève-le au coup de pistolet'}</small></div>
-    <p class="small muted" style="margin:6px 2px 0">Moins de 100 ms = faux départ (règle World Athletics). Mesure au dixième de milliseconde, juste à quelques ms près selon le téléphone (l'écran lit le doigt environ toutes les 4 ms).</p>`;
+    <div class="rcpad${last?.fs ? ' fs' : ''}" role="button" aria-label="Pose ton doigt ici, lève-le au coup"><b>${last ? (last.fs ? (last.early ? 'Faux départ' : rcMs(last.ms) + ' · faux départ') : rcMs(last.ms)) : 'Pose ton doigt ici'}</b><small>${last ? 'Repose ton doigt pour un nouvel essai' : 'Garde-le posé, et lève-le au coup de pistolet'}</small></div>
+    <p class="rcnote">Moins de 100 ms = faux départ</p>`;
   else if (m === 'cam') main = `${rcSettings(true)}
-    ${RCT.cam ? `<div class="rcvbox${RCT.roiOn ? ' roion' : ''}"><div class="rcroi"></div></div>
+    ${RCT.cam ? `<div class="card rccard"><div class="rcvbox${RCT.roiOn ? ' roion' : ''}"><div class="rcroi"></div></div>
       <p class="small muted" style="margin:6px 2px 0">${RCT.cam.fps ? 'Caméra à ' + Math.round(RCT.cam.fps) + ' images/s. ' : ''}Pose le téléphone au sol, de profil, à 2 ou 3 m des blocs. Le cadre vert = la zone surveillée : toi seul dedans.</p>
       <div class="btnrow two" style="margin-top:8px"><button class="btn ghost" data-rcroi>${RCT.roiOn ? 'Valider le cadre' : 'Tracer le cadre'}</button><button class="btn" data-rccamgo${RCT.run ? ' disabled' : ''}>Lancer le départ</button></div>
-      <p class="rcstat small" style="text-align:center;margin:8px 0 0"></p>` : `<button class="btn" data-rccam style="margin-top:10px">Ouvrir la caméra</button><p class="small muted" style="margin:6px 2px 0">Le téléphone filme ton départ dans les blocs, lance le starter et un flash, puis trouve l'image où ton corps bouge.</p>`}
+      <p class="rcstat small" style="text-align:center;margin:8px 0 0"></p></div>` : `<button class="btn rcopen" data-rccam>Ouvrir la caméra</button><p class="rcnote">Téléphone posé au sol, de profil, toi dans les blocs</p>`}
     ${RCT.last?.mode === 'cam' ? rcAnalysis() : ''}`;
   else { const V = RCT.vid;
     main = `<label class="btn ghost rcfile">${V ? 'Choisir une autre vidéo' : 'Importer une vidéo de départ'}<input type="file" accept="video/*" data-rcfile hidden></label>
-    ${V ? `<div class="rcvbox${RCT.roiOn ? ' roion' : ''}"><div class="rcroi"></div></div>
+    ${V ? `<div class="card rccard"><div class="rcvbox${RCT.roiOn ? ' roion' : ''}"><div class="rcroi"></div></div>
       ${V.busy ? `<p class="small" style="text-align:center;margin:8px 0 0">${V.busy}</p>` : `
       ${V.err ? `<p class="small" style="color:var(--warn);margin:8px 2px 0">${esc(V.err)}</p>` : ''}
       <div class="sec-label" style="margin:10px 2px 4px">Le coup de pistolet</div>
       <div class="chips2b">${V.cands.map(c => `<button type="button" class="chip" data-rcbang="${c.t}" aria-pressed="${V.tb === c.t}">${fx(c.t, 3)} s</button>`).join('')}<button type="button" class="chip" data-rcbanghere>À l'image affichée</button></div>
       <p class="small muted" style="margin:4px 2px 0">${V.tb != null ? 'Coup à ' + fx(V.tb, 3) + ' s. ' : ''}Le plus fort bruit sec est proposé en premier ; touche-en un pour aller voir l'image.</p>
       <div class="btnrow two" style="margin-top:8px"><button class="btn ghost" data-rcroi>${RCT.roiOn ? 'Valider la personne' : 'Choisir la personne'}</button><button class="btn" data-rcvidgo${V.tb == null ? ' disabled' : ''}>Analyser le départ</button></div>
-      <p class="small muted" style="margin:6px 2px 0">« Choisir la personne » : trace un cadre autour d'elle seule, sur l'image du coup. Les autres couloirs ne comptent pas.</p>`}` : '<p class="small muted" style="margin:6px 2px 0">Une vidéo avec le son du starter : le coup est retrouvé dans le son, puis le premier mouvement de la personne choisie, image par image. Plus la vidéo a d\'images par seconde (ralenti), plus c\'est précis.</p>'}
+      <p class="small muted" style="margin:6px 2px 0">« Choisir la personne » : trace un cadre autour d'elle seule, sur l'image du coup. Les autres couloirs ne comptent pas.</p>`}</div>` : '<p class="small muted" style="margin:6px 2px 0">Une vidéo avec le son du starter : le coup est retrouvé dans le son, puis le premier mouvement de la personne choisie, image par image. Plus la vidéo a d\'images par seconde (ralenti), plus c\'est précis.</p>'}
     ${RCT.last?.mode === 'video' ? rcAnalysis() : ''}`; }
-  return `<div class="seg" style="margin-top:14px">${RC_MODES.map(([v, l]) => `<button type="button" data-rcmode="${v}" aria-pressed="${m === v}">${l}</button>`).join('')}</div>
+  return `<div class="rcwrap"><div class="seg" style="margin-top:14px">${RC_MODES.map(([v, l]) => `<button type="button" data-rcmode="${v}" aria-pressed="${m === v}">${l}</button>`).join('')}</div>
     ${main}
     <div class="card" style="margin-top:12px"><div class="chead"><span class="eyebrow">Cette session · ${tr.length} essai${tr.length > 1 ? 's' : ''}</span>${best != null ? `<b class="num">${rcMs(best)}</b>` : ''}</div>
-      ${tr.length ? `<div class="rctries">${tr.map(rcTryChip).join('')}</div>${rcChart(tr.map(r => r.fs ? null : r.ms), {label: 'Essais de la session', foot: 'essais'})}` : '<p class="small muted" style="margin:6px 0 0">Tes essais s\'ajoutent ici, avec leur courbe.</p>'}
-      ${tr.length ? `<div class="btnrow two" style="margin-top:10px"><button class="btn" data-rcsave${best == null ? ' disabled' : ''}>Enregistrer la meilleure${best != null ? ' · ' + rcMs(best) : ''}</button><button class="btn ghost" data-rcclear>Nouvelle session</button></div>` : ''}</div>
-    ${hist.length ? `<div class="card" style="margin-top:12px"><span class="eyebrow">Tendance · meilleure de chaque session</span>${rcChart(hist.map(h => h.best), {label: 'Tendance', foot: hist.length + (hist.length > 1 ? ' sessions' : ' session')})}
-      <div class="list" style="margin-top:6px">${hist.slice(-6).reverse().map(h => `<div class="row"><span class="l">${esc(cap(fmtShort(h.date)))}</span><span class="small muted">${h.n || 0} essais · moyenne ${rcMs(h.avg)}</span><b class="num">${rcMs(h.best)}</b></div>`).join('')}</div></div>` : ''}`;
+      ${tr.length ? `<div class="rctries">${tr.map(rcTryChip).join('')}</div>${rcChart(tr.map(r => r.fs ? null : r.ms), {label: 'Essais de la session'})}` : '<p class="small muted" style="margin:6px 0 0">Tes essais s\'ajoutent ici, avec leur courbe.</p>'}
+      ${tr.length ? `<div class="btnrow two" style="margin-top:12px"><button class="btn" data-rcsave${best == null ? ' disabled' : ''}>Enregistrer${best != null ? ' ' + rcMs(best) : ''}</button><button class="btn ghost" data-rcclear>Nouvelle session</button></div>` : ''}</div>
+    ${hist.length ? `<div class="card" style="margin-top:12px"><span class="eyebrow">Tendance · meilleure de chaque session</span>${rcChart(hist.map(h => h.best), {label: 'Tendance'})}
+      <div class="list" style="margin-top:6px">${hist.slice(-6).reverse().map(h => `<div class="row"><span class="l">${esc(cap(fmtShort(h.date)))}</span><span class="small muted">${h.n || 0} essais · moyenne ${rcMs(h.avg)}</span><b class="num">${rcMs(h.best)}</b></div>`).join('')}</div></div>` : ''}</div>`;
 }
 function rcAnalysis() { const L = RCT.last, ms = L.i != null ? rcResult(L.F, L.tb, L.i) : null;
   return `<div class="card" style="margin-top:12px"><span class="eyebrow">Dernier départ</span><div class="rcbig num">${ms == null ? 'Pas de départ vu' : rcMs(ms)}</div>
