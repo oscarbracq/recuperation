@@ -10,7 +10,7 @@
      premier mouvement image par image.
    Chaque essai s'ajoute à la session (courbe) ; on enregistre la meilleure de la session, et la tendance suit. */
 const RCT = {mode: 'son', tries: {son: [], cam: [], video: []}, run: null, cam: null, vid: null, roi: {x: .2, y: .1, w: .6, h: .8}, last: null, roiOn: false};
-const RC_DEF = {start: 'starter', mkMin: 6, mkMax: 10, stMin: 1.5, stMax: 2.5, gnMin: 2, gnMax: 5, lat: 0, flash: true, place: 10};
+const RC_DEF = {start: 'starter', mkMin: 6, mkMax: 10, stMin: 1.5, stMax: 2.5, gnMin: 2, gnMax: 5, lat: 0, flash: true, place: 10, pose: true};
 const rcCfg = () => { try { return {...RC_DEF, ...JSON.parse(localStorage.getItem('tnr-react') || '{}')}; } catch (e) { return {...RC_DEF}; } };
 const rcSetCfg = p => { try { localStorage.setItem('tnr-react', JSON.stringify({...rcCfg(), ...p})); } catch (e) {} };
 const rcRnd = (a, b) => +a + Math.random() * Math.max(0, +b - +a);
@@ -76,7 +76,7 @@ function rcLift(tok, ts) {
   const ms = tok.T != null ? ts - tok.bp : null, early = ms == null || ms < 0;
   rcStop(tok);
   const r = {ms: ms == null ? null : Math.round(ms * 10) / 10, fs: early || ms < 100, early, at: Date.now()};
-  RCT.tries.son.push(r); RCT.last = null;
+  RCT.tries.son.push(r); rcSetLast(null);
   paneRender();
   if (PREFS?.haptic) navigator.vibrate?.(r.fs ? [30, 40, 30] : 15);
 }
@@ -130,35 +130,39 @@ async function rcCamOpen() {
     const stream = await navigator.mediaDevices.getUserMedia({audio: false, video: {facingMode: {ideal: 'environment'}, frameRate: {ideal: 240}, width: {ideal: 1280}, height: {ideal: 720}}});
     const track = stream.getVideoTracks()[0]; try { await track.applyConstraints({frameRate: {ideal: 240}}); } catch (e) {}
     const el = document.createElement('video'); el.playsInline = true; el.muted = true; el.autoplay = true; el.srcObject = stream; el.className = 'rcvid'; await el.play().catch(() => {});
-    RCT.cam = {stream, track, el, fps: track.getSettings?.().frameRate || null}; paneRender();
+    RCT.cam = {stream, track, el, fps: track.getSettings?.().frameRate || null}; el.addEventListener('resize', rcMount); paneRender(); rcPoseLive();
   } catch (e) { toast('Caméra refusée ou indisponible'); }
 }
 function rcCamClose() { try { RCT.cam?.stream.getTracks().forEach(t => t.stop()); } catch (e) {} RCT.cam = null; }
 async function rcCamGo() {
   const cam = RCT.cam; if (!cam || RCT.run) return;
-  const c = rcCfg(), tok = RCT.run = {on: true, kind: 'cam'}, F = [], st = t => { const s = document.querySelector('.rcstat'); if (s) s.textContent = t; };
+  const c = rcCfg(), tok = RCT.run = {on: true, kind: 'cam'}, F = [], cap = [], st = t => { const s = document.querySelector('.rcstat'); if (s) s.textContent = t; };
   RCV.prev = null;
   const loop = (now, md) => {
     if (!tok.on) return;
-    F.push({t: md.captureTime || md.expectedDisplayTime || now, m: rcMotion(cam.el, RCT.roi)}); if (F.length > 3000) F.splice(0, 1000);
-    if (tok.fired && F.at(-1).t > tok.bp + 1200) { rcCamDone(tok, F); return; }
+    const t = md.captureTime || md.expectedDisplayTime || now;
+    F.push({t, m: rcMotion(cam.el, RCT.roi)}); if (F.length > 3000) F.splice(0, 1000);
+    rcGrab(cam.el, RCT.roi, t, cap, tok.fired ? tok.bp : null);
+    if (tok.fired && F.at(-1).t > tok.bp + 1200) { rcCamDone(tok, F, cap); return; }
     cam.el.requestVideoFrameCallback(loop);
   };
+  rcPoseClear();
   if (c.place > 0) { st('Mets-toi en place…'); rcSay('Mets-toi en place'); for (let s = Math.round(c.place); s > 0 && tok.on; s--) { st('Mets-toi en place · ' + s); await rcWait(1); } }
   if (!tok.on) return;
   cam.el.requestVideoFrameCallback(loop);
   await rcStarter(tok, st);
 }
-function rcCamDone(tok, F) {
+function rcCamDone(tok, F, cap) {
   tok.on = false; RCT.run = null;
   const o = rcOnset(F, tok.bp), ms = o ? rcResult(F, tok.bp, o.i) : null;
-  RCT.last = {F, tb: tok.bp, i: o?.i ?? null, thr: o?.thr ?? 2, mode: 'cam'};
+  rcSetLast({F, tb: tok.bp, i: o?.i ?? null, thr: o?.thr ?? 2, mode: 'cam', frames: cap});
+  const s = document.querySelector('.rcstat'); if (s) s.textContent = '';
   RCT.tries.cam.push({ms: ms == null ? null : Math.round(ms), fs: ms != null && ms < 100, early: ms != null && ms < 0, at: Date.now(), none: ms == null});
   paneRender();
 }
 // Corriger d'une image : le départ se décale à l'image d'avant ou d'après, et l'essai se recalcule.
 function rcStep(d) {
-  const L = RCT.last; if (!L || L.i == null) return; const i = Math.max(1, Math.min(L.F.length - 1, L.i + d)); L.i = i;
+  const L = RCT.last; if (!L || L.i == null) return; const i = Math.max(1, Math.min(L.F.length - 1, L.i + d)); L.i = i; if (RCT.rep && L.frames?.length) RCT.rep.i = rcRepIdx(L, 'dep') ?? RCT.rep.i;
   const ms = rcResult(L.F, L.tb, i), arr = RCT.tries[L.mode], r = arr.at(-1); if (r) { r.ms = Math.round(ms); r.fs = ms < 100; r.early = ms < 0; r.none = false; }
   paneRender();
 }
@@ -185,17 +189,17 @@ async function rcVidLoad(file) {
 }
 async function rcVidAnalyze() {
   const V = RCT.vid; if (!V || V.tb == null || V.busy) return;
-  const el = V.el, F = [], tb = V.tb * 1000; V.busy = 'Analyse image par image…'; paneRender(); RCV.prev = null;
+  const el = V.el, F = [], cap = [], tb = V.tb * 1000; V.busy = 'Analyse image par image…'; paneRender(); RCV.prev = null;
   el.controls = false; el.pause(); el.currentTime = Math.max(0, V.tb - .8);
   await new Promise(r => { el.onseeked = r; setTimeout(r, 2000); });
   el.playbackRate = .25;
   await new Promise(res => {
-    const loop = (now, md) => { F.push({t: md.mediaTime * 1000, m: rcMotion(el, RCT.roi)}); if (md.mediaTime > V.tb + 1.3 || el.ended) { el.pause(); res(); return; } el.requestVideoFrameCallback(loop); };
+    const loop = (now, md) => { const t = md.mediaTime * 1000; F.push({t, m: rcMotion(el, RCT.roi)}); if (t >= tb - 400) rcGrab(el, RCT.roi, t, cap, tb); if (md.mediaTime > V.tb + 1.3 || el.ended) { el.pause(); res(); return; } el.requestVideoFrameCallback(loop); };
     el.requestVideoFrameCallback(loop); el.play().catch(res); setTimeout(res, 20000);
   });
   el.playbackRate = 1; el.controls = true;
   const o = rcOnset(F, tb), ms = o ? rcResult(F, tb, o.i) : null;
-  RCT.last = {F, tb, i: o?.i ?? null, thr: o?.thr ?? 2, mode: 'video'};
+  rcSetLast({F, tb, i: o?.i ?? null, thr: o?.thr ?? 2, mode: 'video', frames: cap});
   RCT.tries.video.push({ms: ms == null ? null : Math.round(ms), fs: ms != null && ms < 100, early: ms != null && ms < 0, at: Date.now(), none: ms == null});
   V.busy = ''; paneRender();
 }
@@ -209,7 +213,13 @@ async function rcVidAnalyze() {
 })();
 function rcRoiDraw() { const r = document.querySelector('.rcroi'); if (!r) return; const o = RCT.roi; Object.assign(r.style, {left: o.x * 100 + '%', top: o.y * 100 + '%', width: o.w * 100 + '%', height: o.h * 100 + '%'}); }
 // Le lecteur vidéo survit aux nouveaux rendus du panneau : on le replace dans sa boîte.
-function rcMount() { const box = document.querySelector('.rcvbox'); const el = RCT.mode === 'cam' ? RCT.cam?.el : RCT.mode === 'video' ? RCT.vid?.el : null; if (box && el && el.parentNode !== box) box.prepend(el); rcRoiDraw(); }
+function rcMount() {
+  const box = document.querySelector('.rcvbox'); const el = RCT.mode === 'cam' ? RCT.cam?.el : RCT.mode === 'video' ? RCT.vid?.el : null;
+  if (box && el && el.parentNode !== box) box.prepend(el);
+  if (box && el?.videoWidth) { const a = el.videoWidth / el.videoHeight; box.style.aspectRatio = el.videoWidth + ' / ' + el.videoHeight; box.style.width = `min(100%, calc(58vh * ${a.toFixed(4)}))`; }
+  else if (el && !el._rcm) { el._rcm = 1; el.addEventListener('loadedmetadata', rcMount); }
+  rcRoiDraw();
+}
 
 /* ---------- le panneau ---------- */
 const RC_MODES = [['son', 'Au son'], ['cam', 'Caméra'], ['video', 'Vidéo importée']];
@@ -236,7 +246,8 @@ function rcBody() {
     <p class="rcnote">Moins de 100 ms = faux départ</p>`;
   else if (m === 'cam') main = `${rcSettings(true)}
     ${RCT.cam ? `<div class="card rccard"><div class="rcvbox${RCT.roiOn ? ' roion' : ''}"><div class="rcroi"></div></div>
-      <p class="small muted" style="margin:6px 2px 0">${RCT.cam.fps ? 'Caméra à ' + Math.round(RCT.cam.fps) + ' images/s. ' : ''}Pose le téléphone au sol, de profil, à 2 ou 3 m des blocs. Le cadre vert = la zone surveillée : toi seul dedans.</p>
+      <div class="rcrepgo" style="margin-top:8px"><button type="button" class="chip" data-rcposeon aria-pressed="${!!rcCfg().pose}">Bonhomme</button><span class="rcposestat small muted"></span></div>
+      <p class="small muted" style="margin:6px 2px 0">${RCT.cam.fps ? 'Caméra à ' + Math.round(RCT.cam.fps) + ' images/s. ' : ''}Pose le téléphone au sol, de profil, à 2 ou 3 m des blocs. Le cadre vert = la zone surveillée : toi seul dedans. Le bonhomme montre ce que le téléphone voit de ton corps ; il se met en pause pendant le départ pour ne pas gêner la mesure.</p>
       <div class="btnrow two" style="margin-top:8px"><button class="btn ghost" data-rcroi>${RCT.roiOn ? 'Valider le cadre' : 'Tracer le cadre'}</button><button class="btn" data-rccamgo${RCT.run ? ' disabled' : ''}>Lancer le départ</button></div>
       <p class="rcstat small" style="text-align:center;margin:8px 0 0"></p></div>` : `<button class="btn rcopen" data-rccam>Ouvrir la caméra</button><p class="rcnote">Téléphone posé au sol, de profil, toi dans les blocs</p>`}
     ${RCT.last?.mode === 'cam' ? rcAnalysis() : ''}`;
@@ -261,8 +272,8 @@ function rcBody() {
 }
 function rcAnalysis() { const L = RCT.last, ms = L.i != null ? rcResult(L.F, L.tb, L.i) : null;
   return `<div class="card" style="margin-top:12px"><span class="eyebrow">Dernier départ</span><div class="rcbig num">${ms == null ? 'Pas de départ vu' : rcMs(ms)}</div>
-    ${rcMotionChart(L)}${L.i != null ? `<div class="btnrow two" style="margin-top:8px"><button class="btn ghost" data-rcstep="-1">← Une image avant</button><button class="btn ghost" data-rcstep="1">Une image après →</button></div>` : '<p class="small muted">Rien n\'a bougé assez fort dans le cadre : agrandis-le ou rapproche le téléphone.</p>'}</div>`; }
-function reactPane() { openPane({title: 'Test de réaction', render: rcBody, onClose: () => { if (RCT.run) rcStop(RCT.run); rcCamClose(); }}); }
+    ${rcReplay(L)}${rcMotionChart(L)}${L.i != null ? `<div class="btnrow two" style="margin-top:8px"><button class="btn ghost" data-rcstep="-1">← Une image avant</button><button class="btn ghost" data-rcstep="1">Une image après →</button></div>` : '<p class="small muted">Rien n\'a bougé assez fort dans le cadre : agrandis-le ou rapproche le téléphone.</p>'}</div>`; }
+function reactPane() { openPane({title: 'Test de réaction', render: rcBody, onClose: () => { if (RCT.run) rcStop(RCT.run); rcCamClose(); rcSetLast(null); }}); }
 const rcLastTxt = () => { const t = tests().filter(x => x.type === 'react').sort((a, b) => b.date.localeCompare(a.date))[0]; return t ? `${rcMs(t.best)} le ${fmtShort(t.date)} · ` : ''; };
 document.addEventListener('click', async e => {
   const at = q => e.target.closest?.(q); let b;
@@ -277,11 +288,11 @@ document.addEventListener('click', async e => {
   if (at('[data-rcbanghere]')) { const V = RCT.vid; V.tb = V.el.currentTime; paneRender(); return; }
   if (at('[data-rcvidgo]')) { RCT.roiOn = false; rcVidAnalyze(); return; }
   if ((b = at('[data-rcstep]'))) { rcStep(+b.dataset.rcstep); return; }
-  if (at('[data-rcclear]')) { RCT.tries[RCT.mode] = []; RCT.last = null; paneRender(); return; }
+  if (at('[data-rcclear]')) { RCT.tries[RCT.mode] = []; rcSetLast(null); paneRender(); return; }
   if (at('[data-rcsave]')) {
     const m = RCT.mode, ok = RCT.tries[m].filter(r => !r.fs && r.ms != null); if (!ok.length) return; const v = ok.map(r => r.ms);
     await saveTset({tests: [...tests(), {type: 'react', mode: m, date: TODAY, best: Math.min(...v), avg: Math.round(mean(v)), n: RCT.tries[m].length, tries: RCT.tries[m].map(r => r.fs ? null : r.ms), start: rcCfg().start}]});
-    RCT.tries[m] = []; RCT.last = null; toast('Meilleure de la session enregistrée'); paneRender(); return;
+    RCT.tries[m] = []; rcSetLast(null); toast('Meilleure de la session enregistrée'); paneRender(); return;
   }
 });
 document.addEventListener('change', e => {

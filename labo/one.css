@@ -515,3 +515,23 @@ html.one :is(#t-view,#f-view,[id^="v-"],#home-view){will-change:transform}
 .rcwrap .rctry{white-space:nowrap}
 .rcwrap .list .row{gap:8px}
 .rcwrap .list .row .small{flex:1;min-width:0;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* v158 : le bonhomme et le ralenti */
+.rcvbox{margin-left:auto;margin-right:auto;max-width:100%}
+.rcvbox .rcvid{width:100%;height:100%;max-height:none;object-fit:fill}
+.rcpose{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.rcrep{position:relative;margin-top:10px;border-radius:14px;overflow:hidden;background:#000;display:flex;justify-content:center}
+.rcrepc{display:block;max-width:100%;max-height:52vh;width:auto;height:auto}
+.rcreplab{position:absolute;left:8px;top:8px;padding:4px 9px;border-radius:99px;background:rgba(0,0,0,.6);color:#fff;font-size:.8rem;font-weight:800;font-variant-numeric:tabular-nums}
+.rcreplab.pre{color:#c7c7cc}.rcreplab.coup{background:var(--warn);color:#000}.rcreplab.dep{background:var(--good);color:#000}
+.rcrepbar{position:relative;margin-top:10px;padding-top:8px}
+.rcrepbar input{width:100%;margin:0;accent-color:var(--accent)}
+.rcrepbar .mk{position:absolute;top:0;width:3px;height:12px;border-radius:2px;transform:translateX(-50%)}
+.rcrepbar .mk.coup{background:var(--warn)}.rcrepbar .mk.dep{background:var(--good)}
+.rcrepbtns{display:grid;grid-template-columns:56px 1fr 56px;gap:8px;margin-top:8px}
+.rcrepbtns .btn{min-width:0;padding-left:4px;padding-right:4px;font-size:1rem}
+.rcspeed{margin-top:8px}.rcspeed button{font-size:.75rem}
+.rcrepgo{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;margin-top:8px}
+.rcposestat:empty{display:none}
+.rcwrap .btnrow.two .btn{font-size:.8125rem;padding-left:8px;padding-right:8px}
+.rcrepbtns [data-rcrepstep]{font-size:1.5rem;line-height:1;font-weight:700}

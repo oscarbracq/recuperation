@@ -9,7 +9,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
 src = open('sprint-lab.html', encoding='utf-8', newline='').read()
 css = open('labo/one.css', encoding='utf-8').read()
-js = open('labo/one.js', encoding='utf-8').read() + chr(10) + open('labo/one-actus.js', encoding='utf-8').read() + chr(10) + open('labo/body3-data.js', encoding='utf-8').read() + chr(10) + open('labo/one-body.js', encoding='utf-8').read() + chr(10) + open('labo/one-week.js', encoding='utf-8').read() + chr(10) + open('labo/one-react.js', encoding='utf-8').read()
+js = open('labo/one.js', encoding='utf-8').read() + chr(10) + open('labo/one-actus.js', encoding='utf-8').read() + chr(10) + open('labo/body3-data.js', encoding='utf-8').read() + chr(10) + open('labo/one-body.js', encoding='utf-8').read() + chr(10) + open('labo/one-week.js', encoding='utf-8').read() + chr(10) + open('labo/one-react.js', encoding='utf-8').read() + chr(10) + open('labo/one-pose.js', encoding='utf-8').read()
 ps = ['powershell', '-ExecutionPolicy', 'Bypass', '-File', 'build.ps1', '-Source']
 
 def must(h, o, n, cnt=None):

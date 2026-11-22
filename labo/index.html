@@ -2040,6 +2040,26 @@ html.one :is(#t-view,#f-view,[id^="v-"],#home-view){will-change:transform}
 .rcwrap .rctry{white-space:nowrap}
 .rcwrap .list .row{gap:8px}
 .rcwrap .list .row .small{flex:1;min-width:0;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* v158 : le bonhomme et le ralenti */
+.rcvbox{margin-left:auto;margin-right:auto;max-width:100%}
+.rcvbox .rcvid{width:100%;height:100%;max-height:none;object-fit:fill}
+.rcpose{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.rcrep{position:relative;margin-top:10px;border-radius:14px;overflow:hidden;background:#000;display:flex;justify-content:center}
+.rcrepc{display:block;max-width:100%;max-height:52vh;width:auto;height:auto}
+.rcreplab{position:absolute;left:8px;top:8px;padding:4px 9px;border-radius:99px;background:rgba(0,0,0,.6);color:#fff;font-size:.8rem;font-weight:800;font-variant-numeric:tabular-nums}
+.rcreplab.pre{color:#c7c7cc}.rcreplab.coup{background:var(--warn);color:#000}.rcreplab.dep{background:var(--good);color:#000}
+.rcrepbar{position:relative;margin-top:10px;padding-top:8px}
+.rcrepbar input{width:100%;margin:0;accent-color:var(--accent)}
+.rcrepbar .mk{position:absolute;top:0;width:3px;height:12px;border-radius:2px;transform:translateX(-50%)}
+.rcrepbar .mk.coup{background:var(--warn)}.rcrepbar .mk.dep{background:var(--good)}
+.rcrepbtns{display:grid;grid-template-columns:56px 1fr 56px;gap:8px;margin-top:8px}
+.rcrepbtns .btn{min-width:0;padding-left:4px;padding-right:4px;font-size:1rem}
+.rcspeed{margin-top:8px}.rcspeed button{font-size:.75rem}
+.rcrepgo{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;margin-top:8px}
+.rcposestat:empty{display:none}
+.rcwrap .btnrow.two .btn{font-size:.8125rem;padding-left:8px;padding-right:8px}
+.rcrepbtns [data-rcrepstep]{font-size:1.5rem;line-height:1;font-weight:700}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -13288,7 +13308,7 @@ setInterval(() => { if (WK && WK.end !== wkFriday()) { WK = null; if (S.mod === 
      premier mouvement image par image.
    Chaque essai s'ajoute à la session (courbe) ; on enregistre la meilleure de la session, et la tendance suit. */
 const RCT = {mode: 'son', tries: {son: [], cam: [], video: []}, run: null, cam: null, vid: null, roi: {x: .2, y: .1, w: .6, h: .8}, last: null, roiOn: false};
-const RC_DEF = {start: 'starter', mkMin: 6, mkMax: 10, stMin: 1.5, stMax: 2.5, gnMin: 2, gnMax: 5, lat: 0, flash: true, place: 10};
+const RC_DEF = {start: 'starter', mkMin: 6, mkMax: 10, stMin: 1.5, stMax: 2.5, gnMin: 2, gnMax: 5, lat: 0, flash: true, place: 10, pose: true};
 const rcCfg = () => { try { return {...RC_DEF, ...JSON.parse(localStorage.getItem('tnr-react') || '{}')}; } catch (e) { return {...RC_DEF}; } };
 const rcSetCfg = p => { try { localStorage.setItem('tnr-react', JSON.stringify({...rcCfg(), ...p})); } catch (e) {} };
 const rcRnd = (a, b) => +a + Math.random() * Math.max(0, +b - +a);
@@ -13354,7 +13374,7 @@ function rcLift(tok, ts) {
   const ms = tok.T != null ? ts - tok.bp : null, early = ms == null || ms < 0;
   rcStop(tok);
   const r = {ms: ms == null ? null : Math.round(ms * 10) / 10, fs: early || ms < 100, early, at: Date.now()};
-  RCT.tries.son.push(r); RCT.last = null;
+  RCT.tries.son.push(r); rcSetLast(null);
   paneRender();
   if (PREFS?.haptic) navigator.vibrate?.(r.fs ? [30, 40, 30] : 15);
 }
@@ -13408,35 +13428,39 @@ async function rcCamOpen() {
     const stream = await navigator.mediaDevices.getUserMedia({audio: false, video: {facingMode: {ideal: 'environment'}, frameRate: {ideal: 240}, width: {ideal: 1280}, height: {ideal: 720}}});
     const track = stream.getVideoTracks()[0]; try { await track.applyConstraints({frameRate: {ideal: 240}}); } catch (e) {}
     const el = document.createElement('video'); el.playsInline = true; el.muted = true; el.autoplay = true; el.srcObject = stream; el.className = 'rcvid'; await el.play().catch(() => {});
-    RCT.cam = {stream, track, el, fps: track.getSettings?.().frameRate || null}; paneRender();
+    RCT.cam = {stream, track, el, fps: track.getSettings?.().frameRate || null}; el.addEventListener('resize', rcMount); paneRender(); rcPoseLive();
   } catch (e) { toast('Caméra refusée ou indisponible'); }
 }
 function rcCamClose() { try { RCT.cam?.stream.getTracks().forEach(t => t.stop()); } catch (e) {} RCT.cam = null; }
 async function rcCamGo() {
   const cam = RCT.cam; if (!cam || RCT.run) return;
-  const c = rcCfg(), tok = RCT.run = {on: true, kind: 'cam'}, F = [], st = t => { const s = document.querySelector('.rcstat'); if (s) s.textContent = t; };
+  const c = rcCfg(), tok = RCT.run = {on: true, kind: 'cam'}, F = [], cap = [], st = t => { const s = document.querySelector('.rcstat'); if (s) s.textContent = t; };
   RCV.prev = null;
   const loop = (now, md) => {
     if (!tok.on) return;
-    F.push({t: md.captureTime || md.expectedDisplayTime || now, m: rcMotion(cam.el, RCT.roi)}); if (F.length > 3000) F.splice(0, 1000);
-    if (tok.fired && F.at(-1).t > tok.bp + 1200) { rcCamDone(tok, F); return; }
+    const t = md.captureTime || md.expectedDisplayTime || now;
+    F.push({t, m: rcMotion(cam.el, RCT.roi)}); if (F.length > 3000) F.splice(0, 1000);
+    rcGrab(cam.el, RCT.roi, t, cap, tok.fired ? tok.bp : null);
+    if (tok.fired && F.at(-1).t > tok.bp + 1200) { rcCamDone(tok, F, cap); return; }
     cam.el.requestVideoFrameCallback(loop);
   };
+  rcPoseClear();
   if (c.place > 0) { st('Mets-toi en place…'); rcSay('Mets-toi en place'); for (let s = Math.round(c.place); s > 0 && tok.on; s--) { st('Mets-toi en place · ' + s); await rcWait(1); } }
   if (!tok.on) return;
   cam.el.requestVideoFrameCallback(loop);
   await rcStarter(tok, st);
 }
-function rcCamDone(tok, F) {
+function rcCamDone(tok, F, cap) {
   tok.on = false; RCT.run = null;
   const o = rcOnset(F, tok.bp), ms = o ? rcResult(F, tok.bp, o.i) : null;
-  RCT.last = {F, tb: tok.bp, i: o?.i ?? null, thr: o?.thr ?? 2, mode: 'cam'};
+  rcSetLast({F, tb: tok.bp, i: o?.i ?? null, thr: o?.thr ?? 2, mode: 'cam', frames: cap});
+  const s = document.querySelector('.rcstat'); if (s) s.textContent = '';
   RCT.tries.cam.push({ms: ms == null ? null : Math.round(ms), fs: ms != null && ms < 100, early: ms != null && ms < 0, at: Date.now(), none: ms == null});
   paneRender();
 }
 // Corriger d'une image : le départ se décale à l'image d'avant ou d'après, et l'essai se recalcule.
 function rcStep(d) {
-  const L = RCT.last; if (!L || L.i == null) return; const i = Math.max(1, Math.min(L.F.length - 1, L.i + d)); L.i = i;
+  const L = RCT.last; if (!L || L.i == null) return; const i = Math.max(1, Math.min(L.F.length - 1, L.i + d)); L.i = i; if (RCT.rep && L.frames?.length) RCT.rep.i = rcRepIdx(L, 'dep') ?? RCT.rep.i;
   const ms = rcResult(L.F, L.tb, i), arr = RCT.tries[L.mode], r = arr.at(-1); if (r) { r.ms = Math.round(ms); r.fs = ms < 100; r.early = ms < 0; r.none = false; }
   paneRender();
 }
@@ -13463,17 +13487,17 @@ async function rcVidLoad(file) {
 }
 async function rcVidAnalyze() {
   const V = RCT.vid; if (!V || V.tb == null || V.busy) return;
-  const el = V.el, F = [], tb = V.tb * 1000; V.busy = 'Analyse image par image…'; paneRender(); RCV.prev = null;
+  const el = V.el, F = [], cap = [], tb = V.tb * 1000; V.busy = 'Analyse image par image…'; paneRender(); RCV.prev = null;
   el.controls = false; el.pause(); el.currentTime = Math.max(0, V.tb - .8);
   await new Promise(r => { el.onseeked = r; setTimeout(r, 2000); });
   el.playbackRate = .25;
   await new Promise(res => {
-    const loop = (now, md) => { F.push({t: md.mediaTime * 1000, m: rcMotion(el, RCT.roi)}); if (md.mediaTime > V.tb + 1.3 || el.ended) { el.pause(); res(); return; } el.requestVideoFrameCallback(loop); };
+    const loop = (now, md) => { const t = md.mediaTime * 1000; F.push({t, m: rcMotion(el, RCT.roi)}); if (t >= tb - 400) rcGrab(el, RCT.roi, t, cap, tb); if (md.mediaTime > V.tb + 1.3 || el.ended) { el.pause(); res(); return; } el.requestVideoFrameCallback(loop); };
     el.requestVideoFrameCallback(loop); el.play().catch(res); setTimeout(res, 20000);
   });
   el.playbackRate = 1; el.controls = true;
   const o = rcOnset(F, tb), ms = o ? rcResult(F, tb, o.i) : null;
-  RCT.last = {F, tb, i: o?.i ?? null, thr: o?.thr ?? 2, mode: 'video'};
+  rcSetLast({F, tb, i: o?.i ?? null, thr: o?.thr ?? 2, mode: 'video', frames: cap});
   RCT.tries.video.push({ms: ms == null ? null : Math.round(ms), fs: ms != null && ms < 100, early: ms != null && ms < 0, at: Date.now(), none: ms == null});
   V.busy = ''; paneRender();
 }
@@ -13487,7 +13511,13 @@ async function rcVidAnalyze() {
 })();
 function rcRoiDraw() { const r = document.querySelector('.rcroi'); if (!r) return; const o = RCT.roi; Object.assign(r.style, {left: o.x * 100 + '%', top: o.y * 100 + '%', width: o.w * 100 + '%', height: o.h * 100 + '%'}); }
 // Le lecteur vidéo survit aux nouveaux rendus du panneau : on le replace dans sa boîte.
-function rcMount() { const box = document.querySelector('.rcvbox'); const el = RCT.mode === 'cam' ? RCT.cam?.el : RCT.mode === 'video' ? RCT.vid?.el : null; if (box && el && el.parentNode !== box) box.prepend(el); rcRoiDraw(); }
+function rcMount() {
+  const box = document.querySelector('.rcvbox'); const el = RCT.mode === 'cam' ? RCT.cam?.el : RCT.mode === 'video' ? RCT.vid?.el : null;
+  if (box && el && el.parentNode !== box) box.prepend(el);
+  if (box && el?.videoWidth) { const a = el.videoWidth / el.videoHeight; box.style.aspectRatio = el.videoWidth + ' / ' + el.videoHeight; box.style.width = `min(100%, calc(58vh * ${a.toFixed(4)}))`; }
+  else if (el && !el._rcm) { el._rcm = 1; el.addEventListener('loadedmetadata', rcMount); }
+  rcRoiDraw();
+}
 
 /* ---------- le panneau ---------- */
 const RC_MODES = [['son', 'Au son'], ['cam', 'Caméra'], ['video', 'Vidéo importée']];
@@ -13514,7 +13544,8 @@ function rcBody() {
     <p class="rcnote">Moins de 100 ms = faux départ</p>`;
   else if (m === 'cam') main = `${rcSettings(true)}
     ${RCT.cam ? `<div class="card rccard"><div class="rcvbox${RCT.roiOn ? ' roion' : ''}"><div class="rcroi"></div></div>
-      <p class="small muted" style="margin:6px 2px 0">${RCT.cam.fps ? 'Caméra à ' + Math.round(RCT.cam.fps) + ' images/s. ' : ''}Pose le téléphone au sol, de profil, à 2 ou 3 m des blocs. Le cadre vert = la zone surveillée : toi seul dedans.</p>
+      <div class="rcrepgo" style="margin-top:8px"><button type="button" class="chip" data-rcposeon aria-pressed="${!!rcCfg().pose}">Bonhomme</button><span class="rcposestat small muted"></span></div>
+      <p class="small muted" style="margin:6px 2px 0">${RCT.cam.fps ? 'Caméra à ' + Math.round(RCT.cam.fps) + ' images/s. ' : ''}Pose le téléphone au sol, de profil, à 2 ou 3 m des blocs. Le cadre vert = la zone surveillée : toi seul dedans. Le bonhomme montre ce que le téléphone voit de ton corps ; il se met en pause pendant le départ pour ne pas gêner la mesure.</p>
       <div class="btnrow two" style="margin-top:8px"><button class="btn ghost" data-rcroi>${RCT.roiOn ? 'Valider le cadre' : 'Tracer le cadre'}</button><button class="btn" data-rccamgo${RCT.run ? ' disabled' : ''}>Lancer le départ</button></div>
       <p class="rcstat small" style="text-align:center;margin:8px 0 0"></p></div>` : `<button class="btn rcopen" data-rccam>Ouvrir la caméra</button><p class="rcnote">Téléphone posé au sol, de profil, toi dans les blocs</p>`}
     ${RCT.last?.mode === 'cam' ? rcAnalysis() : ''}`;
@@ -13539,8 +13570,8 @@ function rcBody() {
 }
 function rcAnalysis() { const L = RCT.last, ms = L.i != null ? rcResult(L.F, L.tb, L.i) : null;
   return `<div class="card" style="margin-top:12px"><span class="eyebrow">Dernier départ</span><div class="rcbig num">${ms == null ? 'Pas de départ vu' : rcMs(ms)}</div>
-    ${rcMotionChart(L)}${L.i != null ? `<div class="btnrow two" style="margin-top:8px"><button class="btn ghost" data-rcstep="-1">← Une image avant</button><button class="btn ghost" data-rcstep="1">Une image après →</button></div>` : '<p class="small muted">Rien n\'a bougé assez fort dans le cadre : agrandis-le ou rapproche le téléphone.</p>'}</div>`; }
-function reactPane() { openPane({title: 'Test de réaction', render: rcBody, onClose: () => { if (RCT.run) rcStop(RCT.run); rcCamClose(); }}); }
+    ${rcReplay(L)}${rcMotionChart(L)}${L.i != null ? `<div class="btnrow two" style="margin-top:8px"><button class="btn ghost" data-rcstep="-1">← Une image avant</button><button class="btn ghost" data-rcstep="1">Une image après →</button></div>` : '<p class="small muted">Rien n\'a bougé assez fort dans le cadre : agrandis-le ou rapproche le téléphone.</p>'}</div>`; }
+function reactPane() { openPane({title: 'Test de réaction', render: rcBody, onClose: () => { if (RCT.run) rcStop(RCT.run); rcCamClose(); rcSetLast(null); }}); }
 const rcLastTxt = () => { const t = tests().filter(x => x.type === 'react').sort((a, b) => b.date.localeCompare(a.date))[0]; return t ? `${rcMs(t.best)} le ${fmtShort(t.date)} · ` : ''; };
 document.addEventListener('click', async e => {
   const at = q => e.target.closest?.(q); let b;
@@ -13555,17 +13586,174 @@ document.addEventListener('click', async e => {
   if (at('[data-rcbanghere]')) { const V = RCT.vid; V.tb = V.el.currentTime; paneRender(); return; }
   if (at('[data-rcvidgo]')) { RCT.roiOn = false; rcVidAnalyze(); return; }
   if ((b = at('[data-rcstep]'))) { rcStep(+b.dataset.rcstep); return; }
-  if (at('[data-rcclear]')) { RCT.tries[RCT.mode] = []; RCT.last = null; paneRender(); return; }
+  if (at('[data-rcclear]')) { RCT.tries[RCT.mode] = []; rcSetLast(null); paneRender(); return; }
   if (at('[data-rcsave]')) {
     const m = RCT.mode, ok = RCT.tries[m].filter(r => !r.fs && r.ms != null); if (!ok.length) return; const v = ok.map(r => r.ms);
     await saveTset({tests: [...tests(), {type: 'react', mode: m, date: TODAY, best: Math.min(...v), avg: Math.round(mean(v)), n: RCT.tries[m].length, tries: RCT.tries[m].map(r => r.fs ? null : r.ms), start: rcCfg().start}]});
-    RCT.tries[m] = []; RCT.last = null; toast('Meilleure de la session enregistrée'); paneRender(); return;
+    RCT.tries[m] = []; rcSetLast(null); toast('Meilleure de la session enregistrée'); paneRender(); return;
   }
 });
 document.addEventListener('change', e => {
   const t = e.target, d = t.dataset || {};
   if (d.rccfg) { const v = +String(t.value).replace(',', '.'); if (!isNaN(v)) rcSetCfg({[d.rccfg]: v}); return; }
   if (d.rcfile !== undefined) rcVidLoad(t.files?.[0]);
+});
+
+/* ================= Test de réaction · le bonhomme et le ralenti =================
+   · Le bonhomme : MediaPipe Pose (Google, gratuit), qui tourne sur le téléphone. Il repère 33 points du corps
+     (tête, épaules, coudes, poignets, hanches, genoux, chevilles, talons, pointes de pied) dans le cadre choisi.
+     Le modèle (~19 Mo) se télécharge une fois, au premier usage, puis reste dans le cache du navigateur.
+   · Le ralenti : pendant le départ, on garde chaque image du cadre de 0,4 s avant le coup à 0,9 s après.
+     Ensuite on les relit image par image, ou au ralenti, avec le temps depuis le coup et le bonhomme dessus.
+   Le bonhomme ne tourne pas pendant le départ lui-même : il prendrait du temps à la mesure (des images perdues). */
+const RCP = {lm: null, loading: null, err: '', ts: 0, live: false, lastLive: 0, off: null};
+function rcPoseLoad() {
+  if (RCP.lm || RCP.loading) return RCP.loading || Promise.resolve(RCP.lm);
+  const V = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14';
+  RCP.loading = (async () => {
+    try {
+      const m = await import(V + '/vision_bundle.mjs'), fs = await m.FilesetResolver.forVisionTasks(V + '/wasm');
+      const opt = d => ({baseOptions: {modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task', delegate: d},
+        runningMode: 'VIDEO', numPoses: 1, minPoseDetectionConfidence: .4, minPosePresenceConfidence: .4, minTrackingConfidence: .4});
+      try { RCP.lm = await m.PoseLandmarker.createFromOptions(fs, opt('GPU')); } catch (e) { RCP.lm = await m.PoseLandmarker.createFromOptions(fs, opt('CPU')); }
+      RCP.err = '';
+    } catch (e) { RCP.err = 'Bonhomme indisponible (pas de connexion ?)'; RCP.lm = null; }
+    RCP.loading = null; rcPoseStat(); return RCP.lm;
+  })();
+  rcPoseStat(); return RCP.loading;
+}
+// Le corps sur une image (canvas ou image) : 33 points en 0-1, ou rien.
+function rcPoseOn(src) {
+  if (!RCP.lm) return null;
+  try { RCP.ts = Math.max(RCP.ts + 1, performance.now()); const r = RCP.lm.detectForVideo(src, RCP.ts); return r?.landmarks?.[0] || null; } catch (e) { return null; }
+}
+function rcPoseStat() { const s = document.querySelector('.rcposestat'); if (s) s.textContent = !rcCfg().pose ? '' : RCP.err || (RCP.loading ? 'Chargement du bonhomme… (une seule fois, ~19 Mo)' : RCP.lm ? '' : ''); }
+
+// Le dessin : le côté gauche en bleu, le droit en orange, le tronc et la tête en blanc.
+const RC_SEG = [[11, 12, 't'], [11, 23, 't'], [12, 24, 't'], [23, 24, 't'], [11, 13, 'l'], [13, 15, 'l'], [12, 14, 'r'], [14, 16, 'r'],
+  [23, 25, 'l'], [25, 27, 'l'], [27, 29, 'l'], [29, 31, 'l'], [27, 31, 'l'], [24, 26, 'r'], [26, 28, 'r'], [28, 30, 'r'], [30, 32, 'r'], [28, 32, 'r']];
+const RC_COL = {l: '#64D2FF', r: '#FF9F0A', t: '#FFFFFF'};
+function rcDrawPose(g, lm, X, Y, s = 1) {
+  if (!lm) return;
+  const vis = i => (lm[i]?.visibility ?? 1) > .3, P = i => [X(lm[i].x), Y(lm[i].y)];
+  g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
+  const line = (a, b, c) => { g.beginPath(); g.moveTo(...a); g.lineTo(...b); g.strokeStyle = 'rgba(0,0,0,.55)'; g.lineWidth = 6 * s; g.stroke(); g.strokeStyle = c; g.lineWidth = 3.2 * s; g.stroke(); };
+  for (const [a, b, k] of RC_SEG) if (vis(a) && vis(b)) line(P(a), P(b), RC_COL[k]);
+  // Le cou et la tête
+  if (vis(11) && vis(12) && vis(0)) {
+    const sh = [(X(lm[11].x) + X(lm[12].x)) / 2, (Y(lm[11].y) + Y(lm[12].y)) / 2], h = P(0);
+    const r = Math.max(7 * s, vis(7) && vis(8) ? Math.hypot(X(lm[7].x) - X(lm[8].x), Y(lm[7].y) - Y(lm[8].y)) * .7 : 0, Math.hypot(h[0] - sh[0], h[1] - sh[1]) * .32);
+    line(sh, h, RC_COL.t);
+    g.beginPath(); g.arc(h[0], h[1], r, 0, 7); g.strokeStyle = 'rgba(0,0,0,.55)'; g.lineWidth = 6 * s; g.stroke(); g.strokeStyle = '#fff'; g.lineWidth = 3 * s; g.stroke();
+  }
+  for (const i of [13, 14, 15, 16, 25, 26, 27, 28, 23, 24, 11, 12]) if (vis(i)) { const [x, y] = P(i); g.beginPath(); g.arc(x, y, 3.4 * s, 0, 7); g.fillStyle = i % 2 ? RC_COL.l : RC_COL.r; g.fill(); }
+  g.restore();
+}
+
+// Le cadre (en coordonnées de la vidéo) découpé dans une petite image, pour le bonhomme.
+function rcCrop(el, roi, max = 256) {
+  const vw = el.videoWidth, vh = el.videoHeight; if (!vw) return null;
+  const sx = roi.x * vw, sy = roi.y * vh, sw = Math.max(8, roi.w * vw), sh = Math.max(8, roi.h * vh), k = Math.min(1, max / Math.max(sw, sh));
+  const c = RCP.off || (RCP.off = document.createElement('canvas')), W = Math.round(sw * k), H = Math.round(sh * k);
+  if (c.width !== W || c.height !== H) { c.width = W; c.height = H; }
+  c.getContext('2d').drawImage(el, sx, sy, sw, sh, 0, 0, W, H); return c;
+}
+
+/* ---------- en direct : le bonhomme sur la caméra, dans le cadre ---------- */
+function rcPoseLive() {
+  const cam = RCT.cam; if (!cam || !rcCfg().pose || RCP.live) return;
+  RCP.live = true; rcPoseLoad();
+  const tick = now => {
+    if (!RCT.cam || RCT.cam !== cam || !rcCfg().pose) { RCP.live = false; rcPoseClear(); return; }
+    cam.el.requestVideoFrameCallback(tick);
+    if (RCT.run || !RCP.lm || now - RCP.lastLive < 40) return; RCP.lastLive = now;
+    const c = rcCrop(cam.el, RCT.roi); if (!c) return;
+    rcPoseDrawLive(rcPoseOn(c));
+  };
+  cam.el.requestVideoFrameCallback(tick);
+}
+function rcPoseCanvas() {
+  const box = document.querySelector('.rcvbox'); if (!box) return null;
+  let cv = box.querySelector('.rcpose'); if (!cv) { cv = document.createElement('canvas'); cv.className = 'rcpose'; box.appendChild(cv); }
+  const r = box.getBoundingClientRect(), d = devicePixelRatio || 1, W = Math.round(r.width * d), H = Math.round(r.height * d);
+  if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; } return cv;
+}
+function rcPoseClear() { const cv = document.querySelector('.rcvbox .rcpose'); cv?.getContext('2d').clearRect(0, 0, cv.width, cv.height); }
+function rcPoseDrawLive(lm) {
+  const cv = rcPoseCanvas(); if (!cv) return; const g = cv.getContext('2d'), o = RCT.roi; g.clearRect(0, 0, cv.width, cv.height);
+  rcDrawPose(g, lm, x => (o.x + x * o.w) * cv.width, y => (o.y + y * o.h) * cv.height, devicePixelRatio || 1);
+}
+
+/* ---------- les images gardées autour du coup ---------- */
+// À chaque image : on garde le cadre en petit (côté max 300 px). Avant le coup, seulement les 0,4 dernières secondes.
+function rcGrab(el, roi, t, cap, bp) {
+  if (bp != null && t > bp + 900) return;
+  const vw = el.videoWidth, vh = el.videoHeight; if (!vw) return;
+  const sx = roi.x * vw, sy = roi.y * vh, sw = Math.max(8, roi.w * vw), sh = Math.max(8, roi.h * vh), k = Math.min(1, 300 / Math.max(sw, sh));
+  const f = {t, bmp: null}; cap.push(f);
+  createImageBitmap(el, sx, sy, sw, sh, {resizeWidth: Math.round(sw * k), resizeHeight: Math.round(sh * k), resizeQuality: 'medium'}).then(b => { if (f.dead) b.close(); else f.bmp = b; }).catch(() => {});
+  if (bp == null) while (cap.length && cap[0].t < t - 400) { const o = cap.shift(); o.dead = true; o.bmp?.close?.(); }
+}
+function rcFree(L) { L?.frames?.forEach(f => { f.dead = true; f.bmp?.close?.(); }); }
+function rcSetLast(L) { rcRepStop(); if (RCT.last && RCT.last !== L) rcFree(RCT.last); RCT.last = L; RCT.rep = {i: 0, speed: .1, play: false}; if (L?.frames?.length) RCT.rep.i = rcRepIdx(L, 'dep') ?? rcRepIdx(L, 'coup') ?? 0; }
+// L'image la plus proche du coup, ou du départ trouvé.
+function rcRepIdx(L, what) {
+  const fr = L.frames; if (!fr?.length) return null;
+  const t = what === 'coup' ? L.tb : L.i != null && L.F[L.i] && L.F[L.i - 1] ? L.F[L.i].t : null; if (t == null) return null;
+  let b = 0; fr.forEach((f, k) => { if (Math.abs(f.t - t) < Math.abs(fr[b].t - t)) b = k; }); return b;
+}
+
+/* ---------- le ralenti ---------- */
+function rcReplay(L) {
+  const fr = L.frames?.filter(f => f.bmp); if (!fr?.length) return '';
+  L.frames = fr; const n = fr.length, R = RCT.rep || (RCT.rep = {i: 0, speed: .1}), ic = rcRepIdx(L, 'coup'), id = rcRepIdx(L, 'dep'), pct = k => (n > 1 ? k / (n - 1) * 100 : 50).toFixed(1);
+  queueMicrotask(rcRepDraw);
+  return `<div class="rcrep"><canvas class="rcrepc"></canvas><span class="rcreplab"></span></div>
+    <div class="rcrepbar">${ic != null ? `<i class="mk coup" style="left:${pct(ic)}%"></i>` : ''}${id != null ? `<i class="mk dep" style="left:${pct(id)}%"></i>` : ''}<input type="range" min="0" max="${n - 1}" step="1" value="${Math.min(R.i, n - 1)}" data-rcrepi aria-label="Image"></div>
+    <div class="rcrepbtns"><button type="button" class="btn ghost" data-rcrepstep="-1" aria-label="Image d'avant">‹</button><button type="button" class="btn" data-rcrepplay>${R.play ? 'Pause' : '▶ Ralenti'}</button><button type="button" class="btn ghost" data-rcrepstep="1" aria-label="Image d'après">›</button></div>
+    <div class="seg rcspeed">${[[.05, '× 1/20'], [.1, '× 1/10'], [.25, '× 1/4'], [1, '× 1']].map(([v, l]) => `<button type="button" data-rcrepspeed="${v}" aria-pressed="${R.speed === v}">${l}</button>`).join('')}</div>
+    <div class="rcrepgo">${ic != null ? '<button type="button" class="chip" data-rcrepgo="coup">Au coup</button>' : ''}${id != null ? '<button type="button" class="chip" data-rcrepgo="dep">Au départ</button>' : ''}<button type="button" class="chip" data-rcposeon aria-pressed="${!!rcCfg().pose}">Bonhomme</button></div>
+    <p class="rcnote">${n} images · bleu = côté gauche, orange = côté droit</p>`;
+}
+async function rcRepDraw() {
+  const L = RCT.last, cv = document.querySelector('.rcrepc'); if (!L?.frames?.length || !cv) return;
+  const R = RCT.rep, i = R.i = Math.max(0, Math.min(L.frames.length - 1, R.i)), f = L.frames[i]; if (!f.bmp) return;
+  if (cv.width !== f.bmp.width * 2) { cv.width = f.bmp.width * 2; cv.height = f.bmp.height * 2; }
+  const g = cv.getContext('2d'); g.imageSmoothingQuality = 'high'; g.drawImage(f.bmp, 0, 0, cv.width, cv.height);
+  if (rcCfg().pose) {
+    if (f.pose === undefined && RCP.lm) f.pose = rcPoseOn(f.bmp);
+    if (f.pose) rcDrawPose(g, f.pose, x => x * cv.width, y => y * cv.height, cv.width / 300 * 1.2);
+    else if (!RCP.lm && !RCP.err) rcPoseLoad().then(() => { if (RCT.rep?.i === i) rcRepDraw(); });
+  }
+  const d = f.t - L.tb, ic = rcRepIdx(L, 'coup'), id = rcRepIdx(L, 'dep');
+  const lab = document.querySelector('.rcreplab'); if (lab) { lab.textContent = (d >= 0 ? '+' : '−') + Math.abs(Math.round(d)) + ' ms' + (i === ic ? ' · COUP' : '') + (i === id ? ' · DÉPART' : ''); lab.className = 'rcreplab' + (i === id ? ' dep' : i === ic ? ' coup' : d < 0 ? ' pre' : ''); }
+  const s = document.querySelector('[data-rcrepi]'); if (s && +s.value !== i) s.value = i;
+}
+function rcRepStop() { const R = RCT.rep; if (R?.play) { R.play = false; const b = document.querySelector('[data-rcrepplay]'); if (b) b.textContent = '▶ Ralenti'; } }
+function rcRepPlay() {
+  const L = RCT.last, R = RCT.rep; if (!L?.frames?.length) return;
+  if (R.play) { rcRepStop(); return; }
+  R.play = true; const b = document.querySelector('[data-rcrepplay]'); if (b) b.textContent = 'Pause';
+  if (R.i >= L.frames.length - 1) R.i = 0;
+  let t0 = performance.now(), m0 = L.frames[R.i].t;
+  const step = now => {
+    if (!R.play || RCT.last !== L || !document.querySelector('.rcrepc')) { R.play = false; return; }
+    const m = m0 + (now - t0) * R.speed; let i = R.i; while (i < L.frames.length - 1 && L.frames[i + 1].t <= m) i++;
+    if (i !== R.i) { R.i = i; rcRepDraw(); }
+    if (i >= L.frames.length - 1) { rcRepStop(); return; }
+    requestAnimationFrame(step);
+  };
+  R.reset = () => { t0 = performance.now(); m0 = L.frames[R.i].t; };
+  requestAnimationFrame(step);
+}
+document.addEventListener('input', e => { const s = e.target.closest?.('[data-rcrepi]'); if (!s) return; rcRepStop(); RCT.rep.i = +s.value; rcRepDraw(); });
+document.addEventListener('click', e => {
+  const at = q => e.target.closest?.(q); let b;
+  if ((b = at('[data-rcrepstep]'))) { rcRepStop(); RCT.rep.i += +b.dataset.rcrepstep; rcRepDraw(); return; }
+  if (at('[data-rcrepplay]')) { rcRepPlay(); return; }
+  if ((b = at('[data-rcrepspeed]'))) { RCT.rep.speed = +b.dataset.rcrepspeed; RCT.rep.reset?.(); document.querySelectorAll('[data-rcrepspeed]').forEach(x => x.setAttribute('aria-pressed', x === b)); return; }
+  if ((b = at('[data-rcrepgo]'))) { rcRepStop(); const k = rcRepIdx(RCT.last, b.dataset.rcrepgo); if (k != null) { RCT.rep.i = k; rcRepDraw(); } return; }
+  if (at('[data-rcposeon]')) { rcSetCfg({pose: !rcCfg().pose}); if (rcCfg().pose) { rcPoseLoad(); rcPoseLive(); } else rcPoseClear(); paneRender(); return; }
 });
 
 </script>
