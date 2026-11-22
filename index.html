@@ -9363,18 +9363,38 @@ const WARM = [
   ['jbm_drill', 'Gammes (routine de JB Morin)', 'act', '10 min', {psoas: 1, calves: 1, hams: .75}, 10, true],
   ['jbm_prog', 'Courses progressives (routine de JB Morin)', 'prog', '10 min', {hams: 1, glutes: .75, calves: .75}, 10, true],
   // The same three blocks of 10 min, written out exercise by exercise.
-  ['jbm_m1', 'Balancés de jambe d\'avant en arrière', 'mob', '10 par jambe, en se tenant', {psoas: 1, hams: .75}, 2, true], ['jbm_m2', 'Balancés de jambe sur le côté', 'mob', '10 par jambe', {adduct: 1, gmed: .75}, 2, true],
-  ['jbm_m3', 'Fente avant avec rotation du buste', 'mob', '5 par côté', {psoas: 1, glutes: .5, obl: .5}, 2, true], ['jbm_m4', 'Hanches en 90/90 au sol', 'mob', '5 bascules par côté', {glutes: .75, piri: .75, adduct: .5}, 2, true],
-  ['jbm_m5', 'Chevilles : montées sur pointes et cercles', 'mob', '15 montées, 10 cercles par sens', {calves: 1, tib: .5}, 2, true],
-  ['jbm_d1', 'Montées de genoux en marchant', 'act', '2 × 20 m', {psoas: 1, calves: .5}, 2, true], ['jbm_d2', 'Skipping A (montées de genoux rapides)', 'act', '2 × 20 m', {psoas: 1, calves: .75}, 2, true],
-  ['jbm_d3', 'Skipping B (jambe tendue puis griffé)', 'act', '2 × 20 m', {hams: 1, psoas: .75}, 2, true], ['jbm_d4', 'Talons-fesses dynamiques', 'act', '2 × 20 m', {hams: .75, quads: .5}, 2, true],
-  ['jbm_d5', 'Foulées bondissantes', 'act', '2 × 30 m', {glutes: 1, hams: .75, calves: .75}, 2, true],
-  ['jbm_d6', 'Ciseaux', 'act', '2 × 30 m · jambes presque tendues, pied actif sous le bassin', {hams: 1, psoas: .75, calves: .5}, 2, true],
-  ['jbm_d7', '3-4 petits pas puis montée de genou', 'act', '2 × 30 m · flexion de hanche maximale, buste droit', {psoas: 1, calves: .5}, 2, true],
-  ['jbm_d8', '3-4 petits pas puis extension de hanche', 'act', '2 × 30 m · pousse loin derrière, hanche tendue', {glutes: 1, hams: .75, psoas: .5}, 2, true],
-  ['jbm_p1', 'Accélération progressive à 50 %', 'prog', '1 × 30 m', {hams: .5, glutes: .5}, 1, true], ['jbm_p2', 'Accélération progressive à 60 %', 'prog', '1 × 30 m', {hams: .6, glutes: .6}, 1, true],
-  ['jbm_p3', 'Accélération progressive à 70 %', 'prog', '1 × 30 m', {hams: .7, glutes: .7}, 1, true], ['jbm_p4', 'Accélération progressive à 80 %', 'prog', '1 × 30 m', {hams: .8, glutes: .8, calves: .5}, 1, true],
-  ['jbm_p5', 'Accélération progressive à 90-95 %', 'prog', '1 × 30 m, retour en marchant', {hams: 1, glutes: .9, calves: .75}, 2, true]
+  // L'échauffement de JB Morin (« Sprint Warmup », 2026), exercice par exercice, comme dans la vidéo et sur la fiche d'Oscar.
+  // Mobilité hanche et cheville, au sol puis debout (10 min).
+  ['jbm_m1', 'Étirement des hanches, assis au sol', 'mob', '5-6 par côté', {psoas: .75, glutes: .75, adduct: .5}, 1, true],
+  ['jbm_m2', 'Enrouler le dos, puis s\'étendre et se rasseoir', 'mob', '5-6 fois', {erect: .75, hams: .5, abs: .5}, 1, true],
+  ['jbm_m3', 'Enrouler le dos, s\'étendre en croisant les jambes', 'mob', '5-6 par côté · le buste ne penche pas', {erect: .5, glutes: .75, piri: .75}, 1, true],
+  ['jbm_m4', 'Enrouler le dos, puis assis en S', 'mob', '5-6 par côté', {glutes: .75, piri: .75, adduct: .5}, 1, true],
+  ['jbm_m5', 'Rotations de hanche en 90/90, pieds au sol', 'mob', '10 · gauche-droite, rotation profonde', {glutes: .75, piri: 1, adduct: .5}, 0, true],
+  ['jbm_m6', '90/90 : changer de côté sans les mains', 'mob', '10', {psoas: .75, piri: .75, abs: .5}, 0, true],
+  ['jbm_m7', '90/90 : changer de côté sans décoller les pieds', 'mob', '10', {piri: 1, adduct: .75, gmed: .5}, 0, true],
+  ['jbm_m8', 'Rotation du buste loin à droite, penché sur le genou, loin à gauche', 'mob', '5-6 par côté', {obl: .75, erect: .5, glutes: .5}, 1, true],
+  ['jbm_m9', 'Ischios allongé, cuisse verticale : étirement lent et maximal', 'mob', '10 par côté', {hams: 1}, 1, true],
+  ['jbm_m10', 'Ischios : cycle de jambe, bassin au sol', 'mob', '5-10 par côté · le bassin ne décolle pas, sur le talon', {hams: 1, psoas: .5}, 1, true],
+  ['jbm_m11', 'Pont fessier + cycle de jambe', 'mob', '5-10 par côté · bassin levé, sur l\'avant du pied', {glutes: 1, hams: .75}, 1, true],
+  ['jbm_m12', 'Ruades à quatre pattes puis fente profonde', 'mob', '5-10 par côté · 2-3 ruades, puis la fente (cheville)', {glutes: .75, psoas: .75, calves: .5, soleus: .5}, 1, true],
+  ['jbm_m13', 'Du plongeur au coureur, en équilibre', 'mob', '10 par côté · sans perdre l\'équilibre, bassin contrôlé', {glutes: .75, hams: .75, abs: .5, foot: .5}, 1, true],
+  // Gammes sur 30 m aller-retour sans s'arrêter (10 min) : trois fois les trois mêmes, de plus en plus fort, puis 3 éducatifs.
+  ['jbm_d1', 'Skipping, intensité basse', 'act', '30 m aller-retour', {calves: .75, foot: .5, psoas: .5}, 1, true],
+  ['jbm_d2', 'Pas chassés, intensité basse', 'act', '30 m à droite, 30 m à gauche', {adduct: .75, gmed: .75, calves: .5}, 1, true],
+  ['jbm_d3', 'Skipping synchronisé, intensité basse', 'act', '30 m aller-retour · les deux pieds se posent ensemble, un seul bruit', {calves: .75, psoas: .5, foot: .5}, 1, true],
+  ['jbm_d4', 'Skipping, le plus haut possible', 'act', '30 m aller-retour · chevilles et mollets à fond', {calves: 1, soleus: .75, foot: .75}, 1, true],
+  ['jbm_d5', 'Pas chassés, le plus haut possible', 'act', '30 m à droite, 30 m à gauche', {calves: .75, adduct: .75, gmed: .75}, 1, true],
+  ['jbm_d6', 'Skipping synchronisé, le plus haut possible', 'act', '30 m aller-retour', {calves: 1, foot: .75, psoas: .5}, 1, true],
+  ['jbm_d7', 'Skipping, le plus loin possible', 'act', '30 m aller-retour · la hanche et les ischios prennent le relais', {hams: .75, glutes: .75, calves: .75}, 1, true],
+  ['jbm_d8', 'Pas chassés, le plus loin possible', 'act', '30 m à droite, 30 m à gauche', {adduct: 1, gmed: .75, glutes: .5}, 1, true],
+  ['jbm_d9', 'Skipping synchronisé, le plus loin possible', 'act', '30 m aller-retour · sans perdre la coordination', {glutes: .75, hams: .75, calves: .75}, 1, true],
+  ['jbm_d10', 'Ciseaux', 'act', '2 × 30 m · jambes tendues, le bassin pousse vers l\'avant à chaque appui', {hams: 1, glutes: .75, calves: .5}, 1, true],
+  ['jbm_d11', '3-4 petits pas puis montée de genou', 'act', '2 × 30 m · flexion de hanche maximale, un tous les 3 ou 5 pas', {psoas: 1, calves: .5}, 1, true],
+  ['jbm_d12', '3-4 petits pas puis extension de hanche', 'act', '2 × 30 m · monte calme, frappe le sol fort', {glutes: 1, hams: 1, foot: .5}, 1, true],
+  // Courses progressives (10 min) : 5 × 30 m, 2 min de récup en marchant.
+  ['jbm_p1', 'Accélération progressive à 50 %', 'prog', '1 × 30 m', {hams: .5, glutes: .5}, 2, true], ['jbm_p2', 'Accélération progressive à 60 %', 'prog', '1 × 30 m · 2 min de récup en marchant', {hams: .6, glutes: .6}, 2, true],
+  ['jbm_p3', 'Accélération progressive à 70 %', 'prog', '1 × 30 m · 2 min de récup', {hams: .7, glutes: .7}, 2, true], ['jbm_p4', 'Accélération progressive à 80 %', 'prog', '1 × 30 m · 2 min de récup', {hams: .8, glutes: .8, calves: .5}, 2, true],
+  ['jbm_p5', 'Accélération progressive à 90-95 %', 'prog', '1 × 30 m · presque ton max', {hams: 1, glutes: .9, calves: .75}, 2, true]
 ].map(([id, n, g, dose, mus, min, ctx]) => ({id, n, g, dose, mus, min, trk: ctx === true || ctx === 'trk', gymOnly: ctx === 'gym'}));
 const WX = Object.fromEntries(WARM.map(w => [w.id, w]));
 function sessionMus(ed) {
@@ -9501,7 +9521,7 @@ function whenRow() {
     <span class="hint">${ED.date ? 'Le ' + esc(fmtDay(ED.date)) + (dayPlan(ED.date).find(x => x.c === (ED.kind === 'track' ? 'athle' : 'muscu')) ? ', sur ton créneau du planning' : '') : 'Sans date : touche un jour. Le point = une séance déjà programmée ce jour-là.'}</span></div>`;
 }
 const WARM_ADD = {cardio: '+ Ajouter du cardio', mob: '+ Ajouter de la mobilité', act: '+ Ajouter une activation', prog: '+ Ajouter une course progressive'};
-const JBM_WARM = ['jbm_m1', 'jbm_m2', 'jbm_m3', 'jbm_m4', 'jbm_m5', 'jbm_d1', 'jbm_d2', 'jbm_d3', 'jbm_d4', 'jbm_d5', 'jbm_d6', 'jbm_d7', 'jbm_d8', 'jbm_p1', 'jbm_p2', 'jbm_p3', 'jbm_p4', 'jbm_p5'];
+const JBM_WARM = [...Array.from({length: 13}, (_, i) => 'jbm_m' + (i + 1)), ...Array.from({length: 12}, (_, i) => 'jbm_d' + (i + 1)), 'jbm_p1', 'jbm_p2', 'jbm_p3', 'jbm_p4', 'jbm_p5'];
 const jbmWarm = () => ({sel: JBM_WARM.slice(), preset: 'jbm'});
 // His favourite warm-up, as on his sheet: cardio, joint mobility, activation, running drills, accelerations.
 const OSC_WARM = ['o_fbl', 'o_inv', 'o_ev', 'o_fd', 'o_fp', 'm_9090', 'o_rotO', 'o_rotF', 'o_cobra', 'o_enf', 'm_cc', 'o_ht', 'o_ht1', 'o_frs', 'o_abd', 'o_retro', 'o_badd', 'o_bisc', 'o_ad',
@@ -9512,7 +9532,7 @@ function warmBox() {
   const sel = ED.warm.sel || [];
   return `<div class="exbox wbox"><h3>Échauffement<small>${warmMin(ED.warm)} min</small></h3>
     <div class="chips2b" style="margin-top:8px"${ED.kind === 'track' ? '' : ' hidden'}>${WARM_PRESETS.filter(([id]) => ED.kind === 'track' || id === 'auto').map(([id, n]) => `<button type="button" class="chip" data-edwp="${id}" aria-pressed="${ED.warm.preset === id}">${n}</button>`).join('')}</div>
-    ${ED.warm.preset === 'jbm' ? '<p class="hint" style="margin:6px 2px 0">L\'échauffement de JB Morin, ajouté d\'office à chaque séance de sprint : mobilité, gammes, puis 5 accélérations progressives de 50 à 95 %. Pour les gestes : <a href="https://youtu.be/mcV4l_T9n44" target="_blank" rel="noopener">la vidéo</a>.</p>' : ''}
+    ${ED.warm.preset === 'jbm' ? '<p class="hint" style="margin:6px 2px 0">L\'échauffement de JB Morin, ajouté d\'office à chaque séance de sprint : mobilité, gammes, puis 5 accélérations progressives de 50 à 95 %. 5 min libres ensuite pour te préparer à ta façon. Pour les gestes : <a href="https://youtu.be/mcV4l_T9n44" target="_blank" rel="noopener">la vidéo</a>.</p>' : ''}
     ${WARM_G.filter(([g]) => g !== 'prog' || ED.kind === 'track' || sel.some(id => WX[id]?.g === 'prog')).map(([g, lab, why]) => { const L = sel.map(id => WX[id]).filter(x => x && x.g === g);
       return `<div class="sec-label" style="margin:12px 0 4px">${lab}<small style="text-transform:none;letter-spacing:0;font-weight:500"> · ${why}</small></div>
       ${L.length ? `<div class="wtl">${L.map(x => `<div class="wti"><span><b>${esc(x.n)}</b><small>${esc(x.dose)}</small></span><button type="button" class="wx" data-edws="${x.id}" aria-label="Retirer ${esc(x.n)}">×</button></div>`).join('')}</div>` : ''}
