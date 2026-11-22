@@ -8,14 +8,14 @@
      à gauche, masse grasse à droite. */
 // Le muscle du corps → le muscle suivi par l'appli (charge, limites).
 function b3Key(g, sub) {
-  const t = String(sub).toLowerCase(), R = [[/dentelé/, 'serr'], [/moyen fessier|petit fessier/, 'gmed'], [/piriforme|jumeaux et obt|obturateur|carré fémoral/, 'piri'], [/soléaire|tibial postérieur|long fléchisseur de|long fléchisseur des orteils/, 'soleus'],
+  const t = String(sub).toLowerCase(), R = [[/fibulaire/, 'pero'], [/pédieux|abducteur de l'hallux|abducteur du petit orteil/, 'foot'], [/dentelé/, 'serr'], [/moyen fessier|petit fessier/, 'gmed'], [/piriforme|jumeaux et obt|obturateur|carré fémoral/, 'piri'], [/soléaire|tibial postérieur|long fléchisseur de|long fléchisseur des orteils/, 'soleus'],
     [/transverse/, 'transv'], [/carré des lombes/, 'ql'], [/psoas|iliaque/, 'psoas'], [/tibial antérieur|extenseur.*(orteils|hallux)/, 'tib'], [/sus-épineux|infra-épineux|petit rond|sous-scapulaire/, 'rotat'],
     [/rhombo|élévateur/, 'rhomb'], [/oblique/, 'obl'], [/grand droit|bas-ventre/, 'abs'], [/érecteur|multifide|épineux de la tête|splénius/, 'erect'], [/trapèze/, 'traps'], [/grand dorsal|grand rond/, 'lats'],
     [/deltoïde/, 'shoul'], [/pectoral|subclavier/, 'pecs'], [/^biceps$|brachial|coraco/, 'bi'], [/triceps/, 'tri'], [/biceps fémoral|semi-|ischio/, 'hams'], [/jumeau|poplité/, 'calves'],
     [/fléchisseur|extenseur|brachio-radial|pronateur|supinateur|abducteur du pouce/, 'forearm'], [/vaste|droit fémoral/, 'quads'], [/adducteur|gracile|pectiné/, 'adduct'], [/grand fessier/, 'glutes']];
   for (const [re, k] of R) if (re.test(t)) return k;
   return {pecs: 'pecs', delts: 'shoul', traps: 'traps', lats: 'lats', lowb: 'erect', biceps: 'bi', triceps: 'tri', fore: 'forearm', abs: 'abs', obl: 'obl', glutes: 'glutes', quads: 'quads', add: 'adduct',
-    hams: 'hams', calves: 'calves', tib: 'tib', rot: 'rotat', rhomb: 'rhomb', arm: 'bi', hip: 'psoas', hiprot: 'piri'}[g] || null;
+    hams: 'hams', calves: 'calves', tib: 'tib', rot: 'rotat', rhomb: 'rhomb', arm: 'bi', hip: 'psoas', hiprot: 'piri', pero: 'pero', foot: 'foot'}[g] || null;
 }
 const B3VB = {front: [94, 84, 540, 1268], back: [813.5, 84, 540, 1268]};
 const B3C = {skin: '#2f3036', ghost: '#25262b', line: '#141416', oline: '#6a6d78', obg: '#1a1b20'};
