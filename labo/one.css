@@ -447,3 +447,21 @@ html.one :is(#t-view,#f-view,[id^="v-"],#home-view){will-change:transform}
 .msyn-n b{font-size:2.2rem;font-weight:800;line-height:1}.msyn-n b small{font-size:.9rem}
 .msyn-n span{font-weight:700;line-height:1.25}.msyn-n span small{color:var(--fg2);font-weight:500}
 .msyn-t{margin:10px 2px 0;font-weight:600;line-height:1.45}
+
+/* v151 : séance en direct — case « Tout » et RPE moyen au-dessus de la 1re série ; lignes de course ; volume et intensité */
+.setrow.r5{grid-template-columns:22px 1fr 1fr 1fr 40px}
+.setrow .dl{font-size:.875rem;font-weight:600;text-align:center;font-variant-numeric:tabular-nums}
+.setrow.allrow{margin-bottom:2px}
+.setrow.allrow .allt{grid-column:span 2;justify-self:end;font-size:.6875rem;font-weight:600;color:var(--fg2);text-transform:uppercase;letter-spacing:.04em}
+.setrow.e6.allrow .allt{grid-column:span 3}
+.setrow .okall span{font-size:.5625rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.setrow.allrow.done .okall{background:var(--accent);color:#fff}
+.adon{display:flex;align-items:center;gap:8px;min-height:40px;padding:0 4px 0 14px;border-radius:12px;background:var(--good);color:#fff;font-weight:600;font-size:.875rem}
+.adon>span{flex:1}
+.adon .adx{width:32px;height:32px;border-radius:10px;background:rgba(0,0,0,.18);color:#fff;font-size:1.125rem;line-height:1;display:grid;place-items:center}
+.livevol .lvg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.livevol .lvg>div{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:14px;background:var(--card2)}
+.livevol small{font-size:.6875rem;color:var(--fg2);font-weight:600}
+.livevol b{font-size:1.375rem;font-weight:700}
+.livevol span{font-size:.75rem;color:var(--fg2)}
+.livevol em{font-style:normal;font-size:.6875rem;color:var(--fg3)}

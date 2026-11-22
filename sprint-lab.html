@@ -8920,22 +8920,24 @@ function coolPick() {
 let LBL = [];
 // Sprint main session, in parts: distances in a row (30, 10, 100), done as a block several times, with the rest between
 // reps and between blocks. "2 × 30 then 2 × 60" = two parts. The kind of run (acceleration, top speed…) follows the distance.
-const partEx = it => { if (it.res === 'sled') return 'sled'; if (it.res === 'band') return 'bandres'; const mx = Math.max(...it.seq), pc = it.im === 'rpe' ? (+it.rpe || 8) * 10 + 10 : +it.pct || 95; return pc < 80 ? 'tempo' : it.start === 'fly' && mx <= 80 ? 'fly' : mx <= 40 ? 'accel' : mx <= 80 ? 'fly' : mx <= 200 ? 'speedend' : 'tempo'; };
+const partEx = it => { if (it.res === 'sled') return 'sled'; if (it.res === 'band') return 'bandres'; const mx = Math.max(...it.seq), pc = it.im === 'rpe' ? (+it.rpe || 8) * 10 + 10 : +it.pct || 95; return pc < 80 ? 'tempo' : it.start === 'fly' && mx <= 80 ? 'fly' : mx <= 40 ? (it.start === 'blocks' ? 'blocks' : 'accel') : mx <= 80 ? 'fly' : mx <= 200 ? 'speedend' : 'tempo'; };
 function partNorm(it) { it.seq = (it.seq || []).filter(x => x > 0); if (!it.seq.length) it.seq = [30]; it.blocks = Math.max(1, +it.blocks || 1); it.reps = it.seq.length * it.blocks; it.dist = Math.round(it.seq.reduce((a, b) => a + b, 0) / it.seq.length); it.ex = partEx(it); return it; }
 // Le départ : depuis les blocs, debout, ou lancé (avec une distance d'élan : « 30 m lancés »).
 const STARTS = [['blocks', 'Blocs'], ['stand', 'Debout'], ['fly', 'Lancé']];
 // La résistance : rien, un traîneau (sa charge), ou un partenaire qui retient à la sangle ou à l'élastique (son % de freinage).
 const RESIST = [['', 'Aucune'], ['sled', 'Traîneau'], ['band', 'Retenu']];
 function partBody(it, i, num, rest) {
-  const one = it.seq.length === 1, rpe = it.im === 'rpe';
+  const one = it.seq.length === 1, fly = it.start === 'fly';
+  // En création, seulement l'intensité (le RPE se note en séance, ligne par ligne).
+  if (it.im === 'rpe') { it.pct = it.pct || Math.min(100, (+it.rpe || 8) * 10 + 10); delete it.im; it.ex = partEx(it); }
   return `<div class="ctrow"><span>Départ</span><div class="seg">${STARTS.map(([v, l]) => `<button type="button" data-edstart="${i}.${v}" aria-pressed="${(it.start || 'stand') === v}">${l}</button>`).join('')}</div></div>
     <div class="ctrow"><span>Résistance</span><div class="seg">${RESIST.map(([v, l]) => `<button type="button" data-edres="${i}.${v}" aria-pressed="${(it.res || '') === v}">${l}</button>`).join('')}</div></div>
-    <div class="edrow" style="grid-template-columns:1.6fr 1fr 1fr${it.start === 'fly' ? ' 1fr' : ''}"><label>Distances (m)<input class="mini-in big" inputmode="text" data-edseq="${i}" value="${esc(it.seq.join(', '))}" placeholder="30, 60"></label>${it.start === 'fly' ? `<label>Élan (m)${num(i, 'run', it.run, '20')}</label>` : ''}<label>${one ? 'Répét.' : 'Blocs'}${num(i, 'blocks', it.blocks, '4')}</label><label><button type="button" class="hdtog" data-edim="${i}">${rpe ? 'RPE' : it.res ? 'Intention %' : 'Intensité %'} ⇄</button>${rpe ? num(i, 'rpe', it.rpe, '8') : num(i, 'pct', it.pct, '95')}</label></div>
-    ${it.res || it.start === 'fly' ? `<div class="edrow" style="grid-template-columns:repeat(${(it.res ? 1 : 0) + (it.start === 'fly' ? 1 : 0)},1fr)">${it.res === 'sled' ? `<label>Charge du traîneau (kg)${num(i, 'kg', it.kg, '20')}</label>` : it.res === 'band' ? `<label>Résistance du partenaire %${num(i, 'rpct', it.rpct, '40')}</label>` : ''}${it.start === 'fly' ? `<label>Élan à %${num(i, 'runp', it.runp, '70')}</label>` : ''}</div>` : ''}
+    <div class="edrow" style="grid-template-columns:1fr 1.6fr 1fr"><label>${one ? 'Répét.' : 'Blocs'}${num(i, 'blocks', it.blocks, '4')}</label><label>× ${one ? 'Distance (m)' : 'Distances (m)'}<input class="mini-in big" inputmode="text" data-edseq="${i}" value="${esc(it.seq.join(', '))}" placeholder="30, 60"></label><label>${it.res ? 'Intention %' : 'Intensité %'}${num(i, 'pct', it.pct, '95')}</label></div>
+    ${it.res || fly ? `<div class="edrow" style="grid-template-columns:repeat(${(it.res ? 1 : 0) + (fly ? 1 : 0)},1fr)">${it.res === 'sled' ? `<label>Charge du traîneau (kg)${num(i, 'kg', it.kg, '20')}</label>` : it.res === 'band' ? `<label>Résistance du partenaire %${num(i, 'rpct', it.rpct, '40')}</label>` : ''}${fly ? `<label>Mètres d'élan avant le chrono${num(i, 'run', it.run, '20')}</label>` : ''}</div>` : ''}
     <div class="edrow" style="grid-template-columns:1fr${one ? '' : ' 1fr'}"><label>${one ? 'Récup' : 'Récup entre répét.'}${rest(i, it.rest, '2:00')}</label>${one ? '' : `<label>Récup entre blocs<input class="mini-in big" inputmode="decimal" data-edbrest="${i}" value="${restIn(it.brest)}" placeholder="8:00"></label>`}</div>
     <p class="hint" style="margin:4px 2px 0">${esc(partTxt(it))}</p>`;
 }
-const partTxt = it => `${it.seq.length > 1 ? it.seq.join(' + ') + ' m, ' + it.blocks + ' bloc' + (it.blocks > 1 ? 's' : '') : it.blocks + ' × ' + it.seq[0] + ' m'}${it.start === 'fly' ? ' lancés' + (it.run ? ' (' + it.run + ' m d\'élan' + (it.runp ? ' à ' + it.runp + ' %' : '') + ')' : '') : it.start === 'blocks' ? ' depuis les blocs' : ''}${it.res === 'sled' ? ' · traîneau' + (it.kg ? ' ' + it.kg + ' kg' : '') : it.res === 'band' ? ' · retenu' + (it.rpct ? ' à ' + it.rpct + ' %' : '') : ''}${it.im === 'rpe' ? (it.rpe ? ' à RPE ' + it.rpe : '') : it.pct ? (it.res ? ' · intention ' : ' à ') + it.pct + ' %' : ''}${it.rest ? ' · ' + fmtRest(it.rest) + (it.seq.length > 1 ? ' entre répét.' : ' de récup') : ''}${it.brest && it.seq.length > 1 ? ' · ' + fmtRest(it.brest) + ' entre blocs' : ''} · ${fx(it.seq.reduce((a, b) => a + b, 0) * it.blocks)} m au total`;
+const partTxt = it => `${it.seq.length > 1 ? it.seq.join(' + ') + ' m, ' + it.blocks + ' bloc' + (it.blocks > 1 ? 's' : '') : it.blocks + ' × ' + it.seq[0] + ' m'}${it.start === 'fly' ? ' lancés' + (it.run ? ' (' + it.run + ' m d\'élan avant)' : '') : it.start === 'blocks' ? ' depuis les blocs' : ''}${it.res === 'sled' ? ' · traîneau' + (it.kg ? ' ' + it.kg + ' kg' : '') : it.res === 'band' ? ' · retenu' + (it.rpct ? ' à ' + it.rpct + ' %' : '') : ''}${it.im === 'rpe' ? (it.rpe ? ' à RPE ' + it.rpe : '') : it.pct ? (it.res ? ' · intention ' : ' à ') + it.pct + ' %' : ''}${it.rest ? ' · ' + fmtRest(it.rest) + (it.seq.length > 1 ? ' entre répét.' : ' de récup') : ''}${it.brest && it.seq.length > 1 ? ' · ' + fmtRest(it.brest) + ' entre blocs' : ''} · ${fx(it.seq.reduce((a, b) => a + b, 0) * it.blocks)} m au total`;
 function techBox() {
   if (ED.tech == null) return `<button class="btn ghost" data-edtech>+ Ajouter un travail technique</button>`;
   return `<div class="exbox wbox"><h3>Travail technique</h3><textarea class="mini-in techta" data-edtechv placeholder="Ce que tu travailles : gammes, départs, placement du bassin, griffé…" aria-label="Travail technique">${esc(ED.tech)}</textarea>
@@ -9313,7 +9315,7 @@ function startSession(id, n) {
   saveLive(); closeAllPanes(); openLive();
 }
 // Les réglages d'une course, repris du plan : intention (%), traîneau (kg), partenaire qui retient (%), élan (m et %).
-const runP = it => ({pct: it.pct ?? null, res: it.res || (it.ex === 'sled' ? 'sled' : it.ex === 'bandres' ? 'band' : ''), kg: it.kg ?? null, rpct: it.rpct ?? null, run: it.start === 'fly' || it.run ? it.run ?? 20 : null, runp: it.start === 'fly' || it.run ? it.runp ?? 70 : null});
+const runP = it => ({start: it.start || (it.ex === 'fly' ? 'fly' : 'stand'), pct: it.pct ?? null, res: it.res || (it.ex === 'sled' ? 'sled' : it.ex === 'bandres' ? 'band' : ''), kg: it.kg ?? null, rpct: it.rpct ?? null, run: it.start === 'fly' || it.run ? it.run ?? 20 : null, runp: it.start === 'fly' || it.run ? it.runp ?? 70 : null});
 function liveItem(it) {
   const e = exOf(it.ex);
   if (e.t === 'test') return {ex: it.ex, tg: it, test: true, done: false};
@@ -9350,7 +9352,7 @@ function liveBody() {
     ${L.fill ? `<p class="small muted" style="margin:10px 4px 0">Tout est rempli comme prévu. Corrige ce qui a changé et décoche ce que tu n'as pas fait.</p>` : ''}
     ${L.kind === 'gym' && typeof isPC === 'function' && isPC() ? liveTable() : L.items.map((it, i) => liveBox(it, i)).join('')}
     ${back ? `<div class="rmback">${back}</div>` : ''}
-    ${liveBodyCard()}
+    ${liveBodyCard()}${liveVolCard()}
     <div class="stack" style="margin-top:14px"><button class="btn ghost" data-tladd>+ Ajouter un exercice</button><button class="btn" data-tfinish>Terminer la séance</button>
     <button class="small muted" data-tcancel style="padding:10px">Abandonner sans enregistrer</button></div>`;
 }
@@ -9372,17 +9374,37 @@ function liveTable() {
 }
 const restTxt = s => !s ? '' : s % 60 ? s + ' s' : s / 60 + '\'';
 const restParse = v => { const t = String(v || '').trim().replace(',', '.'); if (!t) return null; const m = t.match(/^(\d+(?:\.\d+)?)\s*(s|sec)?/i); if (!m) return null; return Math.round(m[2] ? +m[1] : +m[1] * 60); };
-function liveRunP(it, i) {
-  const p = it.p || (it.p = runP(it.tg || {ex: it.ex})), f = (k, l, ph) => `<label>${l}<input class="mini-in" inputmode="decimal" data-lp="${i}.${k}" value="${esc(p[k] ?? '')}" placeholder="${ph}"></label>`;
-  return `<div class="lrun"><div class="seg segsm">${RESIST.map(([v, l]) => `<button type="button" data-lpres="${i}.${v}" aria-pressed="${(p.res || '') === v}">${l}</button>`).join('')}</div>
-    <div class="lrunf">${f('pct', p.res ? 'Intention %' : 'Intensité %', '95')}${p.res === 'sled' ? f('kg', 'Charge kg', '20') : p.res === 'band' ? f('rpct', 'Résistance %', '40') : ''}${p.run != null ? f('run', 'Élan m', '20') + f('runp', 'Élan %', '70') : `<button type="button" class="chip" data-lprun="${i}">+ Élan</button>`}</div></div>`;
+// En séance, la course se règle comme en création : départ, résistance, répétitions × distance, intensité, élan, récup.
+// Les lignes suivent : une par répétition, avec le temps (si chronométré) et le RPE ; le RPE noté valide la ligne.
+const liveSeq = it => { const p = it.p || (it.p = runP(it.tg || {ex: it.ex})); return p.seq || (p.seq = it.tg?.seq ? [...it.tg.seq] : [+it.reps?.[0]?.dist || +it.tg?.dist || 30]); };
+function liveReseq(it, seq, blocks) {
+  const old = it.reps || []; it.p.seq = seq;
+  it.reps = Array.from({length: blocks}).flatMap((_, b) => seq.map((d, n) => ({...(old[b * seq.length + n] || {t: '', done: false}), dist: d, blk: b + 1})));
+}
+const liveRunTxt = it => { const p = it.p, seq = liveSeq(it); return partTxt({seq, blocks: Math.max(1, Math.round(it.reps.length / seq.length)), start: p.start, res: p.res, kg: p.kg, rpct: p.rpct, pct: p.pct, run: p.start === 'fly' ? p.run : null, rest: it.rest ?? it.tg?.rest, brest: it.tg?.brest}); };
+function liveRunBox(it, i) {
+  const seq = liveSeq(it), p = it.p, one = seq.length === 1, blocks = Math.max(1, Math.round(it.reps.length / seq.length)), st = p.start || 'stand';
+  const f = (k, l, ph) => `<label>${l}<input class="mini-in big" inputmode="decimal" data-lp="${i}.${k}" value="${esc(p[k] ?? '')}" placeholder="${ph}"></label>`;
+  return `<div class="ctrow"><span>Départ</span><div class="seg">${STARTS.map(([v, l]) => `<button type="button" data-lpstart="${i}.${v}" aria-pressed="${st === v}">${l}</button>`).join('')}</div></div>
+    <div class="ctrow"><span>Résistance</span><div class="seg">${RESIST.map(([v, l]) => `<button type="button" data-lpres="${i}.${v}" aria-pressed="${(p.res || '') === v}">${l}</button>`).join('')}</div></div>
+    <div class="edrow" style="grid-template-columns:1fr 1.6fr 1fr"><label>${one ? 'Répét.' : 'Blocs'}<input class="mini-in big" inputmode="numeric" data-lpn="${i}" value="${blocks}"></label><label>× ${one ? 'Distance (m)' : 'Distances (m)'}<input class="mini-in big" inputmode="text" data-lpseq="${i}" value="${esc(seq.join(', '))}" placeholder="30"></label>${f('pct', p.res ? 'Intention %' : 'Intensité %', '95')}</div>
+    ${p.res || st === 'fly' ? `<div class="edrow" style="grid-template-columns:repeat(${(p.res ? 1 : 0) + (st === 'fly' ? 1 : 0)},1fr)">${p.res === 'sled' ? f('kg', 'Charge du traîneau (kg)', '20') : p.res === 'band' ? f('rpct', 'Résistance du partenaire %', '40') : ''}${st === 'fly' ? f('run', 'Mètres d\'élan avant le chrono', '20') : ''}</div>` : ''}
+    <div class="edrow" style="grid-template-columns:1fr"><label>Récup entre les répétitions<input class="mini-in big" data-lrest="${i}" inputmode="text" value="${esc(restTxt(it.rest ?? it.tg?.rest))}" placeholder="2'"></label></div>`;
+}
+// La ligne du haut, au-dessus de la 1re série : la case « Tout » (même case que les autres) et le RPE moyen à côté.
+function allRow(it, i, em, cls) {
+  const arr = it.sets || it.reps || [], all = arr.length && arr.every(x => x.done), k = em || 'rpe';
+  const vals = arr.map(x => x[k]).filter(v => v !== undefined && v !== '' && v != null).map(Number).filter(v => !isNaN(v));
+  return `<div class="setrow ${cls} allrow${all ? ' done' : ''}"><span></span><span class="allt">${k === 'rir' ? 'RIR' : 'RPE'} moyen</span><input class="mini-in eff" inputmode="decimal" data-lrpeall="${i}.${k}" value="" placeholder="${vals.length ? fx(mean(vals), 1) : '–'}" aria-label="${k.toUpperCase()} moyen, pour toutes les séries"><button type="button" class="ok okall" data-tlall="${i}" aria-pressed="${!!all}" aria-label="${all ? 'Tout décocher' : 'Tout cocher'}"><span>Tout</span></button></div>`;
 }
 function liveBox(it, i) {
   const e = exOf(it.ex), tg = it.tg || {}, last = lastText(it.ex), sg = it.sets ? suggest(tg) : null;
   if (it.test) return `<div class="exbox"><h3>${esc(e.n)}<small>${tg.reps || 3} essais</small></h3><div class="tools" style="border:0;padding-top:4px"><button class="btn" data-ltest="${e.test}">Lancer le test</button><button class="rm" data-tlrm="${i}">Retirer</button></div></div>`;
   const ok = (a, done) => `<button class="ok" data-tok="${a}" aria-label="Valider" aria-pressed="${done}">${TICK}</button>`;
   let rows;
-  if (it.reps) {
+  if (it.reps && e.u === 'm') {
+    rows = `<div class="setrow r5 hd"><span>#</span><span>Distance</span><span>Temps</span><span>RPE</span><span></span></div>` + allRow(it, i, 'rpe', 'r5') + it.reps.map((r, j) => `<div class="setrow r5 ${r.done ? 'done' : ''}"><span class="n">${j + 1}</span><span class="dl">${r.dist ? r.dist + ' m' : '–'}</span><input class="mini-in" inputmode="decimal" data-lv="${i}.${j}.t" value="${esc(r.t ?? '')}" placeholder="s" aria-label="Temps en secondes"><input class="mini-in eff" inputmode="decimal" data-lv="${i}.${j}.rpe" value="${esc(r.rpe ?? '')}" placeholder="RPE" aria-label="RPE de la répétition ${j + 1}">${ok(i + '.' + j, r.done)}</div>`).join('');
+  } else if (it.reps) {
     const timed = e.u === 'm';
     rows = (e.u === 'min' ? '' : `<div class="setrow hd"><span>#</span><span>Distance</span><span>${timed ? 'Temps' : ''}</span><span>${timed ? 'Vitesse' : ''}</span><span></span></div>`) + it.reps.map((r, j) => {
       const v = +r.t > 0 && +r.dist > 0 ? fx(r.dist / r.t * 3.6, 1) + ' km/h' : '';
@@ -9392,17 +9414,17 @@ function liveBox(it, i) {
   } else {
     const prev = exHistory(it.ex)[0]?.it.sets || [], em = effMode(), nu = U_NEXT[unitOf(it)];
     const effV = st => st[em] != null && st[em] !== '' ? st[em] : em === 'rpe' && st.rir != null && st.rir !== '' ? 10 - st.rir : em === 'rir' && st.rpe != null && st.rpe !== '' ? 10 - st.rpe : '';
-    rows = `<div class="setrow e6 hd"><span>#</span><span>Avant</span><span>${e.u === 'kg' ? 'kg' : e.u === 's' ? '' : '+ kg'}</span><button type="button" class="hdtog" data-tlu="${i}.${nu}" aria-label="Compter en ${nu === 's' ? 'secondes' : nu === 'm' ? 'mètres' : 'répétitions'}">${{s: 'Sec.', m: 'Mèt.', reps: 'Rép.'}[unitOf(it)]} ⇄</button><button type="button" class="hdtog" data-tleff aria-label="Noter en ${em === 'rpe' ? 'RIR' : 'RPE'}">${em.toUpperCase()} ⇄</button><span></span></div>` + it.sets.map((s, j) => `<div class="setrow e6 ${s.done ? 'done' : ''}"><span class="n">${j + 1}</span><span class="prev">${prev[j] ? (prev[j].kg ? fx(prev[j].kg, prev[j].kg % 1 ? 1 : 0) + '×' : '') + prev[j].reps : '–'}</span>${e.u === 's' ? '<span></span>' : `<input class="mini-in" inputmode="decimal" data-lv="${i}.${j}.kg" value="${s.kg}" placeholder="${e.u === 'kg' ? 'kg' : '0'}" aria-label="Charge">`}<input class="mini-in" inputmode="numeric" data-lv="${i}.${j}.reps" value="${s.reps}" placeholder="${tg.reps || ''}" aria-label="${{s: 'Secondes', m: 'Mètres', reps: 'Répétitions'}[unitOf(it)]}"><input class="mini-in eff" inputmode="decimal" data-lv="${i}.${j}.${em}" value="${effV(s)}" placeholder="${em === 'rpe' ? '8' : '2'}" aria-label="${em.toUpperCase()}">${ok(i + '.' + j, s.done)}</div>`).join('');
+    rows = `<div class="setrow e6 hd"><span>#</span><span>Avant</span><span>${e.u === 'kg' ? 'kg' : e.u === 's' ? '' : '+ kg'}</span><button type="button" class="hdtog" data-tlu="${i}.${nu}" aria-label="Compter en ${nu === 's' ? 'secondes' : nu === 'm' ? 'mètres' : 'répétitions'}">${{s: 'Sec.', m: 'Mèt.', reps: 'Rép.'}[unitOf(it)]} ⇄</button><button type="button" class="hdtog" data-tleff aria-label="Noter en ${em === 'rpe' ? 'RIR' : 'RPE'}">${em.toUpperCase()} ⇄</button><span></span></div>` + allRow(it, i, em, 'e6') + it.sets.map((s, j) => `<div class="setrow e6 ${s.done ? 'done' : ''}"><span class="n">${j + 1}</span><span class="prev">${prev[j] ? (prev[j].kg ? fx(prev[j].kg, prev[j].kg % 1 ? 1 : 0) + '×' : '') + prev[j].reps : '–'}</span>${e.u === 's' ? '<span></span>' : `<input class="mini-in" inputmode="decimal" data-lv="${i}.${j}.kg" value="${s.kg}" placeholder="${e.u === 'kg' ? 'kg' : '0'}" aria-label="Charge">`}<input class="mini-in" inputmode="numeric" data-lv="${i}.${j}.reps" value="${s.reps}" placeholder="${tg.reps || ''}" aria-label="${{s: 'Secondes', m: 'Mètres', reps: 'Répétitions'}[unitOf(it)]}"><input class="mini-in eff" inputmode="decimal" data-lv="${i}.${j}.${em}" value="${effV(s)}" placeholder="${em === 'rpe' ? '8' : '2'}" aria-label="${em.toUpperCase()}">${ok(i + '.' + j, s.done)}</div>`).join('');
   }
   const lastCn = !it.cn ? exHistory(it.ex)[0]?.it.cn : '', ramp = it.sets && unitOf(it) === 'reps' ? rampText(it.ex, +(sg?.kg || tg.kg || it.sets[0]?.kg || 0), +(tg.reps || it.sets[0]?.reps || 0)) : '';
   const arr = it.sets || it.reps || [], all = arr.length && arr.every(x => x.done);
-  return `<div class="exbox">${arr.length ? `<button type="button" class="allck${all ? ' on' : ''}" data-tlall="${i}" aria-pressed="${!!all}" aria-label="${all ? 'Tout décocher' : 'Tout cocher'}">${TICK}<span>${all ? 'Fait' : 'Tout'}</span></button>` : ''}<h3><span class="exn">${esc(e.n)}${famOf(it.ex) ? `<button type="button" class="varbtn" data-tlvar="${i}">Variante ▾</button>` : ''}</span><small>${itemText(tg.ex ? {...tg, ex: it.ex, u: it.u, note: (tg.note || '').replace(/^une jambe(, )?/, '')} : {ex: it.ex, sets: it.sets?.length, reps: '', min: 0})}</small></h3>
-    ${last ? `<div class="hint">${esc(last)}</div>` : ''}${lastCn ? `<div class="hint">Note du coach, la dernière fois : ${esc(lastCn)}</div>` : ''}${sg ? `<div class="sug">Proposé : ${fx(sg.kg, sg.kg % 1 ? 1 : 0)} kg · ${esc(sg.why)}</div>` : ''}
+  const runBox = it.reps && e.u === 'm';
+  return `<div class="exbox"><h3><span class="exn">${esc(e.n)}${famOf(it.ex) ? `<button type="button" class="varbtn" data-tlvar="${i}">Variante ▾</button>` : ''}</span><small>${runBox ? '' : itemText(tg.ex ? {...tg, ex: it.ex, u: it.u, note: (tg.note || '').replace(/^une jambe(, )?/, '')} : {ex: it.ex, sets: it.sets?.length, reps: '', min: 0})}</small></h3>
+    ${runBox ? `<div class="hint runsum">${esc(liveRunTxt(it))}</div>` : ''}${last ? `<div class="hint">${esc(last)}</div>` : ''}${lastCn ? `<div class="hint">Note du coach, la dernière fois : ${esc(lastCn)}</div>` : ''}${sg ? `<div class="sug">Proposé : ${fx(sg.kg, sg.kg % 1 ? 1 : 0)} kg · ${esc(sg.why)}</div>` : ''}
     ${ramp ? `<div class="ramp"><b>Montée en charge</b><span>${ramp}</span></div>` : ''}
     ${painBox(it, i)}${(() => { const g = S.tset?.gymPlan?.[S.live?.plan]; if (!g || !it.sets || gymHas(g, it.ex)) return ''; const x = gymSub(it.ex, g); return `<div class="adapt"><span>Pas de matériel pour cet exercice à ${esc(gymName(g))}.</span>${x ? `<button type="button" class="btn" data-tlsub="${i}|${x.id}">Remplacer par ${esc(x.n)}</button>` : ''}</div>`; })()}
     ${it.sets ? `<div class="ctline"><span>Contraction</span><button type="button" class="hdtog" data-tlct="${i}">${cap(ctName(it.ct))} ⇄</button></div>` : ''}
-    ${it.reps && e.u === 'm' ? liveRunP(it, i) : ''}
-    ${it.reps && e.u === 'm' ? `<div class="ctline"><span>Récup entre les répétitions</span><input class="mini-in" data-lrest="${i}" inputmode="text" style="width:76px" value="${esc(restTxt(it.rest ?? tg.rest))}" placeholder="4'" aria-label="Récupération"></div>` : ''}
+    ${runBox ? liveRunBox(it, i) : ''}
     <div class="sets">${rows}</div>
     ${it.cn != null ? `<textarea class="cnote" rows="2" data-lcn="${i}" placeholder="Note du coach pour cet exercice…">${esc(it.cn)}</textarea>` : ''}
     <div class="tools"><button data-tlset="${i}">+ Série</button>${(it.sets || it.reps || []).length > 1 ? `<button data-tlsetrm="${i}">− Série</button>` : ''}<button data-tex="${it.ex}">Consignes</button>${it.cn == null ? `<button data-tlnote="${i}">+ Note</button>` : ''}<button class="rm" data-tlrm="${i}">Retirer</button></div></div>`;
@@ -9451,14 +9473,24 @@ function adaptList(it, pn) {
   const tempo = {t: 'Descendre en 3 secondes', why: 'Un tempo lent enlève les à-coups sur la zone et améliore le contrôle.', fn: x => add(x, 'descente en 3 s')};
   const sub = subFor(it.ex, pn.hit), swap = sub ? {t: `Remplacer par ${sub.n}`, why: `Il fait travailler les mêmes muscles en épargnant : ${pn.hit.map(k => MUSI[k]?.n.toLowerCase()).filter(Boolean).join(', ')}.`, fn: x => { x.ex = sub.id; }} : null;
   const drop = {t: 'Retirer l\'exercice aujourd\'hui', why: 'Pour une douleur forte seulement : tu perds le travail du jour, mais tu protèges les semaines suivantes.', fn: 'remove'};
-  if (it.reps) return [{t: 'Courir à 85 % au lieu du maximum', why: 'La vitesse maximale est le moment le plus risqué pour les ischios et les mollets.', fn: x => { x.tg = {...x.tg, pct: Math.min(x.tg?.pct || 100, 85)}; add(x, '85 % maximum'); }},
+  if (it.reps) return [{t: 'Courir à 85 % au lieu du maximum', why: 'La vitesse maximale est le moment le plus risqué pour les ischios et les mollets.', fn: x => { const p = x.p || (x.p = runP(x.tg || {ex: x.ex})); p.pct = Math.min(+p.pct || 100, 85); }},
     {t: 'Faire un tiers de répétitions en moins', why: 'Moins de volume à haute vitesse sur la zone.', fn: x => { x.reps = x.reps.slice(0, Math.max(1, Math.ceil(x.reps.length * 2 / 3))); }}, drop];
   const L = pn.v >= 6 ? [swap, drop, iso, load(.6)] : pn.v >= 3 ? [load(.75), rom, iso, less, swap, rest, drop] : [load(.9), tempo, rom, less, swap, rest];
   return L.filter(Boolean);
 }
+// L'exercice tel qu'il était avant l'adaptation (pour l'annuler, ou passer à une autre).
+const adBase = it => it.adSnap ? JSON.parse(it.adSnap) : it;
+function adUndo(it) { if (!it.adSnap) return; const adI = it.adI, s = JSON.parse(it.adSnap); for (const k of Object.keys(it)) delete it[k]; Object.assign(it, s); if (adI != null) it.adI = adI; }
+function adApply(i) {
+  const it = S.live.items[i], pn = painFor(it.ex); if (!pn) return false;
+  const L = adaptList(it, pn), o = L[(it.adI || 0) % L.length]; if (!o) return false;
+  if (o.fn === 'remove') { const [item] = S.live.items.splice(i, 1); (S.live.removed ||= []).push({at: i, item}); return true; }
+  const snap = JSON.stringify(it); o.fn(it); it.adSnap = snap; it.adapted = o.t; it.adPn = pn.l; return true;
+}
 function painBox(it, i) {
   if (it.test) return '';
-  if (it.adapted) return `<div class="adapt done"><span>Adapté pour ta douleur : <b>${esc(it.adapted)}</b></span></div>`;
+  if (it.adapted) { const base = adBase(it), pn = painFor(base.ex), L = pn ? adaptList(base, pn) : [], o = L.find(x => x.t === it.adapted);
+    return `<div class="adapt done"><span>Douleur notée : <b>${esc(it.adPn || pn?.l || '')}</b>. Adaptation faite :</span><div class="adon"><span>✓ ${esc(it.adapted)}</span><button type="button" class="adx" data-tladx="${i}" aria-label="Annuler l'adaptation">×</button></div>${o ? `<p class="small muted">${esc(o.why)}</p>` : ''}${L.length > 1 ? `<button type="button" class="small adnext" data-tlnextad="${i}">Prendre l'adaptation suivante</button>` : ''}</div>`; }
   const pn = painFor(it.ex); if (!pn) return '';
   const L = adaptList(it, pn); if (!L.length) return '';
   const n = (it.adI || 0) % L.length, o = L[n];
@@ -9467,10 +9499,20 @@ function painBox(it, i) {
 // The body of the week, with this session already counted, under the exercises.
 function liveBodyCard() {
   const L = S.live; if (!L || L.kind === 'class') return '';
-  const per = musPeriod('week'), m = logMuscle({items: L.items.filter(it => !it.test).map(it => it.sets ? {ex: it.ex, u: it.u, sets: it.sets.filter(x => x.done)} : {ex: it.ex, pct: it.tg?.pct, reps: (it.reps || []).filter(x => x.done)})});
+  const per = musPeriod('week'), m = logMuscle({items: L.items.filter(it => !it.test).map(it => it.sets ? {ex: it.ex, u: it.u, sets: it.sets.filter(x => x.done)} : {ex: it.ex, ...(it.p || {}), pct: it.p?.pct ?? it.tg?.pct, reps: (it.reps || []).filter(x => x.done)})});
   for (const k in m) if (per[k]) { per[k].load += m[k]; per[k].pct = per[k].load / musLimit(k) * 100; }
   return `<div class="card livebody"><span class="eyebrow">Ton corps cette semaine, séance comprise</span><div class="mbody nohit">${musFigure('front', per, null)}${musFigure('back', per, null)}</div>
     <div class="mlegend"><span><i style="background:var(--good)"></i>sous 75 %</span><span><i style="background:var(--warn)"></i>75 à 100 %</span><span><i style="background:var(--bad)"></i>au-delà</span></div></div>`;
+}
+// Sous le corps : les mètres courus et l'intensité moyenne (pondérée par les mètres), pour la séance et pour les 7 derniers jours séance comprise.
+function liveVolCard() {
+  const L = S.live; if (!L) return '';
+  const runs = L.items.filter(it => it.reps && exOf(it.ex).u === 'm'); if (!runs.length) return '';
+  const agg = list => { let m = 0, mw = 0, w = 0; for (const {pct, reps} of list) for (const r of reps) { const d = +r.dist || 0; m += d; if (+pct) { mw += d; w += d * +pct; } } return {m, avg: mw ? w / mw : null}; };
+  const pc = it => it.p?.pct ?? it.tg?.pct, now = runs.map(it => ({pct: pc(it), reps: it.reps.filter(r => r.done)})), plan = agg(runs.map(it => ({pct: pc(it), reps: it.reps}))), cur = agg(now);
+  const from = addDays(TODAY, -6), wk = logs().filter(l => l.date >= from && l.date <= TODAY && l.id !== L.id).flatMap(l => (l.items || []).filter(it => it.reps && exOf(it.ex).u === 'm').map(it => ({pct: it.pct, reps: it.reps}))), week = agg([...wk, ...now]);
+  const cell = (lab, x, sub) => `<div><small>${lab}</small><b class="num">${fx(x.m)} m</b><span>${x.avg != null ? fx(x.avg) + ' % d\'intensité moyenne' : 'intensité non notée'}</span>${sub ? `<em>${sub}</em>` : ''}</div>`;
+  return `<div class="card livevol"><span class="eyebrow">Volume et intensité</span><div class="lvg">${cell('Cette séance', cur, cur.m < plan.m ? `sur ${fx(plan.m)} m prévus` : '')}${cell('Cette semaine, séance comprise', week, '')}</div></div>`;
 }
 // No rest timer: the watch times the rests.
 function stopRest() { clearInterval(RT.t); }
@@ -9480,7 +9522,7 @@ function finishPane() {
   // Duration: the watch first; else from the first to the last ticked set plus the warm-up; never the hours a forgotten session stayed open.
   const est = estMin(planById(L.plan) || {items: []}) || 90, span = L.t0 && L.t1 ? Math.round((L.t1 - L.t0) / 60000) + (L.warm ? warmMin(L.warm) : 10) : null, open = Math.round((Date.now() - new Date(L.start)) / 60000);
   const min = L.garmin?.min ? Math.round(L.garmin.min) : Math.max(1, span && span <= 240 ? span : open <= 240 ? open : est);
-  const sr = L.items.flatMap(it => (it.sets || []).filter(x => x.done).map(x => x.rpe !== undefined && x.rpe !== '' ? +x.rpe : x.rir !== undefined && x.rir !== '' ? 10 - +x.rir : null)).filter(v => v != null && !isNaN(v));
+  const sr = L.items.flatMap(it => (it.sets || it.reps || []).filter(x => x.done).map(x => x.rpe !== undefined && x.rpe !== '' ? +x.rpe : x.rir !== undefined && x.rir !== '' ? 10 - +x.rir : null)).filter(v => v != null && !isNaN(v));
   const srS = sr.slice().sort((a, b) => b - a), mAll = mean(sr), mTop = mean(srS.slice(0, Math.max(1, Math.ceil(srS.length / 3))));
   const auto = sr.length ? Math.max(1, Math.min(10, Math.round(.4 * mAll + .6 * mTop))) : null;
   let rpe = auto ?? L.rpe ?? 7;
@@ -9497,7 +9539,7 @@ document.addEventListener('click', e => { const b = e.target.closest('[data-fing
 async function saveLive2() {
   const L = S.live; if (!L) return;
   const rpe = +($('#fin-rpe')?.value || 7), min = parseDur($('#fin-min')?.value) || 1, note = ($('#fin-note')?.value || '').trim();
-  const items = L.items.filter(it => !it.test).map(it => it.reps ? {ex: it.ex, pct: (it.p?.pct ?? it.tg?.pct) || null, ...(it.p?.res ? {res: it.p.res} : {}), ...(it.p?.res === 'sled' && +it.p.kg ? {kg: +it.p.kg} : {}), ...(it.p?.res === 'band' && +it.p.rpct ? {rpct: +it.p.rpct} : {}), ...(+it.p?.run ? {run: +it.p.run, runp: +it.p.runp || 70} : {}), ...(exOf(it.ex).u === 'min' ? {min: it.reps.filter(r => r.done).reduce((a, r) => a + (+r.min || +it.tg?.min || 0), 0)} : {}), ...((it.rest ?? it.tg?.rest) ? {rest: it.rest ?? it.tg.rest} : {}), reps: it.reps.filter(r => r.done).map(r => ({dist: +r.dist || 0, t: +r.t || null}))}
+  const items = L.items.filter(it => !it.test).map(it => it.reps ? {ex: it.ex, pct: (it.p?.pct ?? it.tg?.pct) || null, ...(it.p?.res ? {res: it.p.res} : {}), ...(it.p?.res === 'sled' && +it.p.kg ? {kg: +it.p.kg} : {}), ...(it.p?.res === 'band' && +it.p.rpct ? {rpct: +it.p.rpct} : {}), ...(+it.p?.run ? {run: +it.p.run, runp: +it.p.runp || 70} : {}), ...(exOf(it.ex).u === 'min' ? {min: it.reps.filter(r => r.done).reduce((a, r) => a + (+r.min || +it.tg?.min || 0), 0)} : {}), ...((it.rest ?? it.tg?.rest) ? {rest: it.rest ?? it.tg.rest} : {}), ...(it.p?.start ? {start: it.p.start} : {}), reps: it.reps.filter(r => r.done).map(r => ({dist: +r.dist || 0, t: +r.t || null, ...(r.rpe !== undefined && r.rpe !== '' && !isNaN(+r.rpe) ? {rpe: +r.rpe} : {})}))}
     : {ex: it.ex, ...(it.u === 's' ? {u: 's'} : {}), ...(it.ct ? {ct: it.ct} : {}), ...(it.cn ? {cn: it.cn} : {}), sets: it.sets.filter(s => s.done).map(s => ({kg: +s.kg || 0, reps: +s.reps || 0, ...(s.rpe !== undefined && s.rpe !== '' ? {rpe: +s.rpe} : s.rir !== undefined && s.rir !== '' ? {rpe: 10 - +s.rir, rir: +s.rir} : {})}))}).filter(it => (it.reps || it.sets).length);
   if (!items.length) { toast('Valide au moins une série avec ✓'); return; }
   const tonnage = items.reduce((s, it) => s + (it.u === 's' ? 0 : (it.sets || []).reduce((a, x) => a + (x.kg + sledBase(it.ex)) * x.reps, 0)), 0);
@@ -11039,18 +11081,23 @@ document.addEventListener('click', e => {
   if ((b = at('[data-lpres]'))) { const [i, v] = b.dataset.lpres.split('.'), it = S.live.items[+i], p = it.p || (it.p = runP(it.tg || {})); p.res = v || ''; if (v === 'sled' && p.kg == null) p.kg = 20; if (v === 'band' && p.rpct == null) p.rpct = 30;
     // L'exercice suit : traîneau, sprint retenu, ou de nouveau une course libre.
     it.ex = v === 'sled' ? 'sled' : v === 'band' ? 'bandres' : ['sled', 'bandres'].includes(it.ex) ? (it.tg?.seq ? partEx({...it.tg, res: ''}) : 'accel') : it.ex; saveLive(); paneRender(); return; }
+  if ((b = at('[data-lpstart]'))) { const [i, v] = b.dataset.lpstart.split('.'), it = S.live.items[+i]; liveSeq(it); const p = it.p; p.start = v;
+    if (v === 'fly') { p.run ??= 20; p.runp ??= 70; } else { p.run = null; p.runp = null; }
+    if (it.tg?.seq && !p.res) it.ex = partEx({seq: p.seq, start: v, pct: p.pct, res: ''}); saveLive(); paneRender(); return; }
   if ((b = at('[data-lprun]'))) { const it = S.live.items[+b.dataset.lprun], p = it.p || (it.p = runP(it.tg || {})); p.run = 20; p.runp = 70; saveLive(); paneRender(); return; }
-  if ((b = at('[data-tlset]'))) { const it = S.live.items[+b.dataset.tlset], arr = it?.sets || it?.reps; if (!arr) return; const l = arr.at(-1) || {}; arr.push({...l, done: false, t: ''}); saveLive(); paneRender(); return; }
+  if ((b = at('[data-tlset]'))) { const it = S.live.items[+b.dataset.tlset], arr = it?.sets || it?.reps; if (!arr) return; const l = {...(arr.at(-1) || {})}; delete l.rir; arr.push({...l, done: false, t: '', rpe: ''}); saveLive(); paneRender(); return; }
   if ((b = at('[data-tlrm]'))) { const i = +b.dataset.tlrm, [item] = S.live.items.splice(i, 1); (S.live.removed ||= []).push({at: i, item}); saveLive(); paneRender(); return; }
   if ((b = at('[data-tlback]'))) { const [r] = S.live.removed.splice(+b.dataset.tlback, 1); S.live.items.splice(Math.min(r.at, S.live.items.length), 0, r.item); saveLive(); paneRender(); return; }
   if ((b = at('[data-tlsub]'))) { const [i, x] = b.dataset.tlsub.split('|'); S.live.items[+i].ex = x; saveLive(); paneRender(); return; }
   if (at('[data-tleff]')) { localStorage.setItem('tnr.effm', effMode() === 'rpe' ? 'rir' : 'rpe'); paneRender(); return; }
   if ((b = at('[data-tlnote]'))) { S.live.items[+b.dataset.tlnote].cn = ''; saveLive(); paneRender(); setTimeout(() => $(`[data-lcn="${b.dataset.tlnote}"]`)?.focus(), 50); return; }
   if ((b = at('[data-tlvar]'))) { const it = S.live.items[+b.dataset.tlvar]; pickVariant(it.ex, x => { it.ex = x; if (exOf(x).u === 's' || /isométrie/.test(exOf(x).n)) it.u = 's'; saveLive(); paneRender(); }); return; }
-  if ((b = at('[data-tlnextad]'))) { const it = S.live.items[+b.dataset.tlnextad]; it.adI = (it.adI || 0) + 1; saveLive(); paneRender(); return; }
-  if ((b = at('[data-tladapt]'))) { const i = +b.dataset.tladapt, it = S.live.items[i], pn = painFor(it.ex); if (!pn) return; const L = adaptList(it, pn), o = L[(it.adI || 0) % L.length];
-    if (o.fn === 'remove') { const [item] = S.live.items.splice(i, 1); (S.live.removed ||= []).push({at: i, item}); } else { o.fn(it); it.adapted = o.t; }
-    saveLive(); paneRender(); toast('Séance adaptée'); return; }
+  // Une autre adaptation : celle d'avant est annulée, la suivante est faite tout de suite (sauf « retirer l'exercice », proposée seulement).
+  if ((b = at('[data-tlnextad]'))) { const i = +b.dataset.tlnextad, it = S.live.items[i], was = !!it.adapted; adUndo(it); it.adI = (it.adI || 0) + 1;
+    if (was) { const pn = painFor(it.ex), L = pn ? adaptList(it, pn) : [], o = L[it.adI % (L.length || 1)]; if (o && o.fn !== 'remove') adApply(i); }
+    saveLive(); paneRender(); return; }
+  if ((b = at('[data-tladx]'))) { adUndo(S.live.items[+b.dataset.tladx]); saveLive(); paneRender(); toast('Adaptation annulée'); return; }
+  if ((b = at('[data-tladapt]'))) { if (adApply(+b.dataset.tladapt)) { saveLive(); paneRender(); toast('Séance adaptée'); } return; }
   if ((b = at('[data-tlu]'))) { const [i, u] = b.dataset.tlu.split('.'); S.live.items[+i].u = u; saveLive(); paneRender(); return; }
   if ((b = at('[data-edct]'))) { const [i, c] = b.dataset.edct.split('.'), it = ED.items[+i]; const was = it.ct; if (c) it.ct = c; else delete it.ct; if (c === 'iso') { it.u = 's'; if (!it.reps || it.reps < 15 || it.reps > 90) it.reps = 30; } else if (was === 'iso' && exOf(it.ex).u !== 's') { it.u = 'reps'; it.reps = 8; } paneRender(); return; }
   if ((b = at('[data-tlct]'))) { const it = S.live.items[+b.dataset.tlct], o = CT.map(x => x[0]), c = o[(o.indexOf(it.ct || '') + 1) % o.length]; const was = it.ct; if (c) it.ct = c; else delete it.ct; if (c === 'iso') it.u = 's'; else if (was === 'iso' && exOf(it.ex).u !== 's') it.u = 'reps'; saveLive(); paneRender(); return; }
@@ -11121,6 +11168,8 @@ document.addEventListener('input', e => {
   else if (d.lv) {
     const [i, j, f] = d.lv.split('.'), arr = S.live.items[i].sets || S.live.items[i].reps, old = arr[j][f], v = t.value.replace(',', '.');
     arr[j][f] = v; if (f === 'rpe') delete arr[j].rir; if (f === 'rir') delete arr[j].rpe;
+    // Le RPE noté valide la ligne.
+    if ((f === 'rpe' || f === 'rir') && v !== '' && !arr[j].done) { arr[j].done = true; S.live.t0 ||= Date.now(); S.live.t1 = Date.now(); const row = t.closest('.setrow'); row?.classList.add('done'); row?.querySelector('[data-tok]')?.setAttribute('aria-pressed', 'true'); }
     // A load typed on one set is carried to the next sets not done yet, like the gym apps do.
     if (f === 'kg') for (let n = +j + 1; n < arr.length; n++) if (!arr[n].done && (arr[n].kg === '' || arr[n].kg === old)) { arr[n].kg = v; const el = document.querySelector(`[data-lv="${i}.${n}.kg"]`); if (el) el.value = v; }
     saveLive();
@@ -11133,6 +11182,11 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('change', e => {
   const t = e.target, d = t.dataset;
+  if (S.live && (d.lpn !== undefined || d.lpseq !== undefined)) { const i = +(d.lpn ?? d.lpseq), it = S.live.items[i]; if (!it?.reps) return; const seq0 = liveSeq(it);
+    const seq = d.lpseq !== undefined ? (t.value.match(/\d+(?:[.,]\d+)?/g) || []).map(x => +x.replace(',', '.')).filter(x => x > 0) : seq0, n = d.lpn !== undefined ? Math.max(1, Math.min(60, +t.value || 1)) : Math.max(1, Math.round(it.reps.length / seq0.length));
+    if (seq.length) liveReseq(it, seq, n); if (it.tg?.seq && !it.p.res) it.ex = partEx({seq: it.p.seq, start: it.p.start, pct: it.p.pct, res: ''}); saveLive(); paneRender(); return; }
+  if (S.live && d.lrpeall) { const [i, k] = d.lrpeall.split('.'), it = S.live.items[+i], v = t.value.replace(',', '.').trim(); if (!it || v === '' || isNaN(+v)) return;
+    for (const x of it.sets || it.reps || []) { x[k] = v; delete x[k === 'rpe' ? 'rir' : 'rpe']; x.done = true; } S.live.t0 ||= Date.now(); S.live.t1 = Date.now(); saveLive(); paneRender(); return; }
   if (d.tweek !== undefined) { const week = {...(S.tset.week || {})}; if (t.value) week[d.tweek] = t.value; else delete week[d.tweek]; S.tset.week = week; dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()}); renderMod(); }
   else if (d.fprot !== undefined) saveFset({protein: +t.value});
   else if (d.fkcal !== undefined) saveFset({kcal: +t.value || null});
