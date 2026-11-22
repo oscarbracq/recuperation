@@ -509,6 +509,9 @@ const archMod = el => el?.closest('.rboard') ? 'R' : el?.closest('.mboard') ? 'N
 let ARCH_SIG = '';
 function archAuto() {
   try {
+    // Une fois : les séances de muscu 37, 39, 41 et 42 (l'ancienne liste « Mes séances ») partent dans l'archive.
+    if (S.tset && !S.tset.archSeed1 && Object.keys(S.plans || {}).length) { const ids = ['mwf8x5cflwhw', 'mwjbu0b3t1vw', 'mwi9sjz3emlg', 'mwmc7m27r03g'], add = ids.map(id => planById(id)).filter(Boolean).map(caleRef);
+      saveTset({arch: [...new Set([...(S.tset.arch || []), ...add])], archSeed1: true}); }
     const L = logs().filter(l => (l.kind === 'gym' || l.kind === 'track') && l.plan && !l.deleted), sig = L.length + '|' + (S.tset?.arch || []).length; if (sig === ARCH_SIG) return; ARCH_SIG = sig;
     const no = new Set(S.tset?.archNo || []), have = new Set(S.tset?.arch || []), add = [];
     for (const l of L) { const p = planById(l.plan); if (!p || p.id === 'bal-day') continue; const r = caleRef(p); if (r && !have.has(r) && !no.has(r)) { have.add(r); add.push(r); } }

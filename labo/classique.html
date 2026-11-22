@@ -8433,11 +8433,11 @@ function tSessions() {
   const k = S.tkind, mine = myPlans().filter(p => p.kind === k), base = BUILTIN.filter(p => p.kind === k);
   const row = p => `<button class="rowbtn" data-tplanv="${p.id}"><span><b>${esc(p.name)}</b><span class="meta">${p.title ? esc(p.title) + ' · ' : ''}${estMin(p)} min${!p.title && p.desc ? ' · ' + esc(p.desc) : ''}${caledOn(caleRef(p)).length ? ' · calée' : ''}</span></span>${ICON.chev}</button>`;
   return `
-    <header class="top"><div class="sub">Programmes et séances</div><div class="sehrow"><span></span><h1>Séances</h1>${seasonChip()}</div></header>
+    <header class="top"><div class="sub">Programmes et séances</div><h1>Séances</h1></header>
+    <div class="sechipw">${seasonChip()}</div>
     <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
     ${sesBoard(k)}
     <button class="btn ghost" style="margin-top:16px;width:100%" data-tnew>+ Créer une séance</button>
-    <h2>Mes séances</h2><div class="list">${mine.map(row).join('') || '<div class="row"><span class="muted">Aucune séance à toi pour l\'instant.</span></div>'}</div>
     ${k === 'gym' && TDV_PLANS.length ? progList() : ''}
     ${k === 'track' ? (() => { const L = logs().filter(l => l.kind === 'track').slice(0, 12); return L.length ? `<h2>Séances faites</h2><div class="list donel">${L.map(l => `<button class="rowbtn doneses" data-tlog="${l.id}"><span><b>${esc(l.name)}</b><span class="meta">${esc(cap(fmtShort(l.date)))}${l.min ? ' · ' + l.min + ' min' : ''}${l.rpe ? ' · RPE ' + l.rpe : ''}</span></span><span class="kc">${fx(l.sprintM || 0)} m</span></button>`).join('')}</div>` : ''; })() : ''}
     ${base.length ? `<h2>Programmes <small>à dupliquer et adapter</small></h2><div class="list">${base.map(row).join('')}</div>` : ''}`;
@@ -8680,6 +8680,7 @@ function tProfile() {
       ${row('data-tsymstart', 'Test de symétrie gauche / droite', esc(lastSym ? ago(lastSym.date) + ' · ' : '') + 'mollets, tibial, quadriceps, ischios, adducteurs, moyen fessier')}
       ${row('data-tfvstart', 'Test profil force-vitesse vertical', esc(fvr ? `${ago(fv.date)} · ${Math.round(fvr.imb * 100)} % de l'optimal · ` : '') + 'squat jumps chargés filmés · méthode Samozino')}
       ${row('data-thfvstart', 'Test profil force-vitesse en sprint', esc(hfv ? `${ago(hfv.date)} · F0 ${fx(hfv.F0, 1)} N/kg · Vmax ${fx(hfv.vmax, 2)} m/s · ` : '') + 'sprint 30 m filmé, avec ou sans traîneau · horizontal')}
+      ${row('data-treact', 'Test de réaction', esc(typeof rcLastTxt === 'function' ? rcLastTxt() : '') + 'au son, à la caméra dans les blocs, ou sur une vidéo')}
       ${row('data-tplyo', 'Tests pliométriques', esc(cmj ? 'CMJ ' + fx(+cmj.h, 1) + ' cm · ' : '') + 'CMJ, squat jump, drop jump, RSI, 10/5, pogo, une jambe')}
       ${row('data-vatest="sprint"', 'Tests de sprint', '10, 20, 30, 60 m et 5-0-5 · chronométrés à la vidéo')}
       <button class="btn ghost" data-tmore>+ Plus de tests</button>
@@ -9894,7 +9895,7 @@ function exView(id) {
       <a class="vidbtn" href="https://www.youtube.com/results?search_query=${encodeURIComponent((e.en || e.n) + (e.t === 'track' ? ' sprint drill' : ' exercise') + ' technique')}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="4" fill="#FF0033"/><path d="M10 9l5 3-5 3z" fill="#fff"/></svg><span><b>Voir en vidéo</b><small>${esc(e.en || e.n)}, la bonne technique</small></span><span class="kc">↗</span></a>
       <div class="card why">${esc(e.c)}</div>
       ${isSled(id) ? `<div class="list" style="margin-top:12px"><div class="row"><label for="sled-kg">Traîneau à vide</label><input class="mini-in" id="sled-kg" inputmode="decimal" style="width:90px" value="${S.tset?.sledKg || ''}" placeholder="kg" data-sledkg></div></div><p class="small muted" style="margin:6px 4px 0">Note seulement les disques : le poids du traîneau s'ajoute tout seul au total.</p>` : ''}
-      ${e.t === 'gym' ? `<button class="btn" style="margin:12px 0" data-bonus="${id}">Je l'ai fait : le noter</button>` : ''}${(S.tset?.myEx || []).includes(id) ? `<button class="btn ghost" style="margin:0 0 12px" data-myexdel="${esc(id)}">Retirer de mes exercices</button>` : `<button class="btn ghost" style="margin:0 0 12px" data-myxadd="${esc(id)}">Garder dans mes exercices</button>`}
+      ${e.t === 'gym' ? `<button class="btn" style="margin:12px 0" data-bonus="${id}">Faire l'exercice</button>` : ''}${(S.tset?.myEx || []).includes(id) ? `<button class="btn ghost" style="margin:0 0 12px" data-myexdel="${esc(id)}">Retirer de mes exercices</button>` : `<button class="btn ghost" style="margin:0 0 12px" data-myxadd="${esc(id)}">Garder dans mes exercices</button>`}
       ${musTiers(id)}
       ${e.t === 'gym' && e.u === 'kg' ? rmBlock(id) : ''}
       ${b ? `<div class="stats" style="margin-top:12px"><div><b>${fx(b)} kg</b><span>max estimé</span></div><div><b>${h.length}</b><span>séances</span></div><div><b>${esc(short(h[0].date))}</b><span>dernière fois</span></div></div>` : ''}

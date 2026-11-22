@@ -472,3 +472,26 @@ html.one :is(#t-view,#f-view,[id^="v-"],#home-view){will-change:transform}
 .techbox .twlist .exbox{margin:0;background:var(--card2)}
 .techbox .techta{margin-top:10px}
 .techbox .twlist .chip:not([aria-pressed="true"]){background:var(--card)}
+
+/* v156 : Planification sous le titre Séances, centrée */
+.sechipw{display:flex;justify-content:center;margin:-4px 0 12px}
+.sechipw .seachip{justify-self:auto;align-items:center;text-align:center;padding:6px 14px}
+
+/* v156 : tests de réaction */
+.rcpad{margin-top:12px;height:300px;border-radius:24px;background:var(--card2);border:2px dashed color-mix(in srgb,var(--fg3) 60%,transparent);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:16px;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:pointer}
+.rcpad b{font-size:1.9rem;font-weight:800;font-variant-numeric:tabular-nums}
+.rcpad small{font-size:.8rem;color:var(--fg2)}
+.rcpad.down{background:color-mix(in srgb,var(--accent) 22%,var(--card2));border-style:solid;border-color:var(--accent)}
+.rcflash{position:fixed;inset:0;z-index:99999;background:#fff;pointer-events:none}
+.rcvbox{position:relative;margin-top:12px;border-radius:16px;overflow:hidden;background:#000}
+.rcvbox .rcvid{display:block;width:100%;max-height:60vh;object-fit:contain}
+.rcroi{position:absolute;border:2px solid #30D158;border-radius:6px;box-shadow:0 0 0 9999px rgba(0,0,0,.25);pointer-events:none}
+.rcvbox.roion{touch-action:none;cursor:crosshair}
+.rcvbox.roion .rcroi{border-style:dashed}
+.rcchart{display:block;width:100%;height:auto;margin-top:8px}
+.rctries{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.rctry{font-size:.75rem;font-weight:700;padding:4px 9px;border-radius:99px;background:var(--card2);font-variant-numeric:tabular-nums}
+.rctry.fs{color:var(--bad)}
+.rcbig{font-size:2rem;font-weight:800;margin:4px 0}
+.rcset summary{cursor:pointer}
+.rcfile{display:flex;justify-content:center;margin-top:12px}
