@@ -23,7 +23,7 @@ img{max-width:100%}
 #login .msg,#setpw .msg{font-size:.875rem;color:var(--fg2);min-height:1.4em;margin:0}
 #splash{position:fixed;inset:0;z-index:300;background:#0B1733;pointer-events:none;--d:240px;--sh:0px}
 #splash svg{position:absolute;left:50%;top:50%;width:var(--d);height:var(--d);margin:calc(var(--d) / -2 - var(--sh)) 0 0 calc(var(--d) / -2);fill:#fff}
-#splash .sp{display:none!important;position:absolute;left:50%;top:calc(50% - var(--sh) + var(--d) * .3);width:22px;height:22px;margin:-11px 0 0 -11px;box-sizing:border-box;border-radius:50%;border:2.5px solid rgba(255,255,255,.16);border-top-color:rgba(255,255,255,.9);animation:tnrspin .75s linear infinite,tnrfade .35s ease .15s both;transition:opacity .2s}
+#splash .sp{position:absolute;left:50%;top:calc(50% - var(--sh) + var(--d) * .3);width:22px;height:22px;margin:-11px 0 0 -11px;box-sizing:border-box;border-radius:50%;border:2.5px solid rgba(255,255,255,.16);border-top-color:rgba(255,255,255,.9);animation:tnrspin .75s linear infinite,tnrfade .35s ease .15s both;transition:opacity .2s}
 #splash .sp.out{opacity:0}
 @keyframes tnrspin{to{transform:rotate(360deg)}}@keyframes tnrfade{from{opacity:0}}
 </style>
@@ -1896,10 +1896,11 @@ html.one[data-mod="home"][data-lm="R"] .tab-ghost{--accent:#2D7BFF;--accent-soft
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="supabase-db.js?v=65"></script>
 <script>if ('serviceWorker' in navigator) {
-  // A new version found by the pull-to-refresh takes over at once: reload into it (not on the very first install).
+  // No automatic reload when a new version takes over: at opening the page already comes fresh from the network, and a
+  // reload made the phone show its thin white loading bar under the clock. Only a pull-to-refresh (asked by hand) reloads.
   const had = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js');
-  navigator.serviceWorker.addEventListener('controllerchange', () => { if (had) location.reload(); });
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (had && window.__ptrUpd && Date.now() - window.__ptrUpd < 30000) location.reload(); });
 }</script>
 <script>const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -6533,7 +6534,7 @@ async function refreshAll(silent = false) {
     await Promise.all([...['garmin', 'withings', 'manual', 'reports'].map(c => S.db.collection(c).get()), S.db.doc('analysis/latest').get(), S.db.doc('profile/main').get(), S.db.doc('status/sync').get()]);
   } catch (e) { failed = true; }
   // What the browser's pull-to-reload used to do: pick up a new version of the app, if there is one.
-  try { (await navigator.serviceWorker?.getRegistration?.())?.update(); } catch (e) {}
+  try { window.__ptrUpd = Date.now(); (await navigator.serviceWorker?.getRegistration?.())?.update(); } catch (e) {}
   REST = null;
   setTimeout(() => {
     // The wheel drops down and its space folds away; only a failure is said, and only when asked by hand.

@@ -6057,7 +6057,7 @@ async function refreshAll(silent = false) {
     await Promise.all([...['garmin', 'withings', 'manual', 'reports'].map(c => S.db.collection(c).get()), S.db.doc('analysis/latest').get(), S.db.doc('profile/main').get(), S.db.doc('status/sync').get()]);
   } catch (e) { failed = true; }
   // What the browser's pull-to-reload used to do: pick up a new version of the app, if there is one.
-  try { (await navigator.serviceWorker?.getRegistration?.())?.update(); } catch (e) {}
+  try { window.__ptrUpd = Date.now(); (await navigator.serviceWorker?.getRegistration?.())?.update(); } catch (e) {}
   REST = null;
   setTimeout(() => {
     // The wheel drops down and its space folds away; only a failure is said, and only when asked by hand.
