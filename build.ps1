@@ -37,7 +37,7 @@ img{max-width:100%}
 #login .msg,#setpw .msg{font-size:.875rem;color:var(--fg2);min-height:1.4em;margin:0}
 #splash{position:fixed;inset:0;z-index:300;background:#0B1733;pointer-events:none;--d:240px;--sh:0px}
 #splash svg{position:absolute;left:50%;top:50%;width:var(--d);height:var(--d);margin:calc(var(--d) / -2 - var(--sh)) 0 0 calc(var(--d) / -2);fill:#fff}
-#splash .sp{position:absolute;left:50%;top:calc(50% - var(--sh) + var(--d) * .3);width:22px;height:22px;margin:-11px 0 0 -11px;box-sizing:border-box;border-radius:50%;border:2.5px solid rgba(255,255,255,.16);border-top-color:rgba(255,255,255,.9);animation:tnrspin .75s linear infinite,tnrfade .35s ease .15s both;transition:opacity .2s}
+#splash .sp{display:none!important;position:absolute;left:50%;top:calc(50% - var(--sh) + var(--d) * .3);width:22px;height:22px;margin:-11px 0 0 -11px;box-sizing:border-box;border-radius:50%;border:2.5px solid rgba(255,255,255,.16);border-top-color:rgba(255,255,255,.9);animation:tnrspin .75s linear infinite,tnrfade .35s ease .15s both;transition:opacity .2s}
 #splash .sp.out{opacity:0}
 @keyframes tnrspin{to{transform:rotate(360deg)}}@keyframes tnrfade{from{opacity:0}}
 </style>
@@ -79,7 +79,7 @@ img{max-width:100%}
     var x = c.getContext('2d'), k = r.width / 1024, px = r.left + PX * k, py = r.top + PY * k;
     var ps = svg.querySelectorAll('path'), PT = new Path2D(ps[0].getAttribute('d')), PN = new Path2D(ps[1].getAttribute('d')), PR = new Path2D(ps[2].getAttribute('d')), PA = new Path2D(ps[3].getAttribute('d'));
     var far = Math.max(Math.hypot(px, py), Math.hypot(vw - px, py), Math.hypot(px, vh - py), Math.hypot(vw - px, vh - py));
-    var L = Math.log(far / (RIN * k) * 1.06), T = 1150, ts = null;
+    var L = Math.log(far / (RIN * k) * 1.06), T = 1150, ts = null, bt = false;
     function fit() {
       if (innerWidth === vw && innerHeight === vh) return;
       px += (innerWidth - vw) / 2; py += (innerHeight - vh) / 2; vw = innerWidth; vh = innerHeight;
@@ -96,6 +96,7 @@ img{max-width:100%}
       if (rev > 0) { x.globalCompositeOperation = 'destination-out'; x.globalAlpha = rev; x.fill(PT); x.fill(PR, 'evenodd'); x.globalCompositeOperation = 'source-over'; }
       x.globalAlpha = 1 - rev; if (rev < 1) { x.fill(PT); x.fill(PR, 'evenodd'); }
       if (fa > 0) { x.globalAlpha = fa; x.fill(PA, 'evenodd'); }
+      if (!bt && rev > .5 && x.isPointInPath(PN, dpr * vw / 2, dpr * 4)) { bt = true; bars(); }
     }
     draw(0); document.body.appendChild(c); el.remove();
     var kill = setTimeout(function () { c.remove(); bars(); }, T + 600);

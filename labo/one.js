@@ -31,7 +31,7 @@ function oneSwitch(m, i = oneIdx()) {
   if (y0 > 0) { const y = Math.min(y0, document.documentElement.scrollHeight - innerHeight); window.scrollTo(0, Math.max(0, y)); }
 }
 function oneTab(i) {
-  if (S.mod === 'home') { if (!oneCalm()) oneFade(-1, 1, 650); oneSwitch('T', i); return; }
+  if (S.mod === 'home') { if (!oneCalm()) oneFade(-1, 1, 650); oneSwitch(ONE.lm || 'T', i); return; }
   const k = ONE.keys[S.mod]?.[i]; if (!k) return;
   if (k === oneCur()) { window.scrollTo({top: 0, behavior: 'smooth'}); return; }
   // Le retour du téléphone depuis un onglet ramène à Aujourd'hui (une seule étape dans l'historique).
@@ -51,7 +51,7 @@ function oneMount() {
     <button class="one-sq one-aib one-hai" data-one-ai aria-label="Ouvrir Claude (projet TNR)" title="Ouvrir Claude (projet TNR)">${oneIc('ai')}<span>IA</span></button>
     <nav id="one-tabs" class="one-tabs" aria-label="Sections"><span class="one-pill"></span><button data-one-h aria-label="Accueil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-6.5 8 6.5"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg><span class="lb">Accueil</span></button>${[0, 1, 2, 3, 4, 5].map(i => `<button data-one-t="${i}"></button>`).join('')}</nav>`);
   document.addEventListener('click', e => {
-    const m = e.target.closest('[data-one-m]'); if (m) { if (S.mod === 'home') { if (m.dataset.oneM === 'T' && !oneCalm()) oneFade(-1, 1, 650); oneSwitch(m.dataset.oneM, 0); } else if (m.dataset.oneM !== S.mod) oneSwitch(m.dataset.oneM); else window.scrollTo({top: 0, behavior: 'smooth'}); return; }
+    const m = e.target.closest('[data-one-m]'); if (m) { if (S.mod === 'home') { ONE.lm = m.dataset.oneM; if (!oneCalm()) oneFade(-1, 1, 650); oneSwitch(m.dataset.oneM, 0); } else if (m.dataset.oneM !== S.mod) oneSwitch(m.dataset.oneM); else window.scrollTo({top: 0, behavior: 'smooth'}); return; }
     const t = e.target.closest('[data-one-t]'); if (t) { oneTab(+t.dataset.oneT); return; }
     if (e.target.closest('[data-one-h]')) { oneHome(); return; }
     if (e.target.closest('[data-one-ai]')) { oneAiGo(); return; }
@@ -95,7 +95,7 @@ function oneMag(box, p, ms) {
 // Met la barre et le sélecteur à jour (noms, icônes, pastilles) ; appelée après chaque changement de page.
 function oneSync() {
   const tabs = $('#one-tabs'), top = $('#one-top'), home = S.mod === 'home'; if (!tabs || (!home && !ONE.mods.includes(S.mod))) return;
-  if (!home) ONE.lm = S.mod; const m = home ? 'T' : S.mod;   // à l'Accueil, la barre montre déjà Training : c'est là qu'on arrive en glissant
+  if (!home) ONE.lm = S.mod; const m = home ? ONE.lm || 'T' : S.mod; document.documentElement.dataset.lm = ONE.lm || 'T';   // à l'Accueil, la barre montre déjà Training : c'est là qu'on arrive en glissant
   document.documentElement.classList.toggle('one-home', home);
   // À l'Accueil, le haut de l'écran (heure, batterie) est toujours noir, comme la page.
   if (home && ONE.barTo !== '#000000' && !window.TNR_SPLASH_ON) syncBars();
@@ -308,7 +308,7 @@ fBody = () => {
 
 /* ---------- au pouce, l'Accueil est la page juste à gauche d'Aujourd'hui (et Aujourd'hui juste à droite de l'Accueil) ---------- */
 window.TAB_XNB = (k, T, html) => {
-  if (T.home) { if (k < 0) return null; const m = 'T', key = ONE.keys[m][0];
+  if (T.home) { if (k < 0) return null; const m = ONE.lm || 'T', key = ONE.keys[m][0];
     return {cls: '', box: $('#home-view'), html: () => `<div class="wrap">${m === 'R' ? '<div class="mm-space"></div>' : ''}<section class="gv-${m === 'R' ? 'v-' + key : m === 'T' ? 't-view' : 'f-view'}">${html(m, key)}</section></div>`, go: () => oneSwitch(m, 0)}; }
   if (k < 0 && T.i === 0 && ONE.mods.includes(S.mod)) return {cls: '', box: $('#mod-' + S.mod), html: () => vHome(), go: () => oneHome()};
   return null;
@@ -362,10 +362,11 @@ function oneFade(i, f, ms) {
   if (!R.classList.contains('one-fd')) {
     R.classList.add('one-fd', 'one-snap');
     // Depuis l'Accueil : le fond prend déjà les couleurs de Training (invisibles au départ).
-    ONE_FADE.mp = null; ONE_FADE.c = oneRgb(home ? (window.DA_TRI?.T || ['#FF3B30'])[0] : (window.DA_TRI?.[S.mod] || {T: ['#FF3B30'], N: ['#30D158'], R: ['#0A84FF']}[S.mod] || [])[0]);
-    if (home) { const box = $('#one-top .one-mods'), mp = box?.querySelector('.one-mp'), tb = box?.querySelector('[data-one-m="T"]');
+    const lm = ONE.lm || 'T', TRI = {T: ['#FF3B30', '#FF5240', '#D92B22'], N: ['#30D158', '#3BDB6A', '#22B04A'], R: ['#0A84FF', '#2D7BFF', '#0A6FE0']};
+    ONE_FADE.mp = null; ONE_FADE.c = oneRgb(home ? (window.DA_TRI?.[lm] || TRI[lm])[0] : (window.DA_TRI?.[S.mod] || {T: ['#FF3B30'], N: ['#30D158'], R: ['#0A84FF']}[S.mod] || [])[0]);
+    if (home) { const box = $('#one-top .one-mods'), mp = box?.querySelector('.one-mp'), tb = box?.querySelector(`[data-one-m="${lm}"]`);
       if (mp && tb) { mp._i = null; oneMp(box, mp, tb); mp.style.transition = 'none'; ONE_FADE.mp = mp; } }
-    if (home) { const t = window.DA_TRI?.T || ['#FF3B30', '#FF5240', '#D92B22'], c = {o1: t[0], o2: t[1], o3: t[2]}; for (const v in c) R.style.setProperty('--' + v, c[v], 'important'); R.style.setProperty('--band', `color-mix(in srgb,${t[0]} 30%,#000)`, 'important'); }
+    if (home) { const t = window.DA_TRI?.[lm] || TRI[lm], c = {o1: t[0], o2: t[1], o3: t[2]}; for (const v in c) R.style.setProperty('--' + v, c[v], 'important'); R.style.setProperty('--band', `color-mix(in srgb,${t[0]} 30%,#000)`, 'important'); }
   }
   cancelAnimationFrame(ONE_FADE.raf); clearTimeout(ONE_FADE.t);
   const set = v => { ONE_FADE.k = v; R.style.setProperty('--one-fade', v.toFixed(3)); oneFadeBar(v); const mp = ONE_FADE.mp; if (mp) { const e = Math.max(0, Math.min(1, v)); mp.style.opacity = e.toFixed(3); mp.style.scale = (.25 + .75 * (1 - Math.pow(1 - e, 2))).toFixed(3); } };
@@ -378,7 +379,7 @@ function oneFade(i, f, ms) {
 }
 // La barre du haut du téléphone (heure, batterie) suit le fondu image par image : du noir à la couleur du module, au même rythme que l'écran.
 function oneFadeBar(v) {
-  const c = ONE_FADE.c; if (!c) return; const e = Math.max(0, Math.min(1, v)), hx = '#' + c.map(x => Math.round(x * ONE_BAND * e).toString(16).padStart(2, '0')).join('');
+  const c = ONE_FADE.c; if (!c) return; const e0 = Math.max(0, Math.min(1, v)), e = 1 - (1 - e0) * (1 - e0), hx = '#' + c.map(x => Math.round(x * ONE_BAND * e).toString(16).padStart(2, '0')).join('');
   if (ONE_BAR.cur === hx) return; ONE_BAR.cur = hx; ONE.barTo = hx; cancelAnimationFrame(ONE_BAR.raf); document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.media = ''; m.content = hx; });
 }
 function oneFadeEnd() {

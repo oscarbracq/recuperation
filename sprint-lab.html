@@ -8223,13 +8223,15 @@ document.addEventListener('click', e => {
     openPane({title: 'Caler une séance le ' + fmtShort(k), render: () => L.length ? `<div class="list" style="margin-top:14px">${L.map(x => `<button class="rowbtn" data-proputp="${k}|${kind}|${esc(caleRef(x))}"><span><b>${esc(x.name)}</b><span class="meta">${x.title || x.desc ? esc(x.title || x.desc) + ' · ' : ''}${estMin(x)} min</span></span><span class="kc">+</span></button>`).join('')}</div>` : '<div class="empty" style="margin-top:14px">Crée d\'abord une séance.</div>'}); return; }
 });
 document.addEventListener('click', async e => { const b = e.target.closest('[data-proputp]'); if (!b) return; const [k, kind, ref] = b.dataset.proputp.split('|'); closePane(); await boardPlace(k, kind, ref, null); toast(`${refName(ref) || 'Séance'} calée le ${fmtShort(k)}`); paneRender(); window.proMapRender?.(); });
+// Le petit carré Planification (à droite du titre Séances) : le bloc de la saison en cours, il ouvre Ma saison.
+function seasonChip() { const n = seasonNow(TODAY), on = n && !n.before && !n.after;
+  return `<button type="button" class="seachip" data-tseason aria-label="Planification : ouvrir Ma saison"><span>Planification</span><b>${esc(on ? seLab(n.name) : 'Ma saison')}</b></button>`; }
 function tSessions() {
   if (S.tkind === 'class') S.tkind = 'gym';
   const k = S.tkind, mine = myPlans().filter(p => p.kind === k), base = BUILTIN.filter(p => p.kind === k);
   const row = p => `<button class="rowbtn" data-tplanv="${p.id}"><span><b>${esc(p.name)}</b><span class="meta">${p.title ? esc(p.title) + ' · ' : ''}${estMin(p)} min${!p.title && p.desc ? ' · ' + esc(p.desc) : ''}${caledOn(caleRef(p)).length ? ' · calée' : ''}</span></span>${ICON.chev}</button>`;
   return `
-    <header class="top"><div class="sub">Programmes et séances</div><h1>Séances</h1></header>
-    <button class="banner" data-tseason aria-label="Ma saison" style="display:block;width:100%;padding:0;border:0;background:none;color:inherit;font:inherit;cursor:pointer;margin-bottom:12px">${seasonLine() || '<div class="seasonl"><span class="slk">Planification</span><b>Ma saison</b><span>Tes blocs : PPG, PPS, pré-compétition, compétition</span></div>'}</button>
+    <header class="top"><div class="sub">Programmes et séances</div><div class="sehrow"><span></span><h1>Séances</h1>${seasonChip()}</div></header>
     <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
     ${sesBoard(k)}
     <button class="btn ghost" style="margin-top:16px;width:100%" data-tnew>+ Créer une séance</button>
@@ -8249,14 +8251,19 @@ function tLibrary() {
     <div class="list" id="t-libl">${libRows()}</div>`;
 }
 // Onglet Exercices : une ligne par exercice (toute la largeur), la croix au bout pour le retirer de mes exercices.
-const xRow = (attr, id, thumb, name, sub, del) => `<div class="rowbtn exrow myxr" role="button" tabindex="0" ${attr}="${esc(id)}">${thumb}<span><b>${esc(name)}</b><span class="meta">${esc(sub)}</span></span>${del ? `<button type="button" class="myxdel" ${del}="${esc(id)}" aria-label="Retirer ${esc(name)} de mes exercices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>` : ICON.chev}</div>`;
+const xRow = (attr, id, thumb, name, sub, del) => `<div class="rowbtn exrow myxr" role="button" tabindex="0" ${attr}="${esc(id)}">${thumb}<span class="myxt"><b>${esc(name)}</b>${sub ? ` <span class="meta">${esc(sub)}</span>` : ''}</span>${del ? `<button type="button" class="myxdel" ${del}="${esc(id)}" aria-label="Retirer ${esc(name)} de mes exercices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>` : ICON.chev}</div>`;
 // Training · Exercices : mes exercices (ajoutés ou faits récemment, le dernier en haut) et, en muscu, les exercices de rééquilibrage du jour.
 function tMyEx(k) {
   const mine = (S.tset?.myEx || []).filter(id => exOf(id).t === k), bal = k === 'gym' ? balEx() : [];
-  const sub = id => { const e = exOf(id), h = exHistory(id)[0]; return h ? 'Dernière fois ' + fmtShort(h.date) + (h.it.sets ? ' · ' + setsTxt(h.it) : '') : [e.eq, e.m].filter(Boolean).join(' · ') || e.cat; };
+  // Court : la date de la dernière fois et ce qui a été fait (3 × 6 · 70 kg), ou sinon le matériel.
+  const sub = id => { const e = exOf(id), h = exHistory(id)[0], S0 = h?.it?.sets || [];
+    if (!h) return e.eq || e.cat || '';
+    const same = S0.length && S0.every(x => +x.reps === +S0[0].reps && +(x.kg || 0) === +(S0[0].kg || 0));
+    const what = !S0.length ? '' : same ? `${S0.length} × ${uVal(h.it, S0[0].reps)}${+S0[0].kg ? ' · ' + fx(+S0[0].kg, +S0[0].kg % 1 ? 1 : 0) + ' kg' : ''}` : setsTxt(h.it);
+    return fmtShort(h.date).replace(/^\S+ /, '') + (what ? ' · ' + what : ''); };
   return `<div class="card myxb"><div class="chead" style="margin-bottom:8px"><span class="eyebrow">Mes exercices</span>${mine.length ? `<span class="small muted">${mine.length}</span>` : ''}</div>
     ${mine.length ? `<div class="list">${mine.map(id => xRow('data-myx', id, eqThumb(exOf(id).eq), exOf(id).n, sub(id), 'data-myxdel')).join('')}</div>` : '<p class="small muted" style="margin:0">Cherche un exercice plus bas et ajoute-le à ta journée : il restera ici, prêt à être refait.</p>'}</div>
-    ${bal.length ? `<div class="dayframe"><div class="sec-label" style="margin:0 2px 6px">Exercices de rééquilibrage du jour</div><div class="list">${bal.map(x => xRow('data-myx', x.id, eqThumb(exOf(x.id).eq), exOf(x.id).n, 'Équilibre de tes chaînes' + (MUSI[x.m] ? ' · ' + MUSI[x.m].n : ''))).join('')}</div></div>` : ''}`;
+    ${bal.length ? `<div class="dayframe"><div class="sec-label" style="margin:0 2px 6px">Exercices de rééquilibrage du jour</div><div class="list">${bal.map(x => xRow('data-myx', x.id, eqThumb(exOf(x.id).eq), exOf(x.id).n, MUSI[x.m]?.n || '')).join('')}</div></div>` : ''}`;
 }
 const myExFront = id => { const L = S.tset?.myEx || []; return [id, ...L.filter(x => x !== id)]; };
 document.addEventListener('click', e => {
@@ -8273,7 +8280,7 @@ function rMyEx() {
   const sub = x => `${x.min} min${x.tool ? ' · ' + x.tool : ''}`;
   return `<div class="card myxb"><div class="chead" style="margin-bottom:8px"><span class="eyebrow">Mes exercices</span>${mine.length ? `<span class="small muted">${mine.length}</span>` : ''}</div>
     ${mine.length ? `<div class="list">${mine.map(id => xRow('data-rmyx', id, eqThumb(rxEq(RX[id])), RX[id].n, sub(RX[id]), 'data-rmyxdel')).join('')}</div>` : '<p class="small muted" style="margin:0">Cherche un exercice plus bas et ajoute-le à ta journée : il restera ici, prêt à être refait.</p>'}</div>
-    ${day.length ? `<div class="dayframe"><div class="sec-label" style="margin:0 2px 6px">Exercices de récupération du jour</div><div class="list">${day.map(d => { const x = RX[d.id]; return xRow('data-rmyx', d.id, eqThumb(rxEq(x)), x.n, (d.pain ? 'Douleur · ' + d.pain : 'Muscles à soulager' + (MUSI[d.m] ? ' · ' + MUSI[d.m].n : '')) + ' · ' + x.min + ' min'); }).join('')}</div></div>` : ''}`;
+    ${day.length ? `<div class="dayframe"><div class="sec-label" style="margin:0 2px 6px">Exercices de récupération du jour</div><div class="list">${day.map(d => { const x = RX[d.id]; return xRow('data-rmyx', d.id, eqThumb(rxEq(x)), x.n, (d.pain ? 'Douleur · ' + d.pain : MUSI[d.m]?.n || '') + ' · ' + x.min + ' min'); }).join('')}</div></div>` : ''}`;
 }
 let RQ = '';
 const rqFold = t => String(t || '').toLowerCase().normalize('NFD').replace(/\p{M}/gu, '');
@@ -8293,7 +8300,14 @@ function rlibCards() {
     const s = e.target.closest('.libsearch'); if (!s || e.target.closest('#pane,#sheet')) return; H.classList.add('kbdlib');
     const go = () => { const y = s.getBoundingClientRect().top + scrollY - (parseFloat(getComputedStyle(s).scrollMarginTop) || 0); scrollTo({top: Math.max(0, y), behavior: 'smooth'}); };
     requestAnimationFrame(go); setTimeout(go, 380); });
-  document.addEventListener('focusout', () => setTimeout(() => { if (!txt(document.activeElement)) H.classList.remove('kbd', 'kbdlib'); }, 80));
+  const off = () => H.classList.remove('kbd', 'kbdlib');
+  document.addEventListener('focusout', () => setTimeout(() => { if (!txt(document.activeElement)) off(); }, 80));
+  // Le champ a disparu (fenêtre fermée, page changée) sans perdre le focus : on vérifie régulièrement tant que la barre est cachée.
+  setInterval(() => { if (H.classList.contains('kbd') && (!txt(document.activeElement) || !document.activeElement.isConnected)) off(); }, 400);
+  // Clavier fermé (bouton retour du téléphone) alors que le champ garde le focus : la hauteur de l'écran revient, la barre aussi.
+  const vv = window.visualViewport; let hMax = vv ? vv.height : 0;
+  vv?.addEventListener('resize', () => { hMax = Math.max(hMax, vv.height); if (vv.height > hMax * .88) off(); else if (txt(document.activeElement)) H.classList.add('kbd'); });
+  addEventListener('orientationchange', () => { hMax = 0; });
 })();
 function libRows() { return exRows(exSearch(S.lib.q, S.lib.k || 'gym', {cat: S.lib.cat, eq: S.lib.eq}), 'data-tex'); }
 document.addEventListener('click', e => { const b = e.target.closest('[data-libk]'); if (!b) return; S.lib = {...S.lib, k: b.dataset.libk, cat: '', eq: ''}; renderMod(true); });
@@ -10002,15 +10016,24 @@ function macroChart(D) {
   return `<svg viewBox="0 0 ${W0} ${H}" width="100%" role="img" aria-label="Protéines, lipides et glucides par jour, en grammes">${grid}${lines}${labs}</svg>`;
 }
 const SCANIC = '<svg viewBox="0 0 28 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 3v4M3 3h4M25 3v4M25 3h-4M3 21v-4M3 21h4M25 21v-4M25 21h-4"/><path d="M8 7v10M11 7v10M13.5 7v10M16 7v10M19.5 7v10" stroke-width="1.6"/></svg>';
+let FQ = '';
+// Mes aliments : le dernier scanné ou créé en haut.
+const myFoodsRecent = () => Object.values(S.foods).filter(f => !f.deleted).sort((a, b) => String(b.updatedAt || '9999').localeCompare(String(a.updatedAt || '9999')));
 function fFoods() {
-  const mine = myFoods();
   return `
-    <header class="top tophead"><div><div class="sub">Tes compléments, tes produits, la base</div><h1>Aliments</h1></div><button class="scanbtn" data-fcreate="foods" aria-label="Créer un aliment">${SCANIC}</button></header>
-    ${suppSection()}
-    <h2>Mes aliments</h2><div class="list">${mine.map(f => `<button class="rowbtn" data-fmine="${f.id}"><span><b>${esc(f.n)}</b><span class="meta">${f.code ? 'scanné · ' : ''}pour 100 g · P ${fx(f.p, 1)} · G ${fx(f.c, 1)} · L ${fx(f.f, 1)}${f.price ? ' · ' + fx(f.price, 2) + ' €/kg' : ''}</span></span><span class="kc">${fx(f.kcal)} kcal</span></button>`).join('')}<button class="addbtn" data-fcreate="foods">+ Créer un aliment</button></div>
-    <p class="note" style="text-align:left">Scanne le code-barres d'un produit : ses valeurs arrivent toutes seules. Il reste dans tes aliments pour ton menu et tes courses.</p>
-    <h2>Base TNR <small>${FOODS.length} aliments courants</small></h2>
-    <div class="list">${FOODS.map(f => `<div class="rowbtn"><span><b>${esc(f.n)}</b><span class="meta">pour 100 g · P ${fx(f.p, 1)} · G ${fx(f.c, 1)} · L ${fx(f.f, 1)}</span></span><span class="kc">${fx(f.kcal)}</span></div>`).join('')}</div>`;
+    <header class="top"><div class="sub">Tes compléments, tes produits, la base</div><h1>Aliments</h1></header>
+    <div class="libsearch fsearch"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input class="search" type="search" placeholder="Rechercher un aliment" value="${esc(FQ)}" data-ffq aria-label="Rechercher un aliment"><button type="button" class="lsscan" data-fcreate="foods" aria-label="Scanner un produit ou créer un aliment">${SCANIC}</button></div>
+    <div class="ffl">${fFoodsList()}</div>`;
+}
+function fFoodsList() {
+  const W = rqFold(FQ).split(/\s+/).filter(Boolean), ok = f => !W.length || W.every(w => rqFold(f.n).includes(w));
+  const mine = myFoodsRecent().filter(ok), base = FOODS.filter(ok);
+  if (W.length && !mine.length && !base.length) return '<p class="small muted" style="margin:14px 4px">Aucun aliment ne correspond. Scanne-le avec le bouton dans la barre de recherche.</p>';
+  const mineH = W.length && !mine.length ? '' : `<h2>Mes aliments</h2><div class="list">${mine.map(f => `<button class="rowbtn" data-fmine="${f.id}"><span><b>${esc(f.n)}</b><span class="meta">${f.code ? 'scanné · ' : ''}pour 100 g · P ${fx(f.p, 1)} · G ${fx(f.c, 1)} · L ${fx(f.f, 1)}${f.price ? ' · ' + fx(f.price, 2) + ' €/kg' : ''}</span></span><span class="kc">${fx(f.kcal)} kcal</span></button>`).join('')}${W.length ? '' : '<button class="addbtn" data-fcreate="foods">+ Créer un aliment</button>'}</div>`;
+  return `${mineH}
+    ${W.length ? '' : suppSection()}
+    <h2>Base TNR <small>${W.length ? base.length : FOODS.length} aliments courants</small></h2>
+    <div class="list">${base.map(f => `<div class="rowbtn"><span><b>${esc(f.n)}</b><span class="meta">pour 100 g · P ${fx(f.p, 1)} · G ${fx(f.c, 1)} · L ${fx(f.f, 1)}</span></span><span class="kc">${fx(f.kcal)}</span></div>`).join('')}</div>`;
 }
 // ---------- Courses: the week of his menu plus what he adds, with prices and the budget ----------
 /* Menus as blocks, like the Training sessions. Two kinds:
@@ -10906,6 +10929,7 @@ document.addEventListener('click', e => {
 document.addEventListener('input', e => {
   const t = e.target, d = t.dataset;
   if (d.tlibq !== undefined) { S.lib.q = t.value; $('#t-libl').innerHTML = libRows(); }
+  else if (d.ffq !== undefined) { FQ = t.value; document.querySelectorAll('.ffl').forEach(x => { x.innerHTML = fFoodsList(); }); }
   else if (d.rlibq !== undefined) { RQ = t.value; document.querySelectorAll('.rlibl').forEach(x => { x.innerHTML = rlibCards(); }); }
   else if (d.pkq !== undefined) P.stack.at(-1).setQ(t.value);
   else if (d.mpq !== undefined) P.stack.at(-1).setQ(t.value);

@@ -338,3 +338,28 @@ html.kbd .one-tabs,html.kbd .tabbar{opacity:0!important;pointer-events:none!impo
 .libsearch{scroll-margin-top:calc(env(safe-area-inset-top,0px) + 10px)}
 html.kbdlib #t-libl,html.kbdlib .rlibl{min-height:100vh}
 html.kbdlib #one-top,html.kbdlib .one-top,html.kbdlib .one-hai{opacity:0!important;pointer-events:none!important;transition:opacity .2s}
+
+/* ---------- v141 ---------- */
+/* Le dégradé du haut de l'écran passe sous les boutons du haut (IA, +, TNR, calendrier, Actus) : ils restent nets. */
+html.one body::before{z-index:29!important}
+/* Mes exercices : plus fins ; le nom puis les infos en gris à la suite, sur la même ligne */
+.myxr{padding-top:9px!important;padding-bottom:9px!important;min-height:0!important}
+.myxr .myxt{display:block;line-height:1.35}
+.myxr .myxt b{display:inline;font-weight:600}
+.myxr .myxt .meta{display:inline;margin:0 0 0 6px;color:var(--fg3)}
+
+.myxdel{width:28px;height:28px}.myxdel svg{width:12px;height:12px}
+/* Séances : le titre au milieu, le carré Planification à droite (2 lignes, de la hauteur du titre) */
+.sehrow{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
+.sehrow h1{margin:0}
+.seachip{justify-self:end;max-width:100%;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:1px;padding:5px 9px;border:0;border-radius:9px;cursor:pointer;font:inherit;text-align:left;
+  background:color-mix(in srgb,var(--one-c,var(--accent)) 20%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--one-c,var(--accent)) 55%,transparent);color:var(--fg)}
+.seachip span{font-size:.58rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--one-c,var(--accent));line-height:1.15}
+.seachip b{font-size:.78rem;font-weight:700;line-height:1.2;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Aliments : le bouton scanner dans la barre de recherche, tout à droite */
+.fsearch .search{padding-right:50px}
+.lsscan{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:38px;height:32px;display:grid;place-items:center;border:0;border-radius:10px;background:color-mix(in srgb,var(--one-c,var(--accent)) 22%,transparent);color:var(--fg);cursor:pointer}
+.lsscan svg{width:22px;height:19px}
+/* Depuis l'Accueil, la page qui arrive prend les couleurs du module où l'on retourne */
+html.one[data-mod="home"][data-lm="N"] .tab-ghost{--accent:#3BDB6A;--accent-soft:rgba(48,209,88,.18);--one-c:#30D158}
+html.one[data-mod="home"][data-lm="R"] .tab-ghost{--accent:#2D7BFF;--accent-soft:rgba(10,132,255,.18);--one-c:#0A84FF}
