@@ -282,10 +282,23 @@ window.ONE_SPLASH = function (el, svg, bars) {
   for (let i = 0; i < 3; i++) ps[i].style.opacity = 0;
   el.querySelector('.sp')?.remove();
   el.animate([{opacity: 1}, {opacity: 0}], {duration: 700, delay: 220, easing: 'ease', fill: 'forwards'});
+  oneSplashBar(el);
   let end = false; const fin = () => { if (end) return; end = true; fl.forEach(s => s.remove()); el.remove(); bars(); tg.forEach(b => { b.style.opacity = ''; }); void document.body.offsetWidth; tg.forEach(b => { b.style.transition = ''; }); };
   Promise.all(land).then(fin); setTimeout(fin, 4000);
   return true;
 };
+// La barre du haut du téléphone (heure, batterie) s'efface avec le fond bleu nuit, image par image : même opacité, même moment.
+// Elle ne reste plus bleue au-dessus d'un écran déjà noir.
+function oneSplashBar(el) {
+  window.TNR_SPLASH_ON = false; ONE.splBar = true; const nv = [11, 23, 51];
+  const put = hx => { if (ONE_BAR.cur === hx) return; ONE_BAR.cur = hx; ONE.barTo = hx; document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.media = ''; m.content = hx; }); };
+  const tick = () => { if (!ONE.splBar) return; const o = el.isConnected ? Math.max(0, Math.min(1, +getComputedStyle(el).opacity || 0)) : 0;
+    put('#' + nv.map(c => Math.round(c * o).toString(16).padStart(2, '0')).join(''));
+    if (o <= .004) stop(); };
+  const stop = () => { clearInterval(iv); if (!ONE.splBar) return; ONE.splBar = false; ONE_BAR.cur = null; syncBars(); };
+  // Toutes les 16 ms (une image) : suit le fondu même si le téléphone le démarre en retard. Sécurité : 4 s au plus.
+  const iv = setInterval(tick, 16); tick(); setTimeout(stop, 4000);
+}
 // Le contour réel de la lettre affichée (pas sa boîte) : position et hauteur de l'encre, pour que la lettre volante s'y pose pile.
 function oneInk(b) {
   const t = b.firstChild, cs = getComputedStyle(b), rg = document.createRange(); rg.selectNodeContents(b);
@@ -399,6 +412,7 @@ const ONE_BAR = {cur: null, raf: 0}, ONE_BAND = .3;   // même dosage que --band
 syncBars = function () {
   const R = document.documentElement, set = c => { if (ONE_BAR.cur === c) return; ONE_BAR.cur = c; document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.media = ''; m.content = c; }); };
   cancelAnimationFrame(ONE_BAR.raf);
+  if (ONE.splBar) return;
   if (window.TNR_SPLASH_ON) { ONE.barTo = '#0B1733'; set('#0B1733'); return; }
   if (ONE_FADE.c && R.classList.contains('one-fd')) return;
   // Une page entière noire (Ma saison) : le haut de l'écran est noir aussi.
