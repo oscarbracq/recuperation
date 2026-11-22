@@ -1865,6 +1865,17 @@ html.one .one-st::before{filter:none!important;background:radial-gradient(closes
 .mtl-i.now .mtl-dot::after{background:#fff}
 .mtl-i.now .mtl-h b{color:var(--fg)}
 .mtl-i.now .mtl-t{color:var(--fg)}
+
+/* ---------- v148 : séance en cours, « Tout cocher » et réglages de course ---------- */
+.exbox{position:relative}
+.allck{position:absolute;top:10px;right:10px;z-index:2;display:flex;align-items:center;gap:5px;height:32px;padding:0 11px 0 8px;border-radius:16px;border:1.5px solid color-mix(in srgb,var(--fg3) 70%,transparent);background:none;color:var(--fg2);font:inherit;font-size:.75rem;font-weight:700;cursor:pointer}
+.allck svg{width:15px;height:15px}
+.allck.on{border-color:var(--one-c,var(--accent));background:var(--one-c,var(--accent));color:#fff}
+.exbox:has(> .allck) > h3{padding-right:86px}
+.lrun{display:flex;flex-direction:column;gap:8px;margin:8px 0 4px}
+.lrunf{display:grid;grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:8px;align-items:end}
+.lrunf label{display:flex;flex-direction:column;gap:4px;font-size:.6875rem;font-weight:600;color:var(--fg2)}
+.lrunf .mini-in{width:100%;text-align:center}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -6816,6 +6827,7 @@ const EX = [
   ['tempo', 'Tempo', 'track', 'Tempo', 'Aérobie, récupération', 'Environ 70 % de ta vitesse, foulée relâchée, récup en marchant.', 'm'],
   ['hill', 'Côte', 'track', 'Résistance', 'Puissance, accélération', 'Pente de 5 à 10 %, poussées complètes, retour en marchant.', 'm'],
   ['sled', 'Traîneau', 'track', 'Résistance', 'Puissance horizontale', 'Charge qui ralentit d\'environ 10 % ta vitesse, posture d\'accélération.', 'm'],
+  ['bandres', 'Sprint retenu (élastique ou partenaire)', 'track', 'Résistance', 'Puissance horizontale', 'Une sangle à la taille : le partenaire derrière freine à un % donné, toi tu pousses avec ton intention, posture d\'accélération.', 'm'],
   ['legpress', 'Presse à cuisses', 'gym', 'Bas du corps', 'Quadriceps, fessiers', 'Dos plaqué au dossier, genoux dans l\'axe des pieds, pousse sans verrouiller les genoux.', 'kg'],
   ['halfsquat', 'Demi-squat à la barre', 'gym', 'Bas du corps', 'Quadriceps, fessiers', 'Descends jusqu\'à cuisses à 45°, remonte avec l\'intention d\'aller le plus vite possible.', 'kg'],
   ['deadlift', 'Soulevé de terre à la barre', 'gym', 'Chaîne postérieure', 'Fessiers, ischios, dos', 'Barre contre les tibias, dos neutre, pousse le sol et verrouille les hanches en haut.', 'kg'],
@@ -7261,6 +7273,9 @@ Object.assign(RUN_BASE, {gmed: .6, piri: .5, soleus: .9, pero: .6, foot: .9, tra
 const RUN_SHIFT = {'Accélération': {quads: 1, glutes: 1, hams: .85, psoas: .8, calves: .9}, 'Vitesse max': {hams: 1, calves: 1, psoas: 1, quads: .7, glutes: .9},
   'Résistance': {quads: 1, glutes: 1, hams: .8, calves: .9, erect: .7}, 'Tempo': {quads: .7, hams: .8}};
 // Stress factor and usual intensity per kind of running. 10 m = 1 heavy rep (Oscar's rule, after Bannister and Foster).
+// Sprint résisté : chaque appui demande plus de force horizontale qu'un sprint libre (Petrakos 2016 ; Cross 2017).
+// Traîneau : + 1 % par kg jusqu'à + 50 % ; retenu par un partenaire : + 1 % par % de freinage jusqu'à + 50 %.
+const resF = it => (it.res === 'sled' || it.ex === 'sled') ? 1 + Math.min(.5, (+it.kg || 0) / 100) : (it.res === 'band' || it.ex === 'bandres') ? 1 + Math.min(.5, (+it.rpct || 0) / 100) : 1;
 const RUN_FS = {'Accélération': [2.5, .95], 'Vitesse max': [3, .97], 'Endurance de vitesse': [2, .92], 'Résistance': [2.5, .9], 'Tempo': [1, .75], 'Échauffement et gammes': [.5, .6]};
 // Fatigue factor per exercise: muscle damage and recovery time are larger when the muscle works long and lengthening
 // (Nosaka and Sakamoto 2001; stiff-leg deadlift, Nordic, maximal sprint), smaller for short isolation and holds.
@@ -7319,7 +7334,8 @@ function logMuscle(l) {
       for (const k in cw) { add(k, d / 10 * inten * cw[k]); fo[k] = (fo[k] || 0) + d / 10 * inten * cw[k] * fatF('strides'); }
     } else if (it.reps) {
       const [fs, di] = RUN_FS[e.cat] || [1, .8], inten = (+it.pct || 0) / 100 || di;
-      for (const r of it.reps) { const d = +r.dist || 0; for (const k in c) { add(k, d / 10 * inten * fs * c[k]); fo[k] = (fo[k] || 0) + d / 10 * inten * fs * c[k] * fatF(it.ex); } }
+      const ru = +it.run || 0, ri = (+it.runp || 70) / 100, rf = resF(it);
+      for (const r of it.reps) { const d = +r.dist || 0, w = (d * inten * rf + ru * ri) / 10; for (const k in c) { add(k, w * fs * c[k]); fo[k] = (fo[k] || 0) + w * fs * c[k] * fatF(it.ex); } }
     }
   }
   return out;
@@ -8654,9 +8670,9 @@ function spSide() {
   const kind = MP.kind, arch = new Set(S.tset?.arch || []), src = [...(kind === 'gym' ? tdvTodo(8) : []), ...myPlans().filter(x => x.kind === kind)].filter(x => !arch.has(caleRef(x)));
   const placed = new Set(Object.entries(S.tset?.dated || {}).filter(([d]) => d >= TODAY).map(([, v]) => v));
   return `<div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button type="button" data-mpkind="${v}" aria-pressed="${kind === v}">${l}</button>`).join('')}</div>
-    <button type="button" class="btn" data-mmnew>+ Créer une séance ${kind === 'gym' ? 'de musculation' : 'de sprint'}</button>
+    ${isPC() ? `<button type="button" class="btn" data-mmnew>+ Créer une séance ${kind === 'gym' ? 'de musculation' : 'de sprint'}</button>` : ''}
     <div class="sec-label">Séances <small>${src.length}</small></div>
-    <div class="bsrc mpsrc">${src.length ? src.map(x => { const r = caleRef(x), on = placed.has(r); return `<div class="bchip src${on ? ' on' : ''}" data-bref="${esc(r)}" title="${esc(x.name)}${x.title ? ' · ' + esc(x.title) : ''}"><span>${esc(x.name)}</span><small>${(x.title || x.desc) ? esc(x.title || x.desc) + ' · ' : ''}${x.items?.length || 0} exercice${(x.items?.length || 0) > 1 ? 's' : ''} · ${estMin(x)} min${on ? ' · calée' : ''}</small></div>`; }).join('') : '<p class="small muted" style="margin:0">Crée une séance : elle apparaîtra ici, prête à être posée sur un jour.</p>'}</div>
+    <div class="bsrc mpsrc">${src.length ? src.map(x => { const r = caleRef(x), on = placed.has(r); return `<div class="bchip src${on ? ' on' : ''}" data-bref="${esc(r)}" title="${esc(x.name)}${x.title ? ' · ' + esc(x.title) : ''}"><span>${esc(x.name)}</span><small>${(x.title || x.desc) ? esc(x.title || x.desc) + ' · ' : ''}${x.items?.length || 0} exercice${(x.items?.length || 0) > 1 ? 's' : ''} · ${estMin(x)} min${on ? ' · calée' : ''}</small></div>`; }).join('') : `<p class="small muted" style="margin:0">${isPC() ? 'Crée une séance : elle apparaîtra ici, prête à être posée sur un jour.' : 'Crée tes séances sur ordinateur : elles apparaîtront ici, prêtes à être posées sur un jour.'}</p>`}</div>
     <div class="one-archrow"><button type="button" class="btn ghost one-arch" data-onearch="T">Archive</button></div>
     <p class="small muted" style="margin:0 2px">Attrape une séance et lâche-la sur un jour de la saison. Lâchée sur « Archiver », elle quitte la liste (tu peux la remettre depuis « Archive »). Une séance déjà posée se déplace de la même façon ; lâchée hors des jours, elle est retirée. Un clic sur une séance l'ouvre.</p>`;
 }
@@ -8719,7 +8735,7 @@ function spBind(el) {
     if (at('[data-mpedit]')) { SE_KIND = 'track'; SE_DRAFT = null; seDraft(); seEditPane(); return; }
     if (at('[data-mmnew]')) { S.tkind = MP.kind; editPlan(null); if (ED) ED.fromPro = true; return; }
     if ((b = at('[data-mmadd]'))) { const k = b.dataset.mmadd;
-      openPane({title: 'Le ' + fmtShort(k), render: () => `<div class="stack" style="margin-top:14px">${['gym', 'track'].map(kind => `<div class="sec-label">${kind === 'gym' ? 'Musculation' : 'Sprint'}</div><div class="btnrow two"><button class="btn" data-mmcreate="${k}|${kind}">+ Créer une séance</button><button class="btn ghost" data-mmput="${k}|${kind}">Caler une séance existante</button></div>`).join('')}</div>`}); return; }
+      openPane({title: 'Le ' + fmtShort(k), render: () => `<div class="stack" style="margin-top:14px">${['gym', 'track'].map(kind => `<div class="sec-label">${kind === 'gym' ? 'Musculation' : 'Sprint'}</div><div class="btnrow${isPC() ? ' two' : ''}">${isPC() ? `<button class="btn" data-mmcreate="${k}|${kind}">+ Créer une séance</button>` : ''}<button class="btn ghost" data-mmput="${k}|${kind}">Caler une séance existante</button></div>`).join('')}</div>`}); return; }
   });
 }
 addEventListener('resize', () => { if ($('#promap')?.classList.contains('on')) spApply(); });
@@ -8867,7 +8883,8 @@ function logSplit(l) {
       for (const k in cw) { add(k, d / 10 * inten * cw[k], d / 10 * cw[k]); r.sL += d / 10 * inten * cw[k]; }
     } else if (it.reps) {
       const [fs, di] = RUN_FS[e.cat] || [1, .8], inten = (+it.pct || 0) / 100 || di, sprint = e.cat !== 'Échauffement et gammes' && it.ex !== 'warmup';
-      for (const x of it.reps) { const d = +x.dist || 0; if (sprint) { r.m += d; r.mW += inten * d; r.mD += d; } for (const k in c) { add(k, d / 10 * inten * fs * c[k], d / 10 * fs * c[k]); r.sL += d / 10 * inten * fs * c[k]; } }
+      const ru = +it.run || 0, ri = (+it.runp || 70) / 100, rf = resF(it);
+      for (const x of it.reps) { const d = +x.dist || 0, w = (d * inten * rf + ru * ri) / 10, wf = (d * rf + ru) / 10; if (sprint) { r.m += d; r.mW += inten * d; r.mD += d; } for (const k in c) { add(k, w * fs * c[k], wf * fs * c[k]); r.sL += w * fs * c[k]; } }
     }
   }
   return r;
@@ -9242,7 +9259,8 @@ document.addEventListener('input', e => { const t = e.target; if (ED && t.datase
 document.addEventListener('click', e => {
   if (!ED) return; const at = q => e.target.closest(q); let b;
   if ((b = at('[data-edwk]'))) { ED.wk = addDays(ED.wk, +b.dataset.edwk); paneRender(); return; }
-  if ((b = at('[data-edstart]'))) { const [i, v] = b.dataset.edstart.split('.'), it = ED.items[+i]; it.start = v; if (v === 'fly' && !it.run) it.run = 20; partNorm(it); edKeep(() => paneRender()); return; }
+  if ((b = at('[data-edres]'))) { const [i, v] = b.dataset.edres.split('.'), it = ED.items[+i]; it.res = v || ''; if (v === 'sled' && !it.kg) it.kg = 20; if (v === 'band' && !it.rpct) it.rpct = 30; partNorm(it); edKeep(() => paneRender()); return; }
+  if ((b = at('[data-edstart]'))) { const [i, v] = b.dataset.edstart.split('.'), it = ED.items[+i]; it.start = v; if (v === 'fly' && !it.run) it.run = 20; if (v === 'fly' && !it.runp) it.runp = 70; partNorm(it); edKeep(() => paneRender()); return; }
   if ((b = at('[data-edim]'))) { const it = ED.items[+b.dataset.edim]; it.im = it.im === 'rpe' ? 'pct' : 'rpe'; if (it.im === 'rpe' && !it.rpe) it.rpe = 8; partNorm(it); edKeep(() => paneRender()); return; }
   if (at('[data-edpart]')) { const prev = [...ED.items].reverse().find(x => x.seq); ED.items.push(partNorm({seq: prev ? [60] : [30], blocks: prev ? 2 : 4, pct: 95, rest: 120, brest: 480})); paneRender(); return; }
   if (at('[data-edtech]')) { ED.tech = ''; paneRender(); setTimeout(() => document.querySelector('[data-edtechv]')?.focus(), 50); return; }
@@ -9359,18 +9377,22 @@ function coolPick() {
 let LBL = [];
 // Sprint main session, in parts: distances in a row (30, 10, 100), done as a block several times, with the rest between
 // reps and between blocks. "2 × 30 then 2 × 60" = two parts. The kind of run (acceleration, top speed…) follows the distance.
-const partEx = it => { const mx = Math.max(...it.seq), pc = it.im === 'rpe' ? (+it.rpe || 8) * 10 + 10 : +it.pct || 95; return pc < 80 ? 'tempo' : it.start === 'fly' && mx <= 80 ? 'fly' : mx <= 40 ? 'accel' : mx <= 80 ? 'fly' : mx <= 200 ? 'speedend' : 'tempo'; };
+const partEx = it => { if (it.res === 'sled') return 'sled'; if (it.res === 'band') return 'bandres'; const mx = Math.max(...it.seq), pc = it.im === 'rpe' ? (+it.rpe || 8) * 10 + 10 : +it.pct || 95; return pc < 80 ? 'tempo' : it.start === 'fly' && mx <= 80 ? 'fly' : mx <= 40 ? 'accel' : mx <= 80 ? 'fly' : mx <= 200 ? 'speedend' : 'tempo'; };
 function partNorm(it) { it.seq = (it.seq || []).filter(x => x > 0); if (!it.seq.length) it.seq = [30]; it.blocks = Math.max(1, +it.blocks || 1); it.reps = it.seq.length * it.blocks; it.dist = Math.round(it.seq.reduce((a, b) => a + b, 0) / it.seq.length); it.ex = partEx(it); return it; }
 // Le départ : depuis les blocs, debout, ou lancé (avec une distance d'élan : « 30 m lancés »).
 const STARTS = [['blocks', 'Blocs'], ['stand', 'Debout'], ['fly', 'Lancé']];
+// La résistance : rien, un traîneau (sa charge), ou un partenaire qui retient à la sangle ou à l'élastique (son % de freinage).
+const RESIST = [['', 'Aucune'], ['sled', 'Traîneau'], ['band', 'Retenu']];
 function partBody(it, i, num, rest) {
   const one = it.seq.length === 1, rpe = it.im === 'rpe';
   return `<div class="ctrow"><span>Départ</span><div class="seg">${STARTS.map(([v, l]) => `<button type="button" data-edstart="${i}.${v}" aria-pressed="${(it.start || 'stand') === v}">${l}</button>`).join('')}</div></div>
-    <div class="edrow" style="grid-template-columns:1.6fr 1fr 1fr${it.start === 'fly' ? ' 1fr' : ''}"><label>Distances (m)<input class="mini-in big" inputmode="text" data-edseq="${i}" value="${esc(it.seq.join(', '))}" placeholder="30, 60"></label>${it.start === 'fly' ? `<label>Élan (m)${num(i, 'run', it.run, '20')}</label>` : ''}<label>${one ? 'Répét.' : 'Blocs'}${num(i, 'blocks', it.blocks, '4')}</label><label><button type="button" class="hdtog" data-edim="${i}">${rpe ? 'RPE' : 'Intensité %'} ⇄</button>${rpe ? num(i, 'rpe', it.rpe, '8') : num(i, 'pct', it.pct, '95')}</label></div>
+    <div class="ctrow"><span>Résistance</span><div class="seg">${RESIST.map(([v, l]) => `<button type="button" data-edres="${i}.${v}" aria-pressed="${(it.res || '') === v}">${l}</button>`).join('')}</div></div>
+    <div class="edrow" style="grid-template-columns:1.6fr 1fr 1fr${it.start === 'fly' ? ' 1fr' : ''}"><label>Distances (m)<input class="mini-in big" inputmode="text" data-edseq="${i}" value="${esc(it.seq.join(', '))}" placeholder="30, 60"></label>${it.start === 'fly' ? `<label>Élan (m)${num(i, 'run', it.run, '20')}</label>` : ''}<label>${one ? 'Répét.' : 'Blocs'}${num(i, 'blocks', it.blocks, '4')}</label><label><button type="button" class="hdtog" data-edim="${i}">${rpe ? 'RPE' : it.res ? 'Intention %' : 'Intensité %'} ⇄</button>${rpe ? num(i, 'rpe', it.rpe, '8') : num(i, 'pct', it.pct, '95')}</label></div>
+    ${it.res || it.start === 'fly' ? `<div class="edrow" style="grid-template-columns:repeat(${(it.res ? 1 : 0) + (it.start === 'fly' ? 1 : 0)},1fr)">${it.res === 'sled' ? `<label>Charge du traîneau (kg)${num(i, 'kg', it.kg, '20')}</label>` : it.res === 'band' ? `<label>Résistance du partenaire %${num(i, 'rpct', it.rpct, '40')}</label>` : ''}${it.start === 'fly' ? `<label>Élan à %${num(i, 'runp', it.runp, '70')}</label>` : ''}</div>` : ''}
     <div class="edrow" style="grid-template-columns:1fr${one ? '' : ' 1fr'}"><label>${one ? 'Récup' : 'Récup entre répét.'}${rest(i, it.rest, '2:00')}</label>${one ? '' : `<label>Récup entre blocs<input class="mini-in big" inputmode="decimal" data-edbrest="${i}" value="${restIn(it.brest)}" placeholder="8:00"></label>`}</div>
     <p class="hint" style="margin:4px 2px 0">${esc(partTxt(it))}</p>`;
 }
-const partTxt = it => `${it.seq.length > 1 ? it.seq.join(' + ') + ' m, ' + it.blocks + ' bloc' + (it.blocks > 1 ? 's' : '') : it.blocks + ' × ' + it.seq[0] + ' m'}${it.start === 'fly' ? ' lancés' + (it.run ? ' (' + it.run + ' m d\'élan)' : '') : it.start === 'blocks' ? ' depuis les blocs' : ''}${it.im === 'rpe' ? (it.rpe ? ' à RPE ' + it.rpe : '') : it.pct ? ' à ' + it.pct + ' %' : ''}${it.rest ? ' · ' + fmtRest(it.rest) + (it.seq.length > 1 ? ' entre répét.' : ' de récup') : ''}${it.brest && it.seq.length > 1 ? ' · ' + fmtRest(it.brest) + ' entre blocs' : ''} · ${fx(it.seq.reduce((a, b) => a + b, 0) * it.blocks)} m au total`;
+const partTxt = it => `${it.seq.length > 1 ? it.seq.join(' + ') + ' m, ' + it.blocks + ' bloc' + (it.blocks > 1 ? 's' : '') : it.blocks + ' × ' + it.seq[0] + ' m'}${it.start === 'fly' ? ' lancés' + (it.run ? ' (' + it.run + ' m d\'élan' + (it.runp ? ' à ' + it.runp + ' %' : '') + ')' : '') : it.start === 'blocks' ? ' depuis les blocs' : ''}${it.res === 'sled' ? ' · traîneau' + (it.kg ? ' ' + it.kg + ' kg' : '') : it.res === 'band' ? ' · retenu' + (it.rpct ? ' à ' + it.rpct + ' %' : '') : ''}${it.im === 'rpe' ? (it.rpe ? ' à RPE ' + it.rpe : '') : it.pct ? (it.res ? ' · intention ' : ' à ') + it.pct + ' %' : ''}${it.rest ? ' · ' + fmtRest(it.rest) + (it.seq.length > 1 ? ' entre répét.' : ' de récup') : ''}${it.brest && it.seq.length > 1 ? ' · ' + fmtRest(it.brest) + ' entre blocs' : ''} · ${fx(it.seq.reduce((a, b) => a + b, 0) * it.blocks)} m au total`;
 function techBox() {
   if (ED.tech == null) return `<button class="btn ghost" data-edtech>+ Ajouter un travail technique</button>`;
   return `<div class="exbox wbox"><h3>Travail technique</h3><textarea class="mini-in techta" data-edtechv placeholder="Ce que tu travailles : gammes, départs, placement du bassin, griffé…" aria-label="Travail technique">${esc(ED.tech)}</textarea>
@@ -9747,11 +9769,13 @@ function startSession(id, n) {
   S.live = {id: uid(), plan: p.id, name: p.name, kind: p.kind, date: TODAY, start: new Date().toISOString(), gym, items: p.items.map(liveItem), warm: p.warm || null, cool: p.cool || null};
   saveLive(); closeAllPanes(); openLive();
 }
+// Les réglages d'une course, repris du plan : intention (%), traîneau (kg), partenaire qui retient (%), élan (m et %).
+const runP = it => ({pct: it.pct ?? null, res: it.res || (it.ex === 'sled' ? 'sled' : it.ex === 'bandres' ? 'band' : ''), kg: it.kg ?? null, rpct: it.rpct ?? null, run: it.start === 'fly' || it.run ? it.run ?? 20 : null, runp: it.start === 'fly' || it.run ? it.runp ?? 70 : null});
 function liveItem(it) {
   const e = exOf(it.ex);
   if (e.t === 'test') return {ex: it.ex, tg: it, test: true, done: false};
-  if (it.seq) return {ex: it.ex, tg: it, reps: Array.from({length: it.blocks || 1}).flatMap((_, b) => it.seq.map(d => ({dist: d, blk: b + 1, t: '', done: false})))};
-  if (e.t === 'track') return {ex: it.ex, tg: it, reps: Array.from({length: it.min ? 1 : it.reps || 1}, () => ({dist: it.dist || '', t: '', done: false}))};
+  if (it.seq) return {ex: it.ex, tg: it, p: runP(it), reps: Array.from({length: it.blocks || 1}).flatMap((_, b) => it.seq.map(d => ({dist: d, blk: b + 1, t: '', done: false})))};
+  if (e.t === 'track') return {ex: it.ex, tg: it, p: runP(it), reps: Array.from({length: it.min ? 1 : it.reps || 1}, () => ({dist: it.dist || '', t: '', done: false}))};
   const sg = suggest(it);
   return {ex: it.ex, tg: it, u: unitOf(it), ...(it.ct ? {ct: it.ct} : {}), sets: Array.from({length: it.sets || 1}, () => ({kg: sg ? sg.kg : '', reps: it.reps || '', done: false}))};
 }
@@ -9805,6 +9829,11 @@ function liveTable() {
 }
 const restTxt = s => !s ? '' : s % 60 ? s + ' s' : s / 60 + '\'';
 const restParse = v => { const t = String(v || '').trim().replace(',', '.'); if (!t) return null; const m = t.match(/^(\d+(?:\.\d+)?)\s*(s|sec)?/i); if (!m) return null; return Math.round(m[2] ? +m[1] : +m[1] * 60); };
+function liveRunP(it, i) {
+  const p = it.p || (it.p = runP(it.tg || {ex: it.ex})), f = (k, l, ph) => `<label>${l}<input class="mini-in" inputmode="decimal" data-lp="${i}.${k}" value="${esc(p[k] ?? '')}" placeholder="${ph}"></label>`;
+  return `<div class="lrun"><div class="seg segsm">${RESIST.map(([v, l]) => `<button type="button" data-lpres="${i}.${v}" aria-pressed="${(p.res || '') === v}">${l}</button>`).join('')}</div>
+    <div class="lrunf">${f('pct', p.res ? 'Intention %' : 'Intensité %', '95')}${p.res === 'sled' ? f('kg', 'Charge kg', '20') : p.res === 'band' ? f('rpct', 'Résistance %', '40') : ''}${p.run != null ? f('run', 'Élan m', '20') + f('runp', 'Élan %', '70') : `<button type="button" class="chip" data-lprun="${i}">+ Élan</button>`}</div></div>`;
+}
 function liveBox(it, i) {
   const e = exOf(it.ex), tg = it.tg || {}, last = lastText(it.ex), sg = it.sets ? suggest(tg) : null;
   if (it.test) return `<div class="exbox"><h3>${esc(e.n)}<small>${tg.reps || 3} essais</small></h3><div class="tools" style="border:0;padding-top:4px"><button class="btn" data-ltest="${e.test}">Lancer le test</button><button class="rm" data-tlrm="${i}">Retirer</button></div></div>`;
@@ -9823,15 +9852,17 @@ function liveBox(it, i) {
     rows = `<div class="setrow e6 hd"><span>#</span><span>Avant</span><span>${e.u === 'kg' ? 'kg' : e.u === 's' ? '' : '+ kg'}</span><button type="button" class="hdtog" data-tlu="${i}.${nu}" aria-label="Compter en ${nu === 's' ? 'secondes' : nu === 'm' ? 'mètres' : 'répétitions'}">${{s: 'Sec.', m: 'Mèt.', reps: 'Rép.'}[unitOf(it)]} ⇄</button><button type="button" class="hdtog" data-tleff aria-label="Noter en ${em === 'rpe' ? 'RIR' : 'RPE'}">${em.toUpperCase()} ⇄</button><span></span></div>` + it.sets.map((s, j) => `<div class="setrow e6 ${s.done ? 'done' : ''}"><span class="n">${j + 1}</span><span class="prev">${prev[j] ? (prev[j].kg ? fx(prev[j].kg, prev[j].kg % 1 ? 1 : 0) + '×' : '') + prev[j].reps : '–'}</span>${e.u === 's' ? '<span></span>' : `<input class="mini-in" inputmode="decimal" data-lv="${i}.${j}.kg" value="${s.kg}" placeholder="${e.u === 'kg' ? 'kg' : '0'}" aria-label="Charge">`}<input class="mini-in" inputmode="numeric" data-lv="${i}.${j}.reps" value="${s.reps}" placeholder="${tg.reps || ''}" aria-label="${{s: 'Secondes', m: 'Mètres', reps: 'Répétitions'}[unitOf(it)]}"><input class="mini-in eff" inputmode="decimal" data-lv="${i}.${j}.${em}" value="${effV(s)}" placeholder="${em === 'rpe' ? '8' : '2'}" aria-label="${em.toUpperCase()}">${ok(i + '.' + j, s.done)}</div>`).join('');
   }
   const lastCn = !it.cn ? exHistory(it.ex)[0]?.it.cn : '', ramp = it.sets && unitOf(it) === 'reps' ? rampText(it.ex, +(sg?.kg || tg.kg || it.sets[0]?.kg || 0), +(tg.reps || it.sets[0]?.reps || 0)) : '';
-  return `<div class="exbox"><h3><span class="exn">${esc(e.n)}${famOf(it.ex) ? `<button type="button" class="varbtn" data-tlvar="${i}">Variante ▾</button>` : ''}</span><small>${itemText(tg.ex ? {...tg, ex: it.ex, u: it.u, note: (tg.note || '').replace(/^une jambe(, )?/, '')} : {ex: it.ex, sets: it.sets?.length, reps: '', min: 0})}</small></h3>
+  const arr = it.sets || it.reps || [], all = arr.length && arr.every(x => x.done);
+  return `<div class="exbox">${arr.length ? `<button type="button" class="allck${all ? ' on' : ''}" data-tlall="${i}" aria-pressed="${!!all}" aria-label="${all ? 'Tout décocher' : 'Tout cocher'}">${TICK}<span>${all ? 'Fait' : 'Tout'}</span></button>` : ''}<h3><span class="exn">${esc(e.n)}${famOf(it.ex) ? `<button type="button" class="varbtn" data-tlvar="${i}">Variante ▾</button>` : ''}</span><small>${itemText(tg.ex ? {...tg, ex: it.ex, u: it.u, note: (tg.note || '').replace(/^une jambe(, )?/, '')} : {ex: it.ex, sets: it.sets?.length, reps: '', min: 0})}</small></h3>
     ${last ? `<div class="hint">${esc(last)}</div>` : ''}${lastCn ? `<div class="hint">Note du coach, la dernière fois : ${esc(lastCn)}</div>` : ''}${sg ? `<div class="sug">Proposé : ${fx(sg.kg, sg.kg % 1 ? 1 : 0)} kg · ${esc(sg.why)}</div>` : ''}
     ${ramp ? `<div class="ramp"><b>Montée en charge</b><span>${ramp}</span></div>` : ''}
     ${painBox(it, i)}${(() => { const g = S.tset?.gymPlan?.[S.live?.plan]; if (!g || !it.sets || gymHas(g, it.ex)) return ''; const x = gymSub(it.ex, g); return `<div class="adapt"><span>Pas de matériel pour cet exercice à ${esc(gymName(g))}.</span>${x ? `<button type="button" class="btn" data-tlsub="${i}|${x.id}">Remplacer par ${esc(x.n)}</button>` : ''}</div>`; })()}
     ${it.sets ? `<div class="ctline"><span>Contraction</span><button type="button" class="hdtog" data-tlct="${i}">${cap(ctName(it.ct))} ⇄</button></div>` : ''}
+    ${it.reps && e.u === 'm' ? liveRunP(it, i) : ''}
     ${it.reps && e.u === 'm' ? `<div class="ctline"><span>Récup entre les répétitions</span><input class="mini-in" data-lrest="${i}" inputmode="text" style="width:76px" value="${esc(restTxt(it.rest ?? tg.rest))}" placeholder="4'" aria-label="Récupération"></div>` : ''}
     <div class="sets">${rows}</div>
     ${it.cn != null ? `<textarea class="cnote" rows="2" data-lcn="${i}" placeholder="Note du coach pour cet exercice…">${esc(it.cn)}</textarea>` : ''}
-    <div class="tools"><button data-tlset="${i}">+ Série</button><button data-tex="${it.ex}">Consignes</button>${it.cn == null ? `<button data-tlnote="${i}">+ Note</button>` : ''}<button class="rm" data-tlrm="${i}">Retirer</button></div></div>`;
+    <div class="tools"><button data-tlset="${i}">+ Série</button>${(it.sets || it.reps || []).length > 1 ? `<button data-tlsetrm="${i}">− Série</button>` : ''}<button data-tex="${it.ex}">Consignes</button>${it.cn == null ? `<button data-tlnote="${i}">+ Note</button>` : ''}<button class="rm" data-tlrm="${i}">Retirer</button></div></div>`;
 }
 let RT = {t: null, end: 0};
 const effMode = () => localStorage.getItem('tnr.effm') === 'rir' ? 'rir' : 'rpe';
@@ -9923,7 +9954,7 @@ document.addEventListener('click', e => { const b = e.target.closest('[data-fing
 async function saveLive2() {
   const L = S.live; if (!L) return;
   const rpe = +($('#fin-rpe')?.value || 7), min = parseDur($('#fin-min')?.value) || 1, note = ($('#fin-note')?.value || '').trim();
-  const items = L.items.filter(it => !it.test).map(it => it.reps ? {ex: it.ex, pct: it.tg?.pct || null, ...(exOf(it.ex).u === 'min' ? {min: it.reps.filter(r => r.done).reduce((a, r) => a + (+r.min || +it.tg?.min || 0), 0)} : {}), ...((it.rest ?? it.tg?.rest) ? {rest: it.rest ?? it.tg.rest} : {}), reps: it.reps.filter(r => r.done).map(r => ({dist: +r.dist || 0, t: +r.t || null}))}
+  const items = L.items.filter(it => !it.test).map(it => it.reps ? {ex: it.ex, pct: (it.p?.pct ?? it.tg?.pct) || null, ...(it.p?.res ? {res: it.p.res} : {}), ...(it.p?.res === 'sled' && +it.p.kg ? {kg: +it.p.kg} : {}), ...(it.p?.res === 'band' && +it.p.rpct ? {rpct: +it.p.rpct} : {}), ...(+it.p?.run ? {run: +it.p.run, runp: +it.p.runp || 70} : {}), ...(exOf(it.ex).u === 'min' ? {min: it.reps.filter(r => r.done).reduce((a, r) => a + (+r.min || +it.tg?.min || 0), 0)} : {}), ...((it.rest ?? it.tg?.rest) ? {rest: it.rest ?? it.tg.rest} : {}), reps: it.reps.filter(r => r.done).map(r => ({dist: +r.dist || 0, t: +r.t || null}))}
     : {ex: it.ex, ...(it.u === 's' ? {u: 's'} : {}), ...(it.ct ? {ct: it.ct} : {}), ...(it.cn ? {cn: it.cn} : {}), sets: it.sets.filter(s => s.done).map(s => ({kg: +s.kg || 0, reps: +s.reps || 0, ...(s.rpe !== undefined && s.rpe !== '' ? {rpe: +s.rpe} : s.rir !== undefined && s.rir !== '' ? {rpe: 10 - +s.rir, rir: +s.rir} : {})}))}).filter(it => (it.reps || it.sets).length);
   if (!items.length) { toast('Valide au moins une série avec ✓'); return; }
   const tonnage = items.reduce((s, it) => s + (it.u === 's' ? 0 : (it.sets || []).reduce((a, x) => a + (x.kg + sledBase(it.ex)) * x.reps, 0)), 0);
@@ -11441,6 +11472,12 @@ document.addEventListener('click', e => {
     if (x.done && PREFS.haptic) navigator.vibrate?.(10);
     return;
   }
+  if ((b = at('[data-tlall]'))) { const it = S.live.items[+b.dataset.tlall], arr = it?.sets || it?.reps || []; const v = !arr.every(x => x.done); arr.forEach(x => { x.done = v; }); if (v) { S.live.t0 ||= Date.now(); S.live.t1 = Date.now(); if (PREFS.haptic) navigator.vibrate?.(14); } saveLive(); paneRender(); return; }
+  if ((b = at('[data-tlsetrm]'))) { const it = S.live.items[+b.dataset.tlsetrm], arr = it?.sets || it?.reps; if (!arr || arr.length < 2) return; const j = arr.map(x => !x.done).lastIndexOf(true); arr.splice(j >= 0 ? j : arr.length - 1, 1); saveLive(); paneRender(); return; }
+  if ((b = at('[data-lpres]'))) { const [i, v] = b.dataset.lpres.split('.'), it = S.live.items[+i], p = it.p || (it.p = runP(it.tg || {})); p.res = v || ''; if (v === 'sled' && p.kg == null) p.kg = 20; if (v === 'band' && p.rpct == null) p.rpct = 30;
+    // L'exercice suit : traîneau, sprint retenu, ou de nouveau une course libre.
+    it.ex = v === 'sled' ? 'sled' : v === 'band' ? 'bandres' : ['sled', 'bandres'].includes(it.ex) ? (it.tg?.seq ? partEx({...it.tg, res: ''}) : 'accel') : it.ex; saveLive(); paneRender(); return; }
+  if ((b = at('[data-lprun]'))) { const it = S.live.items[+b.dataset.lprun], p = it.p || (it.p = runP(it.tg || {})); p.run = 20; p.runp = 70; saveLive(); paneRender(); return; }
   if ((b = at('[data-tlset]'))) { const it = S.live.items[+b.dataset.tlset], arr = it?.sets || it?.reps; if (!arr) return; const l = arr.at(-1) || {}; arr.push({...l, done: false, t: ''}); saveLive(); paneRender(); return; }
   if ((b = at('[data-tlrm]'))) { const i = +b.dataset.tlrm, [item] = S.live.items.splice(i, 1); (S.live.removed ||= []).push({at: i, item}); saveLive(); paneRender(); return; }
   if ((b = at('[data-tlback]'))) { const [r] = S.live.removed.splice(+b.dataset.tlback, 1); S.live.items.splice(Math.min(r.at, S.live.items.length), 0, r.item); saveLive(); paneRender(); return; }
@@ -11517,6 +11554,7 @@ document.addEventListener('input', e => {
   else if (d.ffq !== undefined) P.stack.at(-1).setQ(t.value);
   else if (d.fqty !== undefined) P.stack.at(-1).setG(t.value);
   else if (d.lcn !== undefined) { S.live.items[+d.lcn].cn = t.value; saveLive(); }
+  else if (d.lp) { const [i, k] = d.lp.split('.'), it = S.live.items[+i], p = it.p || (it.p = runP(it.tg || {})); p[k] = t.value === '' ? null : +t.value.replace(',', '.'); saveLive(); }
   else if (d.lrest !== undefined) { const s = restParse(t.value); S.live.items[+d.lrest].rest = s; saveLive(); }
   else if (d.lv) {
     const [i, j, f] = d.lv.split('.'), arr = S.live.items[i].sets || S.live.items[i].reps, old = arr[j][f], v = t.value.replace(',', '.');

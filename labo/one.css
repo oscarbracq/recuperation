@@ -405,3 +405,14 @@ html.one .one-st::before{filter:none!important;background:radial-gradient(closes
 .mtl-i.now .mtl-dot::after{background:#fff}
 .mtl-i.now .mtl-h b{color:var(--fg)}
 .mtl-i.now .mtl-t{color:var(--fg)}
+
+/* ---------- v148 : séance en cours, « Tout cocher » et réglages de course ---------- */
+.exbox{position:relative}
+.allck{position:absolute;top:10px;right:10px;z-index:2;display:flex;align-items:center;gap:5px;height:32px;padding:0 11px 0 8px;border-radius:16px;border:1.5px solid color-mix(in srgb,var(--fg3) 70%,transparent);background:none;color:var(--fg2);font:inherit;font-size:.75rem;font-weight:700;cursor:pointer}
+.allck svg{width:15px;height:15px}
+.allck.on{border-color:var(--one-c,var(--accent));background:var(--one-c,var(--accent));color:#fff}
+.exbox:has(> .allck) > h3{padding-right:86px}
+.lrun{display:flex;flex-direction:column;gap:8px;margin:8px 0 4px}
+.lrunf{display:grid;grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:8px;align-items:end}
+.lrunf label{display:flex;flex-direction:column;gap:4px;font-size:.6875rem;font-weight:600;color:var(--fg2)}
+.lrunf .mini-in{width:100%;text-align:center}
