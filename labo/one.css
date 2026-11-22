@@ -363,3 +363,13 @@ html.one body::before{z-index:29!important}
 /* Depuis l'Accueil, la page qui arrive prend les couleurs du module où l'on retourne */
 html.one[data-mod="home"][data-lm="N"] .tab-ghost{--accent:#3BDB6A;--accent-soft:rgba(48,209,88,.18);--one-c:#30D158}
 html.one[data-mod="home"][data-lm="R"] .tab-ghost{--accent:#2D7BFF;--accent-soft:rgba(10,132,255,.18);--one-c:#0A84FF}
+
+/* ---------- v145 : la barre du bas ne clignote plus au toucher ----------
+   Avant, chaque icône portait un halo flou recalculé à chaque image (via --k animé) : pendant que la nouvelle page se
+   dessinait, le téléphone n'avait pas le temps de tout repeindre et laissait des icônes vides quelques images.
+   Maintenant --k change d'un coup ; ce sont la position, la taille, l'opacité et la couleur qui glissent (la carte
+   graphique fait le mouvement seule), et plus aucun halo n'est recalculé pendant le trajet. */
+html.one #one-tabs button,html.one #one-tabs button[data-one-h]{transition:flex-grow var(--tt,440ms) var(--te,ease),color var(--tt,440ms) var(--te,ease)!important}
+html.one #one-tabs button svg,html.one #one-tabs button.on svg,html.one .one-tabs button.on svg{filter:none!important;transition:transform var(--tt,440ms) var(--te,ease),color var(--tt,440ms) var(--te,ease),scale .15s!important}
+html.one #one-tabs button .lb{transition:transform var(--tt,440ms) var(--te,ease),opacity var(--tt,440ms) var(--te,ease)}
+html.one #one-tabs.one-drag button,html.one #one-tabs.one-drag button svg,html.one #one-tabs.one-drag button .lb{transition:none!important}
