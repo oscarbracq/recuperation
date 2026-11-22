@@ -119,7 +119,7 @@ img{max-width:100%}
 '@
 $scripts = @'
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="supabase-db.js?v=65"></script>
+<script src="supabase-db.js?v=66"></script>
 <script>if ('serviceWorker' in navigator) {
   // No automatic reload when a new version takes over: at opening the page already comes fresh from the network, and a
   // reload made the phone show its thin white loading bar under the clock. Only a pull-to-refresh (asked by hand) reloads.

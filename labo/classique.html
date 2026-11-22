@@ -1528,7 +1528,7 @@ input[type=date].mini-in,input[type=date]{min-width:165px;flex:none}
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="../supabase-db.js?v=65"></script>
+<script src="../supabase-db.js?v=66"></script>
 
 <script>
 const $ = s => document.querySelector(s);
@@ -5797,6 +5797,11 @@ function qmAuto(force) {
     const h = new Date().getHours(); if (!force && (seen === TODAY || h < 6 || h >= 11)) return;
     try { localStorage.setItem('tnr-qm', TODAY); } catch (e) {} draft = {}; S.qmForce = 'matin'; openSheet('note', TODAY); }, 250);
 }
+// La notification du soir (./?q=soir) ouvre directement le questionnaire du soir, même si la journée est déjà enregistrée.
+function qmSoir() {
+  const t = setInterval(() => { if (!S.manual || window.TNR_SPLASH_ON || document.getElementById('splash')) return; clearInterval(t);
+    if (S.sheet?.kind === 'note' && S.qm === 'soir') return; draft = {}; S.qmForce = 'soir'; if (M(TODAY, 'closed')) S.noteEdit = true; openSheet('note', TODAY); }, 250);
+}
 
 function noteRecap(k) {
   const d = S.manual[k] || {}, P = Object.entries(pains(k)).filter(([, v]) => v > 0), w = waterOf(k), ses = SES_K.map(([kind, lab, fR, fM]) => d[fR] ? `${lab} · RPE ${d[fR]}${d[fM] ? ' · ' + durTxt(d[fM]) : ''}${kind === 'track' && d.sprintM ? ' · ' + d.sprintM + ' m' : ''}` : '').filter(Boolean);
@@ -7605,26 +7610,32 @@ async function notifLoad() {
   try { NOTIF = window.RECUP_PUSH ? await window.RECUP_PUSH.state() : 'unsupported'; } catch (e) { NOTIF = 'off'; }
   if (P.stack.length) paneRender();
 }
-const NOTIF_DEF = ['09:00', '20:00'];
+const NOTIF_DEF = []; // les bilans ne partent plus : seuls les deux questionnaires sont envoyés
 const notifTimes = () => Array.isArray(S.app?.notifTimes) ? S.app.notifTimes : NOTIF_DEF;
 const notifKind = t => +t.slice(0, 2) < 14 ? 'Bilan du matin : ta nuit, ta récupération, le conseil du jour' : 'Bilan du soir : ton effort et ce que tu fais ou évites ce soir';
-document.addEventListener('change', async e => { const t = e.target; if (!t.matches?.('[data-hqt]')) return; S.app = {...(S.app || {}), questTime: t.value || ''}; await dbSet('settings/app', {...S.app, updatedAt: new Date().toISOString()}); toast(t.value ? 'Questionnaire du matin à ' + tfr(t.value) : 'Plus de notification pour le questionnaire'); });
+// Questionnaire du matin (questTime, 08:30) et du soir (questEve, 20:30) : un interrupteur et une heure chacun ; vide = jamais.
+const QN = {questTime: ['matin', '08:30'], questEve: ['soir', '20:30']};
+const questAt = f => S.app?.[f] === '' ? '' : S.app?.[f] || QN[f][1];
+document.addEventListener('change', async e => {
+  const t = e.target, f = t.dataset?.hqt || t.dataset?.hqon; if (!f || !QN[f]) return;
+  const v = t.matches('[data-hqon]') ? (t.checked ? S.app?.[f + 'Last'] || QN[f][1] : '') : t.value || '';
+  S.app = {...(S.app || {}), [f]: v, ...(v ? {[f + 'Last']: v} : {})}; paneRender();
+  await dbSet('settings/app', {...S.app, updatedAt: new Date().toISOString()});
+  toast(v ? `Questionnaire du ${QN[f][0]} à ${tfr(v)}` : `Plus de notification pour le questionnaire du ${QN[f][0]}`);
+});
 // Touchée alors que l'appli était déjà ouverte : la notification lui dit quoi ouvrir.
-navigator.serviceWorker?.addEventListener('message', e => { if (/[?&]q=matin/.test(e.data?.open || '')) qmAuto(true); });
+navigator.serviceWorker?.addEventListener('message', e => { const o = e.data?.open || ''; if (/[?&]q=matin/.test(o)) qmAuto(true); else if (/[?&]q=soir/.test(o)) qmSoir(); });
 async function saveNotifTimes(times) {
   S.app = {...(S.app || {}), notifTimes: [...new Set(times.filter(Boolean))].sort()};
   paneRender();
   await dbSet('settings/app', {...S.app, updatedAt: new Date().toISOString()});
 }
 function notifSection() {
-  const st = NOTIF, hint = st === 'unsupported' ? 'Disponible dans l\'appli installée sur ton téléphone.' : st === 'denied' ? 'Bloquées par le téléphone : Paramètres > Applications > TNR Athletics > Notifications.' : 'Un petit bilan sur ton téléphone, aux heures que tu choisis (jusqu\'à 3 par jour).';
+  const st = NOTIF, hint = st === 'unsupported' ? 'Disponible dans l\'appli installée sur ton téléphone.' : st === 'denied' ? 'Bloquées par le téléphone : Paramètres > Applications > TNR Athletics > Notifications.' : 'Un rappel pour le questionnaire du matin et celui du soir, aux heures que tu choisis.';
   return `<h2>Notifications</h2>
     <div class="list"><div class="row"><label for="hs-notif">Recevoir les notifications<span class="hint">${hint}</span></label><span class="switch"><input type="checkbox" id="hs-notif" data-hnotif${st === 'on' ? ' checked' : ''}${!st || st === 'unsupported' || st === 'denied' ? ' disabled' : ''}><span></span></span></div>
-      ${st === 'on' ? `${notifTimes().map((t, i) => `<div class="row"><label for="hs-nt${i}">Notification ${i + 1}<span class="hint">${notifKind(t)}</span></label><span style="display:flex;gap:8px;align-items:center"><input type="time" id="hs-nt${i}" class="mini-in" style="width:110px" value="${t}" data-hntime="${i}"><button type="button" class="chip" data-hntdel="${i}" aria-label="Retirer la notification ${i + 1}">✕</button></span></div>`).join('')}
-      ${notifTimes().length < 3 ? '<div class="row col"><button class="addbtn" data-hntadd>+ Ajouter une notification</button></div>' : ''}
-      <div class="row"><label for="hs-qt">Questionnaire du matin<span class="hint">ouvre directement le questionnaire, si tu n'y as pas encore répondu · vide = jamais</span></label><input type="time" id="hs-qt" class="mini-in" style="width:110px" value="${S.app?.questTime === '' ? '' : S.app?.questTime || '08:30'}" data-hqt></div>
-      ${notifTimes().length ? '' : '<div class="row"><span class="hint">Aucune heure choisie : tu ne reçois rien. Ajoute une notification pour en recevoir.</span></div>'}
-      <div class="row col"><span class="hint">Avant 14 h : bilan du matin. À partir de 14 h : bilan du soir. Envoyée à 5 minutes près, juste après une synchro Garmin et Withings.</span><button class="btn ghost" data-hnotiftest>M'envoyer une notification de test</button></div>` : ''}</div>`;
+      ${st === 'on' ? `${[['questTime', 'Questionnaire du matin', 'sommeil, jambes, douleurs, moral · pas envoyé si tu y as déjà répondu'], ['questEve', 'Questionnaire du soir', 'séances, RPE, énergie, douleurs · pas envoyé si ta journée est déjà enregistrée']].map(([f, l, h]) => { const v = questAt(f); return `<div class="row"><label for="hs-${f}">${l}<span class="hint">${h}</span></label><span style="display:flex;gap:10px;align-items:center">${v ? `<input type="time" id="hs-${f}" class="mini-in" style="width:110px" value="${v}" data-hqt="${f}">` : ''}<span class="switch"><input type="checkbox" aria-label="${l}" data-hqon="${f}"${v ? ' checked' : ''}><span></span></span></span></div>`; }).join('')}
+      <div class="row col"><span class="hint">Envoyée à 5 minutes près. Touche la notification : le questionnaire s'ouvre directement.</span><button class="btn ghost" data-hnotiftest>M'envoyer une notification de test</button></div>` : ''}</div>`;
 }
 document.addEventListener('change', async e => {
   const t = e.target; if (!t.matches?.('[data-hnotif]') || !window.RECUP_PUSH || NOTIF_BUSY) return;
@@ -11495,7 +11506,9 @@ go('home', false);
   db.collection('screen').onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); S.screen = o; render(); if (P.stack.length && SCRP.open) paneRender(); }, () => {});
   bootTNR(db);
   if (AW_DESK) { setTimeout(() => awSync(true), 2500); setInterval(() => awSync(), 5 * 60e3); document.addEventListener('visibilitychange', () => { if (!document.hidden) awSync(); }); }
-  if (new URLSearchParams(location.search).get('q') === 'matin') { history.replaceState(history.state, '', location.pathname); qmAuto(true); } else qmAuto(false);
+  const qParam = new URLSearchParams(location.search).get('q');
+  if (qParam === 'matin' || qParam === 'soir') history.replaceState(history.state, '', location.pathname);
+  if (qParam === 'matin') qmAuto(true); else if (qParam === 'soir') qmSoir(); else qmAuto(false);
   if (new URLSearchParams(location.search).get('rpe')) { history.replaceState(history.state, '', location.pathname); const t = setInterval(() => { if (!S.manual) return; clearInterval(t); go('home', false); draft = {}; openSheet('note', TODAY); const i = SES_K.find(([kind]) => sesInfo(TODAY, kind)); if (i) { draft._ses = i[0]; $('#e-ses').innerHTML = noteSessions(TODAY); } }, 200); }
   // Back from the Withings sign-in page: say how it went, show the settings, then fetch the data.
   if (window.RECUP_WITHINGS_DONE) window.RECUP_WITHINGS_DONE.then(m => { homeSettings(); toast(m); if (/connecté/.test(m)) refreshAll(); });

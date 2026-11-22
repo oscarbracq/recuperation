@@ -1,5 +1,6 @@
 // TNR Athletics — the 9 h and 20 h summary, sent to Oscar's phone as a Web Push notification (free, no third party).
-// Called by pg_cron every 5 minutes, with the cron key this function keeps in recup_private (push.cronKey),
+// Sends the morning (settings/app.questTime) and evening (settings/app.questEve) questionnaires; the summaries only
+// if settings/app.bilans is true. Called by pg_cron every 5 minutes, with the cron key this function keeps in recup_private (push.cronKey),
 // so no secret is ever written in the job; it only sends at the times Oscar chose in the app (settings/app.notifTimes,
 // up to 3, default 9 h and 20 h, Paris time; before 14 h the morning summary, after it the evening one), asks the `sync` function
 // for fresh Garmin and Withings data first (with the ingest token handed over once by supabase-notify-token.ps1),
@@ -207,6 +208,7 @@ async function sessionWatch(st: any, TODAY: string, hm: string, token: string | 
   const logged = acts.length > 0 && acts.every(noted);
   const seen: string[] = st.seen?.[TODAY] || [], a = acts.find((x: any) => !seen.includes(x.start) && !noted(x));
   if (!a || logged) return {watched: hm, acts: acts.length, logged};
+  if (S.app?.rpeNotif !== true) return {watched: hm, acts: acts.length, rpeNotif: 'off'};
   st.seen = {[TODAY]: [...seen, a.start]}; await putPrivate('push', st);
   const kind = /strength/.test(a.type) ? 'Musculation' : /track/.test(a.type) ? 'Sprint' : (a.name || 'Activité');
   const results = await sendAll(st, {title: `${kind} reçue · ${Math.round(a.min)} min`, body: 'Note ton RPE à chaud dans le questionnaire du jour : la durée est déjà remplie par ta montre.', tag: 'tnr-rpe', url: './?rpe=1'});
@@ -259,8 +261,11 @@ Deno.serve(async req => {
   if (!body.test) {
     const {data: app} = await db.from('docs').select('data').eq('collection', 'settings').eq('id', 'app').maybeSingle();
     // The morning questionnaire (settings/app.questTime, 08:30 by default; empty = off) comes on top of the chosen times.
+    // The evening one (settings/app.questEve, 20:30 by default; empty = off) too. The 9 h / 20 h summaries only go out
+    // if Oscar turns them back on (settings/app.bilans === true, at settings/app.notifTimes); by default, never.
     const qt = app?.data?.questTime === '' ? null : (app?.data?.questTime || '08:30');
-    const times: string[] = [...(Array.isArray(app?.data?.notifTimes) ? app.data.notifTimes : ['09:00', '20:00']), ...(qt ? [qt] : [])];
+    const qe = app?.data?.questEve === '' ? null : (app?.data?.questEve || '20:30');
+    const times: string[] = [...(qt ? [qt] : []), ...(qe ? [qe] : []), ...(app?.data?.bilans === true && Array.isArray(app?.data?.notifTimes) ? app.data.notifTimes : [])];
     due = times.find(t => /^\d\d:\d\d$/.test(t) && mins(hm) - mins(t) >= 0 && mins(hm) - mins(t) < 10 && (st.last || {})[t] !== TODAY) || null;
     if (!due) return json((await sessionWatch(st, TODAY, hm, token)) || {skipped: 'pas d\'envoi prévu à ' + hm});
   }
@@ -270,6 +275,14 @@ Deno.serve(async req => {
   if (due && !body.test) {
     const {data: app2} = await db.from('docs').select('data').eq('collection', 'settings').eq('id', 'app').maybeSingle();
     const qt = app2?.data?.questTime === '' ? null : (app2?.data?.questTime || '08:30');
+    const qe = app2?.data?.questEve === '' ? null : (app2?.data?.questEve || '20:30');
+    if (due === qe && due !== qt) {
+      const {data: man} = await db.from('docs').select('data').eq('collection', 'manual').eq('id', TODAY).maybeSingle();
+      st.last = {...(st.last || {}), [due]: TODAY}; await putPrivate('push', st);
+      if (man?.data?.closed) return json({skipped: 'journée déjà enregistrée'});
+      const results = await sendAll(st, {title: 'Questionnaire du soir', body: 'Ta journée : séances, RPE, énergie, douleurs. Une minute pour la clôturer et préparer demain.', tag: 'tnr-quest-soir', url: './?q=soir'});
+      return json({slot: 'questEve', results});
+    }
     if (due === qt) {
       const {data: man} = await db.from('docs').select('data').eq('collection', 'manual').eq('id', TODAY).maybeSingle();
       st.last = {...(st.last || {}), [due]: TODAY}; await putPrivate('push', st);
