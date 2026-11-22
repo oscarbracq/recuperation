@@ -1842,6 +1842,29 @@ html.one .one-st{transition:none!important;will-change:transform}
 html.one .one-st::before{filter:none!important;background:radial-gradient(closest-side,color-mix(in srgb,var(--c2) 52%,transparent),color-mix(in srgb,var(--c2) 22%,transparent) 55%,transparent)!important}
 /* Tout le contenu d'une story dans une seule couche : elle grandit depuis le carré Actus avec la forme */
 .one-st .sti{position:absolute;inset:0;transform-origin:0 0;z-index:2}
+
+/* ---------- v147 : Nutrition · Aujourd'hui en ligne du temps (un point par repas, à son heure) ---------- */
+.mtl{position:relative;padding-left:24px;margin-top:4px}
+.mtl::before{content:'';position:absolute;left:7px;top:12px;bottom:18px;width:2px;border-radius:2px;background:linear-gradient(to bottom,color-mix(in srgb,var(--one-c,var(--accent)) 70%,transparent),color-mix(in srgb,var(--fg3) 40%,transparent))}
+.mtl-i{position:relative;margin:0 0 16px}
+.mtl-h{display:flex;align-items:baseline;gap:8px;margin:0 2px 8px;min-height:20px}
+.mtl-dot{position:absolute;left:-24px;top:3px;width:16px;height:16px;box-sizing:border-box;border-radius:50%;border:2px solid color-mix(in srgb,var(--fg3) 80%,transparent);background:var(--bg,#000)}
+.mtl-i.past .mtl-dot{border-color:var(--one-c,var(--accent));background:var(--one-c,var(--accent))}
+.mtl-i.now .mtl-dot{border-color:var(--one-c,var(--accent));background:var(--bg,#000);box-shadow:0 0 0 4px color-mix(in srgb,var(--one-c,var(--accent)) 28%,transparent)}
+.mtl-i.now .mtl-dot::after{content:'';position:absolute;inset:3px;border-radius:50%;background:var(--one-c,var(--accent))}
+.mtl-t{font-size:.8rem;font-weight:700;color:var(--fg2);font-variant-numeric:tabular-nums;min-width:38px}
+.mtl-h b{font-size:1.05rem;font-weight:700}
+.mtl-i.now .mtl-h b{color:var(--one-c,var(--accent))}
+.mtl-h small{margin-left:auto;color:var(--fg2);font-size:.8rem;font-weight:600}
+.mtl .list.meal{margin:0}
+/* Sur le fond coloré du module : points et ligne en blanc, bien lisibles */
+.mtl::before{background:linear-gradient(to bottom,rgba(255,255,255,.55),rgba(255,255,255,.18))}
+.mtl-dot{border-color:rgba(255,255,255,.45)}
+.mtl-i.past .mtl-dot{border-color:#fff;background:#fff}
+.mtl-i.now .mtl-dot{border-color:#fff;background:var(--bg,#000);box-shadow:0 0 0 4px rgba(255,255,255,.22)}
+.mtl-i.now .mtl-dot::after{background:#fff}
+.mtl-i.now .mtl-h b{color:var(--fg)}
+.mtl-i.now .mtl-t{color:var(--fg)}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -10403,6 +10426,7 @@ document.addEventListener('click', e => { let b;
   if (SGV && (b = e.target.closest('[data-sgo]')) && !b.disabled) { SGV.off = Math.max(0, SGV.off + +b.dataset.sgo); paneRender(); } });
 document.addEventListener('click', e => { const b = e.target.closest('[data-nseg]'); if (!b) return; S.nseg = b.dataset.nseg; renderMod(true); });
 function fJournal() {
+  cookSeed();
   const k = S.fday, g = fuelGoal(k), t = dayTotals(k), d = fday(k), left = g.kcal - t.kcal;
   const plan = planFor(k), title = k === TODAY ? 'Aujourd\'hui' : k === addDays(TODAY, -1) ? 'Hier' : cap(fmtShort(k));
   const macro = (lab, v, goal, color) => `<div class="macro" style="--mc:${color}"><span>${lab}</span><b>${fx(v)}<small> / ${fx(goal)} g</small></b><div class="bar"><i style="width:${clamp(v / goal * 100, 0, 100)}%"></i></div></div>`;
@@ -10418,12 +10442,16 @@ function fJournal() {
       </article>
       ${k === TODAY ? coachNutrition(k) : ''}
       ${d.fromPlan ? '<p class="small muted" style="margin:0 4px">' + (d.hist ? `Rempli avec ton plan de la semaine ${seasonWeek(k)}.` : 'Rempli avec ton plan alimentaire.') + ' Change seulement ce qui diffère : touche un aliment pour modifier la quantité ou le retirer.</p>' : ''}
-      ${MEALS.map(([m]) => { const lab = mealLab(m, k), its = (d.items || []).map((it, i) => ({...it, i})).filter(it => it.meal === m), kc = its.reduce((s, it) => s + it.kcal, 0);
+      ${(() => { const now = k === TODAY ? new Date().getHours() * 60 + new Date().getMinutes() : k < TODAY ? 9999 : -1;
+        const L = MEALS.map(([m]) => ({m, a: mealBlk(m, k)?.a || null})), at = L.map(x => x.a ? tmin(x.a) : null);
+        // Le repas en cours : le dernier dont l'heure est passée (jusqu'à l'heure du suivant).
+        const cur = k === TODAY ? at.reduce((c, t, i) => t != null && t <= now ? i : c, -1) : -1;
+        return `<div class="mtl">${L.map(({m, a}, j) => { const lab = mealLab(m, k), its = (d.items || []).map((it, i) => ({...it, i})).filter(it => it.meal === m), kc = its.reduce((s, it) => s + it.kcal, 0);
         const hasY = y.some(it => it.meal === m), hasP = k >= FUEL_PLAN_FROM && menuFor(k).some(it => it.meal === m);
-        const tm = mealBlk(m, k)?.a;
-        return `<div class="list meal"><h3>${lab}${tm ? ` <span class="mt">${tfr(tm)}</span>` : ''}<small>${kc ? fx(kc) + ' kcal' : ''}</small></h3>
-          ${its.map(it => `<button class="rowbtn" data-fitem="${it.i}"><span><b>${esc(it.n)}</b><span class="meta">${fx(it.g)} g · P ${fx(it.p)} · G ${fx(it.c)} · L ${fx(it.f)}</span></span><span class="kc">${fx(it.kcal)}</span></button>`).join('')}
-          <button class="addbtn" data-fadd="${m}">+ Ajouter un aliment</button>${!its.length && hasP ? `<button class="addbtn" data-fplanmeal="${m}" style="color:var(--fg2);font-weight:500">Remettre le ${lab.toLowerCase()} du plan</button>` : ''}${!its.length && hasY ? `<button class="addbtn" data-fcopy="${m}" style="color:var(--fg2);font-weight:500">Reprendre le ${lab.toLowerCase()} de la veille</button>` : ''}</div>`; }).join('')}
+        const st = j === cur ? 'now' : (at[j] != null && at[j] <= now) || k < TODAY ? 'past' : 'next';
+        return `<section class="mtl-i ${st}"><div class="mtl-h"><span class="mtl-dot" aria-hidden="true"></span><span class="mtl-t">${a ? tfr(a) : ''}</span><b>${esc(lab)}</b><small>${kc ? fx(kc) + ' kcal' : ''}</small></div>
+          <div class="list meal">${its.map(it => `<button class="rowbtn" data-fitem="${it.i}"><span><b>${esc(it.n)}</b><span class="meta">${fx(it.g)} g · P ${fx(it.p)} · G ${fx(it.c)} · L ${fx(it.f)}</span></span><span class="kc">${fx(it.kcal)}</span></button>`).join('')}
+          <button class="addbtn" data-fadd="${m}">+ Ajouter un aliment</button>${!its.length && hasP ? `<button class="addbtn" data-fplanmeal="${m}" style="color:var(--fg2);font-weight:500">Remettre le ${lab.toLowerCase()} du plan</button>` : ''}${!its.length && hasY ? `<button class="addbtn" data-fcopy="${m}" style="color:var(--fg2);font-weight:500">Reprendre le ${lab.toLowerCase()} de la veille</button>` : ''}</div></section>`; }).join('')}</div>`; })()}
       <div class="card"><span class="eyebrow">Carences possibles <small style="text-transform:none;letter-spacing:0;font-weight:500">de la plus à la moins importante</small></span>${carenceHtml()}</div>
       <div class="card wfood"><div><span class="eyebrow">Aliment de la semaine</span><p style="margin:6px 0 0"><b>${esc(weekFood()[0])}</b></p><p class="small muted" style="margin:4px 0 0">${esc(weekFood()[1])}.</p></div><button type="button" class="chip on" data-fweek>+ Ajouter</button></div>
     </div>
@@ -10510,6 +10538,7 @@ let FQ = '';
 // Mes aliments : le dernier scanné ou créé en haut.
 const myFoodsRecent = () => Object.values(S.foods).filter(f => !f.deleted).sort((a, b) => String(b.updatedAt || '9999').localeCompare(String(a.updatedAt || '9999')));
 function fFoods() {
+  cookSeed();
   return `
     <header class="top"><div class="sub">Tes compléments, tes produits, la base</div><h1>Aliments</h1></header>
     <div class="libsearch fsearch"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input class="search" type="search" placeholder="Rechercher un aliment" value="${esc(FQ)}" data-ffq aria-label="Rechercher un aliment"><button type="button" class="lsscan" data-fcreate="foods" aria-label="Scanner un produit ou créer un aliment">${SCANIC}</button></div>
@@ -10519,7 +10548,7 @@ function fFoodsList() {
   const W = rqFold(FQ).split(/\s+/).filter(Boolean), ok = f => !W.length || W.every(w => rqFold(f.n).includes(w));
   const mine = myFoodsRecent().filter(ok), base = FOODS.filter(ok);
   if (W.length && !mine.length && !base.length) return '<p class="small muted" style="margin:14px 4px">Aucun aliment ne correspond. Scanne-le avec le bouton dans la barre de recherche.</p>';
-  const mineH = W.length && !mine.length ? '' : `<h2>Mes aliments</h2><div class="list">${mine.map(f => `<button class="rowbtn" data-fmine="${f.id}"><span><b>${esc(f.n)}</b><span class="meta">${f.code ? 'scanné · ' : ''}pour 100 g · P ${fx(f.p, 1)} · G ${fx(f.c, 1)} · L ${fx(f.f, 1)}${f.price ? ' · ' + fx(f.price, 2) + ' €/kg' : ''}</span></span><span class="kc">${fx(f.kcal)} kcal</span></button>`).join('')}${W.length ? '' : '<button class="addbtn" data-fcreate="foods">+ Créer un aliment</button>'}</div>`;
+  const mineH = W.length && !mine.length ? '' : `<h2>Mes aliments</h2><div class="list">${mine.map(f => `<button class="rowbtn" data-fmine="${f.id}"><span><b>${esc(f.n)}</b><span class="meta">${f.code ? 'scanné · ' : ''}${f.raw ? (f.cuit ? 'cuit · ' : 'cru · ') : ''}pour 100 g · P ${fx(f.p, 1)} · G ${fx(f.c, 1)} · L ${fx(f.f, 1)}${f.price ? ' · ' + fx(f.price, 2) + ' €/kg' : ''}</span></span><span class="kc">${fx(f.kcal)} kcal</span></button>`).join('')}${W.length ? '' : '<button class="addbtn" data-fcreate="foods">+ Créer un aliment</button>'}</div>`;
   return `${mineH}
     ${W.length ? '' : suppSection()}
     <h2>Base TNR <small>${W.length ? base.length : FOODS.length} aliments courants</small></h2>
@@ -10627,7 +10656,7 @@ function menuBoard() {
     <p class="small muted" style="margin:10px 2px 0">Garde le doigt sur un bloc, puis glisse-le. Tu peux aussi toucher une semaine (S${seasonWeek(weeks[0])}…) ou un jour pour choisir. Un jour vide, c'est ton menu de base.</p></div>`;
 }
 function fMenu() {
-  menuSeed(); menuMig();
+  menuSeed(); menuMig(); cookSeed();
   const row = m => { const t = menuTot(m.items || []), wk = Object.entries(S.fset.menuWeek || {}).filter(([k, v]) => v === m.id && addDays(k, 6) >= TODAY).length, dy = Object.entries(S.fset.menuDated || {}).filter(([k, v]) => v === m.id && k >= TODAY).length;
     return `<button class="rowbtn" data-mview="${m.id}"><span><b>${esc(m.name)}</b><span class="meta">${m.kind === 'day' ? 'bloc jour' : 'bloc semaine'}${wk ? ` · ${wk} semaine${wk > 1 ? 's' : ''}` : ''}${dy ? ` · ${dy} jour${dy > 1 ? 's' : ''}` : ''} · ${fx(t.kcal)} kcal · P ${fx(t.p)} · G ${fx(t.c)} · L ${fx(t.f)}</span></span>${ICON.chev}</button>`; };
   const bt = menuTot(planItems());
@@ -10673,7 +10702,7 @@ function menuChoose(days, title, week) {
 }
 async function menuNew(from, kind) {
   const src = from ? menuById(from) : null;
-  const m = {id: 'm' + Date.now().toString(36), kind: kind || src?.kind || 'week', name: src ? src.name + ' (copie)' : (kind === 'day' ? 'Jour spécial ' : 'Semaine ') + (myMenus().length + 1), items: structuredClone(src ? src.items : planItems())};
+  const m = {id: 'm' + Date.now().toString(36), kind: kind || src?.kind || 'week', ...(src ? {} : {short: (kind === 'day' ? 'J' : 'M') + menuNextNum(kind)}), name: src ? src.name + ' (copie)' : (kind === 'day' ? 'Jour ' : 'Menu ') + menuNextNum(kind), items: structuredClone(src ? src.items : planItems())};
   await saveFset({menus: [...myMenus(), m]}); renderMod(true); return m.id;
 }
 document.addEventListener('click', async e => {
@@ -10864,6 +10893,58 @@ async function offProduct(code) {
 const allFoods = () => [...myFoods(), ...FOODS, ...CIQ].filter(okFood);
 const foodAny = id => foodById(id) || FOODS.find(f => f.n === id) || CIQ.find(f => f.n === id);
 const itemOf = (f, g, meal) => { const r = g / 100; return {n: f.n, g, kcal: Math.round(f.kcal * r), p: +(f.p * r).toFixed(1), c: +(f.c * r).toFixed(1), f: +(f.f * r).toFixed(1), meal, food: f.id}; };
+/* ---------- Cuit ou cru : les quantités se pèsent cuites (personne ne mange son riz ni sa viande crus) ----------
+   Un produit scanné donne les valeurs de son étiquette, c'est-à-dire cru. Pour le riz, les pâtes, la semoule, les
+   légumineuses sèches et la viande, l'appli garde ces valeurs (raw) et calcule les valeurs cuites avec le rendement
+   à la cuisson (poids cuit ÷ poids cru, tables USDA FoodData Central et Anses-Ciqual) : valeur cuite = valeur crue ÷ rendement.
+   Riz blanc ou basmati × 2,75 (353 kcal cru → 128 kcal cuit), pâtes × 2,25, semoule × 2,4, quinoa et boulgour × 2,6,
+   lentilles et pois chiches secs × 2,4 ; bœuf et porc 0,72 (la viande perd environ 28 % de son poids), volaille 0,75.
+   Par défaut c'est cuit ; la fiche de l'aliment permet de passer en cru. */
+const COOK_RULES = [
+  [/\briz\b|\brice\b/i, 2.75, 'riz', f => f.kcal >= 250],
+  [/p[aâ]tes|pasta|spaghett|penne|fusilli|tagliatell|macaroni|coquillette|farfalle|linguine|nouille|noodle/i, 2.25, 'pâtes', f => f.kcal >= 250],
+  [/semoule|couscous/i, 2.4, 'semoule', f => f.kcal >= 250],
+  [/quinoa|boulgour|\bebly\b|sarrasin|bl[ée] (dur|tendre)/i, 2.6, 'céréale', f => f.kcal >= 250],
+  [/lentille|pois chiche|haricots? (rouge|blanc|sec)|flageolet|pois cass/i, 2.4, 'légumineuse', f => f.kcal >= 250],
+  [/poulet|dinde|volaille|chicken|turkey|pintade/i, .75, 'volaille', f => f.kcal > 0 && f.kcal < 220],
+  [/viande hach|steak|b(oe|œ)uf|bavette|rumsteck|entrec|veau|porc|agneau|escalope|filet mignon|onglet|faux.filet|paleron/i, .72, 'viande', f => f.kcal > 0 && f.kcal < 320]
+];
+// Déjà cuits ou jamais cuits : rien à recalculer.
+const COOK_NO = /cuit|r[oô]ti|grill|po[eê]l|appertis|conserve|bocal|jambon|saucis|chorizo|bacon|lardon|nugget|pan[ée]\b|cordon|knack|p[aâ]t[ée] |terrine|s[ée]ch|bresaola|carpaccio|tartare|galette|souffl|lait de|soupe|sauce|cuisin|plat |salade|chips|biscuit|g[aâ]teau|crackers?/i;
+const cookRule = f => { if (!f?.n || COOK_NO.test(f.n)) return null; const v = f.raw || f; return COOK_RULES.find(([re, , , ok]) => re.test(f.n) && ok(v)) || null; };
+// Les valeurs utilisées partout (f.kcal, f.p, f.c, f.f) sont celles de ce qu'il pèse : cuites ou crues.
+function cookApply(f) { if (!f.raw) return f; const k = f.cuit ? (+f.yf || 1) : 1; f.kcal = Math.round(f.raw.kcal / k); for (const m of ['p', 'c', 'f']) f[m] = +(f.raw[m] / k).toFixed(1); return f; }
+// Un produit qui se cuit, vu pour la première fois : ses valeurs d'étiquette deviennent « raw », et il est compté cuit.
+function cookInit(f) { if (!f || f.raw) return false; const r = cookRule(f); if (!r) return false; f.raw = {kcal: +f.kcal || 0, p: +f.p || 0, c: +f.c || 0, f: +f.f || 0}; f.yf = r[1]; f.ck = r[2]; f.cuit = true; cookApply(f); return true; }
+// À l'enregistrement de la fiche : les champs sont les valeurs de l'étiquette.
+function cookSave(f) { const r = f.raw ? null : cookRule(f); if (!f.raw && !r) return; f.raw = {kcal: +f.kcal || 0, p: +f.p || 0, c: +f.c || 0, f: +f.f || 0}; if (r) { f.yf = r[1]; f.ck = r[2]; } if (f.cuit == null) f.cuit = true; cookApply(f); }
+function cookField(f) {
+  const yf = f.raw ? +f.yf : cookRule(f)?.[1]; if (!yf) return '';
+  const on = f.cuit ?? true, cuit = Math.round((+f.kcal || 0) / yf);
+  return `<div class="field"><span class="eyebrow">Ce que tu pèses</span><div class="seg" role="group" aria-label="Cuit ou cru">${[['1', 'Cuit'], ['0', 'Cru']].map(([v, l]) => `<button type="button" data-nfcook="${v}" aria-pressed="${on === (v === '1')}">${l}</button>`).join('')}</div>
+    <span class="hint" style="display:block;margin:6px 2px 0">${on ? `Compté cuit : ${fx(cuit)} kcal pour 100 g cuits (${yf > 1 ? 'il prend environ ' + fx(yf, 2) + ' fois son poids en eau' : 'il perd environ ' + Math.round((1 - yf) * 100) + ' % de son poids'} à la cuisson). Les valeurs ci-dessous restent celles de l'étiquette.` : 'Compté cru : les valeurs de l\'étiquette telles quelles.'}</span></div>`;
+}
+document.addEventListener('click', e => { const b = e.target.closest?.('[data-nfcook]'); if (b) P.stack.at(-1)?.cook?.(b.dataset.nfcook === '1'); });
+// Une fois : ses aliments déjà scannés passent en cuit, ses menus sont recalculés, « Semaine 15 » et « Semaine 16 »
+// deviennent « Menu 8 » et « Menu 9 », et le Menu 8 se cale du lundi 23 au dimanche 29 novembre.
+const menuNextNum = (kind = 'week') => 1 + Math.max(0, ...myMenus().map(m => +((m.name || '').match(kind === 'day' ? /^Jour (\d+)/ : /^Menu (\d+)/)?.[1] || 0)));
+let CKSEED = false;
+async function cookSeed() {
+  if (CKSEED || !S.fset || !S.db || (S.fset.cookSeed || 0) >= 1 || !Object.keys(S.foods || {}).length || !myMenus().length) return;
+  // Tant que ses aliments ne sont pas tous arrivés, on attend (sinon les menus ne seraient pas recalculés).
+  if (myMenus().some(m => (m.items || []).some(it => it.food && !/^[bc]\d+$/.test(it.food) && !S.foods[it.food]))) return;
+  CKSEED = true;
+  const changed = Object.values(S.foods).filter(f => !f.deleted && cookInit(f));
+  for (const f of changed) await dbSet('foods/' + f.id, {...f, updatedAt: f.updatedAt || new Date().toISOString()});
+  const fix = L => (L || []).map(it => { const f = S.foods[it.food]; return f?.raw ? {...it, ...itemOf(f, it.g, it.meal)} : it; });
+  let n = menuNextNum();
+  const menus = myMenus().map(m => ({...m, items: fix(m.items)})).map(m => m.kind !== 'day' && /^Semaine \d+$/.test(m.name || '') ? {...m, name: 'Menu ' + n, short: 'M' + n++} : m);
+  const md = {...(S.fset.menuDated || {})}, m8 = menus.find(m => m.name === 'Menu 8');
+  if (m8 && TODAY <= '2026-11-29') for (let i = 0; i < 7; i++) { const k = addDays('2026-11-23', i); if (k >= TODAY) md[k] = m8.id; }
+  await saveFset({menus, menuDated: md, cookSeed: 1});
+  if (changed.length) toast(changed.length > 1 ? `${changed.length} aliments comptés cuits, menus recalculés` : `${changed[0].n} compté cuit, menus recalculés`);
+}
+
 // What an item is mostly there for: carbohydrates, protein or fat (by its calories).
 const mainMacro = it => { const c = it.c * 4, p = it.p * 4, f = it.f * 9; return c >= p && c >= f ? 'c' : p >= f ? 'p' : 'f'; };
 const MACRO_N = {c: 'glucides', p: 'protéines', f: 'lipides'};
@@ -10903,7 +10984,7 @@ const RAW = [[/riz/i, .37, 'cru'], [/pâtes|pates/i, .4, 'crues'], [/escalope|di
 function shopList() {
   const by = {};
   for (let i = 0; i < 7; i++) for (const x of menuFor(addDays(TODAY, i))) { const k = x.food || x.n; (by[k] ||= {n: x.n, food: x.food, g: 0}).g += x.g; }
-  const base = Object.values(by).map(x => { const r = RAW.find(([re]) => re.test(x.n) && /cuit|escalope|dinde|poulet|steak|viande/i.test(x.n)); const buy = r ? x.g * r[1] : x.g, price = +(S.fset.prices?.[x.food || x.n]) || +(foodById(x.food)?.price) || null; return {...x, buy, raw: r?.[2], price, cost: price ? buy / 1000 * price : null}; });
+  const base = Object.values(by).map(x => { const fd = foodById(x.food), r = fd?.raw ? (fd.cuit && +fd.yf ? [null, 1 / fd.yf, 'cru'] : null) : RAW.find(([re]) => re.test(x.n) && /cuit|escalope|dinde|poulet|steak|viande/i.test(x.n)); const buy = r ? x.g * r[1] : x.g, price = +(S.fset.prices?.[x.food || x.n]) || +(foodById(x.food)?.price) || null; return {...x, buy, raw: r?.[2], price, cost: price ? buy / 1000 * price : null}; });
   const ext = (S.fset.shopExtra || []).map(e => { const f = foodById(e.id); if (!f) return null; const pack = f.pack || 500, buy = pack * e.n, price = +(S.fset.prices?.[f.id]) || +f.price || null; return {n: f.n, food: f.id, id: f.id, extra: true, packs: e.n, pack, buy, price, cost: price ? buy / 1000 * price : null}; }).filter(Boolean);
   return [...base, ...ext];
 }
@@ -11197,7 +11278,7 @@ function addFood(meal, q0) {
     toast('Recherche du produit…');
     let o = null; try { o = await offProduct(code); } catch (e) { toast('Pas de réseau : remplis l\'étiquette à la main'); newFood('', null, {code}); return; }
     if (!o || !o.kcal) { toast('Produit inconnu : remplis l\'étiquette à la main'); newFood(o?.n || '', null, {code}); return; }
-    const f = {id: uid(), n: ((o.n || 'Produit') + (o.brand && !(o.n || '').includes(o.brand) ? ' ' + o.brand : '')).trim(), code, kcal: o.kcal, p: o.p, c: o.c, f: o.f, g: o.serving || (o.pack && o.pack <= 250 ? o.pack : 100), pack: o.pack};
+    const f = {id: uid(), n: ((o.n || 'Produit') + (o.brand && !(o.n || '').includes(o.brand) ? ' ' + o.brand : '')).trim(), code, kcal: o.kcal, p: o.p, c: o.c, f: o.f, g: o.serving || (o.pack && o.pack <= 250 ? o.pack : 100), pack: o.pack}; cookInit(f);
     S.foods[f.id] = f; dbSet('foods/' + f.id, {...f, updatedAt: new Date().toISOString()});
     toast('Trouvé et rangé dans Mes aliments'); qtyPane(f, meal);
   };
@@ -11258,7 +11339,7 @@ function qtyPane(f, meal, editIndex) {
   let g = editIndex != null ? fday(S.fday).items[editIndex].g : f.g || 100;
   const tot = () => { const r = g / 100; return {kcal: f.kcal * r, p: f.p * r, c: f.c * r, f: f.f * r}; };
   openPane({title: editIndex != null ? 'Modifier' : 'Quantité', render: () => { const t = tot(); return `
-    <div class="dhead"><div class="bigname">${esc(f.n)}</div><p class="small muted">Pour 100 g : ${fx(f.kcal)} kcal · P ${fx(f.p, 1)} · G ${fx(f.c, 1)} · L ${fx(f.f, 1)}</p></div>
+    <div class="dhead"><div class="bigname">${esc(f.n)}</div><p class="small muted">${f.raw ? (f.cuit ? 'Pesé cuit · ' : 'Pesé cru · ') : ''}Pour 100 g : ${fx(f.kcal)} kcal · P ${fx(f.p, 1)} · G ${fx(f.c, 1)} · L ${fx(f.f, 1)}</p></div>
     <div class="qty"><input inputmode="decimal" id="fq-g" value="${g}" data-fqty aria-label="Quantité en grammes"><span>g</span></div>
     <div class="chipsx" style="justify-content:center">${[...new Set([f.g && f.g !== 100 ? f.g : null, 50, 100, 150, 200].filter(Boolean))].map(v => `<button class="chip" data-fqv="${v}">${v} g${v === f.g && f.unit ? ' · ' + esc(f.unit) : ''}</button>`).join('')}</div>
     <div class="stats mac" id="fq-tot"><div><b>${fx(t.kcal)}</b><span>kcal</span></div><div><b>${fx(t.p, 1)} g</b><span>protéines</span></div><div><b>${fx(t.c, 1)} g</b><span>glucides</span></div><div><b>${fx(t.f, 1)} g</b><span>lipides</span></div></div>
@@ -11274,6 +11355,7 @@ function qtyPane(f, meal, editIndex) {
 }
 function newFood(name, id, opt = {}) {
   const f = id ? {...S.foods[id]} : {id: uid(), n: name || '', kcal: '', p: '', c: '', f: '', g: 100, ...(opt.code ? {code: opt.code} : {})};
+  if (f.raw) Object.assign(f, f.raw);
   const grab = () => document.querySelectorAll('#pane-body [data-nf]').forEach(el => { f[el.dataset.nf] = ['n', 'code', 'brand'].includes(el.dataset.nf) ? el.value.trim() : +String(el.value).replace(',', '.') || 0; });
   const fill = async code => {
     grab(); f.code = code; paneRender(); toast('Recherche du produit…');
@@ -11284,18 +11366,21 @@ function newFood(name, id, opt = {}) {
     grab(); scanStop();
     if (!f.n) { toast('Donne un nom à l\'aliment'); return; }
     if (!f.kcal) { toast('Je cherche les valeurs…'); const g = await foodFind(f.n); if (g) { Object.assign(f, g); paneRender(); toast('Valeurs trouvées : vérifie, puis enregistre'); } else toast('Valeurs introuvables : remplis les calories à la main'); return; }
-    S.foods[f.id] = f; await dbSet('foods/' + f.id, {...f, updatedAt: new Date().toISOString()}); closePane();
+    cookSave(f); S.foods[f.id] = f; await dbSet('foods/' + f.id, {...f, updatedAt: new Date().toISOString()}); closePane();
+    // Ses menus qui contiennent cet aliment se recalculent (valeurs cuites ou crues, nouvelles valeurs d'étiquette).
+    if (id && myMenus().some(m => (m.items || []).some(it => it.food === f.id))) await saveFset({menus: myMenus().map(m => ({...m, items: (m.items || []).map(it => it.food === f.id ? {...it, ...itemOf(f, it.g, it.meal)} : it)}))});
     if (opt.shop) await shopExtra(f.id, 1);
     toast(opt.shop ? 'Ajouté à tes courses' : 'Aliment enregistré'); renderMod();
   }}, render: () => `
     <div class="stack" style="margin-top:16px">${id ? '' : `<button class="btn ghost" data-nfscan>${SCANIC.replace('<svg', '<svg width="24" height="20"')} Scanner le code-barres</button><div id="scan-box"></div>
       <div class="field"><label class="eyebrow" for="nf-code">Ou le numéro sous le code-barres</label><span style="display:flex;gap:6px"><input id="nf-code" data-nf="code" inputmode="numeric" value="${esc(f.code || '')}" placeholder="Ex. 3017620422003"><button type="button" class="chip" data-nfcode>Chercher</button></span></div>`}
     <div class="field"><label class="eyebrow" for="nf-n">Nom</label><span style="display:flex;gap:6px"><input id="nf-n" data-nf="n" value="${esc(f.n)}" placeholder="Ex. Skyr vanille"><button type="button" class="chip" data-nffind>Valeurs</button></span><span class="hint" id="nf-src" style="display:block;margin:6px 2px 0">${f.src ? esc(f.src) : 'Tape le nom : les valeurs se cherchent toutes seules (internet nécessaire).'}</span></div>
-    <p class="small muted">Valeurs pour 100 g, comme sur l'étiquette.</p>
+    <p class="small muted">Valeurs pour 100 g, comme sur l'étiquette.</p>${cookField(f)}
     <div class="grid4">${[['kcal', 'kcal'], ['p', 'Protéines'], ['c', 'Glucides'], ['f', 'Lipides']].map(([k, l]) => `<label class="field" style="font-size:.6875rem;color:var(--fg2);font-weight:600;text-align:center">${l}<input class="mini-in" inputmode="decimal" data-nf="${k}" value="${f[k]}"></label>`).join('')}</div>
     <div class="field"><label class="eyebrow" for="nf-g">Portion habituelle (g)</label><input id="nf-g" inputmode="numeric" data-nf="g" value="${f.g}"></div>
     <div class="grid4" style="grid-template-columns:1fr 1fr"><label class="field" style="font-size:.6875rem;color:var(--fg2);font-weight:600;text-align:center">Contenance du paquet (g ou ml)<input class="mini-in" inputmode="numeric" data-nf="pack" value="${f.pack || ''}"></label><label class="field" style="font-size:.6875rem;color:var(--fg2);font-weight:600;text-align:center">Prix au kilo (€)<input class="mini-in" inputmode="decimal" data-nf="price" value="${f.price || ''}"></label></div>
     ${id ? `<button class="btn ghost" data-fdelfood="${id}" style="color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent)">Supprimer</button>` : ''}</div>`,
+    cook: v => { grab(); f.cuit = v; paneRender(); },
     find: async () => { grab(); if (!f.n) { toast('Tape d\'abord le nom'); return; } toast('Recherche…'); const g = await foodFind(f.n); if (g) { Object.assign(f, g); paneRender(); toast('Valeurs remplies'); } else toast('Rien trouvé : remplis à la main'); },
     scan: () => scanStart(fill), code: () => { const c = ($('#nf-code')?.value || '').replace(/\D/g, ''); if (c.length >= 8) fill(c); else toast('Le numéro fait 8 ou 13 chiffres'); }});
   if (opt.scan && !id) setTimeout(() => scanStart(fill), 400);

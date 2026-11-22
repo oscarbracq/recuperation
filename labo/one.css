@@ -382,3 +382,26 @@ html.one .one-st{transition:none!important;will-change:transform}
 html.one .one-st::before{filter:none!important;background:radial-gradient(closest-side,color-mix(in srgb,var(--c2) 52%,transparent),color-mix(in srgb,var(--c2) 22%,transparent) 55%,transparent)!important}
 /* Tout le contenu d'une story dans une seule couche : elle grandit depuis le carré Actus avec la forme */
 .one-st .sti{position:absolute;inset:0;transform-origin:0 0;z-index:2}
+
+/* ---------- v147 : Nutrition · Aujourd'hui en ligne du temps (un point par repas, à son heure) ---------- */
+.mtl{position:relative;padding-left:24px;margin-top:4px}
+.mtl::before{content:'';position:absolute;left:7px;top:12px;bottom:18px;width:2px;border-radius:2px;background:linear-gradient(to bottom,color-mix(in srgb,var(--one-c,var(--accent)) 70%,transparent),color-mix(in srgb,var(--fg3) 40%,transparent))}
+.mtl-i{position:relative;margin:0 0 16px}
+.mtl-h{display:flex;align-items:baseline;gap:8px;margin:0 2px 8px;min-height:20px}
+.mtl-dot{position:absolute;left:-24px;top:3px;width:16px;height:16px;box-sizing:border-box;border-radius:50%;border:2px solid color-mix(in srgb,var(--fg3) 80%,transparent);background:var(--bg,#000)}
+.mtl-i.past .mtl-dot{border-color:var(--one-c,var(--accent));background:var(--one-c,var(--accent))}
+.mtl-i.now .mtl-dot{border-color:var(--one-c,var(--accent));background:var(--bg,#000);box-shadow:0 0 0 4px color-mix(in srgb,var(--one-c,var(--accent)) 28%,transparent)}
+.mtl-i.now .mtl-dot::after{content:'';position:absolute;inset:3px;border-radius:50%;background:var(--one-c,var(--accent))}
+.mtl-t{font-size:.8rem;font-weight:700;color:var(--fg2);font-variant-numeric:tabular-nums;min-width:38px}
+.mtl-h b{font-size:1.05rem;font-weight:700}
+.mtl-i.now .mtl-h b{color:var(--one-c,var(--accent))}
+.mtl-h small{margin-left:auto;color:var(--fg2);font-size:.8rem;font-weight:600}
+.mtl .list.meal{margin:0}
+/* Sur le fond coloré du module : points et ligne en blanc, bien lisibles */
+.mtl::before{background:linear-gradient(to bottom,rgba(255,255,255,.55),rgba(255,255,255,.18))}
+.mtl-dot{border-color:rgba(255,255,255,.45)}
+.mtl-i.past .mtl-dot{border-color:#fff;background:#fff}
+.mtl-i.now .mtl-dot{border-color:#fff;background:var(--bg,#000);box-shadow:0 0 0 4px rgba(255,255,255,.22)}
+.mtl-i.now .mtl-dot::after{background:#fff}
+.mtl-i.now .mtl-h b{color:var(--fg)}
+.mtl-i.now .mtl-t{color:var(--fg)}
