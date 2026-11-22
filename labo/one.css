@@ -373,3 +373,12 @@ html.one #one-tabs button,html.one #one-tabs button[data-one-h]{transition:flex-
 html.one #one-tabs button svg,html.one #one-tabs button.on svg,html.one .one-tabs button.on svg{filter:none!important;transition:transform var(--tt,440ms) var(--te,ease),color var(--tt,440ms) var(--te,ease),scale .15s!important}
 html.one #one-tabs button .lb{transition:transform var(--tt,440ms) var(--te,ease),opacity var(--tt,440ms) var(--te,ease)}
 html.one #one-tabs.one-drag button,html.one #one-tabs.one-drag button svg,html.one #one-tabs.one-drag button .lb{transition:none!important}
+
+/* ---------- v146 : les actus s'ouvrent et se ferment sans trou ni flash ----------
+   La story reste prête en permanence (plus de bascule au début et à la fin de l'animation, qui obligeait le téléphone à
+   tout repeindre : pendant 2 images on voyait l'Accueil au travers). Le halo du fond n'est plus un flou calculé (très lourd)
+   mais un dégradé doux qui donne le même rendu. Plus de transition sur le fond. */
+html.one .one-st{transition:none!important;will-change:transform}
+html.one .one-st::before{filter:none!important;background:radial-gradient(closest-side,color-mix(in srgb,var(--c2) 52%,transparent),color-mix(in srgb,var(--c2) 22%,transparent) 55%,transparent)!important}
+/* Tout le contenu d'une story dans une seule couche : elle grandit depuis le carré Actus avec la forme */
+.one-st .sti{position:absolute;inset:0;transform-origin:0 0;z-index:2}

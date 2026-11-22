@@ -1833,6 +1833,15 @@ html.one #one-tabs button,html.one #one-tabs button[data-one-h]{transition:flex-
 html.one #one-tabs button svg,html.one #one-tabs button.on svg,html.one .one-tabs button.on svg{filter:none!important;transition:transform var(--tt,440ms) var(--te,ease),color var(--tt,440ms) var(--te,ease),scale .15s!important}
 html.one #one-tabs button .lb{transition:transform var(--tt,440ms) var(--te,ease),opacity var(--tt,440ms) var(--te,ease)}
 html.one #one-tabs.one-drag button,html.one #one-tabs.one-drag button svg,html.one #one-tabs.one-drag button .lb{transition:none!important}
+
+/* ---------- v146 : les actus s'ouvrent et se ferment sans trou ni flash ----------
+   La story reste prête en permanence (plus de bascule au début et à la fin de l'animation, qui obligeait le téléphone à
+   tout repeindre : pendant 2 images on voyait l'Accueil au travers). Le halo du fond n'est plus un flou calculé (très lourd)
+   mais un dégradé doux qui donne le même rendu. Plus de transition sur le fond. */
+html.one .one-st{transition:none!important;will-change:transform}
+html.one .one-st::before{filter:none!important;background:radial-gradient(closest-side,color-mix(in srgb,var(--c2) 52%,transparent),color-mix(in srgb,var(--c2) 22%,transparent) 55%,transparent)!important}
+/* Tout le contenu d'une story dans une seule couche : elle grandit depuis le carré Actus avec la forme */
+.one-st .sti{position:absolute;inset:0;transform-origin:0 0;z-index:2}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -12218,26 +12227,30 @@ const acClip = (el, b, m) => { const s = m ? m.a || 1 : 1, e = m ? m.e : 0, f = 
   const x = (b.x - e) / s, y = (b.y - f) / s, w = b.w / s, h = b.h / s;
   return `inset(${y.toFixed(1)}px ${(W - x - w).toFixed(1)}px ${(H - y - h).toFixed(1)}px ${x.toFixed(1)}px round ${(b.rad / s).toFixed(1)}px)`; };
 function acZoom(el, open, done) {
-  const b = acBox(), kids = [...el.children];
-  el.getAnimations().forEach(a => a.cancel()); kids.forEach(c => c.getAnimations().forEach(a => a.cancel()));
-  let ok = false; const fin = () => { if (ok) return; ok = true; el.classList.remove('zm'); el.style.willChange = ''; if (!open) { el.style.transform = ''; el.style.borderRadius = ''; } done?.(); };
-  if (!b || matchMedia('(prefers-reduced-motion: reduce)').matches) { el.style.transform = ''; el.style.opacity = ''; fin(); return; }
-  el.style.opacity = ''; el.style.willChange = 'clip-path'; el.classList.add('zm');
+  const b = acBox(), sti = el.querySelector('.sti');
+  el.getAnimations().forEach(a => a.cancel()); sti?.getAnimations().forEach(a => a.cancel());
+  let ok = false; const fin = () => { if (ok) return; ok = true; el.classList.remove('zm'); if (!open) { el.style.transform = ''; el.style.borderRadius = ''; } done?.(); };
+  if (!b || !sti || matchMedia('(prefers-reduced-motion: reduce)').matches) { el.style.transform = ''; el.style.opacity = ''; fin(); return; }
+  el.style.opacity = ''; el.classList.add('zm');
+  // Le contenu, en petit, posé sur le carré : même largeur que lui, centré dessus (il grandit au même rythme que la forme).
+  const W = el.clientWidth, H = el.clientHeight, small = lb => { const k = lb.w / W; return `translate(${(lb.x + lb.w / 2 - W * k / 2).toFixed(1)}px, ${(lb.y + lb.h / 2 - H * k / 2).toFixed(1)}px) scale(${k.toFixed(4)})`; };
   if (open) {
     el.style.transform = ''; el.style.borderRadius = '';
-    const a = el.animate([{clipPath: acClip(el, b)}, {clipPath: 'inset(0px 0px 0px 0px round 0px)'}], {duration: 440, easing: 'cubic-bezier(.22,.8,.2,1)'});
-    // Le contenu apparaît pendant que la forme grandit (pas de texte minuscule coupé dans le carré).
-    kids.forEach(c => c.animate([{opacity: 0, transform: 'scale(.94)'}, {opacity: 1, transform: 'none'}], {duration: 360, delay: 90, easing: 'cubic-bezier(.22,.8,.2,1)', fill: 'backwards'}));
+    const D = 460, E = 'cubic-bezier(.3,.75,.2,1)';
+    const a = el.animate([{clipPath: acClip(el, b)}, {clipPath: 'inset(0px 0px 0px 0px round 0px)'}], {duration: D, easing: E});
+    sti.animate([{transform: small(b), opacity: 0}, {opacity: 1, offset: .3}, {transform: 'none', opacity: 1}], {duration: D, easing: E});
     a.finished.then(fin, fin);
   } else {
     // Elle repart de là où elle est (même tirée vers le bas avec le doigt) et se referme dans le carré, arrondis compris.
     const cs = getComputedStyle(el).transform, m = cs && cs !== 'none' ? new DOMMatrix(cs) : null, r0 = parseFloat(el.style.borderRadius) || 0;
+    const k = m ? m.a || 1 : 1, lb = {x: (b.x - (m ? m.e : 0)) / k, y: (b.y - (m ? m.f : 0)) / k, w: b.w / k, h: b.h / k};
     el.style.borderRadius = '';
-    const a = el.animate([{clipPath: `inset(0px 0px 0px 0px round ${r0}px)`}, {clipPath: acClip(el, b, m)}], {duration: 380, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards'});
-    kids.forEach(c => c.animate([{opacity: 1}, {opacity: 0}], {duration: 180, easing: 'ease-out', fill: 'forwards'}));
+    const D = 380, E = 'cubic-bezier(.4,0,.2,1)';
+    const a = el.animate([{clipPath: `inset(0px 0px 0px 0px round ${r0}px)`}, {clipPath: acClip(el, b, m)}], {duration: D, easing: E, fill: 'forwards'});
+    sti.animate([{transform: 'none', opacity: 1}, {opacity: 1, offset: .6}, {transform: small(lb), opacity: 0}], {duration: D, easing: E, fill: 'forwards'});
     // Tout à la fin, posée sur le carré, elle s'efface en un instant : le vrai carré Actus est dessous.
-    el.animate([{opacity: 1}, {opacity: 1, offset: .82}, {opacity: 0}], {duration: 380, fill: 'forwards'});
-    a.finished.then(fin, fin); setTimeout(fin, 520);
+    el.animate([{opacity: 1}, {opacity: 1, offset: .85}, {opacity: 0}], {duration: D, fill: 'forwards'});
+    a.finished.then(fin, fin); setTimeout(fin, D + 140);
   }
 }
 // Tirer la story vers le bas : elle suit le doigt en rétrécissant ; lâchée assez bas (ou d'un coup sec), elle se ferme, sinon elle remonte.
@@ -12256,11 +12269,11 @@ function acShow(i) {
   cancelAnimationFrame(ACS.raf); acHush();
   const s = ACS.L[i]; ACS.i = i; ACS.paused = false; el.classList.remove('paused');
   el.style.setProperty('--c', s.c); el.style.setProperty('--c2', s.c2 || s.c);
-  el.innerHTML = `<div class="bars">${ACS.L.map((x, k) => `<i class="${k < i ? 'd' : k === i ? 'c' : ''}"><b></b></i>`).join('')}</div>
+  el.innerHTML = `<div class="sti"><div class="bars">${ACS.L.map((x, k) => `<i class="${k < i ? 'd' : k === i ? 'c' : ''}"><b></b></i>`).join('')}</div>
     <button class="ax" data-acx aria-label="Fermer">${acIc.x}</button>
     <div class="bgw" aria-hidden="true">${s.w}</div><div class="ct"><span class="k">${s.k}</span><div class="big">${s.big}</div><div class="ttl">${s.t}</div>
     <div class="grid${s.g.length === 4 ? ' g4' : ''}">${s.g.map(([b, l]) => `<div><b>${b}</b><span>${l}</span></div>`).join('')}</div>
-    <p class="syn">${s.syn.map(x => /[.!?…]$/.test(x) ? x : x + '.').join(' ')}</p></div>`;
+    <p class="syn">${s.syn.map(x => /[.!?…]$/.test(x) ? x : x + '.').join(' ')}</p></div></div>`;
   ACS.audio = false; acRun(false);
   try { if (PREFS.haptic !== false) navigator.vibrate?.(5); } catch (e) {}
 }
