@@ -6,6 +6,7 @@
       shows up in the real app (same web address, so without this they would share it). Only the sign-in is shared.
    2. labSandbox(db): reads the real account, but every write stays on this phone ("overlay"), merged on top of
       the real data. Nothing reaches the account. "Réinitialiser le labo" wipes the overlay. */
+document.documentElement.classList.add('lab');   // le Lab : certains essais (textes sur le fond) ne s'appliquent qu'ici
 (() => {
   const PRE = 'labo:', shared = k => /^sb-|^supabase|^trf-mock-db$/.test(String(k));
   const sp = Storage.prototype, get = sp.getItem, set = sp.setItem, del = sp.removeItem;
@@ -53,10 +54,19 @@ function labSandbox(db) {
     collection: col => ({path: col, onSnapshot: (fn, err) => listen(col, null, db.collection(col), fn, err), async get() { return mergeCol(col, await db.collection(col).get()); }, doc: id => docRef(col, id)}),
     doc: p => { const i = p.lastIndexOf('/'); return docRef(p.slice(0, i), p.slice(i + 1)); }
   };
-  // Les 3 séances de muscu proposées pour la semaine de PPS (seulement dans le labo, une fois ; « Réinitialiser » les remet).
-  const SEED = {"lab-pps-a": {"id": "lab-pps-a", "kind": "gym", "name": "PPS · Force et contraste", "short": "PA", "title": "Force max + sauts", "desc": "Préparation spécifique : garder la force maximale, la transformer en explosivité par contraste (lourd puis sauts). À placer le lendemain d'une séance de sprint légère, jamais la veille d'une séance de vitesse max.", "items": [{"ex": "halfsquat", "sets": 4, "reps": 3, "pct": 85, "rest": 240, "note": "Descente contrôlée, remontée la plus vite possible", "tempo": [3, 0, 1, 0]}, {"ex": "boxjump", "sets": 4, "reps": 3, "rest": 180, "link": true, "note": "Enchaîné 20 s après chaque série de squat : contraste", "tempo": [3, 0, 1, 0]}, {"ex": "hipthrust", "sets": 3, "reps": 5, "pct": 80, "rest": 150, "tempo": [3, 0, 1, 0]}, {"ex": "nordic", "sets": 3, "reps": 4, "rest": 150, "note": "Excentrique lent, protège les ischios pour la vitesse", "tempo": [3, 0, 1, 0]}, {"ex": "calf", "sets": 3, "reps": 8, "pct": 80, "rest": 90, "note": "Une jambe, pause 1 s en haut", "tempo": [3, 0, 1, 0]}, {"ex": "pallof", "sets": 3, "reps": 8, "rest": 60, "note": "Par côté", "tempo": [3, 0, 1, 0]}], "updatedAt": "2026-11-22T18:00:00.000Z", "lab": true}, "lab-pps-b": {"id": "lab-pps-b", "kind": "gym", "name": "PPS · Puissance", "short": "PB", "title": "Épaulé, sauts chargés, unilatéral", "desc": "Vitesse d'exécution : charges moyennes déplacées le plus vite possible, travail sur une jambe comme en course. Peu de volume, toujours de la qualité.", "items": [{"ex": "pclean", "sets": 5, "reps": 2, "pct": 75, "rest": 180, "note": "Chaque répétition explosive, on s'arrête si la vitesse baisse", "tempo": [3, 0, 1, 0]}, {"ex": "jsquat", "sets": 4, "reps": 4, "pct": 30, "rest": 150, "note": "30 % du max de squat, réception amortie", "tempo": [3, 0, 1, 0]}, {"ex": "bss", "sets": 3, "reps": 5, "pct": 75, "rest": 150, "note": "Par jambe, montée explosive", "tempo": [3, 0, 1, 0]}, {"ex": "rdl", "sets": 3, "reps": 5, "pct": 75, "rest": 150, "tempo": [3, 0, 1, 0]}, {"ex": "copen", "sets": 3, "reps": 6, "rest": 90, "note": "Par côté : adducteurs, protège le pubis", "tempo": [3, 0, 1, 0]}, {"ex": "tib", "sets": 2, "reps": 15, "rest": 60, "tempo": [3, 0, 1, 0]}], "updatedAt": "2026-11-22T18:00:00.000Z", "lab": true}, "lab-pps-c": {"id": "lab-pps-c", "kind": "gym", "name": "PPS · Haut du corps et prévention", "short": "PC", "title": "Bras, dos, psoas, ischios", "desc": "Le haut du corps entretient la force des bras (le bras moteur du sprint) ; le reste protège les zones qui travaillent le plus en vitesse. Séance courte, peut se faire après un sprint.", "items": [{"ex": "bench", "sets": 3, "reps": 5, "pct": 80, "rest": 150, "tempo": [3, 0, 1, 0]}, {"ex": "pullup", "sets": 3, "reps": 6, "rest": 150, "note": "Lesté si 6 passent facilement", "tempo": [3, 0, 1, 0]}, {"ex": "row", "sets": 3, "reps": 8, "pct": 70, "rest": 90, "tempo": [3, 0, 1, 0]}, {"ex": "hipflex", "sets": 3, "reps": 8, "rest": 90, "note": "Psoas : montée rapide du genou, élastique ou poulie", "tempo": [3, 0, 1, 0]}, {"ex": "legcurl", "sets": 3, "reps": 6, "pct": 75, "rest": 90, "note": "Descente en 3 s", "tempo": [3, 0, 1, 0]}, {"ex": "plank", "sets": 3, "reps": 40, "u": "s", "rest": 60, "tempo": [3, 0, 1, 0]}], "updatedAt": "2026-11-22T18:00:00.000Z", "lab": true}};
-  if (!LAB_RAW.get('labo:seed-pps1')) { for (const id in SEED) if (!O['plans/' + id]) O['plans/' + id] = {d: SEED[id], t: Date.now()}; save(); LAB_RAW.set('labo:seed-pps1', '1'); }
-  window.LAB_DB = {count: () => Object.keys(O).length, list: () => Object.keys(O), reset() { O = {}; save(); LAB_RAW.del('labo:seed-pps1'); }};
+  // Le cycle de musculation proposé (seulement dans le labo) : les semaines 2 à 4 de la PPS (la semaine 1 est dans le compte),
+  // 3 séances par semaine (lundi, mercredi, vendredi). Une fois ; « Réinitialiser le labo » les remet. Les essais d'avant sont retirés.
+  const SEED = {"lab-pps2a": {"id": "lab-pps2a", "kind": "gym", "name": "PPS S2 · Force et contraste", "short": "2A", "title": "Force max + sauts · semaine on monte", "desc": "Garder la force maximale et la rendre rapide : une charge lourde, puis des sauts juste après. Ordre : le plus lourd et le plus rapide d'abord (frais), puis les muscles du sprint, la prévention et le tronc à la fin. Environ 60 min.", "items": [{"ex": "halfsquat", "sets": 4, "reps": 3, "rest": 240, "tempo": [3, 0, 1, 0], "pct": 87, "note": "En premier, frais : la charge la plus lourde de la semaine. Descente contrôlée, remontée la plus vite possible ; arrête la série si la barre ralentit nettement."}, {"ex": "boxjump", "sets": 4, "reps": 3, "rest": 180, "tempo": [3, 0, 1, 0], "note": "20 s après chaque série de squat (contraste) : le muscle lourd puis rapide. Box haute, réception douce, et tu redescends en marchant : aucun choc pour les tibias.", "link": true}, {"ex": "hipthrust", "sets": 3, "reps": 4, "rest": 150, "tempo": [3, 0, 1, 0], "pct": 83, "note": "Les fessiers, moteurs de l'accélération. Pause 1 s en haut, bassin verrouillé."}, {"ex": "legcurl1", "sets": 3, "reps": 6, "rest": 120, "tempo": [3, 0, 1, 0], "note": "Une jambe, descente en 3 s : les ischios en allongement, comme en fin de foulée. Remplace le nordic (rien sur les genoux ni les tibias)."}, {"ex": "seatcalf", "sets": 3, "reps": 10, "rest": 90, "tempo": [3, 0, 1, 0], "note": "Mollets assis : le soléaire, qui encaisse chaque appui. Sans impact."}, {"ex": "pallof", "sets": 3, "reps": 8, "rest": 60, "tempo": [3, 0, 1, 0], "note": "Par côté. En dernier : le tronc qui résiste à la rotation, sans fatiguer les jambes."}], "updatedAt": "2026-11-22T21:30:00.000Z", "lab": true}, "lab-pps2b": {"id": "lab-pps2b", "kind": "gym", "name": "PPS S2 · Puissance", "short": "2B", "title": "Épaulé, lancers, une jambe · semaine on monte", "desc": "La vitesse d'exécution : des charges moyennes déplacées le plus vite possible, puis la force sur une jambe. Peu de volume, toujours de la qualité. Environ 55 min.", "items": [{"ex": "pclean", "sets": 5, "reps": 2, "rest": 180, "tempo": [3, 0, 1, 0], "pct": 80, "note": "En premier : le geste le plus technique et le plus rapide. Chaque répétition explosive ; on s'arrête si la vitesse baisse."}, {"ex": "medball", "sets": 4, "reps": 4, "rest": 120, "tempo": [3, 0, 1, 0], "note": "Lancer arrière par-dessus la tête, tout le corps pousse comme au départ. La puissance sans réception au sol."}, {"ex": "bss", "sets": 3, "reps": 5, "rest": 150, "tempo": [3, 0, 1, 0], "pct": 78, "note": "Par jambe, montée explosive : la force sur une jambe, comme en course."}, {"ex": "rdl", "sets": 3, "reps": 5, "rest": 150, "tempo": [3, 0, 1, 0], "pct": 78, "note": "Dos neutre, hanches en arrière : ischios et fessiers en allongement."}, {"ex": "copen", "sets": 3, "reps": 8, "rest": 90, "tempo": [3, 0, 1, 0], "note": "Par côté : les adducteurs, protège le pubis et l'aine."}, {"ex": "tibkb", "sets": 2, "reps": 12, "rest": 60, "tempo": [3, 0, 1, 0], "note": "Léger et sans douleur : renforcer le tibial antérieur aide contre les périostites. Saute-le si le tibia fait mal ce jour-là."}], "updatedAt": "2026-11-22T21:30:00.000Z", "lab": true}, "lab-pps2c": {"id": "lab-pps2c", "kind": "gym", "name": "PPS S2 · Haut du corps et prévention", "short": "2C", "title": "Bras, dos, psoas, lombaires · semaine on monte", "desc": "Le haut du corps entretient la force des bras ; le reste protège ce qui travaille le plus en vitesse. Séance courte, environ 45 min.", "items": [{"ex": "bench", "sets": 3, "reps": 5, "rest": 150, "tempo": [3, 0, 1, 0], "pct": 82, "note": "Le haut du corps en premier, quand les jambes récupèrent : la force des bras, moteur du sprint."}, {"ex": "pullup", "sets": 3, "reps": 6, "rest": 150, "tempo": [3, 0, 1, 0], "note": "Lesté si 6 passent facilement."}, {"ex": "row", "sets": 3, "reps": 8, "rest": 90, "tempo": [3, 0, 1, 0], "pct": 72, "note": "L'équilibre devant / derrière des épaules."}, {"ex": "multihip_flex", "sets": 3, "reps": 8, "rest": 90, "tempo": [3, 0, 1, 0], "note": "Psoas : montée du genou la plus rapide possible, comme le retour de la jambe en course."}, {"ex": "lumbar", "sets": 3, "reps": 10, "rest": 90, "tempo": [3, 0, 1, 0], "note": "Banc à lombaires : le bas du dos et les ischios, en douceur, pour tenir les départs penchés."}, {"ex": "plank", "sets": 3, "reps": 40, "rest": 60, "tempo": [3, 0, 1, 0], "note": "En dernier, le gainage.", "u": "s"}], "updatedAt": "2026-11-22T21:30:00.000Z", "lab": true}, "lab-pps3a": {"id": "lab-pps3a", "kind": "gym", "name": "PPS S3 · Force et contraste", "short": "3A", "title": "Force max + sauts · semaine pic", "desc": "Garder la force maximale et la rendre rapide : une charge lourde, puis des sauts juste après. Ordre : le plus lourd et le plus rapide d'abord (frais), puis les muscles du sprint, la prévention et le tronc à la fin. Environ 60 min. Semaine de pic : les charges les plus hautes du cycle, peu de répétitions.", "items": [{"ex": "halfsquat", "sets": 5, "reps": 2, "rest": 240, "tempo": [3, 0, 1, 0], "pct": 90, "note": "En premier, frais : la charge la plus lourde de la semaine. Descente contrôlée, remontée la plus vite possible ; arrête la série si la barre ralentit nettement."}, {"ex": "boxjump", "sets": 5, "reps": 3, "rest": 180, "tempo": [3, 0, 1, 0], "note": "20 s après chaque série de squat (contraste) : le muscle lourd puis rapide. Box haute, réception douce, et tu redescends en marchant : aucun choc pour les tibias.", "link": true}, {"ex": "hipthrust", "sets": 3, "reps": 3, "rest": 150, "tempo": [3, 0, 1, 0], "pct": 86, "note": "Les fessiers, moteurs de l'accélération. Pause 1 s en haut, bassin verrouillé."}, {"ex": "legcurl1", "sets": 3, "reps": 6, "rest": 120, "tempo": [3, 0, 1, 0], "note": "Une jambe, descente en 3 s : les ischios en allongement, comme en fin de foulée. Remplace le nordic (rien sur les genoux ni les tibias)."}, {"ex": "seatcalf", "sets": 3, "reps": 8, "rest": 90, "tempo": [3, 0, 1, 0], "note": "Mollets assis : le soléaire, qui encaisse chaque appui. Sans impact."}, {"ex": "pallof", "sets": 3, "reps": 8, "rest": 60, "tempo": [3, 0, 1, 0], "note": "Par côté. En dernier : le tronc qui résiste à la rotation, sans fatiguer les jambes."}], "updatedAt": "2026-11-22T21:30:00.000Z", "lab": true}, "lab-pps3b": {"id": "lab-pps3b", "kind": "gym", "name": "PPS S3 · Puissance", "short": "3B", "title": "Épaulé, lancers, une jambe · semaine pic", "desc": "La vitesse d'exécution : des charges moyennes déplacées le plus vite possible, puis la force sur une jambe. Peu de volume, toujours de la qualité. Environ 55 min. Semaine de pic : les charges les plus hautes du cycle, peu de répétitions.", "items": [{"ex": "pclean", "sets": 6, "reps": 1, "rest": 180, "tempo": [3, 0, 1, 0], "pct": 85, "note": "En premier : le geste le plus technique et le plus rapide. Chaque répétition explosive ; on s'arrête si la vitesse baisse."}, {"ex": "medball", "sets": 4, "reps": 4, "rest": 120, "tempo": [3, 0, 1, 0], "note": "Lancer arrière par-dessus la tête, tout le corps pousse comme au départ. La puissance sans réception au sol."}, {"ex": "bss", "sets": 3, "reps": 4, "rest": 150, "tempo": [3, 0, 1, 0], "pct": 82, "note": "Par jambe, montée explosive : la force sur une jambe, comme en course."}, {"ex": "rdl", "sets": 3, "reps": 4, "rest": 150, "tempo": [3, 0, 1, 0], "pct": 80, "note": "Dos neutre, hanches en arrière : ischios et fessiers en allongement."}, {"ex": "copen", "sets": 3, "reps": 8, "rest": 90, "tempo": [3, 0, 1, 0], "note": "Par côté : les adducteurs, protège le pubis et l'aine."}, {"ex": "tibkb", "sets": 2, "reps": 12, "rest": 60, "tempo": [3, 0, 1, 0], "note": "Léger et sans douleur : renforcer le tibial antérieur aide contre les périostites. Saute-le si le tibia fait mal ce jour-là."}], "updatedAt": "2026-11-22T21:30:00.000Z", "lab": true}, "lab-pps3c": {"id": "lab-pps3c", "kind": "gym", "name": "PPS S3 · Haut du corps et prévention", "short": "3C", "title": "Bras, dos, psoas, lombaires · semaine pic", "desc": "Le haut du corps entretient la force des bras ; le reste protège ce qui travaille le plus en vitesse. Séance courte, environ 45 min. Semaine de pic : les charges les plus hautes du cycle, peu de répétitions.", "items": [{"ex": "bench", "sets": 3, "reps": 4, "rest": 150, "tempo": [3, 0, 1, 0], "pct": 85, "note": "Le haut du corps en premier, quand les jambes récupèrent : la force des bras, moteur du sprint."}, {"ex": "pullup", "sets": 3, "reps": 5, "rest": 150, "tempo": [3, 0, 1, 0], "note": "Lesté si 6 passent facilement."}, {"ex": "row", "sets": 3, "reps": 8, "rest": 90, "tempo": [3, 0, 1, 0], "pct": 75, "note": "L'équilibre devant / derrière des épaules."}, {"ex": "multihip_flex", "sets": 3, "reps": 8, "rest": 90, "tempo": [3, 0, 1, 0], "note": "Psoas : montée du genou la plus rapide possible, comme le retour de la jambe en course."}, {"ex": "lumbar", "sets": 3, "reps": 10, "rest": 90, "tempo": [3, 0, 1, 0], "note": "Banc à lombaires : le bas du dos et les ischios, en douceur, pour tenir les départs penchés."}, {"ex": "plank", "sets": 3, "reps": 40, "rest": 60, "tempo": [3, 0, 1, 0], "note": "En dernier, le gainage.", "u": "s"}], "updatedAt": "2026-11-22T21:30:00.000Z", "lab": true}, "lab-pps4a": {"id": "lab-pps4a", "kind": "gym", "name": "PPS S4 · Force et contraste", "short": "4A", "title": "Force max + sauts · semaine allégée", "desc": "Garder la force maximale et la rendre rapide : une charge lourde, puis des sauts juste après. Ordre : le plus lourd et le plus rapide d'abord (frais), puis les muscles du sprint, la prévention et le tronc à la fin. Environ 60 min. Semaine allégée : même intensité, 40 % de volume en moins, pour arriver frais.", "items": [{"ex": "halfsquat", "sets": 3, "reps": 2, "rest": 240, "tempo": [3, 0, 1, 0], "pct": 88, "note": "En premier, frais : la charge la plus lourde de la semaine. Descente contrôlée, remontée la plus vite possible ; arrête la série si la barre ralentit nettement."}, {"ex": "boxjump", "sets": 3, "reps": 3, "rest": 180, "tempo": [3, 0, 1, 0], "note": "20 s après chaque série de squat (contraste) : le muscle lourd puis rapide. Box haute, réception douce, et tu redescends en marchant : aucun choc pour les tibias.", "link": true}, {"ex": "hipthrust", "sets": 2, "reps": 3, "rest": 150, "tempo": [3, 0, 1, 0], "pct": 83, "note": "Les fessiers, moteurs de l'accélération. Pause 1 s en haut, bassin verrouillé."}, {"ex": "legcurl1", "sets": 2, "reps": 6, "rest": 120, "tempo": [3, 0, 1, 0], "note": "Une jambe, descente en 3 s : les ischios en allongement, comme en fin de foulée. Remplace le nordic (rien sur les genoux ni les tibias)."}, {"ex": "seatcalf", "sets": 2, "reps": 8, "rest": 90, "tempo": [3, 0, 1, 0], "note": "Mollets assis : le soléaire, qui encaisse chaque appui. Sans impact."}, {"ex": "pallof", "sets": 2, "reps": 8, "rest": 60, "tempo": [3, 0, 1, 0], "note": "Par côté. En dernier : le tronc qui résiste à la rotation, sans fatiguer les jambes."}], "updatedAt": "2026-11-22T21:30:00.000Z", "lab": true}, "lab-pps4b": {"id": "lab-pps4b", "kind": "gym", "name": "PPS S4 · Puissance", "short": "4B", "title": "Épaulé, lancers, une jambe · semaine allégée", "desc": "La vitesse d'exécution : des charges moyennes déplacées le plus vite possible, puis la force sur une jambe. Peu de volume, toujours de la qualité. Environ 55 min. Semaine allégée : même intensité, 40 % de volume en moins, pour arriver frais.", "items": [{"ex": "pclean", "sets": 4, "reps": 1, "rest": 180, "tempo": [3, 0, 1, 0], "pct": 80, "note": "En premier : le geste le plus technique et le plus rapide. Chaque répétition explosive ; on s'arrête si la vitesse baisse."}, {"ex": "medball", "sets": 3, "reps": 4, "rest": 120, "tempo": [3, 0, 1, 0], "note": "Lancer arrière par-dessus la tête, tout le corps pousse comme au départ. La puissance sans réception au sol."}, {"ex": "bss", "sets": 2, "reps": 4, "rest": 150, "tempo": [3, 0, 1, 0], "pct": 78, "note": "Par jambe, montée explosive : la force sur une jambe, comme en course."}, {"ex": "rdl", "sets": 2, "reps": 4, "rest": 150, "tempo": [3, 0, 1, 0], "pct": 75, "note": "Dos neutre, hanches en arrière : ischios et fessiers en allongement."}, {"ex": "copen", "sets": 2, "reps": 6, "rest": 90, "tempo": [3, 0, 1, 0], "note": "Par côté : les adducteurs, protège le pubis et l'aine."}, {"ex": "tibkb", "sets": 2, "reps": 12, "rest": 60, "tempo": [3, 0, 1, 0], "note": "Léger et sans douleur : renforcer le tibial antérieur aide contre les périostites. Saute-le si le tibia fait mal ce jour-là."}], "updatedAt": "2026-11-22T21:30:00.000Z", "lab": true}, "lab-pps4c": {"id": "lab-pps4c", "kind": "gym", "name": "PPS S4 · Haut du corps et prévention", "short": "4C", "title": "Bras, dos, psoas, lombaires · semaine allégée", "desc": "Le haut du corps entretient la force des bras ; le reste protège ce qui travaille le plus en vitesse. Séance courte, environ 45 min. Semaine allégée : même intensité, 40 % de volume en moins, pour arriver frais.", "items": [{"ex": "bench", "sets": 2, "reps": 4, "rest": 150, "tempo": [3, 0, 1, 0], "pct": 82, "note": "Le haut du corps en premier, quand les jambes récupèrent : la force des bras, moteur du sprint."}, {"ex": "pullup", "sets": 3, "reps": 4, "rest": 150, "tempo": [3, 0, 1, 0], "note": "Lesté si 6 passent facilement."}, {"ex": "row", "sets": 2, "reps": 8, "rest": 90, "tempo": [3, 0, 1, 0], "pct": 72, "note": "L'équilibre devant / derrière des épaules."}, {"ex": "multihip_flex", "sets": 3, "reps": 8, "rest": 90, "tempo": [3, 0, 1, 0], "note": "Psoas : montée du genou la plus rapide possible, comme le retour de la jambe en course."}, {"ex": "lumbar", "sets": 2, "reps": 10, "rest": 90, "tempo": [3, 0, 1, 0], "note": "Banc à lombaires : le bas du dos et les ischios, en douceur, pour tenir les départs penchés."}, {"ex": "plank", "sets": 2, "reps": 40, "rest": 60, "tempo": [3, 0, 1, 0], "note": "En dernier, le gainage.", "u": "s"}], "updatedAt": "2026-11-22T21:30:00.000Z", "lab": true}};
+  const SEED_DAYS = {"2026-11-30": "lab-pps2a", "2026-12-02": "lab-pps2b", "2026-12-04": "lab-pps2c", "2026-12-07": "lab-pps3a", "2026-12-09": "lab-pps3b", "2026-12-11": "lab-pps3c", "2026-12-14": "lab-pps4a", "2026-12-16": "lab-pps4b", "2026-12-18": "lab-pps4c"};
+  if (!LAB_RAW.get('labo:seed-pps3')) { Object.keys(O).filter(k => /^plans\/lab-pps/.test(k)).forEach(k => { delete O[k]; });
+    for (const id in SEED) O['plans/' + id] = {d: SEED[id], t: Date.now()}; save(); LAB_RAW.set('labo:seed-pps3', '1'); LAB_RAW.del('labo:seed-dated3'); }
+  (function labCale(n = 0) {
+    if (LAB_RAW.get('labo:seed-dated3') || n > 240) return;
+    let ok = false; try { ok = S && S.status === 'ready' && S.tset && typeof saveTset === 'function'; } catch (e) {}
+    if (!ok) { setTimeout(() => labCale(n + 1), 500); return; }
+    try { const d = {...(S.tset.dated || {})}; for (const k in d) if (/^lab-pps1/.test(d[k])) delete d[k]; saveTset({dated: {...d, ...SEED_DAYS}}); LAB_RAW.set('labo:seed-dated3', '1'); } catch (e) {}
+  })();
+  window.LAB_DB = {count: () => Object.keys(O).length, list: () => Object.keys(O), reset() { O = {}; save(); LAB_RAW.del('labo:seed-pps3'); LAB_RAW.del('labo:seed-dated3'); }};
   // No cloud call from the labo: no sync request, no key saved, no notification switched on or off.
   const off = () => Promise.resolve('Labo : sans effet sur ton vrai compte');
   window.RECUP_SYNC = async () => 'Labo : tes données sont celles de ton compte, la synchro reste dans ta vraie appli';
@@ -1782,7 +1792,7 @@ html.one .segl3 .row .l{flex:1}html.one .segl3 .row b small{font-size:.75rem;fon
 html.one .b3n text.b3d{font:700 15px/1 var(--display,system-ui);paint-order:stroke;stroke:var(--card,#1c1c1e);stroke-width:5px;stroke-linejoin:round;font-variant-numeric:tabular-nums}html.one .b3n text.b3d .u{font-size:11px;font-weight:600}
 
 /* Boutons secondaires (Archive, + Créer une séance, + Ajouter…) : un fond plus sombre et plein, qui se détache mieux du fond coloré. */
-html.one .btn.ghost{background:color-mix(in srgb,var(--accent) 12%,#0c0d10)!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 22%,transparent)}
+html.one .btn.ghost{background:color-mix(in srgb,var(--accent) 12%,var(--one-base,#0c0d10))!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 22%,transparent)}
 @media (prefers-color-scheme:light){html.one:not([data-theme="dark"]) .btn.ghost{background:color-mix(in srgb,var(--accent) 16%,#fff)!important}}
 /* Impact des habitudes : le repère du milieu, un petit point gris pas plus haut que la ligne. */
 html.one .imb s{top:1px!important;width:4px!important;height:4px!important;margin-left:-2px!important;border:0!important;box-shadow:none!important;background:#8e8e93!important;border-radius:50%!important}
@@ -1803,11 +1813,11 @@ html.one #hm.one-hm{padding-bottom:calc(118px + env(safe-area-inset-bottom,0px))
 html.one #hm.one-hm .wk{margin-top:auto!important;margin-bottom:auto!important}
 /* Tous les blocs teintés (Ma saison, Mes max, Prise de sang, boutons secondaires, pastilles…) : un fond plein et sombre,
    teinté de la couleur du module, qui ne laisse plus voir le fond à travers. */
-html.one{--accent-soft:color-mix(in srgb,var(--accent) 14%,#0c0d10)}
+html.one{--accent-soft:color-mix(in srgb,var(--accent) 14%,var(--one-base,#0c0d10))}
 html.one .banner{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 22%,transparent)}
-html.one .restb:not(:empty){background:color-mix(in srgb,var(--accent) 18%,#0c0d10)}
-html.one .hdtog,html.one .varbtn{background:color-mix(in srgb,var(--accent) 14%,#0c0d10)}
-html.one .vam[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 18%,#0c0d10)}
+html.one .restb:not(:empty){background:color-mix(in srgb,var(--accent) 18%,var(--one-base,#0c0d10))}
+html.one .hdtog,html.one .varbtn{background:color-mix(in srgb,var(--accent) 14%,var(--one-base,#0c0d10))}
+html.one .vam[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 18%,var(--one-base,#0c0d10))}
 /* v126 · Actus : le doigt garde la main (tirer vers le bas pour fermer) ; pendant le zoom, le halo du fond ne bouge pas. */
 html.one .one-st{touch-action:none}
 html.one .one-st.zm::before{animation-play-state:paused}
@@ -2074,7 +2084,7 @@ html.one-calmx *,html.one-calmx *::before,html.one-calmx *::after{transition-dur
 html.one .banner{background:var(--card)!important;box-shadow:none!important}
 html.one .banner.skipb{background:var(--card)!important}
 html.one .seachip{background:var(--card)!important}
-html.one .wk{background:linear-gradient(160deg,rgba(142,155,181,.10),rgba(142,155,181,.03) 60%,rgba(142,155,181,0)),var(--card)!important}
+html.one .wk{background:linear-gradient(160deg,rgba(142,155,181,.10),rgba(142,155,181,.03) 60%,rgba(142,155,181,0)),#1C1C1E!important}
 html.one .bweek.sebk{background-color:var(--card)}
 html.one .malert{background:color-mix(in srgb,var(--bad) 12%,var(--card))}
 html.one .malert.ok{background:color-mix(in srgb,var(--good) 12%,var(--card))}
@@ -2088,6 +2098,55 @@ html.one .malert.mid{background:color-mix(in srgb,var(--warn) 14%,var(--card))}
 .rczoomv{text-transform:none;color:var(--fg)}
 .rccaminfo{margin:0;text-align:center;font-size:.75rem;color:var(--fg3);font-variant-numeric:tabular-nums}
 .rcrepc{image-rendering:auto}
+
+/* v161 : la caméra, « Lancer le départ » au-dessus de l'image ; l'image tient dans l'écran */
+.rccard .rcgo{margin:0 0 4px}
+.rccard .rcvbox{margin-top:6px}
+.rcprec{color:var(--fg);font-weight:700}
+.rcprecl{margin:0 0 4px;font-size:.8rem;font-weight:600;color:var(--fg2);font-variant-numeric:tabular-nums}
+.rcwarn{margin:0;text-align:center;font-size:.75rem;color:var(--warn)}
+.rccamctl .ctrow{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:.85rem}
+/* v161 : le planning de Nutrition et de Recovery à la même hauteur que celui de Training */
+html.one .sboard.rboard{margin-top:101px!important}
+html.one .sboard.mboard,html.one :is(#f-view,.gv-f-view) > header.top + .sboard.mboard{margin-top:113px!important}
+
+/* v161 (Lab) : les textes posés sur le fond coloré restent lisibles, sans bloc derrière */
+html.lab .onbg{color:rgba(255,255,255,.93)!important;text-shadow:0 1px 2px rgba(0,0,0,.55),0 0 12px rgba(0,0,0,.35)}
+html.lab .foot .onbg,html.lab .foot.onbg,html.lab .foot.onbg *{color:rgba(255,255,255,.93)!important}
+html.lab[data-theme="light"] .onbg,html.lab[data-theme="light"] .foot.onbg *{color:rgba(0,0,0,.82)!important;text-shadow:0 1px 2px rgba(255,255,255,.7),0 0 12px rgba(255,255,255,.55)}
+@media (prefers-color-scheme: light){html.lab:not([data-theme="dark"]) .onbg,html.lab:not([data-theme="dark"]) .foot.onbg *{color:rgba(0,0,0,.82)!important;text-shadow:0 1px 2px rgba(255,255,255,.7),0 0 12px rgba(255,255,255,.55)}}
+
+/* v161 : le mode clair */
+/* Les couleurs claires : les gris plus foncés (lisibles sur blanc), les pastilles colorées sur fond clair (plus de noir). */
+html.one[data-theme="light"]{--fg3:#85858D;--fg2:#5E5E66;--accent-soft:color-mix(in srgb,var(--accent) 13%,#ffffff)}
+@media (prefers-color-scheme: light){html.one:not([data-theme="dark"]){--fg3:#85858D;--fg2:#5E5E66;--accent-soft:color-mix(in srgb,var(--accent) 13%,#ffffff)}}
+
+/* v161 : « Clair » choisi dans l'appli = les mêmes règles que le mode clair du téléphone */
+html[data-theme="light"]{--one-base:#ffffff}
+@media (prefers-color-scheme: light){html:not([data-theme="dark"]){--one-base:#ffffff}}
+html.one[data-theme="light"] .btn.ghost{background:color-mix(in srgb,var(--accent) 16%,#fff)!important}
+html.one[data-theme="light"]{--fg3:#85858D;--fg2:#5E5E66;--accent-soft:color-mix(in srgb,var(--accent) 13%,#ffffff)}
+/* v161 : le questionnaire en mode clair (le bouton gris clair avec texte blanc devenait illisible) */
+html.one[data-theme="light"] #sheet.one-qs{--accent:#48484A!important;--accent-soft:rgba(72,72,74,.12)!important}
+@media (prefers-color-scheme: light){html.one:not([data-theme="dark"]) #sheet.one-qs{--accent:#48484A!important;--accent-soft:rgba(72,72,74,.12)!important}}
+
+/* v161 : mode clair, les textes jaunes, verts, orange, bleu clair et roses (faits pour le fond noir) sont foncés pour se lire sur blanc */
+html.one[data-theme="light"] .sct-v,html.one[data-theme="light"] .zmid{color:color-mix(in srgb,var(--c,#FFD60A) 62%,#000)}
+html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color:#FFD60A"],html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color: #FFD60A"]{color:#A88600!important}
+html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color:#30D158"],html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color: #30D158"]{color:#1E8E3E!important}
+html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color:#FF9F0A"],html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color: #FF9F0A"]{color:#B86B00!important}
+html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color:#64D2FF"],html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color: #64D2FF"]{color:#1673A8!important}
+html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color:#FF6FB5"],html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color: #FF6FB5"]{color:#C2307A!important}
+html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color:#34D27A"],html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color: #34D27A"]{color:#1E8E50!important}
+@media (prefers-color-scheme: light){
+html.one:not([data-theme="dark"]) .sct-v,html.one:not([data-theme="dark"]) .zmid{color:color-mix(in srgb,var(--c,#FFD60A) 62%,#000)}
+html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color:#FFD60A"],html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color: #FFD60A"]{color:#A88600!important}
+html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color:#30D158"],html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color: #30D158"]{color:#1E8E3E!important}
+html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color:#FF9F0A"],html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color: #FF9F0A"]{color:#B86B00!important}
+html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color:#64D2FF"],html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color: #64D2FF"]{color:#1673A8!important}
+html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color:#FF6FB5"],html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color: #FF6FB5"]{color:#C2307A!important}
+html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color:#34D27A"],html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color: #34D27A"]{color:#1E8E50!important}
+}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -2161,7 +2220,8 @@ html.one .malert.mid{background:color-mix(in srgb,var(--warn) 14%,var(--card))}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="../supabase-db.js?v=65"></script>
 
-<script>const $ = s => document.querySelector(s);
+<script>
+const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const key = d => { const z = new Date(d.getTime() - d.getTimezoneOffset()*60000); return z.toISOString().slice(0,10); };
 const addDays = (k, n) => { const d = new Date(k + 'T12:00:00'); d.setDate(d.getDate() + n); return key(d); };
@@ -13028,7 +13088,14 @@ function b3Key(g, sub) {
     hams: 'hams', calves: 'calves', tib: 'tib', rot: 'rotat', rhomb: 'rhomb', arm: 'bi', hip: 'psoas', hiprot: 'piri', pero: 'pero', foot: 'foot'}[g] || null;
 }
 const B3VB = {front: [94, 84, 540, 1268], back: [813.5, 84, 540, 1268]};
-const B3C = {skin: '#2f3036', ghost: '#25262b', line: '#141416', oline: '#6a6d78', obg: '#1a1b20'};
+// Les couleurs du corps : sombres en mode sombre, claires en mode clair (le corps n'est plus noir sur fond blanc).
+const b3Light = () => { const t = document.documentElement.dataset.theme; return t === 'light' || (!t && matchMedia('(prefers-color-scheme: light)').matches); };
+const B3_DARK = {skin: '#2f3036', ghost: '#25262b', line: '#141416', oline: '#6a6d78', obg: '#1a1b20', hair: '#26272d', none: '#3a3b42', zero: '#4a4d57'};
+const B3_LIGHT = {skin: '#d5d7dd', ghost: '#e3e5ea', line: '#f7f8fa', oline: '#a4a8b3', obg: '#eceef2', hair: '#b4b8c2', none: '#c3c6ce', zero: '#b3b7c1'};
+const B3C = new Proxy({}, {get: (o, k) => (b3Light() ? B3_LIGHT : B3_DARK)[k]});
+// Le thème change : la page se redessine avec les bonnes couleurs.
+new MutationObserver(() => { try { renderMod(true); } catch (e) {} }).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+matchMedia('(prefers-color-scheme: light)').addEventListener?.('change', () => { try { renderMod(true); } catch (e) {} });
 // Le corps dessiné, en coordonnées d'origine. paint(key, sub) → {fill, cls} pour chaque muscle ; layer : 'm' (superficiels), 'deep' (moyens et profonds), 'shape' (la forme seule).
 function b3Inner(view, layer, paint) {
   const B = B3D[view], mir = `transform="translate(${2 * B.cx} 0) scale(-1 1)"`, hd = `transform="translate(${B.dx} 0)"`, nm = view === 'front' ? ['droit', 'gauche'] : ['gauche', 'droit'];
@@ -13058,7 +13125,7 @@ function b3Inner(view, layer, paint) {
     return outline(true) + clip + `<g stroke="${B3C.line}" stroke-width="3.2" stroke-linejoin="round">${side(0)}<g ${mir}>${side(1)}</g></g>`;
   }
   const half = k => layer === 'shape' ? skin + B.m.map(x => `<path d="${x[2]}" fill="${B3C.skin}"/>`).join('') : skin + mus(B.m, k);
-  const top = B.hair ? `<g ${hd}><g fill="${B3C.skin}" stroke="${B3C.skin}">${head}</g><path d="${B.hair}" fill="#26272d" stroke="${B3C.line}" stroke-width="3"/></g>` : `<g ${hd} fill="${B3C.skin}">${head}</g>`;
+  const top = B.hair ? `<g ${hd}><g fill="${B3C.skin}" stroke="${B3C.skin}">${head}</g><path d="${B.hair}" fill="${B3C.hair}" stroke="${B3C.line}" stroke-width="3"/></g>` : `<g ${hd} fill="${B3C.skin}">${head}</g>`;
   return `<g stroke="${B3C.line}" stroke-width="3.2" stroke-linejoin="round"><g fill="${B3C.skin}" stroke="${B3C.skin}" stroke-width="12">${all}<g ${mir}>${all}</g><g ${hd}>${head}</g></g>${top}${half(0)}<g ${mir}>${half(1)}</g></g>`;
 }
 function b3Svg(view, layer, paint, cls = '') {
@@ -13078,8 +13145,8 @@ const b3In200 = (view, layer, paint) => `<g transform="${b3Fit(view)}">${b3Inner
 const MZONE_C = {good: '#30D158', mid: '#FFD60A', bad: '#FF453A'};
 musFigure = function (view, per, sel) {
   const lay = S.mlay === 'deep' ? 'deep' : 'm', sub = S.msub || '';
-  const paint = key => { if (!key || !per[key]) return {fill: '#3a3b42'}; const x = per[key];
-    const f = x.load ? MZONE_C[musZone(x.pct)] : '#4a4d57', on = sel === key && (!sub || true);
+  const paint = key => { if (!key || !per[key]) return {fill: B3C.none}; const x = per[key];
+    const f = x.load ? MZONE_C[musZone(x.pct)] : B3C.zero, on = sel === key && (!sub || true);
     return {fill: f, cls: sel ? (on ? 'on' : 'off') : (x.load ? '' : 'idle')}; };
   let svg = b3Svg(view, lay, paint, sel ? 'dim' : '');
   if (sel && sub) svg = svg.replace(/class="m3 on"([^>]*data-sub="([^"]*)")/g, (m, rest, sb) => sb === sub ? `class="m3 on pick"${rest}` : `class="m3 on soft"${rest}`);
@@ -13449,23 +13516,53 @@ function rcMotionChart(L) {
     ${on != null ? `<line x1="${X(on).toFixed(1)}" x2="${X(on).toFixed(1)}" y1="4" y2="${H - 16}" stroke="var(--good)" stroke-width="2"/><text x="${X(on).toFixed(1)}" y="${H - 4}" font-size="9" fill="var(--good)" text-anchor="middle">départ</text>` : ''}</svg>
     <p class="small muted" style="margin:4px 0 0">${S.length} images sur 1,4 s · une image toutes les ${fx(mean(S.slice(1).map((f, k) => f.t - S[k].t)), 1)} ms en moyenne : la mesure est juste à une demi-image près.</p>`;
 }
-// La caméra : la meilleure possible. Caméra arrière choisie (pas forcément le grand angle), la cadence la plus haute
-// qu'elle propose au navigateur, en 1080p si elle tient la même cadence, sinon en 720p ; zoom si le téléphone le permet.
+// La caméra : la plus précise possible.
+// · Au premier usage, chaque caméra arrière est essayée : on garde celle qui tient la plus haute cadence
+//   (à égalité : la caméra principale, puis la plus grande définition). Le choix reste modifiable.
+// · Chrome ne donne souvent 60 im/s qu'en 720p : on essaie 1080p puis 720p, et on garde la cadence la plus haute.
+// · « Pose courte » : en intérieur, le téléphone allonge le temps de pose et tombe à 24 im/s. On fixe un temps de pose
+//   court (1/120 s) quand le téléphone le permet : l'image est un peu plus sombre, mais la cadence tient.
+const rcIsFront = d => /front|avant|user/i.test(d.label || '');
+async function rcCamModes(track, fast) {
+  const caps = track.getCapabilities?.() || {}, fmax = Math.min(caps.frameRate?.max || 60, 240);
+  const tryM = async (w, h, f) => { try { await track.applyConstraints({width: {ideal: w}, height: {ideal: h}, frameRate: {ideal: f}}); } catch (e) {} const st = track.getSettings?.() || {}; return {w, h, f, fps: st.frameRate || 0, px: (st.width || 0) * (st.height || 0)}; };
+  const R = [await tryM(1920, 1080, fmax), await tryM(1280, 720, fmax)];
+  const best = R.sort((x, y) => (y.fps - x.fps) > 1 ? 1 : (x.fps - y.fps) > 1 ? -1 : y.px - x.px)[0];
+  await tryM(best.w, best.h, best.f);
+  if (fast && caps.exposureTime && (caps.exposureMode || []).includes('manual')) {
+    const f = Math.max(60, best.fps || 60), et = Math.max(caps.exposureTime.min, Math.min(caps.exposureTime.max, Math.round(10000 / (f * 2))));
+    try { await track.applyConstraints({advanced: [{exposureMode: 'manual', exposureTime: et, ...(caps.iso ? {iso: Math.round(caps.iso.min + (caps.iso.max - caps.iso.min) * .5)} : {})}]}); } catch (e) {}
+  } else if (!fast && (caps.exposureMode || []).includes('continuous')) { try { await track.applyConstraints({advanced: [{exposureMode: 'continuous'}]}); } catch (e) {} }
+  return caps;
+}
+async function rcCamProbe() {
+  let devs = []; try { devs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'videoinput' && !rcIsFront(d)); } catch (e) {}
+  if (devs.length < 2) return devs[0]?.deviceId || '';
+  const st = document.querySelector('.rcstat'); if (st) st.textContent = 'Recherche de la caméra la plus précise…';
+  const res = [];
+  for (const d of devs) {
+    try {
+      const s = await navigator.mediaDevices.getUserMedia({audio: false, video: {deviceId: {exact: d.deviceId}}}), t = s.getVideoTracks()[0];
+      await rcCamModes(t, false); const se = t.getSettings?.() || {}, caps = t.getCapabilities?.() || {};
+      res.push({id: d.deviceId, fps: se.frameRate || 0, w: caps.width?.max || 0, main: /(^|\D)0(,|$)/.test(d.label || '') ? 1 : 0}); s.getTracks().forEach(x => x.stop());
+    } catch (e) {}
+  }
+  res.sort((x, y) => (y.fps - x.fps) > 1 ? 1 : (x.fps - y.fps) > 1 ? -1 : (y.main - x.main) || (y.w - x.w));
+  return res[0]?.id || '';
+}
 async function rcCamOpen() {
   if (RCT.cam || RCT.camBusy) return; RCT.camBusy = true;
-  const c = rcCfg(), base = {width: {ideal: 1920}, height: {ideal: 1080}, frameRate: {ideal: 120}};
-  const v = c.camId ? {...base, deviceId: {exact: c.camId}} : {...base, facingMode: {ideal: 'environment'}};
   try {
+    // La permission d'abord (les noms des caméras n'apparaissent qu'après), puis le choix automatique une fois.
+    if (!rcCfg().camAuto) { const s0 = await navigator.mediaDevices.getUserMedia({audio: false, video: {facingMode: {ideal: 'environment'}}}); s0.getTracks().forEach(t => t.stop()); const id = await rcCamProbe(); rcSetCfg({camId: id, camBest: id, camAuto: 1, zoom: null}); }
+    const c = rcCfg(), v = c.camId ? {deviceId: {exact: c.camId}} : {facingMode: {ideal: 'environment'}};
     let stream; try { stream = await navigator.mediaDevices.getUserMedia({audio: false, video: {...v, zoom: true}}); } catch (e) { stream = await navigator.mediaDevices.getUserMedia({audio: false, video: v}); }
-    const track = stream.getVideoTracks()[0], caps = track.getCapabilities?.() || {}, fmax = caps.frameRate?.max || 60;
-    const tryRes = async (w, h) => { try { await track.applyConstraints({width: {ideal: w}, height: {ideal: h}, frameRate: {ideal: fmax}}); } catch (e) {} return track.getSettings?.() || {}; };
-    let st = await tryRes(1920, 1080);
-    if ((st.frameRate || 0) < Math.min(fmax, 60) - 1) { const st2 = await tryRes(1280, 720); if ((st2.frameRate || 0) > (st.frameRate || 0) + 1) st = st2; else st = await tryRes(1920, 1080); }
-    if (caps.zoom && c.zoom) try { await track.applyConstraints({advanced: [{zoom: c.zoom}]}); } catch (e) {}
-    let devs = []; try { devs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'videoinput'); } catch (e) {}
+    const track = stream.getVideoTracks()[0], caps = await rcCamModes(track, c.fast !== false);
+    if (caps.zoom) try { await track.applyConstraints({advanced: [{zoom: c.zoom || caps.zoom.min}]}); } catch (e) {}
+    let devs = []; try { devs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'videoinput' && !rcIsFront(d)); } catch (e) {}
     const el = document.createElement('video'); el.playsInline = true; el.muted = true; el.autoplay = true; el.srcObject = stream; el.className = 'rcvid'; await el.play().catch(() => {});
-    st = track.getSettings?.() || st;
-    RCT.cam = {stream, track, el, caps, devs, id: st.deviceId, fps: st.frameRate || null, w: st.width, h: st.height, zoom: st.zoom ?? c.zoom ?? null};
+    const st = track.getSettings?.() || {};
+    RCT.cam = {stream, track, el, caps, devs, id: st.deviceId, fps: st.frameRate || null, w: st.width, h: st.height, zoom: st.zoom ?? c.zoom ?? caps.zoom?.min ?? null, fast: c.fast !== false && !!caps.exposureTime};
     el.addEventListener('resize', rcMount); paneRender(); rcPoseLive();
   } catch (e) { toast('Caméra refusée ou indisponible'); }
   RCT.camBusy = false;
@@ -13474,12 +13571,13 @@ function rcCamClose() { try { RCT.cam?.stream.getTracks().forEach(t => t.stop())
 // Le choix de la caméra, le zoom, et ce que la caméra donne vraiment.
 function rcCamCtl() {
   const C = RCT.cam; if (!C) return '';
-  const back = C.devs.filter(d => !/front|avant|user/i.test(d.label)), list = back.length > 1 ? back : C.devs.length > 1 ? C.devs : [];
-  const z = C.caps?.zoom;
+  const list = C.devs.length > 1 ? C.devs : [], z = C.caps?.zoom, fps = C.real || C.fps, pr = fps ? 1000 / fps / 2 + 2 : null;
   return `<div class="rccamctl">
-    ${list.length ? `<label class="rcsel">Caméra<select data-rccamid>${list.map((d, i) => `<option value="${esc(d.deviceId)}"${d.deviceId === C.id ? ' selected' : ''}>${esc(d.label ? d.label.replace(/camera2 /i, 'Caméra ').replace(/, facing back/i, ' (arrière)').replace(/, facing front/i, ' (avant)') : 'Caméra ' + (i + 1))}</option>`).join('')}</select></label>` : ''}
+    ${list.length ? `<label class="rcsel">Caméra<select data-rccamid>${list.map((d, i) => `<option value="${esc(d.deviceId)}"${d.deviceId === C.id ? ' selected' : ''}>Caméra ${i + 1}${d.deviceId === rcCfg().camBest ? ' · la plus précise' : ''}</option>`).join('')}</select></label>` : ''}
     ${z && z.max > z.min ? `<label class="rcsel">Zoom <span class="rczoomv">× ${fx(C.zoom || z.min, 1)}</span><input type="range" data-rczoom min="${z.min}" max="${Math.min(z.max, 10)}" step="${z.step || .1}" value="${C.zoom || z.min}"></label>` : ''}
-    <p class="rccaminfo">${C.w && C.h ? C.w + ' × ' + C.h : ''}${C.fps ? ' · ' + Math.round(C.fps) + ' im/s demandées' : ''} · <span class="rcfps">${C.real ? Math.round(C.real) + ' im/s mesurées' : 'mesure…'}</span></p></div>`;
+    ${C.caps?.exposureTime ? `<div class="ctrow"><span>Pose courte <small class="muted">garde la cadence en intérieur</small></span><div class="seg">${[[1, 'Oui'], [0, 'Non']].map(([v, l]) => `<button type="button" data-rcfast="${v}" aria-pressed="${!!C.fast === !!v}">${l}</button>`).join('')}</div></div>` : ''}
+    <p class="rccaminfo">${C.w && C.h ? C.w + ' × ' + C.h + ' · ' : ''}<span class="rcfps">${C.real ? Math.round(C.real) + ' im/s mesurées' : 'mesure de la cadence…'}</span>${pr ? ` · <b class="rcprec">précision ± ${fx(pr, 0)} ms</b>` : ''}</p>
+    ${C.real && C.real < 45 ? '<p class="rcwarn">Cadence basse : plus de lumière, « Pose courte », ou filme en Pro vidéo 120 im/s et importe la vidéo.</p>' : ''}</div>`;
 }
 async function rcCamGo() {
   const cam = RCT.cam; if (!cam || RCT.run) return;
@@ -13563,7 +13661,7 @@ function rcRoiDraw() { const r = document.querySelector('.rcroi'); if (!r) retur
 function rcMount() {
   const box = document.querySelector('.rcvbox'); const el = RCT.mode === 'cam' ? RCT.cam?.el : RCT.mode === 'video' ? RCT.vid?.el : null;
   if (box && el && el.parentNode !== box) box.prepend(el);
-  if (box && el?.videoWidth) { const a = el.videoWidth / el.videoHeight; box.style.aspectRatio = el.videoWidth + ' / ' + el.videoHeight; box.style.width = `min(100%, calc(58vh * ${a.toFixed(4)}))`; }
+  if (box && el?.videoWidth) { const a = el.videoWidth / el.videoHeight; box.style.aspectRatio = el.videoWidth + ' / ' + el.videoHeight; box.style.width = `min(100%, calc(50vh * ${a.toFixed(4)}))`; }
   else if (el && !el._rcm) { el._rcm = 1; el.addEventListener('loadedmetadata', rcMount); }
   rcRoiDraw();
 }
@@ -13591,14 +13689,16 @@ function rcBody() {
   if (m === 'son') main = `${rcSettings(false)}
     <div class="rcpad${last?.fs ? ' fs' : ''}" role="button" aria-label="Pose ton doigt ici, lève-le au coup"><b>${last ? (last.fs ? (last.early ? 'Faux départ' : rcMs(last.ms) + ' · faux départ') : rcMs(last.ms)) : 'Pose ton doigt ici'}</b><small>${last ? 'Repose ton doigt pour un nouvel essai' : 'Garde-le posé, et lève-le au coup de pistolet'}</small></div>
     <p class="rcnote">Moins de 100 ms = faux départ</p>`;
-  else if (m === 'cam') main = `${rcSettings(true)}
-    ${RCT.cam ? `<div class="card rccard"><div class="rcvbox${RCT.roiOn ? ' roion' : ''}"><div class="rcroi"></div></div>
+  else if (m === 'cam') main = `
+    ${RCT.cam ? `<div class="card rccard"><div class="btnrow two rcgo"><button class="btn ghost" data-rcroi>${RCT.roiOn ? 'Valider le cadre' : 'Tracer le cadre'}</button><button class="btn" data-rccamgo${RCT.run ? ' disabled' : ''}>Lancer le départ</button></div>
+      <p class="rcstat small" style="text-align:center;margin:6px 0 0"></p>
+      <div class="rcvbox${RCT.roiOn ? ' roion' : ''}"><div class="rcroi"></div></div>
       ${rcCamCtl()}
       <div class="rcrepgo" style="margin-top:8px"><button type="button" class="chip" data-rcposeon aria-pressed="${!!rcCfg().pose}">Bonhomme</button><span class="rcposestat small muted"></span></div>
-      <p class="small muted" style="margin:6px 2px 0">Téléphone sur trépied, de profil, à 2 ou 3 m des blocs ; zoome pour que tu remplisses le cadre. La précision dépend de la cadence mesurée : à 30 im/s, ± 17 ms ; à 60 im/s, ± 8 ms. Pour aller plus loin, filme avec l'appareil photo en « Pro vidéo » 1080p à 120 im/s, et importe la vidéo (onglet Vidéo importée) : ± 4 ms. Le cadre vert = la zone surveillée : toi seul dedans. Le bonhomme montre ce que le téléphone voit de ton corps ; il se met en pause pendant le départ pour ne pas gêner la mesure.</p>
-      <div class="btnrow two" style="margin-top:8px"><button class="btn ghost" data-rcroi>${RCT.roiOn ? 'Valider le cadre' : 'Tracer le cadre'}</button><button class="btn" data-rccamgo${RCT.run ? ' disabled' : ''}>Lancer le départ</button></div>
-      <p class="rcstat small" style="text-align:center;margin:8px 0 0"></p></div>` : `<button class="btn rcopen" data-rccam>Ouvrir la caméra</button><p class="rcnote">Téléphone posé au sol, de profil, toi dans les blocs</p>`}
-    ${RCT.last?.mode === 'cam' ? rcAnalysis() : ''}`;
+      <p class="small muted" style="margin:6px 2px 0">Téléphone sur trépied, de profil, à 2 ou 3 m des blocs ; zoome pour que tu remplisses le cadre. La précision dépend de la cadence : à 30 im/s ± 19 ms, à 60 im/s ± 10 ms. Dans un navigateur, Android ne donne pas plus de 60 im/s (le 120 et le 240 im/s sont réservés à l'appareil photo de Samsung). Pour le plus précis : filme en « Pro vidéo », 1080p, 120 im/s, et importe la vidéo (onglet Vidéo importée) : ± 6 ms. Le cadre vert = la zone surveillée : toi seul dedans. Le bonhomme montre ce que le téléphone voit de ton corps ; il se met en pause pendant le départ pour ne pas gêner la mesure.</p>
+</div>` : `<button class="btn rcopen" data-rccam>Ouvrir la caméra</button><p class="rcnote">Téléphone sur trépied, de profil, toi dans les blocs</p><p class="rcstat small" style="text-align:center;margin:6px 0 0"></p>`}
+    ${RCT.last?.mode === 'cam' ? rcAnalysis() : ''}
+    ${rcSettings(true)}`;
   else { const V = RCT.vid;
     main = `<label class="btn ghost rcfile">${V ? 'Choisir une autre vidéo' : 'Importer une vidéo de départ'}<input type="file" accept="video/*" data-rcfile hidden></label>
     ${V ? `<div class="card rccard"><div class="rcvbox${RCT.roiOn ? ' roion' : ''}"><div class="rcroi"></div></div>
@@ -13619,7 +13719,9 @@ function rcBody() {
       <div class="list" style="margin-top:6px">${hist.slice(-6).reverse().map(h => `<div class="row"><span class="l">${esc(cap(fmtShort(h.date)))}</span><span class="small muted">${h.n || 0} essais · moyenne ${rcMs(h.avg)}</span><b class="num">${rcMs(h.best)}</b></div>`).join('')}</div></div>` : ''}</div>`;
 }
 function rcAnalysis() { const L = RCT.last, ms = L.i != null ? rcResult(L.F, L.tb, L.i) : null;
+  const fr = L.F.filter(f => f.t > L.tb - 300 && f.t < L.tb + 600), dt = fr.length > 2 ? (fr.at(-1).t - fr[0].t) / (fr.length - 1) : null, pr = dt ? dt / 2 + 2 : null;
   return `<div class="card" style="margin-top:12px"><span class="eyebrow">Dernier départ</span><div class="rcbig num">${ms == null ? 'Pas de départ vu' : rcMs(ms)}</div>
+    ${ms != null && pr ? `<p class="rcprecl">Précision ± ${fx(pr, 0)} ms · ${fx(Math.max(0, 100 - pr / Math.max(ms, 100) * 100), 0)} % · une image toutes les ${fx(dt, 1)} ms</p>` : ''}
     ${rcReplay(L)}${rcMotionChart(L)}${L.i != null ? `<div class="btnrow two" style="margin-top:8px"><button class="btn ghost" data-rcstep="-1">← Une image avant</button><button class="btn ghost" data-rcstep="1">Une image après →</button></div>` : '<p class="small muted">Rien n\'a bougé assez fort dans le cadre : agrandis-le ou rapproche le téléphone.</p>'}</div>`; }
 function reactPane() { openPane({title: 'Test de réaction', render: rcBody, onClose: () => { if (RCT.run) rcStop(RCT.run); rcCamClose(); rcSetLast(null); }}); }
 const rcLastTxt = () => { const t = tests().filter(x => x.type === 'react').sort((a, b) => b.date.localeCompare(a.date))[0]; return t ? `${rcMs(t.best)} le ${fmtShort(t.date)} · ` : ''; };
@@ -13628,9 +13730,10 @@ document.addEventListener('click', async e => {
   if (at('[data-treact]')) { reactPane(); return; }
   if ((b = at('[data-rcmode]'))) { if (RCT.run) rcStop(RCT.run); RCT.mode = b.dataset.rcmode; RCT.roiOn = false; if (RCT.mode !== 'cam') rcCamClose(); paneRender(); return; }
   if ((b = at('[data-rcstart]'))) { rcSetCfg({start: b.dataset.rcstart}); paneRender(); return; }
+  if ((b = at('[data-rcfast]'))) { rcSetCfg({fast: b.dataset.rcfast === '1'}); rcCamClose(); paneRender(); rcCamOpen(); return; }
   if ((b = at('[data-rcflash]'))) { rcSetCfg({flash: b.dataset.rcflash === '1'}); paneRender(); return; }
   if (at('[data-rccam]')) { rcCamOpen(); return; }
-  if (at('[data-rccamgo]')) { RCT.roiOn = false; document.querySelector('.rcvbox')?.classList.remove('roion'); rcCamGo(); return; }
+  if (at('[data-rccamgo]')) { document.querySelector('.rccard')?.scrollIntoView({block: 'start', behavior: 'smooth'}); RCT.roiOn = false; document.querySelector('.rcvbox')?.classList.remove('roion'); rcCamGo(); return; }
   if (at('[data-rcroi]')) { RCT.roiOn = !RCT.roiOn; if (RCT.vid?.el) RCT.vid.el.controls = !RCT.roiOn; paneRender(); return; }
   if ((b = at('[data-rcbang]'))) { const V = RCT.vid; V.tb = +b.dataset.rcbang; V.el.currentTime = V.tb; paneRender(); return; }
   if (at('[data-rcbanghere]')) { const V = RCT.vid; V.tb = V.el.currentTime; paneRender(); return; }
@@ -13891,6 +13994,42 @@ document.addEventListener('click', e => {
   if (at('[data-rcposeon]')) { rcSetCfg({pose: !rcCfg().pose}); if (rcCfg().pose) { rcPoseLoad(); rcPoseLive(); if (RCT.last && !RCT.last.body) rcBodyAnalyze(RCT.last); } else rcPoseClear(); paneRender(); return; }
 });
 document.addEventListener('change', e => { const s = e.target.closest?.('[data-rccamid]'); if (!s) return; rcSetCfg({camId: s.value, zoom: null}); rcCamClose(); paneRender(); rcCamOpen(); });
+
+/* ================= Les textes posés directement sur le fond coloré (TNR Lab d'abord) =================
+   Le fond animé change de couleur (rouge vif en Training, vert, bleu) : un texte gris posé dessus, sans bloc derrière,
+   disparaît par endroits (« Garmin 20:48 · Withings », « Exercices de rééquilibrage du jour »…).
+   Sans ajouter de fond : ces textes passent en blanc cassé (en noir doux en mode clair) avec un halo très léger de
+   la couleur opposée, qui les détache de n'importe quelle couleur derrière. Seulement dans le Lab pour l'instant
+   (html.lab), pour qu'Oscar juge avant de le passer dans l'appli. */
+(function oneOnBg() {
+  if (!document.documentElement.classList.contains('lab')) return;
+  const SEL = '.foot, .sec-label, h2 small, h2, h1 + p, p.small, p.note, p.hint, .hint, .muted, .eyebrow, .tophead small, .hm-date, .one-tipb, small';
+  const opaque = el => { for (let e = el; e && e !== document.body; e = e.parentElement) { const b = getComputedStyle(e).backgroundColor, m = b.match(/rgba?\(([^)]+)\)/), a = m ? (m[1].split(',')[3] ?? 1) : 0; if (b !== 'transparent' && +a > .5) return true; if (e.classList?.contains('pane') || e.id === 'sheet') return true; } return false; };
+  let T = 0;
+  const run = () => { T = 0; document.querySelectorAll(SEL).forEach(el => { if (el.closest('#one-top, #one-tabs, svg, .toast, .card, .tcard, .list, .seg, button, .one-sq')) return; el.classList.toggle('onbg', !opaque(el.parentElement)); }); };
+  new MutationObserver(() => { if (!T) T = setTimeout(run, 60); }).observe(document.body, {childList: true, subtree: true});
+  setTimeout(run, 500);
+})();
+
+/* ================= La musculation de la semaine de PPS, dans le compte d'Oscar (une fois) =================
+   Trois séances, lundi 23, mercredi 25 et vendredi 27 novembre (le matin, le sprint du coach reste le soir) :
+   A Force et contraste, B Puissance, C Haut du corps et prévention. Sans nordic, sans réception dure (périostites) ;
+   tout se fait en entier au Decathlon de Marcq-en-Barœul. Écrites une seule fois (settings/training.seedPPS1) ;
+   ensuite ce sont des séances comme les autres, à modifier ou déplacer. Pas dans le Lab (il a son propre cycle). */
+(function oneSeedPPS(n = 0) {
+  if (document.documentElement.classList.contains('lab') || n > 240) return;
+  let ok = false; try { ok = S.status === 'ready' && S.db && S.tset && typeof saveTset === 'function' && typeof dbSet === 'function'; } catch (e) {}
+  if (!ok) { setTimeout(() => oneSeedPPS(n + 1), 500); return; }
+  if (S.tset.seedPPS1) return;
+  const P = {"tnr-pps1a": {"id": "tnr-pps1a", "kind": "gym", "name": "PPS S1 · Force et contraste", "short": "1A", "title": "Force max + sauts · semaine reprise", "desc": "Garder la force maximale et la rendre rapide : une charge lourde, puis des sauts juste après. Ordre : le plus lourd et le plus rapide d'abord (frais), puis les muscles du sprint, la prévention et le tronc à la fin. Environ 60 min.", "items": [{"ex": "halfsquat", "sets": 4, "reps": 3, "rest": 240, "tempo": [3, 0, 1, 0], "pct": 85, "note": "En premier, frais : la charge la plus lourde de la semaine. Descente contrôlée, remontée la plus vite possible ; arrête la série si la barre ralentit nettement."}, {"ex": "boxjump", "sets": 4, "reps": 3, "rest": 180, "tempo": [3, 0, 1, 0], "note": "20 s après chaque série de squat (contraste) : le muscle lourd puis rapide. Box haute, réception douce, et tu redescends en marchant : aucun choc pour les tibias.", "link": true}, {"ex": "hipthrust", "sets": 3, "reps": 5, "rest": 150, "tempo": [3, 0, 1, 0], "pct": 80, "note": "Les fessiers, moteurs de l'accélération. Pause 1 s en haut, bassin verrouillé."}, {"ex": "legcurl1", "sets": 3, "reps": 6, "rest": 120, "tempo": [3, 0, 1, 0], "note": "Une jambe, descente en 3 s : les ischios en allongement, comme en fin de foulée. Remplace le nordic (rien sur les genoux ni les tibias)."}, {"ex": "seatcalf", "sets": 3, "reps": 10, "rest": 90, "tempo": [3, 0, 1, 0], "note": "Mollets assis : le soléaire, qui encaisse chaque appui. Sans impact."}, {"ex": "pallof", "sets": 3, "reps": 8, "rest": 60, "tempo": [3, 0, 1, 0], "note": "Par côté. En dernier : le tronc qui résiste à la rotation, sans fatiguer les jambes."}], "updatedAt": "2026-11-22T21:30:00.000Z"}, "tnr-pps1b": {"id": "tnr-pps1b", "kind": "gym", "name": "PPS S1 · Puissance", "short": "1B", "title": "Épaulé, lancers, une jambe · semaine reprise", "desc": "La vitesse d'exécution : des charges moyennes déplacées le plus vite possible, puis la force sur une jambe. Peu de volume, toujours de la qualité. Environ 55 min.", "items": [{"ex": "pclean", "sets": 5, "reps": 2, "rest": 180, "tempo": [3, 0, 1, 0], "pct": 75, "note": "En premier : le geste le plus technique et le plus rapide. Chaque répétition explosive ; on s'arrête si la vitesse baisse."}, {"ex": "medball", "sets": 4, "reps": 4, "rest": 120, "tempo": [3, 0, 1, 0], "note": "Lancer arrière par-dessus la tête, tout le corps pousse comme au départ. La puissance sans réception au sol."}, {"ex": "bss", "sets": 3, "reps": 5, "rest": 150, "tempo": [3, 0, 1, 0], "pct": 75, "note": "Par jambe, montée explosive : la force sur une jambe, comme en course."}, {"ex": "rdl", "sets": 3, "reps": 5, "rest": 150, "tempo": [3, 0, 1, 0], "pct": 75, "note": "Dos neutre, hanches en arrière : ischios et fessiers en allongement."}, {"ex": "copen", "sets": 3, "reps": 6, "rest": 90, "tempo": [3, 0, 1, 0], "note": "Par côté : les adducteurs, protège le pubis et l'aine."}, {"ex": "tibkb", "sets": 2, "reps": 12, "rest": 60, "tempo": [3, 0, 1, 0], "note": "Léger et sans douleur : renforcer le tibial antérieur aide contre les périostites. Saute-le si le tibia fait mal ce jour-là."}], "updatedAt": "2026-11-22T21:30:00.000Z"}, "tnr-pps1c": {"id": "tnr-pps1c", "kind": "gym", "name": "PPS S1 · Haut du corps et prévention", "short": "1C", "title": "Bras, dos, psoas, lombaires · semaine reprise", "desc": "Le haut du corps entretient la force des bras ; le reste protège ce qui travaille le plus en vitesse. Séance courte, environ 45 min.", "items": [{"ex": "bench", "sets": 3, "reps": 5, "rest": 150, "tempo": [3, 0, 1, 0], "pct": 80, "note": "Le haut du corps en premier, quand les jambes récupèrent : la force des bras, moteur du sprint."}, {"ex": "pullup", "sets": 3, "reps": 6, "rest": 150, "tempo": [3, 0, 1, 0], "note": "Lesté si 6 passent facilement."}, {"ex": "row", "sets": 3, "reps": 8, "rest": 90, "tempo": [3, 0, 1, 0], "pct": 70, "note": "L'équilibre devant / derrière des épaules."}, {"ex": "multihip_flex", "sets": 3, "reps": 8, "rest": 90, "tempo": [3, 0, 1, 0], "note": "Psoas : montée du genou la plus rapide possible, comme le retour de la jambe en course."}, {"ex": "lumbar", "sets": 3, "reps": 10, "rest": 90, "tempo": [3, 0, 1, 0], "note": "Banc à lombaires : le bas du dos et les ischios, en douceur, pour tenir les départs penchés."}, {"ex": "plank", "sets": 3, "reps": 40, "rest": 60, "tempo": [3, 0, 1, 0], "note": "En dernier, le gainage.", "u": "s"}], "updatedAt": "2026-11-22T21:30:00.000Z"}}, D = {"2026-11-23": "tnr-pps1a", "2026-11-25": "tnr-pps1b", "2026-11-27": "tnr-pps1c"};
+  (async () => {
+    try {
+      for (const id in P) if (!S.plans?.[id]) { S.plans = {...(S.plans || {}), [id]: P[id]}; await dbSet('plans/' + id, P[id]); }
+      await saveTset({dated: {...(S.tset.dated || {}), ...D}, seedPPS1: true});
+      try { renderMod(true); } catch (e) {}
+    } catch (e) {}
+  })();
+})();
 
 /* ================= TNR · Paramètres (la roue crantée, en haut à gauche de l'Accueil) =================
    Tout ce qui se règle dans l'appli, au même endroit :

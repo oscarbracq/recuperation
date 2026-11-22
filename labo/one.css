@@ -257,7 +257,7 @@ html.one .segl3 .row .l{flex:1}html.one .segl3 .row b small{font-size:.75rem;fon
 html.one .b3n text.b3d{font:700 15px/1 var(--display,system-ui);paint-order:stroke;stroke:var(--card,#1c1c1e);stroke-width:5px;stroke-linejoin:round;font-variant-numeric:tabular-nums}html.one .b3n text.b3d .u{font-size:11px;font-weight:600}
 
 /* Boutons secondaires (Archive, + Créer une séance, + Ajouter…) : un fond plus sombre et plein, qui se détache mieux du fond coloré. */
-html.one .btn.ghost{background:color-mix(in srgb,var(--accent) 12%,#0c0d10)!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 22%,transparent)}
+html.one .btn.ghost{background:color-mix(in srgb,var(--accent) 12%,var(--one-base,#0c0d10))!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 22%,transparent)}
 @media (prefers-color-scheme:light){html.one:not([data-theme="dark"]) .btn.ghost{background:color-mix(in srgb,var(--accent) 16%,#fff)!important}}
 /* Impact des habitudes : le repère du milieu, un petit point gris pas plus haut que la ligne. */
 html.one .imb s{top:1px!important;width:4px!important;height:4px!important;margin-left:-2px!important;border:0!important;box-shadow:none!important;background:#8e8e93!important;border-radius:50%!important}
@@ -278,11 +278,11 @@ html.one #hm.one-hm{padding-bottom:calc(118px + env(safe-area-inset-bottom,0px))
 html.one #hm.one-hm .wk{margin-top:auto!important;margin-bottom:auto!important}
 /* Tous les blocs teintés (Ma saison, Mes max, Prise de sang, boutons secondaires, pastilles…) : un fond plein et sombre,
    teinté de la couleur du module, qui ne laisse plus voir le fond à travers. */
-html.one{--accent-soft:color-mix(in srgb,var(--accent) 14%,#0c0d10)}
+html.one{--accent-soft:color-mix(in srgb,var(--accent) 14%,var(--one-base,#0c0d10))}
 html.one .banner{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 22%,transparent)}
-html.one .restb:not(:empty){background:color-mix(in srgb,var(--accent) 18%,#0c0d10)}
-html.one .hdtog,html.one .varbtn{background:color-mix(in srgb,var(--accent) 14%,#0c0d10)}
-html.one .vam[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 18%,#0c0d10)}
+html.one .restb:not(:empty){background:color-mix(in srgb,var(--accent) 18%,var(--one-base,#0c0d10))}
+html.one .hdtog,html.one .varbtn{background:color-mix(in srgb,var(--accent) 14%,var(--one-base,#0c0d10))}
+html.one .vam[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 18%,var(--one-base,#0c0d10))}
 /* v126 · Actus : le doigt garde la main (tirer vers le bas pour fermer) ; pendant le zoom, le halo du fond ne bouge pas. */
 html.one .one-st{touch-action:none}
 html.one .one-st.zm::before{animation-play-state:paused}
@@ -549,7 +549,7 @@ html.one-calmx *,html.one-calmx *::before,html.one-calmx *::after{transition-dur
 html.one .banner{background:var(--card)!important;box-shadow:none!important}
 html.one .banner.skipb{background:var(--card)!important}
 html.one .seachip{background:var(--card)!important}
-html.one .wk{background:linear-gradient(160deg,rgba(142,155,181,.10),rgba(142,155,181,.03) 60%,rgba(142,155,181,0)),var(--card)!important}
+html.one .wk{background:linear-gradient(160deg,rgba(142,155,181,.10),rgba(142,155,181,.03) 60%,rgba(142,155,181,0)),#1C1C1E!important}
 html.one .bweek.sebk{background-color:var(--card)}
 html.one .malert{background:color-mix(in srgb,var(--bad) 12%,var(--card))}
 html.one .malert.ok{background:color-mix(in srgb,var(--good) 12%,var(--card))}
@@ -563,3 +563,52 @@ html.one .malert.mid{background:color-mix(in srgb,var(--warn) 14%,var(--card))}
 .rczoomv{text-transform:none;color:var(--fg)}
 .rccaminfo{margin:0;text-align:center;font-size:.75rem;color:var(--fg3);font-variant-numeric:tabular-nums}
 .rcrepc{image-rendering:auto}
+
+/* v161 : la caméra, « Lancer le départ » au-dessus de l'image ; l'image tient dans l'écran */
+.rccard .rcgo{margin:0 0 4px}
+.rccard .rcvbox{margin-top:6px}
+.rcprec{color:var(--fg);font-weight:700}
+.rcprecl{margin:0 0 4px;font-size:.8rem;font-weight:600;color:var(--fg2);font-variant-numeric:tabular-nums}
+.rcwarn{margin:0;text-align:center;font-size:.75rem;color:var(--warn)}
+.rccamctl .ctrow{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:.85rem}
+/* v161 : le planning de Nutrition et de Recovery à la même hauteur que celui de Training */
+html.one .sboard.rboard{margin-top:101px!important}
+html.one .sboard.mboard,html.one :is(#f-view,.gv-f-view) > header.top + .sboard.mboard{margin-top:113px!important}
+
+/* v161 (Lab) : les textes posés sur le fond coloré restent lisibles, sans bloc derrière */
+html.lab .onbg{color:rgba(255,255,255,.93)!important;text-shadow:0 1px 2px rgba(0,0,0,.55),0 0 12px rgba(0,0,0,.35)}
+html.lab .foot .onbg,html.lab .foot.onbg,html.lab .foot.onbg *{color:rgba(255,255,255,.93)!important}
+html.lab[data-theme="light"] .onbg,html.lab[data-theme="light"] .foot.onbg *{color:rgba(0,0,0,.82)!important;text-shadow:0 1px 2px rgba(255,255,255,.7),0 0 12px rgba(255,255,255,.55)}
+@media (prefers-color-scheme: light){html.lab:not([data-theme="dark"]) .onbg,html.lab:not([data-theme="dark"]) .foot.onbg *{color:rgba(0,0,0,.82)!important;text-shadow:0 1px 2px rgba(255,255,255,.7),0 0 12px rgba(255,255,255,.55)}}
+
+/* v161 : le mode clair */
+/* Les couleurs claires : les gris plus foncés (lisibles sur blanc), les pastilles colorées sur fond clair (plus de noir). */
+html.one[data-theme="light"]{--fg3:#85858D;--fg2:#5E5E66;--accent-soft:color-mix(in srgb,var(--accent) 13%,#ffffff)}
+@media (prefers-color-scheme: light){html.one:not([data-theme="dark"]){--fg3:#85858D;--fg2:#5E5E66;--accent-soft:color-mix(in srgb,var(--accent) 13%,#ffffff)}}
+
+/* v161 : « Clair » choisi dans l'appli = les mêmes règles que le mode clair du téléphone */
+html[data-theme="light"]{--one-base:#ffffff}
+@media (prefers-color-scheme: light){html:not([data-theme="dark"]){--one-base:#ffffff}}
+html.one[data-theme="light"] .btn.ghost{background:color-mix(in srgb,var(--accent) 16%,#fff)!important}
+html.one[data-theme="light"]{--fg3:#85858D;--fg2:#5E5E66;--accent-soft:color-mix(in srgb,var(--accent) 13%,#ffffff)}
+/* v161 : le questionnaire en mode clair (le bouton gris clair avec texte blanc devenait illisible) */
+html.one[data-theme="light"] #sheet.one-qs{--accent:#48484A!important;--accent-soft:rgba(72,72,74,.12)!important}
+@media (prefers-color-scheme: light){html.one:not([data-theme="dark"]) #sheet.one-qs{--accent:#48484A!important;--accent-soft:rgba(72,72,74,.12)!important}}
+
+/* v161 : mode clair, les textes jaunes, verts, orange, bleu clair et roses (faits pour le fond noir) sont foncés pour se lire sur blanc */
+html.one[data-theme="light"] .sct-v,html.one[data-theme="light"] .zmid{color:color-mix(in srgb,var(--c,#FFD60A) 62%,#000)}
+html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color:#FFD60A"],html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color: #FFD60A"]{color:#A88600!important}
+html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color:#30D158"],html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color: #30D158"]{color:#1E8E3E!important}
+html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color:#FF9F0A"],html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color: #FF9F0A"]{color:#B86B00!important}
+html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color:#64D2FF"],html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color: #64D2FF"]{color:#1673A8!important}
+html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color:#FF6FB5"],html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color: #FF6FB5"]{color:#C2307A!important}
+html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color:#34D27A"],html.one[data-theme="light"] :is(b,span,small,strong,p,em,i,div)[style*="color: #34D27A"]{color:#1E8E50!important}
+@media (prefers-color-scheme: light){
+html.one:not([data-theme="dark"]) .sct-v,html.one:not([data-theme="dark"]) .zmid{color:color-mix(in srgb,var(--c,#FFD60A) 62%,#000)}
+html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color:#FFD60A"],html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color: #FFD60A"]{color:#A88600!important}
+html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color:#30D158"],html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color: #30D158"]{color:#1E8E3E!important}
+html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color:#FF9F0A"],html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color: #FF9F0A"]{color:#B86B00!important}
+html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color:#64D2FF"],html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color: #64D2FF"]{color:#1673A8!important}
+html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color:#FF6FB5"],html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color: #FF6FB5"]{color:#C2307A!important}
+html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color:#34D27A"],html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color: #34D27A"]{color:#1E8E50!important}
+}

@@ -18,7 +18,14 @@ function b3Key(g, sub) {
     hams: 'hams', calves: 'calves', tib: 'tib', rot: 'rotat', rhomb: 'rhomb', arm: 'bi', hip: 'psoas', hiprot: 'piri', pero: 'pero', foot: 'foot'}[g] || null;
 }
 const B3VB = {front: [94, 84, 540, 1268], back: [813.5, 84, 540, 1268]};
-const B3C = {skin: '#2f3036', ghost: '#25262b', line: '#141416', oline: '#6a6d78', obg: '#1a1b20'};
+// Les couleurs du corps : sombres en mode sombre, claires en mode clair (le corps n'est plus noir sur fond blanc).
+const b3Light = () => { const t = document.documentElement.dataset.theme; return t === 'light' || (!t && matchMedia('(prefers-color-scheme: light)').matches); };
+const B3_DARK = {skin: '#2f3036', ghost: '#25262b', line: '#141416', oline: '#6a6d78', obg: '#1a1b20', hair: '#26272d', none: '#3a3b42', zero: '#4a4d57'};
+const B3_LIGHT = {skin: '#d5d7dd', ghost: '#e3e5ea', line: '#f7f8fa', oline: '#a4a8b3', obg: '#eceef2', hair: '#b4b8c2', none: '#c3c6ce', zero: '#b3b7c1'};
+const B3C = new Proxy({}, {get: (o, k) => (b3Light() ? B3_LIGHT : B3_DARK)[k]});
+// Le thème change : la page se redessine avec les bonnes couleurs.
+new MutationObserver(() => { try { renderMod(true); } catch (e) {} }).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+matchMedia('(prefers-color-scheme: light)').addEventListener?.('change', () => { try { renderMod(true); } catch (e) {} });
 // Le corps dessiné, en coordonnées d'origine. paint(key, sub) → {fill, cls} pour chaque muscle ; layer : 'm' (superficiels), 'deep' (moyens et profonds), 'shape' (la forme seule).
 function b3Inner(view, layer, paint) {
   const B = B3D[view], mir = `transform="translate(${2 * B.cx} 0) scale(-1 1)"`, hd = `transform="translate(${B.dx} 0)"`, nm = view === 'front' ? ['droit', 'gauche'] : ['gauche', 'droit'];
@@ -48,7 +55,7 @@ function b3Inner(view, layer, paint) {
     return outline(true) + clip + `<g stroke="${B3C.line}" stroke-width="3.2" stroke-linejoin="round">${side(0)}<g ${mir}>${side(1)}</g></g>`;
   }
   const half = k => layer === 'shape' ? skin + B.m.map(x => `<path d="${x[2]}" fill="${B3C.skin}"/>`).join('') : skin + mus(B.m, k);
-  const top = B.hair ? `<g ${hd}><g fill="${B3C.skin}" stroke="${B3C.skin}">${head}</g><path d="${B.hair}" fill="#26272d" stroke="${B3C.line}" stroke-width="3"/></g>` : `<g ${hd} fill="${B3C.skin}">${head}</g>`;
+  const top = B.hair ? `<g ${hd}><g fill="${B3C.skin}" stroke="${B3C.skin}">${head}</g><path d="${B.hair}" fill="${B3C.hair}" stroke="${B3C.line}" stroke-width="3"/></g>` : `<g ${hd} fill="${B3C.skin}">${head}</g>`;
   return `<g stroke="${B3C.line}" stroke-width="3.2" stroke-linejoin="round"><g fill="${B3C.skin}" stroke="${B3C.skin}" stroke-width="12">${all}<g ${mir}>${all}</g><g ${hd}>${head}</g></g>${top}${half(0)}<g ${mir}>${half(1)}</g></g>`;
 }
 function b3Svg(view, layer, paint, cls = '') {
@@ -68,8 +75,8 @@ const b3In200 = (view, layer, paint) => `<g transform="${b3Fit(view)}">${b3Inner
 const MZONE_C = {good: '#30D158', mid: '#FFD60A', bad: '#FF453A'};
 musFigure = function (view, per, sel) {
   const lay = S.mlay === 'deep' ? 'deep' : 'm', sub = S.msub || '';
-  const paint = key => { if (!key || !per[key]) return {fill: '#3a3b42'}; const x = per[key];
-    const f = x.load ? MZONE_C[musZone(x.pct)] : '#4a4d57', on = sel === key && (!sub || true);
+  const paint = key => { if (!key || !per[key]) return {fill: B3C.none}; const x = per[key];
+    const f = x.load ? MZONE_C[musZone(x.pct)] : B3C.zero, on = sel === key && (!sub || true);
     return {fill: f, cls: sel ? (on ? 'on' : 'off') : (x.load ? '' : 'idle')}; };
   let svg = b3Svg(view, lay, paint, sel ? 'dim' : '');
   if (sel && sub) svg = svg.replace(/class="m3 on"([^>]*data-sub="([^"]*)")/g, (m, rest, sb) => sb === sub ? `class="m3 on pick"${rest}` : `class="m3 on soft"${rest}`);
