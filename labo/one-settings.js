@@ -57,8 +57,8 @@ function oneSettings() {
     <h2>Ouverture de l'appli</h2><div class="list">
       <div class="row col"><span class="l">Page d'ouverture<span class="hint">La page qui s'affiche quand tu ouvres l'appli</span></span>${seg('start', [['home', 'Accueil'], ['T', 'Training'], ['N', 'Nutrition'], ['R', 'Recovery']])}</div>
       ${psw('autoSync', 'Actualiser à l\'ouverture', 'Va chercher Garmin et Withings à chaque ouverture')}</div>
-    <h2>Langue</h2><div class="list"><div class="row col"><span class="l">Noms des trois parties<span class="hint">Les lettres T, N, R restent les mêmes</span></span>
-      <div class="seg" role="group" aria-label="Langue">${[['fr', 'Français'], ['en', 'English']].map(([v, l]) => `<button type="button" data-hlang="${v}" aria-pressed="${(S.lang || 'en') === v}">${l}</button>`).join('')}</div></div></div>
+    <h2>Langue</h2><div class="list"><div class="row col"><span class="l">Langue de l'appli<span class="hint">Toute l'appli en français ou en anglais. Training, Nutrition et Recovery gardent leur nom.</span></span>
+      <div class="seg" role="group" aria-label="Langue de l'appli">${[['fr', 'Français'], ['en', 'English']].map(([v, l]) => `<button type="button" data-hlang="${v}" aria-pressed="${(S.lang || 'fr') === v}">${l}</button>`).join('')}</div></div></div>
     ${notifSection()}
     ${connSection()}
     ${appsSection()}

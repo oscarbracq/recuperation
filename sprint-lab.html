@@ -6310,9 +6310,9 @@ const e1rm = (kg, reps) => kg > 0 && reps > 0 ? kg * (1 + Math.min(reps, 10) / 3
 const dow = k => new Date(k + 'T12:00:00').getDay();
 // Names of the three parts. The letters T, N, R stay whatever the language.
 const NAMES = {en: {T: 'Training', N: 'Nutrition', R: 'Recovery'}, fr: {T: 'Entraînement', N: 'Nutrition', R: 'Récupération'}};
-const modName = m => (NAMES[S.lang] || NAMES.en)[m];
+const modName = m => NAMES.en[m]; // Training, Nutrition, Recovery in both languages (labo/one-i18n.js translates the rest)
 const DAYS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-Object.assign(S, {mod: 'home', plans: {}, logs: {}, tset: {}, fuel: {}, foods: {}, fset: {}, ttab: 'today', tkind: 'gym', lib: {q: '', cat: ''}, prog: 'squat', ftab: 'journal', fday: TODAY, live: null, lang: 'en'});
+Object.assign(S, {mod: 'home', plans: {}, logs: {}, tset: {}, fuel: {}, foods: {}, fset: {}, ttab: 'today', tkind: 'gym', lib: {q: '', cat: ''}, prog: 'squat', ftab: 'journal', fday: TODAY, live: null, lang: 'fr'});
 try { Object.assign(S, JSON.parse(localStorage.getItem('trf-ui') || '{}')); S.fday = TODAY; S.mod = 'home'; } catch (e) {}
 S.tkind = 'gym';
 try { S.live = JSON.parse(localStorage.getItem('trf-live') || 'null'); } catch (e) {}
@@ -7478,8 +7478,8 @@ document.addEventListener('change', async e => {
 });
 function homeSettings() {
   openPane({title: 'Paramètres', side: true, render: () => `
-    <div class="list" style="margin-top:16px"><div class="row col"><span class="l">Langue<span class="hint">Change les noms des trois parties. Les lettres T, N, R restent les mêmes.</span></span>
-      <div class="seg" role="group" aria-label="Langue">${[['fr', 'Français'], ['en', 'English']].map(([v, l]) => `<button type="button" data-hlang="${v}" aria-pressed="${(S.lang || 'en') === v}">${l}</button>`).join('')}</div>
+    <div class="list" style="margin-top:16px"><div class="row col"><span class="l">Langue de l'appli<span class="hint">Toute l'appli en français ou en anglais. Training, Nutrition et Recovery gardent leur nom.</span></span>
+      <div class="seg" role="group" aria-label="Langue de l'appli">${[['fr', 'Français'], ['en', 'English']].map(([v, l]) => `<button type="button" data-hlang="${v}" aria-pressed="${(S.lang || 'fr') === v}">${l}</button>`).join('')}</div>
       <span class="hint">${['T', 'N', 'R'].map(m => `${m} · ${modName(m)}`).join(' &nbsp; ')}</span></div></div>
     ${notifSection()}
     ${connSection()}
