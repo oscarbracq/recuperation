@@ -612,3 +612,28 @@ html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="co
 html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color:#FF6FB5"],html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color: #FF6FB5"]{color:#C2307A!important}
 html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color:#34D27A"],html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="color: #34D27A"]{color:#1E8E50!important}
 }
+
+/* v162 : la séance en tableau (lecture seule), comme pendant la séance */
+.ptabs{display:grid;gap:10px;margin-top:12px}
+.ptab{background:var(--card);border-radius:18px;padding:12px 12px 10px}
+.ptab.plink{margin-top:-6px;border-top-left-radius:6px;border-top-right-radius:6px;box-shadow:inset 3px 0 0 var(--accent)}
+.ptab-h{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;padding:0;margin:0 0 6px;color:var(--fg);font:inherit;text-align:left;cursor:pointer}
+.ptab-h b{font-size:1.0625rem;font-weight:700;flex:1;min-width:0}
+.ptab-go{color:var(--fg3);font-size:1.25rem;line-height:1}
+.ptab-s{margin:-2px 0 8px;font-size:.8125rem;color:var(--fg2)}
+.ptbr{display:grid;grid-template-columns:44px 1fr 1fr 1fr;gap:6px;align-items:center;text-align:center;font-variant-numeric:tabular-nums}
+.ptbr.p2{grid-template-columns:44px 1fr}
+.ptbr>span{padding:9px 4px;border-radius:10px;background:var(--card2);font-size:.9375rem;font-weight:600}
+.ptbr+.ptbr{margin-top:6px}
+.ptbr .n{background:none;color:var(--fg2);font-weight:700}
+.ptbr.hd>span{background:none;padding:0 2px 2px;font-size:.6875rem;font-weight:700;color:var(--fg2);text-transform:uppercase;letter-spacing:.04em}
+.ptab-why{margin-top:8px}
+.ptab-why summary{font-size:.8125rem;font-weight:600;color:var(--accent);cursor:pointer}
+.ptab-why p{margin:6px 2px 0;font-size:.875rem;line-height:1.45;color:var(--fg)}
+/* v162 : le questionnaire, les boutons « Modifier » sous chaque synthèse */
+.qmod{width:100%;margin-top:10px}
+/* v162 : le temps d'écran du téléphone qui n'arrive plus */
+.scr-warn{margin:10px 2px 0;font-size:.8125rem;line-height:1.4;color:var(--warn);font-weight:600}
+/* v162 : le « Détail » en bas à droite d'un bloc ne passe plus sur le contenu */
+html.one .one-hastip{padding-bottom:34px!important}
+html.one .one-tipb.one-tipc{bottom:8px}

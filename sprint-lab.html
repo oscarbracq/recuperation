@@ -4225,6 +4225,14 @@ function scrDev(k, d) {
 const scrTot = k => { const a = scrDev(k, 'ph'), b = scrDev(k, 'pc'); return a || b ? (a?.t || 0) + (b?.t || 0) : null; };
 const PH_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>';
 const PC_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>';
+// Le téléphone envoie son temps d'écran toutes les heures (Automate, « TNR écran »). Plus rien depuis 4 h, ou pas de journée
+// d'hier : le scénario s'est arrêté (redémarrage, économie de batterie). On le dit, avec quoi faire.
+function scrPhStale() {
+  const L = Object.values(S.screenph || {}).map(x => +x.at > 0 ? +x.at * (+x.at < 1e12 ? 1000 : 1) : 0).filter(Boolean); if (!L.length) return '';
+  const last = Math.max(...L), h = (Date.now() - last) / 36e5; if (h < 4 || new Date().getHours() < 9) return '';
+  const d = new Date(last), when = d.toLocaleDateString('fr-FR', {weekday: 'long', day: 'numeric', month: 'long'}) + ' à ' + d.toTimeString().slice(0, 5);
+  return `<p class="scr-warn">Le téléphone n'envoie plus son temps d'écran depuis ${esc(when)}. Sur le téléphone : ouvre Automate, et relance le scénario « TNR écran » (bouton Démarrer).</p>`;
+}
 function scrBlock() {
   const k = TODAY, ph = scrDev(k, 'ph'), pc = scrDev(k, 'pc'), tot = scrTot(k);
   const wk = []; for (let i = 1; i <= 7; i++) { const v = scrTot(addDays(k, -i)); if (v != null) wk.push(v); }
@@ -4238,7 +4246,7 @@ function scrBlock() {
   return `<section class="scr-sec"><h2>Temps d'écran</h2>
     <div class="scr-card">
       <button type="button" class="scr-tot" data-scr="all"><span class="eyebrow">Temps d'écran total · aujourd'hui</span><span class="scr-big"><b class="num">${tot != null ? durTxt(Math.round(tot)) : '–'}</b>${av != null ? `<span class="small muted">moyenne 7 jours ${durTxt(Math.round(av))}</span>` : ''}</span><span class="scr-go" aria-hidden="true">›</span></button>
-      <div class="scr-two">${dev('ph', 'Téléphone', PH_IC, ph)}${dev('pc', 'Ordinateur', PC_IC, pc)}</div>
+      <div class="scr-two">${dev('ph', 'Téléphone', PH_IC, ph)}${dev('pc', 'Ordinateur', PC_IC, pc)}</div>${scrPhStale()}
     </div></section>`;
 }
 const SCRP = {open: false, dev: 'all', per: '7'};
@@ -5547,7 +5555,7 @@ document.addEventListener('click', e => { const b = e.target.closest('[data-wtog
 // pain (OSTRC, Clarsen et al. 2020). The weights follow the strength of evidence; they are written below.
 const SC_C = '#FFD60A', SC_U = '#FF6FB5';
 const wakeGoal = k => dayPlan(k).find(x => x.c === 'sommeil' && tmin(x.a) < 6 * 60)?.b || null;
-const WELL = [['slq', 'Sommeil ressenti', 'très mauvais', 'excellent'], ['fat', 'Fatigue', 'épuisé', 'très frais'], ['sor', 'Courbatures', 'très fortes', 'aucune'], ['leg', 'Jambes', 'très lourdes', 'très légères'], ['str', 'Stress', 'très stressé', 'très détendu'], ['mood', 'Humeur', 'très basse', 'excellente'], ['mot', 'Envie de t\'entraîner', 'aucune', 'à fond']];
+const WELL = [['slq', 'Sommeil ressenti', 'très mauvais', 'excellent'], ['fat', 'Fatigue', 'épuisé', 'très frais'], ['sor', 'Courbatures', 'très fortes', 'aucune'], ['str', 'Stress', 'très stressé', 'très détendu'], ['mood', 'Humeur', 'très basse', 'excellente'], ['mot', 'Envie de t\'entraîner', 'aucune', 'à fond']];
 const wellOf = k => { const w = M(k, 'well') || {}, v = WELL.map(([id]) => w[id]).filter(x => x); return v.length ? mean(v) : null; };
 function dayScores(k) {
   const C = [], U = [], add = (L, w, v, n, d) => { if (v != null && !isNaN(v)) L.push({w, v: clamp(v, 0, 1), n, d}); };
@@ -5638,7 +5646,9 @@ const noteEditable = k => k >= addDays(TODAY, -1);
    Le soir : le planning (coché d'office, il suit les changements), les séances, l'alimentation (choisie d'après le
    journal tant qu'il n'y touche pas), l'eau, l'alcool, la digestion, le stress de la journée, le temps d'écran, les notes. */
 const SICK = [['gorge', 'Mal de gorge'], ['nez', 'Nez qui coule'], ['toux', 'Toux'], ['fievre', 'Fièvre ou frissons'], ['ventre', 'Ventre, digestion'], ['tete', 'Mal de tête']];
-const qmPick = k => { const f = S.qmForce; S.qmForce = null; if (f) return f; return k === TODAY && new Date().getHours() < 14 ? 'matin' : 'soir'; };
+const qmPick = k => { const f = S.qmForce; S.qmForce = null; if (f) return f; if (M(k, 'mornAt')) return 'soir'; return k === TODAY && new Date().getHours() < 14 ? 'matin' : 'soir'; };
+// Les synthèses enregistrées, chacune suivie de son bouton « Modifier » (les questions répondues disparaissent).
+const qmMornPart = k => M(k, 'mornAt') ? mornSyn(k) + '<button type="button" class="btn ghost qmod" data-qm="matin">Modifier le matin</button>' : '<button type="button" class="btn ghost qmod" data-qm="matin">Remplir le questionnaire du matin</button>';
 const qmSeg = () => `<div class="seg qmseg" role="group" aria-label="Moment du questionnaire">${[['matin', 'Le matin'], ['soir', 'Le soir']].map(([v, l]) => `<button type="button" data-qm="${v}" aria-pressed="${S.qm === v}">${l}</button>`).join('')}</div>`;
 const sickHtml = () => `<div class="sec-label">Signes de maladie <small>rien de coché = tu vas bien</small></div><div class="chipsx" id="e-sick">${SICK.map(([id, l]) => `<button type="button" class="chip" data-qsick="${id}" aria-pressed="${(draft.sick || []).includes(id)}">${l}</button>`).join('')}</div>`;
 function eveHtml() {
@@ -5668,12 +5678,12 @@ async function saveMorning() {
   if (!S.db) { toast('Non enregistré : ouvre la page connecté à ton compte'); return; }
   clearTimeout(NOTE_T); NOTE_T = null;
   const {k, doc} = noteCollect(); doc.mornAt = new Date().toISOString(); S.manual[k] = doc;
-  try { await S.db.collection('manual').doc(k).set(doc); S.qmForce = 'matin'; S.noteEdit = true; openSheet('note', k); $('#sheet-scroll').scrollTop = 0; toast('Matin enregistré : ta synthèse est prête'); }
+  try { await S.db.collection('manual').doc(k).set(doc); S.qmForce = 'soir'; S.noteEdit = true; openSheet('note', k); $('#sheet-scroll').scrollTop = 0; toast('Matin enregistré : ta synthèse est prête'); }
   catch (e) { toast('Échec de l\'enregistrement, réessaie'); }
 }
 document.addEventListener('click', async e => {
   if (S.sheet?.kind !== 'note') return; let b;
-  if ((b = e.target.closest('[data-qm]'))) { if (b.dataset.qm === S.qm) return; await noteFlush(); S.qmForce = b.dataset.qm; S.noteEdit = true; openSheet('note', $('#e-date')?.value || S.sheet.arg); return; }
+  if ((b = e.target.closest('[data-qm]'))) { if (b.dataset.qm === S.qm && !$('#sheet-body .recap')) return; await noteFlush(); S.qmForce = b.dataset.qm; S.noteEdit = true; openSheet('note', $('#e-date')?.value || S.sheet.arg); return; }
   if ((b = e.target.closest('[data-qsick]'))) { const id = b.dataset.qsick, L = new Set(draft.sick || []); L.has(id) ? L.delete(id) : L.add(id); draft.sick = [...L]; b.setAttribute('aria-pressed', L.has(id)); return; }
   if ((b = e.target.closest('[data-qeve]'))) { const [k, v] = b.dataset.qeve.split('|'); draft.eve = {...(draft.eve || {}), [k]: +v}; b.parentElement.querySelectorAll('[data-qeve]').forEach(x => x.setAttribute('aria-pressed', x === b)); }
 });
@@ -5681,8 +5691,8 @@ const noteBody0 = noteBody;
 noteBody = k => {
   const h = noteBody0(k), i1 = h.indexOf('<h2 class="qh">Le matin'), i2 = h.indexOf('<h2 class="qh">La journée'); if (i1 < 0 || i2 < 0) return h;
   const head = h.slice(0, i1), mor = h.slice(i1, i2), eve = h.slice(i2);
-  return head + qmSeg() + (S.qm === 'matin' ? (M(k, 'mornAt') ? mornSyn(k) : '') + mor + sickHtml() + '<p class="small muted" style="margin:14px 4px 0">« Enregistrer le matin » garde tes réponses et te donne la synthèse. Le soir, tu complètes ta journée.</p>'
-    : eve.replace('<div class="sec-label">Eau</div>', eveHtml() + '<div class="sec-label">Eau</div>'));
+  return head + (S.qm === 'matin' ? mor + sickHtml() + '<p class="small muted" style="margin:14px 4px 0">« Enregistrer le matin » garde tes réponses et te donne la synthèse. Le soir, tu complètes ta journée.</p>'
+    : qmMornPart(k) + eve.replace('<div class="sec-label">Eau</div>', eveHtml() + '<div class="sec-label">Eau</div>'));
 };
 // La notification du matin (ou l'appli ouverte le matin sans avoir répondu) ouvre directement le questionnaire du matin.
 function qmAuto(force) {
@@ -5700,7 +5710,7 @@ function qmSoir() {
 function noteRecap(k) {
   const d = S.manual[k] || {}, P = Object.entries(pains(k)).filter(([, v]) => v > 0), w = waterOf(k), ses = SES_K.map(([kind, lab, fR, fM]) => d[fR] ? `${lab} · RPE ${d[fR]}${d[fM] ? ' · ' + durTxt(d[fM]) : ''}${kind === 'track' && d.sprintM ? ' · ' + d.sprintM + ' m' : ''}` : '').filter(Boolean);
   const acts = (d.acts || []).map(a => `${RACT_N[a.t] || a.t} ${a.min || ''} min`), row = (l, v) => `<div class="row"><span class="l">${l}<span class="rb">${v}</span></span></div>`;
-  return `<div class="recap"><div class="list" style="margin-top:16px"><div class="row"><label for="e-date">Date</label><input type="date" id="e-date" value="${k}" max="${TODAY}"></div></div>${M(k, 'mornAt') ? mornSyn(k) : ''}${scoresHtml(k)}
+  return `<div class="recap"><div class="list" style="margin-top:16px"><div class="row"><label for="e-date">Date</label><input type="date" id="e-date" value="${k}" max="${TODAY}"></div></div>${M(k, 'mornAt') ? mornSyn(k) + (noteEditable(k) ? '<button type="button" class="btn ghost qmod" data-qm="matin">Modifier le matin</button>' : '') : ''}<div class="sec-label" style="margin-top:16px">Synthèse du soir</div>${scoresHtml(k)}${noteEditable(k) ? '<button type="button" class="btn ghost qmod" data-qm="soir">Modifier le soir</button>' : ''}
     <p class="small muted" style="margin:12px 4px 0">${d.closedAuto ? 'Enregistré automatiquement à 23 h 59.' : 'Journée enregistrée.'} ${noteEditable(k) ? 'Tu peux la modifier jusqu\'au lendemain 23 h 59.' : 'Elle n\'est plus modifiable.'}</p>
     <div class="list" style="margin-top:12px">${row('Séances', esc(ses.join(' ; ') || 'aucune'))}${acts.length ? row('Autres activités', esc(acts.join(', '))) : ''}${row('Eau', `${fx(w.L, 1)} L sur ${fx(fuelGoal(k).waterL, 1)} L`)}${row('Alimentation', esc(NUTRITION[d.nutrition ?? 0][0]))}${row('Douleur', P.length ? esc(P.map(([l, v]) => painTxt(l) + ' ' + v + '/10').join(', ')) : 'aucune')}${d.notes ? row('Note', '« ' + esc(d.notes) + ' »') : ''}</div></div>`;
 }
@@ -5869,7 +5879,8 @@ function openSheet(kind, arg) {
   $('#sheet-title').textContent = kind === 'note' ? (arg === TODAY ? 'Questionnaire du jour' : cap(fmtShort(arg))) : '';
   $('#sh-foot').hidden = kind !== 'note';
   sheetEl.classList.toggle('full', kind === 'note'); $('#sh-back').hidden = kind !== 'note';
-  if (kind === 'note') { draft = structuredClone(S.manual[arg] || {}); noteRestore(arg); const rc = S.manual[arg]?.closed && !S.noteEdit; if (!rc) S.qm = qmPick(arg); $('#sheet-body').innerHTML = rc ? noteRecap(arg) : noteBody(arg); $('#sh-save').textContent = rc ? 'Modifier' : S.qm === 'matin' ? 'Enregistrer le matin' : 'Enregistrer la journée'; if (!rc) $('#sheet-title').textContent = (S.qm === 'matin' ? 'Questionnaire du matin' : 'Questionnaire du soir') + (arg === TODAY ? '' : ' · ' + fmtShort(arg)); $('#sh-foot').hidden = rc && !noteEditable(arg); S.noteEdit = false; initCharts($('#sheet-body')); }
+  if (kind === 'note') { draft = structuredClone(S.manual[arg] || {}); noteRestore(arg); const rc = S.manual[arg]?.closed && !S.noteEdit; if (!rc) S.qm = qmPick(arg); $('#sheet-body').innerHTML = rc ? noteRecap(arg) : noteBody(arg); $('#sh-save').textContent = rc ? 'Modifier' : S.qm === 'matin' ? 'Enregistrer le matin' : 'Enregistrer la journée'; if (!rc) $('#sheet-title').textContent = (S.qm === 'matin' ? 'Questionnaire du matin' : 'Questionnaire du soir') + (arg === TODAY ? '' : ' · ' + fmtShort(arg)); $('#sh-foot').hidden = rc;   // la journée enregistrée : les boutons « Modifier le matin / le soir » sont sous chaque synthèse
+ S.noteEdit = false; initCharts($('#sheet-body')); }
   else { $('#sheet-body').innerHTML = detailBody(arg); initCharts($('#sheet-body')); }
   sheetScroll.scrollTop = 0; sheetEl.classList.remove('flat');
   if (!sheetEl.classList.contains('on')) try { history.pushState({mod: S.mod, sheet: true}, ''); } catch (e) {}
@@ -8671,7 +8682,7 @@ function planView(id, n, from) {
       ${warmText(p.warm).length ? `<div class="card wtxt"><span class="eyebrow">Échauffement · ${warmMin(p.warm)} min</span>${warmText(p.warm).map(t => `<p class="small">${esc(t)}</p>`).join('')}</div>` : ''}
       ${p.tech ? `<div class="card wtxt"><span class="eyebrow">Travail technique</span><p class="small">${esc(p.tech)}</p></div>` : ''}
       ${p.items.some(x => x.seq) ? '<div class="sec-label">Séance principale</div>' : ''}
-      <div class="list">${(LBL = itemLabels(p.items), '')}${p.items.map((it, i) => { const e = exOf(it.ex), sg = e.t === 'test' ? null : suggest(it); return `<button class="rowbtn" data-tex="${it.ex}"><span><b>${LBL[i] ? `<span class="exlbl">${LBL[i]}</span>` : ''}${esc(e.n)}${!it.link && it.meth ? ' · ' + esc(METHX[it.meth]?.[1] || '') : ''}</b><span class="meta">${itemText(it)}${it.rest ? ' · récup ' + fmtRest(it.rest) : ''}${sg ? ' · ' + fx(sg.kg, sg.kg % 1 ? 1 : 0) + ' kg proposés' : ''}</span></span>${ICON.chev}</button>`; }).join('')}</div>
+      ${typeof planTable === 'function' ? planTable(p) : ''}<div class="list"${typeof planTable === 'function' ? ' hidden' : ''}>${(LBL = itemLabels(p.items), '')}${p.items.map((it, i) => { const e = exOf(it.ex), sg = e.t === 'test' ? null : suggest(it); return `<button class="rowbtn" data-tex="${it.ex}"><span><b>${LBL[i] ? `<span class="exlbl">${LBL[i]}</span>` : ''}${esc(e.n)}${!it.link && it.meth ? ' · ' + esc(METHX[it.meth]?.[1] || '') : ''}</b><span class="meta">${itemText(it)}${it.rest ? ' · récup ' + fmtRest(it.rest) : ''}${sg ? ' · ' + fx(sg.kg, sg.kg % 1 ? 1 : 0) + ' kg proposés' : ''}</span></span>${ICON.chev}</button>`; }).join('')}</div>
       ${coolText(p.cool).length ? `<div class="card wtxt" style="margin-top:12px"><span class="eyebrow">Retour au calme</span>${coolText(p.cool).map(t => `<p class="small">${esc(t)}</p>`).join('')}</div>` : ''}
       ${p.kind === 'gym' ? capsLine(planCheck(p.items)) : ''}
       ${gymCard(p)}
