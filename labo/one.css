@@ -637,3 +637,7 @@ html.one:not([data-theme="dark"]) :is(b,span,small,strong,p,em,i,div)[style*="co
 /* v162 : le « Détail » en bas à droite d'un bloc ne passe plus sur le contenu */
 html.one .one-hastip{padding-bottom:34px!important}
 html.one .one-tipb.one-tipc{bottom:8px}
+
+/* v165 : la séance du jour, Visualiser / Commencer / Ne pas la faire ; la liste des exercices sans débordement */
+.btnrow.three{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:8px}.btnrow.three .btn{width:100%;min-width:0;padding-left:6px;padding-right:6px;font-size:.875rem;white-space:normal;line-height:1.15}
+html.one .exl li{align-items:baseline}html.one .exl li span:first-child{flex:1;min-width:0}html.one .exl li span:last-child{flex:0 1 auto;min-width:0;white-space:normal;text-align:right}

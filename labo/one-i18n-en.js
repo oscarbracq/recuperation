@@ -8728,6 +8728,7 @@ const I18N_EN = {
 "Colonne : rotation fermeture": "Spine: closing rotation",
 "Colonne : rotation ouverture": "Spine: opening rotation",
 "Commencer": "Start",
+"Visualiser": "View",
 "Concentrique": "Concentric",
 "Concombre": "Cucumber",
 "Concombre, pulpe, cru": "Cucumber, pulp, raw",
