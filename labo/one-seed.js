@@ -35,3 +35,19 @@
     } catch (e) {}
   })();
 })();
+
+/* Novembre 2026 : la machine multi-hanche n'est plus au Decathlon de Marcq. Dans la séance C, le psoas passe à la montée de
+   genou debout à l'élastique (faisable partout), une fois. */
+(function oneSeedPPS3(n = 0) {
+  if (document.documentElement.classList.contains('lab') || n > 240) return;
+  let ok = false; try { ok = S.status === 'ready' && S.db && S.tset && S.tset.seedPPS2 && typeof saveTset === 'function' && typeof dbSet === 'function'; } catch (e) {}
+  if (!ok) { setTimeout(() => oneSeedPPS3(n + 1), 500); return; }
+  if (S.tset.seedPPS3) return;
+  (async () => {
+    try {
+      const p = S.plans?.['tnr-pps1c'];
+      if (p && p.items?.some(it => it.ex === 'multihip_flex')) { const q = {...p, items: p.items.map(it => it.ex === 'multihip_flex' ? {...it, ex: 'g_hp_e_de', note: 'Par jambe, élastique au pied : genou qui monte le plus vite possible, comme le retour de jambe en course. Remplace la machine multi-hanche, partie de Marcq.'} : it), updatedAt: new Date().toISOString()}; S.plans = {...S.plans, [q.id]: q}; await dbSet('plans/' + q.id, q); }
+      await saveTset({seedPPS3: true});
+    } catch (e) {}
+  })();
+})();
