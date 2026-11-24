@@ -8381,7 +8381,7 @@ function tSessions() {
   const row = p => `<button class="rowbtn" data-tplanv="${p.id}"><span><b>${esc(p.name)}</b><span class="meta">${p.title ? esc(p.title) + ' · ' : ''}${estMin(p)} min${!p.title && p.desc ? ' · ' + esc(p.desc) : ''}${caledOn(caleRef(p)).length ? ' · calée' : ''}</span></span>${ICON.chev}</button>`;
   return `
     <header class="top"><div class="sub">Programmes et séances</div><h1>Séances</h1></header>
-    <div class="sechipw">${seasonChip()}</div>
+    <div class="sechipw">${seasonChip()}${typeof coachChip === 'function' ? coachChip() : ''}</div>
     <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
     ${sesBoard(k)}
     <button class="btn ghost" style="margin-top:16px;width:100%" data-tnew>+ Créer une séance</button>

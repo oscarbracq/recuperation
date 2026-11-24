@@ -663,3 +663,11 @@ html.one .plfs .plw-l{opacity:.75;border-left-color:rgba(255,255,255,.22)}html.o
 html[data-theme="light"].one .plfs .plw-l{border-left-color:rgba(0,0,0,.18)}html[data-theme="light"].one .plfs .plw-l.plq{border-left-color:rgba(0,0,0,.1)}
 html.one .plw-b.plcur,html.one.pc .plw-b.plcur{top:-7px!important;bottom:-7px!important}
 html.one .plw-r{margin:5px 0}
+
+/* v169 : Coach training (ordinateur) */
+.sechipw{gap:10px}.coachchip span{color:var(--accent)}
+.ctf{display:flex;flex-direction:column;gap:4px;margin-top:10px;font-size:.8125rem;color:var(--fg2);font-weight:600}
+.ctf input,.ctf textarea,.card textarea[data-ctk]{font:inherit;font-weight:500;color:var(--fg);background:var(--card2);border:0;border-radius:10px;padding:10px 12px;width:100%;box-sizing:border-box;resize:vertical}
+.ctrow2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ctctx{white-space:pre-wrap;font:inherit;font-size:.8125rem;color:var(--fg2);margin:8px 0 0;line-height:1.45}
+.ctlist{margin-top:10px}
