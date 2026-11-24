@@ -7776,6 +7776,9 @@ const ZRANK = {bad: 0, mid: 1, good: 2, ok: 2};
 const COACH = {T: ['Conseil du coach training', 'Direct et exigeant'], R: ['Conseil du coach recovery', 'Calme et protecteur'], N: ['Conseil du coach nutrition', 'Bon vivant, jamais rigide']};
 function coachBox(who, L) {
   if (S.app?.coach === false) return '';   // coaches switched off in the menu
+  // IA activée : les conseils du jour écrits avec les skills (prepa-physique, nutrition-sport, recup-kine) dans l'analyse du matin.
+  const ai = AN(), aiL = ai && String(ai.date || '').slice(0, 10) === TODAY && Array.isArray(ai.coach?.[who]) ? ai.coach[who].filter(x => Array.isArray(x) && x[1]).map(([z, t]) => [ZRANK[z] != null ? z : 'mid', String(t)]) : null;
+  if (aiL?.length) L = aiL;
   const [title, tag] = COACH[who] || [who, ''], top = L.filter(Boolean).sort((a, b) => ZRANK[a[0]] - ZRANK[b[0]]).slice(0, 3);
   return top.length ? `<div class="card coach coach-${who}"><div class="chead"><span class="eyebrow">${esc(title)}</span><span class="ctag">${esc(tag)}</span></div>${top.map(([z, t, h]) => `<p class="malert ${z === 'bad' ? '' : z === 'mid' ? 'mid' : 'ok'}">${esc(t)}${h ? '<span class="cact">' + h + '</span>' : ''}</p>`).join('')}</div>` : '';
 }
