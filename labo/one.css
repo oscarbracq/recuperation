@@ -740,3 +740,4 @@ html.one .coach .chead{margin-bottom:6px}
 /* v174 : « Supprimer » sous « Archiver », pendant qu'on tient une séance */
 html.one .btn.one-del{width:100%;margin-top:8px;border:1.5px dashed color-mix(in srgb,var(--bad) 60%,transparent);color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,transparent);transition:transform .2s,background .2s}
 html.one .btn.one-del.over{background:var(--bad);color:#fff;border-style:solid;transform:scale(1.06)}
+.ctfit{margin-top:12px}.ctck{display:flex;gap:8px;align-items:center;font-weight:600;font-size:.9rem;margin:0 2px 6px}.ctchg{color:var(--accent)}.ctfit small{color:var(--fg3);font-weight:500}
