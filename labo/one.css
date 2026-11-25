@@ -671,3 +671,30 @@ html.one .plw-r{margin:5px 0}
 .ctrow2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .ctctx{white-space:pre-wrap;font:inherit;font-size:.8125rem;color:var(--fg2);margin:8px 0 0;line-height:1.45}
 .ctlist{margin-top:10px}
+
+/* v170 : cartes coach, flèche de rechargement, conseils sur 3 lignes */
+.coach .chead{align-items:center}.creload{flex:none;width:32px;height:32px;margin:-8px -8px -8px 0;border:0;border-radius:50%;background:none;color:var(--fg3);display:grid;place-items:center;cursor:pointer}
+.creload:active{background:var(--card2)}.creload.spin svg{animation:crspin .6s linear infinite}@keyframes crspin{to{transform:rotate(360deg)}}
+.cadv .ctx{display:-webkit-box;-webkit-line-clamp:3;line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.cadv.open .ctx{display:block;-webkit-line-clamp:unset;line-clamp:unset}
+.cadv .cdet{display:none;margin-top:8px;padding-top:8px;border-top:1px solid color-mix(in srgb,currentColor 14%,transparent);opacity:.88}
+.cadv.open .cdet{display:block}
+.cadv.more{cursor:pointer;position:relative;padding-right:30px}
+.cadv.more::after{content:'';position:absolute;right:12px;top:14px;width:7px;height:7px;border-right:2px solid var(--fg3);border-bottom:2px solid var(--fg3);transform:rotate(45deg);transition:transform .2s}
+.cadv.open::after{transform:rotate(225deg);top:17px}
+.coach .csrc{margin:8px 2px 0;font-size:.72rem;color:var(--fg3)}
+
+/* v170 : Max haltérophilie (table de Baroga) */
+.bgtwo{display:grid;grid-template-columns:1fr 1fr;gap:10px}.bgtwo label{display:flex;flex-direction:column;gap:6px;font-weight:600}.bgtwo label span{display:flex;align-items:center;gap:6px;color:var(--fg3);font-weight:500}
+.bgtwo .bgin{width:100%;font-size:1.25rem;font-weight:700;text-align:center;height:46px}
+.bgsum{margin-top:12px}.bgsum .bgg{font-variant-numeric:tabular-nums}.bgg.m,.bgs.m{color:var(--bad)}.bgg.p,.bgs.p{color:var(--good)}.bgs.e{color:var(--fg3)}
+.bgt{background:var(--card);border-radius:16px;overflow:hidden}
+.bgh,.bgr{display:grid;grid-template-columns:minmax(0,1fr) 52px 66px 54px;gap:8px;align-items:center;padding:9px 12px}
+.bgh{font-size:.7rem;font-weight:600;color:var(--fg3);text-transform:uppercase;letter-spacing:.03em;padding-bottom:4px}.bgh span:not(:first-child),.bgr span:not(:first-child){text-align:center}
+.bgr+.bgr{border-top:1px solid var(--sep,color-mix(in srgb,var(--fg3) 18%,transparent))}
+.bgn{font-size:.9rem;font-weight:600;line-height:1.25;min-width:0}.bgn small{display:block;font-weight:400;font-size:.72rem;color:var(--fg3);margin-top:2px}
+.bgx{font-variant-numeric:tabular-nums;font-weight:600}.bgr .bgin{width:100%;text-align:center;padding:0 4px}
+.bgs{font-weight:800;font-size:1.05rem;line-height:1.1}.bgs small{display:block;font-size:.68rem;font-weight:600}.bgs:not(.m):not(.p):not(.e) small{color:var(--fg3);font-weight:500}
+.bgwhy summary{font-weight:600;cursor:pointer}
+html.one .coach .chead{margin-bottom:6px}
+.bgtop .stats{grid-template-columns:1fr 1fr}

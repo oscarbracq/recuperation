@@ -7697,14 +7697,41 @@ const ZRANK = {bad: 0, mid: 1, good: 2, ok: 2};
 // Three coaches, three characters. Training is direct and pushes; Recovery is calm and protective; Nutrition is warm
 // and a bit playful. Each one only speaks of his own data, so the three never give the same advice.
 const COACH = {T: ['Conseil du coach training', 'Direct et exigeant'], R: ['Conseil du coach recovery', 'Calme et protecteur'], N: ['Conseil du coach nutrition', 'Bon vivant, jamais rigide']};
+// Les conseils écrits par Claude avec les skills (analysis/coach, écrit depuis le PC d'Oscar ; sinon le champ coach de l'analyse).
+// Chaque conseil tient en 3 lignes ; on le touche pour lire la suite et le détail. La flèche relance les conseils.
+const COACH_SK = {T: 'préparateur physique', N: 'nutrition', R: 'kiné et récupération'}, COACH_OPEN = new Set();
+function coachAI(who) {
+  if (!aiOn()) return null;
+  for (const src of [S.coachAI, S.analysis]) {
+    const L = src && String(src.date || '').slice(0, 10) === TODAY && Array.isArray(src.coach?.[who]) ? src.coach[who].filter(x => Array.isArray(x) && x[1]) : null;
+    if (L?.length) return {L: L.map(([z, t, d]) => [ZRANK[z] != null ? z : 'mid', String(t), '', d ? String(d) : '']), at: src.coachAt || src.updatedAt || '', sk: Array.isArray(src.coachSkills) && src.coachSkills.length};
+  }
+  return null;
+}
 function coachBox(who, L) {
   if (S.app?.coach === false) return '';   // coaches switched off in the menu
-  // IA activée : les conseils du jour écrits avec les skills (prepa-physique, nutrition-sport, recup-kine) dans l'analyse du matin.
-  const ai = AN(), aiL = ai && String(ai.date || '').slice(0, 10) === TODAY && Array.isArray(ai.coach?.[who]) ? ai.coach[who].filter(x => Array.isArray(x) && x[1]).map(([z, t]) => [ZRANK[z] != null ? z : 'mid', String(t)]) : null;
-  if (aiL?.length) L = aiL;
-  const [title, tag] = COACH[who] || [who, ''], top = L.filter(Boolean).sort((a, b) => ZRANK[a[0]] - ZRANK[b[0]]).slice(0, 3);
-  return top.length ? `<div class="card coach coach-${who}"><div class="chead"><span class="eyebrow">${esc(title)}</span><span class="ctag">${esc(tag)}</span></div>${top.map(([z, t, h]) => `<p class="malert ${z === 'bad' ? '' : z === 'mid' ? 'mid' : 'ok'}">${esc(t)}${h ? '<span class="cact">' + h + '</span>' : ''}</p>`).join('')}</div>` : '';
+  const ai = coachAI(who), [title] = COACH[who] || [who];
+  const top = ai ? ai.L.slice(0, 3) : L.filter(Boolean).sort((a, b) => ZRANK[a[0]] - ZRANK[b[0]]).slice(0, 3);
+  if (!top.length) return '';
+  const hm = ai?.at ? new Date(ai.at).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'}).replace(':', ' h ') : '';
+  return `<div class="card coach coach-${who}"><div class="chead"><span class="eyebrow">${esc(title)}</span><button type="button" class="creload" data-creload="${who}" aria-label="Recharger les conseils avec les dernières données"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg></button></div>${top.map(([z, t, h, d], i) => {
+    const k = who + i + ':' + t.slice(0, 24), more = !!d || t.length > 150, op = more && COACH_OPEN.has(k);
+    return `<div class="malert cadv ${z === 'bad' ? '' : z === 'mid' ? 'mid' : 'ok'}${more ? ' more' : ''}${op ? ' open' : ''}"${more ? ` role="button" tabindex="0" aria-expanded="${op}" data-cadv="${esc(k)}"` : ''}><span class="ctx">${esc(t)}</span>${d ? `<span class="cdet">${esc(d)}</span>` : ''}${h ? '<span class="cact">' + h + '</span>' : ''}</div>`;
+  }).join('')}${ai ? `<p class="csrc">${ai.sk ? 'Écrit par Claude avec le skill ' + COACH_SK[who] : 'Écrit par Claude'}${hm ? ' · ' + hm : ''}</p>` : ''}</div>`;
 }
+document.addEventListener('click', e => {
+  const a = e.target.closest?.('[data-cadv]'); if (!a || e.target.closest('.cact button, .cact a')) return;
+  const k = a.dataset.cadv; COACH_OPEN.has(k) ? COACH_OPEN.delete(k) : COACH_OPEN.add(k);
+  const op = COACH_OPEN.has(k); a.classList.toggle('open', op); a.setAttribute('aria-expanded', op);
+});
+document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('[data-cadv]')) { e.preventDefault(); e.target.click(); } });
+document.addEventListener('click', async e => {
+  const b = e.target.closest?.('[data-creload]'); if (!b) return;
+  b.classList.add('spin'); b.disabled = true;
+  let sent = false; if (aiOn()) try { await S.db.doc('requests/coach').set({at: new Date().toISOString(), who: b.dataset.creload}); sent = true; } catch (er) {}
+  setTimeout(() => { render(); toast(sent ? 'Conseils recalculés. Demande envoyée : ton PC les fait réécrire par Claude avec les skills.' : 'Conseils recalculés avec tes dernières données'); }, 500);
+});
+
 // The pain, the session it touches, and for each exercise that loads the zone the first adaptation, written out.
 const painTxt = l => l.replace(/[()]/g, '').replace(/ G$/, ' gauche').replace(/ D$/, ' droite').toLowerCase();
 function painCoach() {
@@ -8606,7 +8633,7 @@ function tBody() {
 }
 // Profil: the athlete, the tests, the max of each lift.
 function tProfile() {
-  const nMax = EX.filter(e => e.t === 'gym' && e.u === 'kg' && rmTest(e.id)).length;
+  const nMax = EX.filter(e => e.t === 'gym' && e.u === 'kg' && e.cat !== 'Haltérophilie' && rmTest(e.id)).length;
   const last5 = tests().filter(x => x.type === '5rm').sort((a, b) => b.date.localeCompare(a.date))[0];
   const lastSym = tests().filter(x => x.type === 'sym').sort((a, b) => b.date.localeCompare(a.date))[0];
   const fv = lastTest('fv'), fvr = fv ? fvProfile(fv) : null, cmj = jBest('cmj');
@@ -8618,7 +8645,8 @@ function tProfile() {
     ${sprinterCard()}
     <div class="sec-label">Mes résultats</div>
     <div class="stack">
-      <button class="banner" data-rmlist style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Mes max</b><br><span class="small muted">${nMax ? nMax + ' max testés · ' : ''}les charges de tes séances en découlent</span></span>${ICON.chev}</button>
+      <button class="banner" data-rmlist style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Max musculation</b><br><span class="small muted">${nMax ? nMax + ' max testés · ' : ''}les charges de tes séances en découlent</span></span>${ICON.chev}</button>
+      <button class="banner" data-baroga style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Max haltérophilie</b><br><span class="small muted">${typeof bgTotal === 'function' && bgTotal() ? 'total ' + fx(bgTotal()) + ' kg · ' : ''}table de Baroga : tes déficits sur 46 mouvements</span></span>${ICON.chev}</button>
       <button class="banner" data-tjumps style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Mes max en saut</b><br><span class="small muted">${(() => { const ck = cmjCheck(); return cmj ? 'CMJ ' + fx(+cmj.h, 1) + ' cm' + (ck && ck.d <= -5 ? ' · fatigue détectée' : '') + ' · ' : ''; })()}tes records de saut et de sprint · import My Jump</span></span>${ICON.chev}</button>
     </div>
     <div class="sec-label">Tests</div>
@@ -9796,12 +9824,12 @@ function rmBlock(id) {
       <p class="small muted" style="margin:6px 0 0">RPE 8 = il te reste 2 répétitions. Ta récupération du jour peut baisser la charge proposée en séance.</p>` : ''}</div>`;
 }
 function rmList() {
-  openPane({title: 'Mes max', render: () => {
-    const ex = EX.filter(e => e.t === 'gym' && e.u === 'kg'), cats = [...new Set(ex.map(e => e.cat))];
+  openPane({title: 'Max musculation', render: () => {
+    const ex = EX.filter(e => e.t === 'gym' && e.u === 'kg' && e.cat !== 'Haltérophilie'), cats = [...new Set(ex.map(e => e.cat))];
     // Known maxes first, the main lifts at the top, then the heaviest; the exercises without a max come after, by family.
     const known = ex.filter(e => machineEx(e.id) ? GYMS.some(([g]) => rmOf(e.id, '', g)) : rmOf(e.id, '', null)).sort((a, b) => { const ia = MAIN_LIFTS.indexOf(a.id), ib = MAIN_LIFTS.indexOf(b.id); if (ia >= 0 || ib >= 0) return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib); return (rmOf(b.id, '', null)?.kg || 0) - (rmOf(a.id, '', null)?.kg || 0); });
     const kn = new Set(known.map(e => e.id));
-    return `<p class="small muted" style="margin:16px 4px 6px">Un max par exercice : ton test s'il existe, sinon l'estimation de tes séries de 5 répétitions ou moins (avec le RPE noté). Touche un exercice pour noter un test ou calculer une charge.</p>
+    return `<p class="small muted" style="margin:16px 4px 6px">Un max par exercice : ton test s'il existe, sinon l'estimation de tes séries de 5 répétitions ou moins (avec le RPE noté). Touche un exercice pour noter un test ou calculer une charge. L'haltérophilie a son propre tableau : <button type="button" class="linkbtn" data-baroga>Max haltérophilie</button>.</p>
       ${known.length ? `<div class="sec-label">Tes max connus · ${known.length}</div><div class="list">${known.map(e => rmRow(e)).join('')}</div>` : ''}
       ${cats.map(c => { const L = ex.filter(e => e.cat === c && !kn.has(e.id)); return L.length ? `<div class="sec-label">${esc(c)} <small>pas encore de max</small></div><div class="list">${L.map(e => rmRow(e)).join('')}</div>` : ''; }).join('')}`;
   }});
@@ -11466,6 +11494,7 @@ go('home', false);
   db.collection('manual').onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); S.manual = o; render(); autoClose(); }, fail);
   db.collection('reports').onSnapshot(snap => { S.reports = snap.docs.map(d => ({id: d.id, ...d.data()})); render(); }, fail);
   db.doc('analysis/latest').onSnapshot(snap => { S.analysis = snap.exists ? snap.data() : null; render(); }, fail);
+  db.doc('analysis/coach').onSnapshot(snap => { S.coachAI = snap.exists ? snap.data() : null; render(); }, () => {});
   db.doc('settings/app').onSnapshot(snap => { S.app = snap.exists ? snap.data() : {}; render(); renderMod(); }, () => {});
   db.doc('requests/sync').onSnapshot(snap => { S.req = snap.exists ? snap.data().requestedAt : null; render(); }, () => {});
   db.doc('status/sync').onSnapshot(snap => { S.checked = snap.exists ? snap.data() : null; render(); }, () => {});

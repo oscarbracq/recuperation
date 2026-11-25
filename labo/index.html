@@ -2206,6 +2206,33 @@ html.one .plw-r{margin:5px 0}
 .ctrow2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .ctctx{white-space:pre-wrap;font:inherit;font-size:.8125rem;color:var(--fg2);margin:8px 0 0;line-height:1.45}
 .ctlist{margin-top:10px}
+
+/* v170 : cartes coach, flèche de rechargement, conseils sur 3 lignes */
+.coach .chead{align-items:center}.creload{flex:none;width:32px;height:32px;margin:-8px -8px -8px 0;border:0;border-radius:50%;background:none;color:var(--fg3);display:grid;place-items:center;cursor:pointer}
+.creload:active{background:var(--card2)}.creload.spin svg{animation:crspin .6s linear infinite}@keyframes crspin{to{transform:rotate(360deg)}}
+.cadv .ctx{display:-webkit-box;-webkit-line-clamp:3;line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.cadv.open .ctx{display:block;-webkit-line-clamp:unset;line-clamp:unset}
+.cadv .cdet{display:none;margin-top:8px;padding-top:8px;border-top:1px solid color-mix(in srgb,currentColor 14%,transparent);opacity:.88}
+.cadv.open .cdet{display:block}
+.cadv.more{cursor:pointer;position:relative;padding-right:30px}
+.cadv.more::after{content:'';position:absolute;right:12px;top:14px;width:7px;height:7px;border-right:2px solid var(--fg3);border-bottom:2px solid var(--fg3);transform:rotate(45deg);transition:transform .2s}
+.cadv.open::after{transform:rotate(225deg);top:17px}
+.coach .csrc{margin:8px 2px 0;font-size:.72rem;color:var(--fg3)}
+
+/* v170 : Max haltérophilie (table de Baroga) */
+.bgtwo{display:grid;grid-template-columns:1fr 1fr;gap:10px}.bgtwo label{display:flex;flex-direction:column;gap:6px;font-weight:600}.bgtwo label span{display:flex;align-items:center;gap:6px;color:var(--fg3);font-weight:500}
+.bgtwo .bgin{width:100%;font-size:1.25rem;font-weight:700;text-align:center;height:46px}
+.bgsum{margin-top:12px}.bgsum .bgg{font-variant-numeric:tabular-nums}.bgg.m,.bgs.m{color:var(--bad)}.bgg.p,.bgs.p{color:var(--good)}.bgs.e{color:var(--fg3)}
+.bgt{background:var(--card);border-radius:16px;overflow:hidden}
+.bgh,.bgr{display:grid;grid-template-columns:minmax(0,1fr) 52px 66px 54px;gap:8px;align-items:center;padding:9px 12px}
+.bgh{font-size:.7rem;font-weight:600;color:var(--fg3);text-transform:uppercase;letter-spacing:.03em;padding-bottom:4px}.bgh span:not(:first-child),.bgr span:not(:first-child){text-align:center}
+.bgr+.bgr{border-top:1px solid var(--sep,color-mix(in srgb,var(--fg3) 18%,transparent))}
+.bgn{font-size:.9rem;font-weight:600;line-height:1.25;min-width:0}.bgn small{display:block;font-weight:400;font-size:.72rem;color:var(--fg3);margin-top:2px}
+.bgx{font-variant-numeric:tabular-nums;font-weight:600}.bgr .bgin{width:100%;text-align:center;padding:0 4px}
+.bgs{font-weight:800;font-size:1.05rem;line-height:1.1}.bgs small{display:block;font-size:.68rem;font-weight:600}.bgs:not(.m):not(.p):not(.e) small{color:var(--fg3);font-weight:500}
+.bgwhy summary{font-weight:600;cursor:pointer}
+html.one .coach .chead{margin-bottom:6px}
+.bgtop .stats{grid-template-columns:1fr 1fr}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -8552,14 +8579,41 @@ const ZRANK = {bad: 0, mid: 1, good: 2, ok: 2};
 // Three coaches, three characters. Training is direct and pushes; Recovery is calm and protective; Nutrition is warm
 // and a bit playful. Each one only speaks of his own data, so the three never give the same advice.
 const COACH = {T: ['Conseil du coach training', 'Direct et exigeant'], R: ['Conseil du coach recovery', 'Calme et protecteur'], N: ['Conseil du coach nutrition', 'Bon vivant, jamais rigide']};
+// Les conseils écrits par Claude avec les skills (analysis/coach, écrit depuis le PC d'Oscar ; sinon le champ coach de l'analyse).
+// Chaque conseil tient en 3 lignes ; on le touche pour lire la suite et le détail. La flèche relance les conseils.
+const COACH_SK = {T: 'préparateur physique', N: 'nutrition', R: 'kiné et récupération'}, COACH_OPEN = new Set();
+function coachAI(who) {
+  if (!aiOn()) return null;
+  for (const src of [S.coachAI, S.analysis]) {
+    const L = src && String(src.date || '').slice(0, 10) === TODAY && Array.isArray(src.coach?.[who]) ? src.coach[who].filter(x => Array.isArray(x) && x[1]) : null;
+    if (L?.length) return {L: L.map(([z, t, d]) => [ZRANK[z] != null ? z : 'mid', String(t), '', d ? String(d) : '']), at: src.coachAt || src.updatedAt || '', sk: Array.isArray(src.coachSkills) && src.coachSkills.length};
+  }
+  return null;
+}
 function coachBox(who, L) {
   if (S.app?.coach === false) return '';   // coaches switched off in the menu
-  // IA activée : les conseils du jour écrits avec les skills (prepa-physique, nutrition-sport, recup-kine) dans l'analyse du matin.
-  const ai = AN(), aiL = ai && String(ai.date || '').slice(0, 10) === TODAY && Array.isArray(ai.coach?.[who]) ? ai.coach[who].filter(x => Array.isArray(x) && x[1]).map(([z, t]) => [ZRANK[z] != null ? z : 'mid', String(t)]) : null;
-  if (aiL?.length) L = aiL;
-  const [title, tag] = COACH[who] || [who, ''], top = L.filter(Boolean).sort((a, b) => ZRANK[a[0]] - ZRANK[b[0]]).slice(0, 3);
-  return top.length ? `<div class="card coach coach-${who}"><div class="chead"><span class="eyebrow">${esc(title)}</span><span class="ctag">${esc(tag)}</span></div>${top.map(([z, t, h]) => `<p class="malert ${z === 'bad' ? '' : z === 'mid' ? 'mid' : 'ok'}">${esc(t)}${h ? '<span class="cact">' + h + '</span>' : ''}</p>`).join('')}</div>` : '';
+  const ai = coachAI(who), [title] = COACH[who] || [who];
+  const top = ai ? ai.L.slice(0, 3) : L.filter(Boolean).sort((a, b) => ZRANK[a[0]] - ZRANK[b[0]]).slice(0, 3);
+  if (!top.length) return '';
+  const hm = ai?.at ? new Date(ai.at).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'}).replace(':', ' h ') : '';
+  return `<div class="card coach coach-${who}"><div class="chead"><span class="eyebrow">${esc(title)}</span><button type="button" class="creload" data-creload="${who}" aria-label="Recharger les conseils avec les dernières données"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg></button></div>${top.map(([z, t, h, d], i) => {
+    const k = who + i + ':' + t.slice(0, 24), more = !!d || t.length > 150, op = more && COACH_OPEN.has(k);
+    return `<div class="malert cadv ${z === 'bad' ? '' : z === 'mid' ? 'mid' : 'ok'}${more ? ' more' : ''}${op ? ' open' : ''}"${more ? ` role="button" tabindex="0" aria-expanded="${op}" data-cadv="${esc(k)}"` : ''}><span class="ctx">${esc(t)}</span>${d ? `<span class="cdet">${esc(d)}</span>` : ''}${h ? '<span class="cact">' + h + '</span>' : ''}</div>`;
+  }).join('')}${ai ? `<p class="csrc">${ai.sk ? 'Écrit par Claude avec le skill ' + COACH_SK[who] : 'Écrit par Claude'}${hm ? ' · ' + hm : ''}</p>` : ''}</div>`;
 }
+document.addEventListener('click', e => {
+  const a = e.target.closest?.('[data-cadv]'); if (!a || e.target.closest('.cact button, .cact a')) return;
+  const k = a.dataset.cadv; COACH_OPEN.has(k) ? COACH_OPEN.delete(k) : COACH_OPEN.add(k);
+  const op = COACH_OPEN.has(k); a.classList.toggle('open', op); a.setAttribute('aria-expanded', op);
+});
+document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('[data-cadv]')) { e.preventDefault(); e.target.click(); } });
+document.addEventListener('click', async e => {
+  const b = e.target.closest?.('[data-creload]'); if (!b) return;
+  b.classList.add('spin'); b.disabled = true;
+  let sent = false; if (aiOn()) try { await S.db.doc('requests/coach').set({at: new Date().toISOString(), who: b.dataset.creload}); sent = true; } catch (er) {}
+  setTimeout(() => { render(); toast(sent ? 'Conseils recalculés. Demande envoyée : ton PC les fait réécrire par Claude avec les skills.' : 'Conseils recalculés avec tes dernières données'); }, 500);
+});
+
 // The pain, the session it touches, and for each exercise that loads the zone the first adaptation, written out.
 const painTxt = l => l.replace(/[()]/g, '').replace(/ G$/, ' gauche').replace(/ D$/, ' droite').toLowerCase();
 function painCoach() {
@@ -9461,7 +9515,7 @@ function tBody() {
 }
 // Profil: the athlete, the tests, the max of each lift.
 function tProfile() {
-  const nMax = EX.filter(e => e.t === 'gym' && e.u === 'kg' && rmTest(e.id)).length;
+  const nMax = EX.filter(e => e.t === 'gym' && e.u === 'kg' && e.cat !== 'Haltérophilie' && rmTest(e.id)).length;
   const last5 = tests().filter(x => x.type === '5rm').sort((a, b) => b.date.localeCompare(a.date))[0];
   const lastSym = tests().filter(x => x.type === 'sym').sort((a, b) => b.date.localeCompare(a.date))[0];
   const fv = lastTest('fv'), fvr = fv ? fvProfile(fv) : null, cmj = jBest('cmj');
@@ -9473,7 +9527,8 @@ function tProfile() {
     ${sprinterCard()}
     <div class="sec-label">Mes résultats</div>
     <div class="stack">
-      <button class="banner" data-rmlist style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Mes max</b><br><span class="small muted">${nMax ? nMax + ' max testés · ' : ''}les charges de tes séances en découlent</span></span>${ICON.chev}</button>
+      <button class="banner" data-rmlist style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Max musculation</b><br><span class="small muted">${nMax ? nMax + ' max testés · ' : ''}les charges de tes séances en découlent</span></span>${ICON.chev}</button>
+      <button class="banner" data-baroga style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Max haltérophilie</b><br><span class="small muted">${typeof bgTotal === 'function' && bgTotal() ? 'total ' + fx(bgTotal()) + ' kg · ' : ''}table de Baroga : tes déficits sur 46 mouvements</span></span>${ICON.chev}</button>
       <button class="banner" data-tjumps style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Mes max en saut</b><br><span class="small muted">${(() => { const ck = cmjCheck(); return cmj ? 'CMJ ' + fx(+cmj.h, 1) + ' cm' + (ck && ck.d <= -5 ? ' · fatigue détectée' : '') + ' · ' : ''; })()}tes records de saut et de sprint · import My Jump</span></span>${ICON.chev}</button>
     </div>
     <div class="sec-label">Tests</div>
@@ -10651,12 +10706,12 @@ function rmBlock(id) {
       <p class="small muted" style="margin:6px 0 0">RPE 8 = il te reste 2 répétitions. Ta récupération du jour peut baisser la charge proposée en séance.</p>` : ''}</div>`;
 }
 function rmList() {
-  openPane({title: 'Mes max', render: () => {
-    const ex = EX.filter(e => e.t === 'gym' && e.u === 'kg'), cats = [...new Set(ex.map(e => e.cat))];
+  openPane({title: 'Max musculation', render: () => {
+    const ex = EX.filter(e => e.t === 'gym' && e.u === 'kg' && e.cat !== 'Haltérophilie'), cats = [...new Set(ex.map(e => e.cat))];
     // Known maxes first, the main lifts at the top, then the heaviest; the exercises without a max come after, by family.
     const known = ex.filter(e => machineEx(e.id) ? GYMS.some(([g]) => rmOf(e.id, '', g)) : rmOf(e.id, '', null)).sort((a, b) => { const ia = MAIN_LIFTS.indexOf(a.id), ib = MAIN_LIFTS.indexOf(b.id); if (ia >= 0 || ib >= 0) return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib); return (rmOf(b.id, '', null)?.kg || 0) - (rmOf(a.id, '', null)?.kg || 0); });
     const kn = new Set(known.map(e => e.id));
-    return `<p class="small muted" style="margin:16px 4px 6px">Un max par exercice : ton test s'il existe, sinon l'estimation de tes séries de 5 répétitions ou moins (avec le RPE noté). Touche un exercice pour noter un test ou calculer une charge.</p>
+    return `<p class="small muted" style="margin:16px 4px 6px">Un max par exercice : ton test s'il existe, sinon l'estimation de tes séries de 5 répétitions ou moins (avec le RPE noté). Touche un exercice pour noter un test ou calculer une charge. L'haltérophilie a son propre tableau : <button type="button" class="linkbtn" data-baroga>Max haltérophilie</button>.</p>
       ${known.length ? `<div class="sec-label">Tes max connus · ${known.length}</div><div class="list">${known.map(e => rmRow(e)).join('')}</div>` : ''}
       ${cats.map(c => { const L = ex.filter(e => e.cat === c && !kn.has(e.id)); return L.length ? `<div class="sec-label">${esc(c)} <small>pas encore de max</small></div><div class="list">${L.map(e => rmRow(e)).join('')}</div>` : ''; }).join('')}`;
   }});
@@ -12321,6 +12376,7 @@ go('home', false);
   db.collection('manual').onSnapshot(snap => { const o = {}; snap.docs.forEach(d => o[d.id] = d.data()); S.manual = o; render(); autoClose(); }, fail);
   db.collection('reports').onSnapshot(snap => { S.reports = snap.docs.map(d => ({id: d.id, ...d.data()})); render(); }, fail);
   db.doc('analysis/latest').onSnapshot(snap => { S.analysis = snap.exists ? snap.data() : null; render(); }, fail);
+  db.doc('analysis/coach').onSnapshot(snap => { S.coachAI = snap.exists ? snap.data() : null; render(); }, () => {});
   db.doc('settings/app').onSnapshot(snap => { S.app = snap.exists ? snap.data() : {}; render(); renderMod(); }, () => {});
   db.doc('requests/sync').onSnapshot(snap => { S.req = snap.exists ? snap.data().requestedAt : null; render(); }, () => {});
   db.doc('status/sync').onSnapshot(snap => { S.checked = snap.exists ? snap.data() : null; render(); }, () => {});
@@ -14341,6 +14397,70 @@ document.addEventListener('click', async e => {
   if (at('[data-ctsend]')) { await ctSend(); return; }
 });
 document.addEventListener('input', e => { const k = e.target.dataset?.ctk; if (!k) return; CTR[k] = e.target.type === 'number' ? Math.max(1, +e.target.value || 1) : e.target.value; if (k === 'paste') { ctParse(CTR.paste); paneRender(); } });
+
+/* ================= Max haltérophilie : la table de Baroga =================
+   Ratios repris tels quels du fichier « Table BAROGA Bilan.Haltérophilie » (cours d'haltérophilie de Romain, table
+   d'évaluation de Baroga, version de Florin Nicolae, E.T.R. Bourgogne). Chaque mouvement vaut un pourcentage du total
+   olympique (arraché + épaulé-jeté). Écart : « − » sous 95 % de l'attendu, « + » au-dessus de 106 %, sinon « = ».
+   La colonne « 80 % » du fichier est la charge de travail à 80 % de l'attendu. */
+const BAROGA = [
+  // [n°, mouvement, catégorie (T technique, S semi-technique, R renforcement musculaire), % du total, famille]
+  [1, 'Arraché', 'T', .444, 'ar'], [2, 'Arraché flexion des plots', 'S', .42, 'ar'], [3, 'Arraché flexion puissance', 'S', .41, 'ar'],
+  [4, 'Arraché debout', 'S', .38, 'ar'], [5, 'Arraché debout des plots', 'S', .36, 'ar'], [6, 'Arraché debout puissance', 'S', .36, 'ar'],
+  [7, 'Arraché force', 'S', .28, 'ar'], [8, 'Tirage de bras d\'arraché', 'R', .2, 'ar'], [9, 'Tirage lourd d\'arraché', 'R', .53, 'ar'],
+  [10, 'Tirage lourd d\'arraché des plots', 'R', .55, 'ar'], [11, 'Tirage haut d\'arraché', 'R', .444, 'ar'], [12, 'Flexion d\'arraché', 'R', .444, 'ar'],
+  [13, 'Passages d\'arraché', 'S', .25, 'ar'], [14, 'Chute d\'arraché nuque', 'S', .444, 'ar'], [15, 'Développé d\'arraché', 'R', .2, 'ar'],
+  [17, 'Épaulé-jeté', 'T', .556, 'ej'], [18, 'Épaulé flexion', 'T', .556, 'ej'], [19, 'Épaulé flexion des plots', 'S', .54, 'ej'],
+  [20, 'Épaulé puissance', 'S', .52, 'ej'], [21, 'Épaulé debout', 'S', .47, 'ej'], [22, 'Épaulé debout des plots', 'S', .45, 'ej'],
+  [23, 'Épaulé debout puissance', 'S', .41, 'ej'], [24, 'Épaulé force', 'S', .35, 'ej'], [25, 'Passages d\'épaulé', 'S', .35, 'ej'],
+  [26, 'Tirage de bras d\'épaulé', 'R', .25, 'ej'], [27, 'Tirage lourd d\'épaulé', 'R', .72, 'ej'], [28, 'Tirage lourd d\'épaulé des plots', 'R', .78, 'ej'],
+  [29, 'Jeté supports', 'S', .556, 'je'], [30, 'Jeté nuque', 'S', .6, 'je'], [31, 'Jeté debout puissance', 'S', .52, 'je'],
+  [32, 'Jeté puissance nuque', 'S', .5, 'je'], [33, 'Chute de jeté', 'S', .25, 'je'], [34, 'Chute de jeté nuque', 'S', .25, 'je'],
+  [35, 'Jeté force', 'S', .38, 'je'], [36, 'Jeté force nuque', 'S', .4, 'je'],
+  [37, 'Développé nuque en fente', 'R', .28, 'rf'], [38, 'Flexion clavicules', 'R', .62, 'rf'], [39, 'Flexion nuque', 'R', .75, 'rf'],
+  [40, 'Lombaires nuque (good morning)', 'R', .32, 'rf'], [41, 'Lombaires plinth', 'R', .3, 'rf'], [42, 'Lombaires surélevés', 'R', .556, 'rf'],
+  [43, 'Développé clavicules', 'R', .32, 'rf'], [44, 'Développé nuque', 'R', .3, 'rf'], [45, 'Rowing', 'R', .3, 'rf'], [46, 'Tirage poitrine', 'R', .3, 'rf']
+];
+const BG_CAT = {T: 'Technique', S: 'Semi-technique', R: 'Renforcement'}, BG_FAM = [['ar', 'Arraché'], ['ej', 'Épaulé'], ['je', 'Jeté'], ['rf', 'Flexions, lombaires, développés, tirages']];
+const bgData = () => S.tset?.olym || {};
+const bgTotal = () => { const o = bgData(); return (+o.done?.[1] || 0) + (+o.done?.[17] || 0); };
+// Le verdict exact du fichier : =SI(fait < attendu × 95 % ; « − » ; SI(fait > attendu × 106 % ; « + » ; « = »)).
+const bgSign = (done, exp) => done < exp * .95 ? '-' : done > exp * 1.06 ? '+' : '=';
+const bgNum = (v, d = 0) => (+v).toFixed(d).replace('.', ','), bgKg = v => { const r = Math.round(v * 2) / 2; return bgNum(r, r % 1 ? 1 : 0); };
+function bgRows() {
+  const T = bgTotal(), d = bgData().done || {};
+  return BAROGA.map(([n, name, c, pct, fam]) => { const exp = T * pct, done = +d[n] || 0; return {n, name, c, pct, fam, exp, done, gap: done ? done - exp : null, gp: done ? done / exp - 1 : null, sg: done && T ? bgSign(done, exp) : null}; });
+}
+function baroCard() {
+  const T = bgTotal(), R = bgRows().filter(r => r.done && r.n !== 1 && r.n !== 17), minus = R.filter(r => r.sg === '-').sort((a, b) => a.gp - b.gp), plus = R.filter(r => r.sg === '+').sort((a, b) => b.gp - a.gp);
+  if (!T) return '';
+  const li = r => `<div class="row"><span class="l">${esc(r.name)}<span class="hint">${bgKg(r.done)} kg pour ${bgKg(r.exp)} kg attendus</span></span><b class="bgg ${r.sg === '-' ? 'm' : 'p'}">${r.gp > 0 ? '+' : ''}${bgNum(r.gp * 100)} %</b></div>`;
+  return `<div class="card bgsum"><span class="eyebrow">Tes déficits</span>${minus.length ? `<div class="list">${minus.map(li).join('')}</div>` : `<p class="small muted" style="margin:6px 0 0">${R.length ? 'Aucun : tout ce que tu as noté est à 95 % ou plus de l\'attendu.' : 'Note tes max dans le tableau pour les voir ici.'}</p>`}
+    ${plus.length ? `<span class="eyebrow" style="display:block;margin-top:14px">Tes points forts</span><div class="list">${plus.slice(0, 5).map(li).join('')}</div>` : ''}</div>`;
+}
+function baroPane() {
+  openPane({title: 'Max haltérophilie', render: () => {
+    const o = bgData(), T = bgTotal(), rows = bgRows();
+    const inp = (n, ph) => `<input class="mini-in bgin" inputmode="decimal" placeholder="${ph}" value="${o.done?.[n] ? bgNum(+o.done[n], +o.done[n] % 1 ? 1 : 0) : ''}" data-bgset="${n}" aria-label="Ton max">`;
+    const app = EX.filter(e => e.t === 'gym' && e.u === 'kg' && e.cat === 'Haltérophilie' && rmOf(e.id, '', null));
+    return `<p class="small muted" style="margin:16px 4px 8px">La table de Baroga : à partir de ton arraché et de ton épaulé-jeté, elle donne la charge attendue sur chaque mouvement. Ton max face à l'attendu montre tes déficits.</p>
+      <div class="card bgtop"><div class="bgtwo"><label>Arraché<span>${inp(1, 'kg')} kg</span></label><label>Épaulé-jeté<span>${inp(17, 'kg')} kg</span></label></div>
+        <div class="stats" style="margin-top:12px"><div><b>${T ? bgKg(T) + ' kg' : '–'}</b><span>total olympique</span></div><div><b>${T ? bgNum((+o.done[1] || 0) / T * 100, 1) + ' %' : '–'}</b><span>arraché / total <small>(table : 44,4 %)</small></span></div></div></div>
+      ${baroCard()}
+      ${T ? BG_FAM.map(([f, fn]) => `<div class="sec-label">${esc(fn)}</div><div class="bgt" role="table"><div class="bgh" role="row"><span role="columnheader">Mouvement</span><span role="columnheader">Attendu</span><span role="columnheader">Ton max</span><span role="columnheader">Écart</span></div>
+        ${rows.filter(r => r.fam === f && r.n !== 1 && r.n !== 17).map(r => `<div class="bgr" role="row"><span class="bgn" role="cell">${esc(r.name)}<small>${BG_CAT[r.c]} · ${bgNum(r.pct * 100, 1)} % · travail à 80 % : ${bgKg(r.exp * .8)} kg</small></span><span class="bgx" role="cell">${bgKg(r.exp)}</span><span role="cell">${inp(r.n, '–')}</span><span role="cell" class="bgs ${r.sg === '-' ? 'm' : r.sg === '+' ? 'p' : r.sg ? 'e' : ''}">${r.sg ? (r.sg === '=' ? '=' : r.sg === '-' ? '−' : '+') + `<small>${r.gp > 0 ? '+' : ''}${bgNum(r.gp * 100)} %</small>` : '<small>à tester</small>'}</span></div>`).join('')}</div>`).join('')
+      : '<div class="card" style="margin-top:12px"><p class="small muted" style="margin:0">Note ton arraché et ton épaulé-jeté : le tableau des 44 autres mouvements apparaît.</p></div>'}
+      <details class="card bgwhy" style="margin-top:14px"><summary>Comment ça marche</summary><p class="small" style="margin:8px 0 0">Chaque mouvement vaut un pourcentage fixe du total arraché + épaulé-jeté (table de Baroga, fichier de ton cours d'haltérophilie). <b>−</b> : ton max est sous 95 % de l'attendu, c'est un déficit à travailler. <b>+</b> : au-dessus de 106 %, c'est un point fort. <b>=</b> : entre les deux. « Travail à 80 % » : la charge de travail que donne le fichier.</p></details>
+      ${app.length ? `<div class="sec-label">Tes max d'haltérophilie dans l'appli</div><div class="list">${app.map(e => rmRow(e)).join('')}</div>` : ''}`;
+  }});
+}
+document.addEventListener('change', async e => {
+  const i = e.target.closest?.('[data-bgset]'); if (!i) return;
+  const n = +i.dataset.bgset, v = +String(i.value).replace(',', '.'), o = {...bgData(), done: {...(bgData().done || {})}};
+  if (v > 0) o.done[n] = v; else delete o.done[n];
+  o.date = TODAY; await saveTset({olym: o});
+});
+document.addEventListener('click', e => { if (e.target.closest?.('[data-baroga]')) baroPane(); });
 
 /* ================= TNR · Paramètres (la roue crantée, en haut à gauche de l'Accueil) =================
    Tout ce qui se règle dans l'appli, au même endroit :
@@ -24420,6 +24540,27 @@ const I18N_EN = {
 "{} rép.": "{} reps",
 "Épaulé, lancers, une jambe": "Clean, throws, single leg",
 "Force max + sauts": "Max strength + jumps",
+"Max musculation": "Strength maxes",
+"Max haltérophilie": "Weightlifting maxes",
+"Tes déficits": "Your weak points",
+"Tes points forts": "Your strong points",
+"Mouvement": "Movement",
+"Attendu": "Expected",
+"Écart": "Gap",
+"à tester": "to test",
+"total olympique": "Olympic total",
+"Comment ça marche": "How it works",
+"Flexions, lombaires, développés, tirages": "Squats, lower back, presses, pulls",
+"Technique": "Technique",
+"Semi-technique": "Semi-technical",
+"table de Baroga : tes déficits sur 46 mouvements": "Baroga table: your weak points on 46 movements",
+"Recharger les conseils avec les dernières données": "Reload the advice with the latest data",
+"Conseils recalculés avec tes dernières données": "Advice recalculated with your latest data",
+"Conseils recalculés. Demande envoyée : ton PC les fait réécrire par Claude avec les skills.": "Advice recalculated. Request sent: your PC will have Claude rewrite it with the skills.",
+"Écrit par Claude avec le skill préparateur physique": "Written by Claude with the strength coach skill",
+"Écrit par Claude avec le skill nutrition": "Written by Claude with the nutrition skill",
+"Écrit par Claude avec le skill kiné et récupération": "Written by Claude with the physio and recovery skill",
+"Écrit par Claude": "Written by Claude",
 };
 
 /* ================= TNR · English version =================
