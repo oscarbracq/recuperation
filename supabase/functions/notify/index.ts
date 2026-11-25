@@ -190,6 +190,31 @@ function brief(S: any, TODAY: string) {
   };
 }
 
+// The two questionnaire reminders: short, different every day (picked by the day of the year), and built on what is
+// already known: last night's sleep, today's session, how many days in a row the questionnaire has been filled.
+function questText(S: any, TODAY: string, kind: 'matin' | 'soir') {
+  const addDays = (k: string, n: number) => { const d = new Date(k + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+  const doy = Math.floor((Date.parse(TODAY + 'T12:00:00Z') - Date.parse(TODAY.slice(0, 4) + '-01-01T12:00:00Z')) / 864e5);
+  const pick = <T>(a: T[], salt = 0) => a[(doy + salt) % a.length];
+  const fx = (v: number) => Number(v).toLocaleString('fr-FR', {maximumFractionDigits: 1});
+  const done = (k: string) => kind === 'matin' ? !!S.manual?.[k]?.mornAt : !!S.manual?.[k]?.closed;
+  let streak = 0; while (streak < 60 && done(addDays(TODAY, -streak - 1))) streak++;
+  const serie = streak >= 2 ? `🔥 ${streak} ${kind === 'matin' ? 'matins' : 'soirs'} d’affilée : garde la série.` : streak === 1 ? 'Hier c’était fait. On enchaîne ?' : '';
+  if (kind === 'matin') {
+    const sS = S.g?.[TODAY]?.sleepS, sl = sS > 7200 ? sS / 3600 : null, hrv = S.g?.[TODAY]?.hrv;
+    const nuit = sl == null ? '' : sl >= 8 ? `Belle nuit de ${fx(sl)} h 💪` : sl >= 7 ? `Nuit de ${fx(sl)} h.` : `Nuit courte (${fx(sl)} h) : on adapte ta journée.`;
+    const title = pick(['Bonjour ☀️ Comment tu te sens ?', 'Ta journée commence ici', 'Prêt pour aujourd’hui ?', 'Une minute pour toi ☀️', 'Le point du matin', 'Nouveau jour, on écoute ton corps']);
+    const cta = pick(['Jambes, moral, douleurs : 1 minute, et ta journée est calée.', 'Réponds en 1 minute, ta synthèse du jour t’attend.', 'Dis-moi comment tu te sens, je m’occupe du reste.', 'Ton ressenti + ta montre = la bonne séance aujourd’hui.', 'Quelques touches et ton plan du jour est prêt.'], 3);
+    return {title, body: [nuit || (hrv ? `VFC ${hrv} ms ce matin.` : ''), serie || cta, serie ? cta : ''].filter(Boolean).slice(0, 2).join('\n')};
+  }
+  const acts = (S.g?.[TODAY]?.acts || []).filter((a: any) => (a.min || 0) >= 15);
+  const a = acts.find((x: any) => /strength|fitness|training/.test(x.type)) || acts.find((x: any) => /track|running/.test(x.type)) || acts[0];
+  const what = a ? (/strength|fitness|training/.test(a.type) ? 'ta muscu' : /track|running/.test(a.type) ? 'ta séance de piste' : 'ta séance') : '';
+  const seance = a ? pick([`Bravo pour ${what} (${Math.round(a.min)} min) 👏 Note ton RPE à chaud.`, `${Math.round(a.min)} min de ${what.replace(/^ta /, '')} aujourd’hui : comment c’était ?`, `${what[0].toUpperCase() + what.slice(1)} est dans la boîte. Ton ressenti, vite fait ?`]) : pick(['Journée sans séance : parfait pour récupérer. Dis-moi comment tu te sens.', 'Jour calme aujourd’hui. Comment va ton corps ?', 'Pas de séance aujourd’hui : on note quand même ton énergie ?']);
+  const title = pick(['Ta journée mérite un bilan 🌙', 'On clôture la journée ?', 'Comment s’est passée ta journée ?', 'Dernière étape du jour 🌙', 'Bilan express du soir', 'Avant de dormir, 1 minute'], 1);
+  return {title, body: [seance, serie || 'Une minute, et demain est déjà préparé.'].join('\n')};
+}
+
 // Once an hour from 11 h to 22 h: a quick sync, then if the watch sent a strength or track session today and
 // nothing is noted yet in Training, one notification per session to fill it in.
 async function sessionWatch(st: any, TODAY: string, hm: string, token: string | null) {
@@ -271,6 +296,11 @@ Deno.serve(async req => {
   }
   const slot = (due ? +due.slice(0, 2) : hour) < 14 ? 'morning' : 'evening';
   if (!st.subs?.length) return json({skipped: 'aucun téléphone abonné'});
+  if (body.test) {
+    const k = hour < 14 ? 'matin' : 'soir';
+    const results = await sendAll(st, {...questText(await loadData(), TODAY, k), tag: 'tnr-test', url: './?q=' + k});
+    return json({slot: 'test-' + k, results});
+  }
   // The morning questionnaire: one tap opens it in the app (./?q=matin), unless it is already answered.
   if (due && !body.test) {
     const {data: app2} = await db.from('docs').select('data').eq('collection', 'settings').eq('id', 'app').maybeSingle();
@@ -280,14 +310,16 @@ Deno.serve(async req => {
       const {data: man} = await db.from('docs').select('data').eq('collection', 'manual').eq('id', TODAY).maybeSingle();
       st.last = {...(st.last || {}), [due]: TODAY}; await putPrivate('push', st);
       if (man?.data?.closed) return json({skipped: 'journée déjà enregistrée'});
-      const results = await sendAll(st, {title: 'Questionnaire du soir', body: 'Ta journée : séances, RPE, énergie, douleurs. Une minute pour la clôturer et préparer demain.', tag: 'tnr-quest-soir', url: './?q=soir'});
+      const results = await sendAll(st, {...questText(await loadData(), TODAY, 'soir'), tag: 'tnr-quest-soir', url: './?q=soir'});
       return json({slot: 'questEve', results});
     }
     if (due === qt) {
       const {data: man} = await db.from('docs').select('data').eq('collection', 'manual').eq('id', TODAY).maybeSingle();
       st.last = {...(st.last || {}), [due]: TODAY}; await putPrivate('push', st);
       if (man?.data?.mornAt) return json({skipped: 'questionnaire du matin déjà rempli'});
-      const results = await sendAll(st, {title: 'Questionnaire du matin', body: 'Comment tu te sens ce matin ? Sommeil, jambes, douleurs, moral : une minute, et ta synthèse du jour est prête.', tag: 'tnr-quest', url: './?q=matin'});
+      const syncToken = token || st.syncToken;
+      if (syncToken) { try { await fetch(Deno.env.get('SUPABASE_URL') + '/functions/v1/sync', {method: 'POST', headers: {'x-recup-token': syncToken, Authorization: 'Bearer ' + (st.anonKey || Deno.env.get('SUPABASE_ANON_KEY') || ''), 'Content-Type': 'application/json'}, body: '{}', signal: AbortSignal.timeout(30000)}); } catch (_) { /* the text works without it */ } }
+      const results = await sendAll(st, {...questText(await loadData(), TODAY, 'matin'), tag: 'tnr-quest', url: './?q=matin'});
       return json({slot: 'quest', results});
     }
   }
