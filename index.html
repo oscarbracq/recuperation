@@ -2201,6 +2201,33 @@ html.one .coach .chead{margin-bottom:6px}
 html.one .btn.one-del{width:100%;margin-top:8px;border:1.5px dashed color-mix(in srgb,var(--bad) 60%,transparent);color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,transparent);transition:transform .2s,background .2s}
 html.one .btn.one-del.over{background:var(--bad);color:#fff;border-style:solid;transform:scale(1.06)}
 .ctfit{margin-top:12px}.ctck{display:flex;gap:8px;align-items:center;font-weight:600;font-size:.9rem;margin:0 2px 6px}.ctchg{color:var(--accent)}.ctfit small{color:var(--fg3);font-weight:500}
+
+/* v176 : séance en cours — temps, échauffement coché, fin d'exercice, récup visible */
+.ltime{margin-top:12px;padding:14px 16px}.lthead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.lthead .num{display:block;font-size:2rem;font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.ltr2{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:.8rem;color:var(--fg2)}.ltr2 b{color:var(--fg)}
+.ltbar{position:relative;height:6px;border-radius:3px;background:var(--card2);margin:12px 0 10px;overflow:hidden}.ltbar i{position:absolute;inset:0 auto 0 0;background:var(--accent);border-radius:3px;transition:width .6s}
+.ltbar em{position:absolute;top:0;bottom:0;width:2px;background:var(--bg);opacity:.7}
+.ltgap{display:inline-block;font-size:.78rem;font-weight:700;padding:4px 10px;border-radius:99px;background:var(--card2);color:var(--fg2)}
+.ltgap.ok{background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good)}.ltgap.mid{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}.ltgap.bad{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad)}
+.ltdet{margin-top:8px}.ltdet summary{font-size:.8rem;color:var(--fg3);cursor:pointer;text-align:right;list-style:none}.ltdet summary::-webkit-details-marker{display:none}
+.ltr{display:grid;grid-template-columns:minmax(0,1fr) 62px 62px 34px;gap:6px;font-size:.8rem;padding:6px 2px;border-top:1px solid color-mix(in srgb,var(--fg3) 14%,transparent)}.ltr span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ltr.hd{color:var(--fg3);font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;border:0}.ltr.cur{color:var(--accent);font-weight:600}.ltr b{text-align:right}
+.ltr b.ok,.exdone i.ok{color:var(--good)}.ltr b.mid,.exdone i.mid{color:var(--warn)}.ltr b.bad,.exdone i.bad{color:var(--bad)}.exdone i{font-style:normal;font-weight:600}
+.extime{font-size:.72rem;color:var(--fg3);margin:2px 2px 0;font-variant-numeric:tabular-nums}.extime.late{color:var(--warn)}
+.exmeta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0 4px}
+.exmeta .lcons{background:none;border:0;padding:4px 0;margin:0;color:var(--accent);font-weight:700;font-size:.9rem}
+.lrest{font-size:.78rem;font-weight:700;color:var(--fg2);background:var(--card2);padding:4px 10px;border-radius:99px;white-space:nowrap}
+.lnote{margin:2px 2px 6px;font-size:.8rem;line-height:1.35}
+.exfin{display:block;margin:10px 0 0 auto;padding:7px 14px;border-radius:10px;border:1.5px solid var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent);font-weight:700;font-size:.8rem}
+.exbox.exdone{display:flex;align-items:center;gap:12px;padding:12px 14px}.exck{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;flex:none}.exck svg{width:16px;height:16px}
+.exdt{flex:1;min-width:0}.exdt b{display:block;font-size:.95rem}.exdt small{color:var(--fg3);font-size:.76rem}
+.setrow.ramprow.done{opacity:1}.setrow.ramprow.done .rv{background:var(--accent-soft);color:var(--fg)}
+.wtr.ed .wck{width:28px;height:28px;border-radius:8px;border:0;background:var(--card);color:var(--fg3);display:grid;place-items:center;padding:0}.wtr .wck svg{width:14px;height:14px}
+.wtr.wdone .wck{background:var(--accent);color:#fff}.wtr.wdone .wex,.wtr.wdone .wdo{color:var(--fg3)}
+.wadd{display:grid;grid-template-columns:minmax(0,1fr) 70px auto;gap:6px;margin-top:8px}.wadd .mini-in{text-align:left;height:36px}
+.wcnt{color:var(--fg3)}.wcnt.ok{color:var(--good)}
+.livebody.fin{margin-top:0}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -7167,6 +7194,11 @@ applyPrefs();
    ===================================================================== */
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const r25 = x => Math.round(x / 2.5) * 2.5;
+const KBW = [4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 32, 36, 40, 44, 48];
+const isKB = ex => (EXI[ex]?.eq || '') === 'Kettlebell';
+const kbSnap = x => KBW.reduce((b, w) => Math.abs(w - x) < Math.abs(b - x) - 1e-9 ? w : b, KBW[0]);
+// Une charge réelle : kettlebell existante, sinon arrondie à 2,5 kg.
+const wKg = (ex, x) => isKB(ex) ? kbSnap(x) : r25(x);
 // Estimated one-rep max (Epley); above 10 reps the estimate is no longer reliable, so reps are capped.
 const e1rm = (kg, reps) => kg > 0 && reps > 0 ? kg * (1 + Math.min(reps, 10) / 30) : 0;
 const dow = k => new Date(k + 'T12:00:00').getDay();
@@ -7989,7 +8021,7 @@ document.addEventListener('click', async e => {
 });
 const logs = () => Object.values(S.logs).filter(l => !l.deleted && ((l.name = (l.name || '').replace(/^(Séance \d+) · .*$/, '$1')), true)).sort((a, b) => (b.date + (b.start || '')).localeCompare(a.date + (a.start || '')));
 const logsOn = k => logs().filter(l => l.date === k);
-function estMin(p) { return Math.round(((p.warm ? warmMin(p.warm) : 0) + (p.cool?.min || 0) + (p.tech ? 15 : 0) + p.items.reduce((s, it) => s + (it.min || 0) + (it.sets || it.reps || 0) * (((it.rest || 60) + (it.dist ? it.dist / 6 : 40)) / 60) + (it.seq && it.brest ? it.brest * ((it.blocks || 1) - 1) / 60 : 0), 0)) / 5) * 5; }
+function estMin(p) { return Math.round(((p.warm ? warmMin(p.warm) : 0) + (p.cool?.min || 0) + (p.tech ? 15 : 0) + p.items.reduce((s, it) => s + (it.min || 0) + (it.sets || it.reps || 0) * (((it.rest || 60) + (it.dist ? it.dist / 6 : 40)) / 60) + (it.seq?.length > 1 && it.brest ? (it.brest - (it.rest || 60)) * ((it.blocks || 1) - 1) / 60 : 0), 0)) / 5) * 5; }
 const unitOf = it => it.ct === 'iso' ? 's' : it.u || (exOf(it.ex).u === 's' ? 's' : /traîneau|prowler/i.test(exOf(it.ex).n) ? 'm' : 'reps');
 // Répétitions, secondes (2:00 s'écrit avec deux points) ou mètres (poussée de traîneau : 20 m, 4 fois).
 const U_NEXT = {reps: 's', s: 'm', m: 'reps'}, U_LBL = {reps: 'Répét.', s: 'Secondes', m: 'Mètres'};
@@ -8031,25 +8063,25 @@ function lastText(id) {
 function suggest(it) {
   const e = exOf(it.ex); if (e.u !== 'kg') return null;
   // The load written in his programme comes first: he wrote it as his coach.
-  if (+it.kg > 0) { const f = recFactor(); return {kg: r25(+it.kg * f.k), why: 'charge de ton programme' + f.why}; }
+  if (+it.kg > 0) { const f = recFactor(); return {kg: wKg(it.ex, +it.kg * f.k), why: 'charge de ton programme' + f.why}; }
   const h = exHistory(it.ex)[0];
   const done = h?.it.sets?.filter(s => +s.kg > 0) || [];
   if (done.length) {
     const top = Math.max(...done.map(s => +s.kg));
     const hit = done.length >= (it.sets || 1) && done.every(s => +s.reps >= (it.reps || 0));
     const f = recFactor();
-    if (f.k < 1) return {kg: r25(top * f.k), why: 'même base que la dernière fois' + f.why};
+    if (f.k < 1) return {kg: wKg(it.ex, top * f.k), why: 'même base que la dernière fois' + f.why};
     if (!hit) return {kg: top, why: 'même charge que la dernière fois : valide d\'abord toutes les séries'};
-    const n = r25(top * 1.025);
+    const n = isKB(it.ex) ? (KBW.find(w => w > top) || top) : r25(top * 1.025);
     return n > top ? {kg: n, why: `+${fx((n - top) / top * 100, 1)} % : tout réussi la dernière fois`} : {kg: top, why: 'tout réussi : ajoute une répétition'};
   }
   const b = rmOf(it.ex)?.kg, f = recFactor();
-  return it.pct && b ? {kg: r25(b * it.pct / 100 * f.k), why: `${it.pct} % de ton max (${fx(b)} kg)${f.why}`} : null;
+  return it.pct && b ? {kg: wKg(it.ex, b * it.pct / 100 * f.k), why: `${it.pct} % de ton max (${fx(b)} kg)${f.why}`} : null;
 }
 // Low recovery this morning: the proposed loads go down a little.
 function recFactor() {
   const kG = lastKey('hrv'), z = kG === TODAY || kG === addDays(TODAY, -1) ? zoneOf(recovery(kG)?.score) : null;
-  const r = z === 'bad' ? {k: .9, why: ' · −10 % : récupération basse'} : z === 'mid' ? {k: .95, why: ' · −5 % : récupération moyenne'} : {k: 1, why: ''};
+  const r = z === 'bad' ? {k: .9, why: ' · −10 % : récupération basse'} : z === 'warn' ? {k: .95, why: ' · −5 % : récupération moyenne'} : {k: 1, why: ''};
   return lightOn() && r.k > .9 ? {k: .9, why: ' · −10 % : semaine allégée'} : r;
 }
 
@@ -9780,12 +9812,20 @@ function coolSuggest(ed) {
 const coolDefault = ed => ['r_coh', ...coolSuggest(ed).filter(x => x.kind !== 'respi').slice(0, 2).map(x => x.id)];
 const warmText = w => w?.sel?.length ? WARM_G.map(([g, lab]) => { const L = w.sel.map(id => WX[id]).filter(x => x && x.g === g); return L.length ? `${lab} : ${L.map(x => x.n[0].toLowerCase() + x.n.slice(1) + ' (' + x.dose + ')').join(', ')}` : ''; }).filter(Boolean) : [];
 // En tableau (Oscar est dyslexique) : une ligne par exercice, l'étape à gauche, la dose à droite.
-function warmTable(w, edit) {
-  if (!w?.sel?.length) return '';
-  const rows = WARM_G.map(([g, lab]) => { const L = w.sel.map(id => WX[id]).filter(x => x && x.g === g);
-    return L.map((x, k) => `<div class="wtr${k ? '' : ' g1'}${edit ? ' ed' : ''}"><span class="wst">${k ? '' : esc(lab)}</span><span class="wex">${esc(x.n)}</span><span class="wdo">${esc(x.dose)}</span>${edit ? `<button type="button" class="wx" data-edws="${x.id}" aria-label="Retirer ${esc(x.n)}">×</button>` : ''}</div>`).join(''); }).join('');
-  return `<div class="wtab"><div class="wtr hd${edit ? ' ed' : ''}"><span>Étape</span><span>Exercice</span><span>Dose</span>${edit ? '<span></span>' : ''}</div>${rows}</div>`;
+function warmTable(w, edit, live) {
+  if (!w?.sel?.length && !live?.warmX?.length) return '';
+  const ok = live?.warmOk || {}, ck = id => `<button type="button" class="wck" data-wok="${esc(id)}" aria-pressed="${!!ok[id]}" aria-label="Étape faite">${TICK}</button>`, cl = edit || live ? ' ed' : '';
+  const rows = WARM_G.map(([g, lab]) => { const L = (w?.sel || []).map(id => WX[id]).filter(x => x && x.g === g);
+    return L.map((x, k) => `<div class="wtr${k ? '' : ' g1'}${cl}${ok[x.id] ? ' wdone' : ''}"><span class="wst">${k ? '' : esc(lab)}</span><span class="wex">${esc(x.n)}</span><span class="wdo">${esc(x.dose)}</span>${edit ? `<button type="button" class="wx" data-edws="${x.id}" aria-label="Retirer ${esc(x.n)}">×</button>` : live ? ck(x.id) : ''}</div>`).join(''); }).join('');
+  const extra = (live?.warmX || []).map((x, k) => `<div class="wtr${k ? '' : ' g1'} ed${ok['x' + k] ? ' wdone' : ''}"><span class="wst">${k ? '' : 'Ajouté'}</span><span class="wex">${esc(x.n)}</span><span class="wdo">${esc(x.dose || '')}</span>${ck('x' + k)}</div>`).join('');
+  const add = live ? `<div class="wadd"><input class="mini-in" data-wxn placeholder="Ajouter une étape" aria-label="Étape à ajouter"><input class="mini-in" data-wxd placeholder="Dose" aria-label="Dose"><button type="button" class="chip" data-wxadd>Ajouter</button></div>` : '';
+  return `<div class="wtab"><div class="wtr hd${cl}"><span>Étape</span><span>Exercice</span><span>Dose</span>${cl ? '<span></span>' : ''}</div>${rows}${extra}</div>${add}`;
 }
+document.addEventListener('click', e => {
+  const L = S.live; if (!L) return; let b;
+  if ((b = e.target.closest?.('[data-wok]'))) { const id = b.dataset.wok; L.warmOk = {...(L.warmOk || {}), [id]: !L.warmOk?.[id]}; if (L.warmOk[id]) { L.t0 ||= Date.now(); if (PREFS.haptic) navigator.vibrate?.(10); } saveLive(); paneRender(); return; }
+  if (e.target.closest?.('[data-wxadd]')) { const n = document.querySelector('[data-wxn]')?.value.trim(), d = document.querySelector('[data-wxd]')?.value.trim(); if (!n) { toast('Écris l\'étape à ajouter'); return; } (L.warmX ||= []).push({n, dose: d || ''}); saveLive(); paneRender(); }
+});
 function coolTable(c, edit) {
   if (!c?.sel?.length) return '';
   const L = c.sel.map(id => RX[id]).filter(Boolean);
@@ -10394,7 +10434,8 @@ function startSession(id, n) {
   saveLive(); closeAllPanes(); openLive();
 }
 // Un exercice qui se fait d'un côté puis de l'autre (une jambe, par côté) : une ligne par côté et par série.
-const isUni = it => /une jambe|unilat|bulgare|copenhag|pallof|fente|step-?up|step-?down|pistol|patineur|par c[ôo]t[ée]|par jambe|par bras/i.test(exOf(it.ex).n + ' ' + (it.note || ''));
+const UNI_IDS = new Set(['tibkb', 'calf', 'legext', 'legcurl', 'copen', 'glutecable', 'suitcase', 'kbswing1', 'bupress', 'tgu']);
+const isUni = it => UNI_IDS.has(it.ex) || /une jambe|un bras|un seul|à un haltère|unilat|bulgare|copenhag|pallof|fente|step-?up|step-?down|pistol|patineur|par c[ôo]t[ée]|chaque c[ôo]t[ée]|par jambe|par bras|single|one[- ]arm|one[- ]leg/i.test(exOf(it.ex).n + ' ' + (exOf(it.ex).en || '') + ' ' + (it.note || ''));
 // Les réglages d'une course, repris du plan : intention (%), traîneau (kg), partenaire qui retient (%), élan (m et %).
 const runP = it => ({start: it.start || (it.ex === 'fly' ? 'fly' : 'stand'), pct: it.pct ?? null, res: it.res || (it.ex === 'sled' ? 'sled' : it.ex === 'bandres' ? 'band' : ''), kg: it.kg ?? null, rpct: it.rpct ?? null, run: it.start === 'fly' || it.run ? it.run ?? 20 : null, runp: it.start === 'fly' || it.run ? it.runp ?? 70 : null});
 function liveItem(it) {
@@ -10402,8 +10443,9 @@ function liveItem(it) {
   if (e.t === 'test') return {ex: it.ex, tg: it, test: true, done: false};
   if (it.seq) return {ex: it.ex, tg: it, p: runP(it), reps: Array.from({length: it.blocks || 1}).flatMap((_, b) => it.seq.map(d => ({dist: d, blk: b + 1, t: '', done: false})))};
   if (e.t === 'track') return {ex: it.ex, tg: it, p: runP(it), reps: Array.from({length: it.min ? 1 : it.reps || 1}, () => ({dist: it.dist || '', t: '', done: false}))};
-  const sg = suggest(it), mk = side => ({kg: sg ? sg.kg : '', reps: it.reps || '', done: false, ...(side ? {side} : {})});
-  return {ex: it.ex, tg: it, u: unitOf(it), ...(it.ct ? {ct: it.ct} : {}), sets: Array.from({length: it.sets || 1}, () => isUni(it) ? [mk('D'), mk('G')] : [mk()]).flat()};
+  const sg = suggest(it), hs = exHistory(it.ex)[0]?.it.sets || [], lastKg = j => { const x = hs[j] || hs.at(-1); return x && +x.kg > 0 ? +x.kg : ''; };
+  const mk = (side, j) => ({kg: sg ? sg.kg : lastKg(j), reps: it.reps || '', done: false, ...(side ? {side} : {})});
+  return {ex: it.ex, tg: it, u: unitOf(it), ...(it.ct ? {ct: it.ct} : {}), sets: Array.from({length: it.sets || 1}, (_, n) => isUni(it) ? [mk('D', 2 * n), mk('G', 2 * n + 1)] : [mk('', n)]).flat()};
 }
 // A training session the watch sent to Garmin today (strength for a gym plan, running for a track plan).
 function watchSession(k, p) {
@@ -10428,16 +10470,15 @@ function liveBody() {
   const gA = L.garmin;
   const doneSets = L.items.reduce((s, it) => s + (it.sets || it.reps || []).filter(x => x.done).length, 0), all = L.items.reduce((s, it) => s + (it.sets || it.reps || []).length, 0);
   const back = (L.removed || []).map((r, n) => `<button data-tlback="${n}" aria-label="Remettre ${esc(exOf(r.item.ex).n)} dans la séance"><b>${esc(exOf(r.item.ex).n)}</b> · retiré · toucher pour remettre</button>`).join('');
-  const wt = warmText(L.warm), ct = coolText(L.cool);
-  return `${typeof formCard === 'function' ? formCard() : ''}${wt.length ? `<details class="card wtxt" style="margin-top:12px"${doneSets ? '' : ' open'}><summary class="eyebrow">Échauffement · ${warmMin(L.warm)} min</summary>${warmTable(L.warm)}</details>` : ''}
+  const wt = warmText(L.warm), ct = coolText(L.cool), wn = (L.warm?.sel?.length || 0) + (L.warmX?.length || 0), wd = Object.values(L.warmOk || {}).filter(Boolean).length;
+  return `${liveTimeCard()}${typeof formCard === 'function' ? formCard() : ''}${wt.length || L.warmX?.length ? `<details class="card wtxt" style="margin-top:12px"${doneSets && wd >= wn ? '' : ' open'}><summary class="eyebrow">Échauffement · ${warmMin(L.warm)} min${wn ? ` · <span class="wcnt${wd >= wn ? ' ok' : ''}">${wd}/${wn}</span>` : ''}</summary>${warmTable(L.warm, false, L)}</details>` : ''}
     ${ct.length ? `<details class="card wtxt" style="margin-top:8px"><summary class="eyebrow">Retour au calme, à la fin · ${L.cool.min} min</summary>${coolTable(L.cool)}</details>` : ''}
     <div class="livehead"><span class="chiptag">${L.kind === 'gym' ? 'Musculation' : L.kind === 'class' ? 'Cours collectif' : 'Sprint'} · ${doneSets}/${all}</span>${gA ? `<b>${fx(gA.min)} min</b>` : ''}</div>
     ${L.kind === 'track' ? `<div class="edrow" style="margin-top:10px;grid-template-columns:1fr 1fr"><label>Chaussures<select class="mini-in" data-lmeta="shoes">${['', 'Pointes carbone', 'Pointes', 'Running fractionné', 'Running long'].map(o => `<option${(L.shoes || '') === o ? ' selected' : ''}>${o}</option>`).join('')}</select></label><label>Lieu<select class="mini-in" data-lmeta="place">${['', ...PLACES].map(o => `<option${(L.place || '') === o ? ' selected' : ''}>${o}</option>`).join('')}</select></label><label>Conditions<select class="mini-in" data-lmeta="cond">${['', 'Piste, vent favorable', 'Piste, sans vent', 'Piste, vent contraire', 'Indoor', 'Pluie'].map(o => `<option${(L.cond || '') === o ? ' selected' : ''}>${o}</option>`).join('')}</select></label></div>` : ''}
     ${L.fill ? `<p class="small muted" style="margin:10px 4px 0">Tout est rempli comme prévu. Corrige ce qui a changé et décoche ce que tu n'as pas fait.</p>` : ''}
     ${L.kind === 'gym' && typeof isPC === 'function' && isPC() ? liveTable() : liveList()}
     ${back ? `<div class="rmback">${back}</div>` : ''}
-    ${liveBodyCard()}${liveVolCard()}
-    <div class="card livechrono"><span class="eyebrow">Durée de la séance</span><b class="num" data-lchrono>${liveChrono()}</b></div>
+    ${liveVolCard()}
     <div class="stack" style="margin-top:14px"><button class="btn ghost" data-tladd>+ Ajouter un exercice</button><button class="btn" data-tfinish>Terminer la séance</button>
     <button class="small muted" data-tcancel style="padding:10px">Abandonner sans enregistrer</button></div>`;
 }
@@ -10492,7 +10533,8 @@ function liveList() {
   return liveGroups().map(g => {
     const i0 = g[0], it0 = L.items[i0], head = it0.tg?.tw && !L.items[i0 - 1]?.tg?.tw ? '<div class="sec-label" style="margin:14px 2px 0">Travail technique</div>' : !it0.tg?.tw && L.items[i0 - 1]?.tg?.tw ? '<div class="sec-label" style="margin:14px 2px 0">Séance principale</div>' : '';
     if (g.length < 2) return head + liveBox(it0, i0);
-    return head + `<div class="supg"><div class="sec-label suph">Enchaînés · ${g.map(k => LB[k]).join(' + ')}</div>${g.map(k => liveBox(L.items[k], k, true)).join('')}${liveSupSets(g, LB)}</div>`;
+    if (g.every(k => L.items[k].fin)) return head + g.map(k => exFinBox(L.items[k], k)).join('');
+    return head + `<div class="supg"><div class="sec-label suph">Enchaînés · ${g.map(k => LB[k]).join(' + ')}</div>${g.map(k => liveBox(L.items[k], k, true)).join('')}${liveSupSets(g, LB)}<button type="button" class="exfin" data-tlfin="${g.join(',')}">Terminer les exercices enchaînés</button></div>`;
   }).join('');
 }
 function liveSupSets(g, LB) {
@@ -10530,8 +10572,11 @@ function liveBox(it, i, sup) {
   const lastCn = !it.cn ? exHistory(it.ex)[0]?.it.cn : '', ramp = it.sets && unitOf(it) === 'reps' ? rampText(it.ex, +(sg?.kg || tg.kg || it.sets[0]?.kg || 0), +(tg.reps || it.sets[0]?.reps || 0)) : '';
   const arr = it.sets || it.reps || [], all = arr.length && arr.every(x => x.done);
   const runBox = it.reps && e.u === 'm';
+  if (it.fin && !sup) return exFinBox(it, i);
+  const rs = it.rest ?? tg.rest;
   return `<div class="exbox"><h3><span class="exn">${esc(e.n)}${famOf(it.ex) ? `<button type="button" class="varbtn" data-tlvar="${i}">Variante ▾</button>` : ''}</span><small>${runBox ? '' : itemText(tg.ex ? {...tg, ex: it.ex, u: it.u, note: ''} : {ex: it.ex, sets: it.sets?.length, reps: '', min: 0})}</small></h3>
-    ${tg.note ? `<details class="ptab-why lcons"><summary>Consigne</summary><p>${esc(tg.note)}</p></details>` : ''}
+    ${sup ? '' : exTimeChip(i)}<div class="exmeta"><button type="button" class="lcons" data-tex="${it.ex}">Consigne ›</button>${rs && !runBox ? `<span class="lrest">Récup ${fmtRest(+rs)}${sup ? ' après le tour' : ' entre les séries'}</span>` : ''}</div>
+    ${tg.note ? `<p class="hint lnote">${esc(tg.note)}</p>` : ''}
     ${runBox ? `<div class="hint runsum">${esc(tg.tw ? techTxt({...tg, pct: it.p?.pct ?? tg.pct, dist: it.reps[0]?.dist, rest: it.rest ?? tg.rest}, it.reps.length) : liveRunTxt(it))}</div>` : ''}${last ? `<div class="hint">${esc(last)}</div>` : ''}${lastCn ? `<div class="hint">Note du coach, la dernière fois : ${esc(lastCn)}</div>` : ''}${sg ? `<div class="sug">Proposé : ${fx(sg.kg, sg.kg % 1 ? 1 : 0)} kg · ${esc(sg.why)}</div>` : ''}
     ${ramp && !it.sets ? `<div class="ramp"><b>Montée en charge</b><span>${ramp}</span></div>` : ''}
     ${painBox(it, i)}${(() => { const g = S.tset?.gymPlan?.[S.live?.plan]; if (!g || !it.sets || gymHas(g, it.ex)) return ''; const x = gymSub(it.ex, g); return `<div class="adapt"><span>Pas de matériel pour cet exercice à ${esc(gymName(g))}.</span>${x ? `<button type="button" class="btn" data-tlsub="${i}|${x.id}">Remplacer par ${esc(x.n)}</button>` : ''}</div>`; })()}
@@ -10539,7 +10584,8 @@ function liveBox(it, i, sup) {
     ${runBox ? liveRunBox(it, i) : ''}
     ${sup ? (it.sets && rampRows(it, i, sg, tg) ? `<div class="sets">${rampRows(it, i, sg, tg)}</div>` : '') + '<p class="hint supnote">Les séries sont plus bas, dans l\'ordre où tu les enchaînes.</p>' : `<div class="sets">${rows}</div>`}
     ${it.cn != null ? `<textarea class="cnote" rows="2" data-lcn="${i}" placeholder="Note du coach pour cet exercice…">${esc(it.cn)}</textarea>` : ''}
-    <div class="tools"><button data-tlset="${i}">+ Série</button>${(it.sets || it.reps || []).length > 1 ? `<button data-tlsetrm="${i}">− Série</button>` : ''}<button data-tex="${it.ex}">Consignes</button>${it.cn == null ? `<button data-tlnote="${i}">+ Note</button>` : ''}<button class="rm" data-tlrm="${i}">Retirer</button></div></div>`;
+    <div class="tools"><button data-tlset="${i}">+ Série</button>${(it.sets || it.reps || []).length > 1 ? `<button data-tlsetrm="${i}">− Série</button>` : ''}${it.cn == null ? `<button data-tlnote="${i}">+ Note</button>` : ''}<button class="rm" data-tlrm="${i}">Retirer</button></div>
+    ${sup ? '' : `<button type="button" class="exfin" data-tlfin="${i}">Terminer l'exercice</button>`}</div>`;
 }
 let RT = {t: null, end: 0};
 const effMode = () => localStorage.getItem('tnr.effm') === 'rir' ? 'rir' : 'rpe';
@@ -10555,10 +10601,11 @@ function rampRows(it, i, sg, tg) {
 }
 function rampText(ex, kg, reps, raw) {
   const e = exOf(ex); if (!(kg >= 25) || e.u !== 'kg' || ACCESSORY(e)) return raw ? [] : '';
-  const bar = ['Barre', 'Smith', 'Landmine', 'Barre hexagonale'].includes(e.eq), r = x => Math.round(x / 2.5) * 2.5;
-  const steps = (bar ? [[.4, 8], [.6, 5], [.75, 3], [.88, 2]] : [[.5, 8], [.75, 4]]).filter(([f]) => f < .88 || reps <= 6 || kg >= 60).map(([f, n]) => [Math.max(bar ? 20 : 5, r(kg * f)), n]);
+  const bar = ['Barre', 'Smith', 'Landmine', 'Barre hexagonale'].includes(e.eq), kb = e.eq === 'Kettlebell', r = x => kb ? KBW.filter(w => w <= x).at(-1) || 4 : Math.round(x / 2.5) * 2.5;
+  const fast = e.cat === 'Haltérophilie' || (reps && reps <= 3), RN = fast ? [5, 3, 2, 1] : null;
+  const steps = (bar ? [[.4, 8], [.6, 5], [.75, 3], [.88, 2]] : [[.5, 8], [.75, 4]]).filter(([f]) => f < .88 || reps <= 6 || kg >= 60).map(([f, n], k, A) => [Math.max(bar ? 20 : kb ? 8 : 5, r(kg * f)), RN ? RN[RN.length - A.length + k] ?? n : n]);
   const out = []; for (const [w, n] of steps) if (w < kg && !(bar && w < 30 && kg >= 50) && !out.some(o => o[0] >= w)) out.push([w, n]);
-  if (bar && out[0] && out[0][0] > 20) out.unshift([20, 10]);
+  if (bar && out[0] && out[0][0] > 20) out.unshift([20, fast ? 5 : 10]);
   // Steps closer than 5 kg are merged: each warm-up set has to mean something.
   for (let n = out.length - 1; n > 0; n--) if (out[n][0] - out[n - 1][0] < 5) out.splice(n === 1 && bar ? 1 : n - 1 > 0 ? n - 1 : n, 1);
   if (raw) return out;
@@ -10586,7 +10633,7 @@ function subFor(ex, ks) {
 }
 function adaptList(it, pn) {
   const kg = +(it.sets?.find(x => +x.kg)?.kg || 0), add = (x, t) => { x.cn = (x.cn ? x.cn + ' · ' : '') + t; };
-  const load = f => ({t: `Baisser la charge de ${Math.round((1 - f) * 100)} %${kg ? ` (${fx(kg, kg % 1 ? 1 : 0)} → ${fx(r25(kg * f), 1)} kg)` : ''}`, why: 'La tension sur le tissu est ce qui l\'irrite le plus. Tu gardes les répétitions, donc le travail reste là. Pendant l\'exercice : 3/10 de douleur au maximum.', fn: x => { for (const st of x.sets) if (+st.kg) st.kg = r25(+st.kg * f); }});
+  const load = f => ({t: `Baisser la charge de ${Math.round((1 - f) * 100)} %${kg ? ` (${fx(kg, kg % 1 ? 1 : 0)} → ${fx(wKg(it.ex, kg * f), wKg(it.ex, kg * f) % 1 ? 1 : 0)} kg)` : ''}`, why: 'La tension sur le tissu est ce qui l\'irrite le plus. Tu gardes les répétitions, donc le travail reste là. Pendant l\'exercice : 3/10 de douleur au maximum.', fn: x => { for (const st of x.sets) if (+st.kg) st.kg = wKg(x.ex, +st.kg * f); }});
   const rom = {t: 'Réduire l\'amplitude à la zone sans douleur', why: 'Un muscle douloureux souffre surtout en position étirée. Rester dans l\'amplitude indolore garde la force sans l\'agresser.', fn: x => add(x, 'amplitude réduite, sans douleur')};
   const iso = {t: 'Passer en isométrie : 3 × 30 s à 70 %', why: 'Une contraction sans mouvement à charge modérée entretient la force et calme souvent la douleur sur le moment.', fn: x => { x.u = 's'; x.sets = x.sets.slice(0, 3).map(st => ({...st, kg: +st.kg ? r25(+st.kg * .7) : st.kg, reps: 30, done: false})); }};
   const less = {t: 'Enlever une série', why: 'Moins de volume sur la zone, la même qualité sur les séries gardées.', fn: x => { if (x.sets.length > 1) x.sets.pop(); }};
@@ -10641,8 +10688,10 @@ function finishPane() {
   const L = S.live; if (!L) return;
   if (!L.garmin) { const a = watchSession(L.date, {kind: L.kind}); if (a) L.garmin = {min: a.min, start: a.start, avgHr: a.avgHr || null}; }
   // Duration: the watch first; else from the first to the last ticked set plus the warm-up; never the hours a forgotten session stayed open.
-  const est = estMin(planById(L.plan) || {items: []}) || 90, span = L.t0 && L.t1 ? Math.round((L.t1 - L.t0) / 60000) + (L.warm ? warmMin(L.warm) : 10) : null, open = Math.round((Date.now() - new Date(L.start)) / 60000);
-  const min = L.garmin?.min ? Math.round(L.garmin.min) : Math.max(1, span && span <= 240 ? span : open <= 240 ? open : est);
+  // La durée : celle du chrono, de « Commencer la séance » à « Terminer la séance ». Une séance oubliée ouverte (plus de 4 h) prend la montre, sinon l'estimation.
+  const tEnd = Date.now(); if (!L.gym) L.gym = S.tset?.gymPlan?.[L.plan] || logs().find(l => l.kind === 'gym' && l.gym)?.gym || null;
+  const est = estMin(planById(L.plan) || {items: []}) || 90, open = Math.round((tEnd - new Date(L.start)) / 60000);
+  const chrono = open >= 1 && open <= 240, min = chrono ? open : L.garmin?.min ? Math.round(L.garmin.min) : est;
   const sr = L.items.flatMap(it => (it.sets || it.reps || []).filter(x => x.done).map(x => x.rpe !== undefined && x.rpe !== '' ? +x.rpe : x.rir !== undefined && x.rir !== '' ? 10 - +x.rir : null)).filter(v => v != null && !isNaN(v));
   const srS = sr.slice().sort((a, b) => b - a), mAll = mean(sr), mTop = mean(srS.slice(0, Math.max(1, Math.ceil(srS.length / 3))));
   const auto = sr.length ? Math.max(1, Math.min(10, Math.round(.4 * mAll + .6 * mTop))) : null;
@@ -10650,8 +10699,9 @@ function finishPane() {
   openPane({title: 'Fin de séance', render: () => `
     <div class="dhead"><div class="eyebrow">${esc(L.name)}</div><div class="big num">${min}<small>min</small></div></div>
     <div class="list"><div class="row col"><label for="fin-rpe">Difficulté ressentie (RPE)<span class="hint">${auto ? `Moyenne de tes ${sr.length} séries ${fx(mAll, 1)}, tiers le plus dur ${fx(mTop, 1)} : RPE de séance ${auto}. Les séries dures comptent plus que la moyenne, car le RPE d'une séance noté après coup est plus haut que la moyenne de ses séries (Day et al. 2004). RIR converti : RPE = 10 − RIR. Tu peux l'ajuster.` : '1 = très facile · 10 = effort maximal'}</span></label><div class="rangeline"><input type="range" id="fin-rpe" min="1" max="10" value="${rpe}" data-finrpe><output>${rpe}</output></div></div>
-    <div class="row"><label for="fin-min">Durée<span class="hint">${L.garmin ? 'enregistrée par ta montre' : span ? 'de ta première à ta dernière série, échauffement compris' : 'modifiable'}</span></label><input inputmode="text" data-dur="1" id="fin-min" value="${durTxt(min)}" style="width:96px;text-align:right" class="mini-in"></div></div>
+    <div class="row"><label for="fin-min">Durée<span class="hint">${chrono ? 'ton chrono, du début à la fin de la séance' : L.garmin ? 'enregistrée par ta montre' : 'estimée, modifiable'}</span></label><input inputmode="text" data-dur="1" id="fin-min" value="${durTxt(min)}" style="width:96px;text-align:right" class="mini-in"></div></div>
     ${L.kind === 'gym' ? `<div class="sec-label">Salle</div><div class="chips2b">${GYMS.map(([g, n]) => `<button type="button" class="chip" data-fingym="${g}" aria-pressed="${L.gym === g}">${esc(n)}</button>`).join('')}</div>` : ''}
+    ${finBody()}
     <div class="sec-label">Note</div><textarea id="fin-note" rows="3" placeholder="Sensations, douleurs, consignes du coach…">${esc(L.note || '')}</textarea>
     <p class="note" style="text-align:left">En enregistrant, la séance est ajoutée à « Ma journée » dans ${modName('R')} : elle compte dans ton effort du jour et dans ta récupération.</p>
     <div style="margin-top:14px"><button class="btn" data-tsave>Enregistrer la séance</button></div>`});
@@ -12219,11 +12269,11 @@ document.addEventListener('click', e => {
   // Live session
   if ((b = at('[data-tok]'))) {
     const [i, j] = b.dataset.tok.split('.').map(Number), it = S.live.items[i], x = (it?.sets || it?.reps || [])[j]; if (!x) return;
-    x.done = !x.done; if (x.done) { S.live.t0 ||= Date.now(); S.live.t1 = Date.now(); } saveLive(); paneRender();
+    x.done = !x.done; if (x.done) { S.live.t0 ||= Date.now(); S.live.t1 = Date.now(); x.at = Date.now(); } saveLive(); paneRender();
     if (x.done && PREFS.haptic) navigator.vibrate?.(10);
     return;
   }
-  if ((b = at('[data-tlall]'))) { const it = S.live.items[+b.dataset.tlall], arr = it?.sets || it?.reps || []; const v = !arr.every(x => x.done); arr.forEach(x => { x.done = v; }); if (v) { S.live.t0 ||= Date.now(); S.live.t1 = Date.now(); if (PREFS.haptic) navigator.vibrate?.(14); } saveLive(); paneRender(); return; }
+  if ((b = at('[data-tlall]'))) { const it = S.live.items[+b.dataset.tlall], arr = it?.sets || it?.reps || []; const v = !arr.every(x => x.done); arr.forEach(x => { x.done = v; if (v) x.at ||= Date.now(); }); if (v) { S.live.t0 ||= Date.now(); S.live.t1 = Date.now(); if (PREFS.haptic) navigator.vibrate?.(14); } saveLive(); paneRender(); return; }
   if ((b = at('[data-tlsetrm]'))) { const it = S.live.items[+b.dataset.tlsetrm], arr = it?.sets || it?.reps; if (!arr || arr.length < 2) return; const j = arr.map(x => !x.done).lastIndexOf(true); arr.splice(j >= 0 ? j : arr.length - 1, 1); saveLive(); paneRender(); return; }
   if ((b = at('[data-lpres]'))) { const [i, v] = b.dataset.lpres.split('.'), it = S.live.items[+i], p = it.p || (it.p = runP(it.tg || {})); p.res = v || ''; if (v === 'sled' && p.kg == null) p.kg = 20; if (v === 'band' && p.rpct == null) p.rpct = 30;
     // L'exercice suit : traîneau, sprint retenu, ou de nouveau une course libre.
@@ -12316,7 +12366,7 @@ document.addEventListener('input', e => {
     const [i, j, f] = d.lv.split('.'), arr = S.live.items[i].sets || S.live.items[i].reps, old = arr[j][f], v = t.value.replace(',', '.');
     arr[j][f] = v; if (f === 'rpe') delete arr[j].rir; if (f === 'rir') delete arr[j].rpe;
     // Le RPE noté valide la ligne.
-    if ((f === 'rpe' || f === 'rir') && v !== '' && !arr[j].done) { arr[j].done = true; S.live.t0 ||= Date.now(); S.live.t1 = Date.now(); const row = t.closest('.setrow'); row?.classList.add('done'); row?.querySelector('[data-tok]')?.setAttribute('aria-pressed', 'true'); }
+    if ((f === 'rpe' || f === 'rir') && v !== '' && !arr[j].done) { arr[j].done = true; arr[j].at = Date.now(); S.live.t0 ||= Date.now(); S.live.t1 = Date.now(); const row = t.closest('.setrow'); row?.classList.add('done'); row?.querySelector('[data-tok]')?.setAttribute('aria-pressed', 'true'); }
     // A load typed on one set is carried to the next sets not done yet, like the gym apps do.
     if (f === 'kg') for (let n = +j + 1; n < arr.length; n++) if (!arr[n].done && (arr[n].kg === '' || arr[n].kg === old)) { arr[n].kg = v; const el = document.querySelector(`[data-lv="${i}.${n}.kg"]`); if (el) el.value = v; }
     // Une jambe : ce qui est noté à droite part tout seul sur la gauche (on corrige la gauche si besoin).
@@ -14687,6 +14737,87 @@ document.addEventListener('click', e => {
   else { const isK = !!FK[id]; f.on = f.on.includes(id) ? f.on.filter(x => x !== id) : [...f.on.filter(x => !(isK && FK[x])), id]; formApply(); }
   saveLive(); paneRender();
 });
+
+/* ================= La séance en cours : le temps, la fin de chaque exercice, le corps de la séance =================
+   - En haut : le chrono, la durée prévue, l'heure de fin prévue, et si Oscar est en avance ou en retard (détail repliable).
+   - Chaque exercice : « Terminer l'exercice » en bas, même si toutes les séries ne sont pas faites ; il se replie en une ligne.
+   - Fin de séance : le corps avec les muscles de CETTE séance (rouge = le plus sollicité, orange = moyen, vert = peu). */
+// Le temps prévu d'un exercice, en minutes : effort (40 s par série, ou la course) + récup + séries de montée.
+function liveItemMin(it, i) {
+  const L = S.live, tg = it.tg || {}, arr = it.sets || it.reps || [];
+  if (it.test) return 5;
+  if (tg.min && !arr.length) return +tg.min;
+  if (exOf(it.ex).u === 'min') return arr.reduce((a, r) => a + (+r.min || +tg.min || 0), 0) || +tg.min || 10;
+  const linked = L.items[i + 1]?.tg?.link && it.sets, rest = linked ? 15 : +(it.rest ?? tg.rest ?? 60) || 60;
+  const uni = arr.some(x => x.side), work = it.reps ? (+tg.dist || +arr[0]?.dist || 30) / 6 : 40;
+  const ramp = it.sets && unitOf(it) === 'reps' ? rampText(it.ex, +(arr[0]?.kg || 0), +(tg.reps || arr[0]?.reps || 0), true).length : 0;
+  return (arr.length * work + (uni ? arr.length / 2 : arr.length) * rest + ramp * 75) / 60;
+}
+// Le plan minute par minute, depuis « Commencer la séance » : l'échauffement d'abord, puis chaque exercice.
+function livePlanT() {
+  const L = S.live; let t = L.warm ? warmMin(L.warm) : 0; const out = [];
+  L.items.forEach((it, i) => { const a = t; t += liveItemMin(it, i); out.push({a, b: t}); });
+  return {list: out, total: t + (L.cool?.min || 0)};
+}
+const liveEl = ms => (ms - new Date(S.live.start)) / 60000;
+// Quand l'exercice a été fini : le bouton « Terminer l'exercice », sinon sa dernière série si toutes sont faites.
+function liveItemEnd(it) {
+  if (it.fin) return it.fin;
+  const arr = it.sets || it.reps || []; if (!arr.length || !arr.every(x => x.done)) return null;
+  const ts = arr.map(x => x.at).filter(Boolean); return ts.length ? Math.max(...ts) : null;
+}
+const mm = m => { m = Math.max(0, Math.round(m)); return m < 60 ? m + ' min' : Math.floor(m / 60) + ' h ' + String(m % 60).padStart(2, '0'); };
+const gapTxt = d => Math.abs(d) < 1.5 ? 'dans les temps' : d < 0 ? `${Math.round(-d)} min d'avance` : `${Math.round(d)} min de retard`;
+const gapCls = d => Math.abs(d) < 1.5 ? 'ok' : d < 0 ? 'ok' : d <= 8 ? 'mid' : 'bad';
+// L'écart du moment : le dernier exercice fini, sinon l'exercice en cours s'il dépasse déjà sa fin prévue.
+function liveGap() {
+  const L = S.live, P = livePlanT(); let gap = null;
+  L.items.forEach((it, i) => { const e = liveItemEnd(it); if (e) gap = liveEl(e) - P.list[i].b; });
+  const cur = L.items.findIndex(it => !liveItemEnd(it)), now = liveEl(Date.now());
+  if (cur >= 0 && now > P.list[cur].b) gap = Math.max(gap ?? -Infinity, now - P.list[cur].b);
+  return {P, gap, cur};
+}
+function liveTimeCard() {
+  const L = S.live; if (!L?.start || !L.items.length) return '';
+  const {P, gap, cur} = liveGap(), now = liveEl(Date.now()), endAt = new Date(new Date(L.start).getTime() + (P.total + (gap > 0 ? gap : 0)) * 60000);
+  const pc = Math.min(100, now / Math.max(1, P.total) * 100), hh = d => `${d.getHours()} h ${String(d.getMinutes()).padStart(2, '0')}`;
+  const rows = L.items.map((it, i) => { const e = liveItemEnd(it), d = e ? liveEl(e) - P.list[i].b : null;
+    return `<div class="ltr${i === cur ? ' cur' : ''}"><span>${esc(exOf(it.ex).n)}</span><span>${mm(P.list[i].b)}</span><span>${e ? mm(liveEl(e)) : i === cur ? 'en cours' : '–'}</span><b class="${d == null ? '' : gapCls(d)}">${d == null ? '' : Math.abs(d) < 1.5 ? '=' : (d > 0 ? '+' : '−') + Math.round(Math.abs(d))}</b></div>`; }).join('');
+  return `<div class="card ltime"><div class="lthead"><div><span class="eyebrow">Chrono</span><b class="num" data-lchrono>${liveChrono()}</b></div>
+    <div class="ltr2"><span>Prévu <b>${mm(P.total)}</b></span><span>Fin vers <b>${hh(endAt)}</b></span></div></div>
+    <div class="ltbar"><i style="width:${pc.toFixed(1)}%"></i>${P.list.map(x => `<em style="left:${(x.b / Math.max(1, P.total) * 100).toFixed(1)}%"></em>`).join('')}</div>
+    ${gap != null ? `<span class="ltgap ${gapCls(gap)}">${gapTxt(gap)}</span>` : '<span class="ltgap">Le chrono tourne : bonne séance</span>'}
+    <details class="ltdet"><summary>Détail</summary><div class="ltr hd"><span>Exercice</span><span>Prévu</span><span>Réel</span><span>Écart</span></div>${rows}<p class="small muted" style="margin:8px 2px 0">Depuis le début. Prévu : 40 s par série + ta récup.</p></details></div>`;
+}
+// Le petit repère au-dessus de chaque exercice.
+function exTimeChip(i) {
+  const L = S.live; if (!L?.start) return ''; const {list} = livePlanT(), x = list[i]; if (!x) return '';
+  const now = liveEl(Date.now()), late = now > x.b && !liveItemEnd(L.items[i]);
+  return `<div class="extime${late ? ' late' : ''}">Prévu de ${mm(x.a)} à ${mm(x.b)}${late ? ` · ${Math.round(now - x.b)} min de retard` : ''}</div>`;
+}
+function exFinBox(it, i) {
+  const arr = it.sets || it.reps || [], n = arr.filter(x => x.done).length, e = liveItemEnd(it), P = livePlanT().list[i], d = e && P ? liveEl(e) - P.b : null;
+  return `<div class="exbox exdone"><span class="exck">${TICK}</span><span class="exdt"><b>${esc(exOf(it.ex).n)}</b><small>${n}/${arr.length} série${arr.length > 1 ? 's' : ''}${e ? ` · fini à ${mm(liveEl(e))}` : ''}${d != null ? ` · <i class="${gapCls(d)}">${gapTxt(d)}</i>` : ''}</small></span><button type="button" class="chip" data-tlreopen="${i}">Rouvrir</button></div>`;
+}
+document.addEventListener('click', e => {
+  const L = S.live; if (!L) return; let b;
+  if ((b = e.target.closest?.('[data-tlfin]'))) { const t = Date.now(); for (const k of b.dataset.tlfin.split(',').map(Number)) if (L.items[k]) L.items[k].fin = t; saveLive(); paneRender(); if (PREFS.haptic) navigator.vibrate?.(16); toast('Exercice terminé'); return; }
+  if ((b = e.target.closest?.('[data-tlreopen]'))) { const it = L.items[+b.dataset.tlreopen]; if (it) delete it.fin; saveLive(); paneRender(); }
+});
+// Le chrono et l'avance / le retard se mettent à jour toutes les 30 s pendant la séance.
+setInterval(() => { const c = document.querySelector('.ltime'); if (!c || !S.live || document.activeElement?.matches?.('input,textarea')) return; const o = c.querySelector('.ltdet')?.open, n = document.createElement('div'); n.innerHTML = liveTimeCard(); const k = n.firstElementChild; if (!k) return; if (o) k.querySelector('.ltdet').open = true; c.replaceWith(k); }, 30000);
+// Fin de séance : les muscles de cette séance seulement, du plus sollicité (rouge) au moins sollicité (vert).
+function finBody() {
+  const L = S.live; if (!L || L.kind === 'class') return '';
+  const m = logMuscle({items: L.items.filter(it => !it.test).map(it => it.sets ? {ex: it.ex, u: it.u, sets: it.sets.filter(x => x.done)} : {ex: it.ex, ...(it.p || {}), cones: it.tg?.cones, feet: it.tg?.feet, hn: it.tg?.hn, pct: it.p?.pct ?? it.tg?.pct, reps: (it.reps || []).filter(x => x.done)})});
+  const mx = Math.max(0, ...Object.values(m)); if (!(mx > 0)) return '';
+  const per = {}; for (const [k] of MUS) per[k] = {load: 0, pct: 0}; for (const v of ['front', 'back']) for (const [k] of MZ[v]) per[k] ||= {load: 0, pct: 0};
+  for (const [k, v] of Object.entries(m)) { if (!(v > 0)) continue; const r = v / mx; per[k] = {load: v, pct: r >= .66 ? 115 : r >= .33 ? 85 : 45}; }
+  const top = Object.entries(m).filter(([, v]) => v / mx >= .66).sort((a, b) => b[1] - a[1]).map(([k]) => MUSI[k]?.n).filter(Boolean).slice(0, 4);
+  return `<div class="sec-label">Les muscles de cette séance</div><div class="card livebody fin"><div class="mbody nohit">${musFigure('front', per, null)}${musFigure('back', per, null)}</div>
+    <div class="mlegend"><span><i style="background:var(--bad)"></i>très sollicités</span><span><i style="background:var(--warn)"></i>moyennement</span><span><i style="background:var(--good)"></i>peu</span></div>
+    ${top.length ? `<p class="small muted" style="margin:8px 2px 0">Le plus travaillé : ${esc(top.join(', ').toLowerCase())}.</p>` : ''}</div>`;
+}
 
 /* ================= TNR · Paramètres (la roue crantée, en haut à gauche de l'Accueil) =================
    Tout ce qui se règle dans l'appli, au même endroit :

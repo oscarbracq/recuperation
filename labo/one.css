@@ -741,3 +741,30 @@ html.one .coach .chead{margin-bottom:6px}
 html.one .btn.one-del{width:100%;margin-top:8px;border:1.5px dashed color-mix(in srgb,var(--bad) 60%,transparent);color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,transparent);transition:transform .2s,background .2s}
 html.one .btn.one-del.over{background:var(--bad);color:#fff;border-style:solid;transform:scale(1.06)}
 .ctfit{margin-top:12px}.ctck{display:flex;gap:8px;align-items:center;font-weight:600;font-size:.9rem;margin:0 2px 6px}.ctchg{color:var(--accent)}.ctfit small{color:var(--fg3);font-weight:500}
+
+/* v176 : séance en cours — temps, échauffement coché, fin d'exercice, récup visible */
+.ltime{margin-top:12px;padding:14px 16px}.lthead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.lthead .num{display:block;font-size:2rem;font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.ltr2{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:.8rem;color:var(--fg2)}.ltr2 b{color:var(--fg)}
+.ltbar{position:relative;height:6px;border-radius:3px;background:var(--card2);margin:12px 0 10px;overflow:hidden}.ltbar i{position:absolute;inset:0 auto 0 0;background:var(--accent);border-radius:3px;transition:width .6s}
+.ltbar em{position:absolute;top:0;bottom:0;width:2px;background:var(--bg);opacity:.7}
+.ltgap{display:inline-block;font-size:.78rem;font-weight:700;padding:4px 10px;border-radius:99px;background:var(--card2);color:var(--fg2)}
+.ltgap.ok{background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good)}.ltgap.mid{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}.ltgap.bad{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad)}
+.ltdet{margin-top:8px}.ltdet summary{font-size:.8rem;color:var(--fg3);cursor:pointer;text-align:right;list-style:none}.ltdet summary::-webkit-details-marker{display:none}
+.ltr{display:grid;grid-template-columns:minmax(0,1fr) 62px 62px 34px;gap:6px;font-size:.8rem;padding:6px 2px;border-top:1px solid color-mix(in srgb,var(--fg3) 14%,transparent)}.ltr span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ltr.hd{color:var(--fg3);font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;border:0}.ltr.cur{color:var(--accent);font-weight:600}.ltr b{text-align:right}
+.ltr b.ok,.exdone i.ok{color:var(--good)}.ltr b.mid,.exdone i.mid{color:var(--warn)}.ltr b.bad,.exdone i.bad{color:var(--bad)}.exdone i{font-style:normal;font-weight:600}
+.extime{font-size:.72rem;color:var(--fg3);margin:2px 2px 0;font-variant-numeric:tabular-nums}.extime.late{color:var(--warn)}
+.exmeta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0 4px}
+.exmeta .lcons{background:none;border:0;padding:4px 0;margin:0;color:var(--accent);font-weight:700;font-size:.9rem}
+.lrest{font-size:.78rem;font-weight:700;color:var(--fg2);background:var(--card2);padding:4px 10px;border-radius:99px;white-space:nowrap}
+.lnote{margin:2px 2px 6px;font-size:.8rem;line-height:1.35}
+.exfin{display:block;margin:10px 0 0 auto;padding:7px 14px;border-radius:10px;border:1.5px solid var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent);font-weight:700;font-size:.8rem}
+.exbox.exdone{display:flex;align-items:center;gap:12px;padding:12px 14px}.exck{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;flex:none}.exck svg{width:16px;height:16px}
+.exdt{flex:1;min-width:0}.exdt b{display:block;font-size:.95rem}.exdt small{color:var(--fg3);font-size:.76rem}
+.setrow.ramprow.done{opacity:1}.setrow.ramprow.done .rv{background:var(--accent-soft);color:var(--fg)}
+.wtr.ed .wck{width:28px;height:28px;border-radius:8px;border:0;background:var(--card);color:var(--fg3);display:grid;place-items:center;padding:0}.wtr .wck svg{width:14px;height:14px}
+.wtr.wdone .wck{background:var(--accent);color:#fff}.wtr.wdone .wex,.wtr.wdone .wdo{color:var(--fg3)}
+.wadd{display:grid;grid-template-columns:minmax(0,1fr) 70px auto;gap:6px;margin-top:8px}.wadd .mini-in{text-align:left;height:36px}
+.wcnt{color:var(--fg3)}.wcnt.ok{color:var(--good)}
+.livebody.fin{margin-top:0}
