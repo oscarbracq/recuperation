@@ -736,3 +736,7 @@ html.one .coach .chead{margin-bottom:6px}
 .fopt i{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:.75rem;font-weight:800;background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent)}
 .fopt span{flex:1;min-width:0}.fopt b{display:block;font-size:.9rem}.fopt small{display:block;color:var(--fg3);font-size:.75rem;margin-top:2px}.fopt em{font-style:normal;font-weight:800;color:var(--accent);width:16px}
 .fopt[aria-pressed=true]{box-shadow:inset 0 0 0 1.5px var(--accent)}.fopt.keep{margin-top:10px}
+
+/* v174 : « Supprimer » sous « Archiver », pendant qu'on tient une séance */
+html.one .btn.one-del{width:100%;margin-top:8px;border:1.5px dashed color-mix(in srgb,var(--bad) 60%,transparent);color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,transparent);transition:transform .2s,background .2s}
+html.one .btn.one-del.over{background:var(--bad);color:#fff;border-style:solid;transform:scale(1.06)}

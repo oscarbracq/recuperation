@@ -527,7 +527,7 @@ function archHide(root = document) {
     // Un bouton large, comme « + Créer une séance », juste au-dessus de ces boutons (sinon en bas du planning).
     let row = b.nextElementSibling; for (let i = 0; row && i < 3 && !row.matches('.btnrow'); i++) row = row.nextElementSibling;
     const at = row?.matches('.btnrow') ? row : null, box = at ? at.parentNode : b;
-    if (!box.querySelector(`:scope > .one-archrow[data-for="${m}"]`)) { const h = `<div class="one-archrow" data-for="${m}"><button type="button" class="btn ghost one-arch" data-onearch="${m}">Archive</button></div>`; if (at) at.insertAdjacentHTML('beforebegin', h); else b.insertAdjacentHTML('beforeend', h); }
+    if (!box.querySelector(`:scope > .one-archrow[data-for="${m}"]`)) { const h = `<div class="one-archrow" data-for="${m}"><button type="button" class="btn ghost one-arch" data-onearch="${m}">Archive</button>${m === 'T' ? '<button type="button" class="btn ghost one-del" data-onedel="T" hidden>Supprimer</button>' : ''}</div>`; if (at) at.insertAdjacentHTML('beforebegin', h); else b.insertAdjacentHTML('beforeend', h); }
   });
 }
 new MutationObserver(ms => { for (const x of ms) for (const n of x.addedNodes) if (n.nodeType === 1 && (n.matches?.('.sboard') || n.querySelector?.('.sboard'))) { archHide(n.parentNode || document); return; } }).observe(document.body, {childList: true, subtree: true});
@@ -536,9 +536,20 @@ new MutationObserver(() => {
   const on = document.body.classList.contains('bdragging'), src = document.querySelector('.bdrag');
   document.querySelectorAll('.one-arch').forEach(b => { const mine = on && src && src.closest('.bsrc') && archMod(src) === b.dataset.onearch;
     const m = b.dataset.onearch, ref = src?.dataset[ARCH[m].attr === 'bref' ? 'bref' : ARCH[m].attr === 'rref' ? 'rref' : 'mref'];
-    b.classList.toggle('drop', !!mine); b.textContent = mine ? (ARCH[m].ex(ref) ? 'Supprimer' : 'Archiver') : 'Archive'; });
+    b.classList.toggle('drop', !!mine); b.textContent = mine ? (ARCH[m].ex(ref) ? 'Supprimer' : 'Archiver') : 'Archive';
+    const d = b.parentNode.querySelector('.one-del'); if (d) { const ok = !!(mine && !ARCH[m].ex(ref) && S.plans?.[planOf(ref)?.id]); d.hidden = !ok; d.classList.toggle('drop', ok); if (!ok) d.classList.remove('over'); } });
 }).observe(document.body, {attributes: true, attributeFilter: ['class']});
-document.addEventListener('pointermove', e => { const b = document.querySelector('.one-arch.drop'); if (!b) return; const r = b.getBoundingClientRect(); b.classList.toggle('over', e.clientX > r.left - 10 && e.clientX < r.right + 10 && e.clientY > r.top - 14 && e.clientY < r.bottom + 14); }, true);
+document.addEventListener('pointermove', e => { const near = b => { const r = b.getBoundingClientRect(); return e.clientX > r.left - 10 && e.clientX < r.right + 10 && e.clientY > r.top - 6 && e.clientY < r.bottom + 6; };
+  const d = document.querySelector('.one-del.drop'), dn = !!(d && near(d)); if (d) d.classList.toggle('over', dn);
+  const b = document.querySelector('.one-arch.drop'); if (b) b.classList.toggle('over', !dn && near(b)); }, true);
+// Lâchée sur « Supprimer » : la séance est supprimée (elle reste récupérable dans Archive › Supprimées).
+document.addEventListener('pointerup', async e => {
+  const d = document.querySelector('.one-del.drop.over'), src = document.querySelector('.bdrag'); if (!d || !src) return;
+  const ref = src.dataset.bref, p = S.plans?.[planOf(ref)?.id]; if (!p) return;
+  const doc = {...p, deleted: true, updatedAt: new Date().toISOString()}; S.plans = {...S.plans, [p.id]: doc};
+  await dbSet('plans/' + p.id, doc); await saveTset({trash: [p.id, ...(S.tset.trash || []).filter(x => x !== p.id)].slice(0, 30)});
+  toast(p.name + ' supprimée · récupérable dans Archive'); oneHap(14);
+}, true);
 document.addEventListener('pointerup', async e => {
   const b = document.querySelector('.one-arch.drop.over'), src = document.querySelector('.bdrag'); if (!b || !src) return;
   const m = b.dataset.onearch, A = ARCH[m], ref = src.dataset[A.attr === 'bref' ? 'bref' : A.attr === 'rref' ? 'rref' : 'mref']; if (!ref) return;
@@ -549,12 +560,14 @@ document.addEventListener('pointerup', async e => {
 }, true);
 function archPane(m) {
   const A = ARCH[m];
-  openPane({title: 'Archive', render: () => { const L = A.get().filter(r => A.name(r));
-    return L.length ? `<div class="list" style="margin-top:14px">${L.map(r => `<div class="row"><span class="l">${esc(A.name(r))}</span><button type="button" class="chip" data-onerest="${m}|${esc(r)}">Remettre</button></div>`).join('')}</div>`
-      : '<div class="card empty" style="margin-top:14px"><b>Rien d\'archivé</b>Attrape une séance dans la liste et lâche-la sur « Archiver ».</div>'; }});
+  openPane({title: 'Archive', render: () => { const L = A.get().filter(r => A.name(r)), T = m === 'T' ? (S.tset?.trash || []).map(id => S.plans?.[id]).filter(p => p?.deleted) : [];
+    return (L.length ? `<div class="list" style="margin-top:14px">${L.map(r => `<div class="row"><span class="l">${esc(A.name(r))}</span><button type="button" class="chip" data-onerest="${m}|${esc(r)}">Remettre</button></div>`).join('')}</div>`
+      : '<div class="card empty" style="margin-top:14px"><b>Rien d\'archivé</b>Attrape une séance dans la liste et lâche-la sur « Archiver ».</div>')
+      + (T.length ? `<div class="sec-label" style="margin-top:18px">Supprimées</div><div class="list">${T.map(p => `<div class="row"><span class="l">${esc(p.name)}</span><button type="button" class="chip" data-oneundel="${esc(p.id)}">Remettre</button></div>`).join('')}</div>` : ''); }});
 }
 document.addEventListener('click', async e => {
   const a = e.target.closest('[data-onearch]'); if (a && !a.classList.contains('drop')) { archPane(a.dataset.onearch); return; }
+  const u = e.target.closest('[data-oneundel]'); if (u) { const p = S.plans?.[u.dataset.oneundel]; if (p) { const doc = {...p, deleted: false, updatedAt: new Date().toISOString()}; S.plans = {...S.plans, [p.id]: doc}; await dbSet('plans/' + p.id, doc); await saveTset({trash: (S.tset.trash || []).filter(x => x !== p.id)}); paneRender(); archHide(); toast(p.name + ' remise dans la liste'); } return; }
   const r = e.target.closest('[data-onerest]'); if (r) { const [m, ...x] = r.dataset.onerest.split('|'), ref = x.join('|');
     if (m === 'T') S.tset = {...S.tset, archNo: [...new Set([...(S.tset.archNo || []), ref])]};
     await ARCH[m].set(ARCH[m].get().filter(y => y !== ref)); paneRender(); archHide(); toast('Remis dans la liste'); }

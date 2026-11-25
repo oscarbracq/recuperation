@@ -8317,7 +8317,7 @@ function spSide() {
     ${isPC() ? `<button type="button" class="btn" data-mmnew>+ Créer une séance ${kind === 'gym' ? 'de musculation' : 'de sprint'}</button>` : ''}
     <div class="sec-label">Séances <small>${src.length}</small></div>
     <div class="bsrc mpsrc">${src.length ? src.map(x => { const r = caleRef(x), on = placed.has(r); return `<div class="bchip src${on ? ' on' : ''}" data-bref="${esc(r)}" title="${esc(x.name)}${x.title ? ' · ' + esc(x.title) : ''}"><span>${esc(x.name)}</span><small>${(x.title || x.desc) ? esc(x.title || x.desc) + ' · ' : ''}${x.items?.length || 0} exercice${(x.items?.length || 0) > 1 ? 's' : ''} · ${estMin(x)} min${on ? ' · calée' : ''}</small></div>`; }).join('') : `<p class="small muted" style="margin:0">${isPC() ? 'Crée une séance : elle apparaîtra ici, prête à être posée sur un jour.' : 'Crée tes séances sur ordinateur : elles apparaîtront ici, prêtes à être posées sur un jour.'}</p>`}</div>
-    <div class="one-archrow"><button type="button" class="btn ghost one-arch" data-onearch="T">Archive</button></div>
+    <div class="one-archrow"><button type="button" class="btn ghost one-arch" data-onearch="T">Archive</button><button type="button" class="btn ghost one-del" data-onedel="T" hidden>Supprimer</button></div>
     <p class="small muted" style="margin:0 2px">Attrape une séance et lâche-la sur un jour de la saison. Lâchée sur « Archiver », elle quitte la liste (tu peux la remettre depuis « Archive »). Une séance déjà posée se déplace de la même façon ; lâchée hors des jours, elle est retirée. Un clic sur une séance l'ouvre.</p>`;
 }
 // Le zoom : la saison garde toute la largeur de la colonne, elle grossit ou rapetisse et se déroule plus ou moins long.
