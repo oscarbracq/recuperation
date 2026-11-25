@@ -2253,6 +2253,8 @@ html.one .coach .chead{margin-bottom:6px}
 .wtr{grid-template-columns:80px minmax(0,1fr) minmax(48px,32%)}.wtr.c{grid-template-columns:minmax(0,1fr) minmax(48px,36%)}.wtr.ed{grid-template-columns:80px minmax(0,1fr) minmax(48px,30%) 28px}.wtr.c.ed{grid-template-columns:minmax(0,1fr) minmax(48px,34%) 28px}
 .wtr .wdo{font-size:.8rem}
 .supx{font-weight:800;color:var(--accent);text-align:center}.supgo{font-size:.7rem;color:var(--fg3);text-align:center;margin:2px 0}.supgo b{color:var(--accent);margin-right:4px;font-size:.8rem}
+.mps .mpsw{font-weight:900;margin-right:4px;padding:0 4px;border-radius:4px;background:rgba(0,0,0,.28)}
+@media (max-width:700px){.mps:has(.mpsw){white-space:normal;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;line-height:1.15;font-size:.56rem;font-weight:600;padding:3px 3px 4px}.mps .mpsw{display:table;margin:0 0 2px;font-size:.7rem}}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -8979,6 +8981,9 @@ const mKey = (k, kind) => k + '|' + kind;
 const moreOf = (k, kind) => S.tset?.more?.[mKey(k, kind)] || [];
 // An exercise in a cell: its initials (Pont fessier → PF, Nordic hamstring curl → NHC).
 const exInit = n => String(n || '').split(/[\s\-·',()]+/).filter(w => w && !/^(de|du|des|la|le|les|à|au|aux|en|et|sur|d|l|a|avec|sans)$/i.test(w)).map(w => w[0]).join('').toUpperCase().slice(0, 3) || 'EX';
+// Dans le tableau de la saison, la semaine du bloc d'abord et en gras (« S1 »), puis la séance : le bloc (PPS…) est déjà
+// écrit sur sa ligne, et sur téléphone un nom complet se coupait en « PPS… ».
+const mpsLabel = nm => { const m = String(nm).match(/^(.*?)\bS(\d+)\s*[·:\-–]\s*(.+)$/); return m ? `<b class="mpsw">S${m[2]}</b>${esc(m[3])}` : esc(nm); };
 const refName = r => isExRef(r) ? exOf(r.slice(2)).n : planOf(r)?.name || '';
 const exDone = (k, id) => logsOn(k).some(l => l.kind === 'extra' && l.items?.[0]?.ex === id);
 async function saveTset(patch) { S.tset = {...S.tset, ...patch}; renderMod(); render(); if (P.stack.length) paneRender(); window.proMapRender?.(); await dbSet('settings/training', {...S.tset, updatedAt: new Date().toISOString()}); }
@@ -9191,7 +9196,7 @@ function spHtml() {
   // Les blocs déjà finis sont repliés à l'ouverture.
   MP.shut ||= new Set(B.filter(b => b.to < TODAY).map(b => b.i));
   const chip = (k, kind, ref, from, done) => { const nm = refName(ref) || 'Séance', c = kind === 'gym' ? 'g' : 't';
-    return `<div class="mps ${c}${done ? ' d' : ''}" data-bref="${esc(ref)}"${from && !done && k >= TODAY ? ` data-bfrom="${esc(from)}"` : ''} title="${esc(nm)}">${esc(nm)}</div>`; };
+    return `<div class="mps ${c}${done ? ' d' : ''}" data-bref="${esc(ref)}"${from && !done && k >= TODAY ? ` data-bfrom="${esc(from)}"` : ''} title="${esc(nm)}">${mpsLabel(nm)}</div>`; };
   const dayHtml = k => {
     const ch = ['gym', 'track'].map(kind => { const p = planForK(k, kind), dn = kindDone(k, kind), c = kind === 'gym' ? 'g' : 't';
       const dk = p && S.tset?.dated?.[dKey(k, kind)] === caleRef(p) ? dKey(k, kind) : k;

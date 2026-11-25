@@ -718,3 +718,5 @@ html.one .coach .chead{margin-bottom:6px}
 .wtr{grid-template-columns:80px minmax(0,1fr) minmax(48px,32%)}.wtr.c{grid-template-columns:minmax(0,1fr) minmax(48px,36%)}.wtr.ed{grid-template-columns:80px minmax(0,1fr) minmax(48px,30%) 28px}.wtr.c.ed{grid-template-columns:minmax(0,1fr) minmax(48px,34%) 28px}
 .wtr .wdo{font-size:.8rem}
 .supx{font-weight:800;color:var(--accent);text-align:center}.supgo{font-size:.7rem;color:var(--fg3);text-align:center;margin:2px 0}.supgo b{color:var(--accent);margin-right:4px;font-size:.8rem}
+.mps .mpsw{font-weight:900;margin-right:4px;padding:0 4px;border-radius:4px;background:rgba(0,0,0,.28)}
+@media (max-width:700px){.mps:has(.mpsw){white-space:normal;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;line-height:1.15;font-size:.56rem;font-weight:600;padding:3px 3px 4px}.mps .mpsw{display:table;margin:0 0 2px;font-size:.7rem}}
