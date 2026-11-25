@@ -5025,6 +5025,8 @@ const I18N_EN = {
 "Meilleur temps par séance": "Best time per session",
 "Pas encore fait dans une séance enregistrée.": "Not done yet in a saved session.",
 "Voir en vidéo": "Watch on video",
+"Lancer la vidéo": "Play the video",
+"Vidéo de l'exercice": "Exercise video",
 ", la bonne technique": ", the right technique",
 "Prévu": "Planned",
 "Exercices du jour": "Today's exercises",
