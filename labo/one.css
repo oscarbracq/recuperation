@@ -720,3 +720,19 @@ html.one .coach .chead{margin-bottom:6px}
 .supx{font-weight:800;color:var(--accent);text-align:center}.supgo{font-size:.7rem;color:var(--fg3);text-align:center;margin:2px 0}.supgo b{color:var(--accent);margin-right:4px;font-size:.8rem}
 .mps .mpsw{font-weight:900;margin-right:4px;padding:0 4px;border-radius:4px;background:rgba(0,0,0,.28)}
 @media (max-width:700px){.mps:has(.mpsw){white-space:normal;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;line-height:1.15;font-size:.56rem;font-weight:600;padding:3px 3px 4px}.mps .mpsw{display:table;margin:0 0 2px;font-size:.7rem}}
+
+/* v173 : adaptation de la prochaine séance ; séances faites */
+.adapt{margin-top:12px}.adses{display:flex;justify-content:space-between;align-items:baseline;gap:8px;width:100%;background:none;border:0;padding:0 2px 8px;color:inherit;text-align:left;font-size:.95rem}
+.adrow{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--card2);margin-top:8px}.adrow>span{flex:1;min-width:0;font-size:.88rem;line-height:1.35}
+.adrow small{display:block;color:var(--fg3);margin-top:3px;font-size:.76rem}.adrow .btn{flex:none;width:auto;padding:0 14px;height:38px;font-size:.85rem}
+.adrow.done{background:color-mix(in srgb,var(--good) 10%,var(--card2))}.adrow details{margin-top:4px}.adrow summary{font-size:.76rem;color:var(--accent);cursor:pointer}
+.donemore{display:block;margin:8px auto 0;font-weight:600}
+.doneses{position:relative}.doneses>span:first-child b::after{content:'✓';margin-left:7px;font-size:.78rem;font-weight:800;color:color-mix(in srgb,var(--good) 55%,var(--fg3));opacity:.8}
+
+/* v173 : forme du jour en début de séance */
+.formc{margin-top:12px}.formc .fclab{font-size:.9rem}.formc.bad .fclab{color:var(--bad)}.formc.mid .fclab{color:var(--warn)}.formc.ok .fclab{color:var(--good)}
+.fsig{display:flex;flex-wrap:wrap;gap:6px}.fsig span{font-size:.75rem;padding:4px 8px;border-radius:999px;background:var(--card2)}.fsig span.m{color:var(--bad)}.fsig span.p{color:var(--good)}
+.fopt{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;margin-top:6px;border:0;border-radius:12px;background:var(--card2);color:inherit}
+.fopt i{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:.75rem;font-weight:800;background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent)}
+.fopt span{flex:1;min-width:0}.fopt b{display:block;font-size:.9rem}.fopt small{display:block;color:var(--fg3);font-size:.75rem;margin-top:2px}.fopt em{font-style:normal;font-weight:800;color:var(--accent);width:16px}
+.fopt[aria-pressed=true]{box-shadow:inset 0 0 0 1.5px var(--accent)}.fopt.keep{margin-top:10px}

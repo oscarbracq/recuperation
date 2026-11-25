@@ -2255,6 +2255,22 @@ html.one .coach .chead{margin-bottom:6px}
 .supx{font-weight:800;color:var(--accent);text-align:center}.supgo{font-size:.7rem;color:var(--fg3);text-align:center;margin:2px 0}.supgo b{color:var(--accent);margin-right:4px;font-size:.8rem}
 .mps .mpsw{font-weight:900;margin-right:4px;padding:0 4px;border-radius:4px;background:rgba(0,0,0,.28)}
 @media (max-width:700px){.mps:has(.mpsw){white-space:normal;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;line-height:1.15;font-size:.56rem;font-weight:600;padding:3px 3px 4px}.mps .mpsw{display:table;margin:0 0 2px;font-size:.7rem}}
+
+/* v173 : adaptation de la prochaine séance ; séances faites */
+.adapt{margin-top:12px}.adses{display:flex;justify-content:space-between;align-items:baseline;gap:8px;width:100%;background:none;border:0;padding:0 2px 8px;color:inherit;text-align:left;font-size:.95rem}
+.adrow{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--card2);margin-top:8px}.adrow>span{flex:1;min-width:0;font-size:.88rem;line-height:1.35}
+.adrow small{display:block;color:var(--fg3);margin-top:3px;font-size:.76rem}.adrow .btn{flex:none;width:auto;padding:0 14px;height:38px;font-size:.85rem}
+.adrow.done{background:color-mix(in srgb,var(--good) 10%,var(--card2))}.adrow details{margin-top:4px}.adrow summary{font-size:.76rem;color:var(--accent);cursor:pointer}
+.donemore{display:block;margin:8px auto 0;font-weight:600}
+.doneses{position:relative}.doneses>span:first-child b::after{content:'✓';margin-left:7px;font-size:.78rem;font-weight:800;color:color-mix(in srgb,var(--good) 55%,var(--fg3));opacity:.8}
+
+/* v173 : forme du jour en début de séance */
+.formc{margin-top:12px}.formc .fclab{font-size:.9rem}.formc.bad .fclab{color:var(--bad)}.formc.mid .fclab{color:var(--warn)}.formc.ok .fclab{color:var(--good)}
+.fsig{display:flex;flex-wrap:wrap;gap:6px}.fsig span{font-size:.75rem;padding:4px 8px;border-radius:999px;background:var(--card2)}.fsig span.m{color:var(--bad)}.fsig span.p{color:var(--good)}
+.fopt{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;margin-top:6px;border:0;border-radius:12px;background:var(--card2);color:inherit}
+.fopt i{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:.75rem;font-weight:800;background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent)}
+.fopt span{flex:1;min-width:0}.fopt b{display:block;font-size:.9rem}.fopt small{display:block;color:var(--fg3);font-size:.75rem;margin-top:2px}.fopt em{font-style:normal;font-weight:800;color:var(--accent);width:16px}
+.fopt[aria-pressed=true]{box-shadow:inset 0 0 0 1.5px var(--accent)}.fopt.keep{margin-top:10px}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -8966,7 +8982,7 @@ function progList() {
   const next = nd ? nums.filter(n => n === nx) : [], after = nums.filter(n => n > nx || (!nd && n === nx)), done = nums.filter(n => n <= last).reverse();
   return `${next.length ? `<h2>Prochaine séance${nd ? ` <small>${esc(cap(fmtShort(nd)))}</small>` : ''}</h2><div class="list nextl">${next.map(n => r(n, ' nextses')).join('')}</div>` : ''}
     ${after.length ? `<h2>Mon programme <small>à venir</small></h2><div class="list">${after.map(n => r(n)).join('')}</div>` : ''}
-    ${done.length ? `<h2>Séances faites</h2><div class="list donel">${done.map(n => r(n, ' doneses')).join('')}</div>` : ''}`;
+    ${done.length ? `<h2>Séances faites</h2><div class="list donel">${(S.doneAll ? done : done.slice(0, 5)).map(n => r(n, ' doneses')).join('')}</div>${done.length > 5 ? `<button type="button" class="linkbtn donemore" data-donemore>${S.doneAll ? 'Masquer' : `Détail · les ${done.length} séances`}</button>` : ''}` : ''}`;
 }
 /* ---------- the session board: 4 weeks, empty until he drops a session on a day ---------- */
 // Inside a block of a board: done = a check, not done = a cross, both round and centred like the remove button.
@@ -9319,9 +9335,10 @@ function tSessions() {
     <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
     ${sesBoard(k)}
     <button class="btn ghost" style="margin-top:16px;width:100%" data-tnew>+ Créer une séance</button>
+    ${k === 'gym' && typeof adaptCard === 'function' ? adaptCard() : ''}
     ${k === 'gym' && TDV_PLANS.length ? progList() : ''}
-    ${k === 'track' ? (() => { const L = logs().filter(l => l.kind === 'track').slice(0, 12); return L.length ? `<h2>Séances faites</h2><div class="list donel">${L.map(l => `<button class="rowbtn doneses" data-tlog="${l.id}"><span><b>${esc(l.name)}</b><span class="meta">${esc(cap(fmtShort(l.date)))}${l.min ? ' · ' + l.min + ' min' : ''}${l.rpe ? ' · RPE ' + l.rpe : ''}</span></span><span class="kc">${fx(l.sprintM || 0)} m</span></button>`).join('')}</div>` : ''; })() : ''}
-    ${base.length ? `<h2>Programmes <small>à dupliquer et adapter</small></h2><div class="list">${base.map(row).join('')}</div>` : ''}`;
+    ${k === 'track' ? (() => { const L0 = logs().filter(l => l.kind === 'track'), L = S.doneAll ? L0 : L0.slice(0, 5); return L.length ? `<h2>Séances faites</h2><div class="list donel">${L.map(l => `<button class="rowbtn doneses" data-tlog="${l.id}"><span><b>${esc(l.name)}</b><span class="meta">${esc(cap(fmtShort(l.date)))}${l.min ? ' · ' + l.min + ' min' : ''}${l.rpe ? ' · RPE ' + l.rpe : ''}</span></span><span class="kc">${fx(l.sprintM || 0)} m</span></button>`).join('')}</div>${L0.length > 5 ? `<button type="button" class="linkbtn donemore" data-donemore>${S.doneAll ? 'Masquer' : `Détail · les ${L0.length} séances`}</button>` : ''}` : ''; })() : ''}
+`;
 }
 function tLibrary() {
   const k = S.lib.k || 'gym', n = EX.filter(e => e.t === k && !e.hide && e.id !== 'warmup').length;
@@ -10476,7 +10493,7 @@ function liveBody() {
   const doneSets = L.items.reduce((s, it) => s + (it.sets || it.reps || []).filter(x => x.done).length, 0), all = L.items.reduce((s, it) => s + (it.sets || it.reps || []).length, 0);
   const back = (L.removed || []).map((r, n) => `<button data-tlback="${n}" aria-label="Remettre ${esc(exOf(r.item.ex).n)} dans la séance"><b>${esc(exOf(r.item.ex).n)}</b> · retiré · toucher pour remettre</button>`).join('');
   const wt = warmText(L.warm), ct = coolText(L.cool);
-  return `${wt.length ? `<details class="card wtxt" style="margin-top:12px"${doneSets ? '' : ' open'}><summary class="eyebrow">Échauffement · ${warmMin(L.warm)} min</summary>${warmTable(L.warm)}</details>` : ''}
+  return `${typeof formCard === 'function' ? formCard() : ''}${wt.length ? `<details class="card wtxt" style="margin-top:12px"${doneSets ? '' : ' open'}><summary class="eyebrow">Échauffement · ${warmMin(L.warm)} min</summary>${warmTable(L.warm)}</details>` : ''}
     ${ct.length ? `<details class="card wtxt" style="margin-top:8px"><summary class="eyebrow">Retour au calme, à la fin · ${L.cool.min} min</summary>${coolTable(L.cool)}</details>` : ''}
     <div class="livehead"><span class="chiptag">${L.kind === 'gym' ? 'Musculation' : L.kind === 'class' ? 'Cours collectif' : 'Sprint'} · ${doneSets}/${all}</span>${gA ? `<b>${fx(gA.min)} min</b>` : ''}</div>
     ${L.kind === 'track' ? `<div class="edrow" style="margin-top:10px;grid-template-columns:1fr 1fr"><label>Chaussures<select class="mini-in" data-lmeta="shoes">${['', 'Pointes carbone', 'Pointes', 'Running fractionné', 'Running long'].map(o => `<option${(L.shoes || '') === o ? ' selected' : ''}>${o}</option>`).join('')}</select></label><label>Lieu<select class="mini-in" data-lmeta="place">${['', ...PLACES].map(o => `<option${(L.place || '') === o ? ' selected' : ''}>${o}</option>`).join('')}</select></label><label>Conditions<select class="mini-in" data-lmeta="cond">${['', 'Piste, vent favorable', 'Piste, sans vent', 'Piste, vent contraire', 'Indoor', 'Pluie'].map(o => `<option${(L.cond || '') === o ? ' selected' : ''}>${o}</option>`).join('')}</select></label></div>` : ''}
@@ -14548,6 +14565,142 @@ document.addEventListener('change', async e => {
   o.date = TODAY; await saveTset({olym: o});
 });
 document.addEventListener('click', e => { if (e.target.closest?.('[data-baroga]')) baroPane(); });
+
+/* ================= Adaptation de la prochaine séance =================
+   Sous « Créer une séance » : pour la prochaine séance de muscu, le préparateur propose de changer le dernier exercice
+   pour rééquilibrer une chaîne en retard (durer, pas seulement performer). Sources : la charge par muscle sur 7 jours
+   (balEx, paires de muscles opposés) et, quand l'IA est activée, les propositions écrites avec le skill prepa-physique
+   (analysis/coach.adapt). On applique d'un geste, et on peut revenir en arrière. */
+function adNext() {
+  const n = typeof nextSess === 'function' ? nextSess('gym') : null; if (!n) return null;
+  const p = S.plans?.[n.p.id] || n.p; return {k: n.k, p, mine: !!S.plans?.[n.p.id], gym: S.tset?.gymPlan?.[n.p.id] || 'dmarcq'};
+}
+function adProps(nx) {
+  const p = nx.p, items = (p.items || []).filter(it => it.ex !== 'warmup'), last = items[items.length - 1]; if (!last) return [];
+  const out = [];
+  // 1. Écrites par Claude avec le skill (le matin), pour cette séance.
+  const ai = typeof aiOn === 'function' && aiOn() ? (S.coachAI?.adapt || []) : [];
+  for (const a of ai) if ((a.plan === p.id || a.date === nx.k) && EXI[a.to] && (!a.from || EXI[a.from])) out.push({from: a.from || last.ex, to: a.to, sets: a.sets, reps: a.reps, why: a.why || '', detail: a.detail || '', ai: true});
+  // 2. Calculées par l'appli : la chaîne la plus en retard, avec un exercice ciblé faisable dans la salle de la séance.
+  try {
+    const st = musState(), wk = Object.fromEntries(st.map(x => [x.k, x.week])), have = new Set(items.map(it => it.ex));
+    for (const b of balEx()) {
+      const m = b.m, hit = id => (musCoef(id)[m] || 0) >= .75;
+      if (items.some(it => hit(it.ex))) continue;   // la séance travaille déjà ce muscle
+      let to = gymHas(nx.gym, b.id) ? b.id : null;
+      if (!to) to = EX.find(e => e.t === 'gym' && !e.hide && e.cat === 'Prévention' && hit(e.id) && gymHas(nx.gym, e.id) && !have.has(e.id))?.id || null;
+      if (!to || have.has(to)) continue;
+      const pct = Math.round((wk[m] || 0) / musLimit(m) * 100);
+      out.push({from: last.ex, to, sets: last.sets || 3, reps: 12, why: `${MUSI[m]?.n || m} : ${pct} % de sa limite sur 7 jours, le plus en retard de tes chaînes. On le renforce en fin de séance pour durer.`});
+      break;
+    }
+  } catch (e) {}
+  return out.slice(0, 2);
+}
+function adaptCard() {
+  const nx = adNext(); if (!nx) return '';
+  const p = nx.p, prev = p.adaptPrev, L = prev ? [] : adProps(nx);
+  const when = cap(fmtShort(nx.k)), nm = id => esc(exOf(id).n);
+  const body = prev
+    ? `<div class="adrow done"><span><b>Adapté</b> : ${nm(prev.from)} → ${nm(prev.to)}<small>${esc(prev.why || '')}</small></span><button type="button" class="btn ghost" data-adundo="${esc(p.id)}">Revenir en arrière</button></div>`
+    : L.length ? L.map((a, i) => `<div class="adrow"><span><b>${nm(a.from)}</b> → <b>${nm(a.to)}</b> · ${a.sets || 3} × ${a.reps || 12}<small>${esc(a.why)}${a.ai ? ' · préparateur physique (Claude)' : ''}</small>${a.detail ? `<details><summary>Pourquoi</summary><p class="small">${esc(a.detail)}</p></details>` : ''}</span>${nx.mine ? `<button type="button" class="btn" data-adapply="${i}">Appliquer</button>` : ''}</div>`).join('')
+    : '<p class="small muted" style="margin:0">Rien à changer : tes chaînes sont équilibrées pour cette séance.</p>';
+  return `<div class="card adapt"><div class="chead" style="margin-bottom:8px"><span class="eyebrow">Adaptation de la prochaine séance</span><span class="small muted">${esc(when)}</span></div>
+    <button type="button" class="adses" data-tplanv="${esc(p.id)}"><b>${esc(p.name)}</b><span class="small muted">${esc(gymName(nx.gym))}</span></button>${body}</div>`;
+}
+document.addEventListener('click', async e => {
+  const at = q => e.target.closest?.(q); let b;
+  if ((b = at('[data-adapply]'))) {
+    const nx = adNext(); if (!nx?.mine) return; const a = adProps(nx)[+b.dataset.adapply]; if (!a) return;
+    const p = nx.p, i = p.items.map(it => it.ex).lastIndexOf(a.from); if (i < 0) return;
+    const items = p.items.map((it, j) => j === i ? {ex: a.to, sets: +a.sets || it.sets || 3, reps: +a.reps || 12, rest: 60, note: 'Rééquilibre : ' + a.why} : it);
+    const q = {...p, items, adaptPrev: {items: p.items, from: a.from, to: a.to, why: a.why, at: new Date().toISOString()}, updatedAt: new Date().toISOString()};
+    S.plans = {...S.plans, [p.id]: q}; await dbSet('plans/' + p.id, q); toast('Séance adaptée : ' + exOf(a.to).n); renderMod(true); return;
+  }
+  if ((b = at('[data-adundo]'))) {
+    const p = S.plans?.[b.dataset.adundo]; if (!p?.adaptPrev) return;
+    const q = {...p, items: p.adaptPrev.items, updatedAt: new Date().toISOString()}; delete q.adaptPrev;
+    S.plans = {...S.plans, [p.id]: q}; await dbSet('plans/' + p.id, q); toast('Séance remise comme avant'); renderMod(true); return;
+  }
+  if ((b = at('[data-donemore]'))) { S.doneAll = !S.doneAll; renderMod(true); }
+});
+
+/* ================= Forme du jour, au début de la séance =================
+   Quand Oscar commence une séance de muscu, le préparateur lit ses données du moment (récupération, sommeil, ressenti du
+   questionnaire, douleurs, maladie, fatigue des muscles de la séance, CMJ, antécédents) et propose des réglages classés
+   du plus utile au moins utile. Rien n'est imposé : il active ce qu'il veut, ou garde la séance prévue, et peut revenir
+   en arrière tant qu'aucune série n'est validée. Performer ET durer : en grande forme, il propose aussi de pousser. */
+function formCheck() {
+  const sig = [], add = (v, t) => sig.push({v, t});
+  try {
+    const kG = lastKey('hrv'), r = kG && (kG === TODAY || kG === addDays(TODAY, -1)) ? recovery(kG) : null;
+    if (r?.score != null) { const z = zoneOf(r.score); add(z === 'bad' ? -2 : z === 'warn' ? -1 : 1, `Récupération ${Math.round(r.score)} %`); }
+    const sl = +G(TODAY, 'sleepS') || 0; if (sl) { const h = sl / 3600; if (h < 7) add(-1, `Nuit courte : ${fx(h, 1)} h`); else if (h >= 8.5) add(1, `Nuit complète : ${fx(h, 1)} h`); }
+  } catch (e) {}
+  const m = S.manual?.[TODAY] || {}, w = m.well || {};
+  const fe = ['fat', 'sor', 'mot'].map(k => +w[k]).filter(x => x > 0);
+  if (fe.length) { const a = fe.reduce((x, y) => x + y, 0) / fe.length; if (a <= 2.5) add(-1, 'Ressenti du matin bas (fatigue, courbatures, envie)'); else if (a >= 4) add(1, 'Ressenti du matin bon'); }
+  if (Array.isArray(m.sick) && m.sick.length) add(-1, 'Malade : ' + m.sick.join(', '));
+  try { const P = painNow(); const top = P.sort((a, b) => b.v - a.v)[0]; if (top) add(top.v >= 3 ? -2 : -1, `Douleur : ${painTxt(top.l)} ${top.v}/10`); } catch (e) {}
+  try {
+    const L = S.live, mus = new Set(); for (const it of L?.items || []) for (const [k, c] of Object.entries(musCoef(it.ex))) if (c >= .75) mus.add(k);
+    const st = musState().filter(x => mus.has(x.k));
+    const hot = st.map(x => ({n: MUSI[x.k]?.n, p: (x.fatPct || 0) / 100})).filter(x => x.p >= .8).sort((a, b) => b.p - a.p)[0];
+    if (hot) add(-1, `${hot.n} encore fatigué (${Math.round(hot.p * 100)} %)`);
+  } catch (e) {}
+  try { const ck = cmjCheck(); if (ck && ck.d <= -5) add(-1, `CMJ ${fx(ck.d, 1)} % sous ta moyenne`); else if (ck && ck.d >= 3) add(1, `CMJ +${fx(ck.d, 1)} %`); } catch (e) {}
+  if (lightOn()) add(-1, 'Semaine allégée');
+  const sum = sig.reduce((a, x) => a + x.v, 0), lvl = sum <= -3 ? 'low' : sum <= -1 ? 'mid' : 'good';
+  const inj = S.profile?.injury ? String(S.profile.injury).split(/[.(]/)[0].trim() : '';
+  return {sig, lvl, inj};
+}
+// Les réglages, du plus utile au moins utile selon la forme. Les charges s'excluent entre elles, le reste se combine.
+function formOpts(lvl) {
+  const L = {
+    low: [['k90', 'Charges −10 %', 'garde la vitesse, baisse la fatigue'], ['set', 'Une série de moins par exercice', 'même qualité, moins de volume'], ['plio', 'Sans sauts ni impacts', 'protège tendons, tibias et dos'], ['rpe', 'Arrêter à 3 répétitions en réserve', 'RPE 7 au plus']],
+    mid: [['k95', 'Charges −5 %', 'la vitesse de barre reste haute'], ['rpe', 'Arrêter à 3 répétitions en réserve', 'RPE 7 au plus'], ['set', 'Une série de moins par exercice', 'si la fatigue monte pendant la séance']],
+    good: [['k1025', 'Premier exercice +2,5 %', 'tu es frais : on pousse, dans ta règle des +2,5 %'], ['set+', 'Une série de plus au premier exercice', 'seulement si la barre reste rapide']]
+  };
+  return L[lvl] || [];
+}
+const FK = {k90: .9, k95: .95, k1025: 1.025};
+function formApply() {
+  const L = S.live; if (!L?.form) return; const f = L.form, on = f.on || [];
+  const items = structuredClone(L.formBase), auto = f.autoK || 1, k = on.map(x => FK[x]).find(Boolean) || 1;
+  items.forEach((it, i) => {
+    if (!it.sets) return;
+    const first = items.findIndex(x => x.sets) === i;
+    // Les charges : celles du plan (sans la baisse automatique), puis le réglage choisi (+2,5 % : premier exercice seulement).
+    const kk = on.includes('k1025') ? (first ? 1.025 : 1) : k;
+    for (const s of it.sets) if (+s.kg > 0) s.kg = r25(+s.kg / auto * kk);
+    if (on.includes('set') && it.sets.length > (isUni(it.tg || it) ? 2 : 1)) it.sets.splice(-(isUni(it.tg || it) ? 2 : 1));
+    if (on.includes('set+') && first) it.sets.push(...structuredClone(it.sets.slice(-(isUni(it.tg || it) ? 2 : 1))));
+    if (on.includes('rpe')) it.tg = {...(it.tg || {}), rpe: Math.min(+it.tg?.rpe || 7, 7)};
+  });
+  L.items = on.includes('plio') ? items.filter(it => !(exOf(it.ex).cat === 'Pliométrie' && !PLYO_NOT.test(exOf(it.ex).n))) : items;
+}
+function formCard() {
+  const L = S.live; if (!L || L.kind !== 'gym') return '';
+  const started = L.items.some(it => (it.sets || it.reps || []).some(x => x.done));
+  if (!L.form && !started) { L.form = {...formCheck(), on: [], autoK: recFactor().k}; L.formBase = structuredClone(L.items); if (L.form.autoK !== 1) formApply(); }
+  const f = L.form; if (!f) return '';
+  const lab = {low: 'Forme basse', mid: 'Forme moyenne', good: 'Bonne forme'}[f.lvl], cls = {low: 'bad', mid: 'mid', good: 'ok'}[f.lvl];
+  const ops = formOpts(f.lvl), chosen = ops.filter(([id]) => f.on.includes(id)).map(([, n]) => n);
+  if (started) return chosen.length ? `<div class="card formc ${cls}"><span class="eyebrow">Forme du jour · ${lab}</span><p class="small" style="margin:6px 0 0">Séance adaptée : ${esc(chosen.join(', '))}.</p></div>` : '';
+  return `<div class="card formc ${cls}"><div class="chead" style="margin-bottom:6px"><span class="eyebrow">Forme du jour</span><b class="fclab">${lab}</b></div>
+    ${f.sig.length ? `<div class="fsig">${f.sig.map(x => `<span class="${x.v < 0 ? 'm' : 'p'}">${esc(x.t)}</span>`).join('')}</div>` : '<p class="small muted" style="margin:0">Pas encore de données ce matin : remplis ton questionnaire pour un avis plus précis.</p>'}
+    ${f.inj ? `<p class="small muted" style="margin:6px 2px 0">Antécédent pris en compte : ${esc(f.inj)}.</p>` : ''}
+    <div class="sec-label" style="margin:12px 2px 6px">Ce que tu peux changer, du plus utile au moins utile</div>
+    ${ops.map(([id, n, why], i) => `<button type="button" class="fopt" data-fopt="${id}" aria-pressed="${f.on.includes(id)}"><i>${i + 1}</i><span><b>${esc(n)}</b><small>${esc(why)}</small></span><em>${f.on.includes(id) ? '✓' : ''}</em></button>`).join('')}
+    <button type="button" class="fopt keep" data-fopt="keep" aria-pressed="${!f.on.length}"><i>·</i><span><b>Garder la séance prévue</b><small>les charges de ton programme, rien ne change</small></span><em>${!f.on.length ? '✓' : ''}</em></button></div>`;
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest?.('[data-fopt]'); if (!b || !S.live?.form) return;
+  const f = S.live.form, id = b.dataset.fopt;
+  if (id === 'keep') { f.on = []; formApply(); }
+  else { const isK = !!FK[id]; f.on = f.on.includes(id) ? f.on.filter(x => x !== id) : [...f.on.filter(x => !(isK && FK[x])), id]; formApply(); }
+  saveLive(); paneRender();
+});
 
 /* ================= TNR · Paramètres (la roue crantée, en haut à gauche de l'Accueil) =================
    Tout ce qui se règle dans l'appli, au même endroit :

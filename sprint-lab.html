@@ -8062,7 +8062,7 @@ function progList() {
   const next = nd ? nums.filter(n => n === nx) : [], after = nums.filter(n => n > nx || (!nd && n === nx)), done = nums.filter(n => n <= last).reverse();
   return `${next.length ? `<h2>Prochaine séance${nd ? ` <small>${esc(cap(fmtShort(nd)))}</small>` : ''}</h2><div class="list nextl">${next.map(n => r(n, ' nextses')).join('')}</div>` : ''}
     ${after.length ? `<h2>Mon programme <small>à venir</small></h2><div class="list">${after.map(n => r(n)).join('')}</div>` : ''}
-    ${done.length ? `<h2>Séances faites</h2><div class="list donel">${done.map(n => r(n, ' doneses')).join('')}</div>` : ''}`;
+    ${done.length ? `<h2>Séances faites</h2><div class="list donel">${(S.doneAll ? done : done.slice(0, 5)).map(n => r(n, ' doneses')).join('')}</div>${done.length > 5 ? `<button type="button" class="linkbtn donemore" data-donemore>${S.doneAll ? 'Masquer' : `Détail · les ${done.length} séances`}</button>` : ''}` : ''}`;
 }
 /* ---------- the session board: 4 weeks, empty until he drops a session on a day ---------- */
 // Inside a block of a board: done = a check, not done = a cross, both round and centred like the remove button.
@@ -8415,9 +8415,10 @@ function tSessions() {
     <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
     ${sesBoard(k)}
     <button class="btn ghost" style="margin-top:16px;width:100%" data-tnew>+ Créer une séance</button>
+    ${k === 'gym' && typeof adaptCard === 'function' ? adaptCard() : ''}
     ${k === 'gym' && TDV_PLANS.length ? progList() : ''}
-    ${k === 'track' ? (() => { const L = logs().filter(l => l.kind === 'track').slice(0, 12); return L.length ? `<h2>Séances faites</h2><div class="list donel">${L.map(l => `<button class="rowbtn doneses" data-tlog="${l.id}"><span><b>${esc(l.name)}</b><span class="meta">${esc(cap(fmtShort(l.date)))}${l.min ? ' · ' + l.min + ' min' : ''}${l.rpe ? ' · RPE ' + l.rpe : ''}</span></span><span class="kc">${fx(l.sprintM || 0)} m</span></button>`).join('')}</div>` : ''; })() : ''}
-    ${base.length ? `<h2>Programmes <small>à dupliquer et adapter</small></h2><div class="list">${base.map(row).join('')}</div>` : ''}`;
+    ${k === 'track' ? (() => { const L0 = logs().filter(l => l.kind === 'track'), L = S.doneAll ? L0 : L0.slice(0, 5); return L.length ? `<h2>Séances faites</h2><div class="list donel">${L.map(l => `<button class="rowbtn doneses" data-tlog="${l.id}"><span><b>${esc(l.name)}</b><span class="meta">${esc(cap(fmtShort(l.date)))}${l.min ? ' · ' + l.min + ' min' : ''}${l.rpe ? ' · RPE ' + l.rpe : ''}</span></span><span class="kc">${fx(l.sprintM || 0)} m</span></button>`).join('')}</div>${L0.length > 5 ? `<button type="button" class="linkbtn donemore" data-donemore>${S.doneAll ? 'Masquer' : `Détail · les ${L0.length} séances`}</button>` : ''}` : ''; })() : ''}
+`;
 }
 function tLibrary() {
   const k = S.lib.k || 'gym', n = EX.filter(e => e.t === k && !e.hide && e.id !== 'warmup').length;
@@ -9572,7 +9573,7 @@ function liveBody() {
   const doneSets = L.items.reduce((s, it) => s + (it.sets || it.reps || []).filter(x => x.done).length, 0), all = L.items.reduce((s, it) => s + (it.sets || it.reps || []).length, 0);
   const back = (L.removed || []).map((r, n) => `<button data-tlback="${n}" aria-label="Remettre ${esc(exOf(r.item.ex).n)} dans la séance"><b>${esc(exOf(r.item.ex).n)}</b> · retiré · toucher pour remettre</button>`).join('');
   const wt = warmText(L.warm), ct = coolText(L.cool);
-  return `${wt.length ? `<details class="card wtxt" style="margin-top:12px"${doneSets ? '' : ' open'}><summary class="eyebrow">Échauffement · ${warmMin(L.warm)} min</summary>${warmTable(L.warm)}</details>` : ''}
+  return `${typeof formCard === 'function' ? formCard() : ''}${wt.length ? `<details class="card wtxt" style="margin-top:12px"${doneSets ? '' : ' open'}><summary class="eyebrow">Échauffement · ${warmMin(L.warm)} min</summary>${warmTable(L.warm)}</details>` : ''}
     ${ct.length ? `<details class="card wtxt" style="margin-top:8px"><summary class="eyebrow">Retour au calme, à la fin · ${L.cool.min} min</summary>${coolTable(L.cool)}</details>` : ''}
     <div class="livehead"><span class="chiptag">${L.kind === 'gym' ? 'Musculation' : L.kind === 'class' ? 'Cours collectif' : 'Sprint'} · ${doneSets}/${all}</span>${gA ? `<b>${fx(gA.min)} min</b>` : ''}</div>
     ${L.kind === 'track' ? `<div class="edrow" style="margin-top:10px;grid-template-columns:1fr 1fr"><label>Chaussures<select class="mini-in" data-lmeta="shoes">${['', 'Pointes carbone', 'Pointes', 'Running fractionné', 'Running long'].map(o => `<option${(L.shoes || '') === o ? ' selected' : ''}>${o}</option>`).join('')}</select></label><label>Lieu<select class="mini-in" data-lmeta="place">${['', ...PLACES].map(o => `<option${(L.place || '') === o ? ' selected' : ''}>${o}</option>`).join('')}</select></label><label>Conditions<select class="mini-in" data-lmeta="cond">${['', 'Piste, vent favorable', 'Piste, sans vent', 'Piste, vent contraire', 'Indoor', 'Pluie'].map(o => `<option${(L.cond || '') === o ? ' selected' : ''}>${o}</option>`).join('')}</select></label></div>` : ''}
