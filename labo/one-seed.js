@@ -51,3 +51,21 @@
     } catch (e) {}
   })();
 })();
+// v171 : salle commerciale, pas de place pour lancer un ballon en arrière : le lancer arrière par-dessus la tête de la
+// séance 1B devient un swing kettlebell (même extension explosive des hanches, rien ne vole, peu de place).
+(function oneSeedPPS4(n = 0) {
+  if (document.documentElement.classList.contains('lab') || n > 240) return;
+  let ok = false; try { ok = S.status === 'ready' && S.db && S.tset && S.tset.seedPPS3 && typeof saveTset === 'function' && typeof dbSet === 'function'; } catch (e) {}
+  if (!ok) { setTimeout(() => oneSeedPPS4(n + 1), 500); return; }
+  if (S.tset.seedPPS4) return;
+  (async () => {
+    try {
+      for (const id of Object.keys(S.plans || {})) {
+        const p = S.plans[id]; if (!p?.items?.some(it => it.ex === 'mbback') || !(String(id).startsWith('tnr-') || p.coach)) continue;
+        const q = {...p, items: p.items.map(it => it.ex === 'mbback' ? {...it, ex: 'kbswing', sets: it.sets || 4, reps: 6, rest: it.rest || 120, tempo: [0, 0, 1, 0], note: 'Kettlebell lourde (24 à 32 kg). Hanches explosives, bras relâchés, buste gainé : pas de cambrure en haut (L3). Remplace le lancer arrière : en salle commerciale, pas de place pour lancer un ballon.'} : it), updatedAt: new Date().toISOString()};
+        S.plans = {...S.plans, [id]: q}; await dbSet('plans/' + id, q);
+      }
+      await saveTset({seedPPS4: true});
+    } catch (e) {}
+  })();
+})();

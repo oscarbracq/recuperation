@@ -5,7 +5,7 @@
    Avec l'abonnement Claude (pas d'API payante) : « Demander à Claude » copie la demande complète, à coller dans Claude
    (onglet Code, où le skill « prepa-physique » est installé). Claude répond par un bloc de séances ; on le recolle ici,
    on voit les séances, puis « Envoyer dans le planning » les crée et les cale sur leurs jours. */
-const CTR = {goal: '', until: '', weeks: 4, per: 3, gym: '', notes: '', paste: '', parsed: null, err: ''};
+const CTR = {goal: '', until: '', weeks: 4, per: 3, gyms: ['dmarcq'], notes: '', paste: '', parsed: null, err: ''};
 function coachChip() { return typeof isPC === 'function' && isPC() ? `<button type="button" class="seachip coachchip" data-coachtr aria-label="Coach training : créer des séances"><span>Coach</span><b>Training</b></button>` : ''; }
 const ctMonday = () => { let d = addDays(TODAY, 1); while (dow(d) !== 1) d = addDays(d, 1); return d; };
 function ctContext() {
@@ -25,7 +25,9 @@ function ctContext() {
   const lg = logs().filter(l => l.kind === 'gym' && l.date >= addDays(TODAY, -28)).slice(0, 8).map(l => `${l.date} ${l.name} (RPE ${l.rpe || '–'})`);
   if (lg.length) L.push('Séances de muscu des 4 dernières semaines : ' + lg.join(' ; ') + '.');
   try { const k = lastKey('hrv'), r = k ? recovery(k) : null; if (r) L.push(`Récupération du jour : ${r.score} %.`); } catch (e) {}
-  const g = CTR.gym || 'dmarcq'; L.push(`Salle : ${gymName(g)}. Matériel (identifiants de l'appli) : ${GYM_EQ[g].join(', ')}.`);
+  const gs = CTR.gyms.length ? CTR.gyms : ['dmarcq'];
+  L.push(gs.length > 1 ? `Salles possibles : ${gs.map(gymName).join(', ')}. Une séance se fait dans UNE seule salle, avec seulement son matériel (pas de matériel d'une autre salle dans la même séance).` : `Salle : ${gymName(gs[0])}.`);
+  for (const g of gs) L.push(`Matériel de ${gymName(g)} (identifiant de salle « ${g} », identifiants de l'appli) : ${GYM_EQ[g].join(', ')}.`);
   return L.join('\n');
 }
 function ctPrompt() {
@@ -40,17 +42,20 @@ Ce qu'Oscar demande :
 Ce que l'appli sait déjà :
 ${ctContext()}
 
-Règles : un échauffement adapté à chaque séance (avec le matériel de la salle), une montée en charge, un retour au calme ; uniquement des exercices faisables dans la salle ; identifiants d'exercices de l'appli (référence salles-et-exercices.md du skill) ; progression semaine par semaine, et une semaine allégée si le cycle le demande ; jamais de nordic ni de réception dure (périostites).
+Règles : un échauffement adapté à chaque séance (avec le matériel de la salle), une montée en charge, un retour au calme ; chaque séance dans UNE seule salle (champ "gym" = identifiant de la salle), avec uniquement les exercices faisables avec le matériel de cette salle ; identifiants d'exercices de l'appli (référence salles-et-exercices.md du skill) ; progression semaine par semaine, et une semaine allégée si le cycle le demande ; jamais de nordic ni de réception dure (périostites). Ce sont des salles commerciales, en intérieur, avec peu de place et du monde autour : pas de lancer de ballon vers l'arrière ou en hauteur, pas d'exercice qui demande beaucoup de place ou qui peut gêner les autres ; repère-les et propose une adaptation (swing kettlebell, lancer au sol, lancer contre le mur).
 
 Réponds d'abord par un tableau court par semaine, puis TERMINE par un seul bloc \`\`\`json, exactement de cette forme (Oscar le recolle dans l'appli) :
-{"tnr":"plan","sessions":[{"date":"AAAA-MM-JJ","name":"PPS S2 · Force","title":"…","desc":"…","warm":{"sel":["w_bike","m_ank","a_tib"],"preset":null},"cool":{"min":5,"sel":["r_coh"]},"items":[{"ex":"halfsquat","sets":4,"reps":3,"pct":85,"rest":240,"tempo":[2,0,1,0],"note":"…"},{"ex":"boxjump","sets":4,"reps":3,"rest":180,"link":true}]}]}`;
+{"tnr":"plan","sessions":[{"date":"AAAA-MM-JJ","gym":"dmarcq","name":"PPS S2 · Force","title":"…","desc":"…","warm":{"sel":["w_bike","m_ank","a_tib"],"preset":null},"cool":{"min":5,"sel":["r_coh"]},"items":[{"ex":"halfsquat","sets":4,"reps":3,"pct":85,"rest":240,"tempo":[2,0,1,0],"note":"…"},{"ex":"boxjump","sets":4,"reps":3,"rest":180,"link":true}]}]}`;
 }
 function ctParse(txt) {
   CTR.err = ''; CTR.parsed = null; if (!txt.trim()) return;
   const m = txt.match(/```json\s*([\s\S]*?)```/) || txt.match(/(\{[\s\S]*"sessions"[\s\S]*\})/);
   let j; try { j = JSON.parse((m ? m[1] : txt).trim()); } catch (e) { CTR.err = 'Je n\'arrive pas à lire la réponse : recolle tout le bloc json de Claude.'; return; }
   const ses = Array.isArray(j.sessions) ? j.sessions : []; if (!ses.length) { CTR.err = 'Aucune séance dans la réponse.'; return; }
-  const unk = new Set(); for (const s of ses) for (const it of s.items || []) if (!EXI[it.ex]) unk.add(it.ex);
+  const unk = new Set(), gs = CTR.gyms.length ? CTR.gyms : ['dmarcq'];
+  for (const s of ses) { if (!gs.includes(s.gym)) s.gym = gs.find(g => (s.items || []).every(it => !EXI[it.ex] || gymHas(g, it.ex))) || gs[0];
+    s.miss = (s.items || []).filter(it => EXI[it.ex] && !gymHas(s.gym, it.ex)).map(it => exOf(it.ex).n);
+    for (const it of s.items || []) if (!EXI[it.ex]) unk.add(it.ex); }
   CTR.parsed = ses.filter(s => /^\d{4}-\d\d-\d\d$/.test(s.date || '') && (s.items || []).length); CTR.unk = [...unk];
 }
 async function ctSend() {
@@ -61,7 +66,7 @@ async function ctSend() {
     const p = {id, kind: 'gym', name: String(s.name || 'Séance').slice(0, 40), title: s.title || '', desc: s.desc || '', items: s.items.filter(it => EXI[it.ex]), warm: s.warm || null, cool: s.cool || null, updatedAt: now, coach: true};
     S.plans = {...(S.plans || {}), [id]: p}; await dbSet('plans/' + id, p); dated[s.date] = id;
   }
-  const gp = {...(S.tset.gymPlan || {})}; if (CTR.gym) for (const s of ses) gp[dated[s.date]] = CTR.gym;
+  const gp = {...(S.tset.gymPlan || {})}; for (const s of ses) if (s.gym) gp[dated[s.date]] = s.gym;
   await saveTset({dated, gymPlan: gp});
   toast(`${ses.length} séances envoyées dans le planning`); CTR.parsed = null; CTR.paste = ''; closeAllPanes?.(); try { renderMod(true); } catch (e) {}
 }
@@ -74,14 +79,14 @@ function coachPane() {
         ${f('goal', 'Objectif', 'ex. 6,85 au 60 m, gagner en force sur une jambe')}
         ${f('until', 'Échéance', 'ex. championnats en salle, 7 mars')}
         <div class="ctrow2">${f('weeks', 'Semaines', '4', 'number')}${f('per', 'Séances par semaine', '3', 'number')}</div>
-        <div class="ctf"><span>Salle</span><div class="chipsx">${GYMS.map(([g, n]) => `<button type="button" class="chip" data-ctgym="${g}" aria-pressed="${(CTR.gym || 'dmarcq') === g}">${esc(n)}</button>`).join('')}</div></div>
+        <div class="ctf"><span>Salles possibles <small>(plusieurs au choix ; une seule salle par séance)</small></span><div class="chipsx">${GYMS.map(([g, n]) => `<button type="button" class="chip" data-ctgym="${g}" aria-pressed="${CTR.gyms.includes(g)}">${CTR.gyms.includes(g) ? '✓ ' : ''}${esc(n)}</button>`).join('')}</div></div>
         <label class="ctf"><span>Contraintes, envies, ce que ton coach de sprint prévoit</span><textarea data-ctk="notes" rows="3" placeholder="ex. pas de squat lourd la veille des départs, je veux plus de travail du pied">${esc(CTR.notes)}</textarea></label></div>
       <div class="card" style="margin-top:12px"><span class="eyebrow">2 · Ce que l'appli ajoute toute seule</span><pre class="ctctx">${esc(ctContext())}</pre></div>
       <button class="btn" style="margin-top:12px;width:100%" data-ctcopy>Demander à Claude (copie la demande)</button>
       <p class="small muted" style="margin:6px 2px 0">Colle-la dans Claude, onglet Code (le skill préparateur physique y est). Puis recolle sa réponse ci-dessous.</p>
       <div class="card" style="margin-top:12px"><span class="eyebrow">3 · La réponse de Claude</span><textarea data-ctk="paste" rows="5" placeholder="Colle ici toute la réponse (avec le bloc json)">${esc(CTR.paste)}</textarea>
         ${CTR.err ? `<p class="small" style="color:var(--bad);margin:6px 2px 0">${esc(CTR.err)}</p>` : ''}
-        ${P ? `<div class="ctlist">${P.map(s => `<div class="row"><span class="l">${esc(cap(fmtShort(s.date)))}<span class="hint">${esc(s.name || '')} · ${s.items.length} exercices${s.warm ? ' · échauffement' : ''}</span></span></div>`).join('')}</div>
+        ${P ? `<div class="ctlist">${P.map(s => `<div class="row"><span class="l">${esc(cap(fmtShort(s.date)))}<span class="hint">${esc(s.name || '')} · ${esc(gymName(s.gym))} · ${s.items.length} exercices${s.warm ? ' · échauffement' : ''}${s.miss?.length ? ` · <b style="color:var(--warn)">pas de matériel pour ${esc(s.miss.join(', '))}</b>` : ''}</span></span></div>`).join('')}</div>
           ${CTR.unk?.length ? `<p class="small" style="color:var(--warn);margin:6px 2px 0">Exercices inconnus de l'appli, retirés : ${esc(CTR.unk.join(', '))}</p>` : ''}
           <button class="btn" style="margin-top:10px;width:100%" data-ctsend>Envoyer dans le planning (${P.length} séances)</button>` : ''}</div>`;
   }});
@@ -89,7 +94,7 @@ function coachPane() {
 document.addEventListener('click', async e => {
   const at = q => e.target.closest?.(q); let b;
   if (at('[data-coachtr]')) { coachPane(); return; }
-  if ((b = at('[data-ctgym]'))) { CTR.gym = b.dataset.ctgym; paneRender(); return; }
+  if ((b = at('[data-ctgym]'))) { const g = b.dataset.ctgym; CTR.gyms = CTR.gyms.includes(g) ? (CTR.gyms.length > 1 ? CTR.gyms.filter(x => x !== g) : CTR.gyms) : [...CTR.gyms, g]; if (CTR.paste) ctParse(CTR.paste); paneRender(); return; }
   if (at('[data-ctcopy]')) { try { await navigator.clipboard.writeText(ctPrompt()); toast('Demande copiée : colle-la dans Claude'); } catch (err) { toast('Copie impossible'); } return; }
   if (at('[data-ctsend]')) { await ctSend(); return; }
 });

@@ -8846,11 +8846,11 @@ function planView(id, n, from) {
     GYM_CTX = S.tset?.gymPlan?.[p.id] || null;
     const mine = !BUILTIN.includes(p);
     return `<div class="dhead"><span class="chiptag">${p.kind === 'gym' ? 'Musculation' : 'Sprint'} · ${estMin(p)} min</span><div class="bigname" style="font-size:1.75rem">${esc(p.name)}</div>${p.title ? `<p style="margin:4px 0 0;font-weight:600">Objectif : ${esc(p.title)}</p>` : ''}<p class="small muted">${esc(p.desc || '')}</p></div>
-      ${warmText(p.warm).length ? `<div class="card wtxt"><span class="eyebrow">Échauffement · ${warmMin(p.warm)} min</span>${warmText(p.warm).map(t => `<p class="small">${esc(t)}</p>`).join('')}</div>` : ''}
+      ${p.warm?.sel?.length ? `<div class="card wtxt"><span class="eyebrow">Échauffement · ${warmMin(p.warm)} min</span>${warmTable(p.warm)}</div>` : ''}
       ${p.tech ? `<div class="card wtxt"><span class="eyebrow">Travail technique</span><p class="small">${esc(p.tech)}</p></div>` : ''}
       ${p.items.some(x => x.seq) ? '<div class="sec-label">Séance principale</div>' : ''}
       ${typeof planTable === 'function' ? planTable(p) : ''}<div class="list"${typeof planTable === 'function' ? ' hidden' : ''}>${(LBL = itemLabels(p.items), '')}${p.items.map((it, i) => { const e = exOf(it.ex), sg = e.t === 'test' ? null : suggest(it); return `<button class="rowbtn" data-tex="${it.ex}"><span><b>${LBL[i] ? `<span class="exlbl">${LBL[i]}</span>` : ''}${esc(e.n)}${!it.link && it.meth ? ' · ' + esc(METHX[it.meth]?.[1] || '') : ''}</b><span class="meta">${itemText(it)}${it.rest ? ' · récup ' + fmtRest(it.rest) : ''}${sg ? ' · ' + fx(sg.kg, sg.kg % 1 ? 1 : 0) + ' kg proposés' : ''}</span></span>${ICON.chev}</button>`; }).join('')}</div>
-      ${coolText(p.cool).length ? `<div class="card wtxt" style="margin-top:12px"><span class="eyebrow">Retour au calme</span>${coolText(p.cool).map(t => `<p class="small">${esc(t)}</p>`).join('')}</div>` : ''}
+      ${p.cool?.sel?.length ? `<div class="card wtxt" style="margin-top:12px"><span class="eyebrow">Retour au calme · ${p.cool.min} min</span>${coolTable(p.cool)}</div>` : ''}
       ${p.kind === 'gym' ? capsLine(planCheck(p.items)) : ''}
       ${gymCard(p)}
       <div class="stack" style="margin-top:16px">${(() => { const tk = planForK(TODAY, p.kind)?.id === p.id && !kindDone(TODAY, p.kind) ? p.kind : null;
@@ -9025,6 +9025,18 @@ function coolSuggest(ed) {
 }
 const coolDefault = ed => ['r_coh', ...coolSuggest(ed).filter(x => x.kind !== 'respi').slice(0, 2).map(x => x.id)];
 const warmText = w => w?.sel?.length ? WARM_G.map(([g, lab]) => { const L = w.sel.map(id => WX[id]).filter(x => x && x.g === g); return L.length ? `${lab} : ${L.map(x => x.n[0].toLowerCase() + x.n.slice(1) + ' (' + x.dose + ')').join(', ')}` : ''; }).filter(Boolean) : [];
+// En tableau (Oscar est dyslexique) : une ligne par exercice, l'étape à gauche, la dose à droite.
+function warmTable(w, edit) {
+  if (!w?.sel?.length) return '';
+  const rows = WARM_G.map(([g, lab]) => { const L = w.sel.map(id => WX[id]).filter(x => x && x.g === g);
+    return L.map((x, k) => `<div class="wtr${k ? '' : ' g1'}${edit ? ' ed' : ''}"><span class="wst">${k ? '' : esc(lab)}</span><span class="wex">${esc(x.n)}</span><span class="wdo">${esc(x.dose)}</span>${edit ? `<button type="button" class="wx" data-edws="${x.id}" aria-label="Retirer ${esc(x.n)}">×</button>` : ''}</div>`).join(''); }).join('');
+  return `<div class="wtab"><div class="wtr hd${edit ? ' ed' : ''}"><span>Étape</span><span>Exercice</span><span>Dose</span>${edit ? '<span></span>' : ''}</div>${rows}</div>`;
+}
+function coolTable(c, edit) {
+  if (!c?.sel?.length) return '';
+  const L = c.sel.map(id => RX[id]).filter(Boolean);
+  return `<div class="wtab"><div class="wtr c hd${edit ? ' ed' : ''}"><span>Exercice</span><span>Durée</span>${edit ? '<span></span>' : ''}</div>${L.map(x => `<div class="wtr c${edit ? ' ed' : ''}"><span class="wex">${esc(x.n)}</span><span class="wdo">${x.min} min</span>${edit ? `<button type="button" class="wx" data-edcs="${x.id}" aria-label="Retirer ${esc(x.n)}">×</button>` : ''}</div>`).join('')}</div>`;
+}
 const coolText = c => c?.sel?.length ? [`${c.min} min : ${c.sel.map(id => RX[id]?.n.toLowerCase()).filter(Boolean).join(', ')}`] : [];
 document.addEventListener('change', e => { const t = e.target; if (!ED) return; if (t.dataset?.edmeth != null) { ED.items[+t.dataset.edmeth].meth = t.value || undefined; paneRender(); } if (t.dataset?.ednote != null) { ED.items[+t.dataset.ednote].note = t.value.trim() || undefined; } });
 document.addEventListener('change', e => { const t = e.target; if (!t.dataset?.edrest || !ED) return; const v = parseRest(t.value); ED.items[+t.dataset.edrest].rest = v; t.value = restIn(v); if (ED.items[+t.dataset.edrest].seq) paneRender(); });
@@ -9137,7 +9149,7 @@ function warmBox() {
     ${ED.warm.preset === 'jbm' ? '<p class="hint" style="margin:6px 2px 0">L\'échauffement de JB Morin, ajouté d\'office à chaque séance de sprint : mobilité, gammes, puis 5 accélérations progressives de 50 à 95 %. 5 min libres ensuite pour te préparer à ta façon. Pour les gestes : <a href="https://youtu.be/mcV4l_T9n44" target="_blank" rel="noopener">la vidéo</a>.</p>' : ''}
     ${WARM_G.filter(([g]) => g !== 'prog' || ED.kind === 'track' || sel.some(id => WX[id]?.g === 'prog')).map(([g, lab, why]) => { const L = sel.map(id => WX[id]).filter(x => x && x.g === g);
       return `<div class="sec-label" style="margin:12px 0 4px">${lab}<small style="text-transform:none;letter-spacing:0;font-weight:500"> · ${why}</small></div>
-      ${L.length ? `<div class="wtl">${L.map(x => `<div class="wti"><span><b>${esc(x.n)}</b><small>${esc(x.dose)}</small></span><button type="button" class="wx" data-edws="${x.id}" aria-label="Retirer ${esc(x.n)}">×</button></div>`).join('')}</div>` : ''}
+      ${L.length ? `<div class="wtab">${L.map(x => `<div class="wtr c ed"><span class="wex">${esc(x.n)}</span><span class="wdo">${esc(x.dose)}</span><button type="button" class="wx" data-edws="${x.id}" aria-label="Retirer ${esc(x.n)}">×</button></div>`).join('')}</div>` : ''}
       <button type="button" class="addln" data-edwadd="${g}">${WARM_ADD[g]}</button>`; }).join('')}
     <div class="tools"><button type="button" class="rm" data-edwarmx>Retirer l'échauffement</button></div></div>`;
 }
@@ -9151,7 +9163,7 @@ function coolBox() {
   const sel = ED.cool.sel || [];
   return `<div class="exbox wbox"><h3>Retour au calme<small>${ED.cool.min} min</small></h3>
     <div class="chips2b" style="margin-top:8px">${[5, 10, 15, 20].map(m => `<button type="button" class="chip" data-edcm="${m}" aria-pressed="${ED.cool.min === m}">${m} min</button>`).join('')}</div>
-    ${sel.length ? `<div class="wtl" style="margin-top:10px">${sel.map(id => RX[id]).filter(Boolean).map(x => `<div class="wti"><span><b>${esc(x.n)}</b><small>${x.min} min</small></span><button type="button" class="wx" data-edcs="${x.id}" aria-label="Retirer ${esc(x.n)}">×</button></div>`).join('')}</div>` : ''}
+    ${sel.length ? `<div style="margin-top:10px">${coolTable(ED.cool, true)}</div>` : ''}
     <button type="button" class="addln" data-edcadd style="margin-top:6px">+ Ajouter au retour au calme</button>
     <div class="tools"><button type="button" class="rm" data-edcoolx>Retirer le retour au calme</button></div></div>`;
 }
@@ -9663,12 +9675,12 @@ function liveBody() {
   const doneSets = L.items.reduce((s, it) => s + (it.sets || it.reps || []).filter(x => x.done).length, 0), all = L.items.reduce((s, it) => s + (it.sets || it.reps || []).length, 0);
   const back = (L.removed || []).map((r, n) => `<button data-tlback="${n}" aria-label="Remettre ${esc(exOf(r.item.ex).n)} dans la séance"><b>${esc(exOf(r.item.ex).n)}</b> · retiré · toucher pour remettre</button>`).join('');
   const wt = warmText(L.warm), ct = coolText(L.cool);
-  return `${wt.length ? `<details class="card wtxt" style="margin-top:12px"><summary class="eyebrow">Échauffement · ${warmMin(L.warm)} min</summary>${wt.map(t => `<p class="small">${esc(t)}</p>`).join('')}</details>` : ''}
-    ${ct.length ? `<details class="card wtxt" style="margin-top:8px"><summary class="eyebrow">Retour au calme, à la fin</summary>${ct.map(t => `<p class="small">${esc(t)}</p>`).join('')}</details>` : ''}
+  return `${wt.length ? `<details class="card wtxt" style="margin-top:12px"${doneSets ? '' : ' open'}><summary class="eyebrow">Échauffement · ${warmMin(L.warm)} min</summary>${warmTable(L.warm)}</details>` : ''}
+    ${ct.length ? `<details class="card wtxt" style="margin-top:8px"><summary class="eyebrow">Retour au calme, à la fin · ${L.cool.min} min</summary>${coolTable(L.cool)}</details>` : ''}
     <div class="livehead"><span class="chiptag">${L.kind === 'gym' ? 'Musculation' : L.kind === 'class' ? 'Cours collectif' : 'Sprint'} · ${doneSets}/${all}</span>${gA ? `<b>${fx(gA.min)} min</b>` : ''}</div>
     ${L.kind === 'track' ? `<div class="edrow" style="margin-top:10px;grid-template-columns:1fr 1fr"><label>Chaussures<select class="mini-in" data-lmeta="shoes">${['', 'Pointes carbone', 'Pointes', 'Running fractionné', 'Running long'].map(o => `<option${(L.shoes || '') === o ? ' selected' : ''}>${o}</option>`).join('')}</select></label><label>Lieu<select class="mini-in" data-lmeta="place">${['', ...PLACES].map(o => `<option${(L.place || '') === o ? ' selected' : ''}>${o}</option>`).join('')}</select></label><label>Conditions<select class="mini-in" data-lmeta="cond">${['', 'Piste, vent favorable', 'Piste, sans vent', 'Piste, vent contraire', 'Indoor', 'Pluie'].map(o => `<option${(L.cond || '') === o ? ' selected' : ''}>${o}</option>`).join('')}</select></label></div>` : ''}
     ${L.fill ? `<p class="small muted" style="margin:10px 4px 0">Tout est rempli comme prévu. Corrige ce qui a changé et décoche ce que tu n'as pas fait.</p>` : ''}
-    ${L.kind === 'gym' && typeof isPC === 'function' && isPC() ? liveTable() : L.items.map((it, i) => (it.tg?.tw && !L.items[i - 1]?.tg?.tw ? '<div class="sec-label" style="margin:14px 2px 0">Travail technique</div>' : !it.tg?.tw && L.items[i - 1]?.tg?.tw ? '<div class="sec-label" style="margin:14px 2px 0">Séance principale</div>' : '') + liveBox(it, i)).join('')}
+    ${L.kind === 'gym' && typeof isPC === 'function' && isPC() ? liveTable() : liveList()}
     ${back ? `<div class="rmback">${back}</div>` : ''}
     ${liveBodyCard()}${liveVolCard()}
     <div class="card livechrono"><span class="eyebrow">Durée de la séance</span><b class="num" data-lchrono>${liveChrono()}</b></div>
@@ -9684,7 +9696,7 @@ function liveTable() {
     if (!it.sets) return `<tr class="lx"><td class="lb">${LB[i] || ''}</td><td colspan="8">${liveBox(it, i)}</td></tr>`;
     const sg = suggest(tg), tgt = [tg.pct ? tg.pct + ' %' : '', tg.rpe ? 'RPE ' + tg.rpe : ''].filter(Boolean).join(' · '), last = lastText(it.ex), nd = it.sets.filter(x => x.done).length;
     return `<tr class="lx"><td class="lb">${LB[i] || ''}</td><td class="exn"><b>${esc(e.n)}</b>${last ? `<small>${esc(last)}</small>` : ''}</td><td>${nd}/${it.sets.length}</td><td>${tg.reps != null && tg.reps !== '' ? (u === 's' ? mmss(tg.reps) : tg.reps + ' ' + ul) : '–'}</td>
-      <td class="mt">${esc(tg.note || '')}</td><td>${(tg.tempo || []).some(x => x !== '' && x != null) ? tg.tempo.map(x => x === '' || x == null ? '–' : x).join('-') : '–'}</td><td>${tgt || '–'}${sg ? `<small>≈ ${fx(sg.kg, sg.kg % 1 ? 1 : 0)} kg</small>` : ''}</td><td>${tg.rest ? mmss(tg.rest) : '–'}</td><td class="x"><button type="button" data-tlrm="${i}" aria-label="Retirer l'exercice">×</button></td></tr>
+      <td class="mt">${esc(tg.note || '')}</td><td>${(tg.tempo || []).some(x => x !== '' && x != null) ? tg.tempo.map(x => x === '' || x == null ? '–' : x).join('-') : '–'}</td><td>${tgt || '–'}${sg ? `<small>≈ ${fx(sg.kg, sg.kg % 1 ? 1 : 0)} kg</small>` : ''}</td><td>${L.items[i + 1]?.tg?.link ? '<b class="supx" title="Enchaîne tout de suite">X</b>' : tg.rest ? mmss(tg.rest) : '–'}</td><td class="x"><button type="button" data-tlrm="${i}" aria-label="Retirer l'exercice">×</button></td></tr>
       <tr class="ls"><td></td><td colspan="8"><div class="lsets">${it.sets.map((st, j) => `<div class="lset${st.done ? ' done' : ''}"><span class="n">Série ${j + 1}</span><button type="button" class="ck" data-tok="${i}.${j}" aria-pressed="${!!st.done}" aria-label="Série faite">${TICK}</button>
         <label>Charge<span class="sfw"><input inputmode="decimal" data-lv="${i}.${j}.kg" value="${esc(st.kg ?? '')}"><i>kg</i></span></label><label>${u === 's' ? 'Secondes' : u === 'm' ? 'Mètres' : 'Répétitions'}<input inputmode="numeric" data-lv="${i}.${j}.reps" value="${esc(st.reps ?? '')}"></label><label>RPE réel<input inputmode="decimal" data-lv="${i}.${j}.rpe" value="${esc(st.rpe ?? '')}" placeholder="${tg.rpe || ''}"></label></div>`).join('')}
         <button type="button" class="addset" data-tlset="${i}">+ Série</button></div></td></tr>`;
@@ -9716,7 +9728,33 @@ function allRow(it, i, em, cls) {
   const vals = arr.map(x => x[k]).filter(v => v !== undefined && v !== '' && v != null).map(Number).filter(v => !isNaN(v));
   return `<div class="setrow ${cls} allrow${all ? ' done' : ''}"><span></span><span class="allt">${k === 'rir' ? 'RIR' : 'RPE'} moyen</span><input class="mini-in eff" inputmode="decimal" data-lrpeall="${i}.${k}" value="" placeholder="${vals.length ? fx(mean(vals), 1) : '–'}" aria-label="${k.toUpperCase()} moyen, pour toutes les séries"><button type="button" class="ok okall" data-tlall="${i}" aria-pressed="${!!all}" aria-label="${all ? 'Tout décocher' : 'Tout cocher'}"><span>Tout</span></button></div>`;
 }
-function liveBox(it, i) {
+// Les exercices enchaînés (A1, A2…) : leurs fiches d'abord, puis leurs séries dans l'ordre où on les fait,
+// A1 série 1, A2 série 1, A1 série 2, A2 série 2… La récup s'affiche après chaque tour.
+const liveGroups = () => {
+  const L = S.live, G = []; L.items.forEach((it, i) => { const sup = it.sets && !exOf(it.ex).test && G.length && it.tg?.link && G[G.length - 1].every(k => L.items[k].sets); if (sup) G[G.length - 1].push(i); else G.push([i]); }); return G;
+};
+function liveList() {
+  const L = S.live, LB = itemLabels(L.items.map(it => ({ex: it.ex, link: it.tg?.link})));
+  return liveGroups().map(g => {
+    const i0 = g[0], it0 = L.items[i0], head = it0.tg?.tw && !L.items[i0 - 1]?.tg?.tw ? '<div class="sec-label" style="margin:14px 2px 0">Travail technique</div>' : !it0.tg?.tw && L.items[i0 - 1]?.tg?.tw ? '<div class="sec-label" style="margin:14px 2px 0">Séance principale</div>' : '';
+    if (g.length < 2) return head + liveBox(it0, i0);
+    return head + `<div class="supg"><div class="sec-label suph">Enchaînés · ${g.map(k => LB[k]).join(' + ')}</div>${g.map(k => liveBox(L.items[k], k, true)).join('')}${liveSupSets(g, LB)}</div>`;
+  }).join('');
+}
+function liveSupSets(g, LB) {
+  const L = S.live, em = effMode(), n = Math.max(...g.map(k => L.items[k].sets.length)), last = L.items[g[g.length - 1]], rest = last.rest ?? last.tg?.rest;
+  const ok = (a, done) => `<button class="ok" data-tok="${a}" aria-label="Valider" aria-pressed="${done}">${TICK}</button>`;
+  const effV = st => st[em] != null && st[em] !== '' ? st[em] : em === 'rpe' && st.rir != null && st.rir !== '' ? 10 - st.rir : em === 'rir' && st.rpe != null && st.rpe !== '' ? 10 - st.rpe : '';
+  let rows = '';
+  for (let j = 0; j < n; j++) {
+    rows += `<div class="suptour">Tour ${j + 1}</div>` + g.map(k => { const it = L.items[k], s = it.sets[j], e = exOf(it.ex); if (!s) return '';
+      const gx = k !== g[0] ? '<div class="supgo"><b>X</b> enchaîne tout de suite</div>' : '';
+      return gx + `<div class="setrow e6 sup ${s.done ? 'done' : ''}"><span class="n">${LB[k]}${s.side ? `<small>${s.side === 'D' ? 'droite' : 'gauche'}</small>` : ''}</span><span class="prev">${(() => { const pv = exHistory(it.ex)[0]?.it.sets?.[j]; return pv ? (pv.kg ? fx(pv.kg, pv.kg % 1 ? 1 : 0) + '×' : '') + pv.reps : '–'; })()}</span>${e.u === 's' ? '<span></span>' : `<input class="mini-in" inputmode="decimal" data-lv="${k}.${j}.kg" value="${s.kg}" placeholder="${e.u === 'kg' ? 'kg' : '0'}" aria-label="Charge">`}<input class="mini-in" inputmode="numeric" data-lv="${k}.${j}.reps" value="${s.reps}" placeholder="${it.tg?.reps || ''}" aria-label="${{s: 'Secondes', m: 'Mètres', reps: 'Répétitions'}[unitOf(it)]}"><input class="mini-in eff" inputmode="decimal" data-lv="${k}.${j}.${em}" value="${effV(s)}" placeholder="${em === 'rpe' ? '8' : '2'}" aria-label="${em.toUpperCase()}">${ok(k + '.' + j, s.done)}</div>`; }).join('')
+      + (rest && j < n - 1 ? `<div class="suprest">Récup ${fmtRest(rest)}</div>` : '');
+  }
+  return `<div class="exbox supsets"><h3>Les séries, dans l'ordre<small>${g.map(k => LB[k]).join(', ')} puis récup</small></h3><div class="sets"><div class="suplg">${g.map(k => `<span><b>${LB[k]}</b> ${esc(exOf(L.items[k].ex).n)}</span>`).join('')}</div><div class="setrow e6 sup hd"><span>Exo</span><span>Avant</span><span>kg</span><span>${{s: 'Sec.', m: 'Mèt.', reps: 'Rép.'}[unitOf(L.items[g[0]])]}</span><span>${em.toUpperCase()}</span><span></span></div>${rows}</div></div>`;
+}
+function liveBox(it, i, sup) {
   const e = exOf(it.ex), tg = it.tg || {}, last = lastText(it.ex), sg = it.sets ? suggest(tg) : null;
   if (it.test) return `<div class="exbox"><h3>${esc(e.n)}<small>${tg.reps || 3} essais</small></h3><div class="tools" style="border:0;padding-top:4px"><button class="btn" data-ltest="${e.test}">Lancer le test</button><button class="rm" data-tlrm="${i}">Retirer</button></div></div>`;
   const ok = (a, done) => `<button class="ok" data-tok="${a}" aria-label="Valider" aria-pressed="${done}">${TICK}</button>`;
@@ -9745,7 +9783,7 @@ function liveBox(it, i) {
     ${painBox(it, i)}${(() => { const g = S.tset?.gymPlan?.[S.live?.plan]; if (!g || !it.sets || gymHas(g, it.ex)) return ''; const x = gymSub(it.ex, g); return `<div class="adapt"><span>Pas de matériel pour cet exercice à ${esc(gymName(g))}.</span>${x ? `<button type="button" class="btn" data-tlsub="${i}|${x.id}">Remplacer par ${esc(x.n)}</button>` : ''}</div>`; })()}
     ${it.sets ? `<div class="ctline"><span>Contraction</span><button type="button" class="hdtog" data-tlct="${i}">${cap(ctName(it.ct))} ⇄</button></div>` : ''}
     ${runBox ? liveRunBox(it, i) : ''}
-    <div class="sets">${rows}</div>
+    ${sup ? (it.sets && rampRows(it, i, sg, tg) ? `<div class="sets">${rampRows(it, i, sg, tg)}</div>` : '') + '<p class="hint supnote">Les séries sont plus bas, dans l\'ordre où tu les enchaînes.</p>' : `<div class="sets">${rows}</div>`}
     ${it.cn != null ? `<textarea class="cnote" rows="2" data-lcn="${i}" placeholder="Note du coach pour cet exercice…">${esc(it.cn)}</textarea>` : ''}
     <div class="tools"><button data-tlset="${i}">+ Série</button>${(it.sets || it.reps || []).length > 1 ? `<button data-tlsetrm="${i}">− Série</button>` : ''}<button data-tex="${it.ex}">Consignes</button>${it.cn == null ? `<button data-tlnote="${i}">+ Note</button>` : ''}<button class="rm" data-tlrm="${i}">Retirer</button></div></div>`;
 }

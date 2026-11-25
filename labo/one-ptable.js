@@ -20,7 +20,8 @@ function planTable(p) {
       const sg = suggest(it), kg = +it.kg > 0 ? fx(it.kg, 1) + ' kg' : sg?.kg ? fx(sg.kg, 1) + ' kg' : it.pct ? it.pct + ' %' : e.u === 'kg' ? '' : 'corps';
       const reps = uVal(it, it.reps);
       head = '<span>Série</span><span>Répétitions</span><span>Charge</span><span>Récup</span>';
-      rows = Array.from({length: +it.sets || 1}, (_, j) => `<div class="ptbr"><span class="n">${j + 1}</span>${cell(reps)}${cell(kg)}${cell(it.rest ? fmtRest(it.rest) : '')}</div>`).join('');
+      const nx = p.items[i + 1]?.link; // enchaîné avec le suivant : « X » = tout de suite, pas de récup
+      rows = Array.from({length: +it.sets || 1}, (_, j) => `<div class="ptbr"><span class="n">${j + 1}</span>${cell(reps)}${cell(kg)}${nx ? '<span class="supx" title="Enchaîne tout de suite">X</span>' : cell(it.rest ? fmtRest(it.rest) : '')}</div>`).join('');
     }
     const sub = [it.pct && !(e.t === 'track' || trk) ? it.pct + ' % du max' : '', it.ct && it.ct !== 'iso' ? ctName(it.ct) : it.ct === 'iso' ? 'isométrique' : '', it.link ? 'enchaîné avec le précédent' : ''].filter(Boolean).join(' · ');
     return `<div class="ptab${it.link ? ' plink' : ''}"><button type="button" class="ptab-h" data-tex="${it.ex}">${lab}<b>${esc(e.n)}</b><span class="ptab-go" aria-hidden="true">›</span></button>
