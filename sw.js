@@ -1,7 +1,7 @@
 // TNR Athletics â€” offline fallback only. Every same-origin file is network-first, so the phone
 // always runs one consistent version when online; the cache only serves when there is no network.
 // Supabase data is never cached here: the app reads it live.
-const CACHE = 'recup-v189';
+const CACHE = 'recup-v190';
 const SHELL = ['./', './index.html', './supabase-db.js', './manifest.webmanifest', './icon-192.png', './icon-256.png', './splash-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL))); self.skipWaiting(); });
@@ -34,8 +34,12 @@ self.addEventListener('fetch', e => {
 // The 9 h and 20 h summaries (sent by the Supabase function `notify`): show them, and open the app when touched.
 self.addEventListener('push', e => {
   let d = {}; try { d = e.data.json(); } catch (err) { d = {body: e.data ? e.data.text() : ''}; }
+  // Grande icône = l'icône de l'appli ; petite icône de la barre d'état = « TNR » blanc (Android n'en garde que la forme) ;
+  // image = la bannière du matin ou du soir ; un bouton qui ouvre directement le questionnaire.
+  const abs = u => new URL(u, self.registration.scope).href;
   e.waitUntil(self.registration.showNotification(d.title || 'TNR Athletics', {body: d.body || '', tag: d.tag || 'tnr', renotify: true,
-    icon: 'icon-192.png?v=tnr', badge: 'icon-192.png?v=tnr', data: {url: d.url || './'}}));
+    icon: abs('icon-192.png?v=tnr'), badge: abs('notif-badge.png?v=1'), ...(d.image ? {image: abs(d.image)} : {}),
+    ...(d.action ? {actions: [{action: 'open', title: d.action}]} : {}), vibrate: [80, 40, 80], data: {url: d.url || './'}}));
 });
 self.addEventListener('notificationclick', e => {
   e.notification.close();

@@ -298,7 +298,7 @@ Deno.serve(async req => {
   if (!st.subs?.length) return json({skipped: 'aucun téléphone abonné'});
   if (body.test) {
     const k = hour < 14 ? 'matin' : 'soir';
-    const results = await sendAll(st, {...questText(await loadData(), TODAY, k), tag: 'tnr-test', url: './?q=' + k});
+    const results = await sendAll(st, {...questText(await loadData(), TODAY, k), image: `notif-${k}.png?v=1`, action: 'Répondre maintenant', tag: 'tnr-test', url: './?q=' + k});
     return json({slot: 'test-' + k, results});
   }
   // The morning questionnaire: one tap opens it in the app (./?q=matin), unless it is already answered.
@@ -310,7 +310,7 @@ Deno.serve(async req => {
       const {data: man} = await db.from('docs').select('data').eq('collection', 'manual').eq('id', TODAY).maybeSingle();
       st.last = {...(st.last || {}), [due]: TODAY}; await putPrivate('push', st);
       if (man?.data?.closed) return json({skipped: 'journée déjà enregistrée'});
-      const results = await sendAll(st, {...questText(await loadData(), TODAY, 'soir'), tag: 'tnr-quest-soir', url: './?q=soir'});
+      const results = await sendAll(st, {...questText(await loadData(), TODAY, 'soir'), image: 'notif-soir.png?v=1', action: 'Répondre maintenant', tag: 'tnr-quest-soir', url: './?q=soir'});
       return json({slot: 'questEve', results});
     }
     if (due === qt) {
@@ -319,7 +319,7 @@ Deno.serve(async req => {
       if (man?.data?.mornAt) return json({skipped: 'questionnaire du matin déjà rempli'});
       const syncToken = token || st.syncToken;
       if (syncToken) { try { await fetch(Deno.env.get('SUPABASE_URL') + '/functions/v1/sync', {method: 'POST', headers: {'x-recup-token': syncToken, Authorization: 'Bearer ' + (st.anonKey || Deno.env.get('SUPABASE_ANON_KEY') || ''), 'Content-Type': 'application/json'}, body: '{}', signal: AbortSignal.timeout(30000)}); } catch (_) { /* the text works without it */ } }
-      const results = await sendAll(st, {...questText(await loadData(), TODAY, 'matin'), tag: 'tnr-quest', url: './?q=matin'});
+      const results = await sendAll(st, {...questText(await loadData(), TODAY, 'matin'), image: 'notif-matin.png?v=1', action: 'Répondre maintenant', tag: 'tnr-quest', url: './?q=matin'});
       return json({slot: 'quest', results});
     }
   }
