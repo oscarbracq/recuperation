@@ -156,7 +156,8 @@ const hxoAxis = (q, u1) => `<g class="hxaxis"><line x1="150" y1="150" x2="254" y
   + [25, 50, 75, 100].map(v => `<text x="${(150 + 104 * v / 100).toFixed(1)}" y="${(150 - 8 / u1).toFixed(1)}" text-anchor="middle" class="hxtk" style="font-size:${(10.5 / u1).toFixed(2)}px;stroke-width:${(3 / u1).toFixed(2)}px">${v}</text>`).join('') + '</g>';
 const hxoLab = (q, d) => `<b>${q.n.split(/ (?=de )/).map(esc).join('<br>')}</b><span>${q.s ?? 'à tester'}${d ? ` <em class="${d > 0 ? 'hxu' : 'hxdn'}">${d > 0 ? '+' : '−'}${Math.abs(d)}</em>` : ''}</span>`;
 const hxoSeg = () => HXP.map(([k, l]) => `<button type="button" data-hxoper="${k}" aria-pressed="${k === HXS.per}">${l}</button>`).join('');
-function hxoLay(el, g) { const w = el.querySelector('.hxo-w'); w.style.width = g.w + 'px'; w.style.height = g.h + 'px'; w.style.setProperty('--t0', g.t0); w.style.setProperty('--t1', g.t1); w.style.setProperty('--rot', g.rot + 'deg');
+function hxoLay(el, g) { const w = el.querySelector('.hxo-w'); w.style.width = g.w + 'px'; w.style.height = g.h + 'px'; w.style.setProperty('--t0', g.t0); w.style.setProperty('--t1', g.t1); w.style.setProperty('--rot', g.rot + 'deg'); const rr = w.querySelector('.hxo-r'); if (rr) rr.style.transformOrigin = `${(234 * g.u1).toFixed(2)}px ${(164 * g.u1).toFixed(2)}px`;
+  const inn = el.querySelector('.hxo-in'); if (inn) inn.style.minHeight = Math.round(innerHeight - g.topH) + 'px';
   const l = el.querySelector('.hxo-lab'); l.style.left = Math.round(g.cx + g.R + 14) + 'px'; l.style.top = Math.round(g.cy) + 'px'; el.querySelector('.hxo-gap').style.height = g.top + 'px'; HXO.g = g; }
 // En faisant défiler : l'hexagone monte moins vite que le texte, rapetisse et glisse vers la gauche, puis le texte le recouvre.
 function hxoScroll() { const el = HXO.el, g = HXO.g; if (!el || !g || el.classList.contains('closing')) return;
@@ -168,30 +169,33 @@ const hxRgb = c => { const d = document.createElement('i'); d.style.color = c; d
 function hxBar(on) { const ms = document.querySelectorAll('meta[name="theme-color"]'); if (!ms.length) return; cancelAnimationFrame(HXO.bar); if (on) HXO.bar0 = ms[0].content;
   const top = getComputedStyle(document.documentElement).getPropertyValue('--top').trim() || '#000', a = hxRgb(ms[0].content || top), b = on ? [0, 0, 0] : hxRgb(HXO.bar0 || top), t0 = performance.now();
   const step = now => { const k = Math.min(1, (now - t0) / 480), e = k * (2 - k), c = '#' + a.map((v, j) => Math.round(v + (b[j] - v) * e).toString(16).padStart(2, '0')).join('');
-    ms.forEach(m => { m.media = ''; m.content = c; }); if (k < 1) HXO.bar = requestAnimationFrame(step); else if (!on) { try { syncBars(); } catch (er) {} } };
+    if (k >= 1 || now - (HXO.barT || 0) > 40) { HXO.barT = now; ms.forEach(m => { m.media = ''; m.content = c; }); } if (k < 1) HXO.bar = requestAnimationFrame(step); else if (!on) { try { syncBars(); } catch (er) {} } };
   HXO.bar = requestAnimationFrame(step); }
 const hxSync0 = syncBars;
 syncBars = function (...a) { if (HXO.on && !HXO.el?.classList.contains('closing')) { document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.media = ''; m.content = '#000'; }); return; } return hxSync0.apply(this, a); };
+const hxCardShape = on => document.querySelectorAll('#hxcard svg.hxsvg .hxrot').forEach(g => { g.style.visibility = on ? '' : 'hidden'; });
 function hxoOpen(k) {
   if (HXO.on || HXO.busy) return; const card = $('#hxcard svg.hxsvg'); if (!card) return;
   const {Q, i, q, O, d} = hxoD(k);
-  const el = document.createElement('div'); el.className = 'hxo-ov'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', q.n);
+  const el = document.createElement('div'); el.className = 'hxo-ov prep'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', q.n);
   el.innerHTML = `<div class="hxo-bg"></div><div class="hxo-hx"><div class="hxo-w"></div><div class="hxo-lab">${hxoLab(q, d)}</div></div>
     <div class="hxo-p"><div class="hxo-gap"></div><div class="hxo-in">${hxoPanel(k)}</div></div>
     <div class="hxo-top"><div class="seg hxo-seg" role="group" aria-label="Comparer avec">${hxoSeg()}</div><button type="button" class="hxo-x" aria-label="Fermer"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button></div>`;
   document.body.appendChild(el);
   const g = hxoGeo(card, i, el.querySelector('.hxo-top').offsetHeight);
-  el.querySelector('.hxo-w').innerHTML = hxSvg(Q, O).replace('</svg>', hxoAxis(q, g.u1) + '</svg>');
+  el.querySelector('.hxo-w').innerHTML = `<div class="hxo-r">${hxSvg(Q, O).replace(/<g class="hxk"[\s\S]*?<\/g>/g, '')}</div><svg viewBox="-84 -14 472 346" class="hxsvg hxo-axs" aria-hidden="true">${hxoAxis(q, g.u1)}</svg>`;
   el.querySelectorAll('.hxd').forEach(c => c.classList.toggle('sel', +c.dataset.i === i));
   Object.assign(HXO, {on: true, k, i, el, busy: true, tok: Date.now()}); hxoLay(el, g);
-  card.style.visibility = 'hidden'; document.documentElement.classList.add('hxo-lock');
+  // Le doigt sur la page noire ne touche qu'elle : plus de glissement d'onglet ni de « tirer pour actualiser » dessous.
+  for (const ev of ['touchstart', 'touchmove', 'touchend', 'touchcancel', 'pointerdown', 'pointermove', 'pointerup']) el.addEventListener(ev, e => e.stopPropagation(), {passive: true});
+  hxCardShape(false); document.documentElement.classList.add('hxo-lock');
   el.querySelector('.hxo-p').addEventListener('scroll', () => { if (HXO.raf) return; HXO.raf = requestAnimationFrame(() => { HXO.raf = 0; hxoScroll(); }); }, {passive: true});
   try { history.pushState({...(history.state || {}), hxo: HXO.tok}, ''); } catch (e) {}
-  hxBar(true); void el.offsetWidth; el.classList.add('open'); setTimeout(() => { HXO.busy = false; }, 640);
+  hxBar(true); void el.offsetWidth; el.classList.remove('prep'); void el.offsetWidth; el.classList.add('open'); setTimeout(() => { HXO.busy = false; }, 640);
 }
 // Une autre période, un test noté : l'hexagone d'avant glisse vers sa nouvelle forme, les chiffres suivent.
 function hxoRefresh(prev) { const el = HXO.el; if (!el) return; const {Q, q, O, d} = hxoD(HXO.k);
-  const c = $('#hxcard'); if (c && prev) c.innerHTML = hxCardIn(); document.querySelectorAll('#hxcard svg.hxsvg').forEach(s => { s.style.visibility = 'hidden'; });
+  const c = $('#hxcard'); if (c && prev) c.innerHTML = hxCardIn(); hxCardShape(false);
   el.querySelectorAll('[data-hxoper]').forEach(x => x.setAttribute('aria-pressed', x.dataset.hxoper === HXS.per));
   const poly = el.querySelector('.hxo-w .hxo'), o = O.map(x => x.s); if (poly) { if (prev) hxTween(poly, prev, o); else poly.setAttribute('points', hxPoly(o)); }
   el.querySelector('.hxo-w .hxp')?.setAttribute('points', hxPoly(Q.map(x => x.s)));
@@ -202,9 +206,9 @@ function hxoRefresh(prev) { const el = HXO.el; if (!el) return; const {Q, q, O, 
 function hxoClose(fromBack) {
   if (!HXO.on || HXO.busy) return; const el = HXO.el, card = $('#hxcard svg.hxsvg');
   if (!fromBack && history.state?.hxo === HXO.tok) { try { POP_SKIP = true; history.go(history.state.hxpane ? -2 : -1); } catch (e) {} }
-  HXO.busy = true; if (card) { el.querySelector('.hxo-w').style.setProperty('--t0', hxoGeo(card, 0, HXO.g?.topH).t0); card.style.visibility = 'hidden'; }
+  HXO.busy = true; if (card) { el.querySelector('.hxo-w').style.setProperty('--t0', hxoGeo(card, 0, HXO.g?.topH).t0); hxCardShape(false); }
   el.classList.add('closing'); el.classList.remove('open'); el.querySelector('.hxo-hx').style.transform = ''; hxBar(false);
-  setTimeout(() => { el.remove(); document.querySelectorAll('#hxcard svg.hxsvg').forEach(s => { s.style.visibility = ''; }); document.documentElement.classList.remove('hxo-lock'); Object.assign(HXO, {on: false, k: null, el: null, busy: false, tok: 0, g: null}); }, 620);
+  setTimeout(() => { el.remove(); hxCardShape(true); document.documentElement.classList.remove('hxo-lock'); Object.assign(HXO, {on: false, k: null, el: null, busy: false, tok: 0, g: null}); }, 620);
 }
 // Bouton retour du téléphone : il ferme d'abord le test ouvert par-dessus, puis la page de la qualité. Jamais l'onglet.
 addEventListener('popstate', e => { if (!HXO.on || POP_SKIP || HXO.el?.classList.contains('closing')) return;
@@ -216,7 +220,7 @@ const hxPaneGone = () => { if (HXO.on && !P.stack.length && history.state?.hxpan
 const hxClosePane0 = closePane; closePane = function (...a) { const r = hxClosePane0.apply(this, a); hxPaneGone(); return r; };
 const hxCloseAll0 = closeAllPanes; closeAllPanes = function (...a) { const r = hxCloseAll0.apply(this, a); hxPaneGone(); return r; };
 addEventListener('keydown', e => { if (e.key === 'Escape' && HXO.on && !P.stack.length) hxoClose(); });
-addEventListener('resize', () => { if (!HXO.on || HXO.busy) return; const card = $('#hxcard svg.hxsvg'); if (!card) return; card.style.visibility = 'hidden'; hxoLay(HXO.el, hxoGeo(card, HXO.i, HXO.el.querySelector('.hxo-top').offsetHeight)); hxoScroll(); });
+addEventListener('resize', () => { if (!HXO.on || HXO.busy) return; const card = $('#hxcard svg.hxsvg'); if (!card) return; hxCardShape(false); hxoLay(HXO.el, hxoGeo(card, HXO.i, HXO.el.querySelector('.hxo-top').offsetHeight)); hxoScroll(); });
 // Un test noté ou enregistré pendant que la page est ouverte : les chiffres se mettent à jour.
 const hxRenderMod0 = renderMod;
 renderMod = function (...a) { const r = hxRenderMod0.apply(this, a); if (HXO.on) hxoRefresh(null); return r; };
