@@ -179,6 +179,9 @@ async function recupGetDb() {
       return notify({test: true});
     }
   };
+  // Au démarrage, une fois connecté : le téléphone renvoie en silence son abonnement, la liste du serveur se répare seule
+  // (avant, seulement en ouvrant Paramètres › Notifications ; la liste vide = plus aucune notification).
+  setTimeout(() => { try { window.RECUP_PUSH.state().catch(() => {}); } catch (e) { /* rien */ } }, 3000);
   const back = new URLSearchParams(location.search);
   if (back.get('state') === 'withings') {
     history.replaceState(null, '', location.pathname);
