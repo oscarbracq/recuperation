@@ -118,8 +118,8 @@ function hxCardIn() {
 }
 const hxCard = () => `<div class="card hxpro" id="hxcard">${hxCardIn()}</div>`;
 
-/* ---------- Une qualité en grand : la page noire s'ouvre, l'hexagone grandit et tourne pour mettre la qualité en haut,
-   les autres noms s'effacent. On ne voit plus que son côté, gradué de 0 à 100. ---------- */
+/* ---------- Une qualité en grand : tout l'écran passe au noir (barre du téléphone comprise), l'hexagone grandit et
+   tourne pour coucher la qualité vers la droite, son nom au bout de l'axe gradué. En haut : Jour · Semaine · Mois · Année. ---------- */
 const HX_GO = {
   force: [['data-t5start', 'Test de force maximale', 'Test de RM · de 1 à 5RM, ton 1RM calculé, squat, hip thrust, soulevé de terre'], ['data-rmlist', 'Noter un max à la main', 'Max musculation · un test fait ailleurs ou un ancien record']],
   explo: [['data-vatest="cmj"', 'Test de détente verticale', 'CMJ filmé · mains sur les hanches, avec contre-mouvement'], ['data-vatest="sj"', 'Test de détente sans élan', 'Squat jump filmé · départ arrêté, genoux à 90°'], ['data-tfvstart', 'Test de puissance en saut', 'Profil force-vitesse vertical · squat jumps chargés filmés, méthode Samozino']],
@@ -140,35 +140,71 @@ function hxoPanel(k) {
     ${notes.length ? `<div class="sec-label">Noter un résultat à la main</div><div class="list hxnote">${notes.map(t => `<div class="row"><label for="hxn-${t.id}">${esc(t.n)}</label><span><input class="mini-in" id="hxn-${t.id}" inputmode="decimal" style="width:76px" placeholder="${esc(t.f === 't' ? 's' : t.f === 'rsi' ? 'RSI' : 'cm')}"> <button type="button" class="chip" data-hxnote="${t.jt}|${t.f}|${t.id}">Noter</button></span></div>`).join('')}</div><p class="small muted" data-tip="1" style="margin:6px 4px 0">Un test fait dans l'appli se note tout seul. À la main : pour un test mesuré ailleurs (cellules, My Jump, plateforme).</p>` : ''}
     <p class="small muted" data-tip="1" style="margin:14px 4px 0">0 = sportif entraîné qui débute le sprint (≈ 13″5 au 100 m), 100 = sprinteur international (≈ 10″10). Un test compte 6 mois. Sources : ${esc(q.q.src)}.</p>`;
 }
-// Où l'hexagone de la carte se trouve, et où il va : centre au milieu, la qualité en haut, très grand.
-function hxoGeo(svg, i) {
-  const r = svg.getBoundingClientRect(), u = Math.min(r.width / 472, r.height / 346), ox = (r.width - 472 * u) / 2, oy = (r.height - 346 * u) / 2;
-  const cx = ox + 234 * u, cy = oy + 164 * u, W = innerWidth, H = innerHeight, pc = typeof isPC === 'function' && isPC();
-  const Rf = pc ? Math.min(H * .3, 250) : Math.min(W * .8, H * .36), yc = 96 + 40 + Rf, s = Rf / (104 * u);
-  let rot = -60 * i; if (rot < -180) rot += 360;
-  return {r, u, t0: `translate(${r.left}px,${r.top}px)`, t1: `translate(${W / 2 - cx * s}px,${yc - cy * s}px) scale(${s})`, rot, top: Math.round(yc + 30), yc, Rf};
+// Où l'hexagone de la carte se trouve, et où il va : la qualité couchée vers la droite, son nom au bout de l'axe,
+// l'hexagone poussé vers la gauche. À l'arrivée il est à sa vraie taille (échelle 1) : les traits restent fins.
+function hxoGeo(svg, i, topH = 70) {
+  const r = svg.getBoundingClientRect(), u0 = Math.min(r.width / 472, r.height / 346) || 1, ox = r.left + (r.width - 472 * u0) / 2, oy = r.top + (r.height - 346 * u0) / 2;
+  const W = innerWidth, H = innerHeight, pc = typeof isPC === 'function' && isPC(), colW = Math.min(W, 680), colL = (W - colW) / 2, lab = 140;
+  const R = Math.round(pc ? Math.min(H * .24, 170) : Math.min(colW * .35, H * .17, 150)), u1 = R / 104;
+  const cx = Math.min(colL + colW - 28 - lab - R, colL + (colW - 2 * R - 12 - lab) / 2 + R), cy = topH + 18 + R * .866;
+  let rot = 90 - 60 * i; if (rot > 180) rot -= 360; if (rot <= -180) rot += 360;
+  return {R, u1, cx, cy, rot, topH, w: 472 * u1, h: 346 * u1, t0: `translate(${ox}px,${oy}px) scale(${u0 / u1})`, t1: `translate(${cx - 234 * u1}px,${cy - 164 * u1}px)`, top: Math.round(cy + R * .866 + 24)};
 }
+const hxoD = k => { const Q = hxVals(), i = Q.findIndex(q => q.k === k), q = Q[i], O = hxOld(Q, addDays(TODAY, -hxPer()[2])), d = q.s != null && O[i].s != null ? q.s - O[i].s : null; return {Q, i, q, O, d}; };
+// L'axe de la qualité, couché vers la droite, gradué 25 · 50 · 75 · 100 (les anneaux de la grille tombent pile dessus).
+const hxoAxis = (q, u1) => `<g class="hxaxis"><line x1="150" y1="150" x2="254" y2="150" class="hxtrack"/><line x1="150" y1="150" x2="${(150 + 104 * (q.s ?? 0) / 100).toFixed(1)}" y2="150" class="hxax"${q.s ? '' : ' style="display:none"'}/>`
+  + [25, 50, 75, 100].map(v => `<text x="${(150 + 104 * v / 100).toFixed(1)}" y="${(150 - 8 / u1).toFixed(1)}" text-anchor="middle" class="hxtk" style="font-size:${(10.5 / u1).toFixed(2)}px;stroke-width:${(3 / u1).toFixed(2)}px">${v}</text>`).join('') + '</g>';
+const hxoLab = (q, d) => `<b>${q.n.split(/ (?=de )/).map(esc).join('<br>')}</b><span>${q.s ?? 'à tester'}${d ? ` <em class="${d > 0 ? 'hxu' : 'hxdn'}">${d > 0 ? '+' : '−'}${Math.abs(d)}</em>` : ''}</span>`;
+const hxoSeg = () => HXP.map(([k, l]) => `<button type="button" data-hxoper="${k}" aria-pressed="${k === HXS.per}">${l}</button>`).join('');
+function hxoLay(el, g) { const w = el.querySelector('.hxo-w'); w.style.width = g.w + 'px'; w.style.height = g.h + 'px'; w.style.setProperty('--t0', g.t0); w.style.setProperty('--t1', g.t1); w.style.setProperty('--rot', g.rot + 'deg');
+  const l = el.querySelector('.hxo-lab'); l.style.left = Math.round(g.cx + g.R + 14) + 'px'; l.style.top = Math.round(g.cy) + 'px'; el.querySelector('.hxo-gap').style.height = g.top + 'px'; HXO.g = g; }
+// En faisant défiler : l'hexagone monte moins vite que le texte, rapetisse et glisse vers la gauche, puis le texte le recouvre.
+function hxoScroll() { const el = HXO.el, g = HXO.g; if (!el || !g || el.classList.contains('closing')) return;
+  const y = el.querySelector('.hxo-p').scrollTop, p = Math.max(0, Math.min(1, y / Math.max(1, g.top - g.topH))), s = 1 - .3 * p;
+  el.querySelector('.hxo-hx').style.transform = y > 0 ? `translate(${(-g.R * .55 * p + g.cx * (1 - s)).toFixed(1)}px,${(-y * .5 + g.cy * (1 - s)).toFixed(1)}px) scale(${s.toFixed(3)})` : '';
+  el.classList.toggle('scr', y > 6); }
+// La barre du téléphone (heure, batterie) passe au noir en douceur, puis reprend sa couleur à la fermeture.
+const hxRgb = c => { const d = document.createElement('i'); d.style.color = c; document.body.appendChild(d); const m = (getComputedStyle(d).color.match(/[\d.]+/g) || [0, 0, 0]).slice(0, 3).map(Number); d.remove(); return m; };
+function hxBar(on) { const ms = document.querySelectorAll('meta[name="theme-color"]'); if (!ms.length) return; cancelAnimationFrame(HXO.bar); if (on) HXO.bar0 = ms[0].content;
+  const top = getComputedStyle(document.documentElement).getPropertyValue('--top').trim() || '#000', a = hxRgb(ms[0].content || top), b = on ? [0, 0, 0] : hxRgb(HXO.bar0 || top), t0 = performance.now();
+  const step = now => { const k = Math.min(1, (now - t0) / 480), e = k * (2 - k), c = '#' + a.map((v, j) => Math.round(v + (b[j] - v) * e).toString(16).padStart(2, '0')).join('');
+    ms.forEach(m => { m.media = ''; m.content = c; }); if (k < 1) HXO.bar = requestAnimationFrame(step); else if (!on) { try { syncBars(); } catch (er) {} } };
+  HXO.bar = requestAnimationFrame(step); }
+const hxSync0 = syncBars;
+syncBars = function (...a) { if (HXO.on && !HXO.el?.classList.contains('closing')) { document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.media = ''; m.content = '#000'; }); return; } return hxSync0.apply(this, a); };
 function hxoOpen(k) {
   if (HXO.on || HXO.busy) return; const card = $('#hxcard svg.hxsvg'); if (!card) return;
-  const Q = hxVals(), i = Q.findIndex(q => q.k === k), q = Q[i], p = hxPer(), O = hxOld(Q, addDays(TODAY, -p[2])), g = hxoGeo(card, i);
-  const ticks = [0, 25, 50, 75, 100].map(v => `<text x="158" y="${(150 - 104 * v / 100 + 2.5).toFixed(1)}" class="hxtk">${v}</text>`).join('');
-  const sv = hxSvg(Q, O.every(o => o.s == null) ? null : O).replace('</svg>', `<g class="hxaxis"><line x1="150" y1="150" x2="150" y2="46" class="hxtrack"/>${q.s != null ? `<line x1="150" y1="150" x2="150" y2="${(150 - 104 * q.s / 100).toFixed(1)}" class="hxax"/>` : ''}${ticks}</g></svg>`);
+  const {Q, i, q, O, d} = hxoD(k);
   const el = document.createElement('div'); el.className = 'hxo-ov'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', q.n);
-  el.innerHTML = `<div class="hxo-bg"></div><div class="hxo-w" style="width:${g.r.width}px;height:${g.r.height}px;--t0:${g.t0};--t1:${g.t1};--rot:${g.rot}deg">${sv}</div>
-    <div class="hxo-top"><h2>${esc(q.n)}</h2><button type="button" class="hxo-x" aria-label="Fermer"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button></div>
-    <div class="hxo-p" style="top:${g.top}px"><div class="hxo-in">${hxoPanel(k)}</div></div>`;
+  el.innerHTML = `<div class="hxo-bg"></div><div class="hxo-hx"><div class="hxo-w"></div><div class="hxo-lab">${hxoLab(q, d)}</div></div>
+    <div class="hxo-p"><div class="hxo-gap"></div><div class="hxo-in">${hxoPanel(k)}</div></div>
+    <div class="hxo-top"><div class="seg hxo-seg" role="group" aria-label="Comparer avec">${hxoSeg()}</div><button type="button" class="hxo-x" aria-label="Fermer"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button></div>`;
+  document.body.appendChild(el);
+  const g = hxoGeo(card, i, el.querySelector('.hxo-top').offsetHeight);
+  el.querySelector('.hxo-w').innerHTML = hxSvg(Q, O).replace('</svg>', hxoAxis(q, g.u1) + '</svg>');
   el.querySelectorAll('.hxd').forEach(c => c.classList.toggle('sel', +c.dataset.i === i));
-  document.body.appendChild(el); card.style.visibility = 'hidden';
-  Object.assign(HXO, {on: true, k, el, busy: true, tok: Date.now()}); document.documentElement.classList.add('hxo-lock');
+  Object.assign(HXO, {on: true, k, i, el, busy: true, tok: Date.now()}); hxoLay(el, g);
+  card.style.visibility = 'hidden'; document.documentElement.classList.add('hxo-lock');
+  el.querySelector('.hxo-p').addEventListener('scroll', () => { if (HXO.raf) return; HXO.raf = requestAnimationFrame(() => { HXO.raf = 0; hxoScroll(); }); }, {passive: true});
   try { history.pushState({...(history.state || {}), hxo: HXO.tok}, ''); } catch (e) {}
-  void el.offsetWidth; el.classList.add('open'); setTimeout(() => { HXO.busy = false; }, 640);
+  hxBar(true); void el.offsetWidth; el.classList.add('open'); setTimeout(() => { HXO.busy = false; }, 640);
 }
+// Une autre période, un test noté : l'hexagone d'avant glisse vers sa nouvelle forme, les chiffres suivent.
+function hxoRefresh(prev) { const el = HXO.el; if (!el) return; const {Q, q, O, d} = hxoD(HXO.k);
+  const c = $('#hxcard'); if (c && prev) c.innerHTML = hxCardIn(); document.querySelectorAll('#hxcard svg.hxsvg').forEach(s => { s.style.visibility = 'hidden'; });
+  el.querySelectorAll('[data-hxoper]').forEach(x => x.setAttribute('aria-pressed', x.dataset.hxoper === HXS.per));
+  const poly = el.querySelector('.hxo-w .hxo'), o = O.map(x => x.s); if (poly) { if (prev) hxTween(poly, prev, o); else poly.setAttribute('points', hxPoly(o)); }
+  el.querySelector('.hxo-w .hxp')?.setAttribute('points', hxPoly(Q.map(x => x.s)));
+  el.querySelectorAll('.hxo-w .hxd').forEach(dt => { const v = Q[+dt.dataset.i].s; if (v != null) { const [x, y] = hxPt(+dt.dataset.i, 104 * v / 100); dt.setAttribute('cx', x.toFixed(1)); dt.setAttribute('cy', y.toFixed(1)); } });
+  const ax = el.querySelector('.hxax'); if (ax) { ax.setAttribute('x2', (150 + 104 * (q.s ?? 0) / 100).toFixed(1)); ax.style.display = q.s ? '' : 'none'; }
+  el.querySelector('.hxo-lab').innerHTML = hxoLab(q, d);
+  const inn = el.querySelector('.hxo-in'), sc = el.querySelector('.hxo-p'), y = sc.scrollTop; inn.innerHTML = hxoPanel(HXO.k); sc.scrollTop = y; }
 function hxoClose(fromBack) {
   if (!HXO.on || HXO.busy) return; const el = HXO.el, card = $('#hxcard svg.hxsvg');
   if (!fromBack && history.state?.hxo === HXO.tok) { try { POP_SKIP = true; history.go(history.state.hxpane ? -2 : -1); } catch (e) {} }
-  HXO.busy = true; if (card) { const g = hxoGeo(card, 0); el.querySelector('.hxo-w').style.setProperty('--t0', g.t0); card.style.visibility = 'hidden'; }
-  el.classList.add('closing'); el.classList.remove('open');
-  setTimeout(() => { el.remove(); document.querySelectorAll('#hxcard svg.hxsvg').forEach(s => { s.style.visibility = ''; }); document.documentElement.classList.remove('hxo-lock'); Object.assign(HXO, {on: false, k: null, el: null, busy: false, tok: 0}); }, 620);
+  HXO.busy = true; if (card) { el.querySelector('.hxo-w').style.setProperty('--t0', hxoGeo(card, 0, HXO.g?.topH).t0); card.style.visibility = 'hidden'; }
+  el.classList.add('closing'); el.classList.remove('open'); el.querySelector('.hxo-hx').style.transform = ''; hxBar(false);
+  setTimeout(() => { el.remove(); document.querySelectorAll('#hxcard svg.hxsvg').forEach(s => { s.style.visibility = ''; }); document.documentElement.classList.remove('hxo-lock'); Object.assign(HXO, {on: false, k: null, el: null, busy: false, tok: 0, g: null}); }, 620);
 }
 // Bouton retour du téléphone : il ferme d'abord le test ouvert par-dessus, puis la page de la qualité. Jamais l'onglet.
 addEventListener('popstate', e => { if (!HXO.on || POP_SKIP || HXO.el?.classList.contains('closing')) return;
@@ -180,19 +216,16 @@ const hxPaneGone = () => { if (HXO.on && !P.stack.length && history.state?.hxpan
 const hxClosePane0 = closePane; closePane = function (...a) { const r = hxClosePane0.apply(this, a); hxPaneGone(); return r; };
 const hxCloseAll0 = closeAllPanes; closeAllPanes = function (...a) { const r = hxCloseAll0.apply(this, a); hxPaneGone(); return r; };
 addEventListener('keydown', e => { if (e.key === 'Escape' && HXO.on && !P.stack.length) hxoClose(); });
-addEventListener('resize', () => { if (!HXO.on || HXO.busy) return; const card = $('#hxcard svg.hxsvg'); if (!card) return; card.style.visibility = 'hidden';
-  const i = hxVals().findIndex(q => q.k === HXO.k), g = hxoGeo(card, i), w = HXO.el.querySelector('.hxo-w'); w.style.width = g.r.width + 'px'; w.style.height = g.r.height + 'px'; w.style.setProperty('--t1', g.t1); w.style.setProperty('--t0', g.t0); HXO.el.querySelector('.hxo-p').style.top = g.top + 'px'; });
+addEventListener('resize', () => { if (!HXO.on || HXO.busy) return; const card = $('#hxcard svg.hxsvg'); if (!card) return; card.style.visibility = 'hidden'; hxoLay(HXO.el, hxoGeo(card, HXO.i, HXO.el.querySelector('.hxo-top').offsetHeight)); hxoScroll(); });
 // Un test noté ou enregistré pendant que la page est ouverte : les chiffres se mettent à jour.
 const hxRenderMod0 = renderMod;
-renderMod = function (...a) { const r = hxRenderMod0.apply(this, a);
-  if (HXO.on) { const c = $('#hxcard svg.hxsvg'); if (c) c.style.visibility = 'hidden'; const inn = HXO.el.querySelector('.hxo-in'), sc = HXO.el.querySelector('.hxo-p'), y = sc.scrollTop; inn.innerHTML = hxoPanel(HXO.k); sc.scrollTop = y;
-    const Q = hxVals(); HXO.el.querySelector('.hxp')?.setAttribute('points', hxPoly(Q.map(q => q.s))); }
-  return r; };
+renderMod = function (...a) { const r = hxRenderMod0.apply(this, a); if (HXO.on) hxoRefresh(null); return r; };
 
 document.addEventListener('click', async e => {
   const at = q => e.target.closest?.(q); let b;
   if (at('[data-tsprint]')) { try { vaPane('sprint'); } catch (er) {} return; }
   if (HXO.on && at('.hxo-x')) { hxoClose(); return; }
+  if (HXO.on && (b = at('[data-hxoper]'))) { const k = b.dataset.hxoper; if (k === HXS.per) return; const prev = hxoD(HXO.k).O.map(x => x.s); HXS.per = k; hxoRefresh(prev); return; }
   if ((b = at('#hxcard [data-hxq]'))) { hxoOpen(b.dataset.hxq); return; }
   if ((b = at('#hxcard [data-hxper]'))) { const k = b.dataset.hxper; if (k === HXS.per) return; const Q = hxVals(), prev = hxOld(Q, addDays(TODAY, -hxPer()[2])).map(o => o.s);
     HXS.per = k; const c = $('#hxcard'); c.innerHTML = hxCardIn(); const O = hxOld(Q, addDays(TODAY, -hxPer()[2])).map(o => o.s), poly = c.querySelector('.hxo'); if (poly) hxTween(poly, prev.map((v, i) => v ?? O[i]), O); return; }
