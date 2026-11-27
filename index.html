@@ -2361,17 +2361,23 @@ html.one #home-view{height:auto;min-height:100%}html.one .one-hm{height:auto!imp
 .hxo-w .hxk{transition:opacity .12s ease}.hxo-ov.closing .hxk{transition:opacity .25s ease .3s}.hxo-ov.open .hxk{opacity:0;pointer-events:none}
 .hxo-w .hxd{transition:opacity .4s ease}.hxo-ov.open .hxd:not(.sel){opacity:.35}.hxd.sel{stroke:#fff;stroke-width:1;vector-effect:non-scaling-stroke}
 .hxaxis{opacity:0;transition:opacity .25s ease}.hxo-ov.open .hxaxis{opacity:1;transition:opacity .35s ease .4s}
-.hxtrack{stroke:rgba(255,255,255,.28);stroke-width:1.2;stroke-linecap:round}.hxax{stroke:var(--accent);stroke-width:2.4;stroke-linecap:round}.hxtk{font-weight:600;fill:rgba(255,255,255,.55);font-variant-numeric:tabular-nums;paint-order:stroke;stroke:#000}
+.hxtrack{stroke:rgba(255,255,255,.2);stroke-width:1;stroke-linecap:round}.hxtk{font-weight:600;fill:rgba(255,255,255,.55);font-variant-numeric:tabular-nums;paint-order:stroke;stroke:#000}
 .hxo-hx{position:absolute;inset:0;transform-origin:0 0;will-change:transform}.hxo-ov.closing .hxo-hx{transition:transform .55s cubic-bezier(.32,.72,0,1)}
-.hxo-lab{position:absolute;transform:translateY(-50%);color:#fff;opacity:0;transition:opacity .2s ease;white-space:nowrap}.hxo-ov.open .hxo-lab{opacity:1;transition:opacity .4s ease .4s}
+.hxo-dock{position:absolute;inset:0;z-index:1;pointer-events:none}.hxo-dockbg{position:absolute;left:0;right:0;top:0;opacity:0;background:linear-gradient(to bottom,#000 calc(100% - 26px),rgba(0,0,0,0))}
+.hxo-lab{position:absolute;transform:translateY(-50%);transform-origin:0 50%;color:#fff;opacity:0;transition:opacity .2s ease;white-space:nowrap}
+@keyframes hxoHxK{to{transform:translate(var(--hdx),var(--hdy)) scale(.8)}}
+@keyframes hxoLabK{from{transform:translateY(-50%)}to{transform:translate(var(--ldx),var(--ldy)) translateY(-50%) scale(.86)}}
+@keyframes hxoDockK{from{opacity:0}to{opacity:1}}
+.hxo-ov.sd{timeline-scope:--hxs}.hxo-ov.sd .hxo-p{scroll-timeline:--hxs y}
+.hxo-ov.sd .hxo-hx{animation:hxoHxK linear both;animation-timeline:--hxs}.hxo-ov.sd .hxo-lab{animation:hxoLabK linear both;animation-timeline:--hxs}.hxo-ov.sd .hxo-dockbg{animation:hxoDockK linear both;animation-timeline:--hxs}.hxo-ov.open .hxo-lab{opacity:1;transition:opacity .4s ease .4s}
 .hxo-lab b{display:block;font:700 1.25rem/1.15 var(--display);letter-spacing:-.01em}.hxo-lab span{display:block;margin-top:4px;font-size:.95rem;font-weight:700;color:rgba(255,255,255,.62);font-variant-numeric:tabular-nums}.hxo-lab em{font-style:normal}
 .hxo-top{position:absolute;left:0;right:0;top:0;z-index:2;display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top) + 12px) max(16px,calc((100% - 680px)/2 + 16px)) 10px;background:rgba(0,0,0,0);opacity:0;transform:translateY(-8px);transition:opacity .35s ease .18s,transform .5s cubic-bezier(.32,.72,0,1) .18s,background .2s ease}
-.hxo-ov.open .hxo-top{opacity:1;transform:none}.hxo-ov.scr .hxo-top{background:#000}
+.hxo-ov.open .hxo-top{opacity:1;transform:none}.hxo-top{z-index:3}
 .hxo-seg{flex:1;max-width:360px;background:rgba(255,255,255,.1)}.hxo-seg button{color:rgba(255,255,255,.6);padding:8px 6px}.hxo-seg button[aria-pressed="true"]{background:rgba(255,255,255,.2);color:#fff;box-shadow:none}
 .hxo-x{flex:none;margin-left:auto;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;border:0}
 .hxo-p{position:absolute;inset:0;overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;opacity:0;transform:translateY(28px);transition:opacity .4s ease .16s,transform .6s cubic-bezier(.32,.72,0,1) .12s}
 .hxo-ov.open .hxo-p{opacity:1;transform:none}.hxo-ov.closing .hxo-p,.hxo-ov.closing .hxo-top{transition-duration:.22s;transition-delay:0s}
-.hxo-in{background:#000;border-top:1px solid rgba(255,255,255,.14);max-width:none;margin:0;padding:22px max(16px,calc((100% - 680px)/2 + 16px)) calc(48px + env(safe-area-inset-bottom))}
+.hxo-in{background:linear-gradient(to bottom,rgba(0,0,0,0),#000 64px);max-width:none;margin:0;padding:30px max(16px,calc((100% - 680px)/2 + 16px)) calc(48px + env(safe-area-inset-bottom))}
 .hxo-score{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.hxo-score b{font:800 4rem/1 var(--display);color:#fff;font-variant-numeric:tabular-nums}.hxo-score span{font-size:1.1rem;color:var(--fg2);font-weight:600}
 .hxo-score em{font-style:normal;font-weight:700;font-size:.95rem;padding:3px 10px;border-radius:99px;background:color-mix(in srgb,currentColor 16%,transparent)}
 .hxo-sub{margin:6px 2px 0;color:var(--fg2);font-size:.88rem}.hxo-why{margin:12px 2px 4px;font-size:.95rem;line-height:1.45}
@@ -2395,7 +2401,7 @@ html.one #home-view{height:auto;min-height:100%}html.one .one-hm{height:auto!imp
 .lvstep{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:baseline;padding:5px 0;border-top:1px solid var(--line)}.lvstep:first-of-type{border-top:0}.lvstep span{font-variant-numeric:tabular-nums}.lvstep em{font-style:normal;color:var(--fg2);font-size:.8rem;font-variant-numeric:tabular-nums}
 
 /* ---------- Détail / Masquer : les listes repliées ---------- */
-.foldbtn{flex:none;background:none;border:0;padding:4px 2px 4px 10px;font:600 .8125rem/1 var(--font,inherit);color:var(--accent);cursor:pointer;text-transform:none;letter-spacing:0}
+.foldbtn{flex:none;background:none;border:0;padding:4px 2px 4px 10px;font:600 .8125rem/1 var(--font,inherit);color:var(--fg2);cursor:pointer;text-transform:none;letter-spacing:0}
 .foldn{font:inherit!important;font-weight:800!important;color:var(--fg);margin-left:4px;font-variant-numeric:tabular-nums}
 .sec-label.foldh{display:flex;justify-content:space-between;align-items:center}
 .card.myxb>.chead{margin-bottom:0}
@@ -2424,6 +2430,11 @@ html.one[data-theme="light"] .adwrap{background:color-mix(in srgb,var(--accent) 
 .tsx2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.tsx2>.card{padding:14px 12px;min-width:0;display:flex;flex-direction:column}.tsx2>.card>.chartbox{margin-top:auto}.tsx2 .small{font-size:.72rem;line-height:1.3}
 .dualbox{position:relative;padding-top:46px;touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:crosshair}
 .duhl{fill:var(--fg);opacity:.08}
+html.hxo-lock,html.hxo-lock body{background:#000!important}
+.banner.pbn{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;min-height:56px}.banner.pbn b{font-size:1rem}
+.card.balc>.chead{margin-bottom:4px}
+/* Noter un résultat à la main : les noms et les boutons ne collent plus aux bords du bloc */
+.hxo-in .hxnote .row{padding:10px 12px 10px 16px}.hxo-in .hxnote label{flex:1;min-width:0;font-size:.95rem}.hxo-in .hxnote .row>span{display:flex;align-items:center;gap:8px;flex:none}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -9710,10 +9721,12 @@ function chainCard(st) {
   if (!Object.values(C).some(x => x > 0)) return '';
   const P = CPAIRS.map(([a, b, lo, hi]) => ({a, b, lo, hi, tot: C[a] + (b ? C[b] : 0)})).sort((x, y) => y.tot - x.tot);
   const bar = n => `<div class="musrow"><span>${esc(n)}</span><span class="bar"><i style="width:${(C[n] / max * 100).toFixed(0)}%;background:var(--accent)"></i></span><b>${fx(C[n])}</b></div>`;
-  return `<div class="card"><span class="eyebrow">Équilibre des chaînes · ${GRAN_TXT[S.mgran || 'week']}</span><p class="small muted" style="margin:4px 0 6px">Chaque chaîne face à son antagoniste, de la paire la plus chargée à la moins chargée.</p>
-    ${P.map(x => { const [f, s] = x.b && C[x.b] > C[x.a] ? [x.b, x.a] : [x.a, x.b], r = x.b && C[x.b] ? C[x.a] / C[x.b] : null, off = r != null && x.lo != null && (r < x.lo || r > x.hi);
-      return `<details class="cpair"><summary>${bar(f)}${s ? bar(s) : ''}${r != null ? `<p class="small" style="margin:2px 0 0">${esc(x.a.replace(' (haut du corps)', ''))} / ${esc(x.b.replace(' (haut du corps)', '').toLowerCase())} <b>${fx(r, 2)}</b>${x.lo != null ? ` · <em class="${off ? 'bad' : 'ok'}">${off ? 'à rééquilibrer' : 'correct'}</em>` : ''} <span class="o">· détails</span></p>` : `<p class="small muted" style="margin:2px 0 0">Chaîne de stabilité, sans antagoniste <span class="o">· détails</span></p>`}</summary>
-        <p class="small">${esc(CHAIN_TXT[f])}</p>${s ? `<p class="small">${esc(CHAIN_TXT[s])}</p>` : ''}${x.a === 'Latérale' ? '<p class="small muted">Pas de norme : la chaîne latérale compte 5 muscles contre 1. Compare-la à toi-même d\'une période à l\'autre.</p>' : ''}${x.lo != null ? `<p class="small muted">Repère : entre ${fx(x.lo, 2)} et ${x.hi > 50 ? 'plus' : fx(x.hi, 1)}.</p>` : ''}</details>`; }).join('')}</div>`;
+  const R = P.map(x => { const [f, s] = x.b && C[x.b] > C[x.a] ? [x.b, x.a] : [x.a, x.b], r = x.b && C[x.b] ? C[x.a] / C[x.b] : null, off = r != null && x.lo != null && (r < x.lo || r > x.hi);
+      return [off, `<details class="cpair"><summary>${bar(f)}${s ? bar(s) : ''}${r != null ? `<p class="small" style="margin:2px 0 0">${esc(x.a.replace(' (haut du corps)', ''))} / ${esc(x.b.replace(' (haut du corps)', '').toLowerCase())} <b>${fx(r, 2)}</b>${x.lo != null ? ` · <em class="${off ? 'bad' : 'ok'}">${off ? 'à rééquilibrer' : 'correct'}</em>` : ''} <span class="o">· détails</span></p>` : `<p class="small muted" style="margin:2px 0 0">Chaîne de stabilité, sans antagoniste <span class="o">· détails</span></p>`}</summary>
+        <p class="small">${esc(CHAIN_TXT[f])}</p>${s ? `<p class="small">${esc(CHAIN_TXT[s])}</p>` : ''}${x.a === 'Latérale' ? '<p class="small muted">Pas de norme : la chaîne latérale compte 5 muscles contre 1. Compare-la à toi-même d\'une période à l\'autre.</p>' : ''}${x.lo != null ? `<p class="small muted">Repère : entre ${fx(x.lo, 2)} et ${x.hi > 50 ? 'plus' : fx(x.hi, 1)}.</p>` : ''}</details>`]; });
+  // Fermé par défaut : seules les paires à rééquilibrer restent affichées ; « Détail » montre toutes les chaînes.
+  const on = R.filter(r => r[0]), rest = R.filter(r => !r[0]);
+  return `<div class="card balc"><div class="chead"><span class="eyebrow">Équilibre des chaînes · ${GRAN_TXT[S.mgran || 'week']}</span>${rest.length ? foldBtn('chain') : ''}</div>${on.map(r => r[1]).join('')}${foldBox('chain', '<p class="small muted" style="margin:4px 0 6px">Chaque chaîne face à son antagoniste, de la paire la plus chargée à la moins chargée.</p>' + rest.map(r => r[1]).join(''))}</div>`.replace(/<p class="small muted"/g, '<p data-tip="1" class="small muted"');
 }
 function tBody() {
   const st = musPer(), bal = musBalance(st), v = Object.fromEntries(st.map(x => [x.k, x]));
@@ -9724,8 +9737,9 @@ function tBody() {
     <div class="stack bcols"><div class="bcol pc3">${bodyCard() || '<div class="card empty"><b>Ton corps se colorera ici</b>Dès ta première séance enregistrée.</div>'}
       ${sym.length ? `<div class="card"><span class="eyebrow">Gauche / droite</span>${sym.map(x => `<div class="musrow"><span>${esc(x.n)}</span><span class="small">D ${x.d} · G ${x.g}</span><b style="${x.gap > 10 ? 'color:var(--bad)' : ''}">${fx(x.gap, 1)} %</b></div>`).join('')}<p class="small muted" style="margin-top:6px">Au-delà de 10 % d'écart, travaille d'abord le côté faible. Tes tests se notent dans Profil.</p></div>` : ''}
       ${chainCard(st)}
-      ${bal.length ? `<div class="card"><span class="eyebrow">Équilibres · ${GRAN_TXT[S.mgran || 'week']} · ${esc(MSRC.find(x => x[0] === (S.msrc || 'all'))[1].toLowerCase())}</span>${bal.map(b => { const [a, c] = sides[b.n], T = BAL_TXT[b.n]; return `<details class="bald${b.off ? ' off' : ''}"><summary><span>${esc(b.n)}</span><b>${fx(b.r, 2)}</b><em>${b.off ? 'à rééquilibrer' : 'correct'}</em></summary>
-        <p class="small">${esc(T[0].replace('{P}', PER_TXT[S.mgran || 'week']))}</p><p class="small muted">${a.map(k => esc(v[k].n) + ' ' + fx(v[k].week)).join(' · ')} <b>contre</b> ${c.map(k => esc(v[k].n) + ' ' + fx(v[k].week)).join(' · ')}</p>${b.off ? `<p class="small"><b>Que faire :</b> ${esc(T[1])}</p>` : ''}</details>`; }).join('')}</div>` : ''}</div>
+      ${bal.length ? `<div class="card balc"><div class="chead"><span class="eyebrow">Équilibres · ${GRAN_TXT[S.mgran || 'week']} · ${esc(MSRC.find(x => x[0] === (S.msrc || 'all'))[1].toLowerCase())}</span>${bal.some(b => !b.off) ? foldBtn('bal') : ''}</div>${(() => { const F = b => { const [a, c] = sides[b.n], T = BAL_TXT[b.n]; return `<details class="bald${b.off ? ' off' : ''}"><summary><span>${esc(b.n)}</span><b>${fx(b.r, 2)}</b><em>${b.off ? 'à rééquilibrer' : 'correct'}</em></summary>
+        <p class="small">${esc(T[0].replace('{P}', PER_TXT[S.mgran || 'week']))}</p><p class="small muted">${a.map(k => esc(v[k].n) + ' ' + fx(v[k].week)).join(' · ')} <b>contre</b> ${c.map(k => esc(v[k].n) + ' ' + fx(v[k].week)).join(' · ')}</p>${b.off ? `<p class="small"><b>Que faire :</b> ${esc(T[1])}</p>` : ''}</details>`; };
+        return (bal.filter(b => b.off).map(F).join('') + foldBox('bal', bal.filter(b => !b.off).map(F).join(''))).replace(/<p class="small muted"/g, '<p data-tip="1" class="small muted"'); })()}</div>` : ''}</div>
       <div class="bcol pc3">${plyoCard()}${musCard(st)}</div>
     </div>`;
 }
@@ -9736,18 +9750,18 @@ function tProfile() {
   const lastSym = tests().filter(x => x.type === 'sym').sort((a, b) => b.date.localeCompare(a.date))[0];
   const fv = lastTest('fv'), fvr = fv ? fvProfile(fv) : null, cmj = jBest('cmj');
   const ago = d => { const n = daysBetween(d, TODAY); return n > 56 ? 'à refaire (' + Math.round(n / 7) + ' sem.)' : 'fait le ' + fmtShort(d); };
-  const row = (attr, title, sub) => `<button class="banner" ${attr} style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>${title}</b><br><span class="small muted">${sub}</span></span>${ICON.chev}</button>`;
+  const row = (attr, title) => `<button class="banner pbn" ${attr}><span><b>${title}</b></span>${ICON.chev}</button>`;
   const hfv = tests().filter(x => x.type === 'hfv').sort((a, b) => b.date.localeCompare(a.date))[0];
   return `
     <header class="top"><div class="sub">Ton profil d'athlète</div><h1>Profil</h1></header>
     ${sprinterCard()}
     <div class="sec-label">Mes résultats</div>
     <div class="stack">
-      <button class="banner" data-rmlist style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Max musculation</b><br><span class="small muted">${nMax ? nMax + ' max testés · ' : ''}les charges de tes séances en découlent</span></span>${ICON.chev}</button>
-      <button class="banner" data-baroga style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Max haltérophilie</b><br><span class="small muted">${typeof bgTotal === 'function' && bgTotal() ? 'total ' + fx(bgTotal()) + ' kg · ' : ''}table de Baroga : tes déficits sur 46 mouvements</span></span>${ICON.chev}</button>
-      <button class="banner" data-tjumps style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Mes max en saut</b><br><span class="small muted">${(() => { const ck = cmjCheck(); return cmj ? 'CMJ ' + fx(+cmj.h, 1) + ' cm' + (ck && ck.d <= -5 ? ' · fatigue détectée' : '') + ' · ' : ''; })()}tes records de saut et de sprint · import My Jump</span></span>${ICON.chev}</button>
+      <button class="banner pbn" data-rmlist><span><b>Max musculation</b></span>${ICON.chev}</button>
+      <button class="banner pbn" data-baroga><span><b>Max haltérophilie</b></span>${ICON.chev}</button>
+      <button class="banner pbn" data-tjumps><span><b>Mes max en saut</b></span>${ICON.chev}</button>
     </div>
-    <div class="sec-label">Autres tests <small>ceux de tes qualités sont dans l'hexagone</small></div>
+    <div class="sec-label">Autres tests</div>
     <div class="stack">
       ${row('data-tsymstart', 'Test d’équilibre gauche / droite', esc(lastSym ? ago(lastSym.date) + ' · ' : '') + 'Test de symétrie · mollets, tibial, quadriceps, ischios, adducteurs, moyen fessier')}
       ${row('data-treact', 'Test de réaction au départ', esc(typeof rcLastTxt === 'function' ? rcLastTxt() : '') + 'Test de réaction · au son, à la caméra dans les blocs, ou sur une vidéo')}
@@ -15453,7 +15467,10 @@ async function vidMeta(f) {
 const vidDayOf = ms => { const d = new Date(ms); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 const vidHour = ms => { const d = new Date(ms); return `${d.getHours()} h ${String(d.getMinutes()).padStart(2, '0')}`; };
 const vidTitle = (kind, ms) => `${kind === 'lift' ? 'Muscu' : 'Course'} du ${fmtShort(vidDayOf(ms))} ${new Date(ms).getFullYear()} · ${vidHour(ms)}`;
-async function vidThumbs() { for (const el of document.querySelectorAll('[data-vth]:not([data-ok])')) { el.dataset.ok = 1; const r = await vdbGet('t:' + el.dataset.vth); if (r) el.style.backgroundImage = `url(${URL.createObjectURL(r)})`; else el.classList.add('none'); } }
+const VTH = {};
+async function vidThumbs() { for (const el of document.querySelectorAll('[data-vth]:not([data-ok])')) { el.dataset.ok = 1; const id = el.dataset.vth;
+  if (!(id in VTH)) { const r = await vdbGet('t:' + id).catch(() => null); VTH[id] = r ? URL.createObjectURL(r) : ''; }
+  if (VTH[id]) el.style.backgroundImage = `url(${VTH[id]})`; else el.classList.add('none'); } }
 // Une image du début de la vidéo, en petit, pour la liste.
 function vidThumb(file) { return new Promise(ok => { const v = document.createElement('video'); v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = URL.createObjectURL(file);
   const done = b => { URL.revokeObjectURL(v.src); ok(b); }; setTimeout(() => done(null), 8000);
@@ -15473,8 +15490,8 @@ document.addEventListener('click', e => { let b;
 /* ---------- le lecteur : ralenti, image par image, analyse ---------- */
 const VP = {id: null, url: null};
 function vidPlayer(id) {
-  const v0 = vids().find(v => v.id === id); if (!v0) return; VP.id = id;
-  openPane({title: v0.title || 'Vidéo', full: true, onClose: () => { if (VP.url) URL.revokeObjectURL(VP.url); VP.url = null; VP.id = null; }, render: () => { const v = vids().find(x => x.id === VP.id); if (!v) return '';
+  const v0 = vids().find(v => v.id === id); if (!v0) return; VP.id = id; VP.t = 0;
+  openPane({title: v0.title || 'Vidéo', full: true, onClose: () => { if (VP.url) URL.revokeObjectURL(VP.url); VP.url = null; VP.uid = null; VP.id = null; VP.blob = null; VP.bid = null; VP.t = 0; }, render: () => { const v = vids().find(x => x.id === VP.id); if (!v) return '';
     const mt = v.meta || {};
     return `<div class="vbox"><video class="vplay" playsinline preload="auto" muted data-vvid></video><canvas class="vpose"></canvas><div class="vnone" hidden>Cette vidéo est sur un autre appareil : son analyse est ci-dessous.</div></div>
       <div class="vtime"><b data-vt>0,00 s</b><span>temps réel${+v.slow > 1 ? ` (ralenti ×${v.slow} corrigé)` : ''}</span></div>
@@ -15490,21 +15507,23 @@ function vidPlayer(id) {
         <button type="button" class="small muted" data-vdel style="padding:14px 0 4px">Supprimer la vidéo</button></details>`; }});
   vidLoad();
 }
-async function vidLoad() { const el = document.querySelector('[data-vvid]'); if (!el) return; const b = await vdbGet(VP.id);
+async function vidLoad() { const el = document.querySelector('[data-vvid]:not([data-on])'); if (!el || !VP.id) return; el.dataset.on = '1'; const id = VP.id;
+  // La vidéo est lue une fois ; si le lecteur se redessine, la nouvelle copie reprend la même (avant : écran noir une fois sur deux).
+  const b = VP.bid === id && VP.blob ? VP.blob : await vdbGet(id); if (VP.id !== id || !el.isConnected) return; VP.blob = b; VP.bid = id;
   if (!b) { el.hidden = true; el.parentNode.querySelector('.vnone').hidden = false; return; }
   // Une vidéo ajoutée avant : relire sa date et ses images par seconde dans le fichier.
   const v0 = vids().find(x => x.id === VP.id);
   if (v0 && !v0.meta) vidMeta(b).then(M => { const ms = M.taken || b.lastModified || 0, auto = /^(Course|Muscu) du /.test(v0.title || '');
     vidUp(VP.id, x => ({...x, meta: {fps: M.fps || null, capFps: M.capFps || null, date: M.taken ? 'video' : 'fichier'}, ...(M.fps ? {fps: M.fps} : {}), ...(M.slow > 1 ? {slow: M.slow} : {}), ...(ms ? {d: vidDayOf(ms), taken: ms, ...(auto ? {title: vidTitle(x.kind, ms)} : {})} : {})}), true);
     const nv = vids().find(x => x.id === VP.id), tt = document.getElementById('pane-title'); if (tt && nv) tt.textContent = nv.title; });
-  const th = await vdbGet('t:' + VP.id); if (th) el.poster = URL.createObjectURL(th);
-  if (VP.url) URL.revokeObjectURL(VP.url); VP.url = URL.createObjectURL(b); el.src = VP.url;
+  if (!(id in VTH)) { const th = await vdbGet('t:' + id).catch(() => null); VTH[id] = th ? URL.createObjectURL(th) : ''; } if (VTH[id]) el.poster = VTH[id];
+  if (!(VP.url && VP.uid === id)) { if (VP.url) URL.revokeObjectURL(VP.url); VP.url = URL.createObjectURL(b); VP.uid = id; } const t0 = VP.t || 0; el.src = VP.url;
   // Certains téléphones laissent l'écran noir tant que la vidéo n'a pas bougé : on la pose sur sa première image.
-  el.addEventListener('loadedmetadata', () => { try { el.currentTime = .001; } catch (e) {} }, {once: true});
+  el.addEventListener('loadedmetadata', () => { try { el.currentTime = t0 || .001; } catch (e) {} }, {once: true});
   el.onerror = () => { const n = el.parentNode.querySelector('.vnone'); n.hidden = false; n.textContent = 'Ce téléphone ne lit pas cette vidéo ici (format HEVC ?). Dans l\'appareil photo, choisis le format le plus compatible (H.264).'; };
   const t = () => { const v = vids().find(x => x.id === VP.id), o = document.querySelector('[data-vt]'); if (o && v) o.textContent = fx(el.currentTime / (+v.slow || 1), 2) + ' s'; };
   if (typeof anaBind === 'function') anaBind(el);
-  el.ontimeupdate = t; el.onseeked = t; el.onplay = () => { const p = document.querySelector('[data-vc="play"]'); if (p) p.textContent = 'Pause'; }; el.onpause = () => { const p = document.querySelector('[data-vc="play"]'); if (p) p.textContent = 'Lecture'; }; }
+  el.ontimeupdate = () => { VP.t = el.currentTime; t(); }; el.onseeked = () => { VP.t = el.currentTime; t(); }; el.onplay = () => { const p = document.querySelector('[data-vc="play"]'); if (p) p.textContent = 'Pause'; }; el.onpause = () => { const p = document.querySelector('[data-vc="play"]'); if (p) p.textContent = 'Lecture'; }; }
 function vidResHtml(v) { const r = vidCalc(v), m = v.m || {};
   return `<div><span>Chrono</span><b>${r.chrono != null ? fx(r.chrono, 2) + ' s' : '–'}</b></div><div><span>Contact au sol</span><b>${r.contact != null ? Math.round(r.contact * 1000) + ' ms' : '–'}</b></div><div><span>Fréquence</span><b>${r.freq != null ? fx(r.freq, 2) + ' pas/s' : '–'}</b></div>
     <small>${(m.poses || []).length} poses · ${(m.offs || []).length} décollages${(m.poses || []).length || m.t0 != null ? ' · <button type="button" class="linkbtn" data-vm="clear">effacer</button>' : ''}</small>`; }
@@ -15524,6 +15543,8 @@ document.addEventListener('input', e => { if (!VP.id) return; const t = e.target
   if (t.matches?.('[data-vnote]')) vidUp(VP.id, x => ({...x, note: t.value})); });
 document.addEventListener('change', e => { if (!VP.id) return; const t = e.target; if (!t.matches?.('[data-vset]')) return;
   vidUp(VP.id, x => ({...x, [t.dataset.vset]: +t.value}), true); const r = document.querySelector('[data-vres]'); if (r) r.innerHTML = vidResHtml(vids().find(x => x.id === VP.id)); });
+// Chaque fois qu'une liste de vidéos ou un lecteur apparaît (ouverture, retour, page redessinée), ses images sont remises.
+new MutationObserver(() => { if (document.querySelector('[data-vth]:not([data-ok])')) vidThumbs(); if (VP.id && document.querySelector('[data-vvid]:not([data-on])')) vidLoad(); }).observe(document.body, {childList: true, subtree: true});
 
 /* ================= Profil · Analyse de mes mouvements (musculation) et de ma dynamique de course =================
    Une vidéo de côté (ou de face pour les genoux) → MediaPipe Pose (Google, gratuit, sur l'appareil, déjà utilisé par le
@@ -15918,7 +15939,7 @@ function proAnaCards() {
   const pts = (k, o) => { const g = o.P.filter(x => x.lvl === 'good').length, w = o.P.filter(x => x.lvl === 'warn').length, b = o.P.filter(x => x.lvl === 'bad').length;
     return `<button type="button" class="card pac pts" data-propts="${k}"><span class="eyebrow">Points forts · faibles</span>${o.P.length ? `<p class="pacl">${anDot('good')}${g} fort${g > 1 ? 's' : ''}</p><p class="pacl">${anDot('warn')}${w} à affiner</p><p class="pacl">${anDot('bad')}${b} faible${b > 1 ? 's' : ''}</p>` : '<small>Après ta première analyse.</small>'}</button>`; };
   const hx = typeof hxCard === 'function' ? hxCard() : '';
-  return `<div class="sec-label">Mes qualités et mes analyses vidéo</div>${hx}<div class="pagrid">${box('run', 'Ma dynamique de course', R)}${box('lift', 'Mes mouvements · musculation', M)}${pts('run', R)}${pts('lift', M)}</div>`;
+  return `${hx}<div class="sec-label">Mes analyses vidéo</div><div class="pagrid">${box('run', 'Ma dynamique de course', R)}${box('lift', 'Mes mouvements · musculation', M)}${pts('run', R)}${pts('lift', M)}</div>`;
 }
 document.addEventListener('click', e => { let b;
   if ((b = e.target.closest?.('[data-proana]'))) { vidPane('', b.dataset.proana); return; }
@@ -16187,18 +16208,32 @@ function hxoGeo(svg, i, topH = 70) {
 }
 const hxoD = k => { const Q = hxVals(), i = Q.findIndex(q => q.k === k), q = Q[i], O = hxOld(Q, addDays(TODAY, -hxPer()[2])), d = q.s != null && O[i].s != null ? q.s - O[i].s : null; return {Q, i, q, O, d}; };
 // L'axe de la qualité, couché vers la droite, gradué 25 · 50 · 75 · 100 (les anneaux de la grille tombent pile dessus).
-const hxoAxis = (q, u1) => `<g class="hxaxis"><line x1="150" y1="150" x2="254" y2="150" class="hxtrack"/><line x1="150" y1="150" x2="${(150 + 104 * (q.s ?? 0) / 100).toFixed(1)}" y2="150" class="hxax"${q.s ? '' : ' style="display:none"'}/>`
-  + [25, 50, 75, 100].map(v => `<text x="${(150 + 104 * v / 100).toFixed(1)}" y="${(150 - 8 / u1).toFixed(1)}" text-anchor="middle" class="hxtk" style="font-size:${(10.5 / u1).toFixed(2)}px;stroke-width:${(3 / u1).toFixed(2)}px">${v}</text>`).join('') + '</g>';
+const hxoAxis = (q, u1) => { const x = (150 + 104 * (q.s ?? 0) / 100).toFixed(1), b = (7 / u1).toFixed(2);
+  return `<defs><filter id="hxglow" filterUnits="userSpaceOnUse" x="60" y="90" width="230" height="120"><feGaussianBlur stdDeviation="${b}"/></filter>
+    <linearGradient id="hxhg" gradientUnits="userSpaceOnUse" x1="150" y1="0" x2="${x}" y2="0"><stop offset="0" stop-color="var(--accent)" stop-opacity=".3"/><stop offset="1" stop-color="var(--accent)" stop-opacity=".95"/></linearGradient></defs>
+    <g class="hxaxis"><line x1="150" y1="150" x2="254" y2="150" class="hxtrack"/><g class="hxhalo"${q.s ? '' : ' style="display:none"'}><line x1="150" y1="150" x2="${x}" y2="150" stroke="url(#hxhg)" stroke-width="${(18 / u1).toFixed(2)}" stroke-linecap="round" filter="url(#hxglow)" class="hxhl"/><circle cx="${x}" cy="150" r="${(13 / u1).toFixed(2)}" fill="var(--accent)" opacity=".55" filter="url(#hxglow)" class="hxhc"/>
+    <line x1="150" y1="150" x2="${x}" y2="150" stroke="url(#hxhg)" stroke-width="${(2 / u1).toFixed(2)}" stroke-linecap="round" class="hxax"/></g>`
+  + [25, 50, 75, 100].map(v => `<text x="${(150 + 104 * v / 100).toFixed(1)}" y="${(150 - 8 / u1).toFixed(1)}" text-anchor="middle" class="hxtk" style="font-size:${(10.5 / u1).toFixed(2)}px;stroke-width:${(3 / u1).toFixed(2)}px">${v}</text>`).join('') + '</g>'; };
 const hxoLab = (q, d) => `<b>${q.n.split(/ (?=de )/).map(esc).join('<br>')}</b><span>${q.s ?? 'à tester'}${d ? ` <em class="${d > 0 ? 'hxu' : 'hxdn'}">${d > 0 ? '+' : '−'}${Math.abs(d)}</em>` : ''}</span>`;
 const hxoSeg = () => HXP.map(([k, l]) => `<button type="button" data-hxoper="${k}" aria-pressed="${k === HXS.per}">${l}</button>`).join('');
 function hxoLay(el, g) { const w = el.querySelector('.hxo-w'); w.style.width = g.w + 'px'; w.style.height = g.h + 'px'; w.style.setProperty('--t0', g.t0); w.style.setProperty('--t1', g.t1); w.style.setProperty('--rot', g.rot + 'deg'); const rr = w.querySelector('.hxo-r'); if (rr) rr.style.transformOrigin = `${(234 * g.u1).toFixed(2)}px ${(164 * g.u1).toFixed(2)}px`;
   const inn = el.querySelector('.hxo-in'); if (inn) inn.style.minHeight = Math.round(innerHeight - g.topH) + 'px';
-  const l = el.querySelector('.hxo-lab'); l.style.left = Math.round(g.cx + g.R + 14) + 'px'; l.style.top = Math.round(g.cy) + 'px'; el.querySelector('.hxo-gap').style.height = g.top + 'px'; HXO.g = g; }
+  const l = el.querySelector('.hxo-lab'), lx = Math.round(g.cx + g.R + 14), ly = Math.round(g.cy), colL = Math.max(0, (innerWidth - 680) / 2);
+  l.style.left = lx + 'px'; l.style.top = ly + 'px'; el.querySelector('.hxo-gap').style.height = g.top + 'px';
+  g.D = Math.max(80, g.top - g.topH - 64); g.hdx = -(g.cx + g.R + 40); g.hdy = -g.D * .35; g.ldx = colL + 18 - lx; g.ldy = g.topH + 30 - ly;
+  if (inn) inn.style.minHeight = Math.round(innerHeight - g.topH - 64) + 'px';
+  el.style.setProperty('--hdx', g.hdx + 'px'); el.style.setProperty('--hdy', g.hdy + 'px'); el.style.setProperty('--ldx', g.ldx + 'px'); el.style.setProperty('--ldy', g.ldy + 'px');
+  el.querySelector('.hxo-dockbg').style.height = (g.topH + 72) + 'px';
+  el.querySelector('.hxo-hx').style.animationRange = el.querySelector('.hxo-lab').style.animationRange = `0px ${g.D}px`; el.querySelector('.hxo-dockbg').style.animationRange = `${Math.round(g.D * .55)}px ${g.D}px`;
+  HXO.g = g; }
+// Défilement lié au geste : sur les téléphones récents, le navigateur le fait lui-même (aucun décalage avec le doigt).
+const HX_SD = (() => { try { return CSS.supports('animation-timeline: scroll()') && CSS.supports('timeline-scope: --a'); } catch (e) { return false; } })();
 // En faisant défiler : l'hexagone monte moins vite que le texte, rapetisse et glisse vers la gauche, puis le texte le recouvre.
-function hxoScroll() { const el = HXO.el, g = HXO.g; if (!el || !g || el.classList.contains('closing')) return;
-  const y = el.querySelector('.hxo-p').scrollTop, p = Math.max(0, Math.min(1, y / Math.max(1, g.top - g.topH))), s = 1 - .3 * p;
-  el.querySelector('.hxo-hx').style.transform = y > 0 ? `translate(${(-g.R * .55 * p + g.cx * (1 - s)).toFixed(1)}px,${(-y * .5 + g.cy * (1 - s)).toFixed(1)}px) scale(${s.toFixed(3)})` : '';
-  el.classList.toggle('scr', y > 6); }
+function hxoScroll() { const el = HXO.el, g = HXO.g; if (!el || !g || el.classList.contains('closing') || HX_SD) return;
+  const y = el.querySelector('.hxo-p').scrollTop, p = Math.max(0, Math.min(1, y / g.D)), q = Math.max(0, Math.min(1, (y - g.D * .55) / (g.D * .45)));
+  el.querySelector('.hxo-hx').style.transform = p ? `translate(${(g.hdx * p).toFixed(1)}px,${(g.hdy * p).toFixed(1)}px) scale(${(1 - .2 * p).toFixed(3)})` : '';
+  el.querySelector('.hxo-lab').style.transform = `translate(${(g.ldx * p).toFixed(1)}px,${(g.ldy * p).toFixed(1)}px) translateY(-50%) scale(${(1 - .14 * p).toFixed(3)})`;
+  el.querySelector('.hxo-dockbg').style.opacity = q.toFixed(3); }
 // La barre du téléphone (heure, batterie) passe au noir en douceur, puis reprend sa couleur à la fermeture.
 const hxRgb = c => { const d = document.createElement('i'); d.style.color = c; document.body.appendChild(d); const m = (getComputedStyle(d).color.match(/[\d.]+/g) || [0, 0, 0]).slice(0, 3).map(Number); d.remove(); return m; };
 function hxBar(on) { const ms = document.querySelectorAll('meta[name="theme-color"]'); if (!ms.length) return; cancelAnimationFrame(HXO.bar); if (on) HXO.bar0 = ms[0].content;
@@ -16212,9 +16247,10 @@ const hxCardShape = on => document.querySelectorAll('#hxcard svg.hxsvg .hxrot').
 function hxoOpen(k) {
   if (HXO.on || HXO.busy) return; const card = $('#hxcard svg.hxsvg'); if (!card) return;
   const {Q, i, q, O, d} = hxoD(k);
-  const el = document.createElement('div'); el.className = 'hxo-ov prep'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', q.n);
-  el.innerHTML = `<div class="hxo-bg"></div><div class="hxo-hx"><div class="hxo-w"></div><div class="hxo-lab">${hxoLab(q, d)}</div></div>
+  const el = document.createElement('div'); el.className = 'hxo-ov prep' + (HX_SD ? ' sd' : ''); el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', q.n);
+  el.innerHTML = `<div class="hxo-bg"></div><div class="hxo-hx"><div class="hxo-w"></div></div>
     <div class="hxo-p"><div class="hxo-gap"></div><div class="hxo-in">${hxoPanel(k)}</div></div>
+    <div class="hxo-dock" aria-hidden="true"><div class="hxo-dockbg"></div><div class="hxo-lab">${hxoLab(q, d)}</div></div>
     <div class="hxo-top"><div class="seg hxo-seg" role="group" aria-label="Comparer avec">${hxoSeg()}</div><button type="button" class="hxo-x" aria-label="Fermer"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button></div>`;
   document.body.appendChild(el);
   const g = hxoGeo(card, i, el.querySelector('.hxo-top').offsetHeight);
@@ -16235,14 +16271,15 @@ function hxoRefresh(prev) { const el = HXO.el; if (!el) return; const {Q, q, O, 
   const poly = el.querySelector('.hxo-w .hxo'), o = O.map(x => x.s); if (poly) { if (prev) hxTween(poly, prev, o); else poly.setAttribute('points', hxPoly(o)); }
   el.querySelector('.hxo-w .hxp')?.setAttribute('points', hxPoly(Q.map(x => x.s)));
   el.querySelectorAll('.hxo-w .hxd').forEach(dt => { const v = Q[+dt.dataset.i].s; if (v != null) { const [x, y] = hxPt(+dt.dataset.i, 104 * v / 100); dt.setAttribute('cx', x.toFixed(1)); dt.setAttribute('cy', y.toFixed(1)); } });
-  const ax = el.querySelector('.hxax'); if (ax) { ax.setAttribute('x2', (150 + 104 * (q.s ?? 0) / 100).toFixed(1)); ax.style.display = q.s ? '' : 'none'; }
+  { const x = (150 + 104 * (q.s ?? 0) / 100).toFixed(1), hl = el.querySelector('.hxhalo'); if (hl) { hl.style.display = q.s ? '' : 'none'; hl.querySelectorAll('line').forEach(l => l.setAttribute('x2', x)); hl.querySelector('circle')?.setAttribute('cx', x); el.querySelector('#hxhg')?.setAttribute('x2', x); } }
   el.querySelector('.hxo-lab').innerHTML = hxoLab(q, d);
   const inn = el.querySelector('.hxo-in'), sc = el.querySelector('.hxo-p'), y = sc.scrollTop; inn.innerHTML = hxoPanel(HXO.k); sc.scrollTop = y; }
 function hxoClose(fromBack) {
   if (!HXO.on || HXO.busy) return; const el = HXO.el, card = $('#hxcard svg.hxsvg');
   if (!fromBack && history.state?.hxo === HXO.tok) { try { POP_SKIP = true; history.go(history.state.hxpane ? -2 : -1); } catch (e) {} }
   HXO.busy = true; if (card) { el.querySelector('.hxo-w').style.setProperty('--t0', hxoGeo(card, 0, HXO.g?.topH).t0); hxCardShape(false); }
-  el.classList.add('closing'); el.classList.remove('open'); el.querySelector('.hxo-hx').style.transform = ''; hxBar(false);
+  const sc = el.querySelector('.hxo-p'); if (sc.scrollTop > 0) { try { sc.scrollTo({top: 0, behavior: 'smooth'}); } catch (e) { sc.scrollTop = 0; } }
+  el.classList.add('closing'); el.classList.remove('open'); el.querySelector('.hxo-hx').style.transform = ''; el.querySelector('.hxo-dockbg').style.opacity = ''; hxBar(false);
   setTimeout(() => { el.remove(); hxCardShape(true); document.documentElement.classList.remove('hxo-lock'); Object.assign(HXO, {on: false, k: null, el: null, busy: false, tok: 0, g: null}); }, 620);
 }
 // Bouton retour du téléphone : il ferme d'abord le test ouvert par-dessus, puis la page de la qualité. Jamais l'onglet.
@@ -26447,6 +26484,7 @@ const I18N_EN = {
 "Plus rien à adapter. « Enregistrer » garde tes choix.": "Nothing left to adapt. “Save” keeps your choices.",
 "Remplacer par {} · {} × {}": "Replace with {} · {} × {}",
 "Baisser la charge de {} % ({} → {} % du max)": "Lower the load by {}% ({} → {}% of max)",
+"Mes analyses vidéo": "My video analyses",
 };
 
 /* ================= TNR · English version =================

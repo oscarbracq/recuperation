@@ -8742,10 +8742,12 @@ function chainCard(st) {
   if (!Object.values(C).some(x => x > 0)) return '';
   const P = CPAIRS.map(([a, b, lo, hi]) => ({a, b, lo, hi, tot: C[a] + (b ? C[b] : 0)})).sort((x, y) => y.tot - x.tot);
   const bar = n => `<div class="musrow"><span>${esc(n)}</span><span class="bar"><i style="width:${(C[n] / max * 100).toFixed(0)}%;background:var(--accent)"></i></span><b>${fx(C[n])}</b></div>`;
-  return `<div class="card"><span class="eyebrow">Équilibre des chaînes · ${GRAN_TXT[S.mgran || 'week']}</span><p class="small muted" style="margin:4px 0 6px">Chaque chaîne face à son antagoniste, de la paire la plus chargée à la moins chargée.</p>
-    ${P.map(x => { const [f, s] = x.b && C[x.b] > C[x.a] ? [x.b, x.a] : [x.a, x.b], r = x.b && C[x.b] ? C[x.a] / C[x.b] : null, off = r != null && x.lo != null && (r < x.lo || r > x.hi);
-      return `<details class="cpair"><summary>${bar(f)}${s ? bar(s) : ''}${r != null ? `<p class="small" style="margin:2px 0 0">${esc(x.a.replace(' (haut du corps)', ''))} / ${esc(x.b.replace(' (haut du corps)', '').toLowerCase())} <b>${fx(r, 2)}</b>${x.lo != null ? ` · <em class="${off ? 'bad' : 'ok'}">${off ? 'à rééquilibrer' : 'correct'}</em>` : ''} <span class="o">· détails</span></p>` : `<p class="small muted" style="margin:2px 0 0">Chaîne de stabilité, sans antagoniste <span class="o">· détails</span></p>`}</summary>
-        <p class="small">${esc(CHAIN_TXT[f])}</p>${s ? `<p class="small">${esc(CHAIN_TXT[s])}</p>` : ''}${x.a === 'Latérale' ? '<p class="small muted">Pas de norme : la chaîne latérale compte 5 muscles contre 1. Compare-la à toi-même d\'une période à l\'autre.</p>' : ''}${x.lo != null ? `<p class="small muted">Repère : entre ${fx(x.lo, 2)} et ${x.hi > 50 ? 'plus' : fx(x.hi, 1)}.</p>` : ''}</details>`; }).join('')}</div>`;
+  const R = P.map(x => { const [f, s] = x.b && C[x.b] > C[x.a] ? [x.b, x.a] : [x.a, x.b], r = x.b && C[x.b] ? C[x.a] / C[x.b] : null, off = r != null && x.lo != null && (r < x.lo || r > x.hi);
+      return [off, `<details class="cpair"><summary>${bar(f)}${s ? bar(s) : ''}${r != null ? `<p class="small" style="margin:2px 0 0">${esc(x.a.replace(' (haut du corps)', ''))} / ${esc(x.b.replace(' (haut du corps)', '').toLowerCase())} <b>${fx(r, 2)}</b>${x.lo != null ? ` · <em class="${off ? 'bad' : 'ok'}">${off ? 'à rééquilibrer' : 'correct'}</em>` : ''} <span class="o">· détails</span></p>` : `<p class="small muted" style="margin:2px 0 0">Chaîne de stabilité, sans antagoniste <span class="o">· détails</span></p>`}</summary>
+        <p class="small">${esc(CHAIN_TXT[f])}</p>${s ? `<p class="small">${esc(CHAIN_TXT[s])}</p>` : ''}${x.a === 'Latérale' ? '<p class="small muted">Pas de norme : la chaîne latérale compte 5 muscles contre 1. Compare-la à toi-même d\'une période à l\'autre.</p>' : ''}${x.lo != null ? `<p class="small muted">Repère : entre ${fx(x.lo, 2)} et ${x.hi > 50 ? 'plus' : fx(x.hi, 1)}.</p>` : ''}</details>`]; });
+  // Fermé par défaut : seules les paires à rééquilibrer restent affichées ; « Détail » montre toutes les chaînes.
+  const on = R.filter(r => r[0]), rest = R.filter(r => !r[0]);
+  return `<div class="card balc"><div class="chead"><span class="eyebrow">Équilibre des chaînes · ${GRAN_TXT[S.mgran || 'week']}</span>${rest.length ? foldBtn('chain') : ''}</div>${on.map(r => r[1]).join('')}${foldBox('chain', '<p class="small muted" style="margin:4px 0 6px">Chaque chaîne face à son antagoniste, de la paire la plus chargée à la moins chargée.</p>' + rest.map(r => r[1]).join(''))}</div>`.replace(/<p class="small muted"/g, '<p data-tip="1" class="small muted"');
 }
 function tBody() {
   const st = musPer(), bal = musBalance(st), v = Object.fromEntries(st.map(x => [x.k, x]));
@@ -8756,8 +8758,9 @@ function tBody() {
     <div class="stack bcols"><div class="bcol pc3">${bodyCard() || '<div class="card empty"><b>Ton corps se colorera ici</b>Dès ta première séance enregistrée.</div>'}
       ${sym.length ? `<div class="card"><span class="eyebrow">Gauche / droite</span>${sym.map(x => `<div class="musrow"><span>${esc(x.n)}</span><span class="small">D ${x.d} · G ${x.g}</span><b style="${x.gap > 10 ? 'color:var(--bad)' : ''}">${fx(x.gap, 1)} %</b></div>`).join('')}<p class="small muted" style="margin-top:6px">Au-delà de 10 % d'écart, travaille d'abord le côté faible. Tes tests se notent dans Profil.</p></div>` : ''}
       ${chainCard(st)}
-      ${bal.length ? `<div class="card"><span class="eyebrow">Équilibres · ${GRAN_TXT[S.mgran || 'week']} · ${esc(MSRC.find(x => x[0] === (S.msrc || 'all'))[1].toLowerCase())}</span>${bal.map(b => { const [a, c] = sides[b.n], T = BAL_TXT[b.n]; return `<details class="bald${b.off ? ' off' : ''}"><summary><span>${esc(b.n)}</span><b>${fx(b.r, 2)}</b><em>${b.off ? 'à rééquilibrer' : 'correct'}</em></summary>
-        <p class="small">${esc(T[0].replace('{P}', PER_TXT[S.mgran || 'week']))}</p><p class="small muted">${a.map(k => esc(v[k].n) + ' ' + fx(v[k].week)).join(' · ')} <b>contre</b> ${c.map(k => esc(v[k].n) + ' ' + fx(v[k].week)).join(' · ')}</p>${b.off ? `<p class="small"><b>Que faire :</b> ${esc(T[1])}</p>` : ''}</details>`; }).join('')}</div>` : ''}</div>
+      ${bal.length ? `<div class="card balc"><div class="chead"><span class="eyebrow">Équilibres · ${GRAN_TXT[S.mgran || 'week']} · ${esc(MSRC.find(x => x[0] === (S.msrc || 'all'))[1].toLowerCase())}</span>${bal.some(b => !b.off) ? foldBtn('bal') : ''}</div>${(() => { const F = b => { const [a, c] = sides[b.n], T = BAL_TXT[b.n]; return `<details class="bald${b.off ? ' off' : ''}"><summary><span>${esc(b.n)}</span><b>${fx(b.r, 2)}</b><em>${b.off ? 'à rééquilibrer' : 'correct'}</em></summary>
+        <p class="small">${esc(T[0].replace('{P}', PER_TXT[S.mgran || 'week']))}</p><p class="small muted">${a.map(k => esc(v[k].n) + ' ' + fx(v[k].week)).join(' · ')} <b>contre</b> ${c.map(k => esc(v[k].n) + ' ' + fx(v[k].week)).join(' · ')}</p>${b.off ? `<p class="small"><b>Que faire :</b> ${esc(T[1])}</p>` : ''}</details>`; };
+        return (bal.filter(b => b.off).map(F).join('') + foldBox('bal', bal.filter(b => !b.off).map(F).join(''))).replace(/<p class="small muted"/g, '<p data-tip="1" class="small muted"'); })()}</div>` : ''}</div>
       <div class="bcol pc3">${plyoCard()}${musCard(st)}</div>
     </div>`;
 }
@@ -8768,18 +8771,18 @@ function tProfile() {
   const lastSym = tests().filter(x => x.type === 'sym').sort((a, b) => b.date.localeCompare(a.date))[0];
   const fv = lastTest('fv'), fvr = fv ? fvProfile(fv) : null, cmj = jBest('cmj');
   const ago = d => { const n = daysBetween(d, TODAY); return n > 56 ? 'à refaire (' + Math.round(n / 7) + ' sem.)' : 'fait le ' + fmtShort(d); };
-  const row = (attr, title, sub) => `<button class="banner" ${attr} style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>${title}</b><br><span class="small muted">${sub}</span></span>${ICON.chev}</button>`;
+  const row = (attr, title) => `<button class="banner pbn" ${attr}><span><b>${title}</b></span>${ICON.chev}</button>`;
   const hfv = tests().filter(x => x.type === 'hfv').sort((a, b) => b.date.localeCompare(a.date))[0];
   return `
     <header class="top"><div class="sub">Ton profil d'athlète</div><h1>Profil</h1></header>
     ${sprinterCard()}
     <div class="sec-label">Mes résultats</div>
     <div class="stack">
-      <button class="banner" data-rmlist style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Max musculation</b><br><span class="small muted">${nMax ? nMax + ' max testés · ' : ''}les charges de tes séances en découlent</span></span>${ICON.chev}</button>
-      <button class="banner" data-baroga style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Max haltérophilie</b><br><span class="small muted">${typeof bgTotal === 'function' && bgTotal() ? 'total ' + fx(bgTotal()) + ' kg · ' : ''}table de Baroga : tes déficits sur 46 mouvements</span></span>${ICON.chev}</button>
-      <button class="banner" data-tjumps style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Mes max en saut</b><br><span class="small muted">${(() => { const ck = cmjCheck(); return cmj ? 'CMJ ' + fx(+cmj.h, 1) + ' cm' + (ck && ck.d <= -5 ? ' · fatigue détectée' : '') + ' · ' : ''; })()}tes records de saut et de sprint · import My Jump</span></span>${ICON.chev}</button>
+      <button class="banner pbn" data-rmlist><span><b>Max musculation</b></span>${ICON.chev}</button>
+      <button class="banner pbn" data-baroga><span><b>Max haltérophilie</b></span>${ICON.chev}</button>
+      <button class="banner pbn" data-tjumps><span><b>Mes max en saut</b></span>${ICON.chev}</button>
     </div>
-    <div class="sec-label">Autres tests <small>ceux de tes qualités sont dans l'hexagone</small></div>
+    <div class="sec-label">Autres tests</div>
     <div class="stack">
       ${row('data-tsymstart', 'Test d’équilibre gauche / droite', esc(lastSym ? ago(lastSym.date) + ' · ' : '') + 'Test de symétrie · mollets, tibial, quadriceps, ischios, adducteurs, moyen fessier')}
       ${row('data-treact', 'Test de réaction au départ', esc(typeof rcLastTxt === 'function' ? rcLastTxt() : '') + 'Test de réaction · au son, à la caméra dans les blocs, ou sur une vidéo')}

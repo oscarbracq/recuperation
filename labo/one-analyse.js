@@ -391,7 +391,7 @@ function proAnaCards() {
   const pts = (k, o) => { const g = o.P.filter(x => x.lvl === 'good').length, w = o.P.filter(x => x.lvl === 'warn').length, b = o.P.filter(x => x.lvl === 'bad').length;
     return `<button type="button" class="card pac pts" data-propts="${k}"><span class="eyebrow">Points forts · faibles</span>${o.P.length ? `<p class="pacl">${anDot('good')}${g} fort${g > 1 ? 's' : ''}</p><p class="pacl">${anDot('warn')}${w} à affiner</p><p class="pacl">${anDot('bad')}${b} faible${b > 1 ? 's' : ''}</p>` : '<small>Après ta première analyse.</small>'}</button>`; };
   const hx = typeof hxCard === 'function' ? hxCard() : '';
-  return `<div class="sec-label">Mes qualités et mes analyses vidéo</div>${hx}<div class="pagrid">${box('run', 'Ma dynamique de course', R)}${box('lift', 'Mes mouvements · musculation', M)}${pts('run', R)}${pts('lift', M)}</div>`;
+  return `${hx}<div class="sec-label">Mes analyses vidéo</div><div class="pagrid">${box('run', 'Ma dynamique de course', R)}${box('lift', 'Mes mouvements · musculation', M)}${pts('run', R)}${pts('lift', M)}</div>`;
 }
 document.addEventListener('click', e => { let b;
   if ((b = e.target.closest?.('[data-proana]'))) { vidPane('', b.dataset.proana); return; }

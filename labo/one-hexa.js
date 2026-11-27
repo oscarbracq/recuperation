@@ -152,18 +152,32 @@ function hxoGeo(svg, i, topH = 70) {
 }
 const hxoD = k => { const Q = hxVals(), i = Q.findIndex(q => q.k === k), q = Q[i], O = hxOld(Q, addDays(TODAY, -hxPer()[2])), d = q.s != null && O[i].s != null ? q.s - O[i].s : null; return {Q, i, q, O, d}; };
 // L'axe de la qualité, couché vers la droite, gradué 25 · 50 · 75 · 100 (les anneaux de la grille tombent pile dessus).
-const hxoAxis = (q, u1) => `<g class="hxaxis"><line x1="150" y1="150" x2="254" y2="150" class="hxtrack"/><line x1="150" y1="150" x2="${(150 + 104 * (q.s ?? 0) / 100).toFixed(1)}" y2="150" class="hxax"${q.s ? '' : ' style="display:none"'}/>`
-  + [25, 50, 75, 100].map(v => `<text x="${(150 + 104 * v / 100).toFixed(1)}" y="${(150 - 8 / u1).toFixed(1)}" text-anchor="middle" class="hxtk" style="font-size:${(10.5 / u1).toFixed(2)}px;stroke-width:${(3 / u1).toFixed(2)}px">${v}</text>`).join('') + '</g>';
+const hxoAxis = (q, u1) => { const x = (150 + 104 * (q.s ?? 0) / 100).toFixed(1), b = (7 / u1).toFixed(2);
+  return `<defs><filter id="hxglow" filterUnits="userSpaceOnUse" x="60" y="90" width="230" height="120"><feGaussianBlur stdDeviation="${b}"/></filter>
+    <linearGradient id="hxhg" gradientUnits="userSpaceOnUse" x1="150" y1="0" x2="${x}" y2="0"><stop offset="0" stop-color="var(--accent)" stop-opacity=".3"/><stop offset="1" stop-color="var(--accent)" stop-opacity=".95"/></linearGradient></defs>
+    <g class="hxaxis"><line x1="150" y1="150" x2="254" y2="150" class="hxtrack"/><g class="hxhalo"${q.s ? '' : ' style="display:none"'}><line x1="150" y1="150" x2="${x}" y2="150" stroke="url(#hxhg)" stroke-width="${(18 / u1).toFixed(2)}" stroke-linecap="round" filter="url(#hxglow)" class="hxhl"/><circle cx="${x}" cy="150" r="${(13 / u1).toFixed(2)}" fill="var(--accent)" opacity=".55" filter="url(#hxglow)" class="hxhc"/>
+    <line x1="150" y1="150" x2="${x}" y2="150" stroke="url(#hxhg)" stroke-width="${(2 / u1).toFixed(2)}" stroke-linecap="round" class="hxax"/></g>`
+  + [25, 50, 75, 100].map(v => `<text x="${(150 + 104 * v / 100).toFixed(1)}" y="${(150 - 8 / u1).toFixed(1)}" text-anchor="middle" class="hxtk" style="font-size:${(10.5 / u1).toFixed(2)}px;stroke-width:${(3 / u1).toFixed(2)}px">${v}</text>`).join('') + '</g>'; };
 const hxoLab = (q, d) => `<b>${q.n.split(/ (?=de )/).map(esc).join('<br>')}</b><span>${q.s ?? 'à tester'}${d ? ` <em class="${d > 0 ? 'hxu' : 'hxdn'}">${d > 0 ? '+' : '−'}${Math.abs(d)}</em>` : ''}</span>`;
 const hxoSeg = () => HXP.map(([k, l]) => `<button type="button" data-hxoper="${k}" aria-pressed="${k === HXS.per}">${l}</button>`).join('');
 function hxoLay(el, g) { const w = el.querySelector('.hxo-w'); w.style.width = g.w + 'px'; w.style.height = g.h + 'px'; w.style.setProperty('--t0', g.t0); w.style.setProperty('--t1', g.t1); w.style.setProperty('--rot', g.rot + 'deg'); const rr = w.querySelector('.hxo-r'); if (rr) rr.style.transformOrigin = `${(234 * g.u1).toFixed(2)}px ${(164 * g.u1).toFixed(2)}px`;
   const inn = el.querySelector('.hxo-in'); if (inn) inn.style.minHeight = Math.round(innerHeight - g.topH) + 'px';
-  const l = el.querySelector('.hxo-lab'); l.style.left = Math.round(g.cx + g.R + 14) + 'px'; l.style.top = Math.round(g.cy) + 'px'; el.querySelector('.hxo-gap').style.height = g.top + 'px'; HXO.g = g; }
+  const l = el.querySelector('.hxo-lab'), lx = Math.round(g.cx + g.R + 14), ly = Math.round(g.cy), colL = Math.max(0, (innerWidth - 680) / 2);
+  l.style.left = lx + 'px'; l.style.top = ly + 'px'; el.querySelector('.hxo-gap').style.height = g.top + 'px';
+  g.D = Math.max(80, g.top - g.topH - 64); g.hdx = -(g.cx + g.R + 40); g.hdy = -g.D * .35; g.ldx = colL + 18 - lx; g.ldy = g.topH + 30 - ly;
+  if (inn) inn.style.minHeight = Math.round(innerHeight - g.topH - 64) + 'px';
+  el.style.setProperty('--hdx', g.hdx + 'px'); el.style.setProperty('--hdy', g.hdy + 'px'); el.style.setProperty('--ldx', g.ldx + 'px'); el.style.setProperty('--ldy', g.ldy + 'px');
+  el.querySelector('.hxo-dockbg').style.height = (g.topH + 72) + 'px';
+  el.querySelector('.hxo-hx').style.animationRange = el.querySelector('.hxo-lab').style.animationRange = `0px ${g.D}px`; el.querySelector('.hxo-dockbg').style.animationRange = `${Math.round(g.D * .55)}px ${g.D}px`;
+  HXO.g = g; }
+// Défilement lié au geste : sur les téléphones récents, le navigateur le fait lui-même (aucun décalage avec le doigt).
+const HX_SD = (() => { try { return CSS.supports('animation-timeline: scroll()') && CSS.supports('timeline-scope: --a'); } catch (e) { return false; } })();
 // En faisant défiler : l'hexagone monte moins vite que le texte, rapetisse et glisse vers la gauche, puis le texte le recouvre.
-function hxoScroll() { const el = HXO.el, g = HXO.g; if (!el || !g || el.classList.contains('closing')) return;
-  const y = el.querySelector('.hxo-p').scrollTop, p = Math.max(0, Math.min(1, y / Math.max(1, g.top - g.topH))), s = 1 - .3 * p;
-  el.querySelector('.hxo-hx').style.transform = y > 0 ? `translate(${(-g.R * .55 * p + g.cx * (1 - s)).toFixed(1)}px,${(-y * .5 + g.cy * (1 - s)).toFixed(1)}px) scale(${s.toFixed(3)})` : '';
-  el.classList.toggle('scr', y > 6); }
+function hxoScroll() { const el = HXO.el, g = HXO.g; if (!el || !g || el.classList.contains('closing') || HX_SD) return;
+  const y = el.querySelector('.hxo-p').scrollTop, p = Math.max(0, Math.min(1, y / g.D)), q = Math.max(0, Math.min(1, (y - g.D * .55) / (g.D * .45)));
+  el.querySelector('.hxo-hx').style.transform = p ? `translate(${(g.hdx * p).toFixed(1)}px,${(g.hdy * p).toFixed(1)}px) scale(${(1 - .2 * p).toFixed(3)})` : '';
+  el.querySelector('.hxo-lab').style.transform = `translate(${(g.ldx * p).toFixed(1)}px,${(g.ldy * p).toFixed(1)}px) translateY(-50%) scale(${(1 - .14 * p).toFixed(3)})`;
+  el.querySelector('.hxo-dockbg').style.opacity = q.toFixed(3); }
 // La barre du téléphone (heure, batterie) passe au noir en douceur, puis reprend sa couleur à la fermeture.
 const hxRgb = c => { const d = document.createElement('i'); d.style.color = c; document.body.appendChild(d); const m = (getComputedStyle(d).color.match(/[\d.]+/g) || [0, 0, 0]).slice(0, 3).map(Number); d.remove(); return m; };
 function hxBar(on) { const ms = document.querySelectorAll('meta[name="theme-color"]'); if (!ms.length) return; cancelAnimationFrame(HXO.bar); if (on) HXO.bar0 = ms[0].content;
@@ -177,9 +191,10 @@ const hxCardShape = on => document.querySelectorAll('#hxcard svg.hxsvg .hxrot').
 function hxoOpen(k) {
   if (HXO.on || HXO.busy) return; const card = $('#hxcard svg.hxsvg'); if (!card) return;
   const {Q, i, q, O, d} = hxoD(k);
-  const el = document.createElement('div'); el.className = 'hxo-ov prep'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', q.n);
-  el.innerHTML = `<div class="hxo-bg"></div><div class="hxo-hx"><div class="hxo-w"></div><div class="hxo-lab">${hxoLab(q, d)}</div></div>
+  const el = document.createElement('div'); el.className = 'hxo-ov prep' + (HX_SD ? ' sd' : ''); el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', q.n);
+  el.innerHTML = `<div class="hxo-bg"></div><div class="hxo-hx"><div class="hxo-w"></div></div>
     <div class="hxo-p"><div class="hxo-gap"></div><div class="hxo-in">${hxoPanel(k)}</div></div>
+    <div class="hxo-dock" aria-hidden="true"><div class="hxo-dockbg"></div><div class="hxo-lab">${hxoLab(q, d)}</div></div>
     <div class="hxo-top"><div class="seg hxo-seg" role="group" aria-label="Comparer avec">${hxoSeg()}</div><button type="button" class="hxo-x" aria-label="Fermer"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button></div>`;
   document.body.appendChild(el);
   const g = hxoGeo(card, i, el.querySelector('.hxo-top').offsetHeight);
@@ -200,14 +215,15 @@ function hxoRefresh(prev) { const el = HXO.el; if (!el) return; const {Q, q, O, 
   const poly = el.querySelector('.hxo-w .hxo'), o = O.map(x => x.s); if (poly) { if (prev) hxTween(poly, prev, o); else poly.setAttribute('points', hxPoly(o)); }
   el.querySelector('.hxo-w .hxp')?.setAttribute('points', hxPoly(Q.map(x => x.s)));
   el.querySelectorAll('.hxo-w .hxd').forEach(dt => { const v = Q[+dt.dataset.i].s; if (v != null) { const [x, y] = hxPt(+dt.dataset.i, 104 * v / 100); dt.setAttribute('cx', x.toFixed(1)); dt.setAttribute('cy', y.toFixed(1)); } });
-  const ax = el.querySelector('.hxax'); if (ax) { ax.setAttribute('x2', (150 + 104 * (q.s ?? 0) / 100).toFixed(1)); ax.style.display = q.s ? '' : 'none'; }
+  { const x = (150 + 104 * (q.s ?? 0) / 100).toFixed(1), hl = el.querySelector('.hxhalo'); if (hl) { hl.style.display = q.s ? '' : 'none'; hl.querySelectorAll('line').forEach(l => l.setAttribute('x2', x)); hl.querySelector('circle')?.setAttribute('cx', x); el.querySelector('#hxhg')?.setAttribute('x2', x); } }
   el.querySelector('.hxo-lab').innerHTML = hxoLab(q, d);
   const inn = el.querySelector('.hxo-in'), sc = el.querySelector('.hxo-p'), y = sc.scrollTop; inn.innerHTML = hxoPanel(HXO.k); sc.scrollTop = y; }
 function hxoClose(fromBack) {
   if (!HXO.on || HXO.busy) return; const el = HXO.el, card = $('#hxcard svg.hxsvg');
   if (!fromBack && history.state?.hxo === HXO.tok) { try { POP_SKIP = true; history.go(history.state.hxpane ? -2 : -1); } catch (e) {} }
   HXO.busy = true; if (card) { el.querySelector('.hxo-w').style.setProperty('--t0', hxoGeo(card, 0, HXO.g?.topH).t0); hxCardShape(false); }
-  el.classList.add('closing'); el.classList.remove('open'); el.querySelector('.hxo-hx').style.transform = ''; hxBar(false);
+  const sc = el.querySelector('.hxo-p'); if (sc.scrollTop > 0) { try { sc.scrollTo({top: 0, behavior: 'smooth'}); } catch (e) { sc.scrollTop = 0; } }
+  el.classList.add('closing'); el.classList.remove('open'); el.querySelector('.hxo-hx').style.transform = ''; el.querySelector('.hxo-dockbg').style.opacity = ''; hxBar(false);
   setTimeout(() => { el.remove(); hxCardShape(true); document.documentElement.classList.remove('hxo-lock'); Object.assign(HXO, {on: false, k: null, el: null, busy: false, tok: 0, g: null}); }, 620);
 }
 // Bouton retour du téléphone : il ferme d'abord le test ouvert par-dessus, puis la page de la qualité. Jamais l'onglet.

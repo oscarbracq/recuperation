@@ -86,7 +86,10 @@ async function vidMeta(f) {
 const vidDayOf = ms => { const d = new Date(ms); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 const vidHour = ms => { const d = new Date(ms); return `${d.getHours()} h ${String(d.getMinutes()).padStart(2, '0')}`; };
 const vidTitle = (kind, ms) => `${kind === 'lift' ? 'Muscu' : 'Course'} du ${fmtShort(vidDayOf(ms))} ${new Date(ms).getFullYear()} · ${vidHour(ms)}`;
-async function vidThumbs() { for (const el of document.querySelectorAll('[data-vth]:not([data-ok])')) { el.dataset.ok = 1; const r = await vdbGet('t:' + el.dataset.vth); if (r) el.style.backgroundImage = `url(${URL.createObjectURL(r)})`; else el.classList.add('none'); } }
+const VTH = {};
+async function vidThumbs() { for (const el of document.querySelectorAll('[data-vth]:not([data-ok])')) { el.dataset.ok = 1; const id = el.dataset.vth;
+  if (!(id in VTH)) { const r = await vdbGet('t:' + id).catch(() => null); VTH[id] = r ? URL.createObjectURL(r) : ''; }
+  if (VTH[id]) el.style.backgroundImage = `url(${VTH[id]})`; else el.classList.add('none'); } }
 // Une image du début de la vidéo, en petit, pour la liste.
 function vidThumb(file) { return new Promise(ok => { const v = document.createElement('video'); v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = URL.createObjectURL(file);
   const done = b => { URL.revokeObjectURL(v.src); ok(b); }; setTimeout(() => done(null), 8000);
@@ -106,8 +109,8 @@ document.addEventListener('click', e => { let b;
 /* ---------- le lecteur : ralenti, image par image, analyse ---------- */
 const VP = {id: null, url: null};
 function vidPlayer(id) {
-  const v0 = vids().find(v => v.id === id); if (!v0) return; VP.id = id;
-  openPane({title: v0.title || 'Vidéo', full: true, onClose: () => { if (VP.url) URL.revokeObjectURL(VP.url); VP.url = null; VP.id = null; }, render: () => { const v = vids().find(x => x.id === VP.id); if (!v) return '';
+  const v0 = vids().find(v => v.id === id); if (!v0) return; VP.id = id; VP.t = 0;
+  openPane({title: v0.title || 'Vidéo', full: true, onClose: () => { if (VP.url) URL.revokeObjectURL(VP.url); VP.url = null; VP.uid = null; VP.id = null; VP.blob = null; VP.bid = null; VP.t = 0; }, render: () => { const v = vids().find(x => x.id === VP.id); if (!v) return '';
     const mt = v.meta || {};
     return `<div class="vbox"><video class="vplay" playsinline preload="auto" muted data-vvid></video><canvas class="vpose"></canvas><div class="vnone" hidden>Cette vidéo est sur un autre appareil : son analyse est ci-dessous.</div></div>
       <div class="vtime"><b data-vt>0,00 s</b><span>temps réel${+v.slow > 1 ? ` (ralenti ×${v.slow} corrigé)` : ''}</span></div>
@@ -123,21 +126,23 @@ function vidPlayer(id) {
         <button type="button" class="small muted" data-vdel style="padding:14px 0 4px">Supprimer la vidéo</button></details>`; }});
   vidLoad();
 }
-async function vidLoad() { const el = document.querySelector('[data-vvid]'); if (!el) return; const b = await vdbGet(VP.id);
+async function vidLoad() { const el = document.querySelector('[data-vvid]:not([data-on])'); if (!el || !VP.id) return; el.dataset.on = '1'; const id = VP.id;
+  // La vidéo est lue une fois ; si le lecteur se redessine, la nouvelle copie reprend la même (avant : écran noir une fois sur deux).
+  const b = VP.bid === id && VP.blob ? VP.blob : await vdbGet(id); if (VP.id !== id || !el.isConnected) return; VP.blob = b; VP.bid = id;
   if (!b) { el.hidden = true; el.parentNode.querySelector('.vnone').hidden = false; return; }
   // Une vidéo ajoutée avant : relire sa date et ses images par seconde dans le fichier.
   const v0 = vids().find(x => x.id === VP.id);
   if (v0 && !v0.meta) vidMeta(b).then(M => { const ms = M.taken || b.lastModified || 0, auto = /^(Course|Muscu) du /.test(v0.title || '');
     vidUp(VP.id, x => ({...x, meta: {fps: M.fps || null, capFps: M.capFps || null, date: M.taken ? 'video' : 'fichier'}, ...(M.fps ? {fps: M.fps} : {}), ...(M.slow > 1 ? {slow: M.slow} : {}), ...(ms ? {d: vidDayOf(ms), taken: ms, ...(auto ? {title: vidTitle(x.kind, ms)} : {})} : {})}), true);
     const nv = vids().find(x => x.id === VP.id), tt = document.getElementById('pane-title'); if (tt && nv) tt.textContent = nv.title; });
-  const th = await vdbGet('t:' + VP.id); if (th) el.poster = URL.createObjectURL(th);
-  if (VP.url) URL.revokeObjectURL(VP.url); VP.url = URL.createObjectURL(b); el.src = VP.url;
+  if (!(id in VTH)) { const th = await vdbGet('t:' + id).catch(() => null); VTH[id] = th ? URL.createObjectURL(th) : ''; } if (VTH[id]) el.poster = VTH[id];
+  if (!(VP.url && VP.uid === id)) { if (VP.url) URL.revokeObjectURL(VP.url); VP.url = URL.createObjectURL(b); VP.uid = id; } const t0 = VP.t || 0; el.src = VP.url;
   // Certains téléphones laissent l'écran noir tant que la vidéo n'a pas bougé : on la pose sur sa première image.
-  el.addEventListener('loadedmetadata', () => { try { el.currentTime = .001; } catch (e) {} }, {once: true});
+  el.addEventListener('loadedmetadata', () => { try { el.currentTime = t0 || .001; } catch (e) {} }, {once: true});
   el.onerror = () => { const n = el.parentNode.querySelector('.vnone'); n.hidden = false; n.textContent = 'Ce téléphone ne lit pas cette vidéo ici (format HEVC ?). Dans l\'appareil photo, choisis le format le plus compatible (H.264).'; };
   const t = () => { const v = vids().find(x => x.id === VP.id), o = document.querySelector('[data-vt]'); if (o && v) o.textContent = fx(el.currentTime / (+v.slow || 1), 2) + ' s'; };
   if (typeof anaBind === 'function') anaBind(el);
-  el.ontimeupdate = t; el.onseeked = t; el.onplay = () => { const p = document.querySelector('[data-vc="play"]'); if (p) p.textContent = 'Pause'; }; el.onpause = () => { const p = document.querySelector('[data-vc="play"]'); if (p) p.textContent = 'Lecture'; }; }
+  el.ontimeupdate = () => { VP.t = el.currentTime; t(); }; el.onseeked = () => { VP.t = el.currentTime; t(); }; el.onplay = () => { const p = document.querySelector('[data-vc="play"]'); if (p) p.textContent = 'Pause'; }; el.onpause = () => { const p = document.querySelector('[data-vc="play"]'); if (p) p.textContent = 'Lecture'; }; }
 function vidResHtml(v) { const r = vidCalc(v), m = v.m || {};
   return `<div><span>Chrono</span><b>${r.chrono != null ? fx(r.chrono, 2) + ' s' : '–'}</b></div><div><span>Contact au sol</span><b>${r.contact != null ? Math.round(r.contact * 1000) + ' ms' : '–'}</b></div><div><span>Fréquence</span><b>${r.freq != null ? fx(r.freq, 2) + ' pas/s' : '–'}</b></div>
     <small>${(m.poses || []).length} poses · ${(m.offs || []).length} décollages${(m.poses || []).length || m.t0 != null ? ' · <button type="button" class="linkbtn" data-vm="clear">effacer</button>' : ''}</small>`; }
@@ -157,3 +162,5 @@ document.addEventListener('input', e => { if (!VP.id) return; const t = e.target
   if (t.matches?.('[data-vnote]')) vidUp(VP.id, x => ({...x, note: t.value})); });
 document.addEventListener('change', e => { if (!VP.id) return; const t = e.target; if (!t.matches?.('[data-vset]')) return;
   vidUp(VP.id, x => ({...x, [t.dataset.vset]: +t.value}), true); const r = document.querySelector('[data-vres]'); if (r) r.innerHTML = vidResHtml(vids().find(x => x.id === VP.id)); });
+// Chaque fois qu'une liste de vidéos ou un lecteur apparaît (ouverture, retour, page redessinée), ses images sont remises.
+new MutationObserver(() => { if (document.querySelector('[data-vth]:not([data-ok])')) vidThumbs(); if (VP.id && document.querySelector('[data-vvid]:not([data-on])')) vidLoad(); }).observe(document.body, {childList: true, subtree: true});

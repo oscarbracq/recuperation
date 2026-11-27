@@ -10027,4 +10027,5 @@ const I18N_EN = {
 "Plus rien à adapter. « Enregistrer » garde tes choix.": "Nothing left to adapt. “Save” keeps your choices.",
 "Remplacer par {} · {} × {}": "Replace with {} · {} × {}",
 "Baisser la charge de {} % ({} → {} % du max)": "Lower the load by {}% ({} → {}% of max)",
+"Mes analyses vidéo": "My video analyses",
 };

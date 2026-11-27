@@ -896,17 +896,23 @@ html.one #home-view{height:auto;min-height:100%}html.one .one-hm{height:auto!imp
 .hxo-w .hxk{transition:opacity .12s ease}.hxo-ov.closing .hxk{transition:opacity .25s ease .3s}.hxo-ov.open .hxk{opacity:0;pointer-events:none}
 .hxo-w .hxd{transition:opacity .4s ease}.hxo-ov.open .hxd:not(.sel){opacity:.35}.hxd.sel{stroke:#fff;stroke-width:1;vector-effect:non-scaling-stroke}
 .hxaxis{opacity:0;transition:opacity .25s ease}.hxo-ov.open .hxaxis{opacity:1;transition:opacity .35s ease .4s}
-.hxtrack{stroke:rgba(255,255,255,.28);stroke-width:1.2;stroke-linecap:round}.hxax{stroke:var(--accent);stroke-width:2.4;stroke-linecap:round}.hxtk{font-weight:600;fill:rgba(255,255,255,.55);font-variant-numeric:tabular-nums;paint-order:stroke;stroke:#000}
+.hxtrack{stroke:rgba(255,255,255,.2);stroke-width:1;stroke-linecap:round}.hxtk{font-weight:600;fill:rgba(255,255,255,.55);font-variant-numeric:tabular-nums;paint-order:stroke;stroke:#000}
 .hxo-hx{position:absolute;inset:0;transform-origin:0 0;will-change:transform}.hxo-ov.closing .hxo-hx{transition:transform .55s cubic-bezier(.32,.72,0,1)}
-.hxo-lab{position:absolute;transform:translateY(-50%);color:#fff;opacity:0;transition:opacity .2s ease;white-space:nowrap}.hxo-ov.open .hxo-lab{opacity:1;transition:opacity .4s ease .4s}
+.hxo-dock{position:absolute;inset:0;z-index:1;pointer-events:none}.hxo-dockbg{position:absolute;left:0;right:0;top:0;opacity:0;background:linear-gradient(to bottom,#000 calc(100% - 26px),rgba(0,0,0,0))}
+.hxo-lab{position:absolute;transform:translateY(-50%);transform-origin:0 50%;color:#fff;opacity:0;transition:opacity .2s ease;white-space:nowrap}
+@keyframes hxoHxK{to{transform:translate(var(--hdx),var(--hdy)) scale(.8)}}
+@keyframes hxoLabK{from{transform:translateY(-50%)}to{transform:translate(var(--ldx),var(--ldy)) translateY(-50%) scale(.86)}}
+@keyframes hxoDockK{from{opacity:0}to{opacity:1}}
+.hxo-ov.sd{timeline-scope:--hxs}.hxo-ov.sd .hxo-p{scroll-timeline:--hxs y}
+.hxo-ov.sd .hxo-hx{animation:hxoHxK linear both;animation-timeline:--hxs}.hxo-ov.sd .hxo-lab{animation:hxoLabK linear both;animation-timeline:--hxs}.hxo-ov.sd .hxo-dockbg{animation:hxoDockK linear both;animation-timeline:--hxs}.hxo-ov.open .hxo-lab{opacity:1;transition:opacity .4s ease .4s}
 .hxo-lab b{display:block;font:700 1.25rem/1.15 var(--display);letter-spacing:-.01em}.hxo-lab span{display:block;margin-top:4px;font-size:.95rem;font-weight:700;color:rgba(255,255,255,.62);font-variant-numeric:tabular-nums}.hxo-lab em{font-style:normal}
 .hxo-top{position:absolute;left:0;right:0;top:0;z-index:2;display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top) + 12px) max(16px,calc((100% - 680px)/2 + 16px)) 10px;background:rgba(0,0,0,0);opacity:0;transform:translateY(-8px);transition:opacity .35s ease .18s,transform .5s cubic-bezier(.32,.72,0,1) .18s,background .2s ease}
-.hxo-ov.open .hxo-top{opacity:1;transform:none}.hxo-ov.scr .hxo-top{background:#000}
+.hxo-ov.open .hxo-top{opacity:1;transform:none}.hxo-top{z-index:3}
 .hxo-seg{flex:1;max-width:360px;background:rgba(255,255,255,.1)}.hxo-seg button{color:rgba(255,255,255,.6);padding:8px 6px}.hxo-seg button[aria-pressed="true"]{background:rgba(255,255,255,.2);color:#fff;box-shadow:none}
 .hxo-x{flex:none;margin-left:auto;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;border:0}
 .hxo-p{position:absolute;inset:0;overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;opacity:0;transform:translateY(28px);transition:opacity .4s ease .16s,transform .6s cubic-bezier(.32,.72,0,1) .12s}
 .hxo-ov.open .hxo-p{opacity:1;transform:none}.hxo-ov.closing .hxo-p,.hxo-ov.closing .hxo-top{transition-duration:.22s;transition-delay:0s}
-.hxo-in{background:#000;border-top:1px solid rgba(255,255,255,.14);max-width:none;margin:0;padding:22px max(16px,calc((100% - 680px)/2 + 16px)) calc(48px + env(safe-area-inset-bottom))}
+.hxo-in{background:linear-gradient(to bottom,rgba(0,0,0,0),#000 64px);max-width:none;margin:0;padding:30px max(16px,calc((100% - 680px)/2 + 16px)) calc(48px + env(safe-area-inset-bottom))}
 .hxo-score{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.hxo-score b{font:800 4rem/1 var(--display);color:#fff;font-variant-numeric:tabular-nums}.hxo-score span{font-size:1.1rem;color:var(--fg2);font-weight:600}
 .hxo-score em{font-style:normal;font-weight:700;font-size:.95rem;padding:3px 10px;border-radius:99px;background:color-mix(in srgb,currentColor 16%,transparent)}
 .hxo-sub{margin:6px 2px 0;color:var(--fg2);font-size:.88rem}.hxo-why{margin:12px 2px 4px;font-size:.95rem;line-height:1.45}
@@ -930,7 +936,7 @@ html.one #home-view{height:auto;min-height:100%}html.one .one-hm{height:auto!imp
 .lvstep{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:baseline;padding:5px 0;border-top:1px solid var(--line)}.lvstep:first-of-type{border-top:0}.lvstep span{font-variant-numeric:tabular-nums}.lvstep em{font-style:normal;color:var(--fg2);font-size:.8rem;font-variant-numeric:tabular-nums}
 
 /* ---------- Détail / Masquer : les listes repliées ---------- */
-.foldbtn{flex:none;background:none;border:0;padding:4px 2px 4px 10px;font:600 .8125rem/1 var(--font,inherit);color:var(--accent);cursor:pointer;text-transform:none;letter-spacing:0}
+.foldbtn{flex:none;background:none;border:0;padding:4px 2px 4px 10px;font:600 .8125rem/1 var(--font,inherit);color:var(--fg2);cursor:pointer;text-transform:none;letter-spacing:0}
 .foldn{font:inherit!important;font-weight:800!important;color:var(--fg);margin-left:4px;font-variant-numeric:tabular-nums}
 .sec-label.foldh{display:flex;justify-content:space-between;align-items:center}
 .card.myxb>.chead{margin-bottom:0}
@@ -959,3 +965,8 @@ html.one[data-theme="light"] .adwrap{background:color-mix(in srgb,var(--accent) 
 .tsx2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.tsx2>.card{padding:14px 12px;min-width:0;display:flex;flex-direction:column}.tsx2>.card>.chartbox{margin-top:auto}.tsx2 .small{font-size:.72rem;line-height:1.3}
 .dualbox{position:relative;padding-top:46px;touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:crosshair}
 .duhl{fill:var(--fg);opacity:.08}
+html.hxo-lock,html.hxo-lock body{background:#000!important}
+.banner.pbn{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;min-height:56px}.banner.pbn b{font-size:1rem}
+.card.balc>.chead{margin-bottom:4px}
+/* Noter un résultat à la main : les noms et les boutons ne collent plus aux bords du bloc */
+.hxo-in .hxnote .row{padding:10px 12px 10px 16px}.hxo-in .hxnote label{flex:1;min-width:0;font-size:.95rem}.hxo-in .hxnote .row>span{display:flex;align-items:center;gap:8px;flex:none}
