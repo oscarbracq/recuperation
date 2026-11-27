@@ -2468,6 +2468,37 @@ html.one #home-view{height:auto;min-height:100%}html.one .one-hm{height:auto!imp
 .lvme circle{fill:var(--accent);stroke:var(--bg);stroke-width:2.5}.lvme text,.lvme60 text{font-size:10.5px;font-weight:700;fill:var(--fg)}.lvme60 circle{fill:var(--bg);stroke:var(--accent);stroke-width:2.5}
 .lvpaths{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.lvpath{padding:10px 12px;border-radius:16px;background:var(--card);box-shadow:0 0 0 1px var(--line)}
 .lvstep{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:baseline;padding:5px 0;border-top:1px solid var(--line)}.lvstep:first-of-type{border-top:0}.lvstep span{font-variant-numeric:tabular-nums}.lvstep em{font-style:normal;color:var(--fg2);font-size:.8rem;font-variant-numeric:tabular-nums}
+
+/* ---------- Détail / Masquer : les listes repliées ---------- */
+.foldbtn{flex:none;background:none;border:0;padding:4px 2px 4px 10px;font:600 .8125rem/1 var(--font,inherit);color:var(--accent);cursor:pointer;text-transform:none;letter-spacing:0}
+.foldn{font:inherit!important;font-weight:800!important;color:var(--fg);margin-left:4px;font-variant-numeric:tabular-nums}
+.sec-label.foldh{display:flex;justify-content:space-between;align-items:center}
+.card.myxb>.chead{margin-bottom:0}
+.foldb{display:grid;grid-template-rows:0fr;transition:grid-template-rows .32s cubic-bezier(.32,.72,0,1)}.foldb.on{grid-template-rows:1fr}
+.foldi{overflow:hidden;min-height:0}.foldb:not(.on) .foldi{visibility:hidden;transition:visibility 0s .32s}
+@media (prefers-reduced-motion:reduce){.foldb{transition:none}}
+/* ---------- Aujourd'hui : « Adapter la séance », la séance posée dedans, un peu plus petite ---------- */
+.adwrap{border-radius:24px;padding:8px;background:color-mix(in srgb,var(--accent) 12%,var(--one-base,#0c0d10));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 22%,transparent)}
+.adwh{display:flex;align-items:center;gap:12px;padding:8px 8px 12px}
+.adwt{flex:1;min-width:0}.adwt b{display:block;color:var(--accent);font-size:1rem}.adwt small{display:block;color:var(--fg2);font-size:.8rem;margin-top:2px;line-height:1.3}
+.btn.adgo{flex:none;width:auto;padding:0 18px;height:40px;font-size:.9rem}
+.adwin>.card{margin:0;border-radius:18px}
+html.one[data-theme="light"] .adwrap{background:color-mix(in srgb,var(--accent) 16%,#fff)}
+@media (prefers-color-scheme:light){html.one:not([data-theme="dark"]) .adwrap{background:color-mix(in srgb,var(--accent) 16%,#fff)}}
+/* ---------- L'éditeur en mode « Adapter » ---------- */
+.adban{margin:4px 0 12px;padding:12px 14px;border-radius:16px;background:color-mix(in srgb,var(--accent) 12%,var(--card2))}.adban>b{display:block;color:var(--accent)}.adban>span{display:block;font-size:.85rem;line-height:1.4;margin-top:4px}
+.adbx{margin-top:10px}.adbx>b{font-size:.9rem}
+.edad{margin:10px 0 4px;padding:10px;border-radius:14px;background:color-mix(in srgb,var(--accent) 10%,var(--card2))}
+.edadh{display:block;font-size:.78rem;font-weight:700;color:var(--accent);margin:0 2px 2px}
+.adopt{display:block;width:100%;text-align:left;background:var(--card);border:0;border-radius:11px;padding:9px 11px;margin-top:6px;color:inherit;cursor:pointer}
+.adopt b{font-size:.88rem;font-weight:700}.adopt small{display:block;color:var(--fg3);font-size:.76rem;line-height:1.35;margin-top:2px}.adopt:active{transform:scale(.98)}
+.edad.done{display:flex;align-items:center;justify-content:space-between;gap:10px;background:color-mix(in srgb,var(--good) 12%,var(--card2))}.edad.done span{font-size:.86rem;font-weight:600}
+.edad .linkbtn{background:none;border:0;color:var(--accent);font-weight:600;font-size:.82rem;padding:8px 2px 2px;cursor:pointer}
+.exbox[data-adrm]>*:not(h3):not(.edad){opacity:.4}
+/* ---------- Tendance : tonnage et sprint côte à côte ; Intensité et volume se lit au doigt ---------- */
+.tsx2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.tsx2>.card{padding:14px 12px;min-width:0;display:flex;flex-direction:column}.tsx2>.card>.chartbox{margin-top:auto}.tsx2 .small{font-size:.72rem;line-height:1.3}
+.dualbox{position:relative;padding-top:46px;touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:crosshair}
+.duhl{fill:var(--fg);opacity:.08}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -2702,9 +2733,9 @@ function chart(pts, o = {}) {
   const Y = y => T + (1 - (y - lo) / (hi - lo)) * (H - T - B);
   // Sous la courbe, un dégradé de sa couleur qui s'efface vers le bas (et sous le point touché quand on glisse le doigt).
   const gid = 'cg' + (chId + 1), stop = (o, a) => `<stop offset="${o}" style="stop-color:${color};stop-opacity:${a}"/>`;
-  let g = `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">${stop(0, .42)}${stop(.6, .1)}${stop(1, 0)}</linearGradient><linearGradient id="${gid}s" x1="0" y1="0" x2="0" y2="1">${stop(0, .5)}${stop(1, 0)}</linearGradient></defs>`;
+  let g = `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">${stop(0, .42)}${stop(.6, .1)}${stop(1, 0)}</linearGradient><linearGradient id="${gid}s" x1="0" y1="0" x2="0" y2="1">${stop(0, .5)}${stop(1, 0)}</linearGradient><clipPath id="${gid}k"><rect x="${L}" y="${T}" width="${W0 - L - R}" height="${H - T - B}"/></clipPath></defs>`;
   for (let i = 0; i <= 3; i++) { const t = lo + (hi - lo) * i / 3, y = Y(t); g += `<line class="grid" x1="${L}" x2="${W0 - R}" y1="${y}" y2="${y}"/><text x="${L - 6}" y="${y + 3}" text-anchor="end">${fx(t, hi - lo < .6 ? 2 : hi - lo < 6 ? 1 : 0)}</text>`; }
-  if (pts.length <= 12 && pts.every(p => p.lab)) pts.forEach((p, i) => g += `<text x="${X(i)}" y="${H - 6}" text-anchor="middle">${esc(p.lab)}</text>`);
+  if (pts.length <= 12 && pts.every(p => p.lab)) { const st = Math.max(1, Math.ceil(pts.length * 24 / (W0 - L - R))); pts.forEach((p, i) => { if ((pts.length - 1 - i) % st === 0) g += `<text x="${X(i)}" y="${H - 6}" text-anchor="middle">${esc(p.lab)}</text>`; }); }
   else g += `<text x="${L}" y="${H - 6}">${esc(pts[0].lab ?? short(pts[0].k))}</text><text x="${W0 - R}" y="${H - 6}" text-anchor="end">${esc(pts[pts.length - 1].lab ?? short(pts[pts.length - 1].k))}</text>`;
   pts.forEach((p, i) => { if (p.raw != null) g += `<circle cx="${X(i)}" cy="${Y(p.raw)}" r="3" fill="${color}" opacity=".3"/>`; });
   if (o.target != null) g += `<line x1="${L}" x2="${W0 - R}" y1="${Y(o.target)}" y2="${Y(o.target)}" stroke="${color}" stroke-width="1.5" stroke-dasharray="5 4"/><text x="${W0 - R}" y="${Y(o.target) - 4}" text-anchor="end">objectif</text>`;
@@ -2731,7 +2762,7 @@ function chart(pts, o = {}) {
   if (!o.noTrend) { const Q = pts.map((p, i) => p.v == null ? null : [i, p.v]).filter(Boolean);
     if (Q.length >= 3) { const n = Q.length, mx = Q.reduce((a, q) => a + q[0], 0) / n, my = Q.reduce((a, q) => a + q[1], 0) / n, sxx = Q.reduce((a, q) => a + (q[0] - mx) ** 2, 0);
       if (sxx > 0) { const b = Q.reduce((a, q) => a + (q[0] - mx) * (q[1] - my), 0) / sxx, i0 = Q[0][0], i1 = Q[n - 1][0], y0 = my + b * (i0 - mx), y1 = my + b * (i1 - mx);
-        g += `<line class="trendl" x1="${X(i0)}" y1="${Y(y0)}" x2="${X(i1)}" y2="${Y(y1)}" stroke="var(--fg2)" stroke-width="1.4" stroke-opacity=".38" stroke-dasharray="4 4" stroke-linecap="round"/>`; } } }
+        g += `<line class="trendl" clip-path="url(#${gid}k)" x1="${X(i0)}" y1="${Y(y0)}" x2="${X(i1)}" y2="${Y(y1)}" stroke="var(--fg2)" stroke-width="1.4" stroke-opacity=".38" stroke-dasharray="4 4" stroke-linecap="round"/>`; } } }
   const id = 'c' + (++chId);
   CH[id] = {pts, X, Y, band, dec, unit, fmt, color, avgVals, W0, H, T, B, gid, bars};
   return `<div class="chartbox" data-ch="${id}"><svg class="chart" viewBox="0 0 ${W0} ${H}" role="img" aria-label="Graphique, glisse le doigt pour lire les valeurs">${g}<g class="sc"></g></svg><div class="bubble" hidden></div></div>`;
@@ -6131,8 +6162,8 @@ function rsBoard() {
   const chip = s => { const used = Object.entries(S.app?.rdated || {}).some(([k, v]) => v === s.id && k >= TODAY); return `<div class="bchip src rchip${used ? ' on' : ''}" data-rref="${esc(s.id)}" title="${esc(s.name)}"><span>${esc(s.name)}</span><small>${esc(rsGoal(s) || (s.day ? 'faite pour ta journée' : s.items.length + ' exercice' + (s.items.length > 1 ? 's' : '')))} · ${rsDur(s)} min${used ? ' · calée' : ''}</small></div>`; };
   return `<div class="card sboard rboard"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Mes 4 semaines · récup</span><span class="sbnav"><button type="button" data-rboff="-1" aria-label="4 semaines avant"${off <= -26 ? ' disabled' : ''}>‹</button><small>${esc(fmtShort(weeks[0]).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(weeks[3], 6)).replace(/^\S+ /, ''))}</small><button type="button" data-rboff="1" aria-label="4 semaines après">›</button></span></div>
     <div class="bgrid">${weeks.map(w => `<div class="bweek"><span class="bwk">S${seasonWeek(w)}</span>${[0, 1, 2, 3, 4, 5, 6].map(i => cell(addDays(w, i))).join('')}</div>`).join('')}</div>
-    <div class="sec-label" style="margin:14px 2px 6px">Séances</div>
-    <div class="bsrc">${RS_OWN().map(chip).join('') || '<p class="small muted" style="margin:0">Crée une séance : elle apparaîtra ici.</p>'}</div>
+    ${(() => { const own = RS_OWN(); return `<div class="sec-label foldh" style="margin:14px 2px 6px"><span>Séances${own.length ? ` <b class="foldn">${own.length}</b>` : ''}</span>${own.length ? foldBtn('ses-r') : ''}</div>
+    ${own.length ? foldBox('ses-r', `<div class="bsrc">${own.map(chip).join('')}</div>`) : '<div class="bsrc"><p class="small muted" style="margin:0">Crée une séance : elle apparaîtra ici.</p></div>'}`; })()}
     ${(() => { const auto = RS_DAY.filter(s => recSteps(s.day).length), dchip = s => chip(s).replace(/<small>[\s\S]*?<\/small>/, `<small>${s.day === 'mus' ? 'Musculation' : 'Douleur'} · ${rsDur(s)} min</small>`);
       return auto.length ? `<div class="dayframe"><div class="sec-label" style="margin:0 2px 6px">Séance de récupération du jour</div><div class="bsrc">${auto.map(dchip).join('')}</div></div>` : ''; })()}
     <p class="small muted" style="margin:10px 2px 0">Récup musculation et Récup douleurs sont refaites chaque jour d'après tes séances et tes douleurs. Touche un bloc pour le voir, un jour pour voir tout ce qui y est calé. Plusieurs blocs s'empilent sur un jour, le dernier posé dessus.</p></div>`;
@@ -9164,7 +9195,7 @@ function tToday() {
       // The day's sessions are shown under their week, not up here.
       if (S.live || today.length) return ''; return `<p class="pmsg">${esc(trainMsg(p, done))}</p>`; })()}</header>
     <div class="stack">${live}${ask}
-      <div class="wk2 pc3"><div class="stack">${weekCard('gym')}${sc('gym')}${tMore('gym')}</div><div class="stack">${weekCard('track')}${sc('track')}${tMore('track')}</div></div>
+      <div class="wk2 pc3"><div class="stack">${typeof adWrap === 'function' ? adWrap('gym', sc('gym')) : sc('gym')}${tMore('gym')}</div><div class="stack">${typeof adWrap === 'function' ? adWrap('track', sc('track')) : sc('track')}${tMore('track')}</div></div>
       ${coachCard()}
       ${main}
     </div>
@@ -9297,8 +9328,8 @@ function sesBoard(kind) {
   return `<div class="card sboard"><div class="chead" style="margin-bottom:10px"><span class="sbhd"><span class="eyebrow">Mes 4 semaines · ${kind === 'gym' ? 'muscu' : 'sprint'}</span>${(() => { const seen = []; weeks.forEach(w => { const n = seasonNow(w); if (n && !n.before && !n.after && !seen.some(x => x.name === n.name)) seen.push(n); }); return seen.length ? `<span class="seleg">${seen.map(n => `<span style="--sbc:${n.col}">${esc(seLab(n.name))}</span>`).join('<i>→</i>')}</span>` : ''; })()}</span><span class="sbnav"><button type="button" data-sboff="-1" aria-label="4 semaines avant"${off <= -26 ? ' disabled' : ''}>‹</button><small>${esc(fmtShort(weeks[0]).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(weeks[3], 6)).replace(/^\S+ /, ''))}</small><button type="button" data-sboff="1" aria-label="4 semaines après">›</button></span></div>
     <div class="bgrid">${weeks.map(w => { const n = seasonNow(w), c = n && !n.before && !n.after ? n.col : null; return `<div class="bweek${c ? ' sebk' : ''}"${c ? ` style="--sbc:${c}" title="${esc(n.name)} · semaine ${n.week}/${n.of}"` : ''}><span class="bwk">S${seasonWeek(w)}</span>${[0, 1, 2, 3, 4, 5, 6].map(i => cell(addDays(w, i))).join('')}</div>`; }).join('')}</div>
 
-    <div class="sec-label" style="margin:14px 2px 6px">Séances</div>
-    <div class="bsrc">${src.length ? src.map(x => { const r = caleRef(x), on = placed.has(r); return `<div class="bchip src${on ? ' on' : ''}" data-bref="${esc(r)}" title="${esc(x.name)}${x.title ? ' · ' + esc(x.title) : ''}"><span>${esc(x.name)}</span><small>${(x.title || x.desc) ? esc(x.title || x.desc) + ' · ' : ''}${estMin(x)} min${on ? ' · calée' : ''}</small></div>`; }).join('') : '<p class="small muted" style="margin:0">Crée une séance ci-dessous : elle apparaîtra ici, prête à être calée.</p>'}</div>
+    <div class="sec-label foldh" style="margin:14px 2px 6px"><span>Séances${src.length ? ` <b class="foldn">${src.length}</b>` : ''}</span>${src.length ? foldBtn('ses-' + kind) : ''}</div>
+    ${src.length ? foldBox('ses-' + kind, `<div class="bsrc">${src.map(x => { const r = caleRef(x), on = placed.has(r); return `<div class="bchip src${on ? ' on' : ''}" data-bref="${esc(r)}" title="${esc(x.name)}${x.title ? ' · ' + esc(x.title) : ''}"><span>${esc(x.name)}</span><small>${(x.title || x.desc) ? esc(x.title || x.desc) + ' · ' : ''}${estMin(x)} min${on ? ' · calée' : ''}</small></div>`; }).join('')}</div>`) : '<div class="bsrc"><p class="small muted" style="margin:0">Crée une séance ci-dessous : elle apparaîtra ici, prête à être calée.</p></div>'}
     ${(() => { const bp = kind === 'gym' && balEx().length ? balPlan() : null;
       return bp ? `<div class="dayframe"><div class="sec-label" style="margin:0 2px 6px">Séance de rééquilibre du jour</div><div class="bsrc"><div class="bchip src" data-bref="${esc(bp.id)}" title="${esc(bp.name)}"><span>${esc(bp.name)}</span><small>Équilibre de tes chaînes · ${estMin(bp)} min</small></div></div></div>` : ''; })()}
     <p class="small muted" style="margin:10px 2px 0">Touche un bloc pour le voir, un jour pour voir tout ce qui y est calé. Plusieurs blocs peuvent aller sur un même jour : ils s'empilent, le dernier posé dessus. Les jours encadrés sont tes créneaux ${kind === 'gym' ? 'de muscu' : 'd\'athlé'}.</p></div>`;
@@ -9541,7 +9572,6 @@ function tSessions() {
     <div class="seg" role="group" aria-label="Type">${[['gym', 'Musculation'], ['track', 'Sprint']].map(([v, l]) => `<button data-tkind="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
     ${sesBoard(k)}
     <button class="btn ghost" style="margin-top:16px;width:100%" data-tnew>+ Créer une séance</button>
-    ${k === 'gym' && typeof adaptCard === 'function' ? adaptCard() : ''}
     ${k === 'gym' && TDV_PLANS.length ? progList() : ''}
     ${k === 'track' ? (() => { const L0 = logs().filter(l => l.kind === 'track'), L = S.doneAll ? L0 : L0.slice(0, 5); return L.length ? `<h2>Séances faites</h2><div class="list donel">${L.map(l => `<button class="rowbtn doneses" data-tlog="${l.id}"><span><b>${esc(l.name)}</b><span class="meta">${esc(cap(fmtShort(l.date)))}${l.min ? ' · ' + l.min + ' min' : ''}${l.rpe ? ' · RPE ' + l.rpe : ''}</span></span><span class="kc">${fx(l.sprintM || 0)} m</span></button>`).join('')}</div>${L0.length > 5 ? `<button type="button" class="linkbtn donemore" data-donemore>${S.doneAll ? 'Masquer' : `Détail · les ${L0.length} séances`}</button>` : ''}` : ''; })() : ''}
 `;
@@ -9556,6 +9586,13 @@ function tLibrary() {
     <div data-libf>${exFilters(S.lib, k)}</div>
     <div class="list" id="t-libl">${libRows()}</div>`;
 }
+// Un bloc qui se replie : « Détail » l'ouvre, « Masquer » le referme. Replié à chaque ouverture de l'appli : la page est plus courte.
+const FOLD = {};
+const foldBtn = k => `<button type="button" class="foldbtn" data-fold="${k}" aria-expanded="${!!FOLD[k]}">${FOLD[k] ? 'Masquer' : 'Détail'}</button>`;
+const foldBox = (k, html) => `<div class="foldb${FOLD[k] ? ' on' : ''}" data-foldb="${k}"><div class="foldi">${html}</div></div>`;
+document.addEventListener('click', e => { const b = e.target.closest?.('[data-fold]'); if (!b) return; e.preventDefault(); const k = b.dataset.fold, on = FOLD[k] = !FOLD[k];
+  document.querySelectorAll(`[data-fold="${k}"]`).forEach(x => { x.textContent = on ? 'Masquer' : 'Détail'; x.setAttribute('aria-expanded', on); });
+  document.querySelectorAll(`[data-foldb="${k}"]`).forEach(x => x.classList.toggle('on', on)); });
 // Onglet Exercices : une ligne par exercice (toute la largeur), la croix au bout pour le retirer de mes exercices.
 const xRow = (attr, id, thumb, name, sub, del) => `<div class="rowbtn exrow myxr" role="button" tabindex="0" ${attr}="${esc(id)}">${thumb}<span class="myxt"><b>${esc(name)}</b>${sub ? ` <span class="meta">${esc(sub)}</span>` : ''}</span>${del ? `<button type="button" class="myxdel" ${del}="${esc(id)}" aria-label="Retirer ${esc(name)} de mes exercices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>` : ICON.chev}</div>`;
 // Training · Exercices : mes exercices (ajoutés ou faits récemment, le dernier en haut) et, en muscu, les exercices de rééquilibrage du jour.
@@ -9567,8 +9604,8 @@ function tMyEx(k) {
     const same = S0.length && S0.every(x => +x.reps === +S0[0].reps && +(x.kg || 0) === +(S0[0].kg || 0));
     const what = !S0.length ? '' : same ? `${S0.length} × ${uVal(h.it, S0[0].reps)}${+S0[0].kg ? ' · ' + fx(+S0[0].kg, +S0[0].kg % 1 ? 1 : 0) + ' kg' : ''}` : setsTxt(h.it);
     return fmtShort(h.date).replace(/^\S+ /, '') + (what ? ' · ' + what : ''); };
-  return `<div class="card myxb"><div class="chead" style="margin-bottom:8px"><span class="eyebrow">Mes exercices</span>${mine.length ? `<span class="small muted">${mine.length}</span>` : ''}</div>
-    ${mine.length ? `<div class="list">${mine.map(id => xRow('data-myx', id, eqThumb(exOf(id).eq), exOf(id).n, sub(id), 'data-myxdel')).join('')}</div>` : '<p class="small muted" style="margin:0">Cherche un exercice plus bas et ajoute-le à ta journée : il restera ici, prêt à être refait.</p>'}</div>
+  return `<div class="card myxb"><div class="chead"><span class="eyebrow">Mes exercices${mine.length ? ` <b class="foldn">${mine.length}</b>` : ''}</span>${mine.length ? foldBtn('myx-' + k) : ''}</div>
+    ${mine.length ? foldBox('myx-' + k, `<div class="list" style="margin-top:8px">${mine.map(id => xRow('data-myx', id, eqThumb(exOf(id).eq), exOf(id).n, sub(id), 'data-myxdel')).join('')}</div>`) : ''}</div>
     ${bal.length ? `<div class="dayframe"><div class="sec-label" style="margin:0 2px 6px">Exercices de rééquilibrage du jour</div><div class="list">${bal.map(x => xRow('data-myx', x.id, eqThumb(exOf(x.id).eq), exOf(x.id).n, MUSI[x.m]?.n || '')).join('')}</div></div>` : ''}`;
 }
 const myExFront = id => { const L = S.tset?.myEx || []; return [id, ...L.filter(x => x !== id)]; };
@@ -9584,8 +9621,8 @@ document.addEventListener('click', e => {
 function rMyEx() {
   const mine = (S.app?.rmyEx || []).filter(id => RX[id]), day = rxDay().filter(d => RX[d.id]);
   const sub = x => `${x.min} min${x.tool ? ' · ' + x.tool : ''}`;
-  return `<div class="card myxb"><div class="chead" style="margin-bottom:8px"><span class="eyebrow">Mes exercices</span>${mine.length ? `<span class="small muted">${mine.length}</span>` : ''}</div>
-    ${mine.length ? `<div class="list">${mine.map(id => xRow('data-rmyx', id, eqThumb(rxEq(RX[id])), RX[id].n, sub(RX[id]), 'data-rmyxdel')).join('')}</div>` : '<p class="small muted" style="margin:0">Cherche un exercice plus bas et ajoute-le à ta journée : il restera ici, prêt à être refait.</p>'}</div>
+  return `<div class="card myxb"><div class="chead"><span class="eyebrow">Mes exercices${mine.length ? ` <b class="foldn">${mine.length}</b>` : ''}</span>${mine.length ? foldBtn('myx-r') : ''}</div>
+    ${mine.length ? foldBox('myx-r', `<div class="list" style="margin-top:8px">${mine.map(id => xRow('data-rmyx', id, eqThumb(rxEq(RX[id])), RX[id].n, sub(RX[id]), 'data-rmyxdel')).join('')}</div>`) : ''}</div>
     ${day.length ? `<div class="dayframe"><div class="sec-label" style="margin:0 2px 6px">Exercices de récupération du jour</div><div class="list">${day.map(d => { const x = RX[d.id]; return xRow('data-rmyx', d.id, eqThumb(rxEq(x)), x.n, (d.pain ? 'Douleur · ' + d.pain : MUSI[d.m]?.n || '') + ' · ' + x.min + ' min'); }).join('')}</div></div>` : ''}`;
 }
 let RQ = '';
@@ -9704,8 +9741,8 @@ function tProgress() {
         <div class="stats" style="margin-top:10px">${kv('volume', last[V[0]] / V[3], prev ? prev[V[0]] / V[3] : null, V[3] > 1 ? 1 : 0, V[2] === 'unités de charge' ? '' : V[2])}${kv('intensité', last[V[1]], prev?.[V[1]], 0, '%')}</div>
         ${view === 'all' ? `<p class="small" style="margin:10px 0 0">${last.gL + last.sL ? `Part de la charge : musculation ${Math.round(last.gL / (last.gL + last.sL) * 100)} %, sprint ${Math.round(last.sL / (last.gL + last.sL) * 100)} %.` : 'Rien sur cette période.'}</p>` : ''}
         <p class="small muted" style="margin:6px 0 0">${V[4]}</p></div>
-      <div class="card pc3"><span class="eyebrow">Tonnage en musculation</span><p class="small muted" style="margin:4px 0 30px">Charge × répétitions de toutes tes séries, en tonnes.</p>${chart(B.map(b => ({k: b.a, v: b.ton / 1000, lab: b.lab, tip: b.tip})), {color: 'var(--accent)', bars: true, dec: 1, unit: 't'})}</div>
-      <div class="card pc3"><span class="eyebrow">Sprint</span><p class="small muted" style="margin:4px 0 30px">Mètres de sprint, sans les gammes ni l'échauffement. Règle : pas plus de +15 % d'une semaine à l'autre.</p>${chart(B.map(b => ({k: b.a, v: b.m, lab: b.lab, tip: b.tip})), {color: 'var(--accent)', bars: true, dec: 0, unit: 'm'})}</div>
+      <div class="pc6 tsx2"><div class="card"><span class="eyebrow">Tonnage en musculation</span><p class="small muted" style="margin:4px 0 0">Charge × répétitions de toutes tes séries, en tonnes.</p>${chart(B.map(b => ({k: b.a, v: b.ton / 1000, lab: b.lab, tip: b.tip})), {color: 'var(--accent)', bars: true, dec: 1, unit: 't', w: typeof isPC === 'function' && isPC() ? 340 : 180})}</div>
+      <div class="card"><span class="eyebrow">Sprint</span><p class="small muted" style="margin:4px 0 0">Mètres de sprint, sans les gammes ni l'échauffement. Règle : pas plus de +15 % d'une semaine à l'autre.</p>${chart(B.map(b => ({k: b.a, v: b.m, lab: b.lab, tip: b.tip})), {color: 'var(--accent)', bars: true, dec: 0, unit: 'm', w: typeof isPC === 'function' && isPC() ? 340 : 180})}</div></div>
       ${musRows ? `<div class="card pc6"><div class="chead"><span class="eyebrow">Chaque muscle</span><span class="small muted">volume · intensité · évolution</span></div><div class="mrows">${musRows}</div></div>` : ''}
       ${diagHtml(trainingDiag(), 'Diagnostic')}
       ${Object.keys(bests).length ? `<div class="card"><span class="eyebrow">Meilleurs chronos</span><ul class="exl">${Object.values(bests).sort((a, b) => a.dist - b.dist).map(b => `<li><span>${esc(exOf(b.ex).n)} ${b.dist} m</span><span>${fx(b.t, 2)} s · ${fx(b.dist / b.t * 3.6, 1)} km/h${b.shoes ? ' · ' + esc(b.shoes) : ''}${b.cond ? ' · ' + esc(b.cond) : ''}</span></li>`).join('')}</ul></div>` : ''}
@@ -11735,10 +11772,10 @@ function menuBoard() {
   const wks = myMenus().filter(m => m.kind !== 'day'), dys = myMenus().filter(m => m.kind === 'day');
   return `<div class="card sboard mboard"><div class="chead" style="margin-bottom:10px"><span class="eyebrow">Mes 4 semaines · menus</span><span class="sbnav"><button type="button" data-mboff="-1" aria-label="4 semaines avant"${off <= -26 ? ' disabled' : ''}>‹</button><small>${esc(fmtShort(weeks[0]).replace(/^\S+ /, ''))} – ${esc(fmtShort(addDays(weeks[3], 6)).replace(/^\S+ /, ''))}</small><button type="button" data-mboff="1" aria-label="4 semaines après">›</button></span></div>
     <div class="bgrid">${weeks.map(w => { const wm = menuById(S.fset.menuWeek?.[w]); return `<div class="bweek" data-mwrow="${w}"><button type="button" class="bwk mwk${wm ? ' on' : ''}" data-mweek="${w}" aria-label="Menu de la semaine ${seasonWeek(w)}">S${seasonWeek(w)}</button>${[0, 1, 2, 3, 4, 5, 6].map(i => cell(addDays(w, i))).join('')}</div>`; }).join('')}</div>
-    <div class="sec-label" style="margin:14px 2px 6px">Menu semaine</div>
-    <div class="bsrc">${wks.length ? wks.map(m => mchip(m)).join('') : '<p class="small muted" style="margin:0">Aucun bloc semaine.</p>'}</div>
-    <div class="sec-label" style="margin:14px 2px 6px">Menu jour</div>
-    <div class="bsrc">${dys.length ? dys.map(m => mchip(m)).join('') : '<p class="small muted" style="margin:0">Crée un bloc jour ci-dessous pour un jour différent (compétition, repas de famille…).</p>'}</div>
+    <div class="sec-label foldh" style="margin:14px 2px 6px"><span>Menu semaine${wks.length ? ` <b class="foldn">${wks.length}</b>` : ''}</span>${wks.length ? foldBtn('menu-w') : ''}</div>
+    ${wks.length ? foldBox('menu-w', `<div class="bsrc">${wks.map(m => mchip(m)).join('')}</div>`) : '<div class="bsrc"><p class="small muted" style="margin:0">Aucun bloc semaine.</p></div>'}
+    <div class="sec-label foldh" style="margin:14px 2px 6px"><span>Menu jour${dys.length ? ` <b class="foldn">${dys.length}</b>` : ''}</span>${dys.length ? foldBtn('menu-d') : ''}</div>
+    ${dys.length ? foldBox('menu-d', `<div class="bsrc">${dys.map(m => mchip(m)).join('')}</div>`) : '<div class="bsrc"><p class="small muted" style="margin:0">Crée un bloc jour ci-dessous pour un jour différent (compétition, repas de famille…).</p></div>'}
     <p class="small muted" style="margin:10px 2px 0">Garde le doigt sur un bloc, puis glisse-le. Tu peux aussi toucher une semaine (S${seasonWeek(weeks[0])}…) ou un jour pour choisir. Un jour vide, c'est ton menu de base.</p></div>`;
 }
 function fMenu() {
@@ -14927,6 +14964,118 @@ document.addEventListener('click', async e => {
   }
   if ((b = at('[data-donemore]'))) { S.doneAll = !S.doneAll; renderMod(true); }
 });
+
+/* ================= Adapter la séance (Aujourd'hui → la séance en mode édition) =================
+   Sur Aujourd'hui, la séance du jour (ou la prochaine) est posée dans un bloc « Adapter la séance » quand un exercice
+   le demande : une douleur notée dans le questionnaire (3 derniers jours) sur un muscle qu'il charge, ou, en muscu, une
+   chaîne en retard (rééquilibre). « Adapter » ouvre la séance comme quand on la crée : sous chaque exercice concerné,
+   les adaptations rangées de la plus utile à la moins utile. Oscar choisit ; rien ne change tout seul. */
+function adPlanOpts(it, pn) {
+  const e = exOf(it.ex), note = t => x => { x.note = (x.note ? x.note + ' · ' : '') + t; };
+  const drop = {t: 'Retirer l\'exercice aujourd\'hui', why: 'Pour une douleur forte seulement : tu perds le travail du jour, mais tu protèges les semaines suivantes.', fn: 'remove'};
+  if (e.t === 'track') return [
+    {t: 'Courir à 85 % au lieu du maximum', why: 'La vitesse maximale est le moment le plus risqué pour les ischios et les mollets.', fn: x => { x.pct = Math.min(+x.pct || 100, 85); }},
+    {t: 'Faire un tiers de répétitions en moins', why: 'Moins de volume à haute vitesse sur la zone.', fn: x => { x.reps = Math.max(1, Math.ceil((+x.reps || 3) * 2 / 3)); }}, drop];
+  const load = f => ({t: `Baisser la charge de ${Math.round((1 - f) * 100)} %${+it.pct ? ` (${it.pct} → ${Math.round(+it.pct * f)} % du max)` : ''}`, why: 'La tension sur le tissu est ce qui l\'irrite le plus. Tu gardes les répétitions, donc le travail reste là. Pendant l\'exercice : 3/10 de douleur au maximum.', fn: x => { if (+x.pct) x.pct = Math.round(+x.pct * f); else note(`charge −${Math.round((1 - f) * 100)} %`)(x); }});
+  const rom = {t: 'Réduire l\'amplitude à la zone sans douleur', why: 'Un muscle douloureux souffre surtout en position étirée. Rester dans l\'amplitude indolore garde la force sans l\'agresser.', fn: note('amplitude réduite, sans douleur')};
+  const iso = {t: 'Passer en isométrie : 3 × 30 s à 70 %', why: 'Une contraction sans mouvement à charge modérée entretient la force et calme souvent la douleur sur le moment.', fn: x => { x.ct = 'iso'; x.sets = Math.min(+x.sets || 3, 3); x.reps = 30; x.pct = +x.pct ? Math.round(+x.pct * .7) : 70; }};
+  const less = +it.sets > 1 ? {t: 'Enlever une série', why: 'Moins de volume sur la zone, la même qualité sur les séries gardées.', fn: x => { x.sets = Math.max(1, (+x.sets || 3) - 1); }} : null;
+  const rest = {t: 'Récupérer 1 min de plus entre les séries', why: 'Le muscle arrive moins fatigué à chaque série : moins de compensations, moins de risque.', fn: x => { x.rest = (+x.rest || 90) + 60; }};
+  const tempo = {t: 'Descendre en 3 secondes', why: 'Un tempo lent enlève les à-coups sur la zone et améliore le contrôle.', fn: x => { x.tempo = [3, 0, 1, 0]; }};
+  const sub = subFor(it.ex, pn.hit), swap = sub ? {t: `Remplacer par ${sub.n}`, why: `Il fait travailler les mêmes muscles en épargnant : ${pn.hit.map(k => MUSI[k]?.n.toLowerCase()).filter(Boolean).join(', ')}.`, fn: x => { x.ex = sub.id; }} : null;
+  const L = pn.v >= 6 ? [swap, drop, iso, load(.6)] : pn.v >= 3 ? [load(.75), rom, iso, less, swap, rest, drop] : [load(.9), tempo, rom, less, swap, rest];
+  return L.filter(Boolean);
+}
+// Les exercices d'une séance qui demandent une adaptation, la douleur la plus forte d'abord, puis le rééquilibre.
+function adItems(p, srcId = p?.id) {
+  if (!p?.items) return []; const out = [];
+  p.items.forEach((it0, i) => { const it = it0._ad ? JSON.parse(it0._ad.snap) : it0; if (it.ex === 'warmup' || it.test || exOf(it.ex).t === 'test' || it.seq || it.tw || (!it0._ad && /Adapté : /.test(it.note || ''))) return;
+    const pn = painFor(it.ex); if (pn) out.push({i, ex: it.ex, pn, head: `Douleur notée : ${pn.l} (${pn.v}/10)`, opts: adPlanOpts(it, pn)}); });
+  out.sort((a, b) => b.pn.v - a.pn.v);
+  if (p.kind !== 'track') try { const nx = adNext(); if (nx && nx.p.id === srcId) for (const a of adProps(nx)) {
+    const i = p.items.map(it => it._ad ? JSON.parse(it._ad.snap).ex : it.ex).lastIndexOf(a.from); if (i < 0 || out.some(o => o.i === i)) continue;
+    out.push({i, ex: a.from, head: 'Rééquilibre de tes chaînes', opts: [{t: `Remplacer par ${exOf(a.to).n} · ${a.sets || 3} × ${a.reps || 12}`, why: a.why + (a.ai ? ' · préparateur physique (Claude)' : ''), fn: x => { x.ex = a.to; x.sets = +a.sets || 3; x.reps = +a.reps || 12; x.rest = 60; delete x.pct; x.note = 'Rééquilibre'; }}]}); } } catch (e) {}
+  return out.filter(o => o.opts.length);
+}
+// La séance d'Aujourd'hui (ou la prochaine) dans le bloc « Adapter la séance ».
+function adWrap(kd, html) {
+  if (!html || kindDone(TODAY, kd) || kindSkip(TODAY, kd)) return html;
+  let q = planForK(TODAY, kd), k = TODAY;
+  if (!q) { const nx = [...Array(60)].map((_, i) => addDays(TODAY, i + 1)).map(d => ({k: d, p: planForK(d, kd)})).find(x => x.p); if (!nx) return html; q = nx.p; k = nx.k; }
+  const A = adItems(q); if (!A.length) return html;
+  const why = [...new Set(A.map(a => a.pn ? `${a.pn.l} ${a.pn.v}/10` : 'rééquilibre'))].join(' · ');
+  return `<div class="adwrap"><div class="adwh"><span class="adwt"><b>Adapter la séance</b><small>${A.length} exercice${A.length > 1 ? 's' : ''} à adapter · ${esc(why)}</small></span><button type="button" class="btn adgo" data-adedit="${esc(q.id)}|${k}">Adapter</button></div><div class="adwin">${html}</div></div>`;
+}
+// Dans l'éditeur : sous chaque exercice concerné, ses adaptations (3 d'abord, les autres sur demande), ou celle choisie.
+function adBox(a) {
+  const it = ED.items[a.i], ch = it?._ad;
+  if (ch) return `<div class="edad done"><span>✓ ${esc(ch.t)}${ch.rm ? ' · retiré à l\'enregistrement' : ''}</span><button type="button" class="linkbtn" data-edadx="${a.i}">Annuler</button></div>`;
+  const more = ED.adMore?.[a.i], L = more ? a.opts : a.opts.slice(0, 3);
+  return `<div class="edad"><span class="edadh">${esc(a.head)} · de la plus utile à la moins utile</span>${L.map((o, j) => `<button type="button" class="adopt" data-edad="${a.i}.${j}"><b>${j + 1}. ${esc(o.t)}</b><small>${esc(o.why)}</small></button>`).join('')}${a.opts.length > 3 ? `<button type="button" class="linkbtn" data-edadm="${a.i}">${more ? 'Moins d\'adaptations' : `+ ${a.opts.length - 3} autre${a.opts.length - 3 > 1 ? 's' : ''}`}</button>` : ''}</div>`;
+}
+const adEditBody0 = editBody;
+editBody = function () {
+  let h = adEditBody0(); if (!ED?.adapt) return h;
+  const A = adItems(ED, ED.adSrc);
+  const ban = `<div class="adban"><b>Adapter la séance</b><span>${A.length ? `${A.length} exercice${A.length > 1 ? 's' : ''} à adapter : ${esc(A.map(a => exOf(a.ex).n).join(', '))}. Choisis l'adaptation qui te va sous chacun, puis « Enregistrer ».` : 'Plus rien à adapter. « Enregistrer » garde tes choix.'}</span>${ED.tbl ? A.map(a => `<div class="adbx"><b>${esc(exOf(a.ex).n)}</b>${adBox(a)}</div>`).join('') : ''}</div>`;
+  h = h.replace('<h2 class="sesh">Séance</h2>', '<h2 class="sesh">Séance</h2>' + ban);
+  if (!ED.tbl) for (const a of A) { const m = h.indexOf(`data-edi="${a.i}">`); if (m < 0) continue; const e = h.indexOf('</h3>', m); if (e < 0) continue; h = h.slice(0, e + 5) + adBox(a) + h.slice(e + 5); }
+  for (const [i, it] of ED.items.entries()) if (it._ad?.rm) h = h.replace(`data-edi="${i}">`, `data-edi="${i}" data-adrm>`);
+  return h;
+};
+// À l'enregistrement : les exercices retirés partent, les marques d'adaptation aussi (la note de l'exercice garde le choix).
+const adSavePlan0 = savePlan;
+savePlan = async function (...a) {
+  if (ED) { ED.items = ED.items.filter(it => !it._ad?.rm).map(it => { if (!it._ad) return it; const x = {...it}, t = x._ad.t; delete x._ad; if (!/^Rééquilibre/.test(x.note || '') && !(x.note || '').includes(t)) x.note = (x.note ? x.note + ' · ' : '') + 'Adapté : ' + t; return x; });
+    delete ED.adapt; delete ED.adSrc; delete ED.adMore; }
+  return adSavePlan0.apply(this, a);
+};
+document.addEventListener('click', e => {
+  const at = q => e.target.closest?.(q); let b;
+  if ((b = at('[data-adedit]'))) { const [id, k] = b.dataset.adedit.split('|'); editPlan(id, k); if (ED) { ED.adapt = true; ED.adSrc = id; ED.adMore = {}; paneRender(); } return; }
+  if (!ED?.adapt) return;
+  if ((b = at('[data-edad]'))) { const [i, j] = b.dataset.edad.split('.').map(Number), a = adItems(ED, ED.adSrc).find(x => x.i === i), o = a?.opts[j]; if (!o) return;
+    const it = ED.items[i], snap = JSON.stringify(it);
+    if (o.fn === 'remove') it._ad = {t: o.t, snap, rm: true}; else { const x = JSON.parse(snap); o.fn(x); x._ad = {t: o.t, snap}; ED.items[i] = x; }
+    try { oneHap(8); } catch (er) {} paneRender(); return; }
+  if ((b = at('[data-edadx]'))) { const i = +b.dataset.edadx, it = ED.items[i]; if (it?._ad) ED.items[i] = JSON.parse(it._ad.snap); paneRender(); return; }
+  if ((b = at('[data-edadm]'))) { const i = +b.dataset.edadm; ED.adMore = {...ED.adMore, [i]: !ED.adMore?.[i]}; paneRender(); }
+});
+
+/* ================= Graphiques au doigt et à la souris =================
+   La bulle (la valeur) n'apparaît que pendant que le doigt ou la souris est sur le graphique, et part avec lui.
+   Avant, au téléphone, la dernière valeur restait affichée (tonnage, sprint…). « Intensité et volume » se lit aussi
+   au doigt : volume et intensité de la période touchée. */
+initCharts = function () {};
+const chOff = b => { const sc = b.querySelector('.sc'), bu = b.querySelector('.bubble'); if (sc) sc.innerHTML = ''; if (bu) bu.hidden = true; };
+const chAllOff = () => document.querySelectorAll('.chartbox, .dualbox').forEach(chOff);
+document.addEventListener('pointerup', e => { if (e.pointerType !== 'mouse') chAllOff(); });
+document.addEventListener('pointercancel', chAllOff);
+
+// Intensité et volume : une boîte autour du graphique, la même bulle que les autres.
+const DU = {}; let duId = 0;
+const chDual0 = dualChart;
+dualChart = function (pts, vKey, iKey, vUnit, vDiv = 1) {
+  const id = 'd' + (++duId), W0 = typeof isPC === 'function' && isPC() ? 760 : 340;
+  DU[id] = {W0, H: 160, L: 8, R: 8, Bm: 22, n: pts.length, P: pts.map(p => ({tip: p.tip, v: (p[vKey] || 0) / vDiv, i: p[iKey]})), u: vUnit, dec: vDiv > 1 ? 1 : 0};
+  return `<div class="dualbox" data-du="${id}">${chDual0(pts, vKey, iKey, vUnit, vDiv).replace(/<\/svg>$/, '<g class="sc"></g></svg>')}<div class="bubble" hidden></div></div>`;
+};
+function duTo(box, e) {
+  const c = DU[box.dataset.du]; if (!c || !c.n) return;
+  const r = box.querySelector('svg').getBoundingClientRect(), x = (e.clientX - r.left) / r.width * c.W0, bw = (c.W0 - c.L - c.R) / c.n;
+  const i = Math.max(0, Math.min(c.n - 1, Math.floor((x - c.L) / bw))), p = c.P[i];
+  box.querySelector('.sc').innerHTML = `<rect x="${(c.L + i * bw).toFixed(1)}" y="4" width="${bw.toFixed(1)}" height="${c.H - c.Bm - 4}" rx="4" class="duhl"/>`;
+  const b = box.querySelector('.bubble');
+  b.innerHTML = `<b>${fx(p.v, c.dec)}${c.u ? ' ' + esc(c.u) : ''}</b><em>${esc(p.tip || '')}${p.i != null ? ' · intensité ' + fx(p.i) + ' %' : ''}</em>`; b.hidden = false;
+  const bx = box.getBoundingClientRect(), px = (c.L + (i + .5) * bw) / c.W0 * r.width + (r.left - bx.left), half = Math.min(b.offsetWidth, bx.width) / 2;
+  b.style.left = Math.max(half, Math.min(bx.width - half, px)) + 'px';
+}
+let DUB = null;
+document.addEventListener('pointerdown', e => { const b = e.target.closest?.('.dualbox'); if (!b) return; DUB = b; duTo(b, e); });
+document.addEventListener('pointermove', e => { const b = e.target.closest?.('.dualbox'); if (b && (DUB === b || e.pointerType === 'mouse')) duTo(b, e); });
+document.addEventListener('pointerup', () => { DUB = null; });
+document.addEventListener('pointercancel', () => { DUB = null; });
+document.addEventListener('pointerout', e => { if (e.pointerType !== 'mouse') return; const b = e.target.closest?.('.dualbox'); if (b && !b.contains(e.relatedTarget)) chOff(b); });
 
 /* ================= Forme du jour, au début de la séance =================
    Quand Oscar commence une séance de muscu, le préparateur lit ses données du moment (récupération, sommeil, ressenti du
@@ -26351,6 +26500,22 @@ const I18N_EN = {
 "Écrit par Claude avec le skill nutrition": "Written by Claude with the nutrition skill",
 "Écrit par Claude avec le skill kiné et récupération": "Written by Claude with the physio and recovery skill",
 "Écrit par Claude": "Written by Claude",
+"Adapter la séance": "Adapt the session",
+"Adapter": "Adapt",
+"{} exercice à adapter · {}": "{} exercise to adapt · {}",
+"{} exercices à adapter · {}": "{} exercises to adapt · {}",
+"Douleur notée : {} ({}/10) · de la plus utile à la moins utile": "Pain noted: {} ({}/10) · most useful first",
+"Rééquilibre de tes chaînes · de la plus utile à la moins utile": "Rebalancing your chains · most useful first",
+"rééquilibre": "rebalance",
+"Moins d'adaptations": "Fewer adaptations",
+"+ {} autre": "+ {} other",
+"+ {} autres": "+ {} others",
+"· retiré à l'enregistrement": "· removed when saved",
+"{} exercice à adapter : {}. Choisis l'adaptation qui te va sous chacun, puis « Enregistrer ».": "{} exercise to adapt: {}. Pick the adaptation that suits you under each one, then “Save”.",
+"{} exercices à adapter : {}. Choisis l'adaptation qui te va sous chacun, puis « Enregistrer ».": "{} exercises to adapt: {}. Pick the adaptation that suits you under each one, then “Save”.",
+"Plus rien à adapter. « Enregistrer » garde tes choix.": "Nothing left to adapt. “Save” keeps your choices.",
+"Remplacer par {} · {} × {}": "Replace with {} · {} × {}",
+"Baisser la charge de {} % ({} → {} % du max)": "Lower the load by {}% ({} → {}% of max)",
 };
 
 /* ================= TNR · English version =================

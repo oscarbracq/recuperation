@@ -928,3 +928,34 @@ html.one #home-view{height:auto;min-height:100%}html.one .one-hm{height:auto!imp
 .lvme circle{fill:var(--accent);stroke:var(--bg);stroke-width:2.5}.lvme text,.lvme60 text{font-size:10.5px;font-weight:700;fill:var(--fg)}.lvme60 circle{fill:var(--bg);stroke:var(--accent);stroke-width:2.5}
 .lvpaths{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.lvpath{padding:10px 12px;border-radius:16px;background:var(--card);box-shadow:0 0 0 1px var(--line)}
 .lvstep{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:baseline;padding:5px 0;border-top:1px solid var(--line)}.lvstep:first-of-type{border-top:0}.lvstep span{font-variant-numeric:tabular-nums}.lvstep em{font-style:normal;color:var(--fg2);font-size:.8rem;font-variant-numeric:tabular-nums}
+
+/* ---------- Détail / Masquer : les listes repliées ---------- */
+.foldbtn{flex:none;background:none;border:0;padding:4px 2px 4px 10px;font:600 .8125rem/1 var(--font,inherit);color:var(--accent);cursor:pointer;text-transform:none;letter-spacing:0}
+.foldn{font:inherit!important;font-weight:800!important;color:var(--fg);margin-left:4px;font-variant-numeric:tabular-nums}
+.sec-label.foldh{display:flex;justify-content:space-between;align-items:center}
+.card.myxb>.chead{margin-bottom:0}
+.foldb{display:grid;grid-template-rows:0fr;transition:grid-template-rows .32s cubic-bezier(.32,.72,0,1)}.foldb.on{grid-template-rows:1fr}
+.foldi{overflow:hidden;min-height:0}.foldb:not(.on) .foldi{visibility:hidden;transition:visibility 0s .32s}
+@media (prefers-reduced-motion:reduce){.foldb{transition:none}}
+/* ---------- Aujourd'hui : « Adapter la séance », la séance posée dedans, un peu plus petite ---------- */
+.adwrap{border-radius:24px;padding:8px;background:color-mix(in srgb,var(--accent) 12%,var(--one-base,#0c0d10));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 22%,transparent)}
+.adwh{display:flex;align-items:center;gap:12px;padding:8px 8px 12px}
+.adwt{flex:1;min-width:0}.adwt b{display:block;color:var(--accent);font-size:1rem}.adwt small{display:block;color:var(--fg2);font-size:.8rem;margin-top:2px;line-height:1.3}
+.btn.adgo{flex:none;width:auto;padding:0 18px;height:40px;font-size:.9rem}
+.adwin>.card{margin:0;border-radius:18px}
+html.one[data-theme="light"] .adwrap{background:color-mix(in srgb,var(--accent) 16%,#fff)}
+@media (prefers-color-scheme:light){html.one:not([data-theme="dark"]) .adwrap{background:color-mix(in srgb,var(--accent) 16%,#fff)}}
+/* ---------- L'éditeur en mode « Adapter » ---------- */
+.adban{margin:4px 0 12px;padding:12px 14px;border-radius:16px;background:color-mix(in srgb,var(--accent) 12%,var(--card2))}.adban>b{display:block;color:var(--accent)}.adban>span{display:block;font-size:.85rem;line-height:1.4;margin-top:4px}
+.adbx{margin-top:10px}.adbx>b{font-size:.9rem}
+.edad{margin:10px 0 4px;padding:10px;border-radius:14px;background:color-mix(in srgb,var(--accent) 10%,var(--card2))}
+.edadh{display:block;font-size:.78rem;font-weight:700;color:var(--accent);margin:0 2px 2px}
+.adopt{display:block;width:100%;text-align:left;background:var(--card);border:0;border-radius:11px;padding:9px 11px;margin-top:6px;color:inherit;cursor:pointer}
+.adopt b{font-size:.88rem;font-weight:700}.adopt small{display:block;color:var(--fg3);font-size:.76rem;line-height:1.35;margin-top:2px}.adopt:active{transform:scale(.98)}
+.edad.done{display:flex;align-items:center;justify-content:space-between;gap:10px;background:color-mix(in srgb,var(--good) 12%,var(--card2))}.edad.done span{font-size:.86rem;font-weight:600}
+.edad .linkbtn{background:none;border:0;color:var(--accent);font-weight:600;font-size:.82rem;padding:8px 2px 2px;cursor:pointer}
+.exbox[data-adrm]>*:not(h3):not(.edad){opacity:.4}
+/* ---------- Tendance : tonnage et sprint côte à côte ; Intensité et volume se lit au doigt ---------- */
+.tsx2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.tsx2>.card{padding:14px 12px;min-width:0;display:flex;flex-direction:column}.tsx2>.card>.chartbox{margin-top:auto}.tsx2 .small{font-size:.72rem;line-height:1.3}
+.dualbox{position:relative;padding-top:46px;touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:crosshair}
+.duhl{fill:var(--fg);opacity:.08}
