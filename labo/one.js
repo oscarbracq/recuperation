@@ -143,7 +143,7 @@ function oneAnim(root) {
   root.querySelectorAll('.imb i').forEach((b, i) => { if (!fresh(b)) return; b.style.transformOrigin = b.classList.contains('neg') ? 'right' : 'left';
     b.animate([{transform: 'scaleX(0)'}, {transform: 'scaleX(1)'}], {duration: 750, delay: 150 + i * 60, easing: 'cubic-bezier(.3,1.25,.5,1)', fill: 'backwards'}); });
   // Nutrition · le chiffre du jour part de « − ce que tu dois manger » et monte jusqu'à ton bilan (ex. −2 580 → +2).
-  root.querySelectorAll('.calring .rw > b').forEach(b => { if (!fresh(b)) return; try { const g = fuelGoal(S.fday)?.kcal, t = dayTotals(S.fday)?.kcal || 0; if (g) oneBal(b, -g, t - g); } catch (e) {} });
+  root.querySelectorAll('.calring .rw > b').forEach(b => { if (!fresh(b)) return; try { const g = fuelGoal(S.fday)?.kcal, t = (typeof fuelSoFar === 'function' ? fuelSoFar(S.fday) : dayTotals(S.fday))?.kcal || 0; if (g) oneBal(b, -g, t - g); } catch (e) {} });
   const nums = [...root.querySelectorAll('.num, .imh b, .segl b')].filter(fresh); oneCount(nums);
   if (nums.length || root.querySelector('svg')) ONE.done = ONE.act;
 }

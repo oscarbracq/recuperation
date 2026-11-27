@@ -10230,6 +10230,17 @@ function dayTotals(k) {
   return t;
 }
 const trainDay = k => !!planFor(k) || logsOn(k).length > 0 || highDay(k);
+// Aujourd'hui : ce qui est mangé à cette heure-ci. Un repas compte quand son heure (planning) est passée ; les compléments, au dîner.
+// Le cercle et les jauges se remplissent ainsi au fil de la journée ; les autres jours, tout le journal compte.
+function fuelSoFar(k) {
+  if (k !== TODAY) return {...dayTotals(k), next: null};
+  const now = new Date().getHours() * 60 + new Date().getMinutes(), at = m => { const a = mealBlk(m, k)?.a; return a ? tmin(a) : null; };
+  const done = m => { const t = at(m); return t == null || t <= now; }, t = {kcal: 0, p: 0, c: 0, f: 0}, left = {};
+  for (const it of fday(k).items || []) { if (done(it.meal)) { t.kcal += it.kcal; t.p += it.p; t.c += it.c; t.f += it.f; } else left[it.meal] = (left[it.meal] || 0) + it.kcal; }
+  if (k >= FUEL_PLAN_FROM && t.kcal && done('dinner')) for (const [id, , , , mac] of suppList()) if (mac && suppOf(id).on) { t.kcal += mac.kcal; t.p += mac.p; t.c += mac.c; t.f += mac.f; }
+  const nx = MEALS.map(([m]) => m).filter(m => !done(m) && left[m]).sort((a, b) => at(a) - at(b))[0];
+  return {...t, next: nx ? {m: nx, a: mealBlk(nx, k).a, kcal: left[nx]} : null};
+}
 // Energy, recomputed each week (Monday) from the week before:
 // base = Katch-McArdle on lean mass (Withings weight and fat mass), Mifflin-St Jeor when the fat mass is missing;
 // at rest = base × 1,4 (digestion and daily life without sport); active = sessions from the watch (Keytel 2005 on heart rate,
@@ -10374,9 +10385,11 @@ document.addEventListener('click', e => { let b;
   if (SGV && (b = e.target.closest('[data-sgg]'))) { SGV.gran = b.dataset.sgg; SGV.off = 0; paneRender(); return; }
   if (SGV && (b = e.target.closest('[data-sgo]')) && !b.disabled) { SGV.off = Math.max(0, SGV.off + +b.dataset.sgo); paneRender(); } });
 document.addEventListener('click', e => { const b = e.target.closest('[data-nseg]'); if (!b) return; S.nseg = b.dataset.nseg; renderMod(true); });
+// Le cercle suit l'heure : quand l'heure d'un repas passe, l'écran Nutrition se met à jour tout seul.
+let FSF = null; setInterval(() => { if (S.mod !== 'N' || S.sheet || P.stack.length || S.fday !== TODAY || document.activeElement?.matches?.('input,textarea')) return; const v = fuelSoFar(TODAY).kcal; if (FSF != null && v !== FSF) renderMod(true); FSF = v; }, 60000);
 function fJournal() {
   cookSeed();
-  const k = S.fday, g = fuelGoal(k), t = dayTotals(k), d = fday(k), left = g.kcal - t.kcal;
+  const k = S.fday, g = fuelGoal(k), t = fuelSoFar(k), d = fday(k), left = g.kcal - t.kcal;
   const plan = planFor(k), title = k === TODAY ? 'Aujourd\'hui' : k === addDays(TODAY, -1) ? 'Hier' : cap(fmtShort(k));
   const macro = (lab, v, goal, color) => `<div class="macro" style="--mc:${color}"><span>${lab}</span><b>${fx(v)}<small> / ${fx(goal)} g</small></b><div class="bar"><i style="width:${clamp(v / goal * 100, 0, 100)}%"></i></div></div>`;
   const y = fday(addDays(k, -1)).items || [];
@@ -10386,7 +10399,8 @@ function fJournal() {
     <div class="stack" style="margin-top:12px">
       <article class="card">
         <div class="calring"><div class="rw">${ring(t.kcal, g.kcal, 'var(--accent)', 'lg')}<b>${fx(Math.abs(left))}<small>${left >= 0 ? 'kcal restantes' : 'kcal en trop'}</small></b></div>
-          <div class="calrows"><div><span class="muted">Objectif du jour</span><b>${fx(g.kcal)} kcal</b></div><div><span class="muted">Déjà mangé</span><b>${fx(t.kcal)} kcal</b></div><div><span class="muted">${left >= 0 ? 'Reste à manger' : 'Au-dessus de l\'objectif'}</span><b style="color:${left >= 0 || left > -100 ? 'var(--accent)' : 'var(--warn)'}">${left >= 0 ? fx(left) : '+' + fx(-left)} kcal</b></div></div></div>
+          <div class="calrows"><div><span class="muted">Objectif du jour</span><b>${fx(g.kcal)} kcal</b></div><div><span class="muted">Déjà mangé${k === TODAY ? ' à cette heure' : ''}</span><b>${fx(t.kcal)} kcal</b></div><div><span class="muted">${left >= 0 ? 'Reste à manger' : 'Au-dessus de l\'objectif'}</span><b style="color:${left >= 0 || left > -100 ? 'var(--accent)' : 'var(--warn)'}">${left >= 0 ? fx(left) : '+' + fx(-left)} kcal</b></div></div></div>
+        ${t.next ? `<p class="small muted fnext">Prochain repas : <b>${esc(mealLab(t.next.m, k))}</b> à ${tfr(t.next.a)} · ${fx(t.next.kcal)} kcal prévues</p>` : ''}
         <div class="macros">${macro('Protéines', t.p, g.p, '#E0352B')}${macro('Glucides', t.c, g.c, '#2F7BF5')}${macro('Lipides', t.f, g.f, '#E8900A')}</div>
       </article>
       ${k === TODAY ? coachNutrition(k) : ''}

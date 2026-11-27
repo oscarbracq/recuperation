@@ -768,3 +768,29 @@ html.one .btn.one-del.over{background:var(--bad);color:#fff;border-style:solid;t
 .wadd{display:grid;grid-template-columns:minmax(0,1fr) 70px auto;gap:6px;margin-top:8px}.wadd .mini-in{text-align:left;height:36px}
 .wcnt{color:var(--fg3)}.wcnt.ok{color:var(--good)}
 .livebody.fin{margin-top:0}
+
+/* v178 : nutrition au fil de la journée */
+.fnext{margin:12px 2px 0}.fnext b{color:var(--fg)}
+
+/* v178 : Ton cap (accueil) et la page Idées — sobre, sans couleur */
+.cap{margin:18px 0 14px;padding:16px 18px;border-radius:22px;background:var(--card);border:1px solid color-mix(in srgb,var(--fg) 8%,transparent)}
+.cap-h{display:flex;justify-content:space-between;align-items:center}.cap-ed{background:none;border:0;padding:4px 0;color:var(--fg2);font-size:.8rem;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.cap-dream{margin:8px 0 0;font-size:.82rem;color:var(--fg3);font-style:italic}
+.cap-goal{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:6px}.cap-goal b{font:800 2rem/1.05 var(--display);letter-spacing:-.03em;color:var(--fg)}
+.cap-j{font:700 .95rem/1 var(--display);color:var(--fg);padding:6px 10px;border-radius:99px;border:1px solid color-mix(in srgb,var(--fg) 25%,transparent);white-space:nowrap}
+.cap-sub{margin:6px 0 0;font-size:.82rem;color:var(--fg2);line-height:1.4}
+.cap-line{position:relative;height:4px;border-radius:2px;background:color-mix(in srgb,var(--fg) 12%,transparent);margin:18px 6px 4px}.cap-line i{position:absolute;inset:0 auto 0 0;border-radius:2px;background:var(--fg)}
+.cap-line em{position:absolute;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:var(--bg);border:2px solid color-mix(in srgb,var(--fg) 55%,transparent)}.cap-line em.ok,.cap-line em.past{background:var(--fg);border-color:var(--fg)}.cap-line em.end{width:14px;height:14px;margin:-7px 0 0 -7px;border-color:var(--fg)}
+.cap-nx{margin:12px 0 0;font-size:.86rem;line-height:1.35}.cap-nx span{display:block;font-size:.7rem;color:var(--fg3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.cap-w{margin-top:14px;padding-top:12px;border-top:1px solid color-mix(in srgb,var(--fg) 10%,transparent)}.cap-w .eyebrow{display:block;margin-bottom:4px}
+.cap-r{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:10px;align-items:center;padding:6px 0;font-size:.88rem}.cap-r b{font-variant-numeric:tabular-nums;color:var(--fg2)}
+.cap-ck{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--fg) 35%,transparent);font-size:.72rem;font-weight:800;color:var(--bg);background:none;padding:0}
+.cap-r.ok .cap-ck{background:var(--fg);border-color:var(--fg)}.cap-r.ok span{color:var(--fg2)}
+.cap-draft{margin:10px 0 0;font-size:.76rem;color:var(--fg3)}
+.cap-f{display:flex;flex-direction:column;gap:4px;font-size:.78rem;color:var(--fg2);margin-top:6px}.cap-f .mini-in{text-align:left;height:40px}
+.cap-g2{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end}.cap-g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.cap-st{display:grid;grid-template-columns:128px minmax(0,1fr);gap:6px}.cap-st .chip{justify-self:start}.cap-x{background:none;border:0;color:var(--fg3);font-size:1.2rem;justify-self:end}
+.idp-h{padding:8px 4px 4px}.idp-p{margin:8px 0 0;font-size:.86rem;color:var(--fg2);line-height:1.45}
+.idl{display:grid;gap:10px}.idc{padding:14px 16px;border-radius:18px;background:var(--card);border:1px solid color-mix(in srgb,var(--fg) 8%,transparent)}
+.idc b{display:block;font-size:1rem}.idc p{margin:6px 0 0;font-size:.86rem;line-height:1.4}.idc small{display:block;margin-top:6px;font-size:.74rem;color:var(--fg3);line-height:1.35}
+.idb{display:flex;gap:8px;margin-top:10px}.idc.yes{border-color:color-mix(in srgb,var(--fg) 45%,transparent)}.idc.no{opacity:.45}
