@@ -930,6 +930,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 .sheet{position:fixed;inset:0;z-index:50;transform:translateY(105%);transition:transform .5s cubic-bezier(.32,.72,0,1);pointer-events:none}
 .sheet.on{transform:translateY(var(--sy,0px));pointer-events:auto}
 .sheet.drag{transition:none}
+.sheet.punder{z-index:71!important;transform:none!important;transition:none!important;pointer-events:none!important}
 .sheet-scroll{height:100%;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .sheet-gap{height:calc(28px + env(safe-area-inset-top,0px))}
 .sheet-card{max-width:620px;min-height:100%;margin:0 auto;background:var(--bg);border-radius:20px 20px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.18);transition:border-radius .2s}
@@ -6059,7 +6060,7 @@ sheetEl.addEventListener('touchend', () => {
 (() => {
   const el = $('#pane'), sc = $('#pane-scroll');
   let d = null, y = 0;
-  const set = (v, anim = true) => { y = v; el.classList.toggle('drag', !anim); el.style.setProperty('--sy', v + 'px'); $('#scrim').style.opacity = anim ? '' : String(Math.max(0, Math.min(1, 1 - v / el.offsetHeight))); };
+  const set = (v, anim = true) => { y = v; el.classList.toggle('drag', !anim); el.style.setProperty('--sy', v + 'px'); $('#scrim').style.opacity = anim || P.stack.length > 1 ? '' : String(Math.max(0, Math.min(1, 1 - v / el.offsetHeight))); };
   el.addEventListener('touchstart', e => {
     if (e.target.closest('.chartbox, input, textarea, select') || P.stack.at(-1)?.fixed || P.stack[0]?.side) return;
     const t = e.touches[0].clientY; d = {y0: t, start: y, active: false, last: t, t: performance.now(), v: 0};
@@ -6069,7 +6070,7 @@ sheetEl.addEventListener('touchend', () => {
     const t = e.touches[0].clientY, dy = t - d.y0;
     if (!d.active) {
       if (Math.abs(dy) < 6) return;
-      if (dy > 0 && sc.scrollTop <= 0) { d.active = true; d.y0 = t; d.start = y; } else { d = null; return; }
+      if (dy > 0 && sc.scrollTop <= 0) { d.active = true; d.y0 = t; d.start = y; clearTimeout(PANE_T); if (P.stack.length > 1) paneUnder(true); } else { d = null; return; }
     }
     e.preventDefault();
     const now = performance.now(); d.v = (t - d.last) / Math.max(1, now - d.t); d.last = t; d.t = now;
@@ -6078,8 +6079,8 @@ sheetEl.addEventListener('touchend', () => {
   el.addEventListener('touchend', () => {
     const g = d; d = null; if (!g?.active) return;
     // Only the window on top goes: the one below (and its own back arrow) stays.
-    if (y + g.v * 200 > el.offsetHeight * .25) { el.classList.remove('drag'); if (P.stack.length > 1) { set(el.offsetHeight); setTimeout(() => { closePane(); el.classList.add('drag'); set(0, false); $('#scrim').style.opacity = ''; requestAnimationFrame(() => el.classList.remove('drag')); paneFade(); }, 320); } else { closeAllPanes(); setTimeout(() => set(0), 500); } return; }
-    set(0);
+    if (y + g.v * 200 > el.offsetHeight * .25) { el.classList.remove('drag'); if (P.stack.length > 1) { set(el.offsetHeight); PANE_T = setTimeout(() => { el.classList.add('drag'); closePane(); set(0, false); $('#scrim').style.opacity = ''; void el.offsetWidth; el.classList.remove('drag'); paneUnder(false); }, 470); } else { closeAllPanes(); setTimeout(() => set(0), 500); } return; }
+    set(0); if (P.stack.length > 1) PANE_T = setTimeout(() => paneUnder(false), 520);
   });
 })();
 // A day not saved by hand is saved at 23:59: at that time if the app is open, otherwise at the next opening.
@@ -8787,7 +8788,20 @@ function tProfile() {
 }
 /* ---------- pane: a second sheet for Training and Fuel, with a stack (a picker can open over an editor) ---------- */
 const P = {stack: [], live: false};
-function openPane(view) { if (view.title && P.stack.at(-1)?.title === view.title) return; const over = P.stack.length > 0; P.stack.push(view); paneShow(); if (over) paneFade(); }
+function openPane(view) { if (view.title && P.stack.at(-1)?.title === view.title) return; const over = P.stack.length > 0; if (over) paneSnap(); P.stack.push(view); if (over && !isPC()) { paneSlideIn(); return; } paneShow(); if (over) paneFade(); }
+// Une fenêtre posée sur une autre : celle du dessous est gardée en image (copie figée), affichée dessous quand on
+// descend la fenêtre du dessus. Plus de retour au Profil entre les deux, plus de fondu : elle reste là, nette.
+function paneSnap() { const v = P.stack.at(-1), el = $('#pane'); if (!v || !el) return;
+  const c = el.cloneNode(true); c.removeAttribute('id'); c.querySelectorAll('[id]').forEach(x => x.removeAttribute('id')); c.querySelectorAll('video,audio').forEach(x => { x.removeAttribute('src'); x.querySelectorAll('source').forEach(y => y.remove()); });
+  const a = el.querySelectorAll('canvas'), b = c.querySelectorAll('canvas'); a.forEach((x, i) => { try { b[i].width = x.width; b[i].height = x.height; b[i].getContext('2d').drawImage(x, 0, 0); } catch (e) {} });
+  c.classList.add('punder'); c.classList.remove('drag'); c.setAttribute('aria-hidden', 'true'); c.removeAttribute('role'); v.snap = {node: c, top: $('#pane-scroll').scrollTop}; }
+function paneUnder(on) { document.querySelectorAll('.punder').forEach(x => x.remove()); if (!on) return; const s = P.stack.at(-2)?.snap; if (!s) return; document.body.appendChild(s.node); const sc = s.node.querySelector('.sheet-scroll'); if (sc) sc.scrollTop = s.top; }
+let PANE_T = null;
+function paneSlideIn() { const el = $('#pane'); clearTimeout(PANE_T); paneUnder(true); el.classList.add('drag'); el.style.setProperty('--sy', el.offsetHeight + 'px'); paneShow(); void el.offsetWidth;
+  requestAnimationFrame(() => { el.classList.remove('drag'); el.style.setProperty('--sy', '0px'); }); PANE_T = setTimeout(() => paneUnder(false), 560); }
+// Fermer la fenêtre du dessus en la faisant descendre : celle du dessous est déjà là, à la même place.
+function panePop() { const el = $('#pane'); if (P.stack.length < 2 || isPC()) { closePane(); return; } clearTimeout(PANE_T); paneUnder(true); el.classList.remove('drag'); el.style.setProperty('--sy', el.offsetHeight + 'px');
+  PANE_T = setTimeout(() => { el.classList.add('drag'); closePane(); el.style.setProperty('--sy', '0px'); void el.offsetWidth; el.classList.remove('drag'); paneUnder(false); }, 470); }
 function paneFade() { const c = $('#pane .sheet-card'); if (!c) return; c.classList.remove('pfade'); void c.offsetWidth; c.classList.add('pfade'); }
 function paneShow() {
   const v = P.stack.at(-1); if (!v) return;
@@ -8805,12 +8819,12 @@ function paneShow() {
 function paneRender() { const v = P.stack.at(-1); if (!v) { if (S.mod === 'N') renderMod(true); return; } if (v.keep && v.shown) { v.refresh?.(); return; } let h; try { h = v.render(); } catch (e) { console.error(e); h = `<div class="card empty" style="margin-top:14px"><b>Cette page n'a pas pu s'afficher</b>${esc(String(e?.message || e))}</div>`; } $('#pane-body').innerHTML = h; try { initCharts($('#pane-body')); if (v.keep) { v.shown = true; v.mount?.(); } } catch (e) { console.error(e); } }
 function closePane() {
   const v = P.stack.pop(); v?.onClose?.();
-  if (P.stack.length) { paneShow(); return; }
+  if (P.stack.length) { paneShow(); const sn = P.stack.at(-1).snap; if (sn) { $('#pane-scroll').scrollTop = sn.top; P.stack.at(-1).snap = null; } return; }
   P.live = false;
   $('#pane').classList.remove('on'); if (!S.sheet) { $('#scrim').classList.remove('on'); document.body.style.overflow = ''; }
   renderMod();
 }
-function closeAllPanes() { while (P.stack.length) P.stack.pop(); P.live = false; $('#pane').classList.remove('on'); if (!S.sheet) { $('#scrim').classList.remove('on'); document.body.style.overflow = ''; } renderMod(true); }
+function closeAllPanes() { paneUnder(false); while (P.stack.length) P.stack.pop(); P.live = false; $('#pane').classList.remove('on'); if (!S.sheet) { $('#scrim').classList.remove('on'); document.body.style.overflow = ''; } renderMod(true); }
 
 /* ---------- plan view, editor and weekly planning ---------- */
 // His three gyms and what they have (as he listed it). A session shows where it can be done whole.
@@ -11642,8 +11656,8 @@ document.addEventListener('change', e => {
   else if (d.fkcal !== undefined) saveFset({kcal: +t.value || null});
   else if (d.fwatergoal !== undefined) saveFset({water: Math.max(1, +t.value || 10)});
 });
-$('#pn-close').addEventListener('click', closePane);
-$('#pn-back').addEventListener('click', closePane);
+$('#pn-close').addEventListener('click', panePop);
+$('#pn-back').addEventListener('click', panePop);
 // PC: a click on the dark sides, outside the page, goes back (as the phone's back gesture).
 $('#pane-scroll').addEventListener('click', e => { if (isPC() && P.stack.length && !e.target.closest('.sheet-card')) closePane(); });
 $('#sheet-scroll').addEventListener('click', e => { if (isPC() && S.sheet && !e.target.closest('.sheet-card')) closeSheet(); });

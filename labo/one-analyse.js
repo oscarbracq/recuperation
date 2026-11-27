@@ -384,13 +384,13 @@ function anaProfileHtml(kind) {
     <p class="small muted" data-tip="1" style="margin:8px 4px 0">Un point devient fort ou faible quand il revient sur plusieurs vidéos (ses 5 dernières mesures) : une seule vidéo, un jour de fatigue ou de vent, ne suffit pas. Les points de couleur racontent son histoire, de la plus ancienne vidéo à la plus récente.</p>`
     : '<p class="small muted" data-tip="1" style="margin:4px 4px 0">Ton profil apparaîtra après ta première analyse.</p>'}`;
 }
-// Profil : l'hexagone de tes qualités, puis les deux analyses et leurs points forts · faibles (même page, plus bas).
+// Profil : tes qualités physiques (l'hexagone), puis les deux analyses et leurs points forts · faibles (même page, plus bas).
 function proAnaCards() {
   const c = k => { const L = vids().filter(v => vKind(v) === k), a = L.filter(v => v.an || v.coach).length, {P} = anaAgg(k); return {L, a, P}; }, R = c('run'), M = c('lift');
   const box = (k, t, o) => `<button type="button" class="card pac" data-proana="${k}"><span class="eyebrow">Analyse</span><b>${t}</b><small>${o.L.length ? `${o.L.length} vidéo${o.L.length > 1 ? 's' : ''} · ${o.a} analysée${o.a > 1 ? 's' : ''}` : 'Filme ou ajoute une vidéo'}</small></button>`;
   const pts = (k, o) => { const g = o.P.filter(x => x.lvl === 'good').length, w = o.P.filter(x => x.lvl === 'warn').length, b = o.P.filter(x => x.lvl === 'bad').length;
     return `<button type="button" class="card pac pts" data-propts="${k}"><span class="eyebrow">Points forts · faibles</span>${o.P.length ? `<p class="pacl">${anDot('good')}${g} fort${g > 1 ? 's' : ''}</p><p class="pacl">${anDot('warn')}${w} à affiner</p><p class="pacl">${anDot('bad')}${b} faible${b > 1 ? 's' : ''}</p>` : '<small>Après ta première analyse.</small>'}</button>`; };
-  const hx = typeof hxVals === 'function' && typeof hxSvg === 'function' ? `<button type="button" class="card pac hxpro" data-prohex><span class="eyebrow">L'hexagone de tes qualités</span>${hxSvg(hxVals())}</button>` : '';
+  const hx = typeof hxVals === 'function' && typeof hxSvg === 'function' ? `<button type="button" class="card pac hxpro" data-prohex><span class="eyebrow">Tes qualités physiques</span>${hxSvg(hxVals())}</button>` : '';
   return `<div class="sec-label">Mes qualités et mes analyses vidéo</div>${hx}<div class="pagrid">${box('run', 'Ma dynamique de course', R)}${box('lift', 'Mes mouvements · musculation', M)}${pts('run', R)}${pts('lift', M)}</div>`;
 }
 document.addEventListener('click', e => { let b;

@@ -1006,6 +1006,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-
 .sheet{position:fixed;inset:0;z-index:50;transform:translateY(105%);transition:transform .5s cubic-bezier(.32,.72,0,1);pointer-events:none}
 .sheet.on{transform:translateY(var(--sy,0px));pointer-events:auto}
 .sheet.drag{transition:none}
+.sheet.punder{z-index:71!important;transform:none!important;transition:none!important;pointer-events:none!important}
 .sheet-scroll{height:100%;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .sheet-gap{height:calc(28px + env(safe-area-inset-top,0px))}
 .sheet-card{max-width:620px;min-height:100%;margin:0 auto;background:var(--bg);border-radius:20px 20px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.18);transition:border-radius .2s}
@@ -2389,7 +2390,18 @@ html.one #home-view{height:auto;min-height:100%}html.one .one-hm{height:auto!imp
 .cuec{margin-top:12px}.cuet{display:block;font-size:1.25rem;line-height:1.25;margin-top:4px}
 .hxsvg{display:block;width:100%;max-width:420px;margin:0 auto}.hxg{fill:none;stroke:color-mix(in srgb,var(--fg) 14%,transparent);stroke-width:1}
 .hxp{fill:color-mix(in srgb,var(--accent) 22%,transparent);stroke:var(--accent);stroke-width:2;stroke-linejoin:round}.hxd{fill:var(--accent)}
-.hxl{font-size:12px;font-weight:700;fill:var(--fg)}.hxv{font-size:11px;fill:var(--fg3);font-variant-numeric:tabular-nums}
+.hxl{font-size:17px;font-weight:700;fill:var(--fg)}.hxv{font-size:16px;font-weight:600;fill:var(--fg2);font-variant-numeric:tabular-nums}
+.hxo{fill:color-mix(in srgb,var(--fg) 6%,transparent);stroke:color-mix(in srgb,var(--fg) 62%,transparent);stroke-width:1.6;stroke-dasharray:4 3;stroke-linejoin:round}
+.hxu{fill:var(--good);color:var(--good);font-style:normal;font-weight:700}.hxdn{fill:var(--bad);color:var(--bad);font-style:normal;font-weight:700}
+.hxk{cursor:pointer}.hxseg{margin-top:14px}.hxcard{margin-top:10px}
+.hxleg{display:flex;justify-content:center;gap:16px;font-size:12px;color:var(--fg2);margin-top:2px}.hxleg i{display:inline-block;width:14px;height:0;border-top:2px solid var(--accent);margin-right:6px;vertical-align:middle}.hxleg i.old{border-top:2px dashed color-mix(in srgb,var(--fg) 62%,transparent)}
+.hxlist{margin-top:12px}.hxrow{border-bottom:1px solid var(--line)}.hxrow:last-child{border-bottom:0}.hxrow>.rowbtn{border:0;width:100%}
+.hxchev{display:grid;transition:transform .3s cubic-bezier(.32,.72,0,1)}.hxrow.on .hxchev{transform:rotate(90deg)}
+.hxdet{display:grid;grid-template-rows:0fr;transition:grid-template-rows .34s cubic-bezier(.32,.72,0,1)}.hxrow.on .hxdet{grid-template-rows:1fr}.hxdet>.hxdin{overflow:hidden;min-height:0;padding:0 12px;opacity:0;transition:opacity .25s ease}.hxrow.on .hxdin{opacity:1;padding-bottom:14px}
+.hxtt{display:grid;gap:8px;margin-bottom:10px}.hxtr{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:8px 10px;border-radius:10px;background:color-mix(in srgb,var(--fg) 5%,transparent)}.hxtr.off{opacity:.6}
+.hxtr b{display:block;font-size:.9rem}.hxtr small{color:var(--fg2);font-size:.78rem}.hxsc{font:700 1.15rem var(--display);font-variant-numeric:tabular-nums;align-self:center}.hxref{grid-column:1/-1;color:var(--fg3)!important}
+.hxgo{width:100%;margin-top:6px}.hxnote{margin-top:12px}.hxnote .row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0}
+
 @media (max-width:380px){.pagrid{gap:8px}.card.pac b{font-size:.88rem}}
 
 /* Analyses vidéo (v183) : pages entières noires, filmer / choisir, 3 cases, une intention, profil et évolution */
@@ -2414,6 +2426,20 @@ html.one #home-view{height:auto;min-height:100%}html.one .one-hm{height:auto!imp
 .vset .cap-g2,.vset .cap-f{margin-top:8px}
 [data-anares] .vres{grid-template-columns:repeat(2,minmax(0,1fr))}
 @media (min-width:600px){[data-anares] .vres{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* v184 : courbe des niveaux FFA */
+.lvbtn{display:block;cursor:pointer;-webkit-tap-highlight-color:transparent}.lvbtn:active .card{transform:scale(.985)}.lvbtn .card{transition:transform .2s ease}
+.lvtop{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.lvbox{padding:12px;border-radius:16px;background:var(--card);box-shadow:0 0 0 1px var(--line)}
+.lvbox b{display:block;font:700 1.6rem var(--display);margin:2px 0}.lvbox b small{font-size:.85rem;color:var(--fg2);font-weight:600}.lvbox>small{color:var(--fg2);font-size:.8rem}
+.lvcard{margin-top:12px;padding:10px 8px}.lvsvg{display:block;width:100%}
+.lvh{font-size:10px;font-weight:700;fill:var(--fg3);letter-spacing:.04em;text-transform:uppercase}.lvn{font-size:12px;font-weight:700;fill:var(--fg2)}.lvn.on{fill:var(--fg)}
+.lvp{font-size:10px;fill:var(--fg3);font-variant-numeric:tabular-nums}.lvt{font-size:11.5px;fill:var(--fg2);font-variant-numeric:tabular-nums}.lvt.on{fill:var(--accent);font-weight:700}
+.lvband{fill:color-mix(in srgb,var(--accent) 14%,transparent)}
+.lvrest{fill:none;stroke:color-mix(in srgb,var(--fg) 28%,transparent);stroke-width:2;stroke-dasharray:3 4}.lvdone{fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round}
+.lvd{fill:color-mix(in srgb,var(--fg) 30%,transparent)}.lvd.on{fill:var(--accent)}
+.lvme circle{fill:var(--accent);stroke:var(--bg);stroke-width:2.5}.lvme text,.lvme60 text{font-size:11px;font-weight:700;fill:var(--fg)}.lvme60 circle{fill:var(--bg);stroke:var(--accent);stroke-width:2.5}
+.lvpaths{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.lvpath{padding:10px 12px;border-radius:16px;background:var(--card);box-shadow:0 0 0 1px var(--line)}
+.lvstep{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:baseline;padding:5px 0;border-top:1px solid var(--line)}.lvstep:first-of-type{border-top:0}.lvstep span{font-variant-numeric:tabular-nums}.lvstep em{font-style:normal;color:var(--fg2);font-size:.8rem;font-variant-numeric:tabular-nums}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -7012,7 +7038,7 @@ sheetEl.addEventListener('touchend', () => {
 (() => {
   const el = $('#pane'), sc = $('#pane-scroll');
   let d = null, y = 0;
-  const set = (v, anim = true) => { y = v; el.classList.toggle('drag', !anim); el.style.setProperty('--sy', v + 'px'); $('#scrim').style.opacity = anim ? '' : String(Math.max(0, Math.min(1, 1 - v / el.offsetHeight))); };
+  const set = (v, anim = true) => { y = v; el.classList.toggle('drag', !anim); el.style.setProperty('--sy', v + 'px'); $('#scrim').style.opacity = anim || P.stack.length > 1 ? '' : String(Math.max(0, Math.min(1, 1 - v / el.offsetHeight))); };
   el.addEventListener('touchstart', e => {
     if (e.target.closest('.chartbox, input, textarea, select') || P.stack.at(-1)?.fixed || P.stack[0]?.side) return;
     const t = e.touches[0].clientY; d = {y0: t, start: y, active: false, last: t, t: performance.now(), v: 0};
@@ -7022,7 +7048,7 @@ sheetEl.addEventListener('touchend', () => {
     const t = e.touches[0].clientY, dy = t - d.y0;
     if (!d.active) {
       if (Math.abs(dy) < 6) return;
-      if (dy > 0 && sc.scrollTop <= 0) { d.active = true; d.y0 = t; d.start = y; } else { d = null; return; }
+      if (dy > 0 && sc.scrollTop <= 0) { d.active = true; d.y0 = t; d.start = y; clearTimeout(PANE_T); if (P.stack.length > 1) paneUnder(true); } else { d = null; return; }
     }
     e.preventDefault();
     const now = performance.now(); d.v = (t - d.last) / Math.max(1, now - d.t); d.last = t; d.t = now;
@@ -7031,8 +7057,8 @@ sheetEl.addEventListener('touchend', () => {
   el.addEventListener('touchend', () => {
     const g = d; d = null; if (!g?.active) return;
     // Only the window on top goes: the one below (and its own back arrow) stays.
-    if (y + g.v * 200 > el.offsetHeight * .25) { el.classList.remove('drag'); if (P.stack.length > 1) { set(el.offsetHeight); setTimeout(() => { closePane(); el.classList.add('drag'); set(0, false); $('#scrim').style.opacity = ''; requestAnimationFrame(() => el.classList.remove('drag')); paneFade(); }, 320); } else { closeAllPanes(); setTimeout(() => set(0), 500); } return; }
-    set(0);
+    if (y + g.v * 200 > el.offsetHeight * .25) { el.classList.remove('drag'); if (P.stack.length > 1) { set(el.offsetHeight); PANE_T = setTimeout(() => { el.classList.add('drag'); closePane(); set(0, false); $('#scrim').style.opacity = ''; void el.offsetWidth; el.classList.remove('drag'); paneUnder(false); }, 470); } else { closeAllPanes(); setTimeout(() => set(0), 500); } return; }
+    set(0); if (P.stack.length > 1) PANE_T = setTimeout(() => paneUnder(false), 520);
   });
 })();
 // A day not saved by hand is saved at 23:59: at that time if the app is open, otherwise at the next opening.
@@ -9740,7 +9766,20 @@ function tProfile() {
 }
 /* ---------- pane: a second sheet for Training and Fuel, with a stack (a picker can open over an editor) ---------- */
 const P = {stack: [], live: false};
-function openPane(view) { if (view.title && P.stack.at(-1)?.title === view.title) return; const over = P.stack.length > 0; P.stack.push(view); paneShow(); if (over) paneFade(); }
+function openPane(view) { if (view.title && P.stack.at(-1)?.title === view.title) return; const over = P.stack.length > 0; if (over) paneSnap(); P.stack.push(view); if (over && !isPC()) { paneSlideIn(); return; } paneShow(); if (over) paneFade(); }
+// Une fenêtre posée sur une autre : celle du dessous est gardée en image (copie figée), affichée dessous quand on
+// descend la fenêtre du dessus. Plus de retour au Profil entre les deux, plus de fondu : elle reste là, nette.
+function paneSnap() { const v = P.stack.at(-1), el = $('#pane'); if (!v || !el) return;
+  const c = el.cloneNode(true); c.removeAttribute('id'); c.querySelectorAll('[id]').forEach(x => x.removeAttribute('id')); c.querySelectorAll('video,audio').forEach(x => { x.removeAttribute('src'); x.querySelectorAll('source').forEach(y => y.remove()); });
+  const a = el.querySelectorAll('canvas'), b = c.querySelectorAll('canvas'); a.forEach((x, i) => { try { b[i].width = x.width; b[i].height = x.height; b[i].getContext('2d').drawImage(x, 0, 0); } catch (e) {} });
+  c.classList.add('punder'); c.classList.remove('drag'); c.setAttribute('aria-hidden', 'true'); c.removeAttribute('role'); v.snap = {node: c, top: $('#pane-scroll').scrollTop}; }
+function paneUnder(on) { document.querySelectorAll('.punder').forEach(x => x.remove()); if (!on) return; const s = P.stack.at(-2)?.snap; if (!s) return; document.body.appendChild(s.node); const sc = s.node.querySelector('.sheet-scroll'); if (sc) sc.scrollTop = s.top; }
+let PANE_T = null;
+function paneSlideIn() { const el = $('#pane'); clearTimeout(PANE_T); paneUnder(true); el.classList.add('drag'); el.style.setProperty('--sy', el.offsetHeight + 'px'); paneShow(); void el.offsetWidth;
+  requestAnimationFrame(() => { el.classList.remove('drag'); el.style.setProperty('--sy', '0px'); }); PANE_T = setTimeout(() => paneUnder(false), 560); }
+// Fermer la fenêtre du dessus en la faisant descendre : celle du dessous est déjà là, à la même place.
+function panePop() { const el = $('#pane'); if (P.stack.length < 2 || isPC()) { closePane(); return; } clearTimeout(PANE_T); paneUnder(true); el.classList.remove('drag'); el.style.setProperty('--sy', el.offsetHeight + 'px');
+  PANE_T = setTimeout(() => { el.classList.add('drag'); closePane(); el.style.setProperty('--sy', '0px'); void el.offsetWidth; el.classList.remove('drag'); paneUnder(false); }, 470); }
 function paneFade() { const c = $('#pane .sheet-card'); if (!c) return; c.classList.remove('pfade'); void c.offsetWidth; c.classList.add('pfade'); }
 function paneShow() {
   const v = P.stack.at(-1); if (!v) return;
@@ -9758,12 +9797,12 @@ function paneShow() {
 function paneRender() { const v = P.stack.at(-1); if (!v) { if (S.mod === 'N') renderMod(true); return; } if (v.keep && v.shown) { v.refresh?.(); return; } let h; try { h = v.render(); } catch (e) { console.error(e); h = `<div class="card empty" style="margin-top:14px"><b>Cette page n'a pas pu s'afficher</b>${esc(String(e?.message || e))}</div>`; } $('#pane-body').innerHTML = h; try { initCharts($('#pane-body')); if (v.keep) { v.shown = true; v.mount?.(); } } catch (e) { console.error(e); } }
 function closePane() {
   const v = P.stack.pop(); v?.onClose?.();
-  if (P.stack.length) { paneShow(); return; }
+  if (P.stack.length) { paneShow(); const sn = P.stack.at(-1).snap; if (sn) { $('#pane-scroll').scrollTop = sn.top; P.stack.at(-1).snap = null; } return; }
   P.live = false;
   $('#pane').classList.remove('on'); if (!S.sheet) { $('#scrim').classList.remove('on'); document.body.style.overflow = ''; }
   renderMod();
 }
-function closeAllPanes() { while (P.stack.length) P.stack.pop(); P.live = false; $('#pane').classList.remove('on'); if (!S.sheet) { $('#scrim').classList.remove('on'); document.body.style.overflow = ''; } renderMod(true); }
+function closeAllPanes() { paneUnder(false); while (P.stack.length) P.stack.pop(); P.live = false; $('#pane').classList.remove('on'); if (!S.sheet) { $('#scrim').classList.remove('on'); document.body.style.overflow = ''; } renderMod(true); }
 
 /* ---------- plan view, editor and weekly planning ---------- */
 // His three gyms and what they have (as he listed it). A session shows where it can be done whole.
@@ -12595,8 +12634,8 @@ document.addEventListener('change', e => {
   else if (d.fkcal !== undefined) saveFset({kcal: +t.value || null});
   else if (d.fwatergoal !== undefined) saveFset({water: Math.max(1, +t.value || 10)});
 });
-$('#pn-close').addEventListener('click', closePane);
-$('#pn-back').addEventListener('click', closePane);
+$('#pn-close').addEventListener('click', panePop);
+$('#pn-back').addEventListener('click', panePop);
 // PC: a click on the dark sides, outside the page, goes back (as the phone's back gesture).
 $('#pane-scroll').addEventListener('click', e => { if (isPC() && P.stack.length && !e.target.closest('.sheet-card')) closePane(); });
 $('#sheet-scroll').addEventListener('click', e => { if (isPC() && S.sheet && !e.target.closest('.sheet-card')) closeSheet(); });
@@ -15768,13 +15807,13 @@ function anaProfileHtml(kind) {
     <p class="small muted" data-tip="1" style="margin:8px 4px 0">Un point devient fort ou faible quand il revient sur plusieurs vidéos (ses 5 dernières mesures) : une seule vidéo, un jour de fatigue ou de vent, ne suffit pas. Les points de couleur racontent son histoire, de la plus ancienne vidéo à la plus récente.</p>`
     : '<p class="small muted" data-tip="1" style="margin:4px 4px 0">Ton profil apparaîtra après ta première analyse.</p>'}`;
 }
-// Profil : l'hexagone de tes qualités, puis les deux analyses et leurs points forts · faibles (même page, plus bas).
+// Profil : tes qualités physiques (l'hexagone), puis les deux analyses et leurs points forts · faibles (même page, plus bas).
 function proAnaCards() {
   const c = k => { const L = vids().filter(v => vKind(v) === k), a = L.filter(v => v.an || v.coach).length, {P} = anaAgg(k); return {L, a, P}; }, R = c('run'), M = c('lift');
   const box = (k, t, o) => `<button type="button" class="card pac" data-proana="${k}"><span class="eyebrow">Analyse</span><b>${t}</b><small>${o.L.length ? `${o.L.length} vidéo${o.L.length > 1 ? 's' : ''} · ${o.a} analysée${o.a > 1 ? 's' : ''}` : 'Filme ou ajoute une vidéo'}</small></button>`;
   const pts = (k, o) => { const g = o.P.filter(x => x.lvl === 'good').length, w = o.P.filter(x => x.lvl === 'warn').length, b = o.P.filter(x => x.lvl === 'bad').length;
     return `<button type="button" class="card pac pts" data-propts="${k}"><span class="eyebrow">Points forts · faibles</span>${o.P.length ? `<p class="pacl">${anDot('good')}${g} fort${g > 1 ? 's' : ''}</p><p class="pacl">${anDot('warn')}${w} à affiner</p><p class="pacl">${anDot('bad')}${b} faible${b > 1 ? 's' : ''}</p>` : '<small>Après ta première analyse.</small>'}</button>`; };
-  const hx = typeof hxVals === 'function' && typeof hxSvg === 'function' ? `<button type="button" class="card pac hxpro" data-prohex><span class="eyebrow">L'hexagone de tes qualités</span>${hxSvg(hxVals())}</button>` : '';
+  const hx = typeof hxVals === 'function' && typeof hxSvg === 'function' ? `<button type="button" class="card pac hxpro" data-prohex><span class="eyebrow">Tes qualités physiques</span>${hxSvg(hxVals())}</button>` : '';
   return `<div class="sec-label">Mes qualités et mes analyses vidéo</div>${hx}<div class="pagrid">${box('run', 'Ma dynamique de course', R)}${box('lift', 'Mes mouvements · musculation', M)}${pts('run', R)}${pts('lift', M)}</div>`;
 }
 document.addEventListener('click', e => { let b;
@@ -15890,54 +15929,211 @@ document.addEventListener('click', async e => {
 document.addEventListener('change', e => { if (e.target.matches?.('[data-spover]')) { CSP.over = e.target.checked; paneRender(); } });
 document.addEventListener('input', e => { const k = e.target.dataset?.spk; if (!k) return; CSP[k] = e.target.type === 'number' ? Math.max(1, +e.target.value || 1) : e.target.value; if (k === 'paste') { spParse(CSP.paste); paneRender(); } });
 
-/* ================= Idée à tester : l'hexagone de tes qualités =================
-   6 qualités du sprinteur, chacune notée de 0 à 100 à partir de ses vrais tests de l'appli :
-   force (squat / poids du corps), explosivité (CMJ), réactivité (RSI), accélération (10 ou 30 m, ou F0), vitesse max
-   (Vmax du profil en sprint, sinon le 60 m), endurance de vitesse (100 m comparé au 60 m).
-   Les bornes : 0 = un sportif entraîné qui débute le sprint, 100 = niveau international (Haugen 2019, Suchomel 2016,
-   Loturco 2015 pour les ordres de grandeur). C'est une échelle de lecture, pas une norme : elle sert à voir la forme
-   de son profil et ce qui bouge d'un test à l'autre. Une qualité sans test s'affiche « à tester ». */
+/* ================= Tes qualités physiques : l'hexagone =================
+   6 qualités du sprinteur, chacune notée de 0 à 100 à partir de ses vrais tests, avec plusieurs tests par qualité
+   quand la science le justifie (moyenne pondérée de ceux qui existent).
+   Échelle : 0 = sportif entraîné qui débute le sprint (≈ 13″5 au 100 m), 100 = sprinteur international (≈ 10″10).
+   Les bornes viennent des valeurs publiées chez des sprinteurs de ces niveaux : Suchomel 2016 (force relative),
+   Loturco 2015 et 2019 (sauts et sprint), Samozino 2016 (profil force-vitesse vertical), Flanagan 2008 et 2016 (RSI),
+   Rabita 2015 et Morin 2012 (F0 et Vmax en sprint), Haugen 2019 (temps de passage). C'est une échelle de lecture :
+   elle montre la forme de ton profil et ce qui bouge, pas une note officielle.
+   Une valeur de test vaut 6 mois (on garde la meilleure des 6 derniers mois) ; un max de muscu, le dernier connu. */
+const HX_WIN = 182;
+// [id, nom, unité, borne à 0, borne à 100, poids, lien du test, type de saut pour noter à la main, champ]
 const HX_Q = [
-  ['force', 'Force', 'squat ÷ poids du corps', 1.2, 2.6, x => fx(x, 2) + ' × PDC', 'data-rmlist'],
-  ['explo', 'Explosivité', 'CMJ', 30, 70, x => fx(x, 1) + ' cm', 'data-tplyo'],
-  ['react', 'Réactivité', 'RSI (drop jump, 10/5, pogo)', 1.0, 3.0, x => 'RSI ' + fx(x, 2), 'data-tplyo'],
-  ['acc', 'Accélération', '10 m, 30 m ou F0', 0, 1, x => x, 'data-thfvstart'],
-  ['vmax', 'Vitesse max', 'Vmax du profil, sinon le 60 m', 0, 1, x => x, 'data-thfvstart'],
-  ['send', 'Endurance de vitesse', '100 m ÷ 60 m', 1.66, 1.52, x => '100 m = ' + fx(x, 3) + ' × 60 m', 'data-tsprint']
+  {k: 'force', n: 'Force', s: 'Squat, hip thrust, soulevé de terre', why: 'La force maximale des jambes et des hanches, rapportée à ton poids. Elle nourrit surtout l\'accélération (Seitz 2014 : r ≈ −0,6 entre squat relatif et temps sur 10 à 30 m). On garde les 3 mouvements de base du sprinteur ; pas les mollets ni le gainage, qui ne disent rien de ta force de poussée.',
+    src: 'Suchomel 2016 (squat ≥ 2 × ton poids = très fort) · Seitz 2014 · Loturco 2018 (hip thrust)', T: [
+    {id: 'squat', n: 'Squat complet', u: '× ton poids', a: 1.2, b: 2.4, w: .4, go: 'data-t5start', gn: 'Test de RM'},
+    {id: 'hipthrust', n: 'Hip thrust', u: '× ton poids', a: 1.5, b: 3.2, w: .3, go: 'data-t5start', gn: 'Test de RM'},
+    {id: 'dl', n: 'Soulevé de terre ou trap bar', u: '× ton poids', a: 1.4, b: 2.8, w: .3, go: 'data-t5start', gn: 'Test de RM'}]},
+  {k: 'explo', n: 'Explosivité', s: 'CMJ, squat jump, puissance, longueur', why: 'Produire beaucoup de force en peu de temps, à partir de l\'arrêt ou d\'un petit élan. Le CMJ est le test le plus lié au 100 m chez les sprinteurs (Loturco 2015 : r ≈ −0,7) ; le squat jump et la puissance du profil force-vitesse la complètent, le saut en longueur donne la part horizontale.',
+    src: 'Loturco 2015 et 2019 · Samozino 2016 (Pmax en W/kg)', T: [
+    {id: 'cmj', n: 'CMJ (mains sur les hanches)', u: 'cm', a: 30, b: 65, w: .4, go: 'data-vatest="cmj"', gn: 'Test CMJ filmé', jt: 'cmj', f: 'h'},
+    {id: 'sj', n: 'Squat jump', u: 'cm', a: 28, b: 60, w: .2, go: 'data-vatest="sj"', gn: 'Test squat jump filmé', jt: 'sj', f: 'h'},
+    {id: 'pmax', n: 'Puissance max (profil vertical)', u: 'W/kg', a: 18, b: 32, w: .2, go: 'data-tfvstart', gn: 'Test profil force-vitesse vertical'},
+    {id: 'broad', n: 'Saut en longueur sans élan', u: 'cm', a: 220, b: 330, w: .2, go: '', gn: '', jt: 'broad', f: 'd'}]},
+  {k: 'react', n: 'Réactivité', s: 'RSI : drop jump, test 10/5', why: 'Rebondir vite et haut : ce que tes chevilles et tes tendons rendent à chaque appui (contacts de 80 à 110 ms en vitesse max). L\'indice de force réactive (RSI = hauteur ÷ temps de contact) est la mesure de référence.',
+    src: 'Flanagan 2008 et 2016 (RSI) · Ebben 2011 (RSI modifié)', T: [
+    {id: 'dj', n: 'Drop jump (box 30 à 40 cm)', u: 'RSI', a: 1.0, b: 3.0, w: .5, go: 'data-vatest="dj"', gn: 'Test drop jump filmé', jt: 'dj', f: 'rsi'},
+    {id: 'rj105', n: 'Test 10/5 (rebonds)', u: 'RSI', a: 1.2, b: 3.2, w: .3, go: 'data-vatest="rj105"', gn: 'Test 10/5 filmé', jt: 'rj105', f: 'rsi'},
+    {id: 'rsimod', n: 'RSI modifié (CMJ)', u: 'RSI mod', a: .30, b: .75, w: .2, go: 'data-vatest="rsimod"', gn: 'Test RSI modifié filmé', jt: 'rsimod', f: 'rsi'}]},
+  {k: 'acc', n: 'Accélération', s: '10 m, 30 m, force horizontale F0', why: 'Prendre de la vitesse sur les 30 premiers mètres. Le test du profil force-vitesse en sprint (un 30 m filmé) donne tout d\'un coup : ton 10 m, ton 30 m et F0, la force que tu mets à l\'horizontale au départ.',
+    src: 'Haugen 2019 (temps de passage) · Rabita 2015 et Morin 2012 (F0 des sprinteurs mondiaux ≈ 9 à 10 N/kg)', T: [
+    {id: 'spr10', n: '10 m départ debout', u: 's', a: 2.05, b: 1.70, w: .4, go: 'data-thfvstart', gn: 'Test profil force-vitesse en sprint', jt: 'spr10', f: 't'},
+    {id: 'spr30', n: '30 m départ debout', u: 's', a: 4.65, b: 3.80, w: .3, go: 'data-thfvstart', gn: 'Test profil force-vitesse en sprint', jt: 'spr30', f: 't'},
+    {id: 'f0', n: 'F0, force horizontale', u: 'N/kg', a: 6, b: 10, w: .3, go: 'data-thfvstart', gn: 'Test profil force-vitesse en sprint'}]},
+  {k: 'vmax', n: 'Vitesse max', s: 'Vmax du profil en sprint', why: 'Ta vitesse de pointe, atteinte vers 50 à 70 m. Le profil force-vitesse en sprint la mesure ; sans lui, elle est estimée depuis ton 100 m (pointe ≈ 1,18 × ta vitesse moyenne).',
+    src: 'Morin 2012 · Rabita 2015 · Haugen 2019 (Vmax des finalistes mondiaux ≈ 11,5 à 12,3 m/s)', T: [
+    {id: 'vmax', n: 'Vmax', u: 'm/s', a: 8.5, b: 11.8, w: 1, go: 'data-thfvstart', gn: 'Test profil force-vitesse en sprint'}]},
+  {k: 'send', n: 'Endurance de vitesse', s: 'Ton 100 m comparé à ton 60 m', why: 'Garder ta vitesse jusqu\'au bout. Le rapport entre ton 100 m et ton 60 m montre ce que tu perds sur les 40 derniers mètres : 1,53 chez un sprinteur international, 1,66 chez un débutant. Il se met à jour avec tes courses.',
+    src: 'Calcul sur les barèmes FFA et les meilleures performances (rapport 100 m ÷ 60 m)', T: [
+    {id: 'ratio', n: '100 m ÷ 60 m', u: '', a: 1.66, b: 1.53, w: 1, go: '', gn: ''}]}
 ];
 const hxSc = (x, a, b) => Math.round(Math.max(0, Math.min(100, (x - a) / (b - a) * 100)));
-const hxNum = s => parseFloat(String(s || '').replace(/''|"|’/g, '.').replace(',', '.')) || null;
-function hxVals() {
-  const bw = typeof bodyKg === 'function' ? bodyKg() : null, out = {};
-  const sq = [['squat', 1], ['halfsquat', .8], ['frontsquat', 1 / .85]].map(([id, k]) => { try { const r = rmOf(id)?.kg; return r ? r * k : 0; } catch (e) { return 0; } }).reduce((a, b) => Math.max(a, b), 0);
-  if (sq && bw) out.force = {x: sq / bw};
-  const cmj = jBest('cmj'); if (cmj) out.explo = {x: +cmj.h};
-  const rs = ['dj', 'rj105', 'pogo'].map(t => jBest(t)).filter(Boolean).map(j => +j.rsi || 0).filter(x => x > 0); if (rs.length) out.react = {x: Math.max(...rs)};
-  const hf = tests().filter(x => x.type === 'hfv').sort((a, b) => b.date.localeCompare(a.date))[0], s10 = jBest('spr10'), s30 = jBest('spr30');
-  if (s10) out.acc = {s: hxSc(+s10.t, 2.10, 1.60), txt: `10 m en ${fx(+s10.t, 2)} s`}; else if (s30) out.acc = {s: hxSc(+s30.t, 4.6, 3.7), txt: `30 m en ${fx(+s30.t, 2)} s`}; else if (hf?.F0) out.acc = {s: hxSc(+hf.F0, 6, 11), txt: `F0 ${fx(hf.F0, 1)} N/kg`};
-  const sp = S.profile?.sprinter || {}, p60 = hxNum(sp.pb60), p100 = hxNum(sp.pb100);
-  if (hf?.vmax) out.vmax = {s: hxSc(+hf.vmax, 8.5, 11.8), txt: `${fx(hf.vmax, 2)} m/s`}; else if (p60) out.vmax = {s: hxSc(p60, 8.2, 6.5), txt: `60 m en ${fx(p60, 2)}`};
-  if (p60 && p100) out.send = {x: p100 / p60};
-  return HX_Q.map(([k, n, how, a, b, f, go]) => { const o = out[k]; if (!o) return {k, n, how, go, s: null};
-    return {k, n, how, go, s: o.s ?? hxSc(o.x, a, b), txt: o.txt || f(o.x)}; });
+const hxNum = s => parseFloat(String(s || '').replace(/''|"|″|’/g, '.').replace(',', '.')) || null;
+const hxBack = D => addDays(D, -HX_WIN);
+// Le meilleur saut ou sprint des 6 mois avant la date D. Les valeurs impossibles (au-delà du record des meilleurs
+// sprinteurs : squat jump > 70 cm, CMJ > 78 cm) viennent d'une image mal marquée : elles sont écartées.
+const HX_MAXH = {sj: 70, cmj: 78, abk: 85};
+const hxJ = (type, D) => { const L = jumps().filter(j => j.type === type && j.date <= D && j.date >= hxBack(D) && jVal(j) > 0 && !(HX_MAXH[type] && +j.h > HX_MAXH[type])); return L.sort((a, b) => jVal(b) - jVal(a))[0] || null; };
+// Le max connu à la date D : la fiche du max si elle date d'avant D, sinon le dernier test de RM d'avant D.
+function hxRm(id, D) {
+  const c = S.tset?.rm?.[id], L = [];
+  if (c?.kg && (!c.date || c.date <= D)) L.push({kg: +c.kg, date: c.date || ''});
+  for (const t of tests()) if (t.type === '5rm' && t.ex === id && t.date <= D) L.push({kg: Math.round(e1rm(+t.kg, +t.reps || 5)), date: t.date});
+  return L.sort((a, b) => b.date.localeCompare(a.date))[0] || null;
 }
-function hxSvg(Q) {
-  const W = 300, c = W / 2, R = 104, pt = (i, r) => { const a = -Math.PI / 2 + i * Math.PI / 3; return [c + r * Math.cos(a), c + r * Math.sin(a)]; }, poly = f => Q.map((q, i) => pt(i, f(q)).map(v => v.toFixed(1)).join(',')).join(' ');
-  const grid = [25, 50, 75, 100].map(g => `<polygon points="${poly(() => R * g / 100)}" class="hxg"/>`).join('') + Q.map((q, i) => `<line x1="${c}" y1="${c}" x2="${pt(i, R)[0]}" y2="${pt(i, R)[1]}" class="hxg"/>`).join('');
-  const lab = Q.map((q, i) => { const [x, y] = pt(i, R + 26), an = Math.abs(x - c) < 8 ? 'middle' : x > c ? 'start' : 'end';
-    return `<text x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="${an}" class="hxl">${esc(q.n)}</text><text x="${x.toFixed(1)}" y="${(y + 18).toFixed(1)}" text-anchor="${an}" class="hxv">${q.s == null ? 'à tester' : q.s}</text>`; }).join('');
-  const dots = Q.map((q, i) => q.s == null ? '' : `<circle cx="${pt(i, R * q.s / 100)[0].toFixed(1)}" cy="${pt(i, R * q.s / 100)[1].toFixed(1)}" r="3.5" class="hxd"/>`).join('');
-  return `<svg viewBox="-105 -10 510 330" class="hxsvg" role="img" aria-label="Hexagone de tes qualités">${grid}<polygon points="${poly(q => R * (q.s ?? 0) / 100)}" class="hxp"/>${dots}${lab}</svg>`;
+const hxLast = (type, D) => tests().filter(t => t.type === type && t.date <= D).sort((a, b) => b.date.localeCompare(a.date))[0] || null;
+// La valeur de chaque test à la date D : {x, date, txt, est}.
+function hxRaw(id, D) {
+  const bw = bodyKg(), F = (x, n) => fx(x, n);
+  const rel = r => r && bw ? {x: r.kg / bw, date: r.date, txt: `${fx(r.kg)} kg · ${fx(r.kg / bw, 2)} × ton poids`} : null;
+  if (id === 'squat') return rel(hxRm('squat', D));
+  if (id === 'hipthrust') return rel(hxRm('hipthrust', D));
+  if (id === 'dl') { const a = hxRm('deadlift', D), b = hxRm('hbdl', D), bb = b ? {kg: Math.round(b.kg / 1.05), date: b.date, tb: b.kg} : null, m = [a, bb].filter(Boolean).sort((x, y) => y.kg - x.kg)[0];
+    const o = rel(m); if (o && m.tb) o.txt = `trap bar ${fx(m.tb)} kg ≈ ${fx(m.kg)} kg au soulevé · ${fx(m.kg / bw, 2)} × ton poids`; return o; }
+  if (id === 'pmax') { const t = hxLast('fv', D), r = t ? fvProfile(t) : null; return r && t.date >= hxBack(D) ? {x: r.Pmax, date: t.date, txt: `${F(r.Pmax, 1)} W/kg`} : null; }
+  if (id === 'f0' || id === 'vmax') { const t = hxLast('hfv', D); if (t && t.date >= hxBack(D) && +t[id === 'f0' ? 'F0' : 'vmax'] > 0) { const x = +t[id === 'f0' ? 'F0' : 'vmax']; return {x, date: t.date, txt: id === 'f0' ? `${F(x, 1)} N/kg` : `${F(x, 2)} m/s`}; }
+    if (id === 'vmax') { const sp = S.profile?.sprinter || {}, t100 = hxNum(sp.pb100); if (t100 && (!sp.pb100Date || sp.pb100Date <= D)) { const x = 1.18 * 100 / t100; return {x, date: sp.pb100Date || '', txt: `≈ ${F(x, 2)} m/s, estimée depuis ton 100 m en ${F(t100, 2)}`, est: true}; } }
+    return null; }
+  if (id === 'ratio') { const sp = S.profile?.sprinter || {}, a = hxNum(sp.pb60), b = hxNum(sp.pb100); return a && b && (!sp.pb100Date || sp.pb100Date <= D) ? {x: b / a, date: sp.pb100Date || '', txt: `${F(b, 2)} ÷ ${F(a, 2)} = ${F(b / a, 3)}`} : null; }
+  const t = HX_Q.flatMap(q => q.T).find(x => x.id === id), j = t?.jt ? hxJ(t.jt, D) : null; if (!j) return null;
+  const x = t.f === 't' ? +j.t : t.f === 'rsi' ? +j.rsi : t.f === 'd' ? +j.d : +j.h;
+  return {x, date: j.date, txt: t.f === 't' ? `${F(x, 2)} s` : t.f === 'rsi' ? `${t.u} ${F(x, 2)}` : `${F(x, 1)} cm`};
+}
+// Les 6 qualités à la date D : chaque test noté, puis la moyenne pondérée de ceux qui existent.
+function hxVals(D = TODAY) {
+  return HX_Q.map(q => { const T = q.T.map(t => { const r = hxRaw(t.id, D); return {...t, r, sc: r ? hxSc(r.x, t.a, t.b) : null}; }), on = T.filter(t => t.sc != null), W = on.reduce((a, t) => a + t.w, 0);
+    const s = W ? Math.round(on.reduce((a, t) => a + t.sc * t.w, 0) / W) : null, last = on.map(t => t.r.date).filter(Boolean).sort().at(-1) || '';
+    return {k: q.k, n: q.n, q, T, s, n0: on.length, date: last, est: on.length === 1 && on[0].r.est}; });
+}
+// L'hexagone d'avant se compare sur les MÊMES tests : sa note = la note d'aujourd'hui + l'écart moyen (pondéré) des tests
+// qui existaient aux deux dates. Un test nouveau ne fait donc pas bouger la forme d'avant.
+function hxOld(Q, D) { const O = hxVals(D);
+  return Q.map((q, i) => { const c = q.T.map((t, j) => [t, O[i].T[j]]).filter(([a, b]) => a.sc != null && b.sc != null), W = c.reduce((a, [t]) => a + t.w, 0);
+    return {k: q.k, s: W ? Math.max(0, Math.min(100, Math.round(q.s + c.reduce((a, [t, o]) => a + (o.sc - t.sc) * t.w, 0) / W))) : null}; }); }
+const HXP = [['sem', 'Semaine', 7, 'il y a 1 semaine'], ['mois', 'Mois', 30, 'il y a 1 mois'], ['tri', '3 mois', 91, 'il y a 3 mois'], ['an', 'Année', 365, 'il y a 1 an']];
+const HXS = {per: 'mois', open: null, anim: false, shown: null};
+const hxPt = (i, r, c = 150) => { const a = -Math.PI / 2 + i * Math.PI / 3; return [c + r * Math.cos(a), c + r * Math.sin(a)]; };
+const hxPoly = sc => sc.map((v, i) => hxPt(i, 104 * (v ?? 0) / 100).map(z => z.toFixed(1)).join(',')).join(' ');
+// L'hexagone : la grille, l'hexagone d'avant (autre couleur, en pointillés) sous l'hexagone d'aujourd'hui.
+function hxSvg(Q, O) {
+  const R = 104, c = 150;
+  const grid = [25, 50, 75, 100].map(g => `<polygon points="${hxPoly(Q.map(() => g))}" class="hxg"/>`).join('') + Q.map((q, i) => `<line x1="${c}" y1="${c}" x2="${hxPt(i, R)[0].toFixed(1)}" y2="${hxPt(i, R)[1].toFixed(1)}" class="hxg"/>`).join('');
+  const lab = Q.map((q, i) => { const [x, y] = hxPt(i, R + 26), an = Math.abs(x - c) < 8 ? 'middle' : x > c ? 'start' : 'end', d = O && q.s != null && O[i].s != null ? q.s - O[i].s : null;
+    const L = q.n.length > 13 ? q.n.split(/ (?=de )/) : [q.n], dy = (L.length - 1) * 18, y0 = y + 4 - (i === 3 ? 0 : dy / 2);
+    return `<g class="hxk" data-hxk="${q.k}"><text x="${x.toFixed(1)}" y="${y0.toFixed(1)}" text-anchor="${an}" class="hxl">${L.map((t, j) => `<tspan x="${x.toFixed(1)}" dy="${j ? 18 : 0}">${esc(t)}</tspan>`).join('')}</text><text x="${x.toFixed(1)}" y="${(y0 + dy + 19).toFixed(1)}" text-anchor="${an}" class="hxv">${q.s == null ? 'à tester' : q.s}${d ? `<tspan class="${d > 0 ? 'hxu' : 'hxdn'}"> ${d > 0 ? '+' : '−'}${Math.abs(d)}</tspan>` : ''}</text></g>`; }).join('');
+  const dots = Q.map((q, i) => q.s == null ? '' : `<circle cx="${hxPt(i, R * q.s / 100)[0].toFixed(1)}" cy="${hxPt(i, R * q.s / 100)[1].toFixed(1)}" r="3.5" class="hxd"/>`).join('');
+  const old = O ? `<polygon points="${hxPoly(O.map(o => o.s))}" class="hxo"/>` : '';
+  return `<svg viewBox="-112 -14 524 346" class="hxsvg" role="img" aria-label="Hexagone de tes qualités physiques">${grid}${old}<polygon points="${hxPoly(Q.map(q => q.s))}" class="hxp"/>${dots}${lab}</svg>`;
+}
+// Les formes bougent en douceur : de l'ancienne forme à la nouvelle en 0,45 s.
+function hxTween(poly, from, to, ms = 450) {
+  if (!poly) return; const t0 = performance.now(), ease = t => 1 - Math.pow(1 - t, 3);
+  const step = now => { const k = ease(Math.min(1, (now - t0) / ms)); poly.setAttribute('points', hxPoly(to.map((v, i) => (from[i] ?? 0) + ((v ?? 0) - (from[i] ?? 0)) * k))); if (k < 1 && poly.isConnected) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+const hxDate = d => d ? fmtShort(d) : 'date inconnue';
+function hxDetail(q) {
+  const T = q.T, hasNote = T.filter(t => t.jt);
+  return `<div class="hxdin"><p class="small" style="margin:2px 0 8px">${esc(q.q.why)}</p>
+    <div class="hxtt">${T.map(t => `<div class="hxtr${t.r ? '' : ' off'}"><span><b>${esc(t.n)}</b><small>${t.r ? esc(t.r.txt) + ' · ' + esc(hxDate(t.r.date)) : 'pas encore testé'}</small></span><span class="hxsc">${t.sc ?? '–'}</span><small class="hxref">0 = ${esc(fx(t.a, t.a % 1 ? 2 : 0))} · 100 = ${esc(fx(t.b, t.b % 1 ? 2 : 0))} ${esc(t.u)} · compte pour ${Math.round(t.w * 100)} %</small></div>`).join('')}</div>
+    ${[...new Map(T.filter(t => t.go).map(t => [t.go, t])).values()].map(t => `<button type="button" class="btn ghost hxgo" ${t.go}>Faire le test : ${esc(t.gn)}</button>`).join('')}
+    ${q.k === 'force' ? '<button type="button" class="btn ghost hxgo" data-rmlist>Noter un max à la main</button>' : ''}
+    ${hasNote.length ? `<div class="hxnote"><span class="eyebrow">Noter un résultat à la main</span>${hasNote.map(t => `<div class="row"><label for="hxn-${t.id}">${esc(t.n)}</label><span><input class="mini-in" id="hxn-${t.id}" inputmode="decimal" style="width:76px" placeholder="${esc(t.f === 't' ? 's' : t.f === 'rsi' ? 'RSI' : 'cm')}"> <button type="button" class="chip" data-hxnote="${t.jt}|${t.f}|${t.id}">Noter</button></span></div>`).join('')}<p class="small muted" data-tip="1" style="margin:6px 2px 0">Un test fait dans l'appli se note tout seul ici. À la main : pour un test mesuré ailleurs (cellules, My Jump, plateforme).</p></div>` : ''}
+    <p class="small muted" data-tip="1" style="margin:8px 2px 0">Sources : ${esc(q.q.src)}.</p></div>`;
+}
+function hxBody() {
+  const Q = hxVals(), p = HXP.find(x => x[0] === HXS.per), D = addDays(TODAY, -p[2]), O = hxOld(Q, D), on = Q.filter(q => q.s != null).sort((a, b) => b.s - a.s);
+  const same = Q.every((q, i) => q.s === O[i].s), none = O.every(o => o.s == null);
+  return `<div class="seg hxseg" role="group" aria-label="Comparer avec">${HXP.map(([k, l]) => `<button type="button" data-hxper="${k}" aria-pressed="${k === HXS.per}">${l}</button>`).join('')}</div>
+    <div class="card hxcard">${hxSvg(Q, none ? null : O)}
+      <div class="hxleg"><span><i class="now"></i>Aujourd'hui</span><span><i class="old"></i>${esc(cap(p[3]))} · ${esc(fmtShort(D))}</span></div>
+      ${none ? `<p class="small muted" data-tip="1" style="margin:4px 2px 0">Pas encore de test ${esc(p[3])} : l'hexagone d'avant apparaîtra avec tes prochains tests.</p>` : same ? `<p class="small muted" data-tip="1" style="margin:4px 2px 0">Aucun test nouveau depuis ${esc(p[3].replace('il y a ', ''))} : les deux formes sont les mêmes.</p>` : ''}
+      ${on.length >= 2 ? `<p class="small" style="margin:6px 2px 0"><b>Ta plus haute :</b> ${esc(on[0].n.toLowerCase())} (${on[0].s}). <b>Ta plus basse :</b> ${esc(on.at(-1).n.toLowerCase())} (${on.at(-1).s}).</p>` : ''}</div>
+    <div class="list hxlist">${Q.map((q, i) => { const d = q.s != null && O[i].s != null ? q.s - O[i].s : null, open = HXS.open === q.k;
+      return `<div class="hxrow${open ? ' on' : ''}" data-hxrow="${q.k}"><button type="button" class="rowbtn" data-hxk="${q.k}" aria-expanded="${open}"><span><b>${esc(q.n)}${q.s != null ? ' · ' + q.s : ''}${d ? ` <em class="${d > 0 ? 'hxu' : 'hxdn'}">${d > 0 ? '+' : '−'}${Math.abs(d)}</em>` : ''}</b><span class="meta">${q.s != null ? `${q.n0} test${q.n0 > 1 ? 's' : ''} sur ${q.T.length}${q.est ? ' · estimée' : ''} · ${esc(hxDate(q.date))}` : 'à tester'} · ${esc(q.q.s)}</span></span><i class="hxchev">${ICON.chev}</i></button>
+        <div class="hxdet">${hxDetail(q)}</div></div>`; }).join('')}</div>
+    <p class="small muted" data-tip="1" style="margin:10px 4px 0">0 = sportif entraîné qui débute le sprint (≈ 13″5 au 100 m), 100 = sprinteur international (≈ 10″10). Chaque qualité est la moyenne de ses tests, pondérée par leur lien avec le sprint. Un test compte 6 mois. Touche une qualité pour voir ses tests et faire le bon.</p>`;
 }
 function hexPane() {
-  openPane({title: 'L\'hexagone de tes qualités', render: () => { const Q = hxVals(), on = Q.filter(q => q.s != null).sort((a, b) => b.s - a.s);
-    return `<div class="card" style="margin-top:14px">${hxSvg(Q)}
-      ${on.length >= 2 ? `<p class="small" style="margin:4px 2px 0"><b>Ta qualité la plus haute :</b> ${esc(on[0].n.toLowerCase())} (${on[0].s}). <b>La plus basse :</b> ${esc(on.at(-1).n.toLowerCase())} (${on.at(-1).s}). Un sprinteur progresse le plus en remontant la plus basse.</p>` : ''}</div>
-      <div class="list" style="margin-top:12px">${Q.map(q => `<button type="button" class="rowbtn" ${q.go}><span><b>${esc(q.n)}${q.s != null ? ' · ' + q.s : ''}</b><span class="meta">${q.s != null ? esc(q.txt) + ' · ' : 'à tester · '}${esc(q.how)}</span></span>${ICON.chev}</button>`).join('')}</div>
-      <p class="small muted" data-tip="1" style="margin:10px 4px 0">0 = sportif entraîné qui débute le sprint, 100 = niveau international. C'est une échelle pour lire la forme de ton profil, pas une note. Chaque nouveau test la met à jour.</p>`; }});
+  HXS.anim = true;
+  openPane({title: 'Tes qualités physiques', render: hxBody});
+  requestAnimationFrame(() => { if (!HXS.anim) return; HXS.anim = false; const b = $('#pane-body'), Q = hxVals(), O = hxOld(Q, addDays(TODAY, -HXP.find(x => x[0] === HXS.per)[2])), z = Q.map(() => 0);
+    hxTween(b?.querySelector('.hxp'), z, Q.map(q => q.s), 650); hxTween(b?.querySelector('.hxo'), z, O.map(o => o.s), 650); HXS.shown = O.map(o => o.s); });
 }
-document.addEventListener('click', e => { if (e.target.closest?.('[data-tsprint]')) { try { vaPane('sprint'); } catch (er) {} } });
-if (typeof IDEAS !== 'undefined') IDEAS.splice(3, 0, ['hexa', 'Prête', 'L\'hexagone de tes qualités', 'Tes 6 qualités de sprinteur sur un hexagone, notées de 0 à 100 à partir de tes vrais tests : force, explosivité, réactivité, accélération, vitesse max, endurance de vitesse. Pour voir d\'un coup d\'œil celle à remonter.', () => hexPane()]);
+document.addEventListener('click', async e => {
+  const at = q => e.target.closest?.(q); let b;
+  if (at('[data-tsprint]')) { try { vaPane('sprint'); } catch (er) {} return; }
+  if ((b = at('[data-hxper]'))) { const k = b.dataset.hxper; if (k === HXS.per) return; const Q = hxVals(), prev = hxOld(Q, addDays(TODAY, -HXP.find(x => x[0] === HXS.per)[2])).map(o => o.s); HXS.per = k;
+    const sc = $('#pane-scroll'), y = sc?.scrollTop; paneRender(); if (sc) sc.scrollTop = y;
+    const O = hxOld(Q, addDays(TODAY, -HXP.find(x => x[0] === k)[2])).map(o => o.s), poly = $('#pane-body .hxo'); if (poly) hxTween(poly, prev.map((v, i) => v ?? O[i]), O); return; }
+  if ((b = at('[data-hxk]')) && b.closest('#pane-body')) { const k = b.dataset.hxk, row = $(`#pane-body [data-hxrow="${k}"]`); if (!row) return;
+    const was = HXS.open === k; document.querySelectorAll('#pane-body .hxrow.on').forEach(r => { r.classList.remove('on'); r.querySelector('[aria-expanded]')?.setAttribute('aria-expanded', 'false'); });
+    HXS.open = was ? null : k; if (!was) { row.classList.add('on'); row.querySelector('[aria-expanded]')?.setAttribute('aria-expanded', 'true');
+      if (b.tagName !== 'BUTTON') setTimeout(() => row.scrollIntoView({behavior: 'smooth', block: 'start'}), 60); } return; }
+  if ((b = at('[data-hxnote]'))) { const [type, f, id] = b.dataset.hxnote.split('|'), inp = $('#hxn-' + id), v = +String(inp?.value || '').replace(',', '.');
+    const ok = v > 0 && (f === 't' ? v > 1 && v < 10 : f === 'rsi' ? v < 6 : f === 'd' ? v > 100 && v < 400 : v > 5 && v < 75);
+    if (!ok) { toast(f === 't' ? 'Temps en secondes, par exemple 1,85' : f === 'rsi' ? 'RSI, par exemple 2,1' : f === 'd' ? 'Distance en cm, par exemple 265' : 'Hauteur en cm, par exemple 48'); return; }
+    const j = {id: uid(), type, date: TODAY, src: 'manuel', [f]: f === 'd' ? Math.round(v) : +v.toFixed(f === 'h' ? 1 : 2)};
+    const sc = $('#pane-scroll'), y = sc?.scrollTop; await saveJumps([...jumps(), j]); if (sc) sc.scrollTop = y; toast('Noté : ' + (JT[type]?.n || 'test')); return; }
+});
+if (typeof IDEAS !== 'undefined') IDEAS.splice(3, 0, ['hexa', 'Prête', 'Tes qualités physiques', 'Tes 6 qualités de sprinteur sur un hexagone, notées de 0 à 100 avec tes vrais tests : force, explosivité, réactivité, accélération, vitesse max, endurance de vitesse. Compare avec il y a une semaine, un mois ou un an.', () => hexPane()]);
+
+/* ================= Ton niveau FFA : la courbe des niveaux, du D7 à l'IA =================
+   Barème FFA hommes (classement des clubs, athle.fr « Barèmes Hommes », toujours en vigueur en 2025-2026) :
+   pour chaque niveau, ses points et le temps à battre au 60 m en salle et au 100 m. Une performance égale ou meilleure
+   que le temps du niveau donne ce niveau. En bas, 0,30 à 0,40 s séparent deux niveaux ; en haut, 0,10 s : chaque
+   centième y coûte bien plus cher. La courbe le montre : elle se redresse quand on monte. */
+const FFA_LV = [ // du plus bas au plus haut : [niveau, points, 60 m, 100 m]
+  ['D7', 2, 9.04, 14.14], ['D6', 3, 8.84, 13.74], ['D5', 4, 8.64, 13.44], ['D4', 5, 8.54, 13.14], ['D3', 6, 8.44, 12.94], ['D2', 7, 8.34, 12.74], ['D1', 8, 8.24, 12.54],
+  ['R6', 10, 8.14, 12.44], ['R5', 11, 8.04, 12.34], ['R4', 12, 7.94, 12.24], ['R3', 13, 7.84, 12.14], ['R2', 14, 7.74, 11.94], ['R1', 15, 7.64, 11.74],
+  ['IR4', 18, 7.54, 11.54], ['IR3', 19, 7.44, 11.44], ['IR2', 20, 7.34, 11.34], ['IR1', 21, 7.24, 11.14],
+  ['N4', 24, 7.14, 10.94], ['N3', 26, 6.94, 10.84], ['N2', 28, 6.84, 10.64], ['N1', 30, 6.74, 10.34], ['IB', 35, 6.66, 10.20], ['IA', 40, 6.56, 10.10]];
+const lvT = x => fx(x, 2).replace(',', '″');
+// Où tombe un temps : le niveau atteint (index) et la position entre deux niveaux (pour placer le point sur la courbe).
+function lvPos(t, col) {
+  if (!(t > 0)) return null; const c = col === 60 ? 2 : 3; let i = -1;
+  for (let k = 0; k < FFA_LV.length; k++) if (t <= FFA_LV[k][c] + 1e-9) i = k;
+  const nx = FFA_LV[i + 1], cur = FFA_LV[i];
+  const pos = i < 0 ? -Math.min(.8, (t - FFA_LV[0][c]) / .4) : !nx ? i : i + (cur[c] - t) / (cur[c] - nx[c]);
+  return {i, pos, lv: cur?.[0] || 'sous D7', pts: cur?.[1] || 0, next: nx ? {lv: nx[0], t: nx[c], gap: t - nx[c]} : null};
+}
+function lvSvg(p100, p60) {
+  const N = FFA_LV.length, RH = 25, top = 26, H = top + N * RH + 10, x0 = 66, x1 = 246, t0 = 14.24, t1 = 10.10;
+  const X = t => x0 + (t0 - t) / (t0 - t1) * (x1 - x0), Y = i => top + (N - 1 - i) * RH + RH / 2;
+  const P = FFA_LV.map((l, i) => [X(l[3]), Y(i)]);
+  // Courbe lisse (Catmull-Rom → Bézier) passant par chaque niveau.
+  const path = pts => pts.map((p, i) => { if (!i) return `M${p[0].toFixed(1)},${p[1].toFixed(1)}`; const a = pts[i - 2] || pts[i - 1], b = pts[i - 1], d = pts[i + 1] || p;
+    return `C${(b[0] + (p[0] - a[0]) / 6).toFixed(1)},${(b[1] + (p[1] - a[1]) / 6).toFixed(1)} ${(p[0] - (d[0] - b[0]) / 6).toFixed(1)},${(p[1] - (d[1] - b[1]) / 6).toFixed(1)} ${p[0].toFixed(1)},${p[1].toFixed(1)}`; }).join('');
+  const at = pos => { const i = Math.max(0, Math.min(N - 1, Math.floor(pos))), f = Math.max(0, pos - i), a = P[i], b = P[Math.min(N - 1, i + 1)]; return pos < 0 ? [x0 - 6, Y(0) + (-pos) * RH] : [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f]; };
+  const me = p100 || p60, cut = me ? Math.max(0, Math.floor(me.pos)) : -1;
+  const done = cut >= 0 ? path([...P.slice(0, cut + 1), at(me.pos)]) : '', rest = path(me ? [at(Math.max(0, me.pos)), ...P.slice(cut + 1)] : P);
+  const rows = FFA_LV.map((l, i) => { const y = Y(i), mine = p100?.i === i || p60?.i === i;
+    return `${mine ? `<rect x="0" y="${(y - RH / 2 + 1).toFixed(1)}" width="340" height="${RH - 2}" rx="7" class="lvband"/>` : ''}
+      <text x="8" y="${(y + 4).toFixed(1)}" class="lvn${mine ? ' on' : ''}">${l[0]}</text><text x="54" y="${(y + 4).toFixed(1)}" text-anchor="end" class="lvp">${l[1]}</text>
+      <text x="294" y="${(y + 4).toFixed(1)}" text-anchor="end" class="lvt${p60?.i === i ? ' on' : ''}">${lvT(l[2])}</text><text x="334" y="${(y + 4).toFixed(1)}" text-anchor="end" class="lvt${p100?.i === i ? ' on' : ''}">${lvT(l[3])}</text>`; }).join('');
+  const dots = P.map((p, i) => `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.6" class="lvd${me && i <= me.pos ? ' on' : ''}"/>`).join('');
+  const mk = (o, cls, lab) => { if (!o) return ''; const [x, y] = at(o.pos); return `<g class="${cls}"><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="7"/><text x="${(x - 11).toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="end">${lab}</text></g>`; };
+  return `<svg viewBox="0 0 340 ${H}" class="lvsvg" role="img" aria-label="Courbe des niveaux FFA, du D7 à l'IA, avec ta position">
+    <text x="8" y="14" class="lvh">Niv.</text><text x="54" y="14" text-anchor="end" class="lvh">pts</text><text x="294" y="14" text-anchor="end" class="lvh">60 m</text><text x="334" y="14" text-anchor="end" class="lvh">100 m</text>
+    ${rows}<path d="${rest}" class="lvrest"/>${done ? `<path d="${done}" class="lvdone"/>` : ''}${dots}${mk(p60, 'lvme60', '60 m')}${mk(p100, 'lvme', '100 m')}</svg>`;
+}
+function lvPane() {
+  openPane({title: 'Ton niveau', render: () => {
+    const sp = S.profile?.sprinter || {}, t100 = hxNum(sp.pb100), t60 = hxNum(sp.pb60), a = lvPos(t100, 100), b = lvPos(t60, 60);
+    const box = (d, t, o) => !o ? `<div class="lvbox"><span class="eyebrow">${d}</span><b>–</b><small>pas encore de temps</small></div>` : `<div class="lvbox"><span class="eyebrow">${d} · ${lvT(t)}</span><b>${esc(o.lv)}${o.pts ? ` <small>${o.pts} pts</small>` : ''}</b><small>${o.next ? `${esc(o.next.lv)} en ${lvT(o.next.t)} : encore ${fx(o.next.gap, 2)} s` : 'le plus haut niveau'}</small></div>`;
+    const path = (o, c, d) => { if (!o) return ''; const L = FFA_LV.slice(o.i + 1, o.i + 4), t = c === 60 ? t60 : t100; return L.length ? `<div class="lvpath"><span class="eyebrow">Chemin · ${d}</span>${L.map(l => `<div class="lvstep"><b>${l[0]}</b><span>${lvT(l[c === 60 ? 2 : 3])}</span><em>−${fx(t - l[c === 60 ? 2 : 3], 2)} s</em></div>`).join('')}</div>` : ''; };
+    return `<div class="lvtop">${box('100 m', t100, a)}${box('60 m', t60, b)}</div>
+      ${sp.level ? `<p class="small" style="margin:8px 4px 0">Ta fiche FFA : <b>${esc(sp.level)}</b>${sp.pb60Note ? ` · 60 m ${esc(sp.pb60Note)}` : ''}.</p>` : ''}
+      <div class="card lvcard">${lvSvg(a, b)}</div>
+      <div class="lvpaths">${path(a, 100, '100 m')}${path(b, 60, '60 m')}</div>
+      <p class="small muted" data-tip="1" style="margin:10px 4px 0">La courbe se redresse en montant : entre deux niveaux du bas, il y a 0,20 à 0,40 s au 100 m ; tout en haut, 0,10 s, et chacun de ces centièmes demande des années. Barème FFA hommes du classement des clubs : un temps égal ou meilleur que celui du niveau le donne. Le niveau de ta fiche FFA peut venir d'une autre course ou d'un autre barème.</p>`;
+  }});
+}
+const sprinterCard0 = sprinterCard;
+sprinterCard = function () { return `<div class="lvbtn" role="button" tabindex="0" data-lvl aria-label="Voir la courbe des niveaux FFA">${sprinterCard0()}</div>`; };
+document.addEventListener('click', e => { if (e.target.closest?.('[data-lvl]')) lvPane(); });
 
 /* ================= TNR · Paramètres (la roue crantée, en haut à gauche de l'Accueil) =================
    Tout ce qui se règle dans l'appli, au même endroit :
