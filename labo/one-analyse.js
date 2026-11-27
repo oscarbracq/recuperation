@@ -390,13 +390,12 @@ function proAnaCards() {
   const box = (k, t, o) => `<button type="button" class="card pac" data-proana="${k}"><span class="eyebrow">Analyse</span><b>${t}</b><small>${o.L.length ? `${o.L.length} vidéo${o.L.length > 1 ? 's' : ''} · ${o.a} analysée${o.a > 1 ? 's' : ''}` : 'Filme ou ajoute une vidéo'}</small></button>`;
   const pts = (k, o) => { const g = o.P.filter(x => x.lvl === 'good').length, w = o.P.filter(x => x.lvl === 'warn').length, b = o.P.filter(x => x.lvl === 'bad').length;
     return `<button type="button" class="card pac pts" data-propts="${k}"><span class="eyebrow">Points forts · faibles</span>${o.P.length ? `<p class="pacl">${anDot('good')}${g} fort${g > 1 ? 's' : ''}</p><p class="pacl">${anDot('warn')}${w} à affiner</p><p class="pacl">${anDot('bad')}${b} faible${b > 1 ? 's' : ''}</p>` : '<small>Après ta première analyse.</small>'}</button>`; };
-  const hx = typeof hxVals === 'function' && typeof hxSvg === 'function' ? `<button type="button" class="card pac hxpro" data-prohex><span class="eyebrow">Tes qualités physiques</span>${hxSvg(hxVals())}</button>` : '';
+  const hx = typeof hxCard === 'function' ? hxCard() : '';
   return `<div class="sec-label">Mes qualités et mes analyses vidéo</div>${hx}<div class="pagrid">${box('run', 'Ma dynamique de course', R)}${box('lift', 'Mes mouvements · musculation', M)}${pts('run', R)}${pts('lift', M)}</div>`;
 }
 document.addEventListener('click', e => { let b;
   if ((b = e.target.closest?.('[data-proana]'))) { vidPane('', b.dataset.proana); return; }
-  if ((b = e.target.closest?.('[data-propts]'))) { vidPane('', b.dataset.propts, true); return; }
-  if (e.target.closest?.('[data-prohex]') && typeof hexPane === 'function') { hexPane(); return; } });
+  if ((b = e.target.closest?.('[data-propts]'))) { vidPane('', b.dataset.propts, true); return; } });
 const tProfile0 = tProfile;
 tProfile = function () { const h = tProfile0(); return h.replace('<div class="sec-label">Mes résultats</div>', proAnaCards() + '<div class="sec-label">Mes résultats</div>'); };
 // La consigne aussi pendant la séance de sprint.

@@ -7354,7 +7354,7 @@ function go(mod, push = true) {
   if (push && mod !== 'home') try { history.pushState({mod}, ''); } catch (e) {}
   pcSync();
 }
-addEventListener('popstate', e => { if (POP_SKIP) { POP_SKIP = false; return; } if (PLFS.on && !S.sheet && !P.stack.length) { try { history.pushState({mod: S.mod, plan: true}, ''); } catch (err) {} return; } if (S.sheet) { closeSheet(true); return; } if (P.stack.length) { closePane(); try { history.pushState({mod: S.mod}, ''); } catch (err) {} return; } if ((e.state?.mod || 'home') === S.mod) return; go(e.state?.mod || 'home', false); });
+addEventListener('popstate', e => { if (POP_SKIP) { POP_SKIP = false; return; } if (PLFS.on && !S.sheet && !P.stack.length) { try { history.pushState({mod: S.mod, plan: true}, ''); } catch (err) {} return; } if (S.sheet) { closeSheet(true); return; } if (P.stack.length) { closePane(); if (!(typeof HXO !== 'undefined' && HXO.on && e.state?.hxo === HXO.tok)) try { history.pushState({mod: S.mod}, ''); } catch (err) {} return; } if ((e.state?.mod || 'home') === S.mod) return; go(e.state?.mod || 'home', false); });
 function renderMod(force) {
   if (S.mod === 'home' && (HP.el || HP.busy)) return;
   const el = S.mod === 'home' ? $('#home-view') : S.mod === 'T' ? $('#t-view') : S.mod === 'N' ? $('#f-view') : null;
@@ -8667,15 +8667,11 @@ function tProfile() {
       <button class="banner" data-baroga style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Max haltérophilie</b><br><span class="small muted">${typeof bgTotal === 'function' && bgTotal() ? 'total ' + fx(bgTotal()) + ' kg · ' : ''}table de Baroga : tes déficits sur 46 mouvements</span></span>${ICON.chev}</button>
       <button class="banner" data-tjumps style="display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left"><span><b>Mes max en saut</b><br><span class="small muted">${(() => { const ck = cmjCheck(); return cmj ? 'CMJ ' + fx(+cmj.h, 1) + ' cm' + (ck && ck.d <= -5 ? ' · fatigue détectée' : '') + ' · ' : ''; })()}tes records de saut et de sprint · import My Jump</span></span>${ICON.chev}</button>
     </div>
-    <div class="sec-label">Tests</div>
+    <div class="sec-label">Autres tests <small>ceux de tes qualités sont dans l'hexagone</small></div>
     <div class="stack">
-      ${row('data-t5start', 'Test de RM', esc(last5 ? ago(last5.date) + ' · ' : '') + 'de 1 à 5RM, ton 1RM calculé · tous tes exercices de base')}
-      ${row('data-tsymstart', 'Test de symétrie gauche / droite', esc(lastSym ? ago(lastSym.date) + ' · ' : '') + 'mollets, tibial, quadriceps, ischios, adducteurs, moyen fessier')}
-      ${row('data-tfvstart', 'Test profil force-vitesse vertical', esc(fvr ? `${ago(fv.date)} · ${Math.round(fvr.imb * 100)} % de l'optimal · ` : '') + 'squat jumps chargés filmés · méthode Samozino')}
-      ${row('data-thfvstart', 'Test profil force-vitesse en sprint', esc(hfv ? `${ago(hfv.date)} · F0 ${fx(hfv.F0, 1)} N/kg · Vmax ${fx(hfv.vmax, 2)} m/s · ` : '') + 'sprint 30 m filmé, avec ou sans traîneau · horizontal')}
-      ${row('data-treact', 'Test de réaction', esc(typeof rcLastTxt === 'function' ? rcLastTxt() : '') + 'au son, à la caméra dans les blocs, ou sur une vidéo')}
-      ${row('data-tplyo', 'Tests pliométriques', esc(cmj ? 'CMJ ' + fx(+cmj.h, 1) + ' cm · ' : '') + 'CMJ, squat jump, drop jump, RSI, 10/5, pogo, une jambe')}
-      ${row('data-vatest="sprint"', 'Tests de sprint', '10, 20, 30, 60 m et 5-0-5 · chronométrés à la vidéo')}
+      ${row('data-tsymstart', 'Test d’équilibre gauche / droite', esc(lastSym ? ago(lastSym.date) + ' · ' : '') + 'Test de symétrie · mollets, tibial, quadriceps, ischios, adducteurs, moyen fessier')}
+      ${row('data-treact', 'Test de réaction au départ', esc(typeof rcLastTxt === 'function' ? rcLastTxt() : '') + 'Test de réaction · au son, à la caméra dans les blocs, ou sur une vidéo')}
+      ${row('data-tplyo', 'Tests de saut', 'Tests pliométriques · CMJ sur une jambe, CMJ bras libres, pogo, et tous les autres')}
       <button class="btn ghost" data-tmore>+ Plus de tests</button>
     </div>
 `;

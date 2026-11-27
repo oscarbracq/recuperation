@@ -18,7 +18,7 @@ function lvPos(t, col) {
   return {i, pos, lv: cur?.[0] || 'sous D7', pts: cur?.[1] || 0, next: nx ? {lv: nx[0], t: nx[c], gap: t - nx[c]} : null};
 }
 function lvSvg(p100, p60) {
-  const N = FFA_LV.length, RH = 25, top = 26, H = top + N * RH + 10, x0 = 66, x1 = 246, t0 = 14.24, t1 = 10.10;
+  const N = FFA_LV.length, RH = 17, top = 22, H = top + N * RH + 6, x0 = 66, x1 = 246, t0 = 14.24, t1 = 10.10;
   const X = t => x0 + (t0 - t) / (t0 - t1) * (x1 - x0), Y = i => top + (N - 1 - i) * RH + RH / 2;
   const P = FFA_LV.map((l, i) => [X(l[3]), Y(i)]);
   // Courbe lisse (Catmull-Rom → Bézier) passant par chaque niveau.
@@ -32,9 +32,9 @@ function lvSvg(p100, p60) {
       <text x="8" y="${(y + 4).toFixed(1)}" class="lvn${mine ? ' on' : ''}">${l[0]}</text><text x="54" y="${(y + 4).toFixed(1)}" text-anchor="end" class="lvp">${l[1]}</text>
       <text x="294" y="${(y + 4).toFixed(1)}" text-anchor="end" class="lvt${p60?.i === i ? ' on' : ''}">${lvT(l[2])}</text><text x="334" y="${(y + 4).toFixed(1)}" text-anchor="end" class="lvt${p100?.i === i ? ' on' : ''}">${lvT(l[3])}</text>`; }).join('');
   const dots = P.map((p, i) => `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.6" class="lvd${me && i <= me.pos ? ' on' : ''}"/>`).join('');
-  const mk = (o, cls, lab) => { if (!o) return ''; const [x, y] = at(o.pos); return `<g class="${cls}"><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="7"/><text x="${(x - 11).toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="end">${lab}</text></g>`; };
+  const mk = (o, cls, lab) => { if (!o) return ''; const [x, y] = at(o.pos); return `<g class="${cls}"><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="6"/><text x="${(x - 10).toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="end">${lab}</text></g>`; };
   return `<svg viewBox="0 0 340 ${H}" class="lvsvg" role="img" aria-label="Courbe des niveaux FFA, du D7 à l'IA, avec ta position">
-    <text x="8" y="14" class="lvh">Niv.</text><text x="54" y="14" text-anchor="end" class="lvh">pts</text><text x="294" y="14" text-anchor="end" class="lvh">60 m</text><text x="334" y="14" text-anchor="end" class="lvh">100 m</text>
+    <text x="8" y="12" class="lvh">Niv.</text><text x="54" y="12" text-anchor="end" class="lvh">pts</text><text x="294" y="12" text-anchor="end" class="lvh">60 m</text><text x="334" y="12" text-anchor="end" class="lvh">100 m</text>
     ${rows}<path d="${rest}" class="lvrest"/>${done ? `<path d="${done}" class="lvdone"/>` : ''}${dots}${mk(p60, 'lvme60', '60 m')}${mk(p100, 'lvme', '100 m')}</svg>`;
 }
 function lvPane() {
