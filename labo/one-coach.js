@@ -6,7 +6,7 @@
    (onglet Code, où le skill « prepa-physique » est installé). Claude répond par un bloc de séances ; on le recolle ici,
    on voit les séances, puis « Envoyer dans le planning » les crée et les cale sur leurs jours. */
 const CTR = {goal: '', until: '', comp: '', fit: true, weeks: 4, per: 3, gyms: ['dmarcq'], notes: '', paste: '', parsed: null, err: ''};
-function coachChip() { return typeof isPC === 'function' && isPC() ? `<button type="button" class="seachip coachchip" data-coachtr aria-label="Coach training : créer des séances"><span>Coach</span><b>Training</b></button>` : ''; }
+function coachChip() { return typeof isPC === 'function' && isPC() ? `<button type="button" class="seachip coachchip" data-coachtr aria-label="Coach muscu : créer des séances de musculation"><span>Coach</span><b>Muscu</b></button>` : ''; }
 const ctMonday = () => { let d = addDays(TODAY, 1); while (dow(d) !== 1) d = addDays(d, 1); return d; };
 function ctContext() {
   const L = [], n = seasonNow(TODAY), start = ctMonday(), days = [...Array(CTR.weeks * 7)].map((_, i) => addDays(start, i));
@@ -76,7 +76,7 @@ async function ctSend() {
   toast(`${ses.length} séances envoyées dans le planning${fit?.changed ? ' · saison recalée' : ''}`); CTR.parsed = null; CTR.paste = ''; closeAllPanes?.(); try { renderMod(true); } catch (e) {}
 }
 function coachPane() {
-  openPane({title: 'Coach training', side: true, render: () => {
+  openPane({title: 'Coach muscu', side: true, render: () => {
     const f = (k, l, ph, t = 'text') => `<label class="ctf"><span>${l}</span><input type="${t}" data-ctk="${k}" value="${esc(String(CTR[k] ?? ''))}" placeholder="${ph}"></label>`;
     const P = CTR.parsed;
     return `<div style="margin-top:14px"></div>

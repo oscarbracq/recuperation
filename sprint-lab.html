@@ -8757,6 +8757,7 @@ function planView(id, n, from) {
     GYM_CTX = S.tset?.gymPlan?.[p.id] || null;
     const mine = !BUILTIN.includes(p);
     return `<div class="dhead"><span class="chiptag">${p.kind === 'gym' ? 'Musculation' : 'Sprint'} · ${estMin(p)} min</span><div class="bigname" style="font-size:1.75rem">${esc(p.name)}</div>${p.title ? `<p style="margin:4px 0 0;font-weight:600">Objectif : ${esc(p.title)}</p>` : ''}<p class="small muted">${esc(p.desc || '')}</p></div>
+      ${p.kind === 'track' && typeof cueCard === 'function' ? cueCard(p) : ''}
       ${p.warm?.sel?.length ? `<div class="card wtxt"><span class="eyebrow">Échauffement · ${warmMin(p.warm)} min</span>${warmTable(p.warm)}</div>` : ''}
       ${p.tech ? `<div class="card wtxt"><span class="eyebrow">Travail technique</span><p class="small">${esc(p.tech)}</p></div>` : ''}
       ${p.items.some(x => x.seq) ? '<div class="sec-label">Séance principale</div>' : ''}
