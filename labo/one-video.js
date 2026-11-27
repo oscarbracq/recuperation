@@ -33,20 +33,59 @@ function vidMeasure(axId) {
   return '';
 }
 const VIDF = {ax: '', kind: 'run'};
-// kind : « run » (course, axes de Ton cap) ou « lift » (musculation). Une vidéo sans kind est une course.
-function vidPane(ax, kind) {
-  VIDF.ax = ax || ''; VIDF.kind = kind || 'run';
+// kind : « run » (course) ou « lift » (musculation). Une vidéo sans kind est une course. Page entière, fond noir :
+// filmer ou choisir une vidéo, la liste, puis (en descendant) les points forts · à affiner · à corriger et leur évolution.
+function vidPane(ax, kind, toProfile) {
+  VIDF.ax = ''; VIDF.kind = kind || 'run';
   const run = VIDF.kind === 'run';
-  openPane({title: run ? 'Ma dynamique de course' : 'Mes mouvements · muscu', render: () => { const c = typeof capGet === 'function' ? capGet() : {axes: []}, A = c.axes || [];
-    const L = vids().filter(v => (v.kind || 'run') === VIDF.kind && (!VIDF.ax || (v.axes || []).includes(VIDF.ax))).sort((a, b) => (b.d || '').localeCompare(a.d || '') || (b.at || 0) - (a.at || 0));
-    const sub = v => { const r = run ? vidTxt(vidCalc(v)) : ''; const ex = !run && typeof LIFT_EX !== 'undefined' ? LIFT_EX.find(x => x[0] === v.ex)?.[1] : ''; const a = v.an?.rows?.length ? v.an.rows.filter(x => x.lvl !== 'good').length + ' à travailler' : '';
-      return [cap(fmtShort(v.d)), ex, r, a].filter(Boolean).join(' · '); };
-    return `<label class="btn" style="margin-top:14px;width:100%;display:flex;justify-content:center;align-items:center">+ Ajouter une vidéo<input type="file" accept="video/*" data-vidfile hidden></label>
-      <p class="small muted" data-tip="1" style="margin:8px 4px 0">${run ? 'De côté, caméra fixe, au ralenti si possible.' : 'Tout le corps dans l\'image, caméra fixe, de côté (ou de face pour les genoux).'} La vidéo reste sur cet appareil ; sa fiche et son analyse sont partout.</p>
-      ${run ? `<div class="chips2b" style="margin-top:12px"><button type="button" class="chip" data-vidax="" aria-pressed="${!VIDF.ax}">Toutes</button>${A.map(a => `<button type="button" class="chip" data-vidax="${esc(a.id)}" aria-pressed="${VIDF.ax === a.id}">${esc(a.n.length > 26 ? a.n.slice(0, 24) + '…' : a.n)}</button>`).join('')}</div>` : ''}
-      <div class="vgrid">${L.map(v => `<button type="button" class="vcard" data-vidplay="${esc(v.id)}"><span class="vth" data-vth="${esc(v.id)}"></span><b>${esc(v.title || 'Vidéo')}</b><small>${esc(sub(v))}</small></button>`).join('') || '<p class="small muted" data-tip="1" style="margin:16px 4px">Pas encore de vidéo ici.</p>'}</div>`; }});
+  openPane({title: run ? 'Ma dynamique de course' : 'Mes mouvements · musculation', full: true, render: () => {
+    const L = vids().filter(v => (v.kind || 'run') === VIDF.kind).sort((a, b) => (b.d || '').localeCompare(a.d || '') || (b.taken || b.at || 0) - (a.taken || a.at || 0));
+    const sub = v => { const ex = !run && typeof LIFT_EX !== 'undefined' ? LIFT_EX.find(x => x[0] === v.ex)?.[1] : ''; const R = v.an?.rows || [], a = R.length ? `${R.filter(x => x.lvl === 'good').length} bien · ${R.filter(x => x.lvl !== 'good').length} à travailler` : 'pas encore analysée';
+      return [ex, a].filter(Boolean).join(' · '); };
+    return `<div class="vadd"><label class="btn"><input type="file" accept="video/*" capture="environment" data-vidfile hidden>Filmer</label><label class="btn ghost"><input type="file" accept="video/*" data-vidfile hidden>Choisir une vidéo</label></div>
+      <p class="small muted" data-tip="1" style="margin:8px 4px 0">${run ? 'De côté, à 5 à 10 m, caméra fixe à hauteur de hanche, tout le corps dans l\'image.' : 'Tout le corps dans l\'image, caméra fixe à hauteur de hanche, de côté (ou de face pour les genoux).'} La date et les images par seconde sont lues dans la vidéo.</p>
+      <div class="vgrid">${L.map(v => `<button type="button" class="vcard" data-vidplay="${esc(v.id)}"><span class="vth" data-vth="${esc(v.id)}"></span><b>${esc(v.title || 'Vidéo')}</b><small>${esc(sub(v))}</small></button>`).join('') || '<p class="small muted" data-tip="1" style="margin:16px 4px">Pas encore de vidéo ici.</p>'}</div>
+      ${typeof anaProfileHtml === 'function' ? anaProfileHtml(VIDF.kind) : ''}`; }});
   setTimeout(vidThumbs, 60);
+  if (toProfile) setTimeout(() => document.getElementById('anaprof')?.scrollIntoView({behavior: 'smooth', block: 'start'}), 300);
 }
+/* La fiche de la vidéo lue dans le fichier lui-même (MP4 / MOV) : date de prise de vue (mvhd), images par seconde
+   (mdhd + stts de la piste vidéo), et le ralenti d'Android (clé com.android.capture.fps). Rien n'est envoyé. */
+async function vidMeta(f) {
+  const out = {}, N = f.size, s4 = (d, p) => String.fromCharCode(d.getUint8(p), d.getUint8(p + 1), d.getUint8(p + 2), d.getUint8(p + 3));
+  const kids = (d, a, b, cb) => { let p = a; while (p + 8 <= b) { let sz = d.getUint32(p), hs = 8; const ty = s4(d, p + 4); if (sz === 1) { sz = Number(d.getBigUint64(p + 8)); hs = 16; } else if (sz === 0) sz = b - p; if (sz < 8 || p + sz > b) break; cb(ty, p + hs, p + sz, p); p += sz; } };
+  try {
+    let o = 0, moov = null;
+    while (o + 8 <= N) { const d = new DataView(await f.slice(o, o + 16).arrayBuffer()); let sz = d.getUint32(0), hs = 8; const ty = s4(d, 4);
+      if (sz === 1) { sz = Number(d.getBigUint64(8)); hs = 16; } else if (sz === 0) sz = N - o;
+      if (ty === 'moov') { if (sz < 64e6) moov = new DataView(await f.slice(o + hs, o + sz).arrayBuffer()); break; }
+      if (sz < 8) break; o += sz; }
+    if (!moov) return out;
+    const keys = [];
+    const meta = (a, b) => { const st = ['hdlr', 'keys', 'ilst'].includes(s4(moov, a + 4)) ? a : a + 4;
+      kids(moov, st, b, (t2, c, e) => {
+        if (t2 === 'keys') { const k = moov.getUint32(c + 4); let q = c + 8; for (let i = 0; i < k && q + 8 <= e; i++) { const sz = moov.getUint32(q); let nm = ''; for (let j = q + 8; j < q + sz; j++) nm += String.fromCharCode(moov.getUint8(j)); keys.push(nm); q += sz; } }
+        else if (t2 === 'ilst') kids(moov, c, e, (t3, c3, e3, p3) => { const name = keys[moov.getUint32(p3 + 4) - 1];
+          if (name === 'com.android.capture.fps') kids(moov, c3, e3, (t4, c4) => { if (t4 === 'data') { const typ = moov.getUint32(c4) & 0xffffff, val = typ === 23 ? moov.getFloat32(c4 + 8) : typ === 24 ? moov.getFloat64(c4 + 8) : NaN; if (val > 0) out.capFps = Math.round(val); } }); }); }); };
+    kids(moov, 0, moov.byteLength, (ty, a, b) => {
+      if (ty === 'mvhd') { const v = moov.getUint8(a), ct = v ? Number(moov.getBigUint64(a + 4)) : moov.getUint32(a + 4), ms = (ct - 2082844800) * 1000; if (ct && ms > Date.UTC(2005, 0, 1) && ms < Date.now() + 864e5) out.taken = ms; }
+      if (ty === 'trak') { let vide = false, ts = 0, du = 0, n = 0;
+        const walk = (a2, b2) => kids(moov, a2, b2, (t2, c, e) => {
+          if (['mdia', 'minf', 'stbl'].includes(t2)) walk(c, e);
+          else if (t2 === 'hdlr') vide = s4(moov, c + 8) === 'vide';
+          else if (t2 === 'mdhd') { const v = moov.getUint8(c); ts = moov.getUint32(c + (v ? 20 : 12)); du = v ? Number(moov.getBigUint64(c + 24)) : moov.getUint32(c + 16); }
+          else if (t2 === 'stts') { const k = moov.getUint32(c + 4); for (let i = 0; i < k; i++) n += moov.getUint32(c + 8 + i * 8); } });
+        walk(a, b); if (vide && ts && du && n) out.fps = Math.round(n / (du / ts)); }
+      if (ty === 'meta') meta(a, b);
+      if (ty === 'udta') kids(moov, a, b, (t2, c, e) => { if (t2 === 'meta') meta(c, e); });
+    });
+  } catch (e) {}
+  out.slow = out.capFps && out.fps && out.capFps > out.fps * 1.5 ? Math.round(out.capFps / out.fps) : 1;
+  return out;
+}
+const vidDayOf = ms => { const d = new Date(ms); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+const vidHour = ms => { const d = new Date(ms); return `${d.getHours()} h ${String(d.getMinutes()).padStart(2, '0')}`; };
+const vidTitle = (kind, ms) => `${kind === 'lift' ? 'Muscu' : 'Course'} du ${fmtShort(vidDayOf(ms))} ${new Date(ms).getFullYear()} · ${vidHour(ms)}`;
 async function vidThumbs() { for (const el of document.querySelectorAll('[data-vth]:not([data-ok])')) { el.dataset.ok = 1; const r = await vdbGet('t:' + el.dataset.vth); if (r) el.style.backgroundImage = `url(${URL.createObjectURL(r)})`; else el.classList.add('none'); } }
 // Une image du début de la vidéo, en petit, pour la liste.
 function vidThumb(file) { return new Promise(ok => { const v = document.createElement('video'); v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = URL.createObjectURL(file);
@@ -54,42 +93,48 @@ function vidThumb(file) { return new Promise(ok => { const v = document.createEl
   v.onloadeddata = () => { v.currentTime = Math.min(.5, (v.duration || 1) / 3); };
   v.onseeked = () => { try { const w = 320, h = Math.round(w * (v.videoHeight || 9) / (v.videoWidth || 16)), cv = document.createElement('canvas'); cv.width = w; cv.height = h; cv.getContext('2d').drawImage(v, 0, 0, w, h); cv.toBlob(b => done(b), 'image/jpeg', .7); } catch (e) { done(null); } }; }); }
 document.addEventListener('change', async e => { const t = e.target; if (!t.matches?.('[data-vidfile]') || !t.files?.[0]) return;
-  const f = t.files[0], id = 'v' + Date.now().toString(36); toast('Vidéo en cours de rangement…');
+  const f = t.files[0], id = 'v' + Date.now().toString(36); t.value = ''; toast('Vidéo en cours de rangement…');
   try { await vdbPut(id, f); const th = await vidThumb(f); if (th) await vdbPut('t:' + id, th); } catch (er) { toast('Impossible de garder la vidéo sur ce téléphone'); return; }
-  vidSave([...vids(), {id, d: TODAY, at: Date.now(), title: (VIDF.kind === 'lift' ? 'Muscu du ' : 'Course du ') + fmtShort(TODAY), kind: VIDF.kind || 'run', axes: VIDF.ax ? [VIDF.ax] : [], slow: 1, fps: 30, m: {}}], true);
+  const M = await vidMeta(f), ms = M.taken || f.lastModified || Date.now();
+  vidSave([...vids(), {id, d: vidDayOf(ms), taken: ms, at: Date.now(), title: vidTitle(VIDF.kind, ms), kind: VIDF.kind || 'run', axes: [], slow: M.slow || 1, fps: M.fps || 30, meta: {fps: M.fps || null, capFps: M.capFps || null, date: M.taken ? 'video' : 'fichier'}, m: {}}], true);
   paneRender(); setTimeout(vidThumbs, 60); vidPlayer(id); });
 document.addEventListener('click', e => { let b;
   if ((b = e.target.closest?.('[data-vidopen]'))) { vidPane(b.dataset.vidopen); return; }
   if ((b = e.target.closest?.('[data-vidax]'))) { VIDF.ax = b.dataset.vidax; paneRender(); setTimeout(vidThumbs, 60); return; }
   if ((b = e.target.closest?.('[data-vidplay]'))) { vidPlayer(b.dataset.vidplay); return; } });
 
-/* ---------- le lecteur : ralenti, image par image, chrono, appuis ---------- */
+/* ---------- le lecteur : ralenti, image par image, analyse ---------- */
 const VP = {id: null, url: null};
 function vidPlayer(id) {
   const v0 = vids().find(v => v.id === id); if (!v0) return; VP.id = id;
-  openPane({title: v0.title || 'Vidéo', onClose: () => { if (VP.url) URL.revokeObjectURL(VP.url); VP.url = null; VP.id = null; }, render: () => { const v = vids().find(x => x.id === VP.id); if (!v) return '';
-    const c = typeof capGet === 'function' ? capGet() : {axes: []}, run = (v.kind || 'run') === 'run';
-    return `<div class="vbox"><video class="vplay" playsinline preload="auto" muted data-vvid></video><canvas class="vpose"></canvas><div class="vnone" hidden>Cette vidéo est sur un autre appareil : ses mesures sont ci-dessous.</div></div>
-      <div class="vtime"><b data-vt>0,00 s</b><span>temps réel${+v.slow > 1 ? ` (ralenti ×${v.slow})` : ''}</span></div>
-      <div class="vctl"><button type="button" data-vc="back">− 1 image</button><button type="button" class="vmain" data-vc="play">Lecture</button><button type="button" data-vc="fwd">+ 1 image</button></div>
-      <div class="seg vsp">${[.25, .5, 1].map(r => `<button type="button" data-vrate="${r}" aria-pressed="${r === 1}">${r === 1 ? 'Vitesse normale' : '×' + String(r).replace('.', ',')}</button>`).join('')}</div>
+  openPane({title: v0.title || 'Vidéo', full: true, onClose: () => { if (VP.url) URL.revokeObjectURL(VP.url); VP.url = null; VP.id = null; }, render: () => { const v = vids().find(x => x.id === VP.id); if (!v) return '';
+    const mt = v.meta || {};
+    return `<div class="vbox"><video class="vplay" playsinline preload="auto" muted data-vvid></video><canvas class="vpose"></canvas><div class="vnone" hidden>Cette vidéo est sur un autre appareil : son analyse est ci-dessous.</div></div>
+      <div class="vtime"><b data-vt>0,00 s</b><span>temps réel${+v.slow > 1 ? ` (ralenti ×${v.slow} corrigé)` : ''}</span></div>
+      <div class="vctl"><button type="button" data-vc="back" aria-label="Image précédente">‹ Image</button><button type="button" class="vmain" data-vc="play">Lecture</button><button type="button" data-vc="fwd" aria-label="Image suivante">Image ›</button></div>
+      <div class="seg vsp">${[.25, .5, 1].map(r => `<button type="button" data-vrate="${r}" aria-pressed="${r === 1}">${r === 1 ? 'Normal' : r === .5 ? 'Ralenti ×2' : 'Ralenti ×4'}</button>`).join('')}</div>
+      <p class="small muted" data-tip="1" style="margin:6px 4px 0">« Image » avance ou recule d'une seule image : pour voir le pied toucher le sol.</p>
       ${typeof anaSection === 'function' ? anaSection(v) : ''}
-      ${run ? `<div class="sec-label">Mesurer à la main</div>
-      <div class="vgr"><button type="button" class="chip" data-vm="t0">Départ ici</button><button type="button" class="chip" data-vm="t1">Arrivée ici</button><button type="button" class="chip" data-vm="pose">Pose du pied</button><button type="button" class="chip" data-vm="off">Le pied décolle</button></div>
-      <div class="vres" data-vres>${vidResHtml(v)}</div>
-      <p class="small muted" data-tip="1" style="margin:6px 4px 0">Avance image par image : « Pose du pied » quand il touche le sol, « Le pied décolle » quand il quitte le sol. 3 appuis ou plus donnent ta fréquence. L'analyse du corps les utilise à la place des siens.</p>` : ''}
-      <div class="sec-label">La vidéo</div>
-      <div class="cap-g2"><label class="cap-f">Ralenti du téléphone<select class="mini-in" data-vset="slow">${[[1, 'Non (vitesse normale)'], [4, '×4 (120 images/s)'], [8, '×8 (240 images/s)']].map(([k, l]) => `<option value="${k}"${+v.slow === k ? ' selected' : ''}>${l}</option>`).join('')}</select></label>
-        <label class="cap-f">Images par seconde du fichier<select class="mini-in" data-vset="fps">${[24, 30, 60, 120, 240].map(k => `<option${+v.fps === k ? ' selected' : ''}>${k}</option>`).join('')}</select></label></div>
-      <label class="cap-f">Titre<input class="mini-in" data-vtitle value="${esc(v.title || '')}"></label>
-      <label class="cap-f">Ce que je vois (défauts, points forts)<textarea rows="3" data-vnote placeholder="Ex. je me relève au 3e appui">${esc(v.note || '')}</textarea></label>
-      ${run ? `<div class="sec-label">Rangée dans</div><div class="chips2b">${(c.axes || []).map(a => `<button type="button" class="chip" data-vtag="${esc(a.id)}" aria-pressed="${(v.axes || []).includes(a.id)}">${esc(a.n)}</button>`).join('')}</div>` : ''}
-      <button type="button" class="small muted" data-vdel style="padding:14px;margin-top:8px">Supprimer la vidéo</button>`; }});
+      <details class="anadet vset"><summary>La vidéo · trouvé seul : ${+v.fps || 30} images/s, ${+v.slow > 1 ? `ralenti ×${v.slow}` : 'pas de ralenti'}${mt.date === 'video' ? ', date de la vidéo' : ''}</summary>
+        <div class="cap-g2"><label class="cap-f">Ralenti<select class="mini-in" data-vset="slow">${[[1, 'Non'], [2, '×2'], [4, '×4'], [8, '×8'], [16, '×16'], [32, '×32']].map(([k, l]) => `<option value="${k}"${+v.slow === k ? ' selected' : ''}>${l}</option>`).join('')}</select></label>
+          <label class="cap-f">Images par seconde<select class="mini-in" data-vset="fps">${[...new Set([24, 25, 30, 50, 60, 120, 240, 480, 960, +v.fps || 30])].sort((a, b) => a - b).map(k => `<option${+v.fps === k ? ' selected' : ''}>${k}</option>`).join('')}</select></label></div>
+        <label class="cap-f">Titre<input class="mini-in" data-vtitle value="${esc(v.title || '')}"></label>
+        <label class="cap-f">Ce que je ressens<textarea rows="2" data-vnote placeholder="Ex. fatigué, vent de face, 2e essai">${esc(v.note || '')}</textarea></label>
+        <button type="button" class="small muted" data-vdel style="padding:14px 0 4px">Supprimer la vidéo</button></details>`; }});
   vidLoad();
 }
 async function vidLoad() { const el = document.querySelector('[data-vvid]'); if (!el) return; const b = await vdbGet(VP.id);
   if (!b) { el.hidden = true; el.parentNode.querySelector('.vnone').hidden = false; return; }
+  // Une vidéo ajoutée avant : relire sa date et ses images par seconde dans le fichier.
+  const v0 = vids().find(x => x.id === VP.id);
+  if (v0 && !v0.meta) vidMeta(b).then(M => { const ms = M.taken || b.lastModified || 0, auto = /^(Course|Muscu) du /.test(v0.title || '');
+    vidUp(VP.id, x => ({...x, meta: {fps: M.fps || null, capFps: M.capFps || null, date: M.taken ? 'video' : 'fichier'}, ...(M.fps ? {fps: M.fps} : {}), ...(M.slow > 1 ? {slow: M.slow} : {}), ...(ms ? {d: vidDayOf(ms), taken: ms, ...(auto ? {title: vidTitle(x.kind, ms)} : {})} : {})}), true);
+    const nv = vids().find(x => x.id === VP.id), tt = document.getElementById('pane-title'); if (tt && nv) tt.textContent = nv.title; });
+  const th = await vdbGet('t:' + VP.id); if (th) el.poster = URL.createObjectURL(th);
   if (VP.url) URL.revokeObjectURL(VP.url); VP.url = URL.createObjectURL(b); el.src = VP.url;
+  // Certains téléphones laissent l'écran noir tant que la vidéo n'a pas bougé : on la pose sur sa première image.
+  el.addEventListener('loadedmetadata', () => { try { el.currentTime = .001; } catch (e) {} }, {once: true});
+  el.onerror = () => { const n = el.parentNode.querySelector('.vnone'); n.hidden = false; n.textContent = 'Ce téléphone ne lit pas cette vidéo ici (format HEVC ?). Dans l\'appareil photo, choisis le format le plus compatible (H.264).'; };
   const t = () => { const v = vids().find(x => x.id === VP.id), o = document.querySelector('[data-vt]'); if (o && v) o.textContent = fx(el.currentTime / (+v.slow || 1), 2) + ' s'; };
   if (typeof anaBind === 'function') anaBind(el);
   el.ontimeupdate = t; el.onseeked = t; el.onplay = () => { const p = document.querySelector('[data-vc="play"]'); if (p) p.textContent = 'Pause'; }; el.onpause = () => { const p = document.querySelector('[data-vc="play"]'); if (p) p.textContent = 'Lecture'; }; }

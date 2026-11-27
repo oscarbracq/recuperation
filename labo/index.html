@@ -2391,6 +2391,29 @@ html.one #home-view{height:auto;min-height:100%}html.one .one-hm{height:auto!imp
 .hxp{fill:color-mix(in srgb,var(--accent) 22%,transparent);stroke:var(--accent);stroke-width:2;stroke-linejoin:round}.hxd{fill:var(--accent)}
 .hxl{font-size:12px;font-weight:700;fill:var(--fg)}.hxv{font-size:11px;fill:var(--fg3);font-variant-numeric:tabular-nums}
 @media (max-width:380px){.pagrid{gap:8px}.card.pac b{font-size:.88rem}}
+
+/* Analyses vidéo (v183) : pages entières noires, filmer / choisir, 3 cases, une intention, profil et évolution */
+#pane.sefull .sheet-card{background:#000}
+.vadd{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.vadd .btn{display:flex;align-items:center;justify-content:center;margin:0;width:100%}
+.an3{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+@media (min-width:700px){.an3{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.an3b{border-radius:16px;padding:12px 14px;background:var(--card);border:1px solid transparent}
+.an3b.good{border-color:color-mix(in srgb,var(--good) 45%,transparent);background:color-mix(in srgb,var(--good) 9%,var(--card))}
+.an3b.warn{border-color:color-mix(in srgb,var(--warn) 45%,transparent);background:color-mix(in srgb,var(--warn) 9%,var(--card))}
+.an3b.bad{border-color:color-mix(in srgb,var(--bad) 45%,transparent);background:color-mix(in srgb,var(--bad) 9%,var(--card))}
+.an3t{display:flex;align-items:center;gap:6px;font-size:.74rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--fg2);margin-bottom:6px}
+.an3b p{margin:6px 0 0;font-size:.86rem;line-height:1.35}.an3b p small{display:block;font-size:.72rem;color:var(--fg3)}
+.anunc{font-style:normal;font-size:.7rem;color:var(--warn);border:1px solid currentColor;border-radius:6px;padding:0 4px;margin-left:4px}
+.anint{margin-top:12px;text-align:center}.anint .cuet{display:block;font-size:1.3rem;margin-top:6px}
+.anpi{display:block;width:100%;text-align:left;font:inherit;color:inherit;background:none;border:0;border-top:1px solid var(--line, rgba(255,255,255,.08));padding:8px 0 6px;cursor:pointer}
+.anpi:first-of-type{border-top:0}.anpi b{font-size:.86rem;line-height:1.3}.anpi small{display:block;font-size:.72rem;color:var(--fg3);margin-top:2px}
+.anseq{display:flex;align-items:center;gap:3px;margin-top:4px}.anseq .anad{margin:0}.anseq em{font-style:normal;font-size:.7rem;font-weight:700;margin-left:6px}.anseq em.up{color:var(--good)}.anseq em.down{color:var(--bad)}
+.ancurve{margin-top:10px}.ancurve svg{display:block;width:100%;height:auto;margin-top:6px}
+.ancl{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linejoin:round}.ancd{fill:var(--accent)}.ancg{stroke:var(--fg3);stroke-dasharray:3 4;opacity:.5}.anct{fill:var(--fg3);font-size:10px}
+.card.pac.hxpro{width:100%;min-height:0;margin-bottom:10px;align-items:stretch}.card.pac.hxpro svg{max-height:230px}
+.vset .cap-g2,.vset .cap-f{margin-top:8px}
+[data-anares] .vres{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (min-width:600px){[data-anares] .vres{grid-template-columns:repeat(4,minmax(0,1fr))}}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -15234,20 +15257,59 @@ function vidMeasure(axId) {
   return '';
 }
 const VIDF = {ax: '', kind: 'run'};
-// kind : « run » (course, axes de Ton cap) ou « lift » (musculation). Une vidéo sans kind est une course.
-function vidPane(ax, kind) {
-  VIDF.ax = ax || ''; VIDF.kind = kind || 'run';
+// kind : « run » (course) ou « lift » (musculation). Une vidéo sans kind est une course. Page entière, fond noir :
+// filmer ou choisir une vidéo, la liste, puis (en descendant) les points forts · à affiner · à corriger et leur évolution.
+function vidPane(ax, kind, toProfile) {
+  VIDF.ax = ''; VIDF.kind = kind || 'run';
   const run = VIDF.kind === 'run';
-  openPane({title: run ? 'Ma dynamique de course' : 'Mes mouvements · muscu', render: () => { const c = typeof capGet === 'function' ? capGet() : {axes: []}, A = c.axes || [];
-    const L = vids().filter(v => (v.kind || 'run') === VIDF.kind && (!VIDF.ax || (v.axes || []).includes(VIDF.ax))).sort((a, b) => (b.d || '').localeCompare(a.d || '') || (b.at || 0) - (a.at || 0));
-    const sub = v => { const r = run ? vidTxt(vidCalc(v)) : ''; const ex = !run && typeof LIFT_EX !== 'undefined' ? LIFT_EX.find(x => x[0] === v.ex)?.[1] : ''; const a = v.an?.rows?.length ? v.an.rows.filter(x => x.lvl !== 'good').length + ' à travailler' : '';
-      return [cap(fmtShort(v.d)), ex, r, a].filter(Boolean).join(' · '); };
-    return `<label class="btn" style="margin-top:14px;width:100%;display:flex;justify-content:center;align-items:center">+ Ajouter une vidéo<input type="file" accept="video/*" data-vidfile hidden></label>
-      <p class="small muted" data-tip="1" style="margin:8px 4px 0">${run ? 'De côté, caméra fixe, au ralenti si possible.' : 'Tout le corps dans l\'image, caméra fixe, de côté (ou de face pour les genoux).'} La vidéo reste sur cet appareil ; sa fiche et son analyse sont partout.</p>
-      ${run ? `<div class="chips2b" style="margin-top:12px"><button type="button" class="chip" data-vidax="" aria-pressed="${!VIDF.ax}">Toutes</button>${A.map(a => `<button type="button" class="chip" data-vidax="${esc(a.id)}" aria-pressed="${VIDF.ax === a.id}">${esc(a.n.length > 26 ? a.n.slice(0, 24) + '…' : a.n)}</button>`).join('')}</div>` : ''}
-      <div class="vgrid">${L.map(v => `<button type="button" class="vcard" data-vidplay="${esc(v.id)}"><span class="vth" data-vth="${esc(v.id)}"></span><b>${esc(v.title || 'Vidéo')}</b><small>${esc(sub(v))}</small></button>`).join('') || '<p class="small muted" data-tip="1" style="margin:16px 4px">Pas encore de vidéo ici.</p>'}</div>`; }});
+  openPane({title: run ? 'Ma dynamique de course' : 'Mes mouvements · musculation', full: true, render: () => {
+    const L = vids().filter(v => (v.kind || 'run') === VIDF.kind).sort((a, b) => (b.d || '').localeCompare(a.d || '') || (b.taken || b.at || 0) - (a.taken || a.at || 0));
+    const sub = v => { const ex = !run && typeof LIFT_EX !== 'undefined' ? LIFT_EX.find(x => x[0] === v.ex)?.[1] : ''; const R = v.an?.rows || [], a = R.length ? `${R.filter(x => x.lvl === 'good').length} bien · ${R.filter(x => x.lvl !== 'good').length} à travailler` : 'pas encore analysée';
+      return [ex, a].filter(Boolean).join(' · '); };
+    return `<div class="vadd"><label class="btn"><input type="file" accept="video/*" capture="environment" data-vidfile hidden>Filmer</label><label class="btn ghost"><input type="file" accept="video/*" data-vidfile hidden>Choisir une vidéo</label></div>
+      <p class="small muted" data-tip="1" style="margin:8px 4px 0">${run ? 'De côté, à 5 à 10 m, caméra fixe à hauteur de hanche, tout le corps dans l\'image.' : 'Tout le corps dans l\'image, caméra fixe à hauteur de hanche, de côté (ou de face pour les genoux).'} La date et les images par seconde sont lues dans la vidéo.</p>
+      <div class="vgrid">${L.map(v => `<button type="button" class="vcard" data-vidplay="${esc(v.id)}"><span class="vth" data-vth="${esc(v.id)}"></span><b>${esc(v.title || 'Vidéo')}</b><small>${esc(sub(v))}</small></button>`).join('') || '<p class="small muted" data-tip="1" style="margin:16px 4px">Pas encore de vidéo ici.</p>'}</div>
+      ${typeof anaProfileHtml === 'function' ? anaProfileHtml(VIDF.kind) : ''}`; }});
   setTimeout(vidThumbs, 60);
+  if (toProfile) setTimeout(() => document.getElementById('anaprof')?.scrollIntoView({behavior: 'smooth', block: 'start'}), 300);
 }
+/* La fiche de la vidéo lue dans le fichier lui-même (MP4 / MOV) : date de prise de vue (mvhd), images par seconde
+   (mdhd + stts de la piste vidéo), et le ralenti d'Android (clé com.android.capture.fps). Rien n'est envoyé. */
+async function vidMeta(f) {
+  const out = {}, N = f.size, s4 = (d, p) => String.fromCharCode(d.getUint8(p), d.getUint8(p + 1), d.getUint8(p + 2), d.getUint8(p + 3));
+  const kids = (d, a, b, cb) => { let p = a; while (p + 8 <= b) { let sz = d.getUint32(p), hs = 8; const ty = s4(d, p + 4); if (sz === 1) { sz = Number(d.getBigUint64(p + 8)); hs = 16; } else if (sz === 0) sz = b - p; if (sz < 8 || p + sz > b) break; cb(ty, p + hs, p + sz, p); p += sz; } };
+  try {
+    let o = 0, moov = null;
+    while (o + 8 <= N) { const d = new DataView(await f.slice(o, o + 16).arrayBuffer()); let sz = d.getUint32(0), hs = 8; const ty = s4(d, 4);
+      if (sz === 1) { sz = Number(d.getBigUint64(8)); hs = 16; } else if (sz === 0) sz = N - o;
+      if (ty === 'moov') { if (sz < 64e6) moov = new DataView(await f.slice(o + hs, o + sz).arrayBuffer()); break; }
+      if (sz < 8) break; o += sz; }
+    if (!moov) return out;
+    const keys = [];
+    const meta = (a, b) => { const st = ['hdlr', 'keys', 'ilst'].includes(s4(moov, a + 4)) ? a : a + 4;
+      kids(moov, st, b, (t2, c, e) => {
+        if (t2 === 'keys') { const k = moov.getUint32(c + 4); let q = c + 8; for (let i = 0; i < k && q + 8 <= e; i++) { const sz = moov.getUint32(q); let nm = ''; for (let j = q + 8; j < q + sz; j++) nm += String.fromCharCode(moov.getUint8(j)); keys.push(nm); q += sz; } }
+        else if (t2 === 'ilst') kids(moov, c, e, (t3, c3, e3, p3) => { const name = keys[moov.getUint32(p3 + 4) - 1];
+          if (name === 'com.android.capture.fps') kids(moov, c3, e3, (t4, c4) => { if (t4 === 'data') { const typ = moov.getUint32(c4) & 0xffffff, val = typ === 23 ? moov.getFloat32(c4 + 8) : typ === 24 ? moov.getFloat64(c4 + 8) : NaN; if (val > 0) out.capFps = Math.round(val); } }); }); }); };
+    kids(moov, 0, moov.byteLength, (ty, a, b) => {
+      if (ty === 'mvhd') { const v = moov.getUint8(a), ct = v ? Number(moov.getBigUint64(a + 4)) : moov.getUint32(a + 4), ms = (ct - 2082844800) * 1000; if (ct && ms > Date.UTC(2005, 0, 1) && ms < Date.now() + 864e5) out.taken = ms; }
+      if (ty === 'trak') { let vide = false, ts = 0, du = 0, n = 0;
+        const walk = (a2, b2) => kids(moov, a2, b2, (t2, c, e) => {
+          if (['mdia', 'minf', 'stbl'].includes(t2)) walk(c, e);
+          else if (t2 === 'hdlr') vide = s4(moov, c + 8) === 'vide';
+          else if (t2 === 'mdhd') { const v = moov.getUint8(c); ts = moov.getUint32(c + (v ? 20 : 12)); du = v ? Number(moov.getBigUint64(c + 24)) : moov.getUint32(c + 16); }
+          else if (t2 === 'stts') { const k = moov.getUint32(c + 4); for (let i = 0; i < k; i++) n += moov.getUint32(c + 8 + i * 8); } });
+        walk(a, b); if (vide && ts && du && n) out.fps = Math.round(n / (du / ts)); }
+      if (ty === 'meta') meta(a, b);
+      if (ty === 'udta') kids(moov, a, b, (t2, c, e) => { if (t2 === 'meta') meta(c, e); });
+    });
+  } catch (e) {}
+  out.slow = out.capFps && out.fps && out.capFps > out.fps * 1.5 ? Math.round(out.capFps / out.fps) : 1;
+  return out;
+}
+const vidDayOf = ms => { const d = new Date(ms); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+const vidHour = ms => { const d = new Date(ms); return `${d.getHours()} h ${String(d.getMinutes()).padStart(2, '0')}`; };
+const vidTitle = (kind, ms) => `${kind === 'lift' ? 'Muscu' : 'Course'} du ${fmtShort(vidDayOf(ms))} ${new Date(ms).getFullYear()} · ${vidHour(ms)}`;
 async function vidThumbs() { for (const el of document.querySelectorAll('[data-vth]:not([data-ok])')) { el.dataset.ok = 1; const r = await vdbGet('t:' + el.dataset.vth); if (r) el.style.backgroundImage = `url(${URL.createObjectURL(r)})`; else el.classList.add('none'); } }
 // Une image du début de la vidéo, en petit, pour la liste.
 function vidThumb(file) { return new Promise(ok => { const v = document.createElement('video'); v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = URL.createObjectURL(file);
@@ -15255,42 +15317,48 @@ function vidThumb(file) { return new Promise(ok => { const v = document.createEl
   v.onloadeddata = () => { v.currentTime = Math.min(.5, (v.duration || 1) / 3); };
   v.onseeked = () => { try { const w = 320, h = Math.round(w * (v.videoHeight || 9) / (v.videoWidth || 16)), cv = document.createElement('canvas'); cv.width = w; cv.height = h; cv.getContext('2d').drawImage(v, 0, 0, w, h); cv.toBlob(b => done(b), 'image/jpeg', .7); } catch (e) { done(null); } }; }); }
 document.addEventListener('change', async e => { const t = e.target; if (!t.matches?.('[data-vidfile]') || !t.files?.[0]) return;
-  const f = t.files[0], id = 'v' + Date.now().toString(36); toast('Vidéo en cours de rangement…');
+  const f = t.files[0], id = 'v' + Date.now().toString(36); t.value = ''; toast('Vidéo en cours de rangement…');
   try { await vdbPut(id, f); const th = await vidThumb(f); if (th) await vdbPut('t:' + id, th); } catch (er) { toast('Impossible de garder la vidéo sur ce téléphone'); return; }
-  vidSave([...vids(), {id, d: TODAY, at: Date.now(), title: (VIDF.kind === 'lift' ? 'Muscu du ' : 'Course du ') + fmtShort(TODAY), kind: VIDF.kind || 'run', axes: VIDF.ax ? [VIDF.ax] : [], slow: 1, fps: 30, m: {}}], true);
+  const M = await vidMeta(f), ms = M.taken || f.lastModified || Date.now();
+  vidSave([...vids(), {id, d: vidDayOf(ms), taken: ms, at: Date.now(), title: vidTitle(VIDF.kind, ms), kind: VIDF.kind || 'run', axes: [], slow: M.slow || 1, fps: M.fps || 30, meta: {fps: M.fps || null, capFps: M.capFps || null, date: M.taken ? 'video' : 'fichier'}, m: {}}], true);
   paneRender(); setTimeout(vidThumbs, 60); vidPlayer(id); });
 document.addEventListener('click', e => { let b;
   if ((b = e.target.closest?.('[data-vidopen]'))) { vidPane(b.dataset.vidopen); return; }
   if ((b = e.target.closest?.('[data-vidax]'))) { VIDF.ax = b.dataset.vidax; paneRender(); setTimeout(vidThumbs, 60); return; }
   if ((b = e.target.closest?.('[data-vidplay]'))) { vidPlayer(b.dataset.vidplay); return; } });
 
-/* ---------- le lecteur : ralenti, image par image, chrono, appuis ---------- */
+/* ---------- le lecteur : ralenti, image par image, analyse ---------- */
 const VP = {id: null, url: null};
 function vidPlayer(id) {
   const v0 = vids().find(v => v.id === id); if (!v0) return; VP.id = id;
-  openPane({title: v0.title || 'Vidéo', onClose: () => { if (VP.url) URL.revokeObjectURL(VP.url); VP.url = null; VP.id = null; }, render: () => { const v = vids().find(x => x.id === VP.id); if (!v) return '';
-    const c = typeof capGet === 'function' ? capGet() : {axes: []}, run = (v.kind || 'run') === 'run';
-    return `<div class="vbox"><video class="vplay" playsinline preload="auto" muted data-vvid></video><canvas class="vpose"></canvas><div class="vnone" hidden>Cette vidéo est sur un autre appareil : ses mesures sont ci-dessous.</div></div>
-      <div class="vtime"><b data-vt>0,00 s</b><span>temps réel${+v.slow > 1 ? ` (ralenti ×${v.slow})` : ''}</span></div>
-      <div class="vctl"><button type="button" data-vc="back">− 1 image</button><button type="button" class="vmain" data-vc="play">Lecture</button><button type="button" data-vc="fwd">+ 1 image</button></div>
-      <div class="seg vsp">${[.25, .5, 1].map(r => `<button type="button" data-vrate="${r}" aria-pressed="${r === 1}">${r === 1 ? 'Vitesse normale' : '×' + String(r).replace('.', ',')}</button>`).join('')}</div>
+  openPane({title: v0.title || 'Vidéo', full: true, onClose: () => { if (VP.url) URL.revokeObjectURL(VP.url); VP.url = null; VP.id = null; }, render: () => { const v = vids().find(x => x.id === VP.id); if (!v) return '';
+    const mt = v.meta || {};
+    return `<div class="vbox"><video class="vplay" playsinline preload="auto" muted data-vvid></video><canvas class="vpose"></canvas><div class="vnone" hidden>Cette vidéo est sur un autre appareil : son analyse est ci-dessous.</div></div>
+      <div class="vtime"><b data-vt>0,00 s</b><span>temps réel${+v.slow > 1 ? ` (ralenti ×${v.slow} corrigé)` : ''}</span></div>
+      <div class="vctl"><button type="button" data-vc="back" aria-label="Image précédente">‹ Image</button><button type="button" class="vmain" data-vc="play">Lecture</button><button type="button" data-vc="fwd" aria-label="Image suivante">Image ›</button></div>
+      <div class="seg vsp">${[.25, .5, 1].map(r => `<button type="button" data-vrate="${r}" aria-pressed="${r === 1}">${r === 1 ? 'Normal' : r === .5 ? 'Ralenti ×2' : 'Ralenti ×4'}</button>`).join('')}</div>
+      <p class="small muted" data-tip="1" style="margin:6px 4px 0">« Image » avance ou recule d'une seule image : pour voir le pied toucher le sol.</p>
       ${typeof anaSection === 'function' ? anaSection(v) : ''}
-      ${run ? `<div class="sec-label">Mesurer à la main</div>
-      <div class="vgr"><button type="button" class="chip" data-vm="t0">Départ ici</button><button type="button" class="chip" data-vm="t1">Arrivée ici</button><button type="button" class="chip" data-vm="pose">Pose du pied</button><button type="button" class="chip" data-vm="off">Le pied décolle</button></div>
-      <div class="vres" data-vres>${vidResHtml(v)}</div>
-      <p class="small muted" data-tip="1" style="margin:6px 4px 0">Avance image par image : « Pose du pied » quand il touche le sol, « Le pied décolle » quand il quitte le sol. 3 appuis ou plus donnent ta fréquence. L'analyse du corps les utilise à la place des siens.</p>` : ''}
-      <div class="sec-label">La vidéo</div>
-      <div class="cap-g2"><label class="cap-f">Ralenti du téléphone<select class="mini-in" data-vset="slow">${[[1, 'Non (vitesse normale)'], [4, '×4 (120 images/s)'], [8, '×8 (240 images/s)']].map(([k, l]) => `<option value="${k}"${+v.slow === k ? ' selected' : ''}>${l}</option>`).join('')}</select></label>
-        <label class="cap-f">Images par seconde du fichier<select class="mini-in" data-vset="fps">${[24, 30, 60, 120, 240].map(k => `<option${+v.fps === k ? ' selected' : ''}>${k}</option>`).join('')}</select></label></div>
-      <label class="cap-f">Titre<input class="mini-in" data-vtitle value="${esc(v.title || '')}"></label>
-      <label class="cap-f">Ce que je vois (défauts, points forts)<textarea rows="3" data-vnote placeholder="Ex. je me relève au 3e appui">${esc(v.note || '')}</textarea></label>
-      ${run ? `<div class="sec-label">Rangée dans</div><div class="chips2b">${(c.axes || []).map(a => `<button type="button" class="chip" data-vtag="${esc(a.id)}" aria-pressed="${(v.axes || []).includes(a.id)}">${esc(a.n)}</button>`).join('')}</div>` : ''}
-      <button type="button" class="small muted" data-vdel style="padding:14px;margin-top:8px">Supprimer la vidéo</button>`; }});
+      <details class="anadet vset"><summary>La vidéo · trouvé seul : ${+v.fps || 30} images/s, ${+v.slow > 1 ? `ralenti ×${v.slow}` : 'pas de ralenti'}${mt.date === 'video' ? ', date de la vidéo' : ''}</summary>
+        <div class="cap-g2"><label class="cap-f">Ralenti<select class="mini-in" data-vset="slow">${[[1, 'Non'], [2, '×2'], [4, '×4'], [8, '×8'], [16, '×16'], [32, '×32']].map(([k, l]) => `<option value="${k}"${+v.slow === k ? ' selected' : ''}>${l}</option>`).join('')}</select></label>
+          <label class="cap-f">Images par seconde<select class="mini-in" data-vset="fps">${[...new Set([24, 25, 30, 50, 60, 120, 240, 480, 960, +v.fps || 30])].sort((a, b) => a - b).map(k => `<option${+v.fps === k ? ' selected' : ''}>${k}</option>`).join('')}</select></label></div>
+        <label class="cap-f">Titre<input class="mini-in" data-vtitle value="${esc(v.title || '')}"></label>
+        <label class="cap-f">Ce que je ressens<textarea rows="2" data-vnote placeholder="Ex. fatigué, vent de face, 2e essai">${esc(v.note || '')}</textarea></label>
+        <button type="button" class="small muted" data-vdel style="padding:14px 0 4px">Supprimer la vidéo</button></details>`; }});
   vidLoad();
 }
 async function vidLoad() { const el = document.querySelector('[data-vvid]'); if (!el) return; const b = await vdbGet(VP.id);
   if (!b) { el.hidden = true; el.parentNode.querySelector('.vnone').hidden = false; return; }
+  // Une vidéo ajoutée avant : relire sa date et ses images par seconde dans le fichier.
+  const v0 = vids().find(x => x.id === VP.id);
+  if (v0 && !v0.meta) vidMeta(b).then(M => { const ms = M.taken || b.lastModified || 0, auto = /^(Course|Muscu) du /.test(v0.title || '');
+    vidUp(VP.id, x => ({...x, meta: {fps: M.fps || null, capFps: M.capFps || null, date: M.taken ? 'video' : 'fichier'}, ...(M.fps ? {fps: M.fps} : {}), ...(M.slow > 1 ? {slow: M.slow} : {}), ...(ms ? {d: vidDayOf(ms), taken: ms, ...(auto ? {title: vidTitle(x.kind, ms)} : {})} : {})}), true);
+    const nv = vids().find(x => x.id === VP.id), tt = document.getElementById('pane-title'); if (tt && nv) tt.textContent = nv.title; });
+  const th = await vdbGet('t:' + VP.id); if (th) el.poster = URL.createObjectURL(th);
   if (VP.url) URL.revokeObjectURL(VP.url); VP.url = URL.createObjectURL(b); el.src = VP.url;
+  // Certains téléphones laissent l'écran noir tant que la vidéo n'a pas bougé : on la pose sur sa première image.
+  el.addEventListener('loadedmetadata', () => { try { el.currentTime = .001; } catch (e) {} }, {once: true});
+  el.onerror = () => { const n = el.parentNode.querySelector('.vnone'); n.hidden = false; n.textContent = 'Ce téléphone ne lit pas cette vidéo ici (format HEVC ?). Dans l\'appareil photo, choisis le format le plus compatible (H.264).'; };
   const t = () => { const v = vids().find(x => x.id === VP.id), o = document.querySelector('[data-vt]'); if (o && v) o.textContent = fx(el.currentTime / (+v.slow || 1), 2) + ' s'; };
   if (typeof anaBind === 'function') anaBind(el);
   el.ontimeupdate = t; el.onseeked = t; el.onplay = () => { const p = document.querySelector('[data-vc="play"]'); if (p) p.textContent = 'Pause'; }; el.onpause = () => { const p = document.querySelector('[data-vc="play"]'); if (p) p.textContent = 'Lecture'; }; }
@@ -15345,6 +15413,7 @@ const anDist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const anMid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
 const anMed = L => { const s = L.filter(x => Number.isFinite(x)).sort((a, b) => a - b); return s.length ? s[Math.floor(s.length / 2)] : NaN; };
 const anMean = L => { const s = L.filter(x => Number.isFinite(x)); return s.length ? s.reduce((a, b) => a + b, 0) / s.length : NaN; };
+const anH = () => (S.profile?.height || 177) / 100; // taille d'Oscar : l'échelle en mètres (hanche-cheville ≈ 0,49 × taille, Winter 2009)
 const AN_SIDE = {G: {hip: 23, knee: 25, ank: 27, heel: 29, toe: 31, sh: 11, el: 13, wr: 15, ear: 7}, D: {hip: 24, knee: 26, ank: 28, heel: 30, toe: 32, sh: 12, el: 14, wr: 16, ear: 8}};
 
 /* ---------- 1) le bonhomme sur chaque image ---------- */
@@ -15354,7 +15423,7 @@ async function anaPose(id, onp) {
   const el = document.createElement('video'); el.muted = true; el.playsInline = true; el.preload = 'auto'; const url = URL.createObjectURL(blob); el.src = url;
   await new Promise((ok, ko) => { el.onloadeddata = ok; el.onerror = () => ko(new Error('Vidéo illisible')); setTimeout(ok, 6000); });
   const m = v.m || {}, D = el.duration || 0, a = m.t0 != null && m.t1 > m.t0 ? Math.max(0, m.t0 - .3) : 0, b = m.t0 != null && m.t1 > m.t0 ? Math.min(D, m.t1 + .3) : D;
-  const fps = +v.fps || 30, step = Math.max(1 / fps, (b - a) / 420), F = [], W = el.videoWidth || 1, H = el.videoHeight || 1;
+  const fps = +v.fps || 30, step = Math.max(1 / fps, (b - a) / 900), F = [], W = el.videoWidth || 1, H = el.videoHeight || 1;
   for (let t = a; t <= b + 1e-6; t += step) {
     await new Promise(ok => { const done = () => { el.removeEventListener('seeked', done); ok(); }; el.addEventListener('seeked', done); el.currentTime = Math.min(t, D - .001); setTimeout(done, 1500); });
     ANA.ts = Math.max(performance.now(), ANA.ts + 1);
@@ -15382,8 +15451,10 @@ function anaRun(v, P) {
   const pt = (i, j) => L[i][j], hipC = i => anMid(pt(i, 23), pt(i, 24)), shC = i => anMid(pt(i, 11), pt(i, 12));
   const idx = [...Array(n).keys()].filter(i => ok[i]); if (idx.length < 8) return {err: 'Le corps n\'est pas assez visible sur la vidéo.'};
   const leg = anMed(idx.flatMap(i => [anDist(pt(i, 23), pt(i, 27)), anDist(pt(i, 24), pt(i, 28))]));
-  const hx0 = hipC(idx[0])[0], hx1 = hipC(idx.at(-1))[0], moving = Math.abs(hx1 - hx0) > leg;
-  const nose = anMean(idx.map(i => pt(i, 0)[0] - (pt(i, 7)[0] + pt(i, 8)[0]) / 2)), dir = moving ? Math.sign(hx1 - hx0) : (nose >= 0 ? 1 : -1);
+  const hxs = idx.map(i => hipC(i)[0]).sort((a, b) => a - b), moving = hxs[Math.floor(hxs.length * .85)] - hxs[Math.floor(hxs.length * .15)] > leg;
+  const vmed = anMed(idx.slice(1).map((i, k) => (hipC(i)[0] - hipC(idx[k])[0]) / (i - idx[k])));
+  const toeh = anMean(idx.flatMap(i => [pt(i, 31)[0] - pt(i, 29)[0], pt(i, 32)[0] - pt(i, 30)[0]]));
+  const nose = anMean(idx.map(i => pt(i, 0)[0] - (pt(i, 7)[0] + pt(i, 8)[0]) / 2)), dir = moving && vmed ? Math.sign(vmed) : Math.abs(toeh) > .04 * leg ? Math.sign(toeh) : (nose >= 0 ? 1 : -1);
   const foot = (i, s) => anMid(pt(i, AN_SIDE[s].heel), pt(i, AN_SIDE[s].toe));
   const trunk = i => { const h = hipC(i), s = shC(i); return anVA((s[0] - h[0]) * dir, h[1] - s[1]); };
   const thigh = (i, s) => { const h = pt(i, AN_SIDE[s].hip), k = pt(i, AN_SIDE[s].knee); return anVA((k[0] - h[0]) * dir, k[1] - h[1]); };
@@ -15410,6 +15481,7 @@ function anaRun(v, P) {
       Cm.push({s: foot(a, 'G')[1] > foot(a, 'D')[1] ? 'G' : 'D', a, b, tm: (o - t) / slow}); }
     if (Cm.length >= 2) { C.length = 0; C.push(...Cm); manual = true; } }
   C.sort((p, q) => p.a - q.a);
+  { const keep = C.filter(c => (c.tm ?? (c.b - c.a + 1) * dtr) <= .45); C.length = 0; C.push(...keep); }
   const real = i => P.F[i].t / slow, prec = Math.round(dtr * 1000);
   const S = C.map((c, k) => { const o = c.s === 'G' ? 'D' : 'G', nx = C[k + 1], i = c.a, end = nx ? nx.a : Math.min(n - 1, c.b + win);
     let tl = -90, hk = 180; for (let j = c.a; j <= end; j++) if (ok[j]) { tl = Math.max(tl, thigh(j, o)); if (j <= c.b && thigh(j, o) < 10) hk = Math.min(hk, knee(j, o)); }
@@ -15418,20 +15490,32 @@ function anaRun(v, P) {
   // La position « prêt » : mains au sol, corps immobile, au début de la vidéo.
   let set = null; for (const i of idx.slice(0, Math.ceil(idx.length / 3))) { const w = anMid(pt(i, 15), pt(i, 16)), kn = anMid(pt(i, 25), pt(i, 26));
     if (w[1] > kn[1] - .05 * leg) { const s = shC(i), arm = anDist(pt(i, 11), pt(i, 15)) || leg / 2; set = {i, off: (s[0] - w[0]) * dir / arm}; } else if (set) break; }
-  const tr = anMed(S.map(x => x.trunk)), ph = v.phase && v.phase !== 'auto' ? v.phase : set ? 'depart' : tr > 22 ? 'acc' : 'vmax', acc = ph === 'depart' || ph === 'acc';
-  const R = [], T = L => L.filter(Boolean), cts = S.map(x => x.ct), span = S.length >= 3 ? S.at(-1).t - S[0].t : NaN, fq = S.length >= 3 ? (S.length - 1) / span : NaN;
+  // Échelle image par image : la jambe tendue la plus longue autour de l'image (≈ 0,49 × taille). Si Oscar s'approche ou
+  // s'éloigne de la caméra (parallaxe, couloir pas parallèle à l'image), l'échelle suit, et les distances restent justes.
+  const w2 = Math.max(2, Math.ceil(.5 / dtr)), legPx = L.map((p, i) => p ? Math.max(anDist(pt(i, 23), pt(i, 27)), anDist(pt(i, 24), pt(i, 28))) : NaN);
+  const ppm = i => { let m = 0; for (let j = Math.max(0, i - w2); j <= Math.min(n - 1, i + w2); j++) if (Number.isFinite(legPx[j])) m = Math.max(m, legPx[j]); return m / (.49 * anH()); };
+  const lens = []; for (let k = 0; k + 1 < S.length; k++) { const a = C[k], b = C[k + 1], dt = S[k + 1].t - S[k].t; if (!moving || dt < .15 || dt > .7) continue;
+    const s = (ppm(a.a) + ppm(b.a)) / 2; if (s > 0) lens.push((foot(b.a, b.s)[0] - foot(a.a, a.s)[0]) * dir / s); }
+  const dts = S.slice(1).map((x, k) => x.t - S[k].t).filter(d => d >= .15 && d <= .7), len = anMed(lens.filter(x => x > .3 && x < 3.2));
+  const drift = S.length >= 2 && ppm(C[0].a) ? Math.abs(ppm(C.at(-1).a) / ppm(C[0].a) - 1) : 0;
+  const shR = anMed(idx.map(i => Math.abs(pt(i, 11)[0] - pt(i, 12)[0]) / (anDist(shC(i), hipC(i)) || 1)));
+  // Les appuis tout au bord de l'image sont vus de biais par l'objectif : on les écarte des moyennes s'il en reste assez.
+  const Sc = S.filter((x, k) => { const fx0 = foot(C[k].a, C[k].s)[0]; return fx0 > .08 * P.W && fx0 < .92 * P.W; }), SS = Sc.length >= 3 ? Sc : S;
+  const view = {q: shR > .45 || drift > .15 ? 'biais' : shR > .3 || drift > .08 ? 'moyenne' : 'bonne', sh: +shR.toFixed(2), drift: +drift.toFixed(2), edge: S.length - SS.length};
+  const tr = anMed(SS.map(x => x.trunk)), ph = v.phase && v.phase !== 'auto' ? v.phase : set ? 'depart' : tr > 22 ? 'acc' : 'vmax', acc = ph === 'depart' || ph === 'acc';
+  const R = [], T = L => L.filter(Boolean), cts = S.map(x => x.ct), fq = dts.length >= 2 ? 1 / anMed(dts) : NaN;
   const pr = dtr > .02 ? ` · précision ± ${prec} ms (filme au ralenti pour mieux)` : '';
   if (set) R.push(anRow('set', 'Épaules au-dessus des mains', set.off, `${set.off > 0 ? 'devant' : 'derrière'} de ${Math.round(Math.abs(set.off) * 100)} % du bras`, anLv(set.off, .15, .3), 'juste au-dessus, au plus 15 % du bras devant'));
   if (S.length) {
     const ctm = anMean(cts);
     R.push(acc ? anRow('ct', 'Temps de contact (premiers appuis)', ctm, Math.round(ctm * 1000) + ' ms' + pr, anLv(ctm, .2, .25), '0,17 à 0,23 s au départ') : anRow('ct', 'Temps de contact', ctm, Math.round(ctm * 1000) + ' ms' + pr, anLv(ctm, .11, .13), 'moins de 0,11 s à vitesse max (meilleurs : 0,08 à 0,10)'));
     if (Number.isFinite(fq)) R.push(anRow('fq', 'Fréquence de foulée', fq, fx(fq, 2) + ' pas/s', acc ? anLv(fq, 4.0, 3.6, true) : anLv(fq, 4.4, 4.1, true), acc ? '3,8 à 4,4 pas/s en accélération' : '4,3 à 4,7 pas/s (bon national)'));
-    const td = anMed(S.map(x => x.td)); R.push(acc ? anRow('td', 'Pied posé par rapport à la hanche', td, `${td > 0 ? 'devant' : 'derrière'}, ${Math.round(Math.abs(td) * 100)} % de la jambe`, anLv(td, .05, .15), 'sous ou derrière la hanche au départ')
+    const td = anMed(SS.map(x => x.td)); R.push(acc ? anRow('td', 'Pied posé par rapport à la hanche', td, `${td > 0 ? 'devant' : 'derrière'}, ${Math.round(Math.abs(td) * 100)} % de la jambe`, anLv(td, .05, .15), 'sous ou derrière la hanche au départ')
       : anRow('td', 'Pied posé devant la hanche', td, `${Math.round(td * 100)} % de la longueur de jambe`, anLv(td, .3, .4), 'au plus 30 % de la jambe (≈ 25 à 35 cm)'));
-    const sh = anMed(S.map(x => x.shin)); R.push(acc ? anRow('shin', 'Tibia à la pose', sh, `${Math.round(sh)}° vers l'avant`, anLv(sh, 35, 20, true), '40 à 50° vers l\'avant au 1er appui') : anRow('shin', 'Tibia à la pose', sh, `${sh >= 0 ? Math.round(sh) + '° vers l\'avant' : Math.round(-sh) + '° vers l\'arrière (cheville devant le genou)'}`, anLv(sh, -5, -12, true), 'proche de la verticale'));
-    if (!acc) { const kn = anMed(S.map(x => x.knee)); R.push(anRow('knee', 'Genou à la pose', kn, Math.round(kn) + '°', kn >= 145 && kn <= 168 ? 'good' : kn >= 138 && kn <= 175 ? 'warn' : 'bad', '150 à 160°'));
-      const sp = anMed(S.map(x => x.sep)); R.push(anRow('sep', 'Écart des cuisses à la pose', sp, Math.round(sp) + '°', anLv(sp, 20, 35), 'genou libre à côté du genou d\'appui (≤ 20°)'));
-      const tl = anMed(S.map(x => x.tl)); R.push(anRow('thigh', 'Cuisse libre au plus haut', tl, `${Math.round(90 - tl)}° sous l'horizontale`, anLv(90 - tl, 20, 35), 'presque horizontale (≤ 20° dessous)'));
+    const sh = anMed(SS.map(x => x.shin)); R.push(acc ? anRow('shin', 'Tibia à la pose', sh, `${Math.round(sh)}° vers l'avant`, anLv(sh, 35, 20, true), '40 à 50° vers l\'avant au 1er appui') : anRow('shin', 'Tibia à la pose', sh, `${sh >= 0 ? Math.round(sh) + '° vers l\'avant' : Math.round(-sh) + '° vers l\'arrière (cheville devant le genou)'}`, anLv(sh, -5, -12, true), 'proche de la verticale'));
+    if (!acc) { const kn = anMed(SS.map(x => x.knee)); R.push(anRow('knee', 'Genou à la pose', kn, Math.round(kn) + '°', kn >= 145 && kn <= 168 ? 'good' : kn >= 138 && kn <= 175 ? 'warn' : 'bad', '150 à 160°'));
+      const sp = anMed(SS.map(x => x.sep)); R.push(anRow('sep', 'Écart des cuisses à la pose', sp, Math.round(sp) + '°', anLv(sp, 20, 35), 'genou libre à côté du genou d\'appui (≤ 20°)'));
+      const tl = anMed(SS.map(x => x.tl)); R.push(anRow('thigh', 'Cuisse libre au plus haut', tl, `${Math.round(90 - tl)}° sous l'horizontale`, anLv(90 - tl, 20, 35), 'presque horizontale (≤ 20° dessous)'));
       R.push(anRow('trunk', 'Tronc à vitesse max', tr, Math.round(tr) + '° vers l\'avant', tr >= -3 && tr <= 12 ? 'good' : tr <= 20 ? 'warn' : 'bad', '0 à 10°, stable')); }
     if (acc) { const t1 = S[0].trunk; if (ph === 'depart') R.push(anRow('trunk1', 'Tronc au 1er appui', t1, Math.round(t1) + '° (par rapport à la verticale)', anLv(t1, 40, 30, true), '40 à 50°'));
       const k4 = S.slice(0, Math.min(5, S.length)); if (k4.length >= 3) { const drop = (k4[0].trunk - k4.at(-1).trunk) / (k4.length - 1); R.push(anRow('rise', 'Redressement du tronc', drop, `${fx(drop, 1)}° par appui (${Math.round(k4[0].trunk)}° → ${Math.round(k4.at(-1).trunk)}°)`, anLv(drop, 5, 8), '2 à 5° par appui, régulier')); }
@@ -15440,7 +15524,7 @@ function anaRun(v, P) {
     const g = S.filter(x => x.s === 'G').map(x => x.ct), d = S.filter(x => x.s === 'D').map(x => x.ct);
     if (g.length >= 2 && d.length >= 2 && dtr <= .02) { const a = anMean(g), b = anMean(d), gap = Math.abs(a - b) / Math.max(a, b) * 100; R.push(anRow('sym', 'Contact gauche / droite', gap, `G ${Math.round(a * 1000)} · D ${Math.round(b * 1000)} ms (${Math.round(gap)} %)`, anLv(gap, 8, 15), 'moins de 8 % d\'écart')); }
   }
-  return {at: Date.now(), kind: 'run', ph, manual, prec, steps: S.map(x => ({n: x.n, s: x.s, t: +x.t.toFixed(3), ct: +x.ct.toFixed(3), td: +x.td.toFixed(2), shin: Math.round(x.shin), knee: Math.round(x.knee), sep: Math.round(x.sep), trunk: Math.round(x.trunk)})), rows: T(R), err: S.length ? '' : 'Aucun appui trouvé : filme de côté, caméra fixe, ou marque les appuis à la main.'};
+  return {at: Date.now(), kind: 'run', ph, manual, prec, view, key: {ct: S.length ? +anMean(cts).toFixed(3) : null, fq: Number.isFinite(fq) ? +fq.toFixed(2) : null, len: Number.isFinite(len) ? +len.toFixed(2) : null, spd: Number.isFinite(len) && Number.isFinite(fq) ? +(len * fq).toFixed(2) : null}, steps: S.map(x => ({n: x.n, s: x.s, t: +x.t.toFixed(3), ct: +x.ct.toFixed(3), td: +x.td.toFixed(2), shin: Math.round(x.shin), knee: Math.round(x.knee), sep: Math.round(x.sep), trunk: Math.round(x.trunk)})), rows: T(R), err: S.length ? '' : 'Aucun appui trouvé : filme de côté, caméra fixe, ou marque les appuis à la main.'};
 }
 
 function anaLift(v, P) {
@@ -15510,17 +15594,29 @@ function anaLift(v, P) {
 }
 const anaCompute = (v, P) => vKind(v) === 'lift' ? anaLift(v, P) : anaRun(v, P);
 
-/* ---------- 3) points forts · points faibles (toutes les vidéos) ---------- */
+/* ---------- 3) profil : points forts · à affiner · points faibles, sur toutes les vidéos ---------- */
+// Un point n'est fort ou faible que s'il revient : on prend ses 5 dernières mesures (bien = 2, à affiner = 1, à corriger = 0).
+// Moyenne ≥ 1,5 : point fort ; < 0,75 : point faible ; entre les deux : à affiner. Vu une seule fois : « à confirmer ».
+const LV_SC = {good: 2, warn: 1, bad: 0}, LV_N = {good: 'Point fort', warn: 'À affiner', bad: 'Point faible'};
+const LIFT_CUE = {depth: 'Hanches sous les genoux', par: 'Poitrine et tibias parallèles', shin: 'Genoux vers l\'avant', heel: 'Talons vissés au sol', valgus: 'Genoux au-dessus des pieds', hipfirst: 'Poitrine et hanches ensemble', knee: 'Genoux souples et fixes', ext: 'Grandis-toi jusqu\'au bout', exth: 'Hanches à fond devant', catch: 'Reçois bas et solide', vloss: 'Chaque répétition à fond', desc: 'Descends vite, repars vite', trunk: 'Dos plat, poitrine fière', fly: 'Pousse le sol, vite'};
+const anCue = (kind, k, axe) => kind === 'run' ? (k === 'sym' ? 'Mêmes appuis à gauche et à droite' : AXE_CUE[axe || K_AXE[k]] || 'Vite et relâché') : LIFT_CUE[k] || 'Vite et propre';
+function anaAgg(kind) {
+  const L = vids().filter(v => vKind(v) === kind && (v.an?.rows?.length || v.coach)).sort((a, b) => (a.taken || Date.parse(a.d) || 0) - (b.taken || Date.parse(b.d) || 0));
+  const exN = id => LIFT_EX.find(x => x[0] === id)?.[1] || '', M = new Map();
+  const add = (key, name, it) => { if (!M.has(key)) M.set(key, {key, n: name, k: it.k, axe: it.axe, ex: it.ex, seq: []}); const o = M.get(key); o.seq.push(it); if (it.axe) o.axe = it.axe; };
+  for (const v of L) { const acc = ['depart', 'acc'].includes(v.an?.ph);
+    for (const r of v.an?.rows || []) add(kind === 'lift' ? (v.ex || 'squat') + ':' + r.k : r.k + (['ct', 'fq', 'td', 'shin'].includes(r.k) ? (acc ? '|a' : '|v') : ''), kind === 'lift' ? `${exN(v.ex)} · ${r.n}` : r.n, {k: r.k, lvl: r.lvl, txt: r.txt, ref: r.ref, axe: r.axe, d: v.d, vid: v.id, ex: v.ex});
+    for (const [L2, lv] of [[v.coach?.forts || [], 'good'], [v.coach?.faibles || [], 'bad']]) for (const it of L2) add('c:' + (it.k || it.t), it.t, {k: it.k, lvl: lv, txt: it.t, axe: it.axe || K_AXE[it.k] || null, cue: it.cue, drill: it.drill, d: v.d, vid: v.id, coach: 1}); }
+  const out = [...M.values()].map(o => { const last = o.seq.slice(-5), sc = last.reduce((a, x) => a + LV_SC[x.lvl], 0) / last.length, lvl = sc >= 1.5 ? 'good' : sc < .75 ? 'bad' : 'warn';
+    const f = o.seq[0], z = o.seq.at(-1), trend = o.seq.length >= 2 ? Math.sign(LV_SC[z.lvl] - LV_SC[f.lvl]) : 0;
+    return {...o, lvl, sc, cnt: o.seq.length, sure: o.seq.length >= 2, trend, txt: z.txt, ref: z.ref, d: z.d, vid: z.vid, cue: z.cue || anCue(kind, o.k, o.axe)}; });
+  out.sort((a, b) => a.sc - b.sc || b.cnt - a.cnt);
+  return {L, P: out};
+}
+// Ce que lisent la consigne des séances et Ton cap : les points à travailler et les points forts, tous vidéos confondues.
 function anaPts(kind) {
-  const L = vids().filter(v => vKind(v) === kind && (v.an?.rows?.length || v.coach)).sort((a, b) => (b.d || '').localeCompare(a.d || '') || (b.at || 0) - (a.at || 0)), seen = new Set(), F = [], W = [];
-  const exN = id => LIFT_EX.find(x => x[0] === id)?.[1] || '';
-  for (const v of L) { const pre = kind === 'lift' ? (v.ex || '') + ':' : '', tag = kind === 'lift' ? exN(v.ex) : (RUN_PH.find(x => x[0] === v.an?.ph)?.[1] || '');
-    const put = (it, good, src) => { const key = pre + (it.k || it.t); if (seen.has(key)) return; seen.add(key); (good ? F : W).push({...it, d: v.d, vid: v.id, src, tag}); };
-    for (const it of v.coach?.faibles || []) put({...it, lvl: 'bad', axe: it.axe || K_AXE[it.k] || null}, false, 'coach');
-    for (const it of v.coach?.forts || []) put({...it, lvl: 'good'}, true, 'coach');
-    for (const r of v.an?.rows || []) put({t: `${r.n} : ${r.txt}`, k: r.k, lvl: r.lvl, axe: r.axe, ref: r.ref}, r.lvl === 'good', 'auto'); }
-  W.sort((a, b) => (a.lvl === 'bad' ? 0 : 1) - (b.lvl === 'bad' ? 0 : 1) || (a.prio || 9) - (b.prio || 9));
-  return {forts: F, faibles: W, n: L.length};
+  const {L, P} = anaAgg(kind), it = o => ({t: `${o.n} : ${o.txt}`, k: o.k, lvl: o.lvl, axe: o.axe, cue: o.cue, d: o.d, vid: o.vid, ref: o.ref, cnt: o.cnt});
+  return {forts: P.filter(o => o.lvl === 'good').map(it), faibles: P.filter(o => o.lvl !== 'good').map(it), n: L.length};
 }
 
 /* ---------- 4) la consigne de chaque séance de sprint ---------- */
@@ -15545,30 +15641,45 @@ function cueCard(p) {
 
 /* ---------- 5) l'écran de la vidéo : analyser, voir le bonhomme, le coach ---------- */
 const anDot = l => `<i class="anad ${l}"></i>`;
+// L'unique intention à garder en tête : le point à corriger le plus important (ordre de Ton cap pour la course).
+function anaIntent(kind, rows, coach) {
+  if (coach?.cue) return coach.cue;
+  const c = kind === 'run' && typeof capGet === 'function' ? capGet() : null, ax = c ? capAxes(c) : [], pr = r => { const a = ax.find(x => x.id === (r.axe || K_AXE[r.k])); return a ? capPrio(a) : 0; };
+  const bad = rows.filter(r => r.lvl === 'bad').sort((a, b) => pr(b) - pr(a)), warn = rows.filter(r => r.lvl === 'warn').sort((a, b) => pr(b) - pr(a)), r = bad[0] || warn[0];
+  return r ? anCue(kind, r.k, r.axe) : kind === 'run' ? 'Garde ça : vite et relâché' : 'Garde ça : vite et propre';
+}
+function anaBoxes(G) {
+  return `<div class="an3">${[['good', 'Bien'], ['warn', 'À affiner'], ['bad', 'À corriger']].map(([l, t]) => `<div class="an3b ${l}"><span class="an3t">${anDot(l)}${t} · ${G[l].length}</span>${G[l].map(x => `<p>${x}</p>`).join('') || '<p class="muted">—</p>'}</div>`).join('')}</div>`;
+}
 function anaResHtml(v) {
-  const A = v.an, C = v.coach;
-  const coach = C ? `<div class="card anac"><span class="eyebrow">L'analyse du coach${C.at ? ' · ' + esc(fmtShort(C.at.slice(0, 10))) : ''}</span>${C.cue ? `<b class="cuet">« ${esc(C.cue)} »</b>` : ''}${C.resume ? `<p class="small">${esc(C.resume)}</p>` : ''}
-    ${(C.forts || []).map(x => `<div class="anar">${anDot('good')}<span>${esc(x.t)}</span></div>`).join('')}${(C.faibles || []).map(x => `<div class="anar">${anDot('bad')}<span>${esc(x.t)}${x.drill ? `<small>Exercice : ${esc(x.drill)}</small>` : ''}</span></div>`).join('')}</div>` : '';
-  if (!A) return coach + '<p class="small muted" data-tip="1" style="margin:8px 4px 0">Pas encore analysée.</p>';
-  if (A.err && !A.rows?.length) return coach + `<p class="small" style="color:var(--warn);margin:8px 4px 0">${esc(A.err)}</p>`;
-  const tab = A.kind === 'run' && A.steps?.length ? `<details class="anadet"><summary>Appui par appui (${A.steps.length})</summary><table class="anat"><tr><th>#</th><th>Pied</th><th>Contact</th><th>Pied-hanche</th><th>Tibia</th><th>Tronc</th></tr>${A.steps.map(s => `<tr><td>${s.n}</td><td>${s.s}</td><td>${Math.round(s.ct * 1000)} ms</td><td>${Math.round(s.td * 100)} %</td><td>${s.shin}°</td><td>${s.trunk}°</td></tr>`).join('')}</table></details>`
-    : A.reps?.length ? `<details class="anadet"><summary>Répétition par répétition (${A.reps.length})</summary><table class="anat"><tr><th>#</th><th>Descente</th><th>Montée</th><th>Genou</th><th>Tronc</th></tr>${A.reps.map(r => `<tr><td>${r.n}</td><td>${fx(r.desc, 2)} s</td><td>${fx(r.asc, 2)} s</td><td>${r.knee}°</td><td>${r.trunk}°</td></tr>`).join('')}</table></details>` : '';
-  return coach + `<div class="anarows">${A.rows.map(r => `<div class="anar">${anDot(r.lvl)}<span><b>${esc(r.n)}</b> ${esc(r.txt)}<small>Repère : ${esc(r.ref)}</small></span></div>`).join('')}</div>${tab}
-    <p class="small muted" data-tip="1" style="margin:6px 4px 0">${A.kind === 'run' ? `Phase : ${esc(RUN_PH.find(x => x[0] === A.ph)?.[1] || '')}${A.manual ? ' · appuis marqués à la main' : ' · appuis trouvés seuls'}` : `Côté mesuré : ${A.side === 'G' ? 'gauche' : 'droit'}`}. L'appli mesure ce qu'elle voit en 2D : une vidéo en biais fausse les angles.</p>`;
+  const A = v.an, C = v.coach, k = vKind(v);
+  if (!A && !C) return '<p class="small muted" data-tip="1" style="margin:8px 4px 0">Pas encore analysée.</p>';
+  if (A?.err && !A.rows?.length && !C) return `<p class="small" style="color:var(--warn);margin:8px 4px 0">${esc(A.err)}</p>`;
+  const rows = A?.rows || [], G = {good: [], warn: [], bad: []}, unc = A?.view?.q === 'biais';
+  for (const r of rows) G[r.lvl].push(`<b>${esc(r.n)}</b> ${esc(r.txt)}${unc && !['ct', 'fq', 'sym', 'vloss', 'tempo'].includes(r.k) ? ' <i class="anunc">à vérifier</i>' : ''}<small>Repère : ${esc(r.ref)}</small>`);
+  for (const x of C?.forts || []) G.good.push(`${esc(x.t)}<small>Le coach</small>`);
+  for (const x of C?.faibles || []) G.bad.push(`${esc(x.t)}<small>Le coach${x.drill ? ' · exercice : ' + esc(x.drill) : ''}</small>`);
+  const K = A?.key || {}, kv = (l, x) => `<div><span>${l}</span><b>${x}</b></div>`;
+  const keys = k === 'run' ? `<div class="vres">${kv('Temps de contact', K.ct ? Math.round(K.ct * 1000) + ' ms' : '–')}${kv('Fréquence', K.fq ? fx(K.fq, 2) + ' pas/s' : '–')}${kv('Longueur de pas', K.len ? fx(K.len, 2) + ' m' : '–')}${K.spd ? kv('Vitesse', fx(K.spd, 1) + ' m/s') : ''}</div>`
+    : A?.reps?.length ? `<div class="vres">${kv('Répétitions', A.reps.length)}${kv('Descente', fx(anMean(A.reps.map(r => r.desc)), 2) + ' s')}${kv('Montée', fx(anMean(A.reps.map(r => r.asc)), 2) + ' s')}</div>` : '';
+  const tab = A?.kind === 'run' && A.steps?.length ? `<details class="anadet"><summary>Appui par appui (${A.steps.length})</summary><table class="anat"><tr><th>#</th><th>Pied</th><th>Contact</th><th>Pied-hanche</th><th>Tibia</th><th>Tronc</th></tr>${A.steps.map(s => `<tr><td>${s.n}</td><td>${s.s}</td><td>${Math.round(s.ct * 1000)} ms</td><td>${Math.round(s.td * 100)} %</td><td>${s.shin}°</td><td>${s.trunk}°</td></tr>`).join('')}</table></details>`
+    : A?.reps?.length ? `<details class="anadet"><summary>Répétition par répétition (${A.reps.length})</summary><table class="anat"><tr><th>#</th><th>Descente</th><th>Montée</th><th>Genou</th><th>Tronc</th></tr>${A.reps.map(r => `<tr><td>${r.n}</td><td>${fx(r.desc, 2)} s</td><td>${fx(r.asc, 2)} s</td><td>${r.knee}°</td><td>${r.trunk}°</td></tr>`).join('')}</table></details>` : '';
+  const vw = A?.view, VQ = {bonne: 'bonne prise de vue (bien de côté, distance stable)', moyenne: 'prise de vue moyenne : un peu de biais ou de parallaxe, les angles peuvent bouger de quelques degrés', biais: 'filmé en biais : les angles sont faussés, refilme bien de côté'};
+  const foot = A ? `<p class="small muted" data-tip="1" style="margin:6px 4px 0">${A.kind === 'run' ? `Phase : ${esc(RUN_PH.find(x => x[0] === A.ph)?.[1] || '')}` : `Côté mesuré : ${A.side === 'G' ? 'gauche' : 'droit'}`}${vw ? ' · ' + VQ[vw.q] : ''}${vw?.edge ? ` · ${vw.edge} appui${vw.edge > 1 ? 's' : ''} au bord de l'image écarté${vw.edge > 1 ? 's' : ''}` : ''}${A.prec > 20 ? ` · temps à ± ${A.prec} ms (filme au ralenti pour mieux)` : ''}.</p>` : '';
+  return `${keys}${anaBoxes(G)}<div class="card cuec anint"><span class="eyebrow">${k === 'run' ? 'Ta seule intention pour le prochain sprint' : 'Ta seule intention pour la prochaine série'}</span><b class="cuet">« ${esc(anaIntent(k, rows, C))} »</b></div>${tab}${foot}`;
 }
 function anaSection(v) {
   const k = vKind(v);
   return `<div class="sec-label">Analyse du corps</div>
-    <div class="seg ana-k">${[['run', 'Course'], ['lift', 'Musculation']].map(([x, l]) => `<button type="button" data-anakind="${x}" aria-pressed="${k === x}">${l}</button>`).join('')}</div>
     ${k === 'lift' ? `<div class="cap-g2"><label class="cap-f">Exercice<select class="mini-in" data-anaset="ex">${LIFT_EX.map(([x, l]) => `<option value="${x}"${(v.ex || 'squat') === x ? ' selected' : ''}>${l}</option>`).join('')}</select></label>
       <label class="cap-f">Filmé<select class="mini-in" data-anaset="view">${[['side', 'De côté'], ['front', 'De face']].map(([x, l]) => `<option value="${x}"${(v.view || 'side') === x ? ' selected' : ''}>${l}</option>`).join('')}</select></label></div>`
     : `<label class="cap-f">Phase de la course<select class="mini-in" data-anaset="phase">${RUN_PH.map(([x, l]) => `<option value="${x}"${(v.phase || 'auto') === x ? ' selected' : ''}>${l}</option>`).join('')}</select></label>`}
     <button type="button" class="btn" style="width:100%;margin-top:10px" data-anago>${v.an ? 'Refaire l\'analyse' : 'Analyser mon corps sur cette vidéo'}</button>
-    <p class="small muted" data-tip="1" data-anaprog style="margin:6px 4px 0">${k === 'run' ? 'De côté, caméra fixe, au ralenti si possible. Marque Départ et Arrivée pour n\'analyser que ce passage.' : 'Tout le corps dans l\'image, caméra fixe. De côté pour les angles, de face pour les genoux.'}</p>
+    <p class="small muted" data-tip="1" data-anaprog style="margin:6px 4px 0">${k === 'run' ? 'De côté, caméra fixe à hauteur de hanche, à 5 à 10 m : moins de parallaxe, des angles plus justes.' : 'Tout le corps dans l\'image, caméra fixe à hauteur de hanche. De côté pour les angles, de face pour les genoux.'}</p>
     <div data-anares>${anaResHtml(v)}</div>
     <div class="sec-label">Le coach ${k === 'run' ? 'sprint' : 'muscu'}</div>
     <div class="btnrow two"><button type="button" class="btn ghost" data-anaask>Demander à Claude</button><button type="button" class="btn ghost" data-anasheet>Image pour Claude</button></div>
-    <p class="small muted" data-tip="1" style="margin:6px 4px 0">« Demander » copie la demande avec tes mesures ; « Image » enregistre 8 images clés avec le bonhomme. Envoie-les à Claude (onglet Code) avec la vidéo, puis colle sa réponse ici.</p>
+    <p class="small muted" data-tip="1" style="margin:6px 4px 0">« Demander » copie la demande avec tes mesures ; « Image » enregistre 8 images clés avec le bonhomme. Envoie-les à Claude avec la vidéo, puis colle sa réponse ici.</p>
     <textarea class="mini-in" rows="3" data-anapaste placeholder="Colle ici la réponse de Claude (avec le bloc json)" style="width:100%;margin-top:8px"></textarea>`;
 }
 function anaPrompt(v) {
@@ -15577,7 +15688,7 @@ function anaPrompt(v) {
   return `Utilise le skill « ${k === 'run' ? 'coach-sprint' : 'prepa-physique'} ». Analyse ${k === 'run' ? 'ma course' : 'mon ' + (ex || 'mouvement')} sur la vidéo jointe (« ${v.title || 'vidéo'} », ${v.d}${+v.slow > 1 ? `, ralenti ×${v.slow}` : ''}, fichier à ${v.fps || 30} images/s${k === 'lift' ? `, filmé ${v.view === 'front' ? 'de face' : 'de côté'}` : ''}).
 Extrais les images (scripts/extraire_images.py du skill coach-sprint), regarde-les, mesure, compare aux repères, trouve les causes.
 ${A?.rows?.length ? `\nCe que l'appli a mesuré seule (MediaPipe, en 2D) :\n${A.rows.map(r => `- ${r.n} : ${r.txt} (repère : ${r.ref})`).join('\n')}\n${A.steps?.length ? 'Appuis : ' + A.steps.map(s => `#${s.n} ${s.s} ${Math.round(s.ct * 1000)} ms, pied ${Math.round(s.td * 100)} % de jambe, tronc ${s.trunk}°`).join(' ; ') + '\n' : ''}${A.reps?.length ? 'Répétitions : ' + A.reps.map(r => `#${r.n} descente ${r.desc} s, montée ${r.asc} s, genou ${r.knee}°`).join(' ; ') + '\n' : ''}` : ''}${v.note ? `\nCe que je vois : ${v.note}\n` : ''}${k === 'run' && ax ? `\nMes axes de travail (Ton cap) :\n${ax}\n` : ''}
-Réponds en français simple, en tableaux : points forts chiffrés, points faibles classés avec leur cause, UNE consigne, deux exercices${k === 'run' ? ', le complément en salle' : ', ce que tu changes dans mon programme, le lien avec le sprint'}.
+Réponds en français simple, en 3 cases (bien · à affiner · à corriger) chiffrées, avec la cause de chaque point à corriger, puis UNE seule intention courte à appliquer dès le prochain essai, deux exercices${k === 'run' ? ', le complément en salle' : ', ce que tu changes dans mon programme, le lien avec le sprint'}.
 Termine par un seul bloc \`\`\`json : {"tnr":"analyse","kind":"${k}",${k === 'lift' ? `"ex":"${v.ex || 'squat'}",` : ''}"forts":[{"t":"…","k":"…"}],"faibles":[{"t":"…","k":"…",${k === 'run' ? '"axe":"…",' : ''}"prio":1,"cue":"…","drill":"…"}],"cue":"…","resume":"…"}`;
 }
 // 8 images clés (poses ou bas des répétitions) avec le bonhomme, sur une planche à enregistrer.
@@ -15630,7 +15741,6 @@ function anaParse(txt) {
     return {forts: cl(j.forts), faibles: cl(j.faibles), cue: String(j.cue || '').slice(0, 80), resume: String(j.resume || '').slice(0, 900), ex: j.ex || null, at: new Date().toISOString()}; } catch (e) { return null; }
 }
 document.addEventListener('click', async e => { if (!VP.id) return; let b; const v = vids().find(x => x.id === VP.id); if (!v) return;
-  if ((b = e.target.closest?.('[data-anakind]'))) { vidUp(VP.id, x => ({...x, kind: b.dataset.anakind, an: null}), true); const p = P.stack.at(-1); paneRender(); vidLoad(); return; }
   if (e.target.closest?.('[data-anago]')) { anaGo(VP.id); return; }
   if (e.target.closest?.('[data-anaask]')) { try { await navigator.clipboard.writeText(anaPrompt(v)); toast('Demande copiée : colle-la dans Claude avec la vidéo'); } catch (er) { toast('Copie impossible'); } return; }
   if (e.target.closest?.('[data-anasheet]')) { toast('Préparation de l\'image…'); anaSheet(v); return; }
@@ -15639,26 +15749,38 @@ document.addEventListener('change', e => { if (!VP.id) return; const t = e.targe
 document.addEventListener('input', e => { if (!VP.id || !e.target.matches?.('[data-anapaste]')) return; const c = anaParse(e.target.value); if (!c) return;
   vidUp(VP.id, x => ({...x, coach: c, ...(c.ex && vKind(x) === 'lift' ? {ex: c.ex} : {})}), true); e.target.value = ''; const r = document.querySelector('[data-anares]'); if (r) r.innerHTML = anaResHtml(vids().find(x => x.id === VP.id)); toast('Analyse du coach rangée'); oneHap?.(10); });
 
-/* ---------- 6) Profil : les 4 cases ---------- */
-function proAnaCards() {
-  const c = k => { const L = vids().filter(v => vKind(v) === k), a = L.filter(v => v.an || v.coach).length, P = anaPts(k);
-    return {L, a, P}; }, R = c('run'), M = c('lift');
-  const box = (k, t, o) => `<button type="button" class="card pac" data-proana="${k}"><span class="eyebrow">Analyse</span><b>${t}</b><small>${o.L.length ? `${o.L.length} vidéo${o.L.length > 1 ? 's' : ''} · ${o.a} analysée${o.a > 1 ? 's' : ''}` : 'Ajoute une vidéo'}</small></button>`;
-  const pts = (k, o) => { const F = o.P.forts, W = o.P.faibles;
-    return `<button type="button" class="card pac pts" data-propts="${k}"><span class="eyebrow">Points forts · points faibles</span>${W.length || F.length ? `${W.slice(0, 2).map(x => `<p class="pacl">${anDot(x.lvl)}${esc(x.t.length > 60 ? x.t.slice(0, 58) + '…' : x.t)}</p>`).join('')}${F.slice(0, 1).map(x => `<p class="pacl">${anDot('good')}${esc(x.t.length > 60 ? x.t.slice(0, 58) + '…' : x.t)}</p>`).join('')}<small>${W.length} à travailler · ${F.length} point${F.length > 1 ? 's' : ''} fort${F.length > 1 ? 's' : ''}</small>` : '<small>Ils apparaîtront après ta première analyse.</small>'}</button>`; };
-  return `<div class="sec-label">Mes analyses vidéo</div><div class="pagrid">${box('lift', 'Mes mouvements · musculation', M)}${box('run', 'Ma dynamique de course', R)}${pts('lift', M)}${pts('run', R)}</div>`;
+/* ---------- 6) Le profil dans la page des vidéos, et l'évolution ---------- */
+// La courbe : pour chaque vidéo analysée, la part de points au vert (bien = 1, à affiner = 0,5).
+function anaCurve(L) {
+  const pts = L.filter(v => v.an?.rows?.length).map(v => { const R = v.an.rows; return {d: v.d, y: Math.round(R.reduce((a, r) => a + (r.lvl === 'good' ? 1 : r.lvl === 'warn' ? .5 : 0), 0) / R.length * 100)}; });
+  if (pts.length < 2) return '';
+  const W = 320, H = 110, X = i => 14 + i * (W - 28) / (pts.length - 1), Y = y => 12 + (100 - y) * (H - 34) / 100;
+  return `<div class="card ancurve"><span class="eyebrow">Ton évolution · part des points au vert</span><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Évolution"><line x1="14" x2="${W - 14}" y1="${Y(50)}" y2="${Y(50)}" class="ancg"/><polyline points="${pts.map((p, i) => X(i).toFixed(1) + ',' + Y(p.y).toFixed(1)).join(' ')}" class="ancl"/>${pts.map((p, i) => `<circle cx="${X(i).toFixed(1)}" cy="${Y(p.y).toFixed(1)}" r="3.5" class="ancd"/>`).join('')}
+    <text x="14" y="${H - 4}" class="anct">${esc(fmtShort(pts[0].d))}</text><text x="${W - 14}" y="${H - 4}" text-anchor="end" class="anct">${esc(fmtShort(pts.at(-1).d))}</text></svg>
+    <p class="small" style="margin:2px 2px 0"><b>${pts[0].y} % → ${pts.at(-1).y} %</b> ${pts.at(-1).y > pts[0].y ? 'de points au vert : tu progresses.' : pts.at(-1).y < pts[0].y ? 'de points au vert : regarde ce qui a baissé plus bas.' : 'de points au vert.'}</p></div>`;
 }
-function ptsPane(k) {
-  openPane({title: k === 'run' ? 'Course · forts et faibles' : 'Muscu · forts et faibles', render: () => { const P = anaPts(k), c = typeof capGet === 'function' ? capGet() : {axes: []}, axN = id => c.axes?.find(a => a.id === id)?.n;
-    const it = x => `<button type="button" class="rowbtn" data-vidplay="${esc(x.vid)}"><span>${anDot(x.lvl)}<b>${esc(x.t)}</b><span class="meta">${esc(cap(fmtShort(x.d)))}${x.tag ? ' · ' + esc(x.tag) : ''}${x.src === 'coach' ? ' · coach' : ''}${x.axe && axN(x.axe) ? ' · axe : ' + esc(axN(x.axe)) : ''}${x.cue ? ' · consigne « ' + esc(x.cue) + ' »' : ''}${x.ref ? ' · repère : ' + esc(x.ref) : ''}</span></span>${ICON.chev}</button>`;
-    return `<p class="small muted" data-tip="1" style="margin:14px 4px 8px">La dernière mesure de chaque point, sur toutes tes vidéos${k === 'run' ? '. Les points faibles de course choisissent la consigne de tes séances de sprint.' : '.'}</p>
-      <div class="sec-label">À travailler (${P.faibles.length})</div><div class="list">${P.faibles.map(it).join('') || '<p class="small muted" data-tip="1">Rien pour l\'instant.</p>'}</div>
-      <div class="sec-label">Points forts (${P.forts.length})</div><div class="list">${P.forts.map(it).join('') || '<p class="small muted" data-tip="1">Rien pour l\'instant.</p>'}</div>
-      <button type="button" class="btn" style="width:100%;margin-top:14px" data-proana="${k}">Mes vidéos</button>`; }});
+function anaProfileHtml(kind) {
+  const {L, P} = anaAgg(kind), n = L.filter(v => v.an || v.coach).length;
+  const item = o => `<button type="button" class="anpi" data-vidplay="${esc(o.vid)}"><b>${esc(o.n)}</b><span class="anseq">${o.seq.slice(-8).map(s => anDot(s.lvl)).join('')}${o.trend > 0 ? '<em class="up">progresse</em>' : o.trend < 0 ? '<em class="down">baisse</em>' : ''}</span><small>${esc(o.txt)} · vu ${o.cnt} fois${o.sure ? '' : ' · à confirmer'}</small></button>`;
+  const G = {good: P.filter(o => o.lvl === 'good'), warn: P.filter(o => o.lvl === 'warn'), bad: P.filter(o => o.lvl === 'bad')};
+  return `<div id="anaprof" class="sec-label" style="margin-top:22px">Mon profil · ${n} vidéo${n > 1 ? 's' : ''} analysée${n > 1 ? 's' : ''}</div>
+    ${n ? `${anaCurve(L)}<div class="an3">${[['good', 'Points forts'], ['warn', 'À affiner'], ['bad', 'Points faibles']].map(([l, t]) => `<div class="an3b ${l}"><span class="an3t">${anDot(l)}${t} · ${G[l].length}</span>${G[l].map(item).join('') || '<p class="muted">—</p>'}</div>`).join('')}</div>
+    <p class="small muted" data-tip="1" style="margin:8px 4px 0">Un point devient fort ou faible quand il revient sur plusieurs vidéos (ses 5 dernières mesures) : une seule vidéo, un jour de fatigue ou de vent, ne suffit pas. Les points de couleur racontent son histoire, de la plus ancienne vidéo à la plus récente.</p>`
+    : '<p class="small muted" data-tip="1" style="margin:4px 4px 0">Ton profil apparaîtra après ta première analyse.</p>'}`;
+}
+// Profil : l'hexagone de tes qualités, puis les deux analyses et leurs points forts · faibles (même page, plus bas).
+function proAnaCards() {
+  const c = k => { const L = vids().filter(v => vKind(v) === k), a = L.filter(v => v.an || v.coach).length, {P} = anaAgg(k); return {L, a, P}; }, R = c('run'), M = c('lift');
+  const box = (k, t, o) => `<button type="button" class="card pac" data-proana="${k}"><span class="eyebrow">Analyse</span><b>${t}</b><small>${o.L.length ? `${o.L.length} vidéo${o.L.length > 1 ? 's' : ''} · ${o.a} analysée${o.a > 1 ? 's' : ''}` : 'Filme ou ajoute une vidéo'}</small></button>`;
+  const pts = (k, o) => { const g = o.P.filter(x => x.lvl === 'good').length, w = o.P.filter(x => x.lvl === 'warn').length, b = o.P.filter(x => x.lvl === 'bad').length;
+    return `<button type="button" class="card pac pts" data-propts="${k}"><span class="eyebrow">Points forts · faibles</span>${o.P.length ? `<p class="pacl">${anDot('good')}${g} fort${g > 1 ? 's' : ''}</p><p class="pacl">${anDot('warn')}${w} à affiner</p><p class="pacl">${anDot('bad')}${b} faible${b > 1 ? 's' : ''}</p>` : '<small>Après ta première analyse.</small>'}</button>`; };
+  const hx = typeof hxVals === 'function' && typeof hxSvg === 'function' ? `<button type="button" class="card pac hxpro" data-prohex><span class="eyebrow">L'hexagone de tes qualités</span>${hxSvg(hxVals())}</button>` : '';
+  return `<div class="sec-label">Mes qualités et mes analyses vidéo</div>${hx}<div class="pagrid">${box('run', 'Ma dynamique de course', R)}${box('lift', 'Mes mouvements · musculation', M)}${pts('run', R)}${pts('lift', M)}</div>`;
 }
 document.addEventListener('click', e => { let b;
   if ((b = e.target.closest?.('[data-proana]'))) { vidPane('', b.dataset.proana); return; }
-  if ((b = e.target.closest?.('[data-propts]'))) { ptsPane(b.dataset.propts); return; } });
+  if ((b = e.target.closest?.('[data-propts]'))) { vidPane('', b.dataset.propts, true); return; }
+  if (e.target.closest?.('[data-prohex]') && typeof hexPane === 'function') { hexPane(); return; } });
 const tProfile0 = tProfile;
 tProfile = function () { const h = tProfile0(); return h.replace('<div class="sec-label">Mes résultats</div>', proAnaCards() + '<div class="sec-label">Mes résultats</div>'); };
 // La consigne aussi pendant la séance de sprint.
