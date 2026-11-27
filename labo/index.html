@@ -2333,6 +2333,15 @@ html.one .btn.one-del.over{background:var(--bad);color:#fff;border-style:solid;t
 .idl{display:grid;gap:10px}.idc{padding:14px 16px;border-radius:18px;background:var(--card);border:1px solid color-mix(in srgb,var(--fg) 8%,transparent)}
 .idc b{display:block;font-size:1rem}.idc p{margin:6px 0 0;font-size:.86rem;line-height:1.4}.idc small{display:block;margin-top:6px;font-size:.74rem;color:var(--fg3);line-height:1.35}
 .idb{display:flex;gap:8px;margin-top:10px}.idc.yes{border-color:color-mix(in srgb,var(--fg) 45%,transparent)}.idc.no{opacity:.45}
+
+/* v179 : Ton cap épuré (le détail s'ouvre au toucher) */
+button.cap{display:block;width:100%;text-align:left;color:inherit;font:inherit;cursor:pointer}button.cap>span{display:block}
+.cap .cap-h{display:flex}.cap .cap-goal{display:block;margin-top:8px;font:800 2rem/1.05 var(--display);letter-spacing:-.03em;color:var(--fg)}
+.cap .cap-sub{margin-top:4px}.cap .cap-line{display:block}
+.cap-f2{display:flex!important;justify-content:space-between;gap:10px;margin-top:12px;font-size:.8rem;color:var(--fg2)}.cap-f2 b{color:var(--fg);font-weight:700;white-space:nowrap}
+.cap .cap-j{padding:4px 9px;font-size:.8rem}
+.cap-big{margin:14px 4px 0;display:flex;flex-direction:column;gap:4px}.cap-big b{font:800 2.2rem/1.05 var(--display);letter-spacing:-.03em}.cap-big span{font-size:.86rem;color:var(--fg2)}
+.pane .cap-dream{margin:14px 4px 0}.pane .cap-w{border:0;margin:0;padding:4px 4px 0}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -11139,7 +11148,7 @@ const FSTOP = new Set(['de', 'du', 'des', 'd', 'la', 'le', 'les', 'l', 'a', 'au'
 // "poulets" finds "poulet": a final s or x is dropped from both sides.
 const fstem = x => x.length > 3 ? x.replace(/[sx]$/, '') : x;
 function foodSeek(list, q, n = 40) {
-  const w = fnorm(q).split(' ').filter(x => x && !FSTOP.has(x)).map(fstem); if (!w.length) return [];
+  let w = fnorm(q).split(' ').filter(x => x && !FSTOP.has(x)).map(fstem); if (!w.length) w = fnorm(q).split(' ').filter(Boolean); if (!w.length) return [];
   const out = [];
   for (const f of list) { const s = fnorm(f.n), ws = s.split(' ');
     if (!w.every(x => ws.some(y => fstem(y).startsWith(x) || y.startsWith(x)) || (x.length > 3 && s.includes(x)))) continue;
@@ -12243,7 +12252,7 @@ function addFood(meal, q0) {
     toast('Trouvé et rangé dans Mes aliments'); qtyPane(f, meal);
   };
   openPane({title: 'Ajouter un aliment', focus: '#ff-q', onClose: scanStop, scan: () => scanStart(onCode), render: () => `
-    <div style="margin-top:14px;display:flex;gap:8px"><input class="search" id="ff-q" type="search" placeholder="Rechercher : poulet, skyr, riz…" value="${esc(q)}" data-ffq aria-label="Rechercher un aliment" style="flex:1"><button type="button" class="chip" data-nfscan aria-label="Scanner un code-barres" style="flex:none">${SCANIC.replace('<svg', '<svg width="22" height="18"')}</button></div><div id="scan-box"></div>
+    <div style="margin-top:14px;display:flex;gap:8px"><input class="search" id="ff-q" type="search" placeholder="Rechercher : poulet, skyr, riz…" value="${esc(q)}" data-faddq aria-label="Rechercher un aliment" style="flex:1"><button type="button" class="chip" data-nfscan aria-label="Scanner un code-barres" style="flex:none">${SCANIC.replace('<svg', '<svg width="22" height="18"')}</button></div><div id="scan-box"></div>
     <div class="chipsx">${MEALS.map(([m]) => `<button class="chip" data-fmeal="${m}" aria-pressed="${m === meal}">${esc(mealLab(m))}</button>`).join('')}</div>
     <div class="fres" id="ff-res">${foodResults(q)}</div>`,
   setQ: v => { q = v; $('#ff-res').innerHTML = foodResults(q); onlineSearch(q); }, setMeal: m => { meal = m; paneRender(); }, meal: () => meal});
@@ -12479,7 +12488,7 @@ document.addEventListener('input', e => {
   else if (d.rlibq !== undefined) { RQ = t.value; document.querySelectorAll('.rlibl').forEach(x => { x.innerHTML = rlibCards(); }); }
   else if (d.pkq !== undefined) P.stack.at(-1).setQ(t.value);
   else if (d.mpq !== undefined) P.stack.at(-1).setQ(t.value);
-  else if (d.ffq !== undefined) P.stack.at(-1).setQ(t.value);
+  else if (d.faddq !== undefined) P.stack.at(-1).setQ(t.value);
   else if (d.fqty !== undefined) P.stack.at(-1).setG(t.value);
   else if (d.lcn !== undefined) { S.live.items[+d.lcn].cn = t.value; saveLive(); }
   else if (d.lp) { const [i, k] = d.lp.split('.'), it = S.live.items[+i], p = it.p || (it.p = runP(it.tg || {})); p[k] = t.value === '' ? null : +t.value.replace(',', '.'); saveLive(); }
@@ -14971,17 +14980,24 @@ function capWeek(c) {
     ...(c.free || []).map((x, i) => ({n: x.t, u: '', v: (x.wk === mon ? 1 : 0), goal: 1, free: i}))];
 }
 function capCard() {
-  const c = capGet(), left = daysBetween(TODAY, c.date), W = capWeek(c);
+  const c = capGet(), left = daysBetween(TODAY, c.date), W = capWeek(c), ok = W.filter(x => x.v >= x.goal).length;
   const steps = (c.steps || []).filter(s => s.d).sort((a, b) => a.d.localeCompare(b.d)), t0 = c.start || '2026-11-01', span = Math.max(1, daysBetween(t0, c.date));
   const pos = d => Math.max(0, Math.min(100, daysBetween(t0, d) / span * 100)), nx = steps.find(s => s.d >= TODAY);
-  return `<section class="cap" aria-label="Ton cap"><div class="cap-h"><span class="eyebrow">Ton cap</span><button type="button" class="cap-ed" data-capedit>${c.draft ? 'Valider mon objectif' : 'Modifier'}</button></div>
-    ${c.dream ? `<p class="cap-dream">${esc(c.dream)}</p>` : ''}
-    <div class="cap-goal"><b>${esc(c.ev)} en ${chr(c.to)}</b><span class="cap-j">${left > 0 ? 'J-' + left : left === 0 ? 'Jour J' : 'Passé'}</span></div>
-    <p class="cap-sub">${esc(c.res)} · ${esc(cap(fmtLong(c.date)))} · record ${chr(c.pb)}, soit ${fx(Math.round((c.pb - c.to) * 100) / 100, 2)} s à gagner</p>
-    <div class="cap-line" aria-hidden="true"><i style="width:${pos(TODAY).toFixed(1)}%"></i>${steps.map(s => `<em class="${s.done ? 'ok' : s.d < TODAY ? 'past' : ''}" style="left:${pos(s.d).toFixed(1)}%"></em>`).join('')}<em class="end" style="left:100%"></em></div>
-    ${nx ? `<p class="cap-nx"><span>Prochain jalon · ${esc(fmtShort(nx.d))}</span>${esc(nx.t)}</p>` : ''}
-    ${W.length ? `<div class="cap-w"><span class="eyebrow">Cette semaine, ce qui dépend de toi</span>${W.map(x => `<div class="cap-r${x.v >= x.goal ? ' ok' : ''}">${x.free != null ? `<button type="button" class="cap-ck" data-capfree="${x.free}" aria-pressed="${x.v >= 1}" aria-label="Fait cette semaine">${x.v >= 1 ? '✓' : ''}</button>` : `<span class="cap-ck">${x.v >= x.goal ? '✓' : ''}</span>`}<span>${esc(x.n)}</span><b>${x.free != null ? '' : `${x.v}/${x.goal}`}</b></div>`).join('')}</div>` : ''}
-    ${c.draft ? '<p class="cap-draft">Proposition à partir de ton record. Touche « Valider mon objectif » pour l\'ajuster avec ton coach.</p>' : ''}</section>`;
+  return `<button type="button" class="cap" data-capview aria-label="Ton cap : voir le détail"><span class="cap-h"><span class="eyebrow">Ton cap${c.draft ? ' · à valider' : ''}</span><span class="cap-j">${left > 0 ? 'J-' + left : left === 0 ? 'Jour J' : 'Passé'}</span></span>
+    <span class="cap-goal">${esc(c.ev)} en ${chr(c.to)}</span>
+    <span class="cap-sub">${esc(c.res)} · ${esc(fmtShort(c.date))}</span>
+    <span class="cap-line" aria-hidden="true"><i style="width:${pos(TODAY).toFixed(1)}%"></i>${steps.map(s => `<em class="${s.done ? 'ok' : s.d < TODAY ? 'past' : ''}" style="left:${pos(s.d).toFixed(1)}%"></em>`).join('')}<em class="end" style="left:100%"></em></span>
+    <span class="cap-f2"><span>${nx ? `Prochain : ${esc(nx.t.split(':')[0])} · ${esc(fmtShort(nx.d))}` : ''}</span>${W.length ? `<b>Semaine ${ok}/${W.length} ›</b>` : ''}</span></button>`;
+}
+// Le détail, au toucher : le rêve, le chrono, tous les jalons, les moyens de la semaine.
+function capView() {
+  openPane({title: 'Ton cap', render: () => { const c = capGet(), W = capWeek(c), steps = (c.steps || []).filter(s => s.d).sort((a, b) => a.d.localeCompare(b.d));
+    return `${c.dream ? `<p class="cap-dream">${esc(c.dream)}</p>` : ''}
+      <div class="cap-big"><b>${esc(c.ev)} en ${chr(c.to)}</b><span>${esc(c.res)} · ${esc(cap(fmtLong(c.date)))}</span><span>Record ${chr(c.pb)} · ${fx(Math.round((c.pb - c.to) * 100) / 100, 2)} s à gagner</span></div>
+      <div class="sec-label">Les jalons</div><div class="list">${steps.map(s => `<div class="row"><span style="flex:1">${esc(s.t)}<span class="hint">${esc(cap(fmtShort(s.d)))}</span></span><b>${s.done ? '✓' : s.d < TODAY ? 'passé' : ''}</b></div>`).join('') || '<div class="row"><span class="muted">Aucun jalon</span></div>'}</div>
+      ${W.length ? `<div class="sec-label">Cette semaine, ce qui dépend de toi</div><div class="cap-w">${W.map(x => `<div class="cap-r${x.v >= x.goal ? ' ok' : ''}">${x.free != null ? `<button type="button" class="cap-ck" data-capfree="${x.free}" aria-pressed="${x.v >= 1}" aria-label="Fait cette semaine">${x.v >= 1 ? '✓' : ''}</button>` : `<span class="cap-ck">${x.v >= x.goal ? '✓' : ''}</span>`}<span>${esc(x.n)}</span><b>${x.free != null ? '' : `${x.v}/${x.goal}`}</b></div>`).join('')}</div>` : ''}
+      ${c.draft ? '<p class="small muted" style="margin:12px 4px 0">Proposition à partir de ton record : ajuste-la avec ton coach.</p>' : ''}
+      <button class="btn" style="margin-top:16px;width:100%" data-capedit>${c.draft ? 'Valider mon objectif' : 'Modifier mon cap'}</button>`; }});
 }
 const fmtLong = k => new Date(k + 'T12:00:00').toLocaleDateString('fr-FR', {day: 'numeric', month: 'long', year: 'numeric'});
 // L'éditeur : le rêve, le résultat, le chrono, les jalons, les moyens.
@@ -15011,15 +15027,16 @@ document.addEventListener('input', e => { const t = e.target; if (!CAPED) return
 document.addEventListener('change', e => { const t = e.target; if (!CAPED || !t.dataset?.capp) return; const k = t.dataset.capp;
   CAPED.proc = t.checked ? [...(CAPED.proc || []), {k, n: CAP_PROC[k][2]}] : (CAPED.proc || []).filter(x => x.k !== k); paneRender(); });
 document.addEventListener('click', async e => { let b; const at = q => e.target.closest?.(q);
+  if (at('[data-capview]')) { capView(); return; }
   if (at('[data-capedit]')) { capEdit(); return; }
-  if ((b = at('[data-capfree]'))) { const c = capGet(), i = +b.dataset.capfree, mon = monday(TODAY); c.free = (c.free || []).map((x, j) => j === i ? {...x, wk: x.wk === mon ? null : mon} : x); await capSave(c); renderMod(true); oneHap?.(8); return; }
+  if ((b = at('[data-capfree]'))) { const c = capGet(), i = +b.dataset.capfree, mon = monday(TODAY); c.free = (c.free || []).map((x, j) => j === i ? {...x, wk: x.wk === mon ? null : mon} : x); await capSave(c); renderMod(true); if (P.stack.length) paneRender(); oneHap?.(8); return; }
   if (!CAPED) return;
   if (at('[data-capsadd]')) { (CAPED.steps ||= []).push({d: addDays(TODAY, 28), t: ''}); paneRender(); return; }
   if ((b = at('[data-capsx]'))) { CAPED.steps.splice(+b.dataset.capsx, 1); paneRender(); return; }
   if ((b = at('[data-capsdone]'))) { const s = CAPED.steps[+b.dataset.capsdone]; s.done = !s.done; paneRender(); return; }
   if ((b = at('[data-capfx]'))) { CAPED.free.splice(+b.dataset.capfx, 1); paneRender(); return; }
   if (at('[data-capfadd]')) { const v = document.querySelector('[data-capfn]')?.value.trim(); if (!v) return; (CAPED.free ||= []).push({t: v}); paneRender(); return; }
-  if (at('[data-capsave]')) { if (!(CAPED.to > 0 && CAPED.date)) { toast('Mets un chrono et une date'); return; } await capSave(CAPED); closePane(); renderMod(true); toast('Ton cap est enregistré'); }
+  if (at('[data-capsave]')) { if (!(CAPED.to > 0 && CAPED.date)) { toast('Mets un chrono et une date'); return; } await capSave(CAPED); closePane(); renderMod(true); if (P.stack.length) paneRender(); toast('Ton cap est enregistré'); }
 });
 
 /* ---------- la page Idées : juste à droite de l'Accueil, au pouce ---------- */
@@ -15047,7 +15064,7 @@ function ideasPage() {
   const st = S.app?.ideas || {}, cats = [...new Set(IDEAS.map(x => x[1]))], c = capGet();
   const n = IDEAS.filter(x => st[x[0]] === 'yes').length;
   return `<div class="hm one-hm idp" id="hm"><header class="hm-head idp-h"><div class="sub">Pour aller plus vite, plus tôt</div><h1 class="hello">Idées</h1>
-    <p class="idp-p">Des idées sérieuses, chacune avec sa preuve. « Je teste » l'ajoute à tes moyens de la semaine dans Ton cap.${n ? ` Tu en testes ${n}.` : ''}</p></header>
+    <p class="idp-p">Des idées sérieuses, chacune avec sa preuve. « Je teste » l'ajoute à tes moyens de la semaine. Glisse vers la gauche pour revenir à l'accueil.${n ? ` Tu en testes ${n}.` : ''}</p></header>
     ${cats.map(k => `<div class="sec-label">${esc(k)}</div><div class="idl">${IDEAS.filter(x => x[1] === k).map(([id, , t, how, why]) => { const s = st[id];
       return `<article class="idc${s === 'yes' ? ' yes' : s === 'no' ? ' no' : ''}"><b>${esc(t)}</b><p>${esc(how)}</p><small>${esc(why)}</small><div class="idb"><button type="button" class="chip" data-idea="${id}|yes" aria-pressed="${s === 'yes'}">${s === 'yes' ? '✓ Je teste' : 'Je teste'}</button><button type="button" class="chip" data-idea="${id}|no" aria-pressed="${s === 'no'}">Pas pour moi</button></div></article>`; }).join('')}</div>`).join('')}
     <p class="small muted" style="margin:18px 4px 0">Cette page est un brouillon d'idées : ce que tu gardes passe dans l'appli, le reste disparaîtra.</p></div>`;
@@ -15065,11 +15082,12 @@ document.addEventListener('click', async e => { const b = e.target.closest?.('[d
 const vHomeMain = vHome;
 vHome = () => S.homeP === 'ideas' ? ideasPage() : vHomeMain().replace('</header>', '</header>' + capCard());
 const capXnb0 = window.TAB_XNB;
+// Idées est la page à gauche de l'accueil : le pouce glisse vers la droite pour l'ouvrir, vers la gauche pour revenir.
 window.TAB_XNB = (k, T, html) => {
   if (T.home) {
-    if (!S.homeP && k > 0) return {cls: '', box: $('#home-view'), html: () => ideasPage(), go: () => { S.homeP = 'ideas'; renderMod(true); window.scrollTo(0, 0); }};
-    if (S.homeP && k < 0) return {cls: '', box: $('#home-view'), html: () => vHomeMain().replace('</header>', '</header>' + capCard()), go: () => { S.homeP = null; renderMod(true); window.scrollTo(0, 0); }};
-    if (S.homeP && k > 0) { const n = capXnb0?.(k, T, html); return n ? {...n, go: () => { S.homeP = null; n.go(); }} : null; }
+    if (!S.homeP && k < 0) return {cls: '', box: $('#home-view'), html: () => ideasPage(), go: () => { S.homeP = 'ideas'; renderMod(true); window.scrollTo(0, 0); }};
+    if (S.homeP && k > 0) return {cls: '', box: $('#home-view'), html: () => vHomeMain().replace('</header>', '</header>' + capCard()), go: () => { S.homeP = null; renderMod(true); window.scrollTo(0, 0); }};
+    if (S.homeP) return null;
   }
   if (k < 0 && T.i === 0 && ONE.mods.includes(S.mod)) { S.homeP = null; }
   return capXnb0?.(k, T, html) ?? null;

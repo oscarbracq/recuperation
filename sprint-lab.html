@@ -10161,7 +10161,7 @@ const FSTOP = new Set(['de', 'du', 'des', 'd', 'la', 'le', 'les', 'l', 'a', 'au'
 // "poulets" finds "poulet": a final s or x is dropped from both sides.
 const fstem = x => x.length > 3 ? x.replace(/[sx]$/, '') : x;
 function foodSeek(list, q, n = 40) {
-  const w = fnorm(q).split(' ').filter(x => x && !FSTOP.has(x)).map(fstem); if (!w.length) return [];
+  let w = fnorm(q).split(' ').filter(x => x && !FSTOP.has(x)).map(fstem); if (!w.length) w = fnorm(q).split(' ').filter(Boolean); if (!w.length) return [];
   const out = [];
   for (const f of list) { const s = fnorm(f.n), ws = s.split(' ');
     if (!w.every(x => ws.some(y => fstem(y).startsWith(x) || y.startsWith(x)) || (x.length > 3 && s.includes(x)))) continue;
@@ -11265,7 +11265,7 @@ function addFood(meal, q0) {
     toast('Trouvé et rangé dans Mes aliments'); qtyPane(f, meal);
   };
   openPane({title: 'Ajouter un aliment', focus: '#ff-q', onClose: scanStop, scan: () => scanStart(onCode), render: () => `
-    <div style="margin-top:14px;display:flex;gap:8px"><input class="search" id="ff-q" type="search" placeholder="Rechercher : poulet, skyr, riz…" value="${esc(q)}" data-ffq aria-label="Rechercher un aliment" style="flex:1"><button type="button" class="chip" data-nfscan aria-label="Scanner un code-barres" style="flex:none">${SCANIC.replace('<svg', '<svg width="22" height="18"')}</button></div><div id="scan-box"></div>
+    <div style="margin-top:14px;display:flex;gap:8px"><input class="search" id="ff-q" type="search" placeholder="Rechercher : poulet, skyr, riz…" value="${esc(q)}" data-faddq aria-label="Rechercher un aliment" style="flex:1"><button type="button" class="chip" data-nfscan aria-label="Scanner un code-barres" style="flex:none">${SCANIC.replace('<svg', '<svg width="22" height="18"')}</button></div><div id="scan-box"></div>
     <div class="chipsx">${MEALS.map(([m]) => `<button class="chip" data-fmeal="${m}" aria-pressed="${m === meal}">${esc(mealLab(m))}</button>`).join('')}</div>
     <div class="fres" id="ff-res">${foodResults(q)}</div>`,
   setQ: v => { q = v; $('#ff-res').innerHTML = foodResults(q); onlineSearch(q); }, setMeal: m => { meal = m; paneRender(); }, meal: () => meal});
@@ -11501,7 +11501,7 @@ document.addEventListener('input', e => {
   else if (d.rlibq !== undefined) { RQ = t.value; document.querySelectorAll('.rlibl').forEach(x => { x.innerHTML = rlibCards(); }); }
   else if (d.pkq !== undefined) P.stack.at(-1).setQ(t.value);
   else if (d.mpq !== undefined) P.stack.at(-1).setQ(t.value);
-  else if (d.ffq !== undefined) P.stack.at(-1).setQ(t.value);
+  else if (d.faddq !== undefined) P.stack.at(-1).setQ(t.value);
   else if (d.fqty !== undefined) P.stack.at(-1).setG(t.value);
   else if (d.lcn !== undefined) { S.live.items[+d.lcn].cn = t.value; saveLive(); }
   else if (d.lp) { const [i, k] = d.lp.split('.'), it = S.live.items[+i], p = it.p || (it.p = runP(it.tg || {})); p[k] = t.value === '' ? null : +t.value.replace(',', '.'); saveLive(); }

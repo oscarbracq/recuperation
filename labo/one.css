@@ -794,3 +794,12 @@ html.one .btn.one-del.over{background:var(--bad);color:#fff;border-style:solid;t
 .idl{display:grid;gap:10px}.idc{padding:14px 16px;border-radius:18px;background:var(--card);border:1px solid color-mix(in srgb,var(--fg) 8%,transparent)}
 .idc b{display:block;font-size:1rem}.idc p{margin:6px 0 0;font-size:.86rem;line-height:1.4}.idc small{display:block;margin-top:6px;font-size:.74rem;color:var(--fg3);line-height:1.35}
 .idb{display:flex;gap:8px;margin-top:10px}.idc.yes{border-color:color-mix(in srgb,var(--fg) 45%,transparent)}.idc.no{opacity:.45}
+
+/* v179 : Ton cap épuré (le détail s'ouvre au toucher) */
+button.cap{display:block;width:100%;text-align:left;color:inherit;font:inherit;cursor:pointer}button.cap>span{display:block}
+.cap .cap-h{display:flex}.cap .cap-goal{display:block;margin-top:8px;font:800 2rem/1.05 var(--display);letter-spacing:-.03em;color:var(--fg)}
+.cap .cap-sub{margin-top:4px}.cap .cap-line{display:block}
+.cap-f2{display:flex!important;justify-content:space-between;gap:10px;margin-top:12px;font-size:.8rem;color:var(--fg2)}.cap-f2 b{color:var(--fg);font-weight:700;white-space:nowrap}
+.cap .cap-j{padding:4px 9px;font-size:.8rem}
+.cap-big{margin:14px 4px 0;display:flex;flex-direction:column;gap:4px}.cap-big b{font:800 2.2rem/1.05 var(--display);letter-spacing:-.03em}.cap-big span{font-size:.86rem;color:var(--fg2)}
+.pane .cap-dream{margin:14px 4px 0}.pane .cap-w{border:0;margin:0;padding:4px 4px 0}
