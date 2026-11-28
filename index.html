@@ -2524,6 +2524,22 @@ html.one #mod-home #hm-head{margin-top:clamp(64px,10vh,96px)}
 .mp-step{font-size:1.15rem;line-height:1.45;max-width:460px;min-height:6em;margin:10px 0}.mp-run .mn-prog{width:100%;max-width:460px}.mp-run .btn{min-width:200px}
 .mp-link{width:100%;margin-top:14px}
 .bln,.mp,.mn-in{max-width:760px;margin-left:auto;margin-right:auto}
+/* v195 */
+#one-top [data-hday]{position:relative}#one-top [data-hday].due::after{content:"";position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:#0a84ff;box-shadow:0 0 0 2px var(--bg,#000)}
+.one-hmen.due::after{background:#0a84ff!important}
+.bodyh{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:nowrap}.bodyh h1{margin:0;white-space:nowrap}
+.bodyh-m{flex:none;padding:8px 12px;border-radius:14px;border:1px solid color-mix(in srgb,var(--fg) 14%,transparent);background:var(--card);color:var(--fg);font:inherit;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap}
+@media (max-width:360px){.bodyh h1{font-size:1.6rem}}
+.nextc .nxl{display:block;width:100%;text-align:left;padding-top:10px}.nextc .nxl+.nxl{border-top:1px solid color-mix(in srgb,var(--fg) 8%,transparent);margin-top:10px}.nxd{display:block;font-size:.74rem;color:var(--fg2);font-weight:700;margin-bottom:2px}
+.anrel{margin-top:12px;border:1px solid color-mix(in srgb,var(--warn) 45%,transparent)}.anrel .eyebrow{color:var(--warn)}.anrel p{margin:6px 0 0;font-size:.9rem}.anrel ul{margin:4px 0 0;padding-left:18px}.anrel li{margin:4px 0;font-size:.88rem;line-height:1.35}
+.anrel-h{font-size:.72rem!important;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--fg2);margin-top:12px!important}
+.vcam{margin-top:6px}.vbox{position:relative}.vboxov{position:absolute;inset:0;z-index:5;cursor:crosshair;touch-action:none;background:rgba(0,0,0,.25)}
+.vboxov span{position:absolute;left:50%;top:10px;transform:translateX(-50%);padding:6px 12px;border-radius:99px;background:rgba(0,0,0,.7);color:#fff;font-size:.8rem;font-weight:700;pointer-events:none;white-space:nowrap}
+.vboxov i{position:absolute;display:none;border:2px solid #64D2FF;border-radius:6px;background:rgba(100,210,255,.12);pointer-events:none}
+canvas.vbar{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3}
+.vdel2{width:100%;margin-top:22px;color:var(--accent)!important}
+.anex{margin-top:14px}.anex h3{margin:6px 4px 0;font-size:1.05rem}.anex h3 small{color:var(--fg2);font-weight:600;font-size:.78rem}
+.spimg{display:block;max-width:100%;max-height:260px;margin:10px auto 0;border-radius:12px}.spmode button{font-size:.8rem}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -9210,9 +9226,10 @@ function tToday() {
   const sc = kd => { const q = planForK(TODAY, kd), lab = kd === 'gym' ? 'Musculation' : 'Sprint', b = dayPlan(TODAY).find(x => x.c === (kd === 'gym' ? 'muscu' : 'athle'));
     if (kindDone(TODAY, kd)) { const dn = logsOn(TODAY).filter(l => l.kind === kd), r = M(TODAY, kd === 'gym' ? 'gymRpe' : 'trackRpe');
       return `<article class="card donec"><span class="chiptag okt">${TICK.replace('<svg', '<svg width="12" height="12"')} Séance faite · aujourd'hui</span>${dn.length ? dn.map(l => `<button type="button" class="linkcard" data-tlog="${l.id}"><div class="bigname">${esc(l.name)}</div><p class="small muted">${l.min} min · RPE ${l.rpe}/10${l.tonnage ? ' · ' + fx(l.tonnage) + ' kg soulevés' : ''}${l.sprintM ? ' · ' + fx(l.sprintM) + ' m de sprint' : ''}</p></button>`).join('') : `<div class="bigname">${esc(q?.name || lab)}</div><p class="small muted">Notée dans ton journal${r ? ' · RPE ' + r + '/10' : ''}</p>`}</article>`; }
-    if (!q) { const nx = [...Array(60)].map((_, i) => addDays(TODAY, i + 1)).map(k => ({k, p: planForK(k, kd)})).find(x => x.p); if (!nx) return '';
-      const nb = dayPlan(nx.k).find(x => x.c === (kd === 'gym' ? 'muscu' : 'athle'));
-      return `<article class="card nextc"><span class="chiptag">Prochaine séance · ${esc(cap(fmtShort(nx.k)))}${nb ? ' · ' + tfr(nb.a) : ''}</span><button type="button" class="linkcard" data-tplanv="${nx.p.id}"${nx.p.n ? ` data-tn="${nx.p.n}"` : ''}><div class="bigname">${esc(nx.p.name)}</div><p class="small muted">${nx.p.title || nx.p.desc ? esc(nx.p.title || nx.p.desc) + ' · ' : ''}${estMin(nx.p)} min</p></button></article>`; }
+    if (!q) { const NX = [...Array(60)].map((_, i) => addDays(TODAY, i + 1)).map(k => ({k, p: planForK(k, kd)})).filter(x => x.p).slice(0, 2); if (!NX.length) return '';
+      // Les 2 prochaines séances de ce type, toujours visibles, même les jours sans séance.
+      return `<article class="card nextc"><span class="chiptag">${NX.length > 1 ? 'Prochaines séances' : 'Prochaine séance'} · ${lab}</span>${NX.map(nx => { const nb = dayPlan(nx.k).find(x => x.c === (kd === 'gym' ? 'muscu' : 'athle'));
+        return `<button type="button" class="linkcard nxl" data-tplanv="${nx.p.id}"${nx.p.n ? ` data-tn="${nx.p.n}"` : ''}><small class="nxd">${esc(cap(fmtShort(nx.k)))}${nb ? ' · ' + tfr(nb.a) : ''}</small><div class="bigname">${esc(nx.p.name)}</div><p class="small muted">${nx.p.title || nx.p.desc ? esc(nx.p.title || nx.p.desc) + ' · ' : ''}${estMin(nx.p)} min</p></button>`; }).join('')}</article>`; }
     if (kindSkip(TODAY, kd)) return `<article class="card skipc"><span class="chiptag miss"><svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> ${lab} · pas faite aujourd'hui</span><div class="bigname">${esc(q.name)}</div>${q.title || q.desc ? `<p style="margin:2px 0 0;font-weight:600">${esc(q.title || q.desc)}</p>` : ''}
         <p class="small muted" style="margin-top:8px">Tu as choisi de ne pas la faire. Tu peux changer d'avis jusqu'à ce soir.</p><div style="margin-top:14px"><button class="btn" data-tunskip="${kd}">Finalement, je la fais</button></div></article>`;
     return `<article class="card"><span class="chiptag">Aujourd'hui · ${lab}${b ? ' · ' + tfr(b.a) : ''} · ${estMin(q)} min</span><button type="button" class="linkcard" data-tplanv="${q.id}"${q.n ? ` data-tn="${q.n}"` : ''}><div class="bigname">${esc(q.name)}</div>${q.title || q.desc ? `<p style="margin:2px 0 0;font-weight:600">${esc(q.title || q.desc)}</p>` : ''}
@@ -15673,13 +15690,16 @@ const AN_SIDE = {G: {hip: 23, knee: 25, ank: 27, heel: 29, toe: 31, sh: 11, el: 
 // Entre les repères « début / fin » de la course : toutes les images (les mesures) ; en dehors : une image sur deux (l'affichage).
 const anBox = p => { let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9, n = 0; for (const q of p) if (q[2] > .3) { n++; x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); y0 = Math.min(y0, q[1]); y1 = Math.max(y1, q[1]); }
   return n < 6 ? null : {cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, h: y1 - y0, w: x1 - x0, foot: y1, n}; };
-function anaPick(C, W, H) {
+function anaPick(C, W, H, seedBox) {
   const B = C.map(L => L.map(p => ({p, b: anBox(p)})).filter(x => x.b)), n = B.length, out = Array(n).fill(null);
   // Le premier plan : grand et bas dans l'image ; on prend l'image où ce score est le plus haut comme point de départ.
   const fg = x => x.b.h / H + .5 * x.b.foot / H + .02 * x.b.n / 33;
-  let i0 = -1, best = -1; B.forEach((L, i) => L.forEach(x => { const s = fg(x); if (s > best) { best = s; i0 = i; } }));
-  if (i0 < 0) return out;
-  const seed = B[i0].reduce((a, x) => fg(x) > fg(a) ? x : a); out[i0] = seed.p;
+  let i0 = -1, best = -1, seed = null;
+  // Oscar a entouré la personne à analyser : on part d'elle (la plus grande part de son corps dans le cadre), image la plus proche.
+  if (seedBox) { const ov = x => { const b = x.b, ix = Math.max(0, Math.min(b.cx + b.w / 2, seedBox.x1) - Math.max(b.cx - b.w / 2, seedBox.x0)), iy = Math.max(0, Math.min(b.cy + b.h / 2, seedBox.y1) - Math.max(b.cy - b.h / 2, seedBox.y0)); return ix * iy / Math.max(1, b.w * b.h); };
+    for (let d = 0; d <= 20 && !seed; d++) for (const i of [seedBox.i - d, seedBox.i + d]) { if (i < 0 || i >= n || seed) continue; const c = B[i].map(x => [x, ov(x)]).filter(z => z[1] > .3).sort((a, b) => b[1] - a[1])[0]; if (c) { seed = c[0]; i0 = i; } } }
+  if (!seed) { B.forEach((L, i) => L.forEach(x => { const s = fg(x); if (s > best) { best = s; i0 = i; } })); if (i0 < 0) return out; seed = B[i0].reduce((a, x) => fg(x) > fg(a) ? x : a); }
+  out[i0] = seed.p;
   const run = dir => { let last = seed.b, vx = 0, vy = 0, gap = 0;
     for (let i = i0 + dir; i >= 0 && i < n; i += dir) {
       const px = last.cx + vx * (gap + 1), py = last.cy + vy * (gap + 1), lim = Math.max(.35 * last.h, 40) * (1 + gap * .5);
@@ -15711,7 +15731,8 @@ async function anaPose(id, onp) {
       w: r.worldLandmarks?.[j]?.map(q => [+q.x.toFixed(4), +q.y.toFixed(4), +q.z.toFixed(4)]) || null})));
     onp?.(k / Math.max(1, T.length - 1)); }
   URL.revokeObjectURL(url);
-  const C2 = C.map(L => L.map(x => x.p)), S1 = anaPick(C2, W, H), F = T.map((t, k) => { const j = S1[k] ? C2[k].indexOf(S1[k]) : -1; return {t, p: S1[k], w: j >= 0 ? C[k][j].w : null}; });
+  const bx = v.box, sb = bx ? {i: T.reduce((bi, t, k) => Math.abs(t - bx.t) < Math.abs(T[bi] - bx.t) ? k : bi, 0), x0: bx.x0 * W, y0: bx.y0 * H, x1: bx.x1 * W, y1: bx.y1 * H} : null;
+  const C2 = C.map(L => L.map(x => x.p)), S1 = anaPick(C2, W, H, sb), F = T.map((t, k) => { const j = S1[k] ? C2[k].indexOf(S1[k]) : -1; return {t, p: S1[k], w: j >= 0 ? C[k][j].w : null}; });
   const P = {W, H, step, step2, wa: a, wb: b, fps, F, v: 3}; await vdbPut('p:' + id, P); ANA.cache[id] = P; return P;
 }
 // Lisse chaque point sur 3 images (moins de tremblement) ; une image sans bonhomme reprend ses voisines.
@@ -15886,7 +15907,9 @@ function anaLift(v, P) {
     err: reps.length || ex === 'clean' ? '' : 'Aucune répétition trouvée : filme tout le corps, de côté, caméra fixe.'};
 }
 // Les mesures ne lisent que les images du passage marqué (pas régulier) ; le reste sert à l'affichage du bonhomme.
-const anaCompute = (v, P) => { const Q = P.wa != null ? {...P, F: P.F.filter(f => f.t >= P.wa - 1e-6 && f.t <= P.wb + 1e-6)} : P; return vKind(v) === 'lift' ? anaLift(v, Q) : anaRun(v, Q); };
+const anaCompute = (v, P) => { let Q = P.wa != null ? {...P, F: P.F.filter(f => f.t >= P.wa - 1e-6 && f.t <= P.wb + 1e-6)} : P;
+  const U = typeof anaUsable === 'function' ? anaUsable(v, Q) : null; if (U) Q = U.Q;
+  const A = vKind(v) === 'lift' ? anaLift(v, Q) : anaRun(v, Q); return typeof anaRely === 'function' ? anaRely(v, Q, A, U) : A; };
 
 /* ---------- 3) profil : points forts · à affiner · points faibles, sur toutes les vidéos ---------- */
 // Un point n'est fort ou faible que s'il revient : on prend ses 5 dernières mesures (bien = 2, à affiner = 1, à corriger = 0).
@@ -15895,7 +15918,7 @@ const LV_SC = {good: 2, warn: 1, bad: 0}, LV_N = {good: 'Point fort', warn: 'À 
 const LIFT_CUE = {depth: 'Hanches sous les genoux', par: 'Poitrine et tibias parallèles', shin: 'Genoux vers l\'avant', heel: 'Talons vissés au sol', valgus: 'Genoux au-dessus des pieds', hipfirst: 'Poitrine et hanches ensemble', knee: 'Genoux souples et fixes', ext: 'Grandis-toi jusqu\'au bout', exth: 'Hanches à fond devant', catch: 'Reçois bas et solide', vloss: 'Chaque répétition à fond', desc: 'Descends vite, repars vite', trunk: 'Dos plat, poitrine fière', fly: 'Pousse le sol, vite'};
 const anCue = (kind, k, axe) => kind === 'run' ? (k === 'sym' ? 'Mêmes appuis à gauche et à droite' : AXE_CUE[axe || K_AXE[k]] || 'Vite et relâché') : LIFT_CUE[k] || 'Vite et propre';
 function anaAgg(kind) {
-  const L = vids().filter(v => vKind(v) === kind && (v.an?.rows?.length || v.coach)).sort((a, b) => (a.taken || Date.parse(a.d) || 0) - (b.taken || Date.parse(b.d) || 0));
+  const L = vids().filter(v => vKind(v) === kind && ((v.an?.rows?.length && v.an?.rel?.ok !== false) || v.coach)).sort((a, b) => (a.taken || Date.parse(a.d) || 0) - (b.taken || Date.parse(b.d) || 0));
   const exN = id => LIFT_EX.find(x => x[0] === id)?.[1] || '', M = new Map();
   const add = (key, name, it) => { if (!M.has(key)) M.set(key, {key, n: name, k: it.k, axe: it.axe, ex: it.ex, seq: []}); const o = M.get(key); o.seq.push(it); if (it.axe) o.axe = it.axe; };
   for (const v of L) { const acc = ['depart', 'acc'].includes(v.an?.ph);
@@ -17011,6 +17034,222 @@ document.addEventListener('input', e => { const t = e.target;
 // Le bilan mental mène au préparateur : un bouton sous l'introduction et sous la conclusion.
 const mnRender0 = mnRender;
 mnRender = function () { const h = mnRender0(); return MN.on ? h : h + '<button type="button" class="btn ghost mp-link" data-mpopen>Ouvrir le préparateur mental</button>'; };
+
+/* ================= Vidéos · v195 : l'angle, la personne entourée, la fiabilité, la barre et la force =================
+   · Avant l'analyse : Profil, Face ou Téléphone libre (la vidéo reste rangée au même endroit), et « Entourer la personne » :
+     Oscar trace un cadre sur lui ; le bonhomme part de là et le suit (plus jamais un autre athlète).
+   · Seule la partie exploitable est mesurée : images où le corps est entier et bien vu. Si elle est trop courte ou trop
+     mauvaise, l'appli le dit (« Vidéo pas assez fiable ») avec les raisons et quoi changer, et n'ajoute aucun point.
+   · Haltérophilie (de profil) : le trajet de la barre (milieu des poignets) et la flèche de la force (direction de la
+     force sur la barre, longueur = intensité, du vert au rouge), à montrer ou cacher. F = m (a + g).
+   · Musculation : les points forts et faibles sont rangés exercice par exercice (un curl n'est pas un mollet). */
+const OLY = ['clean', 'snatch', 'jerk', 'pull'];
+LIFT_EX.splice(LIFT_EX.findIndex(x => x[0] === 'clean'), 1, ['clean', 'Épaulé'], ['snatch', 'Arraché'], ['jerk', 'Jeté'], ['pull', 'Tirage (haltérophilie)']);
+const CAM = [['side', 'Profil'], ['front', 'Face'], ['free', 'Téléphone libre']];
+const vCam = v => v.cam || (v.view === 'front' ? 'front' : 'side');
+
+/* ---------- 1) la partie exploitable et la fiabilité ---------- */
+const AN_KEYJ = [11, 12, 23, 24, 25, 26, 27, 28];
+function anaUsable(v, Q) {
+  const n = Q.F.length; if (!n) return null;
+  const good = Q.F.map(f => { const p = f.p; if (!p) return false; const vis = AN_KEYJ.reduce((a, j) => a + (p[j]?.[2] || 0), 0) / AN_KEYJ.length;
+    let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; for (const j of AN_KEYJ) { x0 = Math.min(x0, p[j][0]); x1 = Math.max(x1, p[j][0]); y0 = Math.min(y0, p[j][1]); y1 = Math.max(y1, p[j][1]); }
+    const inside = x0 > .01 * Q.W && x1 < .99 * Q.W && y1 < .995 * Q.H; return vis >= .5 && inside; });
+  // Les morceaux exploitables (on bouche les trous d'une ou deux images) ; on garde ceux d'au moins 0,4 s.
+  for (let i = 1; i < n - 1; i++) if (!good[i] && good[i - 1] && (good[i + 1] || good[i + 2])) good[i] = true;
+  const segs = []; for (let i = 0; i < n; i++) if (good[i]) { let j = i; while (j + 1 < n && good[j + 1]) j++; segs.push([i, j]); i = j; }
+  const dt = Q.step, keep = segs.filter(([a, b]) => (b - a + 1) * dt >= .4), useT = keep.reduce((s, [a, b]) => s + (b - a + 1) * dt, 0), allT = n * dt;
+  const F = Q.F.map((f, i) => keep.some(([a, b]) => i >= a && i <= b) ? f : {...f, p: null, w: null});
+  return {Q: {...Q, F}, useT, allT, segs: keep.length, vis: Q.F.filter(f => f.p).length / n};
+}
+function anaRely(v, Q, A, U) {
+  const why = [], tips = [], cam = vCam(v), kind = vKind(v), slow = +v.slow || 1, fps = (+v.fps || 30) * 1;
+  if (U) { if (U.useT / slow < (kind === 'run' ? .6 : 1)) { why.push(`le corps n'est entier et bien visible que ${fx(U.useT / slow, 1)} s sur ${fx(U.allT / slow, 1)} s`); tips.push('tout le corps dans l\'image du début à la fin, de la tête aux pieds'); }
+    if (U.vis < .5) { why.push('la personne n\'est trouvée que sur ' + Math.round(U.vis * 100) + ' % des images'); tips.push('une seule personne bien visible, ou entoure-toi avant l\'analyse'); } }
+  if (kind === 'run' && cam === 'front') { why.push('de face, les angles de course (tronc, tibia, pied sous la hanche) ne se mesurent pas'); tips.push('filme de profil, à 5 à 10 m'); }
+  if (kind === 'run' && A.kind === 'run' && (A.steps?.length || 0) < 3) { why.push(`${A.steps?.length || 0} appui${(A.steps?.length || 0) > 1 ? 's' : ''} exploitable${(A.steps?.length || 0) > 1 ? 's' : ''} seulement (il en faut 3)`); tips.push('filme plus de foulées, ou plus loin pour en voir davantage'); }
+  if (kind === 'run' && fps / slow < 50 && fps < 100) tips.push('filme au ralenti (120 ou 240 images/s) pour des temps de contact justes');
+  if (A.view?.q === 'biais') { why.push('filmé de biais (épaules vues de trois quarts) : les angles sont faussés'); tips.push('caméra perpendiculaire à la course, à hauteur de hanche'); }
+  if (cam === 'free') tips.push('téléphone libre : les distances (longueur de pas, vitesse) ne sont pas mesurées, seuls les angles et les temps le sont');
+  if (A.err && !A.rows?.length) why.push(A.err.replace(/\.$/, ''));
+  const ok = !why.length || (why.length === 1 && A.view?.q === 'biais' && (A.rows || []).length >= 4 && cam !== 'front');
+  const out = {...A, rel: {ok, why, tips: [...new Set(tips)], useT: U ? +(U.useT / slow).toFixed(2) : null, allT: U ? +(U.allT / slow).toFixed(2) : null}};
+  if (cam === 'free' && out.key) { out.key = {...out.key, len: null, spd: null}; }
+  if (cam === 'free') out.view = {...(out.view || {}), q: 'biais'}; // téléphone libre : chaque angle passe en « à vérifier »
+  return out;
+}
+const anaResHtml0 = anaResHtml;
+anaResHtml = function (v) {
+  const R = v.an?.rel, cut = R && R.useT != null && R.allT && R.useT < R.allT - .2 ? `<p class="small muted" data-tip="1" style="margin:8px 4px 0">Mesuré sur la partie exploitable seulement : ${fx(R.useT, 1)} s sur ${fx(R.allT, 1)} s.</p>` : '';
+  if (R && !R.ok) return `<div class="card anrel"><span class="eyebrow">Vidéo pas assez fiable</span><p>Aucun point fort ni faible n'est ajouté avec cette vidéo.</p>
+    <p class="anrel-h">Pourquoi</p><ul>${R.why.map(x => `<li>${esc(x.charAt(0).toUpperCase() + x.slice(1))}.</li>`).join('')}</ul>
+    ${R.tips.length ? `<p class="anrel-h">La prochaine fois</p><ul>${R.tips.map(x => `<li>${esc(x.charAt(0).toUpperCase() + x.slice(1))}.</li>`).join('')}</ul>` : ''}</div>`;
+  const h = anaResHtml0(v); return R?.tips?.length ? h + cut + `<p class="small muted" data-tip="1" style="margin:6px 4px 0">Pour plus de précision : ${esc(R.tips.join(' ; '))}.</p>` : h + cut;
+};
+
+/* ---------- 2) l'angle, entourer la personne, supprimer ---------- */
+const anaSection0 = anaSection;
+anaSection = function (v) {
+  const cam = vCam(v), lift = vKind(v) === 'lift', oly = lift && OLY.includes(v.ex);
+  let h = anaSection0(v);
+  // L'ancien choix « Filmé de côté / de face » de la musculation est remplacé par l'angle commun.
+  h = h.replace(/<label class="cap-f">Filmé<select[\s\S]*?<\/select><\/label>/, '');
+  const head = `<div class="sec-label">Comment tu as filmé</div><div class="seg vcam" role="group">${CAM.map(([k, l]) => `<button type="button" data-vcam="${k}" aria-pressed="${cam === k}">${l}</button>`).join('')}</div>
+    <div class="btnrow two" style="margin-top:10px"><button type="button" class="btn ghost" data-vbox>${v.box ? 'Personne entourée ✓' : 'Entourer la personne'}</button>${v.box ? '<button type="button" class="btn ghost" data-vboxx>Enlever le cadre</button>' : '<span></span>'}</div>
+    <p class="small muted" data-tip="1" style="margin:6px 4px 0">${v.box ? 'Le bonhomme part de la personne entourée et la suit jusqu\'au bout.' : 'Mets la vidéo sur une image où tu es bien visible, touche « Entourer la personne » et trace un cadre sur toi.'}</p>`;
+  const bar = lift ? `<div class="sec-label">Sur la vidéo</div><div class="btnrow two"><button type="button" class="btn ghost" data-vbar="path" aria-pressed="${!!ANA.showPath}">${ANA.showPath ? '✓ ' : ''}Trajet de la barre</button><button type="button" class="btn ghost" data-vbar="force" aria-pressed="${!!ANA.showForce}">${ANA.showForce ? '✓ ' : ''}Force</button></div>
+    ${cam !== 'side' ? '<p class="small muted" data-tip="1" style="margin:6px 4px 0">La barre et la force ne se lisent que de profil.</p>' : ''}<label class="cap-f" style="margin-top:8px">Charge sur la barre (kg)<input class="mini-in" inputmode="decimal" data-vkg value="${esc(v.kg ?? '')}" placeholder="Ex. 80 : la force s'affiche en newtons"></label>` : '';
+  return h.replace('<div class="sec-label">Analyse du corps</div>', '<div class="sec-label">Analyse du corps</div>' + head) .replace('<div data-anares>', bar + '<div data-anares>')
+    + `<button type="button" class="btn ghost vdel2" data-vdel>Supprimer cette vidéo</button><p class="small muted" data-tip="1" style="margin:4px 4px 0">Ses points forts et faibles disparaissent avec elle.</p>`;
+};
+// Le cadre : on le trace au doigt sur l'image affichée (coordonnées rangées en fraction de la vidéo).
+function vBoxMode(on) { const box = document.querySelector('.vbox'), el = box?.querySelector('[data-vvid]'); if (!box || !el) return; el.pause?.();
+  let ov = box.querySelector('.vboxov'); if (!on) { ov?.remove(); return; }
+  if (!ov) { ov = document.createElement('div'); ov.className = 'vboxov'; ov.innerHTML = '<i></i><span>Trace un cadre autour de toi</span>'; box.appendChild(ov); }
+  const r0 = () => { const a = el.videoWidth / el.videoHeight, ew = el.clientWidth, eh = el.clientHeight, w = ew / eh > a ? eh * a : ew, h = ew / eh > a ? eh : ew / a; return {ox: el.offsetLeft + (ew - w) / 2, oy: el.offsetTop + (eh - h) / 2, w, h}; };
+  let st = null; const rect = ov.querySelector('i'), pos = e => { const b = box.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
+  ov.onpointerdown = e => { e.preventDefault(); ov.setPointerCapture(e.pointerId); st = pos(e); rect.style.cssText = `left:${st[0]}px;top:${st[1]}px;width:0;height:0;display:block`; };
+  ov.onpointermove = e => { if (!st) return; const p = pos(e); rect.style.left = Math.min(st[0], p[0]) + 'px'; rect.style.top = Math.min(st[1], p[1]) + 'px'; rect.style.width = Math.abs(p[0] - st[0]) + 'px'; rect.style.height = Math.abs(p[1] - st[1]) + 'px'; };
+  ov.onpointerup = e => { if (!st) return; const p = pos(e), g = r0(), c = (x, a, l) => Math.max(0, Math.min(1, (x - a) / l));
+    const b = {t: el.currentTime, x0: c(Math.min(st[0], p[0]), g.ox, g.w), x1: c(Math.max(st[0], p[0]), g.ox, g.w), y0: c(Math.min(st[1], p[1]), g.oy, g.h), y1: c(Math.max(st[1], p[1]), g.oy, g.h)}; st = null;
+    if (b.x1 - b.x0 < .03 || b.y1 - b.y0 < .05) { toast('Cadre trop petit : recommence'); rect.style.display = 'none'; return; }
+    vidUp(VP.id, x => ({...x, box: b}), true); vBoxMode(false); toast('Personne choisie : lance l\'analyse'); const y = $('#pane-scroll')?.scrollTop; paneRender(); if (y != null) $('#pane-scroll').scrollTop = y; };
+}
+document.addEventListener('click', e => { if (!VP.id) return; let b; const at = q => (b = e.target.closest?.(q));
+  if (at('[data-vcam]')) { const c = b.dataset.vcam; vidUp(VP.id, x => ({...x, cam: c, view: c === 'front' ? 'front' : 'side'}), true); document.querySelectorAll('[data-vcam]').forEach(x => x.setAttribute('aria-pressed', x === b)); return; }
+  if (at('[data-vbox]')) { vBoxMode(true); document.querySelector('.vbox')?.scrollIntoView({behavior: 'smooth', block: 'center'}); return; }
+  if (at('[data-vboxx]')) { vidUp(VP.id, x => { const y = {...x}; delete y.box; return y; }, true); const s = $('#pane-scroll')?.scrollTop; paneRender(); if (s != null) $('#pane-scroll').scrollTop = s; return; }
+  if (at('[data-vbar]')) { const k = b.dataset.vbar; if (k === 'path') ANA.showPath = !ANA.showPath; else ANA.showForce = !ANA.showForce; b.setAttribute('aria-pressed', k === 'path' ? !!ANA.showPath : !!ANA.showForce); b.textContent = (b.getAttribute('aria-pressed') === 'true' ? '✓ ' : '') + (k === 'path' ? 'Trajet de la barre' : 'Force'); ANA.redraw?.(); return; }
+});
+document.addEventListener('input', e => { if (!VP.id || !e.target.matches?.('[data-vkg]')) return; const k = parseFloat(String(e.target.value).replace(',', '.')); vidUp(VP.id, x => ({...x, kg: k > 0 ? k : null})); ANA.redraw?.(); });
+
+/* ---------- 3) haltérophilie : la barre, sa vitesse, la force ---------- */
+// La barre = le milieu des poignets (elle est dans les mains) ; lissée sur 5 images. Échelle : la jambe ≈ 0,49 × la taille.
+function anaBar(P, slow = 1) {
+  if (!P?.F?.length) return null; const F = P.F.filter(f => f.p), pts = F.map(f => { const a = f.p[15], b = f.p[16], va = a[2] > .3, vb = b[2] > .3;
+    return {t: f.t, x: va && vb ? (a[0] + b[0]) / 2 : va ? a[0] : b[0], y: va && vb ? (a[1] + b[1]) / 2 : va ? a[1] : b[1], leg: Math.max(anDist(f.p[23], f.p[27]), anDist(f.p[24], f.p[28]))}; });
+  if (pts.length < 6) return null;
+  const sm = pts.map((p, i) => { const L = pts.slice(Math.max(0, i - 2), i + 3); return {...p, x: L.reduce((a, q) => a + q.x, 0) / L.length, y: L.reduce((a, q) => a + q.y, 0) / L.length}; });
+  const ppm = anMed(pts.map(p => p.leg)) / (.49 * anH());
+  for (let i = 1; i < sm.length - 1; i++) { const a = sm[i - 1], b = sm[i + 1], dt = (b.t - a.t) / slow || 1e-3; sm[i].vx = (b.x - a.x) / dt / ppm; sm[i].vy = -(b.y - a.y) / dt / ppm; }
+  for (let i = 2; i < sm.length - 2; i++) { const a = sm[i - 1], b = sm[i + 1], dt = (b.t - a.t) / slow || 1e-3; if (a.vx == null || b.vx == null) continue; sm[i].ax = (b.vx - a.vx) / dt; sm[i].ay = (b.vy - a.vy) / dt; }
+  return {pts: sm, ppm};
+}
+const anaLift0 = anaLift;
+anaLift = function (v, P) {
+  const oly = OLY.includes(v.ex), A = anaLift0(oly && v.ex !== 'clean' ? {...v, ex: 'clean'} : v, P); if (!oly) return A;
+  const B = anaBar(P, +v.slow || 1); if (!B || vCam(v) !== 'side') return {...A, ex: v.ex};
+  const L = B.pts, x0 = L[0].x, dev = Math.max(...L.map(p => Math.abs(p.x - x0))) / B.ppm * 100, vmax = Math.max(...L.map(p => p.vy || 0)), hmax = (L[0].y - Math.min(...L.map(p => p.y))) / B.ppm;
+  const R = [...(A.rows || [])];
+  R.push(anRow('bardev', 'Trajet de la barre', dev, `s'écarte de ${Math.round(dev)} cm de sa ligne de départ`, anLv(dev, 10, 16), 'proche de la verticale : 10 cm d\'écart au plus'));
+  if (vmax > 0) R.push(anRow('vbar', 'Vitesse max de la barre', vmax, fx(vmax, 2) + ' m/s', v.ex === 'snatch' ? anLv(vmax, 1.8, 1.5, true) : anLv(vmax, 1.5, 1.25, true), v.ex === 'snatch' ? '1,8 à 2,1 m/s à l\'arraché' : '1,5 à 1,8 m/s à l\'épaulé'));
+  if (hmax > 0) R.push(anRow('hbar', 'Hauteur de la barre au plus haut', hmax, fx(hmax * 100, 0) + ' cm de montée', 'good', 'selon ta taille et le mouvement'));
+  return {...A, ex: v.ex, rows: R, err: R.length ? '' : A.err};
+};
+Object.assign(AN_IMP, {bardev: 7, vbar: 8, hbar: 3});
+// Le dessin : par-dessus le bonhomme, le trajet (toute la vidéo) et la flèche de force à l'image affichée.
+const anaBind0 = anaBind;
+anaBind = function (el) {
+  anaBind0(el); const box = el.closest('.vbox'); if (!box) return; let cv = box.querySelector('canvas.vbar'); if (!cv) { cv = document.createElement('canvas'); cv.className = 'vbar'; box.appendChild(cv); }
+  const id = VP.id, draw = async () => { if (VP.id !== id) return; const v = vids().find(x => x.id === id), r = box.getBoundingClientRect(), d = devicePixelRatio || 1; cv.width = r.width * d; cv.height = r.height * d;
+    const g = cv.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0); g.clearRect(0, 0, r.width, r.height); if (!v || vKind(v) !== 'lift' || !(ANA.showPath || ANA.showForce) || !el.videoWidth) return;
+    const P = ANA.cache[id] || (ANA.cache[id] = await vdbGet('p:' + id)); if (!P) return; const B = ANA.bar?.id === id && ANA.bar.P === P ? ANA.bar.B : (ANA.bar = {id, P, B: anaBar(P, +v.slow || 1)}).B; if (!B) return;
+    const a = el.videoWidth / el.videoHeight, ew = el.clientWidth, eh = el.clientHeight, w = ew / eh > a ? eh * a : ew, h = ew / eh > a ? eh : ew / a, ox = el.offsetLeft + (ew - w) / 2, oy = el.offsetTop + (eh - h) / 2, X = z => ox + z / P.W * w, Y = z => oy + z / P.H * h;
+    const L = B.pts, t = el.currentTime; let cur = L[0]; for (const p of L) if (Math.abs(p.t - t) < Math.abs(cur.t - t)) cur = p;
+    if (ANA.showPath) { g.lineWidth = 3; g.lineJoin = 'round'; g.strokeStyle = 'rgba(100,210,255,.35)'; g.beginPath(); L.forEach((p, i) => i ? g.lineTo(X(p.x), Y(p.y)) : g.moveTo(X(p.x), Y(p.y))); g.stroke();
+      g.strokeStyle = '#64D2FF'; g.beginPath(); L.filter(p => p.t <= t).forEach((p, i) => i ? g.lineTo(X(p.x), Y(p.y)) : g.moveTo(X(p.x), Y(p.y))); g.stroke();
+      g.fillStyle = '#fff'; g.beginPath(); g.arc(X(cur.x), Y(cur.y), 5, 0, 7); g.fill(); }
+    if (ANA.showForce && cur.ax != null && Math.abs(cur.t - t) < .2) {
+      const fx0 = cur.ax, fy0 = cur.ay + 9.81, mag = Math.hypot(fx0, fy0) / 9.81, k = Math.max(0, Math.min(1, (mag - .6) / 1.8)), len = Math.min(160, 26 + 52 * mag), ang = Math.atan2(-fy0, fx0);
+      const col = `hsl(${Math.round(120 - 120 * k)},90%,55%)`, x1 = X(cur.x), y1 = Y(cur.y), x2 = x1 + Math.cos(ang) * len, y2 = y1 + Math.sin(ang) * len;
+      g.strokeStyle = col; g.fillStyle = col; g.lineWidth = 5; g.lineCap = 'round'; g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke();
+      g.beginPath(); g.moveTo(x2 + Math.cos(ang) * 10, y2 + Math.sin(ang) * 10); g.lineTo(x2 + Math.cos(ang + 2.4) * 14, y2 + Math.sin(ang + 2.4) * 14); g.lineTo(x2 + Math.cos(ang - 2.4) * 14, y2 + Math.sin(ang - 2.4) * 14); g.closePath(); g.fill();
+      g.font = '700 13px system-ui'; g.fillStyle = '#fff'; g.fillText(v.kg ? `${Math.round(v.kg * mag * 9.81)} N` : `${fx(mag, 1)} × le poids de la barre`, x2 + 12, y2); }
+  };
+  const ld = ANA.redraw; ANA.redraw = () => { ld?.(); draw(); };
+  el.addEventListener('seeked', draw); el.addEventListener('loadeddata', draw); el.addEventListener('timeupdate', draw);
+  el.addEventListener('play', () => { const loop = () => { if (el.paused || VP.id !== id) return; draw(); requestAnimationFrame(loop); }; loop(); });
+  setTimeout(draw, 350);
+};
+
+/* ---------- 4) musculation : un bloc de points forts et faibles par exercice ---------- */
+const anaProfileHtml0 = anaProfileHtml;
+anaProfileHtml = function (kind) {
+  if (kind !== 'lift') return anaProfileHtml0(kind);
+  const {L, P} = anaAgg('lift'), n = L.filter(v => v.an || v.coach).length;
+  if (!n) return anaProfileHtml0(kind);
+  const exN = id => LIFT_EX.find(x => x[0] === id)?.[1] || 'Autre', w = o => anImp(o) * Math.min(o.cnt, 5) * (o.lvl === 'good' ? o.sc : 2 - o.sc);
+  const item = (o, i) => `<button type="button" class="anpi" data-vidplay="${esc(o.vid)}">${i != null ? `<em class="annum">${i + 1}</em>` : ''}<b>${esc(o.n.replace(/^[^·]*·\s*/, ''))}</b><small>${esc(o.txt)} · vu ${o.cnt} fois</small>${o.sure ? '' : anPill}</button>`;
+  const exs = [...new Set(P.map(o => o.ex || 'squat'))];
+  return `<div id="anaprof" class="sec-label" style="margin-top:22px">Mon profil · ${n} vidéo${n > 1 ? 's' : ''} analysée${n > 1 ? 's' : ''}</div>
+    ${exs.map(ex => { const S2 = P.filter(o => (o.ex || 'squat') === ex && o.lvl !== 'warn').sort((a, b) => w(b) - w(a)), F = S2.filter(o => o.sure && o.lvl === 'good'), B = S2.filter(o => o.sure && o.lvl === 'bad'), U = S2.filter(o => !o.sure);
+      const nv = L.filter(v => (v.ex || 'squat') === ex).length;
+      return `<div class="anex"><h3>${esc(exN(ex))} <small>${nv} vidéo${nv > 1 ? 's' : ''}</small></h3><div class="an2"><div class="an2b"><span class="an3t">Points forts · ${F.length}</span>${F.map(item).join('') || '<p class="muted">Rien de sûr pour l\'instant</p>'}</div><div class="an2b"><span class="an3t">Points faibles · ${B.length}</span>${B.map(item).join('') || '<p class="muted">Rien de sûr pour l\'instant</p>'}</div></div>
+        ${U.length ? `<div class="an2u"><span class="an3t">À vérifier</span>${U.map(o => item(o)).join('')}</div>` : ''}</div>`; }).join('')}
+    <p class="small muted" data-tip="1" style="margin:8px 4px 0">Chaque exercice a ses propres points : ils ne se mélangent pas. Un point devient sûr quand il revient sur 2 vidéos.</p>`;
+};
+
+/* ================= v195 : séances de sprint remises, Mon mental, point du questionnaire, séances du coach en image ================= */
+
+// 1) Les séances de sprint du coach (athle-AAAA-MM-JJ) n'étaient plus posées sur leurs jours : on les remet, une seule fois,
+//    sur le créneau du soir (« jour|t »), sans rien écraser de ce qui est déjà calé.
+(function mig195() {
+  const t = setInterval(async () => {
+    if (!S.app?.updatedAt || !S.tset?.updatedAt || !S.plans || !Object.keys(S.plans).length || typeof saveTset !== 'function') return;
+    clearInterval(t); if (S.app.mig195) return;
+    const dated = {...(S.tset.dated || {})}; let n = 0;
+    for (const p of Object.values(S.plans)) { const m = /^athle-(\d{4}-\d\d-\d\d)$/.exec(p.id || ''); if (!m || p.deleted || p.kind !== 'track' || m[1] < TODAY) continue;
+      const k = m[1]; if (dated[k + '|t'] || planOf(dated[k])?.kind === 'track') continue; dated[k + '|t'] = p.id; n++; }
+    try { if (n) await saveTset({dated}); S.app = {...S.app, mig195: true}; await dbSet('settings/app', {...S.app, updatedAt: new Date().toISOString()}); if (n) toast(`${n} séances de sprint remises dans le planning`); } catch (e) { /* on réessaiera */ }
+  }, 1500);
+})();
+
+// 2) Training · Mon corps : « Mon corps » reste au centre, « Mon mental » à côté, dans un bloc qui ouvre le préparateur mental.
+const tBody195 = tBody;
+tBody = function () { return tBody195().replace('<h1>Mon corps</h1>', '<div class="bodyh"><h1>Mon corps</h1><button type="button" class="bodyh-m" data-mpopen>Mon mental <span aria-hidden="true">›</span></button></div>'); };
+
+// 3) Le petit point bleu sur « + » tant que le questionnaire du moment n'est pas rempli (matin, puis soir à partir de 18 h).
+function qDot() { const b = document.querySelector('#one-top [data-hday]'); if (!b || !S.manual) return; const h = new Date().getHours();
+  const due = !M(TODAY, 'mornAt') && h >= 5 || h >= 18 && !M(TODAY, 'closed'); b.classList.toggle('due', !!due); }
+setInterval(qDot, 30e3); new MutationObserver(() => { clearTimeout(qDot.t); qDot.t = setTimeout(qDot, 300); }).observe(document.body, {childList: true});
+document.addEventListener('visibilitychange', () => { if (!document.hidden) qDot(); });
+
+// 4) Les séances du coach envoyées en image (WhatsApp, capture, PDF) : Claude les recopie telles quelles, avec ses
+//    conseils, et ajoute en haut de chaque séance UNE phrase pour travailler un défaut d'Oscar. Sur téléphone aussi.
+sprintChip = () => `<button type="button" class="seachip coachchip" data-coachsp aria-label="Coach sprint : créer des séances de piste"><span>Coach</span><b>Sprint</b></button>`;
+const tSes195 = tSessions;
+tSessions = () => tSes195().replace('data-tnew>+ Créer une séance</button>', 'data-tnew>+ Créer une séance</button><button class="btn ghost" style="margin-top:8px;width:100%" data-spimg>Séances de mon coach (image)</button>');
+const spPrompt0 = spPrompt;
+spPrompt = function () {
+  if (!CSP.img) return spPrompt0();
+  return `Utilise le skill « coach-sprint ». L'image jointe (ou le fichier) contient les séances de piste que mon coach de club m'a envoyées.
+1. RECOPIE-LES EXACTEMENT : mêmes dates, même contenu (distances, répétitions, récupérations, intensités), mêmes conseils du coach. N'invente rien, ne change rien. Si une date manque, déduis-la du jour de la semaine et du mois ; si un élément est illisible, dis-le.
+2. Pour CHAQUE séance, ajoute en haut une seule phrase (« cue », 2 à 10 mots) qui va m'aider à corriger un de mes défauts, choisie selon le contenu de la séance (départs → défaut de départ, vitesse → contact ou fréquence, lactique → relâchement).
+
+Ce que l'appli sait de moi :
+${spContext()}
+
+Réponds d'abord par un tableau (date, séance du coach, ma phrase), puis TERMINE par un seul bloc \`\`\`json, de la même forme que d'habitude :
+{"tnr":"plan","kind":"track","sessions":[{"date":"AAAA-MM-JJ","name":"…","title":"…","cue":"…","axe":"…","desc":"le texte du coach","tech":"ses conseils","twMin":15,"items":[…]}]}
+Les exercices (« ex ») doivent être des identifiants de l'appli (voir le skill).`;
+};
+const spPane0 = spPane;
+spPane = function () {
+  spPane0(); const v = P.stack.at(-1); if (!v || v.title !== 'Coach sprint' || v.render._w) { paneRender(); return; } const r0 = v.render;
+  v.render = () => { let h = r0();
+    const sw = `<div class="seg spmode" role="group" style="margin-top:14px"><button type="button" data-spmode="0" aria-pressed="${!CSP.img}">Claude crée mes séances</button><button type="button" data-spmode="1" aria-pressed="${!!CSP.img}">Séances de mon coach</button></div>`;
+    if (CSP.img) h = h.replace(/<div class="card"><span class="eyebrow">1 · Ce que tu veux<\/span>[\s\S]*?<\/div>\s*<div class="card" style="margin-top:12px"><span class="eyebrow">2 ·/, `<div class="card"><span class="eyebrow">1 · L'image de ton coach</span>
+        <label class="btn ghost" style="width:100%;margin-top:8px"><input type="file" accept="image/*,application/pdf" data-spfile hidden>${CSP.imgName ? '✓ ' + esc(CSP.imgName) : 'Ajouter la capture ou le fichier'}</label>
+        ${CSP.imgUrl ? `<img src="${CSP.imgUrl}" alt="" class="spimg">` : ''}<p class="small muted" data-tip="1" style="margin:8px 2px 0">Ensuite : « Demander à Claude » copie la demande ; dans Claude, colle-la ET joins la même image.</p></div>
+      <div class="card" style="margin-top:12px"><span class="eyebrow">2 ·`);
+    return sw + h; }; v.render._w = 1;
+  paneRender();
+};
+document.addEventListener('click', e => { let b;
+  if ((b = e.target.closest?.('[data-spimg]'))) { CSP.img = true; spPane(); return; }
+  if ((b = e.target.closest?.('[data-spmode]'))) { CSP.img = b.dataset.spmode === '1'; paneRender(); return; } });
+document.addEventListener('change', e => { const t = e.target; if (!t.matches?.('[data-spfile]') || !t.files?.[0]) return; const f = t.files[0];
+  if (CSP.imgUrl) URL.revokeObjectURL(CSP.imgUrl); CSP.imgName = f.name; CSP.imgUrl = /^image\//.test(f.type) ? URL.createObjectURL(f) : ''; CSP.over = true; paneRender(); });
 
 /* ================= Changement unique du 28 novembre 2026 (v193), fait par l'appli avec la connexion d'Oscar =================
    1) La prépa muscu à venir est retirée (il la refait au propre) : les séances de salle du Coach training du 30 nov. au

@@ -42,13 +42,16 @@ const AN_SIDE = {G: {hip: 23, knee: 25, ank: 27, heel: 29, toe: 31, sh: 11, el: 
 // Entre les repères « début / fin » de la course : toutes les images (les mesures) ; en dehors : une image sur deux (l'affichage).
 const anBox = p => { let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9, n = 0; for (const q of p) if (q[2] > .3) { n++; x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); y0 = Math.min(y0, q[1]); y1 = Math.max(y1, q[1]); }
   return n < 6 ? null : {cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, h: y1 - y0, w: x1 - x0, foot: y1, n}; };
-function anaPick(C, W, H) {
+function anaPick(C, W, H, seedBox) {
   const B = C.map(L => L.map(p => ({p, b: anBox(p)})).filter(x => x.b)), n = B.length, out = Array(n).fill(null);
   // Le premier plan : grand et bas dans l'image ; on prend l'image où ce score est le plus haut comme point de départ.
   const fg = x => x.b.h / H + .5 * x.b.foot / H + .02 * x.b.n / 33;
-  let i0 = -1, best = -1; B.forEach((L, i) => L.forEach(x => { const s = fg(x); if (s > best) { best = s; i0 = i; } }));
-  if (i0 < 0) return out;
-  const seed = B[i0].reduce((a, x) => fg(x) > fg(a) ? x : a); out[i0] = seed.p;
+  let i0 = -1, best = -1, seed = null;
+  // Oscar a entouré la personne à analyser : on part d'elle (la plus grande part de son corps dans le cadre), image la plus proche.
+  if (seedBox) { const ov = x => { const b = x.b, ix = Math.max(0, Math.min(b.cx + b.w / 2, seedBox.x1) - Math.max(b.cx - b.w / 2, seedBox.x0)), iy = Math.max(0, Math.min(b.cy + b.h / 2, seedBox.y1) - Math.max(b.cy - b.h / 2, seedBox.y0)); return ix * iy / Math.max(1, b.w * b.h); };
+    for (let d = 0; d <= 20 && !seed; d++) for (const i of [seedBox.i - d, seedBox.i + d]) { if (i < 0 || i >= n || seed) continue; const c = B[i].map(x => [x, ov(x)]).filter(z => z[1] > .3).sort((a, b) => b[1] - a[1])[0]; if (c) { seed = c[0]; i0 = i; } } }
+  if (!seed) { B.forEach((L, i) => L.forEach(x => { const s = fg(x); if (s > best) { best = s; i0 = i; } })); if (i0 < 0) return out; seed = B[i0].reduce((a, x) => fg(x) > fg(a) ? x : a); }
+  out[i0] = seed.p;
   const run = dir => { let last = seed.b, vx = 0, vy = 0, gap = 0;
     for (let i = i0 + dir; i >= 0 && i < n; i += dir) {
       const px = last.cx + vx * (gap + 1), py = last.cy + vy * (gap + 1), lim = Math.max(.35 * last.h, 40) * (1 + gap * .5);
@@ -80,7 +83,8 @@ async function anaPose(id, onp) {
       w: r.worldLandmarks?.[j]?.map(q => [+q.x.toFixed(4), +q.y.toFixed(4), +q.z.toFixed(4)]) || null})));
     onp?.(k / Math.max(1, T.length - 1)); }
   URL.revokeObjectURL(url);
-  const C2 = C.map(L => L.map(x => x.p)), S1 = anaPick(C2, W, H), F = T.map((t, k) => { const j = S1[k] ? C2[k].indexOf(S1[k]) : -1; return {t, p: S1[k], w: j >= 0 ? C[k][j].w : null}; });
+  const bx = v.box, sb = bx ? {i: T.reduce((bi, t, k) => Math.abs(t - bx.t) < Math.abs(T[bi] - bx.t) ? k : bi, 0), x0: bx.x0 * W, y0: bx.y0 * H, x1: bx.x1 * W, y1: bx.y1 * H} : null;
+  const C2 = C.map(L => L.map(x => x.p)), S1 = anaPick(C2, W, H, sb), F = T.map((t, k) => { const j = S1[k] ? C2[k].indexOf(S1[k]) : -1; return {t, p: S1[k], w: j >= 0 ? C[k][j].w : null}; });
   const P = {W, H, step, step2, wa: a, wb: b, fps, F, v: 3}; await vdbPut('p:' + id, P); ANA.cache[id] = P; return P;
 }
 // Lisse chaque point sur 3 images (moins de tremblement) ; une image sans bonhomme reprend ses voisines.
@@ -255,7 +259,9 @@ function anaLift(v, P) {
     err: reps.length || ex === 'clean' ? '' : 'Aucune répétition trouvée : filme tout le corps, de côté, caméra fixe.'};
 }
 // Les mesures ne lisent que les images du passage marqué (pas régulier) ; le reste sert à l'affichage du bonhomme.
-const anaCompute = (v, P) => { const Q = P.wa != null ? {...P, F: P.F.filter(f => f.t >= P.wa - 1e-6 && f.t <= P.wb + 1e-6)} : P; return vKind(v) === 'lift' ? anaLift(v, Q) : anaRun(v, Q); };
+const anaCompute = (v, P) => { let Q = P.wa != null ? {...P, F: P.F.filter(f => f.t >= P.wa - 1e-6 && f.t <= P.wb + 1e-6)} : P;
+  const U = typeof anaUsable === 'function' ? anaUsable(v, Q) : null; if (U) Q = U.Q;
+  const A = vKind(v) === 'lift' ? anaLift(v, Q) : anaRun(v, Q); return typeof anaRely === 'function' ? anaRely(v, Q, A, U) : A; };
 
 /* ---------- 3) profil : points forts · à affiner · points faibles, sur toutes les vidéos ---------- */
 // Un point n'est fort ou faible que s'il revient : on prend ses 5 dernières mesures (bien = 2, à affiner = 1, à corriger = 0).
@@ -264,7 +270,7 @@ const LV_SC = {good: 2, warn: 1, bad: 0}, LV_N = {good: 'Point fort', warn: 'À 
 const LIFT_CUE = {depth: 'Hanches sous les genoux', par: 'Poitrine et tibias parallèles', shin: 'Genoux vers l\'avant', heel: 'Talons vissés au sol', valgus: 'Genoux au-dessus des pieds', hipfirst: 'Poitrine et hanches ensemble', knee: 'Genoux souples et fixes', ext: 'Grandis-toi jusqu\'au bout', exth: 'Hanches à fond devant', catch: 'Reçois bas et solide', vloss: 'Chaque répétition à fond', desc: 'Descends vite, repars vite', trunk: 'Dos plat, poitrine fière', fly: 'Pousse le sol, vite'};
 const anCue = (kind, k, axe) => kind === 'run' ? (k === 'sym' ? 'Mêmes appuis à gauche et à droite' : AXE_CUE[axe || K_AXE[k]] || 'Vite et relâché') : LIFT_CUE[k] || 'Vite et propre';
 function anaAgg(kind) {
-  const L = vids().filter(v => vKind(v) === kind && (v.an?.rows?.length || v.coach)).sort((a, b) => (a.taken || Date.parse(a.d) || 0) - (b.taken || Date.parse(b.d) || 0));
+  const L = vids().filter(v => vKind(v) === kind && ((v.an?.rows?.length && v.an?.rel?.ok !== false) || v.coach)).sort((a, b) => (a.taken || Date.parse(a.d) || 0) - (b.taken || Date.parse(b.d) || 0));
   const exN = id => LIFT_EX.find(x => x[0] === id)?.[1] || '', M = new Map();
   const add = (key, name, it) => { if (!M.has(key)) M.set(key, {key, n: name, k: it.k, axe: it.axe, ex: it.ex, seq: []}); const o = M.get(key); o.seq.push(it); if (it.axe) o.axe = it.axe; };
   for (const v of L) { const acc = ['depart', 'acc'].includes(v.an?.ph);

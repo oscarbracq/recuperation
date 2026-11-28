@@ -1059,3 +1059,19 @@ html.one #mod-home #hm-head{margin-top:clamp(64px,10vh,96px)}
 .mp-step{font-size:1.15rem;line-height:1.45;max-width:460px;min-height:6em;margin:10px 0}.mp-run .mn-prog{width:100%;max-width:460px}.mp-run .btn{min-width:200px}
 .mp-link{width:100%;margin-top:14px}
 .bln,.mp,.mn-in{max-width:760px;margin-left:auto;margin-right:auto}
+/* v195 */
+#one-top [data-hday]{position:relative}#one-top [data-hday].due::after{content:"";position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:#0a84ff;box-shadow:0 0 0 2px var(--bg,#000)}
+.one-hmen.due::after{background:#0a84ff!important}
+.bodyh{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:nowrap}.bodyh h1{margin:0;white-space:nowrap}
+.bodyh-m{flex:none;padding:8px 12px;border-radius:14px;border:1px solid color-mix(in srgb,var(--fg) 14%,transparent);background:var(--card);color:var(--fg);font:inherit;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap}
+@media (max-width:360px){.bodyh h1{font-size:1.6rem}}
+.nextc .nxl{display:block;width:100%;text-align:left;padding-top:10px}.nextc .nxl+.nxl{border-top:1px solid color-mix(in srgb,var(--fg) 8%,transparent);margin-top:10px}.nxd{display:block;font-size:.74rem;color:var(--fg2);font-weight:700;margin-bottom:2px}
+.anrel{margin-top:12px;border:1px solid color-mix(in srgb,var(--warn) 45%,transparent)}.anrel .eyebrow{color:var(--warn)}.anrel p{margin:6px 0 0;font-size:.9rem}.anrel ul{margin:4px 0 0;padding-left:18px}.anrel li{margin:4px 0;font-size:.88rem;line-height:1.35}
+.anrel-h{font-size:.72rem!important;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--fg2);margin-top:12px!important}
+.vcam{margin-top:6px}.vbox{position:relative}.vboxov{position:absolute;inset:0;z-index:5;cursor:crosshair;touch-action:none;background:rgba(0,0,0,.25)}
+.vboxov span{position:absolute;left:50%;top:10px;transform:translateX(-50%);padding:6px 12px;border-radius:99px;background:rgba(0,0,0,.7);color:#fff;font-size:.8rem;font-weight:700;pointer-events:none;white-space:nowrap}
+.vboxov i{position:absolute;display:none;border:2px solid #64D2FF;border-radius:6px;background:rgba(100,210,255,.12);pointer-events:none}
+canvas.vbar{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3}
+.vdel2{width:100%;margin-top:22px;color:var(--accent)!important}
+.anex{margin-top:14px}.anex h3{margin:6px 4px 0;font-size:1.05rem}.anex h3 small{color:var(--fg2);font-weight:600;font-size:.78rem}
+.spimg{display:block;max-width:100%;max-height:260px;margin:10px auto 0;border-radius:12px}.spmode button{font-size:.8rem}
