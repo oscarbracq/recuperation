@@ -299,6 +299,31 @@ Deno.serve(async req => {
         return json({slot: 'mental', results});
       }
     }
+    // Weekly summary: Friday 20:35 (5 min after the evening questionnaire, so the two never replace each other).
+    const at = (t: string) => mins(hm) - mins(t) >= 0 && mins(hm) - mins(t) < 10;
+    if (new Date(TODAY + 'T12:00:00Z').getUTCDay() === 5 && at('20:35') && (st.last || {}).bilan !== TODAY && st.subs?.length) {
+      st.last = {...(st.last || {}), bilan: TODAY}; await putPrivate('push', st);
+      const S = await loadData(), days = [...Array(7)].map((_, i) => { const d = new Date(TODAY + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() - i); return d.toISOString().slice(0, 10); });
+      const ses = days.reduce((n, k) => n + (S.g[k]?.acts || []).filter((x: any) => (x.min || 0) >= 15 && /strength|fitness|training|track|running/.test(x.type)).length, 0);
+      const sl = days.map(k => S.g[k]?.sleepS).filter((v: any) => v > 7200).map((v: number) => v / 3600);
+      const nuit = sl.length ? (sl.reduce((x, y) => x + y, 0) / sl.length).toLocaleString('fr-FR', {maximumFractionDigits: 1}) + ' h de sommeil en moyenne' : '';
+      const facts = [ses ? `${ses} séance${ses > 1 ? 's' : ''}` : '', nuit].filter(Boolean).join(', ');
+      const results = await sendAll(st, {title: 'Ton bilan de la semaine 📊', body: (facts ? `Cette semaine : ${facts}. ` : '') + 'Ce qui a marché, ce qu’on ajuste : tout est prêt.',
+        action: 'Lire mon bilan', tag: 'tnr-bilan', url: './?q=bilan'});
+      return json({slot: 'bilan', results});
+    }
+    // Monthly review: the 1st at 10:05 (after the mental check-in), unless last month's review is already done.
+    if (TODAY.slice(8, 10) === '01' && at('10:05') && (st.last || {}).mois !== TODAY && st.subs?.length) {
+      st.last = {...(st.last || {}), mois: TODAY}; await putPrivate('push', st);
+      const pm = new Date(TODAY.slice(0, 7) + '-15T12:00:00Z'); pm.setUTCMonth(pm.getUTCMonth() - 1);
+      const prev = pm.toISOString().slice(0, 7);
+      if (!app?.data?.monthRev?.[prev]?.at) {
+        const name = pm.toLocaleDateString('fr-FR', {month: 'long', timeZone: 'UTC'});
+        const results = await sendAll(st, {title: 'Ton bilan du mois 🗓️', body: `${name[0].toUpperCase() + name.slice(1)} est bouclé : regarde le chemin parcouru et fixe le cap du mois qui commence.`,
+          action: 'Faire mon bilan', tag: 'tnr-mois', url: './?q=mois'});
+        return json({slot: 'mois', results});
+      }
+    }
     // The morning questionnaire (settings/app.questTime, 08:30 by default; empty = off) comes on top of the chosen times.
     // The evening one (settings/app.questEve, 20:30 by default; empty = off) too. The 9 h / 20 h summaries only go out
     // if Oscar turns them back on (settings/app.bilans === true, at settings/app.notifTimes); by default, never.
