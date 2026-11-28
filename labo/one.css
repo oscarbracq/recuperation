@@ -1075,3 +1075,6 @@ canvas.vbar{position:absolute;inset:0;width:100%;height:100%;pointer-events:none
 .vdel2{width:100%;margin-top:22px;color:var(--accent)!important}
 .anex{margin-top:14px}.anex h3{margin:6px 4px 0;font-size:1.05rem}.anex h3 small{color:var(--fg2);font-weight:600;font-size:.78rem}
 .spimg{display:block;max-width:100%;max-height:260px;margin:10px auto 0;border-radius:12px}.spmode button{font-size:.8rem}
+.cpbox{margin-top:16px}.cprow{display:flex;gap:8px;margin-top:10px}.cprow input{flex:1;min-width:0;text-align:left!important}.cprow .btn{flex:none;padding-left:16px;padding-right:16px}
+.cpli{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid color-mix(in srgb,var(--fg) 7%,transparent);margin-top:8px}.cpx{flex:1;min-width:0;font-size:.9rem;line-height:1.3}.cpx small{display:block;color:var(--fg3);font-size:.72rem}
+.cpt{flex:none;font-size:.68rem;font-weight:800;padding:3px 8px;border-radius:99px;background:color-mix(in srgb,var(--fg) 10%,transparent)}.cpt.good{color:#34c759}.cpt.bad{color:var(--accent)}

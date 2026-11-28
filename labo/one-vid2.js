@@ -141,7 +141,7 @@ anaProfileHtml = function (kind) {
   if (kind !== 'lift') return anaProfileHtml0(kind);
   const {L, P} = anaAgg('lift'), n = L.filter(v => v.an || v.coach).length;
   if (!n) return anaProfileHtml0(kind);
-  const exN = id => LIFT_EX.find(x => x[0] === id)?.[1] || 'Autre', w = o => anImp(o) * Math.min(o.cnt, 5) * (o.lvl === 'good' ? o.sc : 2 - o.sc);
+  const exN = id => id === 'coach' ? 'Notes de mon coach' : LIFT_EX.find(x => x[0] === id)?.[1] || 'Autre', w = o => anImp(o) * Math.min(o.cnt, 5) * (o.lvl === 'good' ? o.sc : 2 - o.sc);
   const item = (o, i) => `<button type="button" class="anpi" data-vidplay="${esc(o.vid)}">${i != null ? `<em class="annum">${i + 1}</em>` : ''}<b>${esc(o.n.replace(/^[^·]*·\s*/, ''))}</b><small>${esc(o.txt)} · vu ${o.cnt} fois</small>${o.sure ? '' : anPill}</button>`;
   const exs = [...new Set(P.map(o => o.ex || 'squat'))];
   return `<div id="anaprof" class="sec-label" style="margin-top:22px">Mon profil · ${n} vidéo${n > 1 ? 's' : ''} analysée${n > 1 ? 's' : ''}</div>

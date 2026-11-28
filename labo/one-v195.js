@@ -59,3 +59,27 @@ document.addEventListener('click', e => { let b;
   if ((b = e.target.closest?.('[data-spmode]'))) { CSP.img = b.dataset.spmode === '1'; paneRender(); return; } });
 document.addEventListener('change', e => { const t = e.target; if (!t.matches?.('[data-spfile]') || !t.files?.[0]) return; const f = t.files[0];
   if (CSP.imgUrl) URL.revokeObjectURL(CSP.imgUrl); CSP.imgName = f.name; CSP.imgUrl = /^image\//.test(f.type) ? URL.createObjectURL(f) : ''; CSP.over = true; paneRender(); });
+
+// 5) Les notes du coach : Oscar ajoute à la main un point fort ou faible que son coach lui a donné. Il compte comme un
+//    point sûr (dans les cadres, en premier), nourrit la consigne des séances et la prépa, et se retire d'un geste.
+const coachPts = kind => (S.app?.coachPts || []).filter(x => x.kind === kind);
+const anaAgg196 = anaAgg;
+anaAgg = function (kind) { const r = anaAgg196(kind);
+  r.P = [...r.P, ...coachPts(kind).map(x => ({key: 'cp:' + x.id, n: x.t, k: 'coach', axe: x.axe || null, lvl: x.lvl, sc: x.lvl === 'good' ? 2 : 0, cnt: 2, sure: true, trend: 0, txt: `Note de ton coach · ${fmtShort(x.d)}`, seq: [], d: x.d, prio: 1, cue: '', coach: 1, ex: 'coach'}))]; return r; };
+const anaProfileHtml196 = anaProfileHtml;
+anaProfileHtml = function (kind) {
+  const h = anaProfileHtml196(kind).replace(/(Note de ton coach · [^<]*?) · vu \d+ fois/g, '$1'), L = coachPts(kind);
+  return h + `<div class="card cpbox"><span class="eyebrow">Les notes de mon coach</span>
+    <div class="seg segsm" role="group" style="margin-top:8px"><button type="button" data-cplvl="good" aria-pressed="${CPL !== 'bad'}">Point fort</button><button type="button" data-cplvl="bad" aria-pressed="${CPL === 'bad'}">Point faible</button></div>
+    <div class="cprow"><input class="mini-in" data-cptxt placeholder="${kind === 'run' ? 'Ex. « bon placement du bassin à vitesse max »' : 'Ce que ton coach a remarqué'}"><button type="button" class="btn" data-cpadd="${kind}">Ajouter</button></div>
+    ${L.map(x => `<div class="cpli"><span class="cpt ${x.lvl}">${x.lvl === 'good' ? 'Fort' : 'Faible'}</span><span class="cpx">${esc(x.t)}<small>${esc(fmtShort(x.d))}</small></span><button type="button" class="cap-x" data-cpdel="${esc(x.id)}" aria-label="Retirer">×</button></div>`).join('')}
+    <p class="small muted" data-tip="1" style="margin:8px 2px 0">Ses notes comptent comme des points sûrs : elles passent en tête de tes points forts ou faibles et guident la consigne de tes séances.</p></div>`;
+};
+let CPL = 'good';
+function cpSave(L) { S.app = {...(S.app || {}), coachPts: L}; dbSet('settings/app', {...S.app, updatedAt: new Date().toISOString()}).catch(() => {}); const y = $('#pane-scroll')?.scrollTop; paneRender(); if (y != null) $('#pane-scroll').scrollTop = y; }
+document.addEventListener('click', e => { let b;
+  if ((b = e.target.closest?.('[data-cplvl]'))) { CPL = b.dataset.cplvl; b.parentElement.querySelectorAll('[data-cplvl]').forEach(x => x.setAttribute('aria-pressed', x === b)); return; }
+  if ((b = e.target.closest?.('[data-cpadd]'))) { const inp = b.parentElement.querySelector('[data-cptxt]'), t = (inp?.value || '').trim(); if (!t) { toast('Écris la note de ton coach'); return; }
+    cpSave([...(S.app?.coachPts || []), {id: 'cp' + Date.now().toString(36), kind: b.dataset.cpadd, lvl: CPL, t: t.slice(0, 200), d: TODAY}]); toast('Note du coach ajoutée'); return; }
+  if ((b = e.target.closest?.('[data-cpdel]'))) { if (!confirm('Retirer cette note du coach ?')) return; cpSave((S.app?.coachPts || []).filter(x => x.id !== b.dataset.cpdel)); } });
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches?.('[data-cptxt]')) e.target.parentElement.querySelector('[data-cpadd]')?.click(); });
