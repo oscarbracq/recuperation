@@ -9,7 +9,7 @@ function sprintChip() { return typeof isPC === 'function' && isPC() ? `<button t
 const tSesCoach0 = tSessions;
 tSessions = () => tSesCoach0().replace('<div class="sechipw">', '<div class="sechipw">' + sprintChip());
 function spContext() {
-  const L = [], n = seasonNow(TODAY), start = ctMonday(), days = [...Array(CSP.weeks * 7)].map((_, i) => addDays(start, i)), pr = S.profile || {}, sp = pr.sprinter || {};
+  const L = [], n = seasonNow(TODAY), start = ctStart('track'), days = [...Array(CSP.weeks * 7)].map((_, i) => addDays(start, i)), pr = S.profile || {}, sp = pr.sprinter || {};
   L.push(`Aujourd'hui : ${TODAY}. Les séances commencent le lundi ${start} (${CSP.weeks} semaines).`);
   if (n && !n.before && !n.after) L.push(`Saison : bloc « ${n.name} », semaine ${n.week} sur ${n.of}${n.goal ? ' (' + n.goal + ')' : ''}${n.comp != null ? `, compétition dans ${n.comp} jours` : ''}.`);
   const se = S.tset?.season?.blocks || []; if (se.length) L.push('Blocs de la saison : ' + se.map(b => `${b[0]} ${b[1]} sem.`).join(' → ') + '.');
@@ -79,7 +79,7 @@ function spPane() {
         ${f('goal', 'Objectif', 'ex. 6,95 au 60 m, garder le buste penché jusqu\'à 15 m')}
         ${f('until', 'Échéance', 'ex. championnats en salle, 7 mars')}
         ${f('comp', 'Date de la compétition visée', '', 'date')}
-        <div class="ctrow2">${f('weeks', 'Semaines', '4', 'number')}${f('per', 'Séances de piste par semaine', '3', 'number')}</div>
+        <p class="small muted" data-spwk style="margin:4px 2px 0">${ctWkTxt('track', CSP.comp)}</p><div class="ctrow2">${f('weeks', 'Semaines', '4', 'number')}${f('per', 'Séances de piste par semaine', '3', 'number')}</div>
         <label class="ctf"><span>Contraintes, envies, ce que ton coach de club prévoit</span><textarea data-spk="notes" rows="3" placeholder="ex. le mercredi c'est mon coach qui fait la séance ; pas de départs si le dos tire">${esc(CSP.notes)}</textarea></label></div>
       <div class="card" style="margin-top:12px"><span class="eyebrow">2 · Ce que l'appli ajoute toute seule</span><pre class="ctctx">${esc(spContext())}</pre></div>
       <button class="btn" style="margin-top:12px;width:100%" data-spcopy>Demander à Claude (copie la demande)</button>
@@ -99,4 +99,4 @@ document.addEventListener('click', async e => {
   if (at('[data-spsend]')) { await spSend(); return; }
 });
 document.addEventListener('change', e => { if (e.target.matches?.('[data-spover]')) { CSP.over = e.target.checked; paneRender(); } });
-document.addEventListener('input', e => { const k = e.target.dataset?.spk; if (!k) return; CSP[k] = e.target.type === 'number' ? Math.max(1, +e.target.value || 1) : e.target.value; if (k === 'paste') { spParse(CSP.paste); paneRender(); } });
+document.addEventListener('input', e => { const k = e.target.dataset?.spk; if (!k) return; CSP[k] = e.target.type === 'number' ? Math.max(1, +e.target.value || 1) : e.target.value; if (k === 'comp') { const w = ctWeeks(ctStart('track'), CSP.comp); if (w) { CSP.weeks = w; const i = document.querySelector('[data-spk="weeks"]'); if (i) i.value = w; } const s2 = document.querySelector('[data-spwk]'); if (s2) s2.textContent = ctWkTxt('track', CSP.comp); } if (k === 'paste') { spParse(CSP.paste); paneRender(); } });

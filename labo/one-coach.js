@@ -5,11 +5,18 @@
    Avec l'abonnement Claude (pas d'API payante) : « Demander à Claude » copie la demande complète, à coller dans Claude
    (onglet Code, où le skill « prepa-physique » est installé). Claude répond par un bloc de séances ; on le recolle ici,
    on voit les séances, puis « Envoyer dans le planning » les crée et les cale sur leurs jours. */
-const CTR = {goal: '', until: '', comp: '', fit: true, weeks: 4, per: 3, gyms: ['dmarcq'], notes: '', paste: '', parsed: null, err: ''};
+const CTR = {goal: '', until: '', comp: '', fit: true, weeks: 4, per: 3, gyms: GYMS.map(g => g[0]), notes: '', paste: '', parsed: null, err: ''};
 function coachChip() { return typeof isPC === 'function' && isPC() ? `<button type="button" class="seachip coachchip" data-coachtr aria-label="Coach muscu : créer des séances de musculation"><span>Coach</span><b>Muscu</b></button>` : ''; }
 const ctMonday = () => { let d = addDays(TODAY, 1); while (dow(d) !== 1) d = addDays(d, 1); return d; };
+// Le départ du programme : le lundi qui suit la dernière séance déjà calée (de ce type), jamais en milieu de semaine.
+function ctStart(kind) { const D = S.tset?.dated || {}; let last = null;
+  for (const [k, v] of Object.entries(D)) { const day = k.slice(0, 10), tr = k.endsWith('|t') || planOf(v)?.kind === 'track'; if (day < TODAY || (kind === 'track') !== tr || !planOf(v) || planOf(v).deleted) continue; if (!last || day > last) last = day; }
+  let d = addDays(last || TODAY, 1); while (dow(d) !== 1) d = addDays(d, 1); return d; }
+// Le nombre de semaines, du lundi de départ à la semaine de la compétition (comprise).
+const ctWkTxt = (kind, comp) => { const st = ctStart(kind), w = ctWeeks(st, comp); return `Départ : ${fmtShort(st)}${w ? ` · ${w} semaine${w > 1 ? 's' : ''} jusqu'à la compétition (sa semaine comprise)` : ' · mets la date de la compétition pour calculer les semaines'}`; };
+const ctWeeks = (start, comp) => comp && comp >= start ? Math.floor(daysBetween(start, comp) / 7) + 1 : null;
 function ctContext() {
-  const L = [], n = seasonNow(TODAY), start = ctMonday(), days = [...Array(CTR.weeks * 7)].map((_, i) => addDays(start, i));
+  const L = [], n = seasonNow(TODAY), start = ctStart('gym'), days = [...Array(CTR.weeks * 7)].map((_, i) => addDays(start, i));
   L.push(`Aujourd'hui : ${TODAY}. Les séances commencent le lundi ${start} (${CTR.weeks} semaines).`);
   if (n && !n.before && !n.after) L.push(`Saison : bloc « ${n.name} », semaine ${n.week} sur ${n.of}${n.goal ? ' (' + n.goal + ')' : ''}${n.comp != null ? `, compétition dans ${n.comp} jours` : ''}.`);
   const se = S.tset?.season?.blocks || []; if (se.length) L.push('Blocs de la saison : ' + se.map(b => `${b[0]} ${b[1]} sem.`).join(' → ') + '.');
@@ -84,7 +91,7 @@ function coachPane() {
         ${f('goal', 'Objectif', 'ex. 6,85 au 60 m, gagner en force sur une jambe')}
         ${f('until', 'Échéance', 'ex. championnats en salle, 7 mars')}
         ${f('comp', 'Date de la compétition visée', '', 'date')}
-        <div class="ctrow2">${f('weeks', 'Semaines', '4', 'number')}${f('per', 'Séances par semaine', '3', 'number')}</div>
+        <p class="small muted" data-ctwk style="margin:4px 2px 0">${ctWkTxt('gym', CTR.comp)}</p><div class="ctrow2">${f('weeks', 'Semaines', '4', 'number')}${f('per', 'Séances par semaine', '3', 'number')}</div>
         <div class="ctf"><span>Salles possibles <small>(plusieurs au choix ; une seule salle par séance)</small></span><div class="chipsx">${GYMS.map(([g, n]) => `<button type="button" class="chip" data-ctgym="${g}" aria-pressed="${CTR.gyms.includes(g)}">${CTR.gyms.includes(g) ? '✓ ' : ''}${esc(n)}</button>`).join('')}</div></div>
         <label class="ctf"><span>Contraintes, envies, ce que ton coach de sprint prévoit</span><textarea data-ctk="notes" rows="3" placeholder="ex. pas de squat lourd la veille des départs, je veux plus de travail du pied">${esc(CTR.notes)}</textarea></label></div>
       <div class="card" style="margin-top:12px"><span class="eyebrow">2 · Ce que l'appli ajoute toute seule</span><pre class="ctctx">${esc(ctContext())}</pre></div>
@@ -106,7 +113,8 @@ document.addEventListener('click', async e => {
   if (at('[data-ctsend]')) { await ctSend(); return; }
 });
 document.addEventListener('change', e => { if (e.target.matches?.('[data-ctfit]')) CTR.fit = e.target.checked; if (e.target.dataset?.ctk === 'comp' && CTR.parsed) paneRender(); });
-document.addEventListener('input', e => { const k = e.target.dataset?.ctk; if (!k) return; CTR[k] = e.target.type === 'number' ? Math.max(1, +e.target.value || 1) : e.target.value; if (k === 'paste') { ctParse(CTR.paste); paneRender(); } });
+document.addEventListener('input', e => { const k = e.target.dataset?.ctk; if (!k) return; CTR[k] = e.target.type === 'number' ? Math.max(1, +e.target.value || 1) : e.target.value;
+  if (k === 'comp') { const w = ctWeeks(ctStart('gym'), CTR.comp); if (w) { CTR.weeks = w; const i = document.querySelector('[data-ctk="weeks"]'); if (i) i.value = w; const s = document.querySelector('[data-ctwk]'); if (s) s.textContent = ctWkTxt('gym', CTR.comp); } } if (k === 'paste') { ctParse(CTR.paste); paneRender(); } });
 
 /* La saison recalée sur la programmation du coach : les blocs passés ne bougent pas ; ceux qui viennent commencent là où
    le coach les fait commencer (champ « blocks » de sa réponse, sinon la première séance nommée « PPS », « Pré-compét. »,
