@@ -285,6 +285,20 @@ Deno.serve(async req => {
   let due: string | null = null;
   if (!body.test) {
     const {data: app} = await db.from('docs').select('data').eq('collection', 'settings').eq('id', 'app').maybeSingle();
+    // Monthly mental check-in: the 1st at 10:00 (Paris), reminder the 4th at 10:00 if still not done; never twice a day,
+    // and never once settings/app.mental["YYYY-MM"].at exists for the current month.
+    const dom = TODAY.slice(8, 10);
+    if ((dom === '01' || dom === '04') && mins(hm) - 600 >= 0 && mins(hm) - 600 < 10 && (st.last || {}).mental !== TODAY && st.subs?.length) {
+      st.last = {...(st.last || {}), mental: TODAY}; await putPrivate('push', st);
+      if (!app?.data?.mental?.[TODAY.slice(0, 7)]?.at) {
+        const first = dom === '01';
+        const results = await sendAll(st, {title: first ? 'Ton bilan mental du mois 🧠' : 'Ton bilan mental t’attend 🧠',
+          body: first ? '5 minutes pour faire le point sur ta tête : motivation, fatigue, pression. Une note et une conclusion à la fin.'
+            : 'Pas encore fait ce mois-ci : 5 minutes pour ta motivation, ta fatigue et ta pression. Ta tête compte autant que tes jambes.',
+          action: 'Répondre maintenant', tag: 'tnr-mental', url: './?q=mental'});
+        return json({slot: 'mental', results});
+      }
+    }
     // The morning questionnaire (settings/app.questTime, 08:30 by default; empty = off) comes on top of the chosen times.
     // The evening one (settings/app.questEve, 20:30 by default; empty = off) too. The 9 h / 20 h summaries only go out
     // if Oscar turns them back on (settings/app.bilans === true, at settings/app.notifTimes); by default, never.
