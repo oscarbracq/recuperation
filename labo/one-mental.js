@@ -83,7 +83,7 @@ function mnConc(r, prev) {
     txt: `Ton point fort ce mois-ci : ${MN_TXT[best].toLowerCase()} (${sc[best]}/100). Ce qui te coûte le plus : ${MN_TXT[low].toLowerCase()} (${sc[low]}/100).`};
 }
 
-function mnOpen() { MN = {i: 0, a: {}, res: mnDone() ? mnAll()[mnMonth()] : null}; openPane({title: 'Bilan mental du mois', render: mnRender, onClose: () => { MN.res = null; }}); }
+function mnOpen() { MN = {i: 0, a: {}, res: mnDone() ? mnAll()[mnMonth()] : null}; openPane({title: 'Bilan mental du mois', full: true, render: mnRender, onClose: () => { MN.res = null; }}); }
 function mnRender() {
   if (MN.res) return mnResult(MN.res);
   if (!MN.on) {
@@ -130,9 +130,9 @@ document.addEventListener('click', async e => {
     MN.i = Math.max(0, Math.min(MN_SEC.length - 1, MN.i + d)); paneRender(); $('#pane-scroll')?.scrollTo({top: 0, behavior: 'smooth'}); }
 });
 // Les deux carrés de l'accueil : à gauche le bilan mental (point rouge s'il reste à faire ce mois-ci), à droite Ton cap.
-function mnDot() { const b = $('.one-hmen'); if (b) b.classList.toggle('due', !mnDone()); const c = $('.one-hcap span'); if (c && typeof capGet === 'function') { const l = daysBetween(TODAY, capGet().date); c.textContent = l > 0 ? 'J-' + l : l === 0 ? 'J' : 'Cap'; } }
-document.body.insertAdjacentHTML('beforeend', `<button class="one-sq one-aib one-hmen" data-one-mental aria-label="Bilan mental du mois" title="Bilan mental du mois"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21v-3.2A7 7 0 1 1 18.6 12l1.4 3h-2v2.5a1.5 1.5 0 0 1-1.5 1.5H14v2"/><path d="M10.5 9.5a2 2 0 1 1 2.5 1.9V12"/></svg><span>MENTAL</span></button>
-  <button class="one-sq one-aib one-hcap" data-capview aria-label="Ton cap" title="Ton cap"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg><span>CAP</span></button>`);
+function mnDot() { const b = $('.one-hmen'); if (b) b.classList.toggle('due', !mnDone()); const c = $('.one-hcap .one-capn'); if (c && typeof capGet === 'function') { const l = daysBetween(TODAY, capGet().date); c.textContent = l > 0 ? 'J-' + l : l === 0 ? 'J' : 'Cap'; } }
+document.body.insertAdjacentHTML('beforeend', `<button class="one-sq one-aib one-hmen" data-one-mental aria-label="Bilan mental du mois" title="Bilan mental du mois"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21v-3.2A7 7 0 1 1 18.6 12l1.4 3h-2v2.5a1.5 1.5 0 0 1-1.5 1.5H14v2"/><path d="M10.5 9.5a2 2 0 1 1 2.5 1.9V12"/></svg></button>
+  <button class="one-sq one-aib one-hcap" data-capview aria-label="Ton cap" title="Ton cap"><span class="one-capn">CAP</span></button>`);
 setTimeout(mnDot, 0); setInterval(mnDot, 60e3);
 // La notification du mois (./?q=mental) ouvre directement le bilan.
 function mnAuto() { const t = setInterval(() => { if (!S.app || window.TNR_SPLASH_ON || document.getElementById('splash')) return; clearInterval(t); mnDot(); mnOpen(); }, 250); }

@@ -1018,3 +1018,44 @@ html.one.one-pl :is(.one-hmen,.one-hcap),html.kbdlib :is(.one-hmen,.one-hcap){op
 .hxo-ov.open .hxa1{animation:hxBreath 3.6s ease-in-out 1.4s infinite}
 @keyframes hxBreath{50%{opacity:.55}}
 @media (prefers-reduced-motion:reduce){.hxarc{transition:none;stroke-dashoffset:0}.hxo-ov.open .hxa1{animation:none}}
+/* v194 : accueil plus aéré · le bilan descend un peu, ses chiffres en gras se touchent (courbe), la carte ouvre la page Bilan */
+html.one #hm.one-hm .wk.wkb,html.one .one-hm .wk.wkb{margin-top:clamp(28px,7vh,64px)!important;margin-bottom:24px!important;cursor:pointer;transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+html.one .wk.wkb:active{transform:scale(.985)}
+html.one #mod-home #hm-head{margin-top:clamp(64px,10vh,96px)}
+.wkv{font-weight:650;color:var(--fg)}.wkv[data-metric]{cursor:pointer;text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--fg) 25%,transparent);text-underline-offset:3px}
+.wk-h small{white-space:nowrap}
+.one-capn{font-size:.72rem;font-weight:800;letter-spacing:-.01em}
+/* La page Bilan */
+.bln{padding:4px 2px 40px}.bln-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:6px 0 10px}.bln-nav span{font-weight:700;color:var(--fg2)}
+.bln-h{font:800 1.5rem/1.15 var(--display);letter-spacing:-.02em;margin:6px 0 8px}.bln-h small{font-size:.8rem;color:var(--fg2);font-weight:600}
+.bln-p{font-size:.98rem;line-height:1.45;margin:0 0 6px}.bln-todo{margin:4px 0 8px;padding-left:22px}.bln-todo li{margin:8px 0;line-height:1.4}
+.bln-t{border-radius:18px;background:var(--card);overflow:hidden;border:1px solid color-mix(in srgb,var(--fg) 7%,transparent)}
+.bln-r{display:grid;grid-template-columns:1.5fr 1fr 1fr .9fr;gap:6px;align-items:center;padding:10px 12px;border-top:1px solid color-mix(in srgb,var(--fg) 6%,transparent);font-size:.84rem}
+.bln-r:first-child{border-top:0}.bln-r>*:not(:first-child){text-align:right}.bln-r span:first-child{color:var(--fg2)}
+.bln-hd{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--fg3)}.bln-hd b{font-weight:700}
+.bln-go{cursor:pointer}.bln-go:active{background:color-mix(in srgb,var(--fg) 6%,transparent)}
+.bln-4 .bln-r{grid-template-columns:1.2fr repeat(4,1fr)}
+.bln-up{color:#34c759;font-weight:700}.bln-dn{color:var(--accent);font-weight:700}.bln-eq{color:var(--fg3)}
+.bln-mo{margin-top:30px;padding-top:20px;border-top:1px solid color-mix(in srgb,var(--fg) 10%,transparent)}.bln-moh{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.bln-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 6px}@media (min-width:700px){.bln-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.bln-kv{border-radius:16px;background:var(--card);padding:10px 12px;display:flex;flex-direction:column;gap:2px}.bln-kv span{font-size:.72rem;color:var(--fg2)}.bln-kv b{font-size:1.02rem}.bln-kv[data-metric]{cursor:pointer}
+.bln-rev h3{margin:6px 0 4px;font-size:1.1rem}.bln-rev ol{padding-left:20px;margin:4px 0}.bln-rev li{margin:5px 0;font-size:.9rem}
+.bln-notes,[data-blnin]{width:100%;box-sizing:border-box;font:inherit;line-height:1.4;text-align:left!important}.mp-box textarea,.mp-box input{text-align:left!important}
+/* Le préparateur mental */
+.mp{padding:4px 2px 40px}.mp-bil{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;text-align:left;color:inherit;font:inherit;cursor:pointer;position:relative}
+.mp-bil b{font:800 2rem/1.1 var(--display)}.mp-bil b small{font-size:1rem;color:var(--fg2)}.mp-bil span{color:var(--fg2);font-size:.86rem}.mp-bil em{position:absolute;top:14px;right:14px;font-style:normal;font-size:.72rem;font-weight:700;color:var(--accent)}
+.mp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}@media (min-width:700px){.mp-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.mp-tile{display:flex;flex-direction:column;gap:4px;text-align:left;padding:14px;border-radius:18px;background:var(--card);border:1px solid color-mix(in srgb,var(--fg) 7%,transparent);color:inherit;font:inherit;cursor:pointer;min-height:92px;transition:transform .2s}
+.mp-tile:active{transform:scale(.97)}.mp-tile b{font-size:.95rem;line-height:1.2}.mp-tile span{font-size:.75rem;color:var(--fg2);line-height:1.3}
+.mp-box{border-radius:18px;background:var(--card);padding:10px 12px;border:1px solid color-mix(in srgb,var(--fg) 7%,transparent)}
+.mp-li,.mp-sw{display:flex;gap:6px;align-items:center;margin:6px 0}.mp-li input,.mp-sw input{flex:1;min-width:0}.mp-sw>span{color:var(--fg3)}
+.mp-dom{margin:10px 0 2px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--fg2)}
+.mp-box .cap-f{display:block;margin:6px 0}.mp-box textarea,.mp-box .cap-f input{width:100%;box-sizing:border-box;font:inherit}
+.mp-hist{margin:10px 0 0;font-size:.86rem;line-height:1.35;padding-top:8px;border-top:1px solid color-mix(in srgb,var(--fg) 6%,transparent)}.mp-hist small{display:block;color:var(--fg2)}
+.mp-run{display:flex;flex-direction:column;align-items:center;gap:14px;padding:6px 4px 40px;text-align:center}.mp-run>.chip{align-self:flex-start}.mp-run h2{margin:4px 0 0;font:800 1.4rem/1.2 var(--display)}
+.mp-circle{position:relative;width:min(70vw,280px);aspect-ratio:1;display:grid;place-items:center;margin:16px 0}
+.mp-circle i{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 55%,transparent),color-mix(in srgb,var(--accent) 12%,transparent) 70%);transform:scale(.55);transition:transform .12s linear;box-shadow:0 0 60px color-mix(in srgb,var(--accent) 35%,transparent)}
+.mp-circle b{position:relative;font:800 1.3rem/1 var(--display)}.mp-left{font-size:1.1rem;color:var(--fg2);min-height:1.4em;margin:0}
+.mp-step{font-size:1.15rem;line-height:1.45;max-width:460px;min-height:6em;margin:10px 0}.mp-run .mn-prog{width:100%;max-width:460px}.mp-run .btn{min-width:200px}
+.mp-link{width:100%;margin-top:14px}
+.bln,.mp,.mn-in{max-width:760px;margin-left:auto;margin-right:auto}

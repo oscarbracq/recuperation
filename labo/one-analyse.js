@@ -17,7 +17,7 @@ const RUN_PH = [['auto', 'Je ne sais pas'], ['depart', 'Départ, blocs'], ['acc'
 const vKind = v => v?.kind || 'run';
 const KIND_T = {run: 'Analyse de ma dynamique de course', lift: 'Analyse de mes mouvements · Musculation'};
 // Les axes de « Ton cap » que chaque mesure de course dit.
-const K_AXE = {ct: 'contact', td: 'contact', shin: 'contact', knee: 'contact', fq: 'freq', sep: 'freq', thigh: 'freq', rise: 'releve', trunk1: 'releve', head: 'tete', heel: 'talons', set: 'ligne', trunk: 'relache'};
+const K_AXE = {ank: 'contact', hipx: 'releve', rk: 'freq', arm: 'relache', elb: 'relache', ct: 'contact', td: 'contact', shin: 'contact', knee: 'contact', fq: 'freq', sep: 'freq', thigh: 'freq', rise: 'releve', trunk1: 'releve', head: 'tete', heel: 'talons', set: 'ligne', trunk: 'relache'};
 // Une consigne de 3 à 7 mots par axe (coach-sprint › defauts.md).
 const AXE_CUE = {contact: 'Pied sous la hanche', freq: 'Genou devant, vite', releve: 'Pousse le sol derrière toi', tete: 'Regarde le sol à 3 m', talons: 'Genou devant, pied bas', relache: 'Visage mou, épaules basses', ligne: 'Épaules sur les mains', fv: 'Vite, pas fort'};
 
@@ -25,6 +25,8 @@ const AXE_CUE = {contact: 'Pied sous la hanche', freq: 'Genou devant, vite', rel
 const anDg = r => r * 180 / Math.PI;
 const anVA = (dx, up) => anDg(Math.atan2(dx, up));
 const anA3 = (a, b, c) => { const ux = a[0] - b[0], uy = a[1] - b[1], wx = c[0] - b[0], wy = c[1] - b[1], n = Math.hypot(ux, uy) * Math.hypot(wx, wy); return n ? anDg(Math.acos(Math.max(-1, Math.min(1, (ux * wx + uy * wy) / n)))) : NaN; };
+// Angle en 3D (points « monde » de MediaPipe, en mètres) : le même que vu de face ou de côté, la parallaxe ne le fausse plus.
+const anA3w = (a, b, c) => { if (!a || !b || !c) return NaN; const u = [0, 1, 2].map(i => a[i] - b[i]), w = [0, 1, 2].map(i => c[i] - b[i]), n = Math.hypot(...u) * Math.hypot(...w); return n ? anDg(Math.acos(Math.max(-1, Math.min(1, (u[0] * w[0] + u[1] * w[1] + u[2] * w[2]) / n)))) : NaN; };
 const anDist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const anMid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
 const anMed = L => { const s = L.filter(x => Number.isFinite(x)).sort((a, b) => a - b); return s.length ? s[Math.floor(s.length / 2)] : NaN; };
@@ -74,11 +76,12 @@ async function anaPose(id, onp) {
     await new Promise(ok => { const done = () => { el.removeEventListener('seeked', done); ok(); }; el.addEventListener('seeked', done); el.currentTime = Math.min(t, D - .001); setTimeout(done, 1500); });
     ANA.ts = Math.max(performance.now(), ANA.ts + 1);
     let r = null; try { r = lm.detectForVideo(el, ANA.ts); } catch (e) {}
-    C.push((r?.landmarks || []).map(p => p.map(q => [+(q.x * W).toFixed(1), +(q.y * H).toFixed(1), +(q.visibility ?? 1).toFixed(2)])));
+    C.push((r?.landmarks || []).map((p, j) => ({p: p.map(q => [+(q.x * W).toFixed(1), +(q.y * H).toFixed(1), +(q.visibility ?? 1).toFixed(2)]),
+      w: r.worldLandmarks?.[j]?.map(q => [+q.x.toFixed(4), +q.y.toFixed(4), +q.z.toFixed(4)]) || null})));
     onp?.(k / Math.max(1, T.length - 1)); }
   URL.revokeObjectURL(url);
-  const S1 = anaPick(C, W, H), F = T.map((t, k) => ({t, p: S1[k]}));
-  const P = {W, H, step, step2, wa: a, wb: b, fps, F, v: 2}; await vdbPut('p:' + id, P); ANA.cache[id] = P; return P;
+  const C2 = C.map(L => L.map(x => x.p)), S1 = anaPick(C2, W, H), F = T.map((t, k) => { const j = S1[k] ? C2[k].indexOf(S1[k]) : -1; return {t, p: S1[k], w: j >= 0 ? C[k][j].w : null}; });
+  const P = {W, H, step, step2, wa: a, wb: b, fps, F, v: 3}; await vdbPut('p:' + id, P); ANA.cache[id] = P; return P;
 }
 // Lisse chaque point sur 3 images (moins de tremblement) ; une image sans bonhomme reprend ses voisines.
 function anaSmooth(F) {
@@ -105,7 +108,12 @@ function anaRun(v, P) {
   const trunk = i => { const h = hipC(i), s = shC(i); return anVA((s[0] - h[0]) * dir, h[1] - s[1]); };
   const thigh = (i, s) => { const h = pt(i, AN_SIDE[s].hip), k = pt(i, AN_SIDE[s].knee); return anVA((k[0] - h[0]) * dir, k[1] - h[1]); };
   const shin = (i, s) => { const a = pt(i, AN_SIDE[s].ank), k = pt(i, AN_SIDE[s].knee); return anVA((k[0] - a[0]) * dir, a[1] - k[1]); };
-  const knee = (i, s) => anA3(pt(i, AN_SIDE[s].hip), pt(i, AN_SIDE[s].knee), pt(i, AN_SIDE[s].ank));
+  const Wp = i => P.F[i]?.w, J3 = (i, s, k) => Wp(i)?.[AN_SIDE[s][k]];
+  // Le genou : en 3D quand MediaPipe le donne (vidéos analysées depuis la v194), sinon dans l'image.
+  const knee = (i, s) => { const a = anA3w(J3(i, s, 'hip'), J3(i, s, 'knee'), J3(i, s, 'ank')); return Number.isFinite(a) ? a : anA3(pt(i, AN_SIDE[s].hip), pt(i, AN_SIDE[s].knee), pt(i, AN_SIDE[s].ank)); };
+  const ankA = (i, s) => anA3(pt(i, AN_SIDE[s].knee), pt(i, AN_SIDE[s].ank), pt(i, AN_SIDE[s].toe));
+  const elbA = (i, s) => { const a = anA3w(J3(i, s, 'sh'), J3(i, s, 'el'), J3(i, s, 'wr')); return Number.isFinite(a) ? a : anA3(pt(i, AN_SIDE[s].sh), pt(i, AN_SIDE[s].el), pt(i, AN_SIDE[s].wr)); };
+  const armA = (i, s) => { const h = pt(i, AN_SIDE[s].sh), e = pt(i, AN_SIDE[s].el); return anVA((e[0] - h[0]) * dir, e[1] - h[1]); };
   const head = i => { const s = shC(i), h = hipC(i), e = anMid(pt(i, 7), pt(i, 8)); return anVA((e[0] - s[0]) * dir, s[1] - e[1]) - anVA((s[0] - h[0]) * dir, h[1] - s[1]); };
   // Les appuis : le pied au plus bas de sa trajectoire, presque immobile (caméra fixe : aussi immobile de côté).
   const win = Math.max(2, Math.ceil(.35 / dtr)), tol = .05 * leg, C = [];
@@ -130,9 +138,10 @@ function anaRun(v, P) {
   { const keep = C.filter(c => (c.tm ?? (c.b - c.a + 1) * dtr) <= .45); C.length = 0; C.push(...keep); }
   const real = i => P.F[i].t / slow, prec = Math.round(dtr * 1000);
   const S = C.map((c, k) => { const o = c.s === 'G' ? 'D' : 'G', nx = C[k + 1], i = c.a, end = nx ? nx.a : Math.min(n - 1, c.b + win);
-    let tl = -90, hk = 180; for (let j = c.a; j <= end; j++) if (ok[j]) { tl = Math.max(tl, thigh(j, o)); if (j <= c.b && thigh(j, o) < 10) hk = Math.min(hk, knee(j, o)); }
+    let tl = -90, hk = 180, rk = 180, amx = -180, amn = 180, el = []; for (let j = c.a; j <= end; j++) if (ok[j]) { tl = Math.max(tl, thigh(j, o)); if (j <= c.b && thigh(j, o) < 10) hk = Math.min(hk, knee(j, o)); rk = Math.min(rk, knee(j, o));
+      for (const sd of ['G', 'D']) { const a = armA(j, sd); amx = Math.max(amx, a); amn = Math.min(amn, a); el.push(elbA(j, sd)); } }
     return {n: k + 1, s: c.s, t: real(i), ct: c.tm ?? (c.b - c.a + 1) * dtr, td: (foot(i, c.s)[0] - hipC(i)[0]) * dir / leg, shin: shin(i, c.s), knee: knee(i, c.s),
-      sep: Math.abs(thigh(i, c.s) - thigh(i, o)), trunk: trunk(i), head: head(i), tl, hk}; });
+      sep: Math.abs(thigh(i, c.s) - thigh(i, o)), trunk: trunk(i), head: head(i), tl, hk, rk, ank: ankA(i, c.s), hipx: ok[c.b] ? -thigh(c.b, c.s) : NaN, arm: amx - amn, elb: anMed(el)}; });
   // La position « prêt » : mains au sol, corps immobile, au début de la vidéo.
   let set = null; for (const i of idx.slice(0, Math.ceil(idx.length / 3))) { const w = anMid(pt(i, 15), pt(i, 16)), kn = anMid(pt(i, 25), pt(i, 26));
     if (w[1] > kn[1] - .05 * leg) { const s = shC(i), arm = anDist(pt(i, 11), pt(i, 15)) || leg / 2; set = {i, off: (s[0] - w[0]) * dir / arm}; } else if (set) break; }
@@ -166,11 +175,18 @@ function anaRun(v, P) {
     if (acc) { const t1 = S[0].trunk; if (ph === 'depart') R.push(anRow('trunk1', 'Tronc au 1er appui', t1, Math.round(t1) + '° (par rapport à la verticale)', anLv(t1, 40, 30, true), '40 à 50°'));
       const k4 = S.slice(0, Math.min(5, S.length)); if (k4.length >= 3) { const drop = (k4[0].trunk - k4.at(-1).trunk) / (k4.length - 1); R.push(anRow('rise', 'Redressement du tronc', drop, `${fx(drop, 1)}° par appui (${Math.round(k4[0].trunk)}° → ${Math.round(k4.at(-1).trunk)}°)`, anLv(drop, 5, 8), '2 à 5° par appui, régulier')); }
       const hk = S.slice(0, 4).filter(x => x.hk < 180).map(x => x.hk); if (hk.length >= 2) { const m = anMed(hk); R.push(anRow('heel', 'Talon de la jambe libre', m, `genou fermé à ${Math.round(m)}°${m < 45 ? ' : talon vers la fesse' : ''}`, anLv(m, 0, 0) && (m >= 55 ? 'good' : m >= 45 ? 'warn' : 'bad'), 'talon bas, genou qui avance (≥ 55°)')); } }
+    // Les autres articulations : cheville, hanche à la poussée, retour de la jambe, bras et coudes.
+    const ak = anMed(SS.map(x => x.ank)); if (Number.isFinite(ak)) R.push(anRow('ank', 'Cheville à la pose', ak, `${Math.round(ak)}° entre tibia et pied`, anLv(ak, 110, 120), 'pied « armé », pointe relevée : 95 à 110°'));
+    const hx = anMed(SS.map(x => x.hipx)); if (Number.isFinite(hx)) R.push(acc ? anRow('hipx', 'Hanche à la fin de la poussée', hx, `cuisse ${Math.round(hx)}° derrière la verticale`, anLv(hx, 25, 15, true), 'poussée complète : 25° ou plus derrière')
+      : anRow('hipx', 'Hanche à la fin de la poussée', hx, `cuisse ${Math.round(hx)}° derrière la verticale`, anLv(hx, 22, 30), 'à vitesse max : pied qui quitte vite le sol, 22° au plus'));
+    if (!acc) { const rk = anMed(SS.map(x => x.rk).filter(x => x < 180)); if (Number.isFinite(rk)) R.push(anRow('rk', 'Retour de la jambe libre', rk, `genou fermé à ${Math.round(rk)}°`, anLv(rk, 45, 60), 'talon près de la fesse : 45° ou moins (jambe courte = retour rapide)')); }
+    const am = anMed(S.map(x => x.arm)); if (Number.isFinite(am)) R.push(anRow('arm', 'Amplitude des bras', am, `${Math.round(am)}° d'avant en arrière`, anLv(am, 90, 70, true), '90° ou plus, mains du menton à la hanche'));
+    const eb = anMed(S.map(x => x.elb)); if (Number.isFinite(eb)) R.push(anRow('elb', 'Coudes', eb, `${Math.round(eb)}° en moyenne`, eb >= 70 && eb <= 115 ? 'good' : eb >= 55 && eb <= 135 ? 'warn' : 'bad', 'fléchis autour de 90° (70 à 115°)'));
     const hd = anMed(S.slice(0, acc ? 4 : 99).map(x => x.head)); R.push(anRow('head', 'Tête', hd, hd < -10 ? `relevée de ${Math.round(-hd)}° par rapport au dos` : 'dans l\'alignement du dos', hd >= -20 ? 'good' : hd >= -32 ? 'warn' : 'bad', 'alignée avec le tronc'));
     const g = S.filter(x => x.s === 'G').map(x => x.ct), d = S.filter(x => x.s === 'D').map(x => x.ct);
     if (g.length >= 2 && d.length >= 2 && dtr <= .02) { const a = anMean(g), b = anMean(d), gap = Math.abs(a - b) / Math.max(a, b) * 100; R.push(anRow('sym', 'Contact gauche / droite', gap, `G ${Math.round(a * 1000)} · D ${Math.round(b * 1000)} ms (${Math.round(gap)} %)`, anLv(gap, 8, 15), 'moins de 8 % d\'écart')); }
   }
-  return {at: Date.now(), kind: 'run', ph, manual, prec, view, key: {ct: S.length ? +anMean(cts).toFixed(3) : null, fq: Number.isFinite(fq) ? +fq.toFixed(2) : null, len: Number.isFinite(len) ? +len.toFixed(2) : null, spd: Number.isFinite(len) && Number.isFinite(fq) ? +(len * fq).toFixed(2) : null}, steps: S.map(x => ({n: x.n, s: x.s, t: +x.t.toFixed(3), ct: +x.ct.toFixed(3), td: +x.td.toFixed(2), shin: Math.round(x.shin), knee: Math.round(x.knee), sep: Math.round(x.sep), trunk: Math.round(x.trunk)})), rows: T(R), err: S.length ? '' : 'Aucun appui trouvé : filme de côté, caméra fixe, ou marque les appuis à la main.'};
+  return {at: Date.now(), kind: 'run', ph, manual, prec, view, key: {ct: S.length ? +anMean(cts).toFixed(3) : null, fq: Number.isFinite(fq) ? +fq.toFixed(2) : null, len: Number.isFinite(len) ? +len.toFixed(2) : null, spd: Number.isFinite(len) && Number.isFinite(fq) ? +(len * fq).toFixed(2) : null}, steps: S.map(x => ({n: x.n, s: x.s, t: +x.t.toFixed(3), ct: +x.ct.toFixed(3), td: +x.td.toFixed(2), shin: Math.round(x.shin), knee: Math.round(x.knee), sep: Math.round(x.sep), trunk: Math.round(x.trunk), ank: Math.round(x.ank), hipx: Math.round(x.hipx), elb: Math.round(x.elb)})), rows: T(R), err: S.length ? '' : 'Aucun appui trouvé : filme de côté, caméra fixe, ou marque les appuis à la main.'};
 }
 
 function anaLift(v, P) {
@@ -298,7 +314,7 @@ function anaIntent(kind, rows, coach) {
 // Ce que coûte (ou rapporte) chaque point sur un 100 m, du plus au moins : la fréquence et le temps de contact font la
 // vitesse (Weyand 2000, Morin 2012) ; le pied devant la hanche freine à chaque appui ; l'écart gauche / droite, la poussée
 // des premiers appuis (tronc, tibia) font l'accélération (Kugler 2010) ; la tête et la position des blocs comptent moins.
-const AN_IMP = {fq: 10, ct: 10, td: 9, sym: 7, trunk1: 7, rise: 7, shin: 6, thigh: 6, knee: 5, sep: 5, trunk: 4, heel: 4, set: 3, head: 3,
+const AN_IMP = {ank: 6, hipx: 6, rk: 5, arm: 5, elb: 3, fq: 10, ct: 10, td: 9, sym: 7, trunk1: 7, rise: 7, shin: 6, thigh: 6, knee: 5, sep: 5, trunk: 4, heel: 4, set: 3, head: 3,
   vloss: 8, depth: 6, ext: 7, exth: 7, catch: 5, fly: 9, par: 6, valgus: 8, hipfirst: 6, desc: 4, tempo: 3};
 const anImp = x => x.prio ? Math.max(1, 12 - x.prio) : AN_IMP[x.k] ?? 4;
 const anPill = '<i class="anunc">à vérifier</i>';
@@ -327,7 +343,7 @@ function anaResHtml(v) {
   const K = A?.key || {}, kv = (l, x) => `<div><span>${l}</span><b>${x}</b></div>`;
   const keys = k === 'run' ? `<div class="vres">${kv('Temps de contact', K.ct ? Math.round(K.ct * 1000) + ' ms' : '–')}${kv('Fréquence', K.fq ? fx(K.fq, 2) + ' pas/s' : '–')}${kv('Longueur de pas', K.len ? fx(K.len, 2) + ' m' : '–')}${K.spd ? kv('Vitesse', fx(K.spd, 1) + ' m/s') : ''}</div>`
     : A?.reps?.length ? `<div class="vres">${kv('Répétitions', A.reps.length)}${kv('Descente', fx(anMean(A.reps.map(r => r.desc)), 2) + ' s')}${kv('Montée', fx(anMean(A.reps.map(r => r.asc)), 2) + ' s')}</div>` : '';
-  const tab = A?.kind === 'run' && A.steps?.length ? `<details class="anadet"><summary>Appui par appui (${A.steps.length})</summary><table class="anat"><tr><th>#</th><th>Pied</th><th>Contact</th><th>Pied-hanche</th><th>Tibia</th><th>Tronc</th></tr>${A.steps.map(s => `<tr><td>${s.n}</td><td>${s.s}</td><td>${Math.round(s.ct * 1000)} ms</td><td>${Math.round(s.td * 100)} %</td><td>${s.shin}°</td><td>${s.trunk}°</td></tr>`).join('')}</table></details>`
+  const tab = A?.kind === 'run' && A.steps?.length ? `<details class="anadet"><summary>Appui par appui (${A.steps.length})</summary><table class="anat"><tr><th>#</th><th>Pied</th><th>Contact</th><th>Pied-hanche</th><th>Tibia</th><th>Tronc</th><th>Genou</th><th>Cheville</th><th>Hanche</th></tr>${A.steps.map(s => `<tr><td>${s.n}</td><td>${s.s}</td><td>${Math.round(s.ct * 1000)} ms</td><td>${Math.round(s.td * 100)} %</td><td>${s.shin}°</td><td>${s.trunk}°</td><td>${s.knee ?? '–'}°</td><td>${Number.isFinite(s.ank) ? s.ank + '°' : '–'}</td><td>${Number.isFinite(s.hipx) ? s.hipx + '°' : '–'}</td></tr>`).join('')}</table></details>`
     : A?.reps?.length ? `<details class="anadet"><summary>Répétition par répétition (${A.reps.length})</summary><table class="anat"><tr><th>#</th><th>Descente</th><th>Montée</th><th>Genou</th><th>Tronc</th></tr>${A.reps.map(r => `<tr><td>${r.n}</td><td>${fx(r.desc, 2)} s</td><td>${fx(r.asc, 2)} s</td><td>${r.knee}°</td><td>${r.trunk}°</td></tr>`).join('')}</table></details>` : '';
   const vw = A?.view, VQ = {bonne: 'bonne prise de vue (bien de côté, distance stable)', moyenne: 'prise de vue moyenne : un peu de biais ou de parallaxe, les angles peuvent bouger de quelques degrés', biais: 'filmé en biais : les angles sont faussés, refilme bien de côté'};
   const foot = A ? `<p class="small muted" data-tip="1" style="margin:6px 4px 0">${A.kind === 'run' ? `Phase : ${esc(RUN_PH.find(x => x[0] === A.ph)?.[1] || '')}` : `Côté mesuré : ${A.side === 'G' ? 'gauche' : 'droit'}`}${vw ? ' · ' + VQ[vw.q] : ''}${vw?.edge ? ` · ${vw.edge} appui${vw.edge > 1 ? 's' : ''} au bord de l'image écarté${vw.edge > 1 ? 's' : ''}` : ''}${A.prec > 20 ? ` · temps à ± ${A.prec} ms (filme au ralenti pour mieux)` : ''}.</p>` : '';

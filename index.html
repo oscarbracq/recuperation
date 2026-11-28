@@ -2483,6 +2483,47 @@ html.one.one-pl :is(.one-hmen,.one-hcap),html.kbdlib :is(.one-hmen,.one-hcap){op
 .hxo-ov.open .hxa1{animation:hxBreath 3.6s ease-in-out 1.4s infinite}
 @keyframes hxBreath{50%{opacity:.55}}
 @media (prefers-reduced-motion:reduce){.hxarc{transition:none;stroke-dashoffset:0}.hxo-ov.open .hxa1{animation:none}}
+/* v194 : accueil plus aéré · le bilan descend un peu, ses chiffres en gras se touchent (courbe), la carte ouvre la page Bilan */
+html.one #hm.one-hm .wk.wkb,html.one .one-hm .wk.wkb{margin-top:clamp(28px,7vh,64px)!important;margin-bottom:24px!important;cursor:pointer;transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+html.one .wk.wkb:active{transform:scale(.985)}
+html.one #mod-home #hm-head{margin-top:clamp(64px,10vh,96px)}
+.wkv{font-weight:650;color:var(--fg)}.wkv[data-metric]{cursor:pointer;text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--fg) 25%,transparent);text-underline-offset:3px}
+.wk-h small{white-space:nowrap}
+.one-capn{font-size:.72rem;font-weight:800;letter-spacing:-.01em}
+/* La page Bilan */
+.bln{padding:4px 2px 40px}.bln-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:6px 0 10px}.bln-nav span{font-weight:700;color:var(--fg2)}
+.bln-h{font:800 1.5rem/1.15 var(--display);letter-spacing:-.02em;margin:6px 0 8px}.bln-h small{font-size:.8rem;color:var(--fg2);font-weight:600}
+.bln-p{font-size:.98rem;line-height:1.45;margin:0 0 6px}.bln-todo{margin:4px 0 8px;padding-left:22px}.bln-todo li{margin:8px 0;line-height:1.4}
+.bln-t{border-radius:18px;background:var(--card);overflow:hidden;border:1px solid color-mix(in srgb,var(--fg) 7%,transparent)}
+.bln-r{display:grid;grid-template-columns:1.5fr 1fr 1fr .9fr;gap:6px;align-items:center;padding:10px 12px;border-top:1px solid color-mix(in srgb,var(--fg) 6%,transparent);font-size:.84rem}
+.bln-r:first-child{border-top:0}.bln-r>*:not(:first-child){text-align:right}.bln-r span:first-child{color:var(--fg2)}
+.bln-hd{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--fg3)}.bln-hd b{font-weight:700}
+.bln-go{cursor:pointer}.bln-go:active{background:color-mix(in srgb,var(--fg) 6%,transparent)}
+.bln-4 .bln-r{grid-template-columns:1.2fr repeat(4,1fr)}
+.bln-up{color:#34c759;font-weight:700}.bln-dn{color:var(--accent);font-weight:700}.bln-eq{color:var(--fg3)}
+.bln-mo{margin-top:30px;padding-top:20px;border-top:1px solid color-mix(in srgb,var(--fg) 10%,transparent)}.bln-moh{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.bln-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 6px}@media (min-width:700px){.bln-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.bln-kv{border-radius:16px;background:var(--card);padding:10px 12px;display:flex;flex-direction:column;gap:2px}.bln-kv span{font-size:.72rem;color:var(--fg2)}.bln-kv b{font-size:1.02rem}.bln-kv[data-metric]{cursor:pointer}
+.bln-rev h3{margin:6px 0 4px;font-size:1.1rem}.bln-rev ol{padding-left:20px;margin:4px 0}.bln-rev li{margin:5px 0;font-size:.9rem}
+.bln-notes,[data-blnin]{width:100%;box-sizing:border-box;font:inherit;line-height:1.4;text-align:left!important}.mp-box textarea,.mp-box input{text-align:left!important}
+/* Le préparateur mental */
+.mp{padding:4px 2px 40px}.mp-bil{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;text-align:left;color:inherit;font:inherit;cursor:pointer;position:relative}
+.mp-bil b{font:800 2rem/1.1 var(--display)}.mp-bil b small{font-size:1rem;color:var(--fg2)}.mp-bil span{color:var(--fg2);font-size:.86rem}.mp-bil em{position:absolute;top:14px;right:14px;font-style:normal;font-size:.72rem;font-weight:700;color:var(--accent)}
+.mp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}@media (min-width:700px){.mp-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.mp-tile{display:flex;flex-direction:column;gap:4px;text-align:left;padding:14px;border-radius:18px;background:var(--card);border:1px solid color-mix(in srgb,var(--fg) 7%,transparent);color:inherit;font:inherit;cursor:pointer;min-height:92px;transition:transform .2s}
+.mp-tile:active{transform:scale(.97)}.mp-tile b{font-size:.95rem;line-height:1.2}.mp-tile span{font-size:.75rem;color:var(--fg2);line-height:1.3}
+.mp-box{border-radius:18px;background:var(--card);padding:10px 12px;border:1px solid color-mix(in srgb,var(--fg) 7%,transparent)}
+.mp-li,.mp-sw{display:flex;gap:6px;align-items:center;margin:6px 0}.mp-li input,.mp-sw input{flex:1;min-width:0}.mp-sw>span{color:var(--fg3)}
+.mp-dom{margin:10px 0 2px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--fg2)}
+.mp-box .cap-f{display:block;margin:6px 0}.mp-box textarea,.mp-box .cap-f input{width:100%;box-sizing:border-box;font:inherit}
+.mp-hist{margin:10px 0 0;font-size:.86rem;line-height:1.35;padding-top:8px;border-top:1px solid color-mix(in srgb,var(--fg) 6%,transparent)}.mp-hist small{display:block;color:var(--fg2)}
+.mp-run{display:flex;flex-direction:column;align-items:center;gap:14px;padding:6px 4px 40px;text-align:center}.mp-run>.chip{align-self:flex-start}.mp-run h2{margin:4px 0 0;font:800 1.4rem/1.2 var(--display)}
+.mp-circle{position:relative;width:min(70vw,280px);aspect-ratio:1;display:grid;place-items:center;margin:16px 0}
+.mp-circle i{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 55%,transparent),color-mix(in srgb,var(--accent) 12%,transparent) 70%);transform:scale(.55);transition:transform .12s linear;box-shadow:0 0 60px color-mix(in srgb,var(--accent) 35%,transparent)}
+.mp-circle b{position:relative;font:800 1.3rem/1 var(--display)}.mp-left{font-size:1.1rem;color:var(--fg2);min-height:1.4em;margin:0}
+.mp-step{font-size:1.15rem;line-height:1.45;max-width:460px;min-height:6em;margin:10px 0}.mp-run .mn-prog{width:100%;max-width:460px}.mp-run .btn{min-width:200px}
+.mp-link{width:100%;margin-top:14px}
+.bln,.mp,.mn-in{max-width:760px;margin-left:auto;margin-right:auto}
 </style>
 
 <div class="aura" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -6831,7 +6872,7 @@ noteBody = k => {
   const h = noteBody0(k), i1 = h.indexOf('<h2 class="qh">Le matin'), i2 = h.indexOf('<h2 class="qh">La journée'); if (i1 < 0 || i2 < 0) return h;
   const head = h.slice(0, i1), mor = h.slice(i1, i2), eve = h.slice(i2);
   return head + (S.qm === 'matin' ? mor + sickHtml() + '<p class="small muted" style="margin:14px 4px 0">« Enregistrer le matin » garde tes réponses et te donne la synthèse. Le soir, tu complètes ta journée.</p>'
-    : qmMornPart(k) + (qmEveLocked(k) ? `<div class="card qlock"><b>La partie du soir s'ouvre à 18 h</b><span class="small muted">Tu recevras la notification à ${esc(String(S.app?.questEve || '20:30')).replace(':', ' h ')} pour la remplir.</span></div>` : eve.replace('<div class="sec-label">Eau</div>', eveHtml() + '<div class="sec-label">Eau</div>')));
+    : qmMornPart(k) + (qmEveLocked(k) ? `<div class="card qlock"><b>La partie du soir s'ouvre à 18 h</b><span class="small muted">Tu recevras la notification à ${esc(String(S.app?.questEve || '20:30')).replace(':', ' h ')} pour la remplir.</span></div>` : (eve.includes('<div class="sec-label">Information pour l\'appli') ? eve.replace('<div class="sec-label">Information pour l\'appli', eveHtml() + '<div class="sec-label">Information pour l\'appli') : eve.replace('<div class="sec-label">Eau</div>', eveHtml() + '<div class="sec-label">Eau</div>'))));
 };
 // La notification du matin (ou l'appli ouverte le matin sans avoir répondu) ouvre directement le questionnaire du matin.
 function qmAuto(force) {
@@ -15607,7 +15648,7 @@ const RUN_PH = [['auto', 'Je ne sais pas'], ['depart', 'Départ, blocs'], ['acc'
 const vKind = v => v?.kind || 'run';
 const KIND_T = {run: 'Analyse de ma dynamique de course', lift: 'Analyse de mes mouvements · Musculation'};
 // Les axes de « Ton cap » que chaque mesure de course dit.
-const K_AXE = {ct: 'contact', td: 'contact', shin: 'contact', knee: 'contact', fq: 'freq', sep: 'freq', thigh: 'freq', rise: 'releve', trunk1: 'releve', head: 'tete', heel: 'talons', set: 'ligne', trunk: 'relache'};
+const K_AXE = {ank: 'contact', hipx: 'releve', rk: 'freq', arm: 'relache', elb: 'relache', ct: 'contact', td: 'contact', shin: 'contact', knee: 'contact', fq: 'freq', sep: 'freq', thigh: 'freq', rise: 'releve', trunk1: 'releve', head: 'tete', heel: 'talons', set: 'ligne', trunk: 'relache'};
 // Une consigne de 3 à 7 mots par axe (coach-sprint › defauts.md).
 const AXE_CUE = {contact: 'Pied sous la hanche', freq: 'Genou devant, vite', releve: 'Pousse le sol derrière toi', tete: 'Regarde le sol à 3 m', talons: 'Genou devant, pied bas', relache: 'Visage mou, épaules basses', ligne: 'Épaules sur les mains', fv: 'Vite, pas fort'};
 
@@ -15615,6 +15656,8 @@ const AXE_CUE = {contact: 'Pied sous la hanche', freq: 'Genou devant, vite', rel
 const anDg = r => r * 180 / Math.PI;
 const anVA = (dx, up) => anDg(Math.atan2(dx, up));
 const anA3 = (a, b, c) => { const ux = a[0] - b[0], uy = a[1] - b[1], wx = c[0] - b[0], wy = c[1] - b[1], n = Math.hypot(ux, uy) * Math.hypot(wx, wy); return n ? anDg(Math.acos(Math.max(-1, Math.min(1, (ux * wx + uy * wy) / n)))) : NaN; };
+// Angle en 3D (points « monde » de MediaPipe, en mètres) : le même que vu de face ou de côté, la parallaxe ne le fausse plus.
+const anA3w = (a, b, c) => { if (!a || !b || !c) return NaN; const u = [0, 1, 2].map(i => a[i] - b[i]), w = [0, 1, 2].map(i => c[i] - b[i]), n = Math.hypot(...u) * Math.hypot(...w); return n ? anDg(Math.acos(Math.max(-1, Math.min(1, (u[0] * w[0] + u[1] * w[1] + u[2] * w[2]) / n)))) : NaN; };
 const anDist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const anMid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
 const anMed = L => { const s = L.filter(x => Number.isFinite(x)).sort((a, b) => a - b); return s.length ? s[Math.floor(s.length / 2)] : NaN; };
@@ -15664,11 +15707,12 @@ async function anaPose(id, onp) {
     await new Promise(ok => { const done = () => { el.removeEventListener('seeked', done); ok(); }; el.addEventListener('seeked', done); el.currentTime = Math.min(t, D - .001); setTimeout(done, 1500); });
     ANA.ts = Math.max(performance.now(), ANA.ts + 1);
     let r = null; try { r = lm.detectForVideo(el, ANA.ts); } catch (e) {}
-    C.push((r?.landmarks || []).map(p => p.map(q => [+(q.x * W).toFixed(1), +(q.y * H).toFixed(1), +(q.visibility ?? 1).toFixed(2)])));
+    C.push((r?.landmarks || []).map((p, j) => ({p: p.map(q => [+(q.x * W).toFixed(1), +(q.y * H).toFixed(1), +(q.visibility ?? 1).toFixed(2)]),
+      w: r.worldLandmarks?.[j]?.map(q => [+q.x.toFixed(4), +q.y.toFixed(4), +q.z.toFixed(4)]) || null})));
     onp?.(k / Math.max(1, T.length - 1)); }
   URL.revokeObjectURL(url);
-  const S1 = anaPick(C, W, H), F = T.map((t, k) => ({t, p: S1[k]}));
-  const P = {W, H, step, step2, wa: a, wb: b, fps, F, v: 2}; await vdbPut('p:' + id, P); ANA.cache[id] = P; return P;
+  const C2 = C.map(L => L.map(x => x.p)), S1 = anaPick(C2, W, H), F = T.map((t, k) => { const j = S1[k] ? C2[k].indexOf(S1[k]) : -1; return {t, p: S1[k], w: j >= 0 ? C[k][j].w : null}; });
+  const P = {W, H, step, step2, wa: a, wb: b, fps, F, v: 3}; await vdbPut('p:' + id, P); ANA.cache[id] = P; return P;
 }
 // Lisse chaque point sur 3 images (moins de tremblement) ; une image sans bonhomme reprend ses voisines.
 function anaSmooth(F) {
@@ -15695,7 +15739,12 @@ function anaRun(v, P) {
   const trunk = i => { const h = hipC(i), s = shC(i); return anVA((s[0] - h[0]) * dir, h[1] - s[1]); };
   const thigh = (i, s) => { const h = pt(i, AN_SIDE[s].hip), k = pt(i, AN_SIDE[s].knee); return anVA((k[0] - h[0]) * dir, k[1] - h[1]); };
   const shin = (i, s) => { const a = pt(i, AN_SIDE[s].ank), k = pt(i, AN_SIDE[s].knee); return anVA((k[0] - a[0]) * dir, a[1] - k[1]); };
-  const knee = (i, s) => anA3(pt(i, AN_SIDE[s].hip), pt(i, AN_SIDE[s].knee), pt(i, AN_SIDE[s].ank));
+  const Wp = i => P.F[i]?.w, J3 = (i, s, k) => Wp(i)?.[AN_SIDE[s][k]];
+  // Le genou : en 3D quand MediaPipe le donne (vidéos analysées depuis la v194), sinon dans l'image.
+  const knee = (i, s) => { const a = anA3w(J3(i, s, 'hip'), J3(i, s, 'knee'), J3(i, s, 'ank')); return Number.isFinite(a) ? a : anA3(pt(i, AN_SIDE[s].hip), pt(i, AN_SIDE[s].knee), pt(i, AN_SIDE[s].ank)); };
+  const ankA = (i, s) => anA3(pt(i, AN_SIDE[s].knee), pt(i, AN_SIDE[s].ank), pt(i, AN_SIDE[s].toe));
+  const elbA = (i, s) => { const a = anA3w(J3(i, s, 'sh'), J3(i, s, 'el'), J3(i, s, 'wr')); return Number.isFinite(a) ? a : anA3(pt(i, AN_SIDE[s].sh), pt(i, AN_SIDE[s].el), pt(i, AN_SIDE[s].wr)); };
+  const armA = (i, s) => { const h = pt(i, AN_SIDE[s].sh), e = pt(i, AN_SIDE[s].el); return anVA((e[0] - h[0]) * dir, e[1] - h[1]); };
   const head = i => { const s = shC(i), h = hipC(i), e = anMid(pt(i, 7), pt(i, 8)); return anVA((e[0] - s[0]) * dir, s[1] - e[1]) - anVA((s[0] - h[0]) * dir, h[1] - s[1]); };
   // Les appuis : le pied au plus bas de sa trajectoire, presque immobile (caméra fixe : aussi immobile de côté).
   const win = Math.max(2, Math.ceil(.35 / dtr)), tol = .05 * leg, C = [];
@@ -15720,9 +15769,10 @@ function anaRun(v, P) {
   { const keep = C.filter(c => (c.tm ?? (c.b - c.a + 1) * dtr) <= .45); C.length = 0; C.push(...keep); }
   const real = i => P.F[i].t / slow, prec = Math.round(dtr * 1000);
   const S = C.map((c, k) => { const o = c.s === 'G' ? 'D' : 'G', nx = C[k + 1], i = c.a, end = nx ? nx.a : Math.min(n - 1, c.b + win);
-    let tl = -90, hk = 180; for (let j = c.a; j <= end; j++) if (ok[j]) { tl = Math.max(tl, thigh(j, o)); if (j <= c.b && thigh(j, o) < 10) hk = Math.min(hk, knee(j, o)); }
+    let tl = -90, hk = 180, rk = 180, amx = -180, amn = 180, el = []; for (let j = c.a; j <= end; j++) if (ok[j]) { tl = Math.max(tl, thigh(j, o)); if (j <= c.b && thigh(j, o) < 10) hk = Math.min(hk, knee(j, o)); rk = Math.min(rk, knee(j, o));
+      for (const sd of ['G', 'D']) { const a = armA(j, sd); amx = Math.max(amx, a); amn = Math.min(amn, a); el.push(elbA(j, sd)); } }
     return {n: k + 1, s: c.s, t: real(i), ct: c.tm ?? (c.b - c.a + 1) * dtr, td: (foot(i, c.s)[0] - hipC(i)[0]) * dir / leg, shin: shin(i, c.s), knee: knee(i, c.s),
-      sep: Math.abs(thigh(i, c.s) - thigh(i, o)), trunk: trunk(i), head: head(i), tl, hk}; });
+      sep: Math.abs(thigh(i, c.s) - thigh(i, o)), trunk: trunk(i), head: head(i), tl, hk, rk, ank: ankA(i, c.s), hipx: ok[c.b] ? -thigh(c.b, c.s) : NaN, arm: amx - amn, elb: anMed(el)}; });
   // La position « prêt » : mains au sol, corps immobile, au début de la vidéo.
   let set = null; for (const i of idx.slice(0, Math.ceil(idx.length / 3))) { const w = anMid(pt(i, 15), pt(i, 16)), kn = anMid(pt(i, 25), pt(i, 26));
     if (w[1] > kn[1] - .05 * leg) { const s = shC(i), arm = anDist(pt(i, 11), pt(i, 15)) || leg / 2; set = {i, off: (s[0] - w[0]) * dir / arm}; } else if (set) break; }
@@ -15756,11 +15806,18 @@ function anaRun(v, P) {
     if (acc) { const t1 = S[0].trunk; if (ph === 'depart') R.push(anRow('trunk1', 'Tronc au 1er appui', t1, Math.round(t1) + '° (par rapport à la verticale)', anLv(t1, 40, 30, true), '40 à 50°'));
       const k4 = S.slice(0, Math.min(5, S.length)); if (k4.length >= 3) { const drop = (k4[0].trunk - k4.at(-1).trunk) / (k4.length - 1); R.push(anRow('rise', 'Redressement du tronc', drop, `${fx(drop, 1)}° par appui (${Math.round(k4[0].trunk)}° → ${Math.round(k4.at(-1).trunk)}°)`, anLv(drop, 5, 8), '2 à 5° par appui, régulier')); }
       const hk = S.slice(0, 4).filter(x => x.hk < 180).map(x => x.hk); if (hk.length >= 2) { const m = anMed(hk); R.push(anRow('heel', 'Talon de la jambe libre', m, `genou fermé à ${Math.round(m)}°${m < 45 ? ' : talon vers la fesse' : ''}`, anLv(m, 0, 0) && (m >= 55 ? 'good' : m >= 45 ? 'warn' : 'bad'), 'talon bas, genou qui avance (≥ 55°)')); } }
+    // Les autres articulations : cheville, hanche à la poussée, retour de la jambe, bras et coudes.
+    const ak = anMed(SS.map(x => x.ank)); if (Number.isFinite(ak)) R.push(anRow('ank', 'Cheville à la pose', ak, `${Math.round(ak)}° entre tibia et pied`, anLv(ak, 110, 120), 'pied « armé », pointe relevée : 95 à 110°'));
+    const hx = anMed(SS.map(x => x.hipx)); if (Number.isFinite(hx)) R.push(acc ? anRow('hipx', 'Hanche à la fin de la poussée', hx, `cuisse ${Math.round(hx)}° derrière la verticale`, anLv(hx, 25, 15, true), 'poussée complète : 25° ou plus derrière')
+      : anRow('hipx', 'Hanche à la fin de la poussée', hx, `cuisse ${Math.round(hx)}° derrière la verticale`, anLv(hx, 22, 30), 'à vitesse max : pied qui quitte vite le sol, 22° au plus'));
+    if (!acc) { const rk = anMed(SS.map(x => x.rk).filter(x => x < 180)); if (Number.isFinite(rk)) R.push(anRow('rk', 'Retour de la jambe libre', rk, `genou fermé à ${Math.round(rk)}°`, anLv(rk, 45, 60), 'talon près de la fesse : 45° ou moins (jambe courte = retour rapide)')); }
+    const am = anMed(S.map(x => x.arm)); if (Number.isFinite(am)) R.push(anRow('arm', 'Amplitude des bras', am, `${Math.round(am)}° d'avant en arrière`, anLv(am, 90, 70, true), '90° ou plus, mains du menton à la hanche'));
+    const eb = anMed(S.map(x => x.elb)); if (Number.isFinite(eb)) R.push(anRow('elb', 'Coudes', eb, `${Math.round(eb)}° en moyenne`, eb >= 70 && eb <= 115 ? 'good' : eb >= 55 && eb <= 135 ? 'warn' : 'bad', 'fléchis autour de 90° (70 à 115°)'));
     const hd = anMed(S.slice(0, acc ? 4 : 99).map(x => x.head)); R.push(anRow('head', 'Tête', hd, hd < -10 ? `relevée de ${Math.round(-hd)}° par rapport au dos` : 'dans l\'alignement du dos', hd >= -20 ? 'good' : hd >= -32 ? 'warn' : 'bad', 'alignée avec le tronc'));
     const g = S.filter(x => x.s === 'G').map(x => x.ct), d = S.filter(x => x.s === 'D').map(x => x.ct);
     if (g.length >= 2 && d.length >= 2 && dtr <= .02) { const a = anMean(g), b = anMean(d), gap = Math.abs(a - b) / Math.max(a, b) * 100; R.push(anRow('sym', 'Contact gauche / droite', gap, `G ${Math.round(a * 1000)} · D ${Math.round(b * 1000)} ms (${Math.round(gap)} %)`, anLv(gap, 8, 15), 'moins de 8 % d\'écart')); }
   }
-  return {at: Date.now(), kind: 'run', ph, manual, prec, view, key: {ct: S.length ? +anMean(cts).toFixed(3) : null, fq: Number.isFinite(fq) ? +fq.toFixed(2) : null, len: Number.isFinite(len) ? +len.toFixed(2) : null, spd: Number.isFinite(len) && Number.isFinite(fq) ? +(len * fq).toFixed(2) : null}, steps: S.map(x => ({n: x.n, s: x.s, t: +x.t.toFixed(3), ct: +x.ct.toFixed(3), td: +x.td.toFixed(2), shin: Math.round(x.shin), knee: Math.round(x.knee), sep: Math.round(x.sep), trunk: Math.round(x.trunk)})), rows: T(R), err: S.length ? '' : 'Aucun appui trouvé : filme de côté, caméra fixe, ou marque les appuis à la main.'};
+  return {at: Date.now(), kind: 'run', ph, manual, prec, view, key: {ct: S.length ? +anMean(cts).toFixed(3) : null, fq: Number.isFinite(fq) ? +fq.toFixed(2) : null, len: Number.isFinite(len) ? +len.toFixed(2) : null, spd: Number.isFinite(len) && Number.isFinite(fq) ? +(len * fq).toFixed(2) : null}, steps: S.map(x => ({n: x.n, s: x.s, t: +x.t.toFixed(3), ct: +x.ct.toFixed(3), td: +x.td.toFixed(2), shin: Math.round(x.shin), knee: Math.round(x.knee), sep: Math.round(x.sep), trunk: Math.round(x.trunk), ank: Math.round(x.ank), hipx: Math.round(x.hipx), elb: Math.round(x.elb)})), rows: T(R), err: S.length ? '' : 'Aucun appui trouvé : filme de côté, caméra fixe, ou marque les appuis à la main.'};
 }
 
 function anaLift(v, P) {
@@ -15888,7 +15945,7 @@ function anaIntent(kind, rows, coach) {
 // Ce que coûte (ou rapporte) chaque point sur un 100 m, du plus au moins : la fréquence et le temps de contact font la
 // vitesse (Weyand 2000, Morin 2012) ; le pied devant la hanche freine à chaque appui ; l'écart gauche / droite, la poussée
 // des premiers appuis (tronc, tibia) font l'accélération (Kugler 2010) ; la tête et la position des blocs comptent moins.
-const AN_IMP = {fq: 10, ct: 10, td: 9, sym: 7, trunk1: 7, rise: 7, shin: 6, thigh: 6, knee: 5, sep: 5, trunk: 4, heel: 4, set: 3, head: 3,
+const AN_IMP = {ank: 6, hipx: 6, rk: 5, arm: 5, elb: 3, fq: 10, ct: 10, td: 9, sym: 7, trunk1: 7, rise: 7, shin: 6, thigh: 6, knee: 5, sep: 5, trunk: 4, heel: 4, set: 3, head: 3,
   vloss: 8, depth: 6, ext: 7, exth: 7, catch: 5, fly: 9, par: 6, valgus: 8, hipfirst: 6, desc: 4, tempo: 3};
 const anImp = x => x.prio ? Math.max(1, 12 - x.prio) : AN_IMP[x.k] ?? 4;
 const anPill = '<i class="anunc">à vérifier</i>';
@@ -15917,7 +15974,7 @@ function anaResHtml(v) {
   const K = A?.key || {}, kv = (l, x) => `<div><span>${l}</span><b>${x}</b></div>`;
   const keys = k === 'run' ? `<div class="vres">${kv('Temps de contact', K.ct ? Math.round(K.ct * 1000) + ' ms' : '–')}${kv('Fréquence', K.fq ? fx(K.fq, 2) + ' pas/s' : '–')}${kv('Longueur de pas', K.len ? fx(K.len, 2) + ' m' : '–')}${K.spd ? kv('Vitesse', fx(K.spd, 1) + ' m/s') : ''}</div>`
     : A?.reps?.length ? `<div class="vres">${kv('Répétitions', A.reps.length)}${kv('Descente', fx(anMean(A.reps.map(r => r.desc)), 2) + ' s')}${kv('Montée', fx(anMean(A.reps.map(r => r.asc)), 2) + ' s')}</div>` : '';
-  const tab = A?.kind === 'run' && A.steps?.length ? `<details class="anadet"><summary>Appui par appui (${A.steps.length})</summary><table class="anat"><tr><th>#</th><th>Pied</th><th>Contact</th><th>Pied-hanche</th><th>Tibia</th><th>Tronc</th></tr>${A.steps.map(s => `<tr><td>${s.n}</td><td>${s.s}</td><td>${Math.round(s.ct * 1000)} ms</td><td>${Math.round(s.td * 100)} %</td><td>${s.shin}°</td><td>${s.trunk}°</td></tr>`).join('')}</table></details>`
+  const tab = A?.kind === 'run' && A.steps?.length ? `<details class="anadet"><summary>Appui par appui (${A.steps.length})</summary><table class="anat"><tr><th>#</th><th>Pied</th><th>Contact</th><th>Pied-hanche</th><th>Tibia</th><th>Tronc</th><th>Genou</th><th>Cheville</th><th>Hanche</th></tr>${A.steps.map(s => `<tr><td>${s.n}</td><td>${s.s}</td><td>${Math.round(s.ct * 1000)} ms</td><td>${Math.round(s.td * 100)} %</td><td>${s.shin}°</td><td>${s.trunk}°</td><td>${s.knee ?? '–'}°</td><td>${Number.isFinite(s.ank) ? s.ank + '°' : '–'}</td><td>${Number.isFinite(s.hipx) ? s.hipx + '°' : '–'}</td></tr>`).join('')}</table></details>`
     : A?.reps?.length ? `<details class="anadet"><summary>Répétition par répétition (${A.reps.length})</summary><table class="anat"><tr><th>#</th><th>Descente</th><th>Montée</th><th>Genou</th><th>Tronc</th></tr>${A.reps.map(r => `<tr><td>${r.n}</td><td>${fx(r.desc, 2)} s</td><td>${fx(r.asc, 2)} s</td><td>${r.knee}°</td><td>${r.trunk}°</td></tr>`).join('')}</table></details>` : '';
   const vw = A?.view, VQ = {bonne: 'bonne prise de vue (bien de côté, distance stable)', moyenne: 'prise de vue moyenne : un peu de biais ou de parallaxe, les angles peuvent bouger de quelques degrés', biais: 'filmé en biais : les angles sont faussés, refilme bien de côté'};
   const foot = A ? `<p class="small muted" data-tip="1" style="margin:6px 4px 0">${A.kind === 'run' ? `Phase : ${esc(RUN_PH.find(x => x[0] === A.ph)?.[1] || '')}` : `Côté mesuré : ${A.side === 'G' ? 'gauche' : 'droit'}`}${vw ? ' · ' + VQ[vw.q] : ''}${vw?.edge ? ` · ${vw.edge} appui${vw.edge > 1 ? 's' : ''} au bord de l'image écarté${vw.edge > 1 ? 's' : ''}` : ''}${A.prec > 20 ? ` · temps à ± ${A.prec} ms (filme au ralenti pour mieux)` : ''}.</p>` : '';
@@ -16643,7 +16700,7 @@ function mnConc(r, prev) {
     txt: `Ton point fort ce mois-ci : ${MN_TXT[best].toLowerCase()} (${sc[best]}/100). Ce qui te coûte le plus : ${MN_TXT[low].toLowerCase()} (${sc[low]}/100).`};
 }
 
-function mnOpen() { MN = {i: 0, a: {}, res: mnDone() ? mnAll()[mnMonth()] : null}; openPane({title: 'Bilan mental du mois', render: mnRender, onClose: () => { MN.res = null; }}); }
+function mnOpen() { MN = {i: 0, a: {}, res: mnDone() ? mnAll()[mnMonth()] : null}; openPane({title: 'Bilan mental du mois', full: true, render: mnRender, onClose: () => { MN.res = null; }}); }
 function mnRender() {
   if (MN.res) return mnResult(MN.res);
   if (!MN.on) {
@@ -16690,14 +16747,270 @@ document.addEventListener('click', async e => {
     MN.i = Math.max(0, Math.min(MN_SEC.length - 1, MN.i + d)); paneRender(); $('#pane-scroll')?.scrollTo({top: 0, behavior: 'smooth'}); }
 });
 // Les deux carrés de l'accueil : à gauche le bilan mental (point rouge s'il reste à faire ce mois-ci), à droite Ton cap.
-function mnDot() { const b = $('.one-hmen'); if (b) b.classList.toggle('due', !mnDone()); const c = $('.one-hcap span'); if (c && typeof capGet === 'function') { const l = daysBetween(TODAY, capGet().date); c.textContent = l > 0 ? 'J-' + l : l === 0 ? 'J' : 'Cap'; } }
-document.body.insertAdjacentHTML('beforeend', `<button class="one-sq one-aib one-hmen" data-one-mental aria-label="Bilan mental du mois" title="Bilan mental du mois"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21v-3.2A7 7 0 1 1 18.6 12l1.4 3h-2v2.5a1.5 1.5 0 0 1-1.5 1.5H14v2"/><path d="M10.5 9.5a2 2 0 1 1 2.5 1.9V12"/></svg><span>MENTAL</span></button>
-  <button class="one-sq one-aib one-hcap" data-capview aria-label="Ton cap" title="Ton cap"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg><span>CAP</span></button>`);
+function mnDot() { const b = $('.one-hmen'); if (b) b.classList.toggle('due', !mnDone()); const c = $('.one-hcap .one-capn'); if (c && typeof capGet === 'function') { const l = daysBetween(TODAY, capGet().date); c.textContent = l > 0 ? 'J-' + l : l === 0 ? 'J' : 'Cap'; } }
+document.body.insertAdjacentHTML('beforeend', `<button class="one-sq one-aib one-hmen" data-one-mental aria-label="Bilan mental du mois" title="Bilan mental du mois"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21v-3.2A7 7 0 1 1 18.6 12l1.4 3h-2v2.5a1.5 1.5 0 0 1-1.5 1.5H14v2"/><path d="M10.5 9.5a2 2 0 1 1 2.5 1.9V12"/></svg></button>
+  <button class="one-sq one-aib one-hcap" data-capview aria-label="Ton cap" title="Ton cap"><span class="one-capn">CAP</span></button>`);
 setTimeout(mnDot, 0); setInterval(mnDot, 60e3);
 // La notification du mois (./?q=mental) ouvre directement le bilan.
 function mnAuto() { const t = setInterval(() => { if (!S.app || window.TNR_SPLASH_ON || document.getElementById('splash')) return; clearInterval(t); mnDot(); mnOpen(); }, 250); }
 navigator.serviceWorker?.addEventListener('message', e => { if (/[?&]q=mental/.test(e.data?.open || '')) mnAuto(); });
 if (new URLSearchParams(location.search).get('q') === 'mental') { history.replaceState(history.state, '', location.pathname); mnAuto(); }
+
+/* ================= Accueil · le bilan : la carte de la semaine, puis la page Bilan (semaine + mois) =================
+   · La carte : le résumé et les 3 conseils. Chaque chiffre est un peu plus gras et se touche : il ouvre sa courbe.
+     Les conseils tiennent compte de la semaine qui vient (séances prévues, compétition proche), pas seulement du passé.
+   · Toucher la carte ouvre la page Bilan : la synthèse de la semaine (tous les chiffres face à ta normale, les 4
+     dernières semaines), puis plus bas le bilan du mois : toutes les données du mois, tes notes (enregistrées toutes
+     seules), et « Copier pour Claude » → la réponse de Claude se colle ici et reste dans l'appli.
+   · Notifications : le vendredi soir (./?q=bilan) ouvre la page ; le 1er du mois (./?q=mois) ouvre le bilan du mois.
+   Rangé dans settings/app.monthRev["AAAA-MM"] = {notes, at, rev}. */
+
+// Chaque chiffre d'une phrase : en gras, et relié à sa courbe d'après le mot qui le précède.
+const WK_MET = [[/récup(?!s)/i, 'recovery'], [/VFC/i, 'hrv'], [/pouls|FC|battements/i, 'rhr'], [/nuit|sommeil|coucher|couché/i, 'sleepH'], [/charge|journées?|séances?|effort/i, 'effort'], [/poids|kg/i, 'weight']];
+function wkLinks(t) {
+  const h = esc(t);
+  return h.replace(/(?<![&#\w,.])(\d+(?:[,.]\d+)?(?:\s?h(?:\s?\d{2})?)?(?:\s?(?:%|g|kcal|min|L|ms|pts|points|battements|jours?|soirs?|\/10))?)/g, (m, x, off) => {
+    const before = h.slice(Math.max(0, off - 80), off + m.length + 30), mt = WK_MET.find(([re]) => re.test(before))?.[1];
+    return `<b class="wkv"${mt ? ` data-metric="${mt}" role="button"` : ''}>${m}</b>`; });
+}
+// La semaine qui vient : séances prévues et compétition proche, pour des conseils qui servent vraiment.
+function wkNext(end, A, N) {
+  const D = [...Array(7)].map((_, i) => addDays(end, i + 1)), out = [];
+  const has = (k, kind) => { try { return !!planForK(k, kind); } catch (e) { return false; } };
+  const dbl = D.filter(k => has(k, 'gym') && has(k, 'track')), trk = D.filter(k => has(k, 'track')), gym = D.filter(k => has(k, 'gym'));
+  const dn = k => new Date(k + 'T12:00:00').toLocaleDateString('fr-FR', {weekday: 'short'}).replace('.', '');
+  const c = typeof capGet === 'function' ? capGet() : null;
+  const comp = c ? [...(c.steps || []).filter(s => s.d && !s.done), {d: c.date, t: c.res}].filter(s => s.d > end && s.d <= addDays(end, 10)).sort((a, b) => a.d.localeCompare(b.d))[0] : null;
+  if (comp) { const j = daysBetween(end, comp.d), nm = String(comp.t || 'Compétition').split(':')[0];
+    out.push([6, `${nm} ${fmtShort(comp.d).replace(/\.$/, '')} (J-${j}) : dernière séance de sprint intense ${j >= 5 ? '3 jours avant' : 'au plus tard 2 jours avant'}, puis léger ; même heure de coucher 3 soirs avant.`]); }
+  const recLow = A.rec != null && N.rec != null && A.rec < N.rec - 3;
+  if (dbl.length >= 3) out.push([recLow ? 4.6 : 3.4, `${dbl.length} jours doubles prévus (${dbl.map(dn).join(', ')}) : les jours entre eux restent vraiment calmes (marche, mobilité), sinon la piste du soir perd sa qualité.`]);
+  else if (trk.length + gym.length === 0 && (N.gym + N.track) >= 2) out.push([2.5, 'Aucune séance prévue la semaine prochaine : place-les dans le planning pour que l\'appli adapte tes conseils.']);
+  if (recLow && trk.length) out.push([4.2, `Récup sous ta normale et ${trk.length} séance${trk.length > 1 ? 's' : ''} de piste prévue${trk.length > 1 ? 's' : ''} : garde la vitesse max, coupe 1 ou 2 répétitions si le matin est rouge.`]);
+  return out;
+}
+const wkCoach0b = wkCoach;
+wkCoach = function (end = wkFriday()) {
+  const C = wkCoach0b(end); try { const X = wkNext(end, C.A, C.N); if (X.length) { const L = [...X.sort((a, b) => b[0] - a[0]).map(x => x[1]), ...C.todo]; C.todo = [...new Set(L)].slice(0, 3); } } catch (e) {} return C;
+};
+wkCard = function () {
+  const C = wkSafe(() => (WK = wkCoach())); if (!C) return '';
+  const range = `${fmtShort(C.from).replace(/\.$/, '')} – ${fmtShort(C.end)}`;
+  return `<section class="wk wkb" data-bilan role="button" tabindex="0" aria-label="Bilan de la semaine : ouvrir"><div class="wk-h"><span class="eyebrow">Bilan de la semaine</span><small>${esc(range)} ›</small></div>
+    <h2 class="wk-t">${esc(C.title)}</h2><p class="wk-p">${wkLinks(C.para)}</p>
+    <div class="wk-n"><span class="eyebrow">Pour la semaine qui vient</span><ol>${C.todo.map(t => `<li><span>${wkLinks(t)}</span></li>`).join('')}</ol></div></section>`;
+};
+
+/* ---------- la page Bilan ---------- */
+let BLN = {off: 0, mo: null};
+const blnMonth = () => { const d = +TODAY.slice(8, 10); return d <= 7 ? addDays(TODAY.slice(0, 8) + '01', -1).slice(0, 7) : TODAY.slice(0, 7); };
+const moName = m => cap(new Date(m + '-15T12:00:00').toLocaleDateString('fr-FR', {month: 'long', year: 'numeric'}));
+function blnOpen(part) { BLN = {off: 0, mo: blnMonth()}; openPane({title: 'Bilan', full: true, render: blnHtml}); if (part === 'mois') setTimeout(() => document.getElementById('blnmo')?.scrollIntoView({behavior: 'smooth', block: 'start'}), 450); }
+const bf = (v, d = 0, u = '') => v == null || Number.isNaN(v) ? '–' : fx(v, d) + u;
+function blnRows(A, N) {
+  const dd = (a, b, d = 0, u = '', inv) => a == null || b == null ? '' : (() => { const x = a - b, good = inv ? x < 0 : x > 0; return Math.abs(x) < Math.pow(10, -d) / 2 ? '<span class="bln-eq">=</span>' : `<span class="${good ? 'bln-up' : 'bln-dn'}">${x > 0 ? '+' : '−'}${fx(Math.abs(x), d)}${u}</span>`; })();
+  const R = [
+    ['recovery', 'Récupération', bf(A.rec, 0, ' %'), bf(N.rec, 0, ' %'), dd(A.rec, N.rec, 0, ' pts')],
+    ['hrv', 'VFC', bf(A.hrv, 0, ' ms'), bf(N.hrv, 0, ' ms'), dd(A.hrv, N.hrv, 0, ' ms')],
+    ['rhr', 'FC au repos', bf(A.rhr, 0), bf(N.rhr, 0), dd(A.rhr, N.rhr, 0, '', true)],
+    ['sleepH', 'Sommeil', A.sleep != null ? wkH(A.sleep) : '–', N.sleep != null ? wkH(N.sleep) : '–', dd(A.sleep, N.sleep, 1, ' h')],
+    ['sleepH', 'Coucher moyen', A.bed != null ? wkT(A.bed) : '–', N.bed != null ? wkT(N.bed) : '–', A.bed != null && N.bed != null ? `<span class="${A.bed <= N.bed ? 'bln-up' : 'bln-dn'}">${A.bed <= N.bed ? '−' : '+'}${Math.round(Math.abs(A.bed - N.bed))} min</span>` : ''],
+    ['effort', 'Charge (effort cumulé)', bf(A.load, 0), bf(N.load, 0), dd(A.load, N.load, 0)],
+    ['effort', 'Jours durs', bf(A.hard, 0), bf(N.hard, 1), ''],
+    ['', 'Séances muscu · piste', `${A.gym} · ${A.track}`, `${bf(N.gym, 1)} · ${bf(N.track, 1)}`, ''],
+    ['', 'Protéines par jour', bf(A.prot, 0, ' g'), A.protG ? bf(A.protG, 0, ' g visés') : '–', ''],
+    ['', 'Apports / dépense', A.kcal != null ? bf(A.kcal * 100, 0, ' %') : '–', '100 %', ''],
+    ['', 'Jours à 2 L d\'eau', `${A.water}/${A.waterN || 7}`, '', ''],
+    ['', 'Douleur', A.pain ? `${A.pain} j · max ${A.painMax}/10` : 'aucune', '', ''],
+    ['', 'Récup active', bf(A.recov, 0, ' min'), bf(N.recov, 0, ' min'), ''],
+    ['weight', 'Poids', bf(A.weight, 1, ' kg'), bf(N.weight, 1, ' kg'), dd(A.weight, N.weight, 1, ' kg')]];
+  return `<div class="bln-t"><div class="bln-r bln-hd"><span></span><b>Cette semaine</b><b>Ta normale</b><b>Écart</b></div>${R.map(([m, l, a, n, d]) => `<div class="bln-r${m ? ' bln-go' : ''}"${m ? ` data-metric="${m}" role="button"` : ''}><span>${l}</span><b>${a}</b><span>${n}</span><span>${d}</span></div>`).join('')}</div>`;
+}
+function blnHtml() {
+  const end = addDays(wkFriday(), -7 * BLN.off), C = wkCoach(end), A = C.A, N = C.N;
+  const W4 = [0, 1, 2, 3].map(i => ({e: addDays(end, -7 * i), s: i ? wkStats(addDays(end, -7 * i)) : A})).reverse();
+  const range = `${fmtShort(C.from).replace(/\.$/, '')} – ${fmtShort(C.end)}`;
+  return `<div class="bln">
+    <div class="bln-nav"><button type="button" class="chip" data-blnoff="1" aria-label="Semaine d'avant">‹</button><span>${esc(range)}</span><button type="button" class="chip" data-blnoff="-1"${BLN.off ? '' : ' disabled'} aria-label="Semaine d'après">›</button></div>
+    <h2 class="bln-h">${esc(C.title)}</h2><p class="bln-p">${wkLinks(C.para)}</p>
+    <div class="sec-label">Pour la semaine qui vient</div><ol class="bln-todo">${C.todo.map(t => `<li><span>${wkLinks(t)}</span></li>`).join('')}</ol>
+    <div class="sec-label">Tes chiffres <small>face aux 4 semaines d'avant · touche une ligne pour sa courbe</small></div>${blnRows(A, N)}
+    <div class="sec-label">Les 4 dernières semaines</div>
+    <div class="bln-t bln-4"><div class="bln-r bln-hd"><span></span>${W4.map(w => `<b>${esc(fmtShort(addDays(w.e, -6)).replace(/\.$/, ''))}</b>`).join('')}</div>
+      ${[['Récup', w => bf(w.rec, 0, ' %')], ['Sommeil', w => w.sleep != null ? wkH(w.sleep) : '–'], ['Charge', w => bf(w.load, 0)], ['Séances', w => `${w.gym + w.track}`], ['Douleur', w => w.pain ? `${w.pain} j` : '0'], ['Poids', w => bf(w.weight, 1)]].map(([l, f]) => `<div class="bln-r"><span>${l}</span>${W4.map(w => `<b>${f(w.s)}</b>`).join('')}</div>`).join('')}</div>
+    ${blnMonthHtml()}</div>`;
+}
+
+/* ---------- le bilan du mois ---------- */
+const moDays = m => { const L = []; for (let k = m + '-01'; k.startsWith(m) && k <= TODAY; k = addDays(k, 1)) L.push(k); return L; };
+function moDay(k) {
+  const s = f => wkSafe(f), t = s(() => dayTotals(k)), g = s(() => fuelGoal(k)), w = M(k, 'well') || {};
+  return {k, rec: s(() => recovery(k)?.score), hrv: s(() => G(k, 'hrv')), rhr: s(() => G(k, 'rhr')), sl: s(() => VAL.sleepH(addDays(k, 1))), bed: s(() => G(addDays(k, 1), 'bed')),
+    eff: s(() => effortDay(k)), gym: s(() => logsOn(k).some(l => l.kind === 'gym')) || !!M(k, 'gymRpe'), trk: s(() => logsOn(k).some(l => l.kind === 'track')) || !!M(k, 'trackRpe'),
+    grpe: M(k, 'gymRpe'), trpe: M(k, 'trackRpe'), kcal: t?.kcal || null, kg: g?.kcal || null, p: t?.p || null, water: s(() => waterOf(k).L),
+    pain: s(() => maxPain(k)) || 0, zones: s(() => Object.entries(pains(k)).filter(([, v]) => +v > 0).map(([z, v]) => `${painTxt(z)} ${v}`).join(', ')) || '',
+    well: w, str: M(k, 'eve')?.dstr || null, wt: s(() => W(k, 'weight'))};
+}
+function moStats(m) {
+  const D = moDays(m).map(moDay), avg = f => wkMean(D.map(f));
+  return {D, n: D.length, rec: avg(d => d.rec), hrv: avg(d => d.hrv), rhr: avg(d => d.rhr), sl: avg(d => d.sl), gym: D.filter(d => d.gym).length, trk: D.filter(d => d.trk).length,
+    eff: D.reduce((a, d) => a + (d.eff || 0), 0), pain: D.filter(d => d.pain > 0).length, painMax: Math.max(0, ...D.map(d => d.pain)), kcal: avg(d => d.kcal && d.kg ? d.kcal / d.kg : null), p: avg(d => d.p),
+    w0: D.find(d => d.wt)?.wt, w1: [...D].reverse().find(d => d.wt)?.wt, food: D.filter(d => d.kcal).length, quest: D.filter(d => M(d.k, 'mornAt')).length};
+}
+const moRev = m => S.app?.monthRev?.[m] || {};
+function blnMonthHtml() {
+  const m = BLN.mo || blnMonth(), X = moStats(m), R = moRev(m), r = R.rev, mn = S.app?.mental?.[m] || S.app?.mental?.[addDays(m + '-01', 32).slice(0, 7)];
+  const opts = [0, 1, 2].map(i => addDays(TODAY.slice(0, 8) + '01', -i * 28).slice(0, 7)).filter((x, i, a) => a.indexOf(x) === i);
+  const kv = (l, v, mt) => `<div class="bln-kv"${mt ? ` data-metric="${mt}" role="button"` : ''}><span>${l}</span><b>${v}</b></div>`;
+  return `<div id="blnmo" class="bln-mo"><div class="bln-moh"><span class="eyebrow">Bilan du mois</span><div class="seg segsm">${opts.map(o => `<button type="button" data-blnmo="${o}" aria-pressed="${o === m}">${esc(new Date(o + '-15T12:00:00').toLocaleDateString('fr-FR', {month: 'short'}))}</button>`).join('')}</div></div>
+    <h2 class="bln-h">${esc(moName(m))}${m === TODAY.slice(0, 7) ? ' <small>en cours</small>' : ''}</h2>
+    <div class="bln-grid">${kv('Récup moyenne', bf(X.rec, 0, ' %'), 'recovery')}${kv('VFC', bf(X.hrv, 0, ' ms'), 'hrv')}${kv('FC repos', bf(X.rhr, 0), 'rhr')}${kv('Sommeil', X.sl != null ? wkH(X.sl) : '–', 'sleepH')}
+      ${kv('Séances muscu', X.gym)}${kv('Séances piste', X.trk)}${kv('Charge du mois', bf(X.eff, 0), 'effort')}${kv('Jours de douleur', X.pain ? `${X.pain} · max ${X.painMax}/10` : '0')}
+      ${kv('Apports / dépense', X.kcal != null ? bf(X.kcal * 100, 0, ' %') : '–')}${kv('Protéines', bf(X.p, 0, ' g/j'))}${kv('Poids', X.w0 && X.w1 ? `${fx(X.w0, 1)} → ${fx(X.w1, 1)} kg` : '–', 'weight')}${kv('Bilan mental', mn ? mn.note + '/100' : 'pas fait')}</div>
+    ${r ? `<div class="card bln-rev"><span class="eyebrow">L'analyse de Claude</span>${r.titre ? `<h3>${esc(r.titre)}</h3>` : ''}${r.resume ? `<p>${esc(r.resume)}</p>` : ''}
+      ${r.forts?.length ? `<div class="sec-label">Points forts</div><ol>${r.forts.map(x => `<li>${esc(x)}</li>`).join('')}</ol>` : ''}
+      ${r.faibles?.length ? `<div class="sec-label">Points faibles</div><ol>${r.faibles.map(x => `<li>${esc(x)}</li>`).join('')}</ol>` : ''}
+      ${r.objectifs?.length ? `<div class="sec-label">Le mois qui vient</div><ol>${r.objectifs.map(x => `<li>${esc(x)}</li>`).join('')}</ol>` : ''}
+      ${r.domaines ? Object.entries(r.domaines).map(([k, v]) => `<p class="small"><b>${esc(k)} :</b> ${esc(v)}</p>`).join('') : ''}</div>` : ''}
+    <div class="sec-label">Mes notes du mois <small>enregistrées toutes seules</small></div>
+    <textarea class="mini-in bln-notes" data-blnnotes="${m}" rows="4" placeholder="Ce qui s'est passé ce mois : compétitions, sensations, fatigue, vie perso, ce que tu veux changer…">${esc(R.notes || '')}</textarea>
+    <div class="btnrow two" style="margin-top:12px"><button type="button" class="btn" data-blncopy="${m}">Copier pour Claude</button><button type="button" class="btn ghost" data-blnpaste="${m}">Coller sa réponse</button></div>
+    <p class="small muted" data-tip="1" style="margin:8px 4px 0">« Copier » prend toutes les données du mois, jour par jour (récup, sommeil, séances, nutrition, douleurs, ressenti, poids), ton bilan mental, Ton cap et tes vidéos. Colle-les dans Claude, puis colle sa réponse ici : elle reste dans l'appli.</p>
+    <textarea class="mini-in" data-blnin="${m}" rows="3" placeholder="Colle ici la réponse de Claude (avec le bloc json)" style="width:100%;margin-top:8px;display:none"></textarea></div>`;
+}
+function moPrompt(m) {
+  const X = moStats(m), f = (v, d = 0) => v == null || Number.isNaN(+v) ? '' : fx(+v, d);
+  const rows = X.D.map(d => [d.k, f(d.rec), f(d.hrv), f(d.rhr), d.sl != null ? f(d.sl, 1) : '', d.bed || '', f(d.eff, 1), [d.gym ? 'muscu' + (d.grpe ? ' RPE ' + d.grpe : '') : '', d.trk ? 'piste' + (d.trpe ? ' RPE ' + d.trpe : '') : ''].filter(Boolean).join(' + '),
+    d.kcal ? `${Math.round(d.kcal)}/${Math.round(d.kg || 0)}` : '', f(d.p), d.water != null ? f(d.water, 1) : '', d.pain ? d.zones : '', ['slq', 'fat', 'sor', 'str', 'moo'].map(x => d.well[x] || '-').join('/'), d.str || '', f(d.wt, 1)].join(' ; ')).join('\n');
+  const mn = S.app?.mental?.[m] || S.app?.mental?.[addDays(m + '-01', 32).slice(0, 7)];
+  const c = typeof capGet === 'function' ? capGet() : null, ax = c ? capAxes(c).filter(a => a.st !== 'done').slice(0, 5).map(a => `- ${a.n} (${a.subs.filter(s => s.done).length}/${a.subs.length})`).join('\n') : '';
+  const vp = typeof anaPts === 'function' ? anaPts('run') : null;
+  return `Utilise les skills recup-kine, nutrition-sport, prepa-physique, coach-sprint et preparateur-mental. Fais mon BILAN DU MOIS de ${moName(m)} : complet, rien d'oublié, chiffré, comparé à mes normales, avec les liens entre les données (sommeil → récup → séances, nutrition → poids, douleurs → charge, mental → performance).
+Je suis Oscar, sprinteur 60/100 m. Objectif : ${c ? `${c.ev} en ${chr(c.to)} (${c.res}, ${c.date})` : ''}.
+
+Résumé : ${X.n} jours · récup ${f(X.rec)} % · VFC ${f(X.hrv)} ms · FC repos ${f(X.rhr)} · sommeil ${X.sl != null ? wkH(X.sl) : '?'} · ${X.gym} séances muscu, ${X.trk} piste · charge ${f(X.eff)} · ${X.pain} jours de douleur (max ${X.painMax}/10) · apports ${X.kcal != null ? f(X.kcal * 100) + ' % de la dépense' : '?'} sur ${X.food} jours notés · protéines ${f(X.p)} g/j · poids ${X.w0 ? f(X.w0, 1) + ' → ' + f(X.w1, 1) + ' kg' : '?'} · questionnaire du matin ${X.quest}/${X.n} jours.
+
+Jour par jour (date ; récup % ; VFC ; FC repos ; sommeil h ; coucher ; effort ; séances ; kcal mangées/besoin ; protéines g ; eau L ; douleurs ; ressenti sommeil/fatigue/courbatures/stress/humeur sur 5 ; stress du soir sur 4 ; poids) :
+${rows}
+
+${mn ? `Bilan mental du mois : ${mn.note}/100 (tension ${mn.sc.tens}, humeur ${mn.sc.mood}, énergie ${mn.sc.burn}, mental de compétition ${mn.sc.comp}, équilibre ${mn.sc.life}).\n` : ''}${ax ? `Mes axes de travail (Ton cap) :\n${ax}\n` : ''}${vp?.n ? `Vidéos de course (${vp.n}) · points forts : ${vp.forts.slice(0, 4).map(x => x.t).join(' ; ')} · points faibles : ${vp.faibles.slice(0, 4).map(x => x.t).join(' ; ')}\n` : ''}${moRev(m).notes ? `Mes notes : ${moRev(m).notes}\n` : ''}
+Réponds en français simple, phrases courtes, tableaux. Termine par un seul bloc \`\`\`json : {"tnr":"mois","mois":"${m}","titre":"…","resume":"…","forts":["…"],"faibles":["…"],"objectifs":["…","…","…"],"domaines":{"Récupération":"…","Entraînement":"…","Sprint":"…","Nutrition":"…","Mental":"…"}}`;
+}
+function moParse(t) { const x = t.match(/```json\s*([\s\S]*?)```/) || t.match(/(\{[\s\S]*"tnr"\s*:\s*"mois"[\s\S]*\})/); if (!x) return null;
+  try { const j = JSON.parse(x[1].trim()); if (j.tnr !== 'mois') return null; const L = a => (Array.isArray(a) ? a : []).map(v => String(v).slice(0, 300)).slice(0, 8);
+    return {titre: String(j.titre || '').slice(0, 120), resume: String(j.resume || '').slice(0, 1500), forts: L(j.forts), faibles: L(j.faibles), objectifs: L(j.objectifs), domaines: j.domaines && typeof j.domaines === 'object' ? Object.fromEntries(Object.entries(j.domaines).slice(0, 8).map(([k, v]) => [String(k).slice(0, 30), String(v).slice(0, 500)])) : null}; } catch (e) { return null; } }
+let BLNT = null;
+function moSave(m, patch, now) { S.app = {...(S.app || {}), monthRev: {...(S.app?.monthRev || {}), [m]: {...moRev(m), ...patch}}}; clearTimeout(BLNT);
+  const go = () => dbSet('settings/app', {...S.app, updatedAt: new Date().toISOString()}).catch(() => {}); if (now) return go(); BLNT = setTimeout(go, 800); }
+document.addEventListener('click', async e => { let b; const at = q => (b = e.target.closest?.(q));
+  if (at('[data-bilan]')) { if (e.target.closest('[data-metric]')) return; try { oneHap(6); } catch (er) {} blnOpen(); return; }
+  if (at('[data-blnoff]')) { if (b.disabled) return; BLN.off = Math.max(0, BLN.off + +b.dataset.blnoff); paneRender(); return; }
+  if (at('[data-blnmo]')) { BLN.mo = b.dataset.blnmo; const y = $('#pane-scroll')?.scrollTop; paneRender(); if (y != null) $('#pane-scroll').scrollTop = y; return; }
+  if (at('[data-blncopy]')) { try { await navigator.clipboard.writeText(moPrompt(b.dataset.blncopy)); toast('Bilan copié : colle-le dans Claude'); } catch (er) { toast('Copie impossible'); } return; }
+  if (at('[data-blnpaste]')) { const t = document.querySelector(`[data-blnin="${b.dataset.blnpaste}"]`); if (t) { t.style.display = ''; t.focus(); } return; }
+});
+document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('[data-bilan]')) { e.preventDefault(); blnOpen(); } });
+document.addEventListener('input', e => { const t = e.target;
+  if (t.matches?.('[data-blnnotes]')) { moSave(t.dataset.blnnotes, {notes: t.value}); return; }
+  if (t.matches?.('[data-blnin]')) { const r = moParse(t.value); if (!r) return; const m = t.dataset.blnin; moSave(m, {rev: r, at: new Date().toISOString()}, true); toast('Bilan du mois rangé'); const y = $('#pane-scroll')?.scrollTop; paneRender(); if (y != null) $('#pane-scroll').scrollTop = y; }
+});
+// Les notifications : vendredi soir → la page Bilan ; début du mois → le bilan du mois.
+function blnAuto(part) { const t = setInterval(() => { if (!S.app || window.TNR_SPLASH_ON || document.getElementById('splash')) return; clearInterval(t); blnOpen(part); }, 250); }
+navigator.serviceWorker?.addEventListener('message', e => { const o = e.data?.open || ''; if (/[?&]q=bilan/.test(o)) blnAuto(); else if (/[?&]q=mois/.test(o)) blnAuto('mois'); });
+{ const q = new URLSearchParams(location.search).get('q'); if (q === 'bilan' || q === 'mois') { history.replaceState(history.state, '', location.pathname); blnAuto(q === 'mois' ? 'mois' : ''); } }
+
+/* ================= Le préparateur mental : une page à part entière (l'entraînement du mental) =================
+   D'après les cours de préparation mentale d'Oscar (T. Knaepen, BPJEPS) : dialogue interne et ses 4 dominantes
+   (confiance, calme, combativité, concentration), le « switch » en 4 étapes, le tableau de la confiance, les objectifs
+   de résultat / performance / processus (Kingston et Hardy 1997), les routines de performance, la respiration
+   (cohérence cardiaque à 6 cycles par minute, respiration carrée, respiration dynamisante avant l'effort), l'imagerie
+   (modèle PETTLEP, Holmes et Collins 2001), la relaxation progressive (Jacobson).
+   Rangé dans settings/app.mprep. Le bilan mental du mois (questionnaire) reste à part, sur l'accueil. */
+const MP_DEF = {
+  routine: ['Échauffement fini 15 min avant l\'appel', '3 accélérations, la dernière à fond', 'Respiration dynamisante 30 s', 'Mon mot de confiance, 3 fois', 'Imagerie du départ : les 5 premiers appuis', 'Réglage des blocs, toujours dans le même ordre', 'Soupir long, épaules basses : « À vos marques »'],
+  words: {conf: ['Je me suis entraîné pour ça'], calm: ['Épaules basses'], comb: ['Explosif, tout de suite'], conc: ['Pousse loin derrière']},
+  sw: [['Je n\'ai pas les jambes aujourd\'hui', 'Mes jambes répondent dès le premier appui']], fier: [], deb: []
+};
+const mpGet = () => ({...MP_DEF, ...(S.app?.mprep || {})});
+let MPT = null;
+function mpSave(fn, keep) { const m = mpGet(); fn(m); S.app = {...(S.app || {}), mprep: m}; clearTimeout(MPT); const go = () => dbSet('settings/app', {...S.app, updatedAt: new Date().toISOString()}).catch(() => {}); if (keep) MPT = setTimeout(go, 700); else { go(); const y = $('#pane-scroll')?.scrollTop; paneRender(); if (y != null) $('#pane-scroll').scrollTop = y; } }
+const MP_DOM = [['conf', 'Confiance'], ['calm', 'Calme'], ['comb', 'Combativité'], ['conc', 'Concentration']];
+// Les scripts d'imagerie : à la 1re personne, avec les sensations (PETTLEP), à la vitesse réelle à la fin.
+const MP_IMG = {
+  depart: ['Le départ dans les blocs', [['Installe-toi assis, yeux fermés. Trois respirations lentes.', 20], ['Tu es dans la chambre d\'appel : tu entends les noms, tu sens tes pointes aux pieds. Tu es calme et prêt.', 25], ['Tu règles tes blocs, toujours dans le même ordre. Tes mains sur la piste, le contact de la ligne.', 25], ['« À vos marques » : épaules juste au-dessus de la ligne, regard au sol. « Prêt » : hanches montent, tout le corps est chargé.', 25], ['Le coup de feu : tu pousses fort sur les deux blocs, le bras part vite, le premier appui tombe sous toi.', 20], ['Cinq appuis bas et puissants : tu pousses le sol loin derrière toi, le buste se relève petit à petit.', 25], ['Revois-le une dernière fois à vitesse réelle, du « prêt » au 10e mètre. Ouvre les yeux.', 20]]],
+  course: ['Mon 60 m parfait', [['Yeux fermés, trois respirations lentes. Tu es dans ton couloir.', 20], ['Le départ : puissance, pied sous la hanche, tu restes penché.', 20], ['L\'accélération : chaque appui pousse un peu plus vite, le corps se redresse tout seul.', 25], ['La vitesse max : relâché, visage mou, genoux devant, les pieds griffent le sol.', 25], ['Les derniers mètres : tu gardes ta fréquence, tu cours au-delà de la ligne.', 20], ['Tu vois ton chrono : celui de ton objectif. Ressens la fierté.', 20]]],
+  appel: ['Gérer la chambre d\'appel', [['Yeux fermés, respiration lente : inspire 5 s, expire 5 s.', 25], ['Tu arrives en chambre d\'appel. Les autres sautent, parlent fort. Toi, tu restes dans ta bulle.', 25], ['Une pensée négative arrive (« ils sont plus forts »). Ton stop : un geste, et tu dis ton mot de confiance.', 25], ['Tu fais ta routine, étape par étape, comme à l\'entraînement.', 25], ['Tu marches vers ta ligne, calme et chargé. Tu es prêt.', 20]]]
+};
+let MPV = null;
+function mpOpen() { MPV = null; openPane({title: 'Préparateur mental', full: true, render: mpRender, onClose: () => { mpStop(); MPV = null; }}); }
+function mpRender() {
+  if (MPV?.k === 'breath') return mpBreathHtml();
+  if (MPV?.k === 'img') return mpImgHtml();
+  const m = mpGet(), mn = S.app?.mental || {}, last = Object.keys(mn).sort().at(-1), lr = last ? mn[last] : null;
+  const tile = (a, t, s) => `<button type="button" class="mp-tile" ${a}><b>${t}</b><span>${s}</span></button>`;
+  const editL = (key, L, ph) => `${L.map((x, i) => `<div class="mp-li"><input class="mini-in" data-mpin="${key}.${i}" value="${esc(x)}"><button type="button" class="cap-x" data-mpdel="${key}.${i}" aria-label="Retirer">×</button></div>`).join('')}<button type="button" class="cap-add" data-mpadd="${key}">+ ${ph}</button>`;
+  const today = m.fier.find(x => x.d === TODAY) || {};
+  return `<div class="mp">
+    <button type="button" class="card mp-bil" data-one-mental><span class="eyebrow">Bilan mental du mois</span>${lr ? `<b class="num">${lr.note}<small>/100</small></b><span>${esc(mnLvl(lr.note)[0])} · ${esc(moName(last))}</span>` : '<b>À faire</b><span>38 questions, une note et ta conclusion</span>'}${mnDone() ? '' : '<em>à faire ce mois-ci</em>'}</button>
+    <div class="sec-label">Respirer</div>
+    <div class="mp-grid">${tile('data-mpbr="coh"', 'Cohérence cardiaque', '5 min · 6 respirations par minute · calme et récup')}${tile('data-mpbr="car"', 'Respiration carrée', '3 min · 4 s inspire, bloque, expire, bloque')}${tile('data-mpbr="dyn"', 'Respiration dynamisante', '30 s · 1 par seconde · juste avant l\'effort')}${tile('data-mpbr="sigh"', 'Soupir long', '1 min · 2 inspirations, 1 longue expiration')}</div>
+    <div class="sec-label">Imagerie</div>
+    <div class="mp-grid">${Object.entries(MP_IMG).map(([k, [t, L]]) => tile(`data-mpimg="${k}"`, t, `${Math.max(1, Math.round(L.reduce((a, x) => a + x[1], 0) / 60))} min · guidée, avec la voix`)).join('')}</div>
+    <div class="sec-label">Ma routine d'avant-course <small>la même à chaque fois</small></div>
+    <div class="mp-box">${editL('routine', m.routine, 'Ajouter une étape')}</div>
+    <div class="sec-label">Mes mots-clés <small>dialogue interne · préparés à l'avance</small></div>
+    <div class="mp-box">${MP_DOM.map(([k, l]) => `<p class="mp-dom">${l}</p>${editL('words.' + k, m.words[k] || [], 'Un mot de ' + l.toLowerCase())}`).join('')}</div>
+    <div class="sec-label">Mes switchs <small>pensée qui freine → phrase qui pousse</small></div>
+    <div class="mp-box">${m.sw.map(([a, b], i) => `<div class="mp-sw"><input class="mini-in" data-mpin="sw.${i}.0" value="${esc(a)}" placeholder="La pensée qui freine"><span>→</span><input class="mini-in" data-mpin="sw.${i}.1" value="${esc(b)}" placeholder="Ce que je me dis à la place"><button type="button" class="cap-x" data-mpdel="sw.${i}" aria-label="Retirer">×</button></div>`).join('')}<button type="button" class="cap-add" data-mpadd="sw">+ Un switch</button>
+      <p class="small muted" data-tip="1">1) repère la pensée ; 2) ton stop (un mot, un geste) ; 3) la phrase positive, sans « ne… pas » ; 4) teste-la en séance et ajuste.</p></div>
+    <div class="sec-label">Le tableau de la confiance <small>chaque soir, 1 minute</small></div>
+    <div class="mp-box"><label class="cap-f">Ce dont je suis fier aujourd'hui<textarea class="mini-in" rows="2" data-mpfier="t">${esc(today.t || '')}</textarea></label><label class="cap-f">Mon objectif pour demain<textarea class="mini-in" rows="2" data-mpfier="o">${esc(today.o || '')}</textarea></label>
+      ${m.fier.filter(x => x.d !== TODAY).slice(-5).reverse().map(x => `<p class="mp-hist"><b>${esc(fmtShort(x.d))}</b> ${esc(x.t || '')}${x.o ? `<small>→ ${esc(x.o)}</small>` : ''}</p>`).join('')}</div>
+    <div class="sec-label">Après une course</div>
+    <div class="mp-box"><label class="cap-f">Course<input class="mini-in" data-mpdeb="ev" placeholder="Ex. Liévin, 60 m, 7&quot;58"></label><label class="cap-f">Ce qui a marché<textarea class="mini-in" rows="2" data-mpdeb="ok"></textarea></label><label class="cap-f">Ce que je change<textarea class="mini-in" rows="2" data-mpdeb="ch"></textarea></label><label class="cap-f">Mon mot pour la prochaine<input class="mini-in" data-mpdeb="mot"></label>
+      <button type="button" class="btn" data-mpdebsave style="width:100%;margin-top:8px">Garder ce débrief</button>
+      ${m.deb.slice(-4).reverse().map(x => `<p class="mp-hist"><b>${esc(fmtShort(x.d))} · ${esc(x.ev || '')}</b> ${esc(x.ok || '')}${x.ch ? `<small>À changer : ${esc(x.ch)}${x.mot ? ' · mot : « ' + esc(x.mot) + ' »' : ''}</small>` : ''}</p>`).join('')}</div>
+    <p class="small muted" data-tip="1" style="margin:18px 4px 0">La préparation mentale s'entraîne comme le reste : 10 min par jour valent mieux qu'une heure la veille. Si le stress ou l'humeur pèsent longtemps, parles-en à un psychologue du sport.</p></div>`;
+}
+/* ---------- la respiration guidée : un cercle qui gonfle et dégonfle, le temps qui reste ---------- */
+const MP_BR = {coh: ['Cohérence cardiaque', [['Inspire', 5], ['Expire', 5]], 300], car: ['Respiration carrée', [['Inspire', 4], ['Bloque', 4], ['Expire', 4], ['Bloque', 4]], 180], dyn: ['Respiration dynamisante', [['Inspire', .5], ['Expire', .5]], 30], sigh: ['Soupir long', [['Inspire', 2], ['Encore un peu', 1], ['Expire longtemps', 6]], 60]};
+function mpBreathHtml() { const [t] = MP_BR[MPV.id]; return `<div class="mp-run"><button type="button" class="chip" data-mpback>‹ Retour</button><h2>${t}</h2><div class="mp-circle"><i></i><b data-mpph>Prêt</b></div><p class="mp-left num" data-mpleft></p><button type="button" class="btn" data-mpgo>${MPV.on ? 'Arrêter' : 'Commencer'}</button></div>`; }
+function mpStop() { clearTimeout(MPV?.tm); cancelAnimationFrame(MPV?.raf); try { speechSynthesis.cancel(); } catch (e) {} if (MPV) MPV.on = false; }
+function mpBreathRun() {
+  const [, P, dur] = MP_BR[MPV.id], t0 = performance.now(), cyc = P.reduce((a, x) => a + x[1], 0);
+  const loop = now => { if (!MPV?.on) return; const t = (now - t0) / 1000, left = dur - t, c = $('.mp-circle i'), ph = $('[data-mpph]'), lf = $('[data-mpleft]');
+    if (left <= 0) { mpStop(); if (ph) ph.textContent = 'Terminé'; if (c) c.style.transform = 'scale(.55)'; const b = $('[data-mpgo]'); if (b) b.textContent = 'Recommencer'; try { oneHap(20); } catch (e) {} return; }
+    let x = t % cyc, i = 0; while (x >= P[i][1]) { x -= P[i][1]; i++; } const k = x / P[i][1], nm = P[i][0];
+    const s = /Inspire|Encore/.test(nm) ? .55 + .45 * (nm === 'Encore un peu' ? 1 : k) : /Expire/.test(nm) ? 1 - .45 * k : (i === 1 ? 1 : .55);
+    if (c) c.style.transform = `scale(${s.toFixed(3)})`; if (ph && ph.textContent !== nm) { ph.textContent = nm; if (MPV.id !== 'dyn') try { navigator.vibrate?.(15); } catch (e) {} }
+    if (lf) lf.textContent = `${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, '0')}`; MPV.raf = requestAnimationFrame(loop); };
+  MPV.raf = requestAnimationFrame(loop);
+}
+/* ---------- l'imagerie guidée : une étape à la fois, lue à voix haute ---------- */
+function mpImgHtml() { const [t, L] = MP_IMG[MPV.id], i = MPV.i || 0;
+  return `<div class="mp-run"><button type="button" class="chip" data-mpback>‹ Retour</button><h2>${t}</h2><div class="mn-prog">${L.map((_, j) => `<i class="${j < i ? 'ok' : j === i && MPV.on ? 'on' : ''}"></i>`).join('')}</div>
+    <p class="mp-step">${esc(MPV.on || i ? L[Math.min(i, L.length - 1)][0] : 'Assieds-toi au calme. Le téléphone lit chaque étape ; garde les yeux fermés et vis la scène avec tes sensations.')}</p>
+    <button type="button" class="btn" data-mpgo>${MPV.on ? 'Arrêter' : i >= L.length ? 'Recommencer' : 'Commencer'}</button></div>`; }
+function mpImgStep() { const L = MP_IMG[MPV.id][1]; if (!MPV.on) return; if (MPV.i >= L.length) { mpStop(); paneRender(); return; }
+  paneRender(); try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(L[MPV.i][0]); u.lang = 'fr-FR'; u.rate = .9; speechSynthesis.speak(u); } catch (e) {}
+  MPV.tm = setTimeout(() => { MPV.i++; mpImgStep(); }, L[MPV.i][1] * 1000); }
+document.addEventListener('click', e => { let b; const at = q => (b = e.target.closest?.(q));
+  if (at('[data-mpopen]')) { mpOpen(); return; }
+  if (at('[data-mpbr]')) { MPV = {k: 'breath', id: b.dataset.mpbr, on: false}; paneRender(); $('#pane-scroll')?.scrollTo(0, 0); return; }
+  if (at('[data-mpimg]')) { MPV = {k: 'img', id: b.dataset.mpimg, on: false, i: 0}; paneRender(); $('#pane-scroll')?.scrollTo(0, 0); return; }
+  if (at('[data-mpback]')) { mpStop(); MPV = null; paneRender(); return; }
+  if (at('[data-mpgo]')) { if (MPV.on) { mpStop(); paneRender(); return; } MPV.on = true; if (MPV.k === 'breath') { paneRender(); mpBreathRun(); } else { MPV.i = MPV.i >= MP_IMG[MPV.id][1].length ? 0 : MPV.i || 0; mpImgStep(); } return; }
+  if (at('[data-mpadd]')) { const k = b.dataset.mpadd; mpSave(m => { if (k === 'sw') m.sw = [...m.sw, ['', '']]; else if (k.startsWith('words.')) { const d = k.slice(6); m.words = {...m.words, [d]: [...(m.words[d] || []), '']}; } else m[k] = [...m[k], '']; }); return; }
+  if (at('[data-mpdel]')) { const [k, a, i] = b.dataset.mpdel.split('.'); mpSave(m => { if (k === 'words') { m.words = {...m.words, [a]: m.words[a].filter((_, j) => j !== +i)}; } else m[k] = m[k].filter((_, j) => j !== +a); }); return; }
+  if (at('[data-mpdebsave]')) { const v = q => $(`[data-mpdeb="${q}"]`)?.value.trim() || ''; if (!v('ok') && !v('ch')) { toast('Écris au moins ce qui a marché'); return; } mpSave(m => { m.deb = [...m.deb, {d: TODAY, ev: v('ev'), ok: v('ok'), ch: v('ch'), mot: v('mot')}]; }); toast('Débrief gardé'); return; }
+});
+document.addEventListener('input', e => { const t = e.target;
+  if (t.matches?.('[data-mpin]')) { const p = t.dataset.mpin.split('.'); mpSave(m => { if (p[0] === 'words') { const L = [...(m.words[p[1]] || [])]; L[+p[2]] = t.value; m.words = {...m.words, [p[1]]: L}; } else if (p[0] === 'sw') { m.sw = m.sw.map((x, i) => i === +p[1] ? (p[2] === '0' ? [t.value, x[1]] : [x[0], t.value]) : x); } else { const L = [...m[p[0]]]; L[+p[1]] = t.value; m[p[0]] = L; } }, true); return; }
+  if (t.matches?.('[data-mpfier]')) { mpSave(m => { const o = {...(m.fier.find(x => x.d === TODAY) || {d: TODAY}), [t.dataset.mpfier]: t.value}; m.fier = [...m.fier.filter(x => x.d !== TODAY), o].slice(-60); }, true); }
+});
+// Le bilan mental mène au préparateur : un bouton sous l'introduction et sous la conclusion.
+const mnRender0 = mnRender;
+mnRender = function () { const h = mnRender0(); return MN.on ? h : h + '<button type="button" class="btn ghost mp-link" data-mpopen>Ouvrir le préparateur mental</button>'; };
 
 /* ================= Changement unique du 28 novembre 2026 (v193), fait par l'appli avec la connexion d'Oscar =================
    1) La prépa muscu à venir est retirée (il la refait au propre) : les séances de salle du Coach training du 30 nov. au
@@ -26798,6 +27111,31 @@ const I18N_EN = {
 "Le starter": "The starter",
 "Mes vidéos de sprint": "My sprint videos",
 "Classés par ce qui revient le plus et ce qui pèse le plus sur ton 100 m.": "Ranked by what repeats most and what weighs most on your 100 m.",
+"Bilan": "Review",
+"Bilan du mois": "Monthly review",
+"Mes notes du mois": "My notes for the month",
+"Copier pour Claude": "Copy for Claude",
+"Coller sa réponse": "Paste its reply",
+"Les 4 dernières semaines": "The last 4 weeks",
+"Ta normale": "Your normal",
+"Préparateur mental": "Mental coach",
+"Respirer": "Breathe",
+"Imagerie": "Imagery",
+"Respiration dynamisante": "Energising breathing",
+"Soupir long": "Long sigh",
+"Mes mots-clés": "My cue words",
+"Mes switchs": "My switches",
+"Le tableau de la confiance": "The confidence board",
+"Après une course": "After a race",
+"Garder ce débrief": "Save this debrief",
+"Arrêter": "Stop",
+"Ouvrir le préparateur mental": "Open the mental coach",
+"Ma routine d'avant-course": "My pre-race routine",
+"Cheville à la pose": "Ankle at touchdown",
+"Hanche à la fin de la poussée": "Hip at the end of the push",
+"Retour de la jambe libre": "Swing-leg recovery",
+"Amplitude des bras": "Arm swing range",
+"Coudes": "Elbows",
 };
 
 /* ================= TNR · English version =================

@@ -5698,7 +5698,7 @@ noteBody = k => {
   const h = noteBody0(k), i1 = h.indexOf('<h2 class="qh">Le matin'), i2 = h.indexOf('<h2 class="qh">La journée'); if (i1 < 0 || i2 < 0) return h;
   const head = h.slice(0, i1), mor = h.slice(i1, i2), eve = h.slice(i2);
   return head + (S.qm === 'matin' ? mor + sickHtml() + '<p class="small muted" style="margin:14px 4px 0">« Enregistrer le matin » garde tes réponses et te donne la synthèse. Le soir, tu complètes ta journée.</p>'
-    : qmMornPart(k) + (qmEveLocked(k) ? `<div class="card qlock"><b>La partie du soir s'ouvre à 18 h</b><span class="small muted">Tu recevras la notification à ${esc(String(S.app?.questEve || '20:30')).replace(':', ' h ')} pour la remplir.</span></div>` : eve.replace('<div class="sec-label">Eau</div>', eveHtml() + '<div class="sec-label">Eau</div>')));
+    : qmMornPart(k) + (qmEveLocked(k) ? `<div class="card qlock"><b>La partie du soir s'ouvre à 18 h</b><span class="small muted">Tu recevras la notification à ${esc(String(S.app?.questEve || '20:30')).replace(':', ' h ')} pour la remplir.</span></div>` : (eve.includes('<div class="sec-label">Information pour l\'appli') ? eve.replace('<div class="sec-label">Information pour l\'appli', eveHtml() + '<div class="sec-label">Information pour l\'appli') : eve.replace('<div class="sec-label">Eau</div>', eveHtml() + '<div class="sec-label">Eau</div>'))));
 };
 // La notification du matin (ou l'appli ouverte le matin sans avoir répondu) ouvre directement le questionnaire du matin.
 function qmAuto(force) {
