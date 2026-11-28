@@ -11,10 +11,10 @@
 const RCP = {lm: null, loading: null, hv: null, hvLoading: null, err: '', ts: 0, hts: 0, live: false, lastLive: 0, off: null, oe: null, n: 0, t0: 0};
 const MP_V = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14', MP_M = 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/';
 let MP_MOD = null, MP_FS = null;
-async function rcMk(model) {
+async function rcMk(model, many) {
   if (!MP_MOD) { MP_MOD = await import(MP_V + '/vision_bundle.mjs'); MP_FS = await MP_MOD.FilesetResolver.forVisionTasks(MP_V + '/wasm'); }
   const opt = d => ({baseOptions: {modelAssetPath: `${MP_M}pose_landmarker_${model}/float16/1/pose_landmarker_${model}.task`, delegate: d},
-    runningMode: 'VIDEO', numPoses: 1, minPoseDetectionConfidence: .6, minPosePresenceConfidence: .6, minTrackingConfidence: .6});
+    runningMode: 'VIDEO', numPoses: many ? 4 : 1, minPoseDetectionConfidence: many ? .45 : .6, minPosePresenceConfidence: many ? .45 : .6, minTrackingConfidence: many ? .45 : .6});
   try { return await MP_MOD.PoseLandmarker.createFromOptions(MP_FS, opt('GPU')); } catch (e) { return await MP_MOD.PoseLandmarker.createFromOptions(MP_FS, opt('CPU')); }
 }
 function rcPoseLoad() {
@@ -26,6 +26,12 @@ function rcPoseHeavy() {
   if (RCP.hv) return Promise.resolve(RCP.hv); if (RCP.hvLoading) return RCP.hvLoading;
   RCP.hvLoading = rcMk('heavy').catch(() => rcMk('full')).then(l => { RCP.hv = l; return l; }).catch(() => null).finally(() => { RCP.hvLoading = null; });
   return RCP.hvLoading;
+}
+// Pour l'analyse des vidéos : jusqu'à 4 personnes vues à chaque image ; l'appli garde ensuite la même, celle au premier plan.
+function rcPoseMany() {
+  if (RCP.mn) return Promise.resolve(RCP.mn); if (RCP.mnLoading) return RCP.mnLoading;
+  RCP.mnLoading = rcMk('heavy', true).catch(() => rcMk('full', true)).then(l => { RCP.mn = l; return l; }).catch(() => null).finally(() => { RCP.mnLoading = null; });
+  return RCP.mnLoading;
 }
 function rcPoseStat() { const s = document.querySelector('.rcposestat'); if (s) s.textContent = !rcCfg().pose ? '' : RCP.err || (RCP.loading ? 'Chargement du bonhomme… (une seule fois)' : ''); }
 

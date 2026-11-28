@@ -152,12 +152,19 @@ function hxoGeo(svg, i, topH = 70) {
 }
 const hxoD = k => { const Q = hxVals(), i = Q.findIndex(q => q.k === k), q = Q[i], O = hxOld(Q, addDays(TODAY, -hxPer()[2])), d = q.s != null && O[i].s != null ? q.s - O[i].s : null; return {Q, i, q, O, d}; };
 // L'axe de la qualité, couché vers la droite, gradué 25 · 50 · 75 · 100 (les anneaux de la grille tombent pile dessus).
-const hxoAxis = (q, u1) => { const x = (150 + 104 * (q.s ?? 0) / 100).toFixed(1), b = (7 / u1).toFixed(2);
-  return `<defs><filter id="hxglow" filterUnits="userSpaceOnUse" x="60" y="90" width="230" height="120"><feGaussianBlur stdDeviation="${b}"/></filter>
-    <linearGradient id="hxhg" gradientUnits="userSpaceOnUse" x1="150" y1="0" x2="${x}" y2="0"><stop offset="0" stop-color="var(--accent)" stop-opacity=".3"/><stop offset="1" stop-color="var(--accent)" stop-opacity=".95"/></linearGradient></defs>
-    <g class="hxaxis"><line x1="150" y1="150" x2="254" y2="150" class="hxtrack"/><g class="hxhalo"${q.s ? '' : ' style="display:none"'}><line x1="150" y1="150" x2="${x}" y2="150" stroke="url(#hxhg)" stroke-width="${(18 / u1).toFixed(2)}" stroke-linecap="round" filter="url(#hxglow)" class="hxhl"/><circle cx="${x}" cy="150" r="${(13 / u1).toFixed(2)}" fill="var(--accent)" opacity=".55" filter="url(#hxglow)" class="hxhc"/>
-    <line x1="150" y1="150" x2="${x}" y2="150" stroke="url(#hxhg)" stroke-width="${(2 / u1).toFixed(2)}" stroke-linecap="round" class="hxax"/></g>`
-  + [25, 50, 75, 100].map(v => `<text x="${(150 + 104 * v / 100).toFixed(1)}" y="${(150 - 8 / u1).toFixed(1)}" text-anchor="middle" class="hxtk" style="font-size:${(10.5 / u1).toFixed(2)}px;stroke-width:${(3 / u1).toFixed(2)}px">${v}</text>`).join('') + '</g>'; };
+// Le halo : un arc de cercle rouge au rayon du score, centré sur l'hexagone, qui s'ouvre de part et d'autre de l'axe
+// (plus fort sur l'axe, il s'efface en tournant), flou et doux. La ligne de l'axe reste fine, sans lumière.
+const hxArc = (r, dir) => { const t = 112 * Math.PI / 180, x = 150 + r * Math.cos(t), y = 150 + dir * r * Math.sin(t);
+  return `M${(150 + r).toFixed(1)} 150A${r.toFixed(1)} ${r.toFixed(1)} 0 0 ${dir > 0 ? 1 : 0} ${x.toFixed(1)} ${y.toFixed(1)}`; };
+const hxoHalo = (s0, u1) => { const r = Math.max(4, 104 * (s0 ?? 0) / 100), g = `x1="${(150 + r).toFixed(1)}" y1="150" x2="${(150 - .38 * r).toFixed(1)}" y2="150"`;
+  return `<defs><filter id="hxglow" filterUnits="userSpaceOnUse" x="-20" y="-20" width="340" height="340"><feGaussianBlur stdDeviation="${(9 / u1).toFixed(2)}"/></filter>
+    <filter id="hxglow2" filterUnits="userSpaceOnUse" x="-20" y="-20" width="340" height="340"><feGaussianBlur stdDeviation="${(3 / u1).toFixed(2)}"/></filter>
+    <linearGradient id="hxhg" gradientUnits="userSpaceOnUse" ${g}><stop offset="0" stop-color="var(--accent)" stop-opacity="1"/><stop offset=".55" stop-color="var(--accent)" stop-opacity=".45"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient>
+    <radialGradient id="hxpg"><stop offset="0" stop-color="var(--accent)" stop-opacity=".85"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></radialGradient></defs>
+    <g class="hxhalo"${s0 ? '' : ' style="display:none"'}><circle cx="${(150 + r).toFixed(1)}" cy="150" r="${(30 / u1).toFixed(2)}" fill="url(#hxpg)" class="hxhp"/>
+    ${[[22, 'hxglow', 'hxa1'], [7, 'hxglow2', 'hxa2'], [1.6, '', 'hxa3']].map(([w, f, c]) => [1, -1].map(d => `<path d="${hxArc(r, d)}" pathLength="1" fill="none" stroke="url(#hxhg)" stroke-width="${(w / u1).toFixed(2)}" stroke-linecap="round"${f ? ` filter="url(#${f})"` : ''} class="hxarc ${c}"/>`).join('')).join('')}</g>`; };
+const hxoAxis = (q, u1) => `${hxoHalo(q.s, u1)}<g class="hxaxis"><line x1="150" y1="150" x2="254" y2="150" class="hxtrack"/>`
+  + [25, 50, 75, 100].map(v => `<text x="${(150 + 104 * v / 100).toFixed(1)}" y="${(150 - 8 / u1).toFixed(1)}" text-anchor="middle" class="hxtk" style="font-size:${(10.5 / u1).toFixed(2)}px;stroke-width:${(3 / u1).toFixed(2)}px">${v}</text>`).join('') + '</g>';
 const hxoLab = (q, d) => `<b>${q.n.split(/ (?=de )/).map(esc).join('<br>')}</b><span>${q.s ?? 'à tester'}${d ? ` <em class="${d > 0 ? 'hxu' : 'hxdn'}">${d > 0 ? '+' : '−'}${Math.abs(d)}</em>` : ''}</span>`;
 const hxoSeg = () => HXP.map(([k, l]) => `<button type="button" data-hxoper="${k}" aria-pressed="${k === HXS.per}">${l}</button>`).join('');
 function hxoLay(el, g) { const w = el.querySelector('.hxo-w'); w.style.width = g.w + 'px'; w.style.height = g.h + 'px'; w.style.setProperty('--t0', g.t0); w.style.setProperty('--t1', g.t1); w.style.setProperty('--rot', g.rot + 'deg'); const rr = w.querySelector('.hxo-r'); if (rr) rr.style.transformOrigin = `${(234 * g.u1).toFixed(2)}px ${(164 * g.u1).toFixed(2)}px`;
@@ -215,7 +222,7 @@ function hxoRefresh(prev) { const el = HXO.el; if (!el) return; const {Q, q, O, 
   const poly = el.querySelector('.hxo-w .hxo'), o = O.map(x => x.s); if (poly) { if (prev) hxTween(poly, prev, o); else poly.setAttribute('points', hxPoly(o)); }
   el.querySelector('.hxo-w .hxp')?.setAttribute('points', hxPoly(Q.map(x => x.s)));
   el.querySelectorAll('.hxo-w .hxd').forEach(dt => { const v = Q[+dt.dataset.i].s; if (v != null) { const [x, y] = hxPt(+dt.dataset.i, 104 * v / 100); dt.setAttribute('cx', x.toFixed(1)); dt.setAttribute('cy', y.toFixed(1)); } });
-  { const x = (150 + 104 * (q.s ?? 0) / 100).toFixed(1), hl = el.querySelector('.hxhalo'); if (hl) { hl.style.display = q.s ? '' : 'none'; hl.querySelectorAll('line').forEach(l => l.setAttribute('x2', x)); hl.querySelector('circle')?.setAttribute('cx', x); el.querySelector('#hxhg')?.setAttribute('x2', x); } }
+  { const sv = el.querySelector('svg.hxo-axs'); if (sv && HXO.g) { const old = sv.querySelector('.hxhalo'); sv.querySelector('defs')?.remove(); old?.remove(); sv.insertAdjacentHTML('afterbegin', hxoHalo(q.s, HXO.g.u1)); } }
   el.querySelector('.hxo-lab').innerHTML = hxoLab(q, d);
   const inn = el.querySelector('.hxo-in'), sc = el.querySelector('.hxo-p'), y = sc.scrollTop; inn.innerHTML = hxoPanel(HXO.k); sc.scrollTop = y; }
 function hxoClose(fromBack) {

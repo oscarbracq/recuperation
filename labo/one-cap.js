@@ -101,7 +101,7 @@ function capHub() {
     <div class="cap-sec"><span class="sec-label">Tes chronos <small>la saison</small></span></div>
     <div class="list">${chronos.map(x => `<div class="row"><span style="flex:1"><b>${chr(+x.t)}</b> · ${esc(x.ev || c.ev)}<span class="hint">${esc(x.w || '')}${x.d ? ' · ' + esc(fmtShort(x.d)) : ''}</span></span><button type="button" class="cap-x" data-capdel="chr.${x.i}" aria-label="Retirer">×</button></div>`).join('')}
       <div class="row cap-chr">${capIn('cd', TODAY, 'date', '', 'cap-cd')}${capIn('ct', '', 'number', 'Temps (s)', 'cap-ct')}${capIn('cw', '', 'text', 'Où', 'cap-cw')}<button type="button" class="chip" data-capchr>Ajouter</button></div></div>
-    <button type="button" class="btn ghost" style="margin-top:16px;width:100%" data-vidopen="">Mes vidéos de sprint</button>`;
+    <div class="cap-g2" style="margin-top:16px"><button type="button" class="btn ghost" data-vidopen="">Mes vidéos de sprint</button><button type="button" class="btn ghost" data-ideago="start">Le starter</button></div>`;
 }
 // Les champs : un texte change la donnée sans redessiner (le clavier reste ouvert).
 document.addEventListener('input', e => { const k = e.target.dataset?.capin; if (!k || ['cd', 'ct', 'cw'].includes(k)) return; const v = e.target.value;
@@ -181,18 +181,6 @@ document.addEventListener('click', e => { if (!e.target.closest?.('[data-strgo]'
     STR.t = setTimeout(() => { strSay('Prêt'); STR.t = setTimeout(() => { strBeep(); STR.beep = performance.now(); paneRender(); STR.t = setTimeout(() => { if (STR.on) { STR.on = false; STR.last = null; paneRender(); } }, 3000); }, 1200 + Math.random() * 1300); }, 5000); return; }
   clearTimeout(STR.t); const r = STR.beep ? Math.round(performance.now() - STR.beep) : -1; STR.on = false; STR.last = r; if (r >= 100 && (!STR.best || r < STR.best)) STR.best = r; oneHap?.(12); paneRender(); });
 
-// L'accueil : la date, la phrase du jour, Ton cap, puis le bilan. La page Idées est à sa gauche.
-const vHomeMain = vHome;
-vHome = () => S.homeP === 'ideas' ? ideasPage() : vHomeMain().replace('</header>', '</header>' + capCard());
-const capXnb0 = window.TAB_XNB;
-window.TAB_XNB = (k, T, html) => {
-  if (T.home) {
-    if (!S.homeP && k < 0) return {cls: '', box: $('#home-view'), html: () => ideasPage(), go: () => { S.homeP = 'ideas'; renderMod(true); $('#mod-home')?.scrollTo(0, 0); }};
-    if (S.homeP && k > 0) return {cls: '', box: $('#home-view'), html: () => vHomeMain().replace('</header>', '</header>' + capCard()), go: () => { S.homeP = null; renderMod(true); $('#mod-home')?.scrollTo(0, 0); }};
-    if (S.homeP) return null;
-  }
-  if (k < 0 && T.i === 0 && ONE.mods.includes(S.mod)) { S.homeP = null; }
-  return capXnb0?.(k, T, html) ?? null;
-};
-const capHome0 = oneHome;
-oneHome = function () { if (S.mod === 'home' && S.homeP) { S.homeP = null; renderMod(true); $('#mod-home')?.scrollTo(0, 0); return; } S.homeP = null; capHome0(); };
+// L'accueil : la date, la phrase du jour, puis le bilan. Ton cap est un carré en haut (à côté du planning) ;
+// plus de page Idées sur le côté : ses fonctions sont dans Ton cap (vidéos, axes, starter).
+S.homeP = null;

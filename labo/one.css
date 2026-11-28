@@ -969,4 +969,52 @@ html.hxo-lock,html.hxo-lock body{background:#000!important}
 .banner.pbn{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;min-height:56px}.banner.pbn b{font-size:1rem}
 .card.balc>.chead{margin-bottom:4px}
 /* Noter un résultat à la main : les noms et les boutons ne collent plus aux bords du bloc */
-.hxo-in .hxnote .row{padding:10px 12px 10px 16px}.hxo-in .hxnote label{flex:1;min-width:0;font-size:.95rem}.hxo-in .hxnote .row>span{display:flex;align-items:center;gap:8px;flex:none}
+.hxo-in .hxnote .row{padding:10px 12px 10px 16px!important}.hxo-in .hxnote label{flex:1;min-width:0;font-size:.95rem}.hxo-in .hxnote .row>span{display:flex;align-items:center;gap:8px;flex:none}
+/* v192 : accueil · deux carrés de plus en haut : Bilan mental (à gauche, après la roue) et Ton cap (à droite, avant l'IA).
+   Tous les carrés rétrécissent un peu sur les petits téléphones pour que les 7 tiennent sans se toucher. */
+:root{--sq:clamp(34px,calc((50vw - 72px) / 3),46px)}
+.one-sq{width:var(--sq);height:var(--sq);border-radius:calc(var(--sq) * .37)}
+.one-hmen,.one-hcap{position:fixed;z-index:31;top:calc(19px + env(safe-area-inset-top,0px));opacity:0;pointer-events:none;transform:scale(.6);transition:opacity .35s,transform .45s cubic-bezier(.34,1.56,.64,1)}
+.one-hmen{left:calc(50% - 2 * var(--sq) - 58px)}.one-hcap{left:calc(50% + var(--sq) + 58px)}
+html.one.one-home .one-hmen,html.one.one-home .one-hcap{opacity:1;pointer-events:auto;transform:none}
+html.one.one-pl :is(.one-hmen,.one-hcap),html.kbdlib :is(.one-hmen,.one-hcap){opacity:0!important;pointer-events:none!important}
+.one-hmen span,.one-hcap span{font-size:.5rem;letter-spacing:0;line-height:1}
+.one-hmen.due::after{content:"";position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--bg,#000)}
+/* Le bilan mental */
+.mn-in{padding:6px 2px 30px}.mn-big{font:800 1.5rem/1.15 var(--display);letter-spacing:-.02em;margin:10px 0 8px}
+.mn-prog{display:flex;gap:5px;margin:8px 0 14px}.mn-prog i{flex:1;height:4px;border-radius:2px;background:color-mix(in srgb,var(--fg) 14%,transparent);transition:background .3s}
+.mn-prog i.ok{background:color-mix(in srgb,var(--fg) 55%,transparent)}.mn-prog i.on{background:var(--fg)}
+.mn-sec{font:700 1.15rem/1.2 var(--display);margin:0 0 4px}
+.mn-q{margin:12px 0;padding:14px 14px 12px;border-radius:18px;background:var(--card);border:1px solid color-mix(in srgb,var(--fg) 7%,transparent);transition:opacity .3s}
+.mn-q.done{opacity:.62}.mn-q p{margin:0 0 10px;font-size:.98rem;line-height:1.3;font-weight:600}
+.mn-ch{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:5px}.mn-ch button{min-width:0;min-height:44px;padding:4px 3px;line-height:1.15;hyphens:auto;border-radius:12px;border:1px solid color-mix(in srgb,var(--fg) 14%,transparent);background:none;color:var(--fg2);font:inherit;font-size:.72rem;font-weight:600;cursor:pointer;transition:background .2s,color .2s,transform .2s}
+.mn-ch button:active{transform:scale(.95)}.mn-ch button.on{background:var(--fg);color:var(--bg,#000);border-color:var(--fg)}
+.mn-nav{display:flex;gap:8px;margin-top:18px}.mn-nav .btn{flex:1}.mn-nav .btn[disabled]{opacity:.4}
+.mn-res{display:flex;align-items:baseline;justify-content:center;gap:6px;margin:14px 0 2px}.mn-res b{font:800 4.4rem/1 var(--display);letter-spacing:-.04em}.mn-res span{color:var(--fg2);font-weight:700}
+.mn-lv{text-align:center;font-weight:700;margin:0 0 14px;color:var(--fg2)}
+.mn-al{border-radius:18px;padding:12px 14px;margin:0 0 14px;background:color-mix(in srgb,var(--accent) 16%,var(--card));border:1px solid color-mix(in srgb,var(--accent) 40%,transparent)}.mn-al p{margin:4px 0;font-size:.9rem;line-height:1.35}
+.mn-txt{font-size:1rem;line-height:1.4;margin:0 0 16px}
+.mn-bars{display:grid;gap:10px;margin:6px 0 18px}.mn-bar{display:grid;grid-template-columns:1fr 38%  34px;align-items:center;gap:10px;font-size:.9rem}
+.mn-bar i{height:8px;border-radius:4px;background:color-mix(in srgb,var(--fg) 10%,transparent);overflow:hidden}.mn-bar em{display:block;height:100%;border-radius:4px;background:var(--fg)}
+.mn-bar b{text-align:right}
+:is(.mn-bar em,.mn-hist i).good{background:#34c759}:is(.mn-bar em,.mn-hist i).ok{background:color-mix(in srgb,var(--fg) 75%,transparent)}:is(.mn-bar em,.mn-hist i).mid{background:#ff9f0a}:is(.mn-bar em,.mn-hist i).bad{background:var(--accent)}
+.mn-n.good{color:#34c759}.mn-n.mid{color:#ff9f0a}.mn-n.bad{color:var(--accent)}
+.mn-hist{display:flex;gap:6px;align-items:flex-end;height:110px;margin:8px 0 16px}.mn-hist>div{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px}
+.mn-hist i{width:100%;max-width:26px;border-radius:6px 6px 2px 2px}.mn-hist span{font-size:.7rem;color:var(--fg2)}
+.mn-src{margin-top:10px}
+/* v192 : analyse vidéo · deux cadres (points forts, points faibles) sans couleur ; « à vérifier » en bas, pastille sous le point */
+.an2{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}@media (min-width:700px){.an2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.an2b{border-radius:18px;padding:12px 14px;background:var(--card);border:1px solid color-mix(in srgb,var(--fg) 10%,transparent)}
+.an2b p,.an2u p{margin:8px 0 0;font-size:.88rem;line-height:1.35}.an2b p small,.an2u p small{display:block;font-size:.74rem;color:var(--fg3);margin-top:2px}
+.an2u{margin-top:16px;padding:0 4px}.an2u>.small{margin:2px 0 6px}.an2h{font-size:.72rem!important;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--fg2);margin-top:12px!important}
+.an2u p:not(.an2h):not(.small){padding:8px 0;border-top:1px solid color-mix(in srgb,var(--fg) 7%,transparent)}
+.anunc{display:table;white-space:nowrap;font-style:normal;font-size:.68rem;font-weight:700;color:var(--warn);border:1px solid currentColor;border-radius:99px;padding:1px 8px;margin:6px 0 0}
+.annum{display:inline-grid;place-items:center;width:18px;height:18px;margin-right:7px;border-radius:50%;font-style:normal;font-size:.68rem;font-weight:800;background:color-mix(in srgb,var(--fg) 12%,transparent);vertical-align:1px}
+.an2b .anpi,.an2u .anpi{padding:9px 0 8px}
+/* v192 : le halo rouge en arc de cercle au rayon du score : il se dessine depuis l'axe vers le haut et le bas, puis respire */
+.hxarc{stroke-dasharray:1 1;stroke-dashoffset:1;transition:stroke-dashoffset 1.1s cubic-bezier(.3,.7,.25,1) .28s}
+.hxo-ov.open .hxarc{stroke-dashoffset:0}.hxo-ov.closing .hxarc{stroke-dashoffset:1;transition-duration:.35s;transition-delay:0s}
+.hxhp{opacity:0;transition:opacity .6s ease .25s}.hxo-ov.open .hxhp{opacity:.9}.hxo-ov.closing .hxhp{opacity:0;transition-delay:0s}
+.hxo-ov.open .hxa1{animation:hxBreath 3.6s ease-in-out 1.4s infinite}
+@keyframes hxBreath{50%{opacity:.55}}
+@media (prefers-reduced-motion:reduce){.hxarc{transition:none;stroke-dashoffset:0}.hxo-ov.open .hxa1{animation:none}}
